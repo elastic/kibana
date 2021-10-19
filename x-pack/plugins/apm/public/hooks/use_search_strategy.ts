@@ -59,10 +59,12 @@ const getInitialProgress = (): SearchStrategyProgress => ({
   total: 100,
 });
 
-const getReducer = <T>() => (prev: T, update: Partial<T>): T => ({
-  ...prev,
-  ...update,
-});
+const getReducer =
+  <T>() =>
+  (prev: T, update: Partial<T>): T => ({
+    ...prev,
+    ...update,
+  });
 
 interface SearchStrategyReturnBase<TRawResponse extends RawResponseBase> {
   progress: SearchStrategyProgress;
@@ -154,8 +156,8 @@ export function useSearchStrategy<
           setRawResponse(response.rawResponse);
           setFetchState({
             isRunning: response.isRunning || false,
-            loaded: response.loaded,
-            total: response.total,
+            ...(response.loaded ? { loaded: response.loaded } : {}),
+            ...(response.total ? { total: response.total } : {}),
           });
 
           if (isCompleteResponse(response)) {
@@ -166,7 +168,7 @@ export function useSearchStrategy<
           } else if (isErrorResponse(response)) {
             searchSubscription$.current?.unsubscribe();
             setFetchState({
-              error: (response as unknown) as Error,
+              error: response as unknown as Error,
               isRunning: false,
             });
           }

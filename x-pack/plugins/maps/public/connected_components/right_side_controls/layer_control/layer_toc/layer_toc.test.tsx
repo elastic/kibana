@@ -18,22 +18,22 @@ import { ILayer } from '../../../../classes/layers/layer';
 import { LayerTOC } from './layer_toc';
 
 const mockLayers = [
-  ({
+  {
     getId: () => {
       return '1';
     },
     supportsFitToBounds: () => {
       return true;
     },
-  } as unknown) as ILayer,
-  ({
+  } as unknown as ILayer,
+  {
     getId: () => {
       return '2';
     },
     supportsFitToBounds: () => {
       return false;
     },
-  } as unknown) as ILayer,
+  } as unknown as ILayer,
 ];
 
 const defaultProps = {

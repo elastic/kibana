@@ -40,12 +40,13 @@ export function runCli() {
         --es-ca            if Elasticsearch url points to https://localhost we default to the CA from @kbn/dev-utils, customize the CA with this flag
       `,
     },
-    async extendContext({ log, flags, addCleanupTask }) {
+    async extendContext({ log, flags, addCleanupTask, statsMeta }) {
       const configPath = flags.config || defaultConfigPath;
       if (typeof configPath !== 'string') {
         throw createFlagError('--config must be a string');
       }
       const config = await readConfigFile(log, Path.resolve(configPath));
+      statsMeta.set('ftrConfigPath', configPath);
 
       let esUrl = flags['es-url'];
       if (esUrl && typeof esUrl !== 'string') {
@@ -148,14 +149,18 @@ export function runCli() {
           --query            query object to limit the documents being archived, needs to be properly escaped JSON
         `,
       },
-      async run({ flags, esArchiver }) {
+      async run({ flags, esArchiver, statsMeta }) {
         const [path, ...indices] = flags._;
         if (!path) {
           throw createFlagError('missing [path] argument');
         }
+
         if (!indices.length) {
           throw createFlagError('missing [...indices] arguments');
         }
+
+        statsMeta.set('esArchiverPath', path);
+        statsMeta.set('esArchiverIndices', indices.join(','));
 
         const raw = flags.raw;
         if (typeof raw !== 'boolean') {
@@ -195,7 +200,7 @@ export function runCli() {
           --use-create       use create instead of index for loading documents
         `,
       },
-      async run({ flags, esArchiver }) {
+      async run({ flags, esArchiver, statsMeta }) {
         const [path] = flags._;
         if (!path) {
           throw createFlagError('missing [path] argument');
@@ -203,6 +208,8 @@ export function runCli() {
         if (flags._.length > 1) {
           throw createFlagError(`unknown extra arguments: [${flags._.slice(1).join(', ')}]`);
         }
+
+        statsMeta.set('esArchiverPath', path);
 
         const useCreate = flags['use-create'];
         if (typeof useCreate !== 'boolean') {
@@ -216,7 +223,7 @@ export function runCli() {
       name: 'unload',
       usage: 'unload [path]',
       description: 'remove indices created by the archive at [path]',
-      async run({ flags, esArchiver }) {
+      async run({ flags, esArchiver, statsMeta }) {
         const [path] = flags._;
         if (!path) {
           throw createFlagError('missing [path] argument');
@@ -224,6 +231,8 @@ export function runCli() {
         if (flags._.length > 1) {
           throw createFlagError(`unknown extra arguments: [${flags._.slice(1).join(', ')}]`);
         }
+
+        statsMeta.set('esArchiverPath', path);
 
         await esArchiver.unload(path);
       },
@@ -233,7 +242,7 @@ export function runCli() {
       usage: 'edit [path]',
       description:
         'extract the archives within or at [path], wait for edits to be completed, and then recompress the archives',
-      async run({ flags, esArchiver }) {
+      async run({ flags, esArchiver, statsMeta }) {
         const [path] = flags._;
         if (!path) {
           throw createFlagError('missing [path] argument');
@@ -241,6 +250,8 @@ export function runCli() {
         if (flags._.length > 1) {
           throw createFlagError(`unknown extra arguments: [${flags._.slice(1).join(', ')}]`);
         }
+
+        statsMeta.set('esArchiverPath', path);
 
         await esArchiver.edit(path, async () => {
           const rl = readline.createInterface({

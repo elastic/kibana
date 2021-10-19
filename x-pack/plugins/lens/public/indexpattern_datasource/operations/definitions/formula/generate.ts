@@ -38,6 +38,11 @@ export function generateFormula(
   previousFormula: string,
   operationDefinitionMap: Record<string, GenericOperationDefinition> | undefined
 ) {
+  if (previousColumn.operationType === 'static_value') {
+    if (previousColumn.params && 'value' in previousColumn.params) {
+      return String(previousColumn.params.value); // make sure it's a string
+    }
+  }
   if ('references' in previousColumn) {
     const metric = layer.columns[previousColumn.references[0]];
     if (metric && 'sourceField' in metric && metric.dataType === 'number') {

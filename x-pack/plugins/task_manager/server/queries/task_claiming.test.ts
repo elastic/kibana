@@ -841,16 +841,18 @@ if (doc['task.runAt'].size()!=0) {
           )
         ).map(
           (result, index) =>
-            (store.updateByQuery.mock.calls[index][0] as {
-              query: MustNotCondition;
-              size: number;
-              sort: string | string[];
-              script: {
-                params: {
-                  [claimableTaskTypes: string]: string[];
+            (
+              store.updateByQuery.mock.calls[index][0] as {
+                query: MustNotCondition;
+                size: number;
+                sort: string | string[];
+                script: {
+                  params: {
+                    [claimableTaskTypes: string]: string[];
+                  };
                 };
-              };
-            }).script.params.claimableTaskTypes
+              }
+            ).script.params.claimableTaskTypes
         );
       }
 

@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCurrentUser, useHttp } from '../../lib/kibana';
 import { appRoutesService, CheckPermissionsResponse } from '../../../../../fleet/common';
+import { useLicense } from '../../hooks/use_license';
 
 export interface EndpointPrivileges {
   loading: boolean;
@@ -15,6 +16,7 @@ export interface EndpointPrivileges {
   canAccessFleet: boolean;
   /** If user has permissions to access Endpoint management (includes check to ensure they also have access to fleet) */
   canAccessEndpointManagement: boolean;
+  isPlatinumPlus: boolean;
 }
 
 /**
@@ -27,6 +29,7 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
   const http = useHttp();
   const user = useCurrentUser();
   const isMounted = useRef<boolean>(true);
+  const license = useLicense();
   const [canAccessFleet, setCanAccessFleet] = useState<boolean>(false);
   const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
 
@@ -62,8 +65,9 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
       loading: !fleetCheckDone || !user,
       canAccessFleet,
       canAccessEndpointManagement: canAccessFleet && isSuperUser,
+      isPlatinumPlus: license.isPlatinumPlus(),
     };
-  }, [canAccessFleet, fleetCheckDone, isSuperUser, user]);
+  }, [canAccessFleet, fleetCheckDone, isSuperUser, user, license]);
 
   // Capture if component is unmounted
   useEffect(

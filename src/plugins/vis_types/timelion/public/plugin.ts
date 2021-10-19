@@ -66,7 +66,8 @@ export class TimelionVisPlugin
       VisTypeTimelionPluginStart,
       TimelionVisSetupDependencies,
       TimelionVisStartDependencies
-    > {
+    >
+{
   constructor(public initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(

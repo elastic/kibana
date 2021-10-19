@@ -39,20 +39,17 @@ export const useLogHighlightsState = ({
   const throttledStartTimestamp = useThrottle(startTimestamp, FETCH_THROTTLE_INTERVAL);
   const throttledEndTimestamp = useThrottle(endTimestamp, FETCH_THROTTLE_INTERVAL);
 
-  const {
-    logEntryHighlights,
-    logEntryHighlightsById,
-    loadLogEntryHighlightsRequest,
-  } = useLogEntryHighlights(
-    sourceId,
-    sourceVersion,
-    throttledStartTimestamp,
-    throttledEndTimestamp,
-    centerCursor,
-    size,
-    filterQuery,
-    highlightTerms
-  );
+  const { logEntryHighlights, logEntryHighlightsById, loadLogEntryHighlightsRequest } =
+    useLogEntryHighlights(
+      sourceId,
+      sourceVersion,
+      throttledStartTimestamp,
+      throttledEndTimestamp,
+      centerCursor,
+      size,
+      filterQuery,
+      highlightTerms
+    );
 
   const { logSummaryHighlights, loadLogSummaryHighlightsRequest } = useLogSummaryHighlights(
     sourceId,

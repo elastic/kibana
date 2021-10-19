@@ -48,7 +48,7 @@ export class TiledVectorLayer extends VectorLayer {
     mapColors?: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(descriptor, mapColors);
-    layerDescriptor.type = TiledVectorLayer.type;
+    layerDescriptor.type = LAYER_TYPE.TILED_VECTOR;
 
     if (!layerDescriptor.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
@@ -123,7 +123,8 @@ export class TiledVectorLayer extends VectorLayer {
     );
     const prevDataRequest = this.getSourceDataRequest();
     if (prevDataRequest) {
-      const data: MVTSingleLayerVectorSourceConfig = prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
+      const data: MVTSingleLayerVectorSourceConfig =
+        prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
       if (data) {
         const noChangesInSourceState: boolean =
           data.layerName === this._source.getLayerName() &&
@@ -197,7 +198,8 @@ export class TiledVectorLayer extends VectorLayer {
       return;
     }
 
-    const sourceMeta: MVTSingleLayerVectorSourceConfig | null = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
+    const sourceMeta: MVTSingleLayerVectorSourceConfig | null =
+      sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
     if (!sourceMeta) {
       return;
     }
@@ -226,7 +228,8 @@ export class TiledVectorLayer extends VectorLayer {
     if (!sourceDataRequest) {
       return;
     }
-    const sourceMeta: MVTSingleLayerVectorSourceConfig = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
+    const sourceMeta: MVTSingleLayerVectorSourceConfig =
+      sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
     if (sourceMeta.layerName === '') {
       return;
     }
@@ -247,7 +250,8 @@ export class TiledVectorLayer extends VectorLayer {
     if (!sourceDataRequest) {
       return null;
     }
-    const sourceMeta: MVTSingleLayerVectorSourceConfig = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
+    const sourceMeta: MVTSingleLayerVectorSourceConfig =
+      sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
     if (sourceMeta.layerName === '') {
       return null;
     }
@@ -292,7 +296,8 @@ export class TiledVectorLayer extends VectorLayer {
     if (!dataRequest) {
       return false;
     }
-    const tiledSourceMeta: MVTSingleLayerVectorSourceConfig | null = dataRequest.getData() as MVTSingleLayerVectorSourceConfig;
+    const tiledSourceMeta: MVTSingleLayerVectorSourceConfig | null =
+      dataRequest.getData() as MVTSingleLayerVectorSourceConfig;
 
     if (!tiledSourceMeta) {
       return false;

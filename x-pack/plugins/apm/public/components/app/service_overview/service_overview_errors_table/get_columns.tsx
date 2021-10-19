@@ -15,8 +15,10 @@ import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 
-type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
-type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
+type ErrorGroupMainStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
+type ErrorGroupDetailedStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 export function getColumns({
   serviceName,

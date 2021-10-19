@@ -25,17 +25,10 @@ const DocTableWrapperMemoized = memo(DocTableWrapper);
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const tableWrapperRef = useRef<HTMLDivElement>(null);
-  const {
-    currentPage,
-    pageSize,
-    totalPages,
-    startIndex,
-    hasNextPage,
-    changePage,
-    changePageSize,
-  } = usePager({
-    totalItems: props.rows.length,
-  });
+  const { currentPage, pageSize, totalPages, startIndex, hasNextPage, changePage, changePageSize } =
+    usePager({
+      totalItems: props.rows.length,
+    });
   const showPagination = totalPages !== 0;
 
   const scrollTop = useCallback(() => {
@@ -44,11 +37,10 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     }
   }, []);
 
-  const pageOfItems = useMemo(() => props.rows.slice(startIndex, pageSize + startIndex), [
-    pageSize,
-    startIndex,
-    props.rows,
-  ]);
+  const pageOfItems = useMemo(
+    () => props.rows.slice(startIndex, pageSize + startIndex),
+    [pageSize, startIndex, props.rows]
+  );
 
   const onPageChange = useCallback(
     (page: number) => {

@@ -41,9 +41,8 @@ interface SearchServiceState<TRawResponse extends RawResponseBase> {
   rawResponse: TRawResponse;
 }
 
-type GetSearchServiceState<
-  TRawResponse extends RawResponseBase
-> = () => SearchServiceState<TRawResponse>;
+type GetSearchServiceState<TRawResponse extends RawResponseBase> =
+  () => SearchServiceState<TRawResponse>;
 
 export type SearchServiceProvider<
   TSearchStrategyClientParams extends SearchStrategyClientParams,

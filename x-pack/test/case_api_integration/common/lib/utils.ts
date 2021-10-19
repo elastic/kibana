@@ -6,6 +6,9 @@
  */
 
 import { omit } from 'lodash';
+import getPort from 'get-port';
+import http from 'http';
+
 import expect from '@kbn/expect';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
@@ -47,6 +50,7 @@ import {
   AlertResponse,
   ConnectorMappings,
   CasesByAlertId,
+  CaseResolveResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -57,6 +61,7 @@ import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { ESCasesConfigureAttributes } from '../../../../plugins/cases/server/services/configure/types';
 import { ESCaseAttributes } from '../../../../plugins/cases/server/services/cases/types';
+import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -550,9 +555,10 @@ export const superUserSpace1Auth = getAuthWithSuperUser();
  * Returns an auth object with the specified space and user set as super user. The result can be passed to other utility
  * functions.
  */
-export function getAuthWithSuperUser(
-  space: string | null = 'space1'
-): { user: User; space: string | null } {
+export function getAuthWithSuperUser(space: string | null = 'space1'): {
+  user: User;
+  space: string | null;
+} {
   return { user: superUser, space };
 }
 
@@ -588,20 +594,19 @@ interface ConnectorMappingsSavedObject {
  * Returns connector mappings saved objects from Elasticsearch directly.
  */
 export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) => {
-  const mappings: ApiResponse<
-    estypes.SearchResponse<ConnectorMappingsSavedObject>
-  > = await es.search({
-    index: '.kibana',
-    body: {
-      query: {
-        term: {
-          type: {
-            value: 'cases-connector-mappings',
+  const mappings: ApiResponse<estypes.SearchResponse<ConnectorMappingsSavedObject>> =
+    await es.search({
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases-connector-mappings',
+            },
           },
         },
       },
-    },
-  });
+    });
 
   return mappings;
 };
@@ -631,20 +636,19 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: KibanaClient 
 };
 
 export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
-  const configure: ApiResponse<
-    estypes.SearchResponse<{ cases: ESCaseAttributes }>
-  > = await es.search({
-    index: '.kibana',
-    body: {
-      query: {
-        term: {
-          type: {
-            value: 'cases',
+  const configure: ApiResponse<estypes.SearchResponse<{ cases: ESCaseAttributes }>> =
+    await es.search({
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases',
+            },
           },
         },
       },
-    },
-  });
+    });
 
   return configure;
 };
@@ -652,13 +656,13 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) =>
 export const createCaseWithConnector = async ({
   supertest,
   configureReq = {},
-  servicenowSimulatorURL,
+  serviceNowSimulatorURL,
   actionsRemover,
   auth = { user: superUser, space: null },
   createCaseReq = getPostCaseRequest(),
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
-  servicenowSimulatorURL: string;
+  serviceNowSimulatorURL: string;
   actionsRemover: ActionsRemover;
   configureReq?: Record<string, unknown>;
   auth?: { user: User; space: string | null };
@@ -671,7 +675,7 @@ export const createCaseWithConnector = async ({
     supertest,
     req: {
       ...getServiceNowConnector(),
-      config: { apiUrl: servicenowSimulatorURL },
+      config: { apiUrl: serviceNowSimulatorURL },
     },
     auth,
   });
@@ -1067,6 +1071,32 @@ export const getCase = async ({
   return theCase;
 };
 
+export const resolveCase = async ({
+  supertest,
+  caseId,
+  includeComments = false,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  includeComments?: boolean;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResolveResponse> => {
+  const { body: theResolvedCase } = await supertest
+    .get(
+      `${getSpaceUrlPrefix(
+        auth?.space
+      )}${CASES_URL}/${caseId}/resolve?includeComments=${includeComments}`
+    )
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return theResolvedCase;
+};
+
 export const findCases = async ({
   supertest,
   query = {},
@@ -1193,4 +1223,18 @@ export const getAlertsAttachedToCase = async ({
     .expect(expectedHttpCode);
 
   return theCase;
+};
+
+export const getServiceNowSimulationServer = async (): Promise<{
+  server: http.Server;
+  url: string;
+}> => {
+  const server = await getServiceNowServer();
+  const port = await getPort({ port: getPort.makeRange(9000, 9100) });
+  if (!server.listening) {
+    server.listen(port);
+  }
+  const url = `http://localhost:${port}`;
+
+  return { server, url };
 };

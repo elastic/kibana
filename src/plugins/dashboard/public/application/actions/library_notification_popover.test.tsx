@@ -73,10 +73,10 @@ describe('LibraryNotificationPopover', () => {
     }
 
     defaultProps = {
-      unlinkAction: ({
+      unlinkAction: {
         execute: jest.fn(),
         getDisplayName: () => 'test unlink',
-      } as unknown) as LibraryNotificationProps['unlinkAction'],
+      } as unknown as LibraryNotificationProps['unlinkAction'],
       displayName: 'test display',
       context: { embeddable: contactCardEmbeddable },
       icon: 'testIcon',

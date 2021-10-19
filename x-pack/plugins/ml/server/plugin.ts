@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
@@ -21,10 +21,11 @@ import {
 } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { PluginsSetup, PluginsStart, RouteInitialization } from './types';
-import { SpacesPluginSetup } from '../../spaces/server';
+import type { PluginStart as DataViewsPluginStart } from '../../../../src/plugins/data_views/server';
+import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
+import type { SpacesPluginSetup } from '../../spaces/server';
 import { PLUGIN_ID } from '../common/constants/app';
-import { MlCapabilities } from '../common/types/capabilities';
+import type { MlCapabilities } from '../common/types/capabilities';
 
 import { initMlServerLog } from './lib/log';
 import { initSampleDataSets } from './lib/sample_data_sets';
@@ -67,7 +68,8 @@ export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
 
 export class MlServerPlugin
-  implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup, PluginsStart> {
+  implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup, PluginsStart>
+{
   private log: Logger;
   private mlLicense: MlLicense;
   private capabilities: CapabilitiesStart | null = null;
@@ -77,6 +79,7 @@ export class MlServerPlugin
   private savedObjectsStart: SavedObjectsServiceStart | null = null;
   private spacesPlugin: SpacesPluginSetup | undefined;
   private security: SecurityPluginSetup | undefined;
+  private dataViews: DataViewsPluginStart | null = null;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
   private readonly kibanaIndexConfig: SharedGlobalConfig;
@@ -155,7 +158,8 @@ export class MlServerPlugin
         getInternalSavedObjectsClient,
         plugins.spaces,
         plugins.security?.authz,
-        () => this.isMlReady
+        () => this.isMlReady,
+        () => this.dataViews
       ),
       mlLicense: this.mlLicense,
     };
@@ -171,6 +175,13 @@ export class MlServerPlugin
     const getSpaces = plugins.spaces
       ? () => coreSetup.getStartServices().then(([, { spaces }]) => spaces!)
       : undefined;
+
+    const getDataViews = () => {
+      if (this.dataViews === null) {
+        throw Error('Data views plugin not initialized');
+      }
+      return this.dataViews;
+    };
 
     annotationRoutes(routeInit, plugins.security);
     calendars(routeInit);
@@ -210,6 +221,7 @@ export class MlServerPlugin
       () => getInternalSavedObjectsClient(),
       () => this.uiSettings,
       () => this.fieldsFormat,
+      getDataViews,
       () => this.isMlReady
     );
 
@@ -235,6 +247,7 @@ export class MlServerPlugin
     this.capabilities = coreStart.capabilities;
     this.clusterClient = coreStart.elasticsearch.client;
     this.savedObjectsStart = coreStart.savedObjects;
+    this.dataViews = plugins.dataViews;
 
     // check whether the job saved objects exist
     // and create them if needed.

@@ -26,7 +26,8 @@ export interface RemoteClustersPluginSetup {
 }
 
 export class RemoteClustersServerPlugin
-  implements Plugin<RemoteClustersPluginSetup, void, any, any> {
+  implements Plugin<RemoteClustersPluginSetup, void, any, any>
+{
   licenseStatus: LicenseStatus;
   log: Logger;
   config: ConfigType;

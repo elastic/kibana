@@ -89,7 +89,7 @@ export function ChangeIndexPattern({
               checked: id === indexPatternId ? 'on' : undefined,
             }))}
             onChange={(choices) => {
-              const choice = (choices.find(({ checked }) => checked) as unknown) as {
+              const choice = choices.find(({ checked }) => checked) as unknown as {
                 value: string;
               };
               trackUiEvent('indexpattern_changed');

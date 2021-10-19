@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -86,7 +85,7 @@ export function SchemaOverview({
                 />
               }
               title={i18n.translate('xpack.apm.settings.schema.success.title', {
-                defaultMessage: 'Data streams successfully setup!',
+                defaultMessage: 'Elastic Agent successfully setup!',
               })}
               description={i18n.translate(
                 'xpack.apm.settings.schema.success.description',
@@ -139,17 +138,17 @@ export function SchemaOverview({
         <EuiFlexItem />
         <EuiFlexItem style={{ minWidth: '250px' }}>
           <EuiCard
-            icon={<EuiIcon size="xxl" type="documents" />}
+            icon={<EuiIcon size="xxl" type="node" />}
             title={i18n.translate(
               'xpack.apm.settings.schema.migrate.classicIndices.title',
-              { defaultMessage: 'Classic APM indices' }
+              { defaultMessage: 'APM Server binary' }
             )}
             display="subdued"
             description={i18n.translate(
               'xpack.apm.settings.schema.migrate.classicIndices.description',
               {
                 defaultMessage:
-                  'You are currently using classic APM indices for your data. This data schema is going away and is being replaced by data streams in Elastic Stack version 8.0.',
+                  'You are currently using APM Server binary. This legacy option is deprecated since version 7.16 and is being replaced by a managed APM Server in Elastic Agent from version 8.0.',
               }
             )}
             footer={
@@ -168,21 +167,6 @@ export function SchemaOverview({
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: '250px' }}>
           <EuiCard
-            betaBadgeLabel={i18n.translate(
-              'xpack.apm.settings.schema.migrate.dataStreams.betaBadge.label',
-              { defaultMessage: 'Beta' }
-            )}
-            betaBadgeTitle={i18n.translate(
-              'xpack.apm.settings.schema.migrate.dataStreams.betaBadge.title',
-              { defaultMessage: 'Data streams' }
-            )}
-            betaBadgeTooltipContent={i18n.translate(
-              'xpack.apm.settings.schema.migrate.dataStreams.betaBadge.description',
-              {
-                defaultMessage:
-                  'The switch to data streams is not GA. Please help us by reporting any bugs.',
-              }
-            )}
             image={
               <div>
                 <img src={rocketLaunchGraphic} alt="rocket launch" />
@@ -190,13 +174,13 @@ export function SchemaOverview({
             }
             title={i18n.translate(
               'xpack.apm.settings.schema.migrate.dataStreams.title',
-              { defaultMessage: 'Data streams' }
+              { defaultMessage: 'Elastic Agent' }
             )}
             description={i18n.translate(
               'xpack.apm.settings.schema.migrate.dataStreams.description',
               {
                 defaultMessage:
-                  'Going forward, any newly ingested data gets stored in data streams. Previously ingested data remains in classic APM indices. The APM and UX apps will continue to support both indices.',
+                  'Starting in version 8.0, Elastic Agent must manage APM Server. Elastic Agent can run on our hosted Elasticsearch Service, ECE, or be self-managed. Then, add the Elastic APM integration to continue ingesting APM data.',
               }
             )}
             footer={
@@ -216,7 +200,7 @@ export function SchemaOverview({
                   >
                     {i18n.translate(
                       'xpack.apm.settings.schema.migrate.dataStreams.buttonText',
-                      { defaultMessage: 'Switch to data streams' }
+                      { defaultMessage: 'Switch to Elastic Agent' }
                     )}
                   </EuiButton>
                 </EuiToolTip>
@@ -238,7 +222,7 @@ export function SchemaOverviewHeading() {
       <EuiText color="subdued">
         <FormattedMessage
           id="xpack.apm.settings.schema.descriptionText"
-          defaultMessage="We have created a simple and seamless process for switching from the classic APM indices to immediately take advantage of the new data streams features. Beware this action is {irreversibleEmphasis} and can only be performed by a {superuserEmphasis} with access to Fleet. Learn more about {dataStreamsDocLink}."
+          defaultMessage="We have created a simple and seamless process for switching from APM Server binary to Elastic Agent. Beware this action is {irreversibleEmphasis} and can only be performed by a {superuserEmphasis} with access to Fleet. Learn more about {elasticAgentDocLink}."
           values={{
             irreversibleEmphasis: (
               <strong>
@@ -256,45 +240,21 @@ export function SchemaOverviewHeading() {
                 )}
               </strong>
             ),
-            dataStreamsDocLink: (
+            elasticAgentDocLink: (
               <ElasticDocsLink
                 section="/apm/server"
                 path="/apm-integration-data-streams.html"
                 target="_blank"
               >
                 {i18n.translate(
-                  'xpack.apm.settings.schema.descriptionText.dataStreamsDocLinkText',
-                  { defaultMessage: 'data streams' }
+                  'xpack.apm.settings.schema.descriptionText.elasticAgentDocLinkText',
+                  { defaultMessage: 'Elastic Agent' }
                 )}
               </ElasticDocsLink>
             ),
           }}
         />
       </EuiText>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="center">
-        <EuiFlexItem />
-        <EuiFlexItem grow={2}>
-          <EuiCallOut
-            size="s"
-            title={i18n.translate(
-              'xpack.apm.settings.schema.descriptionText.betaCalloutTitle',
-              { defaultMessage: 'Data streams are beta in APM' }
-            )}
-            iconType="alert"
-            color="warning"
-          >
-            {i18n.translate(
-              'xpack.apm.settings.schema.descriptionText.betaCalloutMessage',
-              {
-                defaultMessage:
-                  'This functionality is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-              }
-            )}
-          </EuiCallOut>
-        </EuiFlexItem>
-        <EuiFlexItem />
-      </EuiFlexGroup>
       <EuiSpacer size="m" />
     </>
   );
@@ -338,7 +298,7 @@ function getDisabledReason({
     return (
       <FormattedMessage
         id="xpack.apm.settings.schema.disabledReason"
-        defaultMessage="Switch to data streams is unavailable: {reasons}"
+        defaultMessage="Switch to Elastic Agent is unavailable: {reasons}"
         values={{
           reasons: (
             <ul>

@@ -7,14 +7,26 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'trustedApps']);
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
+  const endpointTestResources = getService('endpointTestResources');
+  const policyTestResources = getService('policyTestResources');
 
   describe('When on the Trusted Apps list', function () {
+    let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
+      const endpointPackage = await policyTestResources.getEndpointPackage();
+      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
+      indexedData = await endpointTestResources.loadEndpointData();
+      await browser.refresh();
       await pageObjects.trustedApps.navigateToTrustedAppsList();
+    });
+    after(async () => {
+      await endpointTestResources.unloadEndpointData(indexedData);
     });
 
     it('should show page title', async () => {

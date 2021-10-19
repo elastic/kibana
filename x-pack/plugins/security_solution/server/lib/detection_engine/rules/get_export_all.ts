@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { transformDataToNdjson } from '@kbn/securitysolution-utils';
+
 import { RulesClient } from '../../../../../alerting/server';
 import { getNonPackagedRules } from './get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { transformAlertsToRules } from '../routes/rules/utils';
-import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
 
 export const getExportAll = async (
   rulesClient: RulesClient,

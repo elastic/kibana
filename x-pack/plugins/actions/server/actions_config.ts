@@ -35,6 +35,7 @@ export interface ActionsConfigurationUtilities {
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
+  getMicrosoftGraphApiUrl: () => undefined | string;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -101,6 +102,10 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
   };
 }
 
+function getMicrosoftGraphApiUrlFromConfig(config: ActionsConfig): undefined | string {
+  return config.microsoftGraphApiUrl;
+}
+
 function arrayAsSet<T>(arr: T[] | undefined): Set<T> | undefined {
   if (!arr) return;
   return new Set(arr);
@@ -164,5 +169,6 @@ export function getActionsConfigurationUtilities(
       }
     },
     getCustomHostSettings: (targetUrl: string) => getCustomHostSettings(config, targetUrl),
+    getMicrosoftGraphApiUrl: () => getMicrosoftGraphApiUrlFromConfig(config),
   };
 }

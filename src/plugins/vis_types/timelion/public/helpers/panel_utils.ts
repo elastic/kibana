@@ -66,11 +66,11 @@ export const createTickFormat = (
 export const MAIN_GROUP_ID = 1;
 
 export const withStaticPadding = (domain: AxisSpec['domain']): AxisSpec['domain'] =>
-  (({
+  ({
     ...domain,
     padding: 50,
     paddingUnit: 'pixel',
-  } as unknown) as AxisSpec['domain']);
+  } as unknown as AxisSpec['domain']);
 
 const adaptYaxisParams = (yaxis: IAxis) => {
   const y = { ...yaxis };
@@ -88,8 +88,8 @@ const adaptYaxisParams = (yaxis: IAxis) => {
     tickFormat: y.tickFormatter,
     domain: withStaticPadding({
       fit: y.min === undefined && y.max === undefined,
-      min: y.min,
-      max: y.max,
+      min: y.min ?? NaN,
+      max: y.max ?? NaN,
     }),
   };
 };
@@ -118,6 +118,8 @@ export const extractAllYAxis = (series: Series[]) => {
         groupId,
         domain: withStaticPadding({
           fit: false,
+          min: NaN,
+          max: NaN,
         }),
         id: (yaxis?.position || Position.Left) + index,
         position: Position.Left,

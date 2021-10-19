@@ -106,7 +106,7 @@ export const create = async (
           actionBy: { username, full_name, email },
           caseId: newCase.id,
           fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
-          newValue: JSON.stringify(query),
+          newValue: query,
           owner: newCase.attributes.owner,
         }),
       ],

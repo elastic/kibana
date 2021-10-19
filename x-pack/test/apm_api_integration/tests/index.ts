@@ -29,10 +29,6 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     });
 
     // correlations
-    describe('correlations/latency_slow_transactions', function () {
-      loadTestFile(require.resolve('./correlations/latency_slow_transactions'));
-    });
-
     describe('correlations/failed_transactions', function () {
       loadTestFile(require.resolve('./correlations/failed_transactions'));
     });
@@ -41,16 +37,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./correlations/latency'));
     });
 
-    describe('correlations/latency_overall', function () {
-      loadTestFile(require.resolve('./correlations/latency_overall'));
-    });
-
-    describe('correlations/errors_overall', function () {
-      loadTestFile(require.resolve('./correlations/errors_overall'));
-    });
-
-    describe('correlations/errors_failed_transactions', function () {
-      loadTestFile(require.resolve('./correlations/errors_failed_transactions'));
+    describe('metadata/event_metadata', function () {
+      loadTestFile(require.resolve('./metadata/event_metadata'));
     });
 
     describe('metrics_charts/metrics_charts', function () {
@@ -108,6 +96,14 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./services/throughput'));
     });
 
+    describe('service apis throughput', function () {
+      loadTestFile(require.resolve('./throughput/service_apis'));
+    });
+
+    describe('dependencies throughput', function () {
+      loadTestFile(require.resolve('./throughput/dependencies_apis'));
+    });
+
     describe('services/top_services', function () {
       loadTestFile(require.resolve('./services/top_services'));
     });
@@ -153,11 +149,16 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./settings/custom_link'));
     });
 
+    // suggestions
+    describe('suggestions', function () {
+      loadTestFile(require.resolve('./suggestions/suggestions'));
+    });
+
     // traces
     describe('traces/top_traces', function () {
       loadTestFile(require.resolve('./traces/top_traces'));
     });
-    describe('/api/apm/traces/{traceId}', function () {
+    describe('/internal/apm/traces/{traceId}', function () {
       loadTestFile(require.resolve('./traces/trace_by_id'));
     });
 
@@ -226,6 +227,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('historical_data/has_data', function () {
       loadTestFile(require.resolve('./historical_data/has_data'));
+    });
+
+    describe('latency/service_apis', function () {
+      loadTestFile(require.resolve('./latency/service_apis'));
     });
 
     registry.run(providerContext);

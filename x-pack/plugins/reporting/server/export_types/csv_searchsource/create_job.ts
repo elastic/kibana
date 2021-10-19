@@ -8,10 +8,9 @@
 import { CreateJobFn, CreateJobFnFactory } from '../../types';
 import { JobParamsCSV, TaskPayloadCSV } from './types';
 
-export const createJobFnFactory: CreateJobFnFactory<
-  CreateJobFn<JobParamsCSV, TaskPayloadCSV>
-> = function createJobFactoryFn() {
-  return async function createJob(jobParams) {
-    return jobParams;
+export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsCSV, TaskPayloadCSV>> =
+  function createJobFactoryFn() {
+    return async function createJob(jobParams) {
+      return jobParams;
+    };
   };
-};

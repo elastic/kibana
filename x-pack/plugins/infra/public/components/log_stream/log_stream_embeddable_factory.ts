@@ -19,7 +19,8 @@ import {
 } from './log_stream_embeddable';
 
 export class LogStreamEmbeddableFactoryDefinition
-  implements EmbeddableFactoryDefinition<LogStreamEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<LogStreamEmbeddableInput>
+{
   public readonly type = LOG_STREAM_EMBEDDABLE;
 
   constructor(private getStartServices: StartServicesAccessor<InfraClientStartDeps>) {}

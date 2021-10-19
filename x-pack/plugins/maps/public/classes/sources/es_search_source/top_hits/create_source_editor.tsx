@@ -77,14 +77,8 @@ export class CreateSourceEditor extends Component<Props, State> {
   };
 
   _previewLayer = () => {
-    const {
-      indexPattern,
-      geoFieldName,
-      sortField,
-      sortOrder,
-      topHitsSplitField,
-      topHitsSize,
-    } = this.state;
+    const { indexPattern, geoFieldName, sortField, sortOrder, topHitsSplitField, topHitsSize } =
+      this.state;
 
     const tooltipProperties: string[] = [];
     if (topHitsSplitField) {

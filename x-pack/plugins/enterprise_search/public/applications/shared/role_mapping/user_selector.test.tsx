@@ -30,7 +30,7 @@ describe('UserSelector', () => {
   const handleRoleChange = jest.fn();
   const handleUsernameSelectChange = jest.fn();
 
-  const roleType = ('user' as unknown) as ASRole;
+  const roleType = 'user' as unknown as ASRole;
 
   const props = {
     isNewUser: true,

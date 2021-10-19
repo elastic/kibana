@@ -250,16 +250,15 @@ export class ApplicationService {
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
         }
-        if (!navigatingToSameApp) {
-          this.appInternalStates.delete(this.currentAppId$.value!);
-        }
         if (openInNewTab) {
           this.openInNewTab!(getAppUrl(availableMounters, appId, path));
         } else {
+          if (!navigatingToSameApp) {
+            this.appInternalStates.delete(this.currentAppId$.value!);
+          }
           this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
+          this.currentAppId$.next(appId);
         }
-
-        this.currentAppId$.next(appId);
       }
     };
 

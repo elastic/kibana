@@ -10,6 +10,50 @@ import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
+interface EcsError {
+  code?: string;
+  id?: string;
+  message: string;
+  stack_trace?: string;
+  type?: string;
+}
+
+interface EndpointActionFields {
+  action_id: string;
+  data: EndpointActionData;
+}
+
+interface ActionRequestFields {
+  expiration: string;
+  type: 'INPUT_ACTION';
+  input_type: 'endpoint';
+}
+
+interface ActionResponseFields {
+  completed_at: string;
+  started_at: string;
+}
+export interface LogsEndpointAction {
+  '@timestamp': string;
+  agent: {
+    id: string | string[];
+  };
+  EndpointActions: EndpointActionFields & ActionRequestFields;
+  error?: EcsError;
+  user: {
+    id: string;
+  };
+}
+
+export interface LogsEndpointActionResponse {
+  '@timestamp': string;
+  agent: {
+    id: string | string[];
+  };
+  EndpointActions: EndpointActionFields & ActionResponseFields;
+  error?: EcsError;
+}
+
 export interface EndpointActionData {
   command: ISOLATION_ACTIONS;
   comment?: string;

@@ -2,7 +2,7 @@
   "id": "visTypeXy",
   "version": "kibana",
   "ui": true,
-  "server": false,
+  "server": true,
   "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection"],
   "requiredBundles": ["kibanaUtils", "visDefaultEditor"],
   "extraPublicDirs": ["common/index"],

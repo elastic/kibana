@@ -314,14 +314,8 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
       variableCounts: [],
     }
   );
-  const {
-    pageCounts,
-    pageMin,
-    pageMax,
-    elementCounts,
-    functionCounts,
-    variableCounts,
-  } = combinedWorkpadsInfo;
+  const { pageCounts, pageMin, pageMax, elementCounts, functionCounts, variableCounts } =
+    combinedWorkpadsInfo;
 
   const pageTotal = arraySum(pageCounts);
   const elementsTotal = arraySum(elementCounts);

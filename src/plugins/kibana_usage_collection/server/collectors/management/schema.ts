@@ -276,6 +276,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'metrics:allowStringIndices': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'query:allowLeadingWildcards': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -404,12 +408,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'apm:enableSignificantTerms': {
+  'observability:enableInspectEsQueries': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableInspectEsQueries': {
-    type: 'boolean',
+  'observability:maxSuggestions': {
+    type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
   'banners:placement': {

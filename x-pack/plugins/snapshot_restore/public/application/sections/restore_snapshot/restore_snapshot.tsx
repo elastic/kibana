@@ -40,10 +40,11 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   const [snapshotDetails, setSnapshotDetails] = useState<SnapshotDetails | {}>({});
 
   // Load snapshot
-  const { error: snapshotError, isLoading: loadingSnapshot, data: snapshotData } = useLoadSnapshot(
-    repositoryName,
-    snapshotId
-  );
+  const {
+    error: snapshotError,
+    isLoading: loadingSnapshot,
+    data: snapshotData,
+  } = useLoadSnapshot(repositoryName, snapshotId);
 
   // Update repository state when data is loaded
   useEffect(() => {

@@ -37,7 +37,8 @@ export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
 export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 
 export class DataEnhancedPlugin
-  implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
+  implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies>
+{
   private config!: ConfigSchema;
   private readonly storage = new Storage(window.localStorage);
   private usageCollector?: SearchUsageCollector;

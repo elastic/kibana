@@ -58,12 +58,16 @@ function Wrapper({
 
   history.replace({
     pathname: '/services/the-service-name/transactions/view',
-    search: fromQuery({ transactionName: 'the-transaction-name' }),
+    search: fromQuery({
+      transactionName: 'the-transaction-name',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+    }),
   });
 
-  const mockPluginContext = (merge({}, mockApmPluginContextValue, {
+  const mockPluginContext = merge({}, mockApmPluginContextValue, {
     core: { http: { get: httpGet } },
-  }) as unknown) as ApmPluginContextValue;
+  }) as unknown as ApmPluginContextValue;
 
   return (
     <IntlProvider locale="en">
@@ -73,14 +77,7 @@ function Wrapper({
             history={history}
             value={mockPluginContext}
           >
-            <MockUrlParamsContextProvider
-              params={{
-                rangeFrom: 'now-15m',
-                rangeTo: 'now',
-                start: 'mystart',
-                end: 'myend',
-              }}
-            >
+            <MockUrlParamsContextProvider>
               {children}
             </MockUrlParamsContextProvider>
           </MockApmPluginContextWrapper>

@@ -27,6 +27,7 @@ const migrationDeprecations: ConfigDeprecationProvider = () => [
     const migrationsConfig = settings[fromPath];
     if (migrationsConfig?.enableV2 !== undefined) {
       addDeprecation({
+        configPath: `${fromPath}.enableV2`,
         message:
           '"migrations.enableV2" is deprecated and will be removed in an upcoming release without any further notice.',
         documentationUrl: 'https://ela.st/kbn-so-migration-v2',
@@ -39,11 +40,12 @@ const migrationDeprecations: ConfigDeprecationProvider = () => [
   },
 ];
 
-export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> = {
-  path: 'migrations',
-  schema: migrationSchema,
-  deprecations: migrationDeprecations,
-};
+export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> =
+  {
+    path: 'migrations',
+    schema: migrationSchema,
+    deprecations: migrationDeprecations,
+  };
 
 const soSchema = schema.object({
   maxImportPayloadBytes: schema.byteSize({ defaultValue: 26_214_400 }),

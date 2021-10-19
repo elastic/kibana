@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { getTestScenariosForSpace } from '../lib/space_test_utils';
+import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -43,38 +43,15 @@ export function deleteTestSuiteFactory(
 
     // Query ES to ensure that we deleted everything we expected, and nothing we didn't
     // Grouping first by namespace, then by saved object type
-    const { body: response } = await es.search({
-      index: '.kibana',
-      body: {
-        size: 0,
-        query: {
-          terms: {
-            type: ['visualization', 'dashboard', 'space', 'index-pattern'],
-            // TODO: add assertions for config objects -- these assertions were removed because of flaky behavior in #92358, but we should
-            // consider adding them again at some point, especially if we convert config objects to `namespaceType: 'multiple-isolated'` in
-            // the future.
-          },
-        },
-        aggs: {
-          count: {
-            terms: {
-              field: 'namespace',
-              missing: 'default',
-              size: 10,
-            },
-            aggs: {
-              countByType: {
-                terms: {
-                  field: 'type',
-                  missing: 'UNKNOWN',
-                  size: 10,
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+    const { body: response } = await getAggregatedSpaceData(es, [
+      'visualization',
+      'dashboard',
+      'space',
+      'index-pattern',
+      // TODO: add assertions for config objects -- these assertions were removed because of flaky behavior in #92358, but we should
+      // consider adding them again at some point, especially if we convert config objects to `namespaceType: 'multiple-isolated'` in
+      // the future.
+    ]);
 
     // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
     const buckets = response.aggregations?.count.buckets;
@@ -176,53 +153,52 @@ export function deleteTestSuiteFactory(
     });
   };
 
-  const makeDeleteTest = (describeFn: DescribeFn) => (
-    description: string,
-    { user = {}, spaceId, tests }: DeleteTestDefinition
-  ) => {
-    describeFn(description, () => {
-      beforeEach(async () => {
-        await esArchiver.load(
-          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+  const makeDeleteTest =
+    (describeFn: DescribeFn) =>
+    (description: string, { user = {}, spaceId, tests }: DeleteTestDefinition) => {
+      describeFn(description, () => {
+        beforeEach(async () => {
+          await esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          );
+        });
+        afterEach(() =>
+          esArchiver.unload(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
         );
-      });
-      afterEach(() =>
-        esArchiver.unload(
-          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
 
-      getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
-        it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
-          return supertest
-            .delete(`${urlPrefix}/api/spaces/space/space_2`)
-            .auth(user.username, user.password)
-            .expect(tests.exists.statusCode)
-            .then(tests.exists.response);
-        });
-
-        describe(`when the space is reserved`, () => {
-          it(`should return ${tests.reservedSpace.statusCode} ${scenario}`, async () => {
+        getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
+          it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
             return supertest
-              .delete(`${urlPrefix}/api/spaces/space/default`)
+              .delete(`${urlPrefix}/api/spaces/space/space_2`)
               .auth(user.username, user.password)
-              .expect(tests.reservedSpace.statusCode)
-              .then(tests.reservedSpace.response);
+              .expect(tests.exists.statusCode)
+              .then(tests.exists.response);
           });
-        });
 
-        describe(`when the space doesn't exist`, () => {
-          it(`should return ${tests.doesntExist.statusCode} ${scenario}`, async () => {
-            return supertest
-              .delete(`${urlPrefix}/api/spaces/space/space_3`)
-              .auth(user.username, user.password)
-              .expect(tests.doesntExist.statusCode)
-              .then(tests.doesntExist.response);
+          describe(`when the space is reserved`, () => {
+            it(`should return ${tests.reservedSpace.statusCode} ${scenario}`, async () => {
+              return supertest
+                .delete(`${urlPrefix}/api/spaces/space/default`)
+                .auth(user.username, user.password)
+                .expect(tests.reservedSpace.statusCode)
+                .then(tests.reservedSpace.response);
+            });
+          });
+
+          describe(`when the space doesn't exist`, () => {
+            it(`should return ${tests.doesntExist.statusCode} ${scenario}`, async () => {
+              return supertest
+                .delete(`${urlPrefix}/api/spaces/space/space_3`)
+                .auth(user.username, user.password)
+                .expect(tests.doesntExist.statusCode)
+                .then(tests.doesntExist.response);
+            });
           });
         });
       });
-    });
-  };
+    };
 
   const deleteTest = makeDeleteTest(describe);
   // @ts-ignore

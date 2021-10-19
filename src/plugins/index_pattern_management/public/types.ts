@@ -38,4 +38,5 @@ export interface IndexPatternManagmentContext {
   IndexPatternEditor: IndexPatternEditorStart['IndexPatternEditorComponent'];
 }
 
-export type IndexPatternManagmentContextValue = KibanaReactContextValue<IndexPatternManagmentContext>;
+export type IndexPatternManagmentContextValue =
+  KibanaReactContextValue<IndexPatternManagmentContext>;

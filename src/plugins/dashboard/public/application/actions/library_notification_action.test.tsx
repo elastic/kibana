@@ -44,10 +44,10 @@ let unlinkAction: UnlinkFromLibraryAction;
 beforeEach(async () => {
   coreStart = coreMock.createStart();
 
-  unlinkAction = ({
+  unlinkAction = {
     getDisplayName: () => 'unlink from dat library',
     execute: jest.fn(),
-  } as unknown) as UnlinkFromLibraryAction;
+  } as unknown as UnlinkFromLibraryAction;
 
   const containerOptions = {
     ExitFullScreenButton: () => null,

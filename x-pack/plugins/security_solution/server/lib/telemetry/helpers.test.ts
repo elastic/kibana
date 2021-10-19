@@ -6,18 +6,21 @@
  */
 
 import moment from 'moment';
-import { createMockPackagePolicy } from './mocks';
-import { TrustedApp } from '../../../common/endpoint/types';
-import { LIST_ENDPOINT_EXCEPTION, LIST_ENDPOINT_EVENT_FILTER } from './constants';
+import { createMockPackagePolicy } from './__mocks__';
+import {
+  LIST_DETECTION_RULE_EXCEPTION,
+  LIST_ENDPOINT_EXCEPTION,
+  LIST_ENDPOINT_EVENT_FILTER,
+  LIST_TRUSTED_APPLICATION,
+} from './constants';
 import {
   getPreviousDiagTaskTimestamp,
-  getPreviousEpMetaTaskTimestamp,
+  getPreviousDailyTaskTimestamp,
   batchTelemetryRecords,
   isPackagePolicyList,
-  templateTrustedApps,
-  templateEndpointExceptions,
+  templateExceptionList,
 } from './helpers';
-import { EndpointExceptionListItem } from './types';
+import { ExceptionListItem } from './types';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -51,7 +54,7 @@ describe('test endpoint meta telemetry scheduled task timing helper', () => {
   test('test -24 hours is returned when there is no previous task run', async () => {
     const executeTo = moment().utc().toISOString();
     const executeFrom = undefined;
-    const newExecuteFrom = getPreviousEpMetaTaskTimestamp(executeTo, executeFrom);
+    const newExecuteFrom = getPreviousDailyTaskTimestamp(executeTo, executeFrom);
 
     expect(newExecuteFrom).toEqual(moment(executeTo).subtract(24, 'hours').toISOString());
   });
@@ -59,7 +62,7 @@ describe('test endpoint meta telemetry scheduled task timing helper', () => {
   test('test -24 hours is returned when there was a previous task run', async () => {
     const executeTo = moment().utc().toISOString();
     const executeFrom = moment(executeTo).subtract(24, 'hours').toISOString();
-    const newExecuteFrom = getPreviousEpMetaTaskTimestamp(executeTo, executeFrom);
+    const newExecuteFrom = getPreviousDailyTaskTimestamp(executeTo, executeFrom);
 
     expect(newExecuteFrom).toEqual(executeFrom);
   });
@@ -69,7 +72,7 @@ describe('test endpoint meta telemetry scheduled task timing helper', () => {
   test('test 24 hours is returned when previous task run took longer than 24 hours', async () => {
     const executeTo = moment().utc().toISOString();
     const executeFrom = moment(executeTo).subtract(72, 'hours').toISOString(); // down 3 days
-    const newExecuteFrom = getPreviousEpMetaTaskTimestamp(executeTo, executeFrom);
+    const newExecuteFrom = getPreviousDailyTaskTimestamp(executeTo, executeFrom);
 
     expect(newExecuteFrom).toEqual(moment(executeTo).subtract(24, 'hours').toISOString());
   });
@@ -132,65 +135,88 @@ describe('test package policy type guard', () => {
 });
 
 describe('list telemetry schema', () => {
-  test('trusted apps document is correctly formed', () => {
-    const data = [{ id: 'test_1' }] as TrustedApp[];
-    const templatedItems = templateTrustedApps(data);
+  test('detection rules document is correctly formed', () => {
+    const data = [{ id: 'test_1' }] as ExceptionListItem[];
+    const templatedItems = templateExceptionList(data, LIST_DETECTION_RULE_EXCEPTION);
 
-    expect(templatedItems[0]?.trusted_application.length).toEqual(1);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
+    expect(templatedItems[0]?.detection_rule).not.toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).toBeUndefined();
+  });
+
+  test('detection rules document is correctly formed with multiple entries', () => {
+    const data = [{ id: 'test_2' }, { id: 'test_2' }] as ExceptionListItem[];
+    const templatedItems = templateExceptionList(data, LIST_DETECTION_RULE_EXCEPTION);
+
+    expect(templatedItems[0]?.detection_rule).not.toBeUndefined();
+    expect(templatedItems[1]?.detection_rule).not.toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).toBeUndefined();
+  });
+
+  test('trusted apps document is correctly formed', () => {
+    const data = [{ id: 'test_1' }] as ExceptionListItem[];
+    const templatedItems = templateExceptionList(data, LIST_TRUSTED_APPLICATION);
+
+    expect(templatedItems[0]?.detection_rule).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).not.toBeUndefined();
   });
 
   test('trusted apps document is correctly formed with multiple entries', () => {
-    const data = [{ id: 'test_2' }, { id: 'test_2' }] as TrustedApp[];
-    const templatedItems = templateTrustedApps(data);
+    const data = [{ id: 'test_2' }, { id: 'test_2' }] as ExceptionListItem[];
+    const templatedItems = templateExceptionList(data, LIST_TRUSTED_APPLICATION);
 
-    expect(templatedItems[0]?.trusted_application.length).toEqual(1);
-    expect(templatedItems[1]?.trusted_application.length).toEqual(1);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
+    expect(templatedItems[0]?.detection_rule).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).not.toBeUndefined();
+    expect(templatedItems[1]?.trusted_application).not.toBeUndefined();
   });
 
   test('endpoint exception document is correctly formed', () => {
-    const data = [{ id: 'test_3' }] as EndpointExceptionListItem[];
-    const templatedItems = templateEndpointExceptions(data, LIST_ENDPOINT_EXCEPTION);
+    const data = [{ id: 'test_3' }] as ExceptionListItem[];
+    const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EXCEPTION);
 
-    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(1);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
+    expect(templatedItems[0]?.detection_rule).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).not.toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).toBeUndefined();
   });
 
   test('endpoint exception document is correctly formed with multiple entries', () => {
-    const data = [
-      { id: 'test_4' },
-      { id: 'test_4' },
-      { id: 'test_4' },
-    ] as EndpointExceptionListItem[];
-    const templatedItems = templateEndpointExceptions(data, LIST_ENDPOINT_EXCEPTION);
+    const data = [{ id: 'test_4' }, { id: 'test_4' }, { id: 'test_4' }] as ExceptionListItem[];
+    const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EXCEPTION);
 
-    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(1);
-    expect(templatedItems[1]?.endpoint_exception.length).toEqual(1);
-    expect(templatedItems[2]?.endpoint_exception.length).toEqual(1);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(0);
+    expect(templatedItems[0]?.detection_rule).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).not.toBeUndefined();
+    expect(templatedItems[1]?.endpoint_exception).not.toBeUndefined();
+    expect(templatedItems[2]?.endpoint_exception).not.toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).toBeUndefined();
   });
 
   test('endpoint event filters document is correctly formed', () => {
-    const data = [{ id: 'test_5' }] as EndpointExceptionListItem[];
-    const templatedItems = templateEndpointExceptions(data, LIST_ENDPOINT_EVENT_FILTER);
+    const data = [{ id: 'test_5' }] as ExceptionListItem[];
+    const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EVENT_FILTER);
 
-    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(1);
+    expect(templatedItems[0]?.detection_rule).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).not.toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).toBeUndefined();
   });
 
   test('endpoint event filters document is correctly formed with multiple entries', () => {
-    const data = [{ id: 'test_6' }, { id: 'test_6' }] as EndpointExceptionListItem[];
-    const templatedItems = templateEndpointExceptions(data, LIST_ENDPOINT_EVENT_FILTER);
+    const data = [{ id: 'test_6' }, { id: 'test_6' }] as ExceptionListItem[];
+    const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EVENT_FILTER);
 
-    expect(templatedItems[0]?.trusted_application.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_exception.length).toEqual(0);
-    expect(templatedItems[0]?.endpoint_event_filter.length).toEqual(1);
-    expect(templatedItems[1]?.endpoint_event_filter.length).toEqual(1);
+    expect(templatedItems[0]?.detection_rule).toBeUndefined();
+    expect(templatedItems[0]?.endpoint_event_filter).not.toBeUndefined();
+    expect(templatedItems[1]?.endpoint_event_filter).not.toBeUndefined();
+    expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
+    expect(templatedItems[0]?.trusted_application).toBeUndefined();
   });
 });

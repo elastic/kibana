@@ -245,9 +245,11 @@ describe('KibanaRequest', () => {
       });
 
       it('does not complete before response has been sent', async () => {
-        const { server: innerServer, createRouter, registerOnPreAuth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerOnPreAuth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();

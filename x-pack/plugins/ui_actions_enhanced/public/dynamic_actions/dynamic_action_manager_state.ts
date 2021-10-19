@@ -66,12 +66,14 @@ export const transitions: Transitions = {
     events,
   }),
 
-  failFetching: (state) => ({ message }) => ({
-    ...state,
-    isFetchingEvents: false,
-    fetchCount: state.fetchCount + 1,
-    fetchError: { message },
-  }),
+  failFetching:
+    (state) =>
+    ({ message }) => ({
+      ...state,
+      isFetchingEvents: false,
+      fetchCount: state.fetchCount + 1,
+      fetchError: { message },
+    }),
 
   addEvent: (state) => (event: SerializedEvent) => ({
     ...state,

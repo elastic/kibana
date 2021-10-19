@@ -35,7 +35,7 @@ const xpackMocks = {
 
 describe('getAllNodeVersions', () => {
   it('returns a list of unique node versions', async () => {
-    const adminClient = ({
+    const adminClient = {
       asInternalUser: {
         nodes: {
           info: jest.fn().mockResolvedValue({
@@ -49,7 +49,7 @@ describe('getAllNodeVersions', () => {
           }),
         },
       },
-    } as unknown) as IScopedClusterClient;
+    } as unknown as IScopedClusterClient;
 
     await expect(getAllNodeVersions(adminClient)).resolves.toEqual([
       new SemVer('6.0.0'),

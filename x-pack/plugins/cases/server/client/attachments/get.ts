@@ -124,10 +124,8 @@ export const getAllAlertsAttachToCase = async (
     includeSubCaseComments: false,
   });
 
-  const {
-    filter: authorizationFilter,
-    ensureSavedObjectsAreAuthorized,
-  } = await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
+  const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+    await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
 
   const alerts = await attachmentService.getAllAlertsAttachToCase({
     unsecuredSavedObjectsClient,
@@ -159,10 +157,8 @@ export async function find(
   try {
     checkEnabledCaseConnectorOrThrow(queryParams?.subCaseId);
 
-    const {
-      filter: authorizationFilter,
-      ensureSavedObjectsAreAuthorized,
-    } = await authorization.getAuthorizationFilter(Operations.findComments);
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.findComments);
 
     const id = queryParams?.subCaseId ?? caseID;
     const associationType = queryParams?.subCaseId ? AssociationType.subCase : AssociationType.case;

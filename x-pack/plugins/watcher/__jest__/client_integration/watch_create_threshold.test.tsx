@@ -9,15 +9,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
+
 import { getExecuteDetails } from '../../__fixtures__';
 import { WATCH_TYPES } from '../../common/constants';
-import {
-  setupEnvironment,
-  pageHelpers,
-  nextTick,
-  wrapBodyResponse,
-  unwrapBodyResponse,
-} from './helpers';
+import { setupEnvironment, pageHelpers, wrapBodyResponse, unwrapBodyResponse } from './helpers';
 import { WatchCreateThresholdTestBed } from './helpers/watch_create_threshold.helpers';
 
 const WATCH_NAME = 'my_test_watch';
@@ -76,7 +71,9 @@ jest.mock('@elastic/eui', () => {
     // which does not produce a valid component wrapper
     EuiComboBox: (props: any) => (
       <input
-        data-test-subj="mockComboBox"
+        data-test-subj={props['data-test-subj'] || 'mockComboBox'}
+        data-currentvalue={props.selectedOptions}
+        value={props.selectedOptions[0]?.value ?? ''}
         onChange={(syntheticEvent: any) => {
           props.onChange([syntheticEvent['0']]);
         }}
@@ -91,7 +88,12 @@ describe('<ThresholdWatchEdit /> create route', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchCreateThresholdTestBed;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
   afterAll(() => {
+    jest.useRealTimers();
     server.restore();
   });
 
@@ -99,7 +101,6 @@ describe('<ThresholdWatchEdit /> create route', () => {
     beforeEach(async () => {
       testBed = await setup();
       const { component } = testBed;
-      await nextTick();
       component.update();
     });
 
@@ -159,46 +160,60 @@ describe('<ThresholdWatchEdit /> create route', () => {
         test('it should enable the Create button and render additional content with valid fields', async () => {
           const { form, find, component, exists } = testBed;
 
-          form.setInputValue('nameInput', 'my_test_watch');
-          find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
-          form.setInputValue('watchTimeFieldSelect', '@timestamp');
+          expect(find('saveWatchButton').props().disabled).toBe(true);
 
           await act(async () => {
-            await nextTick();
-            component.update();
+            form.setInputValue('nameInput', 'my_test_watch');
+            find('indicesComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
+            form.setInputValue('watchTimeFieldSelect', '@timestamp');
           });
+          component.update();
 
-          expect(find('saveWatchButton').props().disabled).toEqual(false);
-
+          expect(find('saveWatchButton').props().disabled).toBe(false);
           expect(find('watchConditionTitle').text()).toBe('Match the following condition');
           expect(exists('watchVisualizationChart')).toBe(true);
           expect(exists('watchActionsPanel')).toBe(true);
         });
 
-        // Looks like there is an issue with using 'mockComboBox'.
-        describe.skip('watch conditions', () => {
-          beforeEach(() => {
-            const { form, find } = testBed;
+        describe('watch conditions', () => {
+          beforeEach(async () => {
+            const { form, find, component } = testBed;
 
             // Name, index and time fields are required before the watch condition expression renders
-            form.setInputValue('nameInput', 'my_test_watch');
-            act(() => {
-              find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
+            await act(async () => {
+              form.setInputValue('nameInput', 'my_test_watch');
+              find('indicesComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
+              form.setInputValue('watchTimeFieldSelect', '@timestamp');
             });
-            form.setInputValue('watchTimeFieldSelect', '@timestamp');
+            component.update();
           });
 
-          test('should require a threshold value', () => {
-            const { form, find } = testBed;
+          test('should require a threshold value', async () => {
+            const { form, find, component } = testBed;
 
+            // Display the threshold pannel
             act(() => {
               find('watchThresholdButton').simulate('click');
+            });
+            component.update();
+
+            await act(async () => {
               // Provide invalid value
               form.setInputValue('watchThresholdInput', '');
+            });
+
+            // We need to wait for the debounced validation to be triggered and update the DOM
+            jest.advanceTimersByTime(500);
+            component.update();
+
+            expect(form.getErrorsMessages()).toContain('A value is required.');
+
+            await act(async () => {
               // Provide valid value
               form.setInputValue('watchThresholdInput', '0');
             });
-            expect(form.getErrorsMessages()).toContain('A value is required.');
+            component.update();
+            // No need to wait as the validation errors are cleared whenever the field changes
             expect(form.getErrorsMessages().length).toEqual(0);
           });
         });
@@ -209,14 +224,12 @@ describe('<ThresholdWatchEdit /> create route', () => {
           const { form, find, component } = testBed;
 
           // Set up valid fields needed for actions component to render
-          form.setInputValue('nameInput', WATCH_NAME);
-          find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
-          form.setInputValue('watchTimeFieldSelect', WATCH_TIME_FIELD);
-
           await act(async () => {
-            await nextTick();
-            component.update();
+            form.setInputValue('nameInput', WATCH_NAME);
+            find('indicesComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]);
+            form.setInputValue('watchTimeFieldSelect', WATCH_TIME_FIELD);
           });
+          component.update();
         });
 
         test('should simulate a logging action', async () => {
@@ -240,7 +253,6 @@ describe('<ThresholdWatchEdit /> create route', () => {
 
           await act(async () => {
             actions.clickSimulateButton();
-            await nextTick();
           });
 
           // Verify request
@@ -303,7 +315,6 @@ describe('<ThresholdWatchEdit /> create route', () => {
 
           await act(async () => {
             actions.clickSimulateButton();
-            await nextTick();
           });
 
           // Verify request
@@ -366,7 +377,6 @@ describe('<ThresholdWatchEdit /> create route', () => {
 
           await act(async () => {
             actions.clickSimulateButton();
-            await nextTick();
           });
 
           // Verify request
@@ -431,15 +441,14 @@ describe('<ThresholdWatchEdit /> create route', () => {
           expect(exists('watchActionAccordion')).toBe(true);
 
           // Provide valid fields and verify
-          find('watchActionAccordion.mockComboBox').simulate('change', [
+          find('watchActionAccordion.toEmailAddressInput').simulate('change', [
             { label: EMAIL_RECIPIENT, value: EMAIL_RECIPIENT },
-          ]); // Using mocked EuiComboBox
+          ]);
           form.setInputValue('emailSubjectInput', EMAIL_SUBJECT);
           form.setInputValue('emailBodyInput', EMAIL_BODY);
 
           await act(async () => {
             actions.clickSimulateButton();
-            await nextTick();
           });
 
           // Verify request
@@ -532,7 +541,6 @@ describe('<ThresholdWatchEdit /> create route', () => {
 
           await act(async () => {
             actions.clickSimulateButton();
-            await nextTick();
           });
 
           // Verify request
@@ -553,8 +561,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
                 port: Number(PORT),
                 scheme: SCHEME,
                 path: PATH,
-                body:
-                  '{\n  "message": "Watch [{{ctx.metadata.name}}] has exceeded the threshold"\n}', // Default
+                body: '{\n  "message": "Watch [{{ctx.metadata.name}}] has exceeded the threshold"\n}', // Default
                 username: USERNAME,
                 password: PASSWORD,
                 webhook: {
@@ -622,7 +629,6 @@ describe('<ThresholdWatchEdit /> create route', () => {
 
           await act(async () => {
             actions.clickSimulateButton();
-            await nextTick();
           });
 
           // Verify request
@@ -703,7 +709,6 @@ describe('<ThresholdWatchEdit /> create route', () => {
 
           await act(async () => {
             actions.clickSimulateButton();
-            await nextTick();
           });
 
           // Verify request
@@ -754,20 +759,66 @@ describe('<ThresholdWatchEdit /> create route', () => {
         });
       });
 
+      describe('watch visualize data payload', () => {
+        test('should send the correct payload', async () => {
+          const { form, find, component } = testBed;
+
+          // Set up required fields
+          await act(async () => {
+            form.setInputValue('nameInput', WATCH_NAME);
+            find('indicesComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]);
+            form.setInputValue('watchTimeFieldSelect', WATCH_TIME_FIELD);
+          });
+          component.update();
+
+          const latestReqToGetVisualizeData = server.requests.find(
+            (req) => req.method === 'POST' && req.url === '/api/watcher/watch/visualize'
+          );
+          if (!latestReqToGetVisualizeData) {
+            throw new Error(`No request found to fetch visualize data.`);
+          }
+
+          const requestBody = unwrapBodyResponse(latestReqToGetVisualizeData.requestBody);
+
+          expect(requestBody.watch).toEqual({
+            id: requestBody.watch.id, // id is dynamic
+            name: 'my_test_watch',
+            type: 'threshold',
+            isNew: true,
+            isActive: true,
+            actions: [],
+            index: ['index1'],
+            timeField: '@timestamp',
+            triggerIntervalSize: 1,
+            triggerIntervalUnit: 'm',
+            aggType: 'count',
+            termSize: 5,
+            termOrder: 'desc',
+            thresholdComparator: '>',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            hasTermsAgg: false,
+            threshold: 1000,
+          });
+
+          expect(requestBody.options.interval).toBeDefined();
+        });
+      });
+
       describe('form payload', () => {
         test('should send the correct payload', async () => {
           const { form, find, component, actions } = testBed;
 
           // Set up required fields
-          form.setInputValue('nameInput', WATCH_NAME);
-          find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
-          form.setInputValue('watchTimeFieldSelect', WATCH_TIME_FIELD);
+          await act(async () => {
+            form.setInputValue('nameInput', WATCH_NAME);
+            find('indicesComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]);
+            form.setInputValue('watchTimeFieldSelect', WATCH_TIME_FIELD);
+          });
+          component.update();
 
           await act(async () => {
-            await nextTick();
-            component.update();
             actions.clickSubmitButton();
-            await nextTick();
           });
 
           // Verify request

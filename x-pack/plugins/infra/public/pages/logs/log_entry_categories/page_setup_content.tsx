@@ -14,41 +14,40 @@ interface LogEntryCategoriesSetupContentProps {
   onOpenSetup: () => void;
 }
 
-export const LogEntryCategoriesSetupContent: React.FunctionComponent<LogEntryCategoriesSetupContentProps> = ({
-  onOpenSetup,
-}) => {
-  useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup' });
-  useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup', delay: 15000 });
+export const LogEntryCategoriesSetupContent: React.FunctionComponent<LogEntryCategoriesSetupContentProps> =
+  ({ onOpenSetup }) => {
+    useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup' });
+    useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup', delay: 15000 });
 
-  return (
-    <EuiEmptyPrompt
-      data-test-subj="logEntryCategoriesSetupPage"
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.infra.logs.logEntryCategories.setupTitle"
-            defaultMessage="Set up log category analysis"
-          />
-        </h2>
-      }
-      body={
-        <EuiText size="s">
-          <p>
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="logEntryCategoriesSetupPage"
+        title={
+          <h2>
             <FormattedMessage
-              id="xpack.infra.logs.logEntryCategories.setupDescription"
-              defaultMessage="To enable log categories, set up a machine learning job."
+              id="xpack.infra.logs.logEntryCategories.setupTitle"
+              defaultMessage="Set up log category analysis"
             />
-          </p>
-        </EuiText>
-      }
-      actions={
-        <EuiButton fill onClick={onOpenSetup}>
-          <FormattedMessage
-            id="xpack.infra.logs.logEntryCategories.showAnalysisSetupButtonLabel"
-            defaultMessage="ML setup"
-          />
-        </EuiButton>
-      }
-    />
-  );
-};
+          </h2>
+        }
+        body={
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.infra.logs.logEntryCategories.setupDescription"
+                defaultMessage="To enable log categories, set up a machine learning job."
+              />
+            </p>
+          </EuiText>
+        }
+        actions={
+          <EuiButton fill onClick={onOpenSetup}>
+            <FormattedMessage
+              id="xpack.infra.logs.logEntryCategories.showAnalysisSetupButtonLabel"
+              defaultMessage="ML setup"
+            />
+          </EuiButton>
+        }
+      />
+    );
+  };

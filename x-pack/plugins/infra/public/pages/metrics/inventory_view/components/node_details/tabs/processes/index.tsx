@@ -46,13 +46,12 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
     return { [field]: node.name };
   }, [options, node, nodeType]);
 
-  const { loading, error, response, makeRequest: reload } = useProcessList(
-    hostTerm,
-    timefield,
-    currentTime,
-    sortBy,
-    parseSearchString(searchFilter)
-  );
+  const {
+    loading,
+    error,
+    response,
+    makeRequest: reload,
+  } = useProcessList(hostTerm, timefield, currentTime, sortBy, parseSearchString(searchFilter));
 
   const debouncedSearchOnChange = useMemo(
     () => debounce<(queryText: string) => void>((queryText) => setSearchFilter(queryText), 500),

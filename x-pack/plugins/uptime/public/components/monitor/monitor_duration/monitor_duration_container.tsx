@@ -28,12 +28,8 @@ import { createExploratoryViewUrl } from '../../../../../observability/public';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
-  const {
-    dateRangeStart,
-    dateRangeEnd,
-    absoluteDateRangeStart,
-    absoluteDateRangeEnd,
-  } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, absoluteDateRangeStart, absoluteDateRangeEnd } =
+    useGetUrlParams();
 
   const { durationLines, loading } = useSelector(selectDurationLines);
 
@@ -55,16 +51,19 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
 
   const exploratoryViewLink = createExploratoryViewUrl(
     {
-      [`monitor-duration`]: {
-        reportType: 'kpi-over-time',
-        time: { from: dateRangeStart, to: dateRangeEnd },
-        reportDefinitions: {
-          'monitor.id': [monitorId] as string[],
+      reportType: 'kpi-over-time',
+      allSeries: [
+        {
+          name: `${monitorId}-response-duration`,
+          time: { from: dateRangeStart, to: dateRangeEnd },
+          reportDefinitions: {
+            'monitor.id': [monitorId] as string[],
+          },
+          breakdown: 'observer.geo.name',
+          operationType: 'average',
+          dataType: 'synthetics',
         },
-        breakdown: 'observer.geo.name',
-        operationType: 'average',
-        dataType: 'synthetics',
-      },
+      ],
     },
     basePath
   );

@@ -8,7 +8,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from 'src/core/public';
-import { PersistableStateService } from '../../kibana_utils/common';
+import { PersistableStateService, PersistableState } from '../../kibana_utils/common';
 
 export enum ViewMode {
   EDIT = 'edit',
@@ -62,8 +62,7 @@ export interface PanelState<E extends EmbeddableInput & { id: string } = { id: s
   type: string;
 
   // Stores input for this embeddable that is specific to this embeddable. Other parts of embeddable input
-  // will be derived from the container's input. **Any state in here will override any state derived from
-  // the container.**
+  // will be derived from the container's input. **State in here will override state derived from the container.**
   explicitInput: Partial<E> & { id: string };
 }
 
@@ -72,6 +71,8 @@ export type EmbeddableStateWithType = EmbeddableInput & { type: string };
 export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
 
 export interface CommonEmbeddableStartContract {
-  getEmbeddableFactory: (embeddableFactoryId: string) => any;
-  getEnhancement: (enhancementId: string) => any;
+  getEmbeddableFactory: (
+    embeddableFactoryId: string
+  ) => PersistableState & { isContainerType: boolean };
+  getEnhancement: (enhancementId: string) => PersistableState;
 }

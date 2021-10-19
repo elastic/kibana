@@ -6,15 +6,19 @@
  */
 
 import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
+import { REMOVE_COLUMN } from './column_headers/translations';
 import { Direction } from '../../../../common/search_strategy';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { defaultHeaders, mockBrowserFields, mockTimelineData, TestProviders } from '../../../mock';
 import { TimelineTabs } from '../../../../common/types/timeline';
 import { TestCellRenderer } from '../../../mock/cell_renderer';
 import { mockGlobalState } from '../../../mock/global_state';
+import { EuiDataGridColumn } from '@elastic/eui';
+import { defaultColumnHeaderType } from '../../../store/t_grid/defaults';
 
 const mockSort: Sort[] = [
   {
@@ -41,8 +45,9 @@ jest.mock('../../../hooks/use_selector', () => ({
 
 jest.mock(
   'react-visibility-sensor',
-  () => ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
-    children({ isVisible: true })
+  () =>
+    ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
+      children({ isVisible: true })
 );
 
 window.matchMedia = jest.fn().mockImplementation((query) => {
@@ -60,7 +65,7 @@ describe('Body', () => {
   const props: StatefulBodyProps = {
     activePage: 0,
     browserFields: mockBrowserFields,
-    clearSelected: (jest.fn() as unknown) as StatefulBodyProps['clearSelected'],
+    clearSelected: jest.fn() as unknown as StatefulBodyProps['clearSelected'],
     columnHeaders: defaultHeaders,
     data: mockTimelineData,
     excludedRowRendererIds: [],
@@ -74,7 +79,7 @@ describe('Body', () => {
     renderCellValue: TestCellRenderer,
     rowRenderers: [],
     selectedEventIds: {},
-    setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],
+    setSelected: jest.fn() as unknown as StatefulBodyProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
     tabType: TimelineTabs.query,
@@ -149,6 +154,178 @@ describe('Body', () => {
           .childAt(0)
           .text()
       ).toEqual(mockTimelineData[0].ecs.timestamp);
+    });
+
+    test("timestamp column doesn't render cell actions", () => {
+      const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
+      const testProps = {
+        ...props,
+        columnHeaders: headersJustTimestamp,
+        data: mockTimelineData.slice(0, 1),
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <BodyComponent {...testProps} />
+        </TestProviders>
+      );
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find('[data-test-subj="body-data-grid"]')
+          .first()
+          .prop<EuiDataGridColumn[]>('columns')
+          .find((c) => c.id === '@timestamp')?.cellActions
+      ).toBeUndefined();
+    });
+
+    test("signal.rule.risk_score column doesn't render cell actions", () => {
+      const columnHeaders = [
+        {
+          category: 'signal',
+          columnHeaderType: defaultColumnHeaderType,
+          id: 'signal.rule.risk_score',
+          type: 'number',
+          aggregatable: true,
+          initialWidth: 105,
+        },
+      ];
+      const testProps = {
+        ...props,
+        columnHeaders,
+        data: mockTimelineData.slice(0, 1),
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <BodyComponent {...testProps} />
+        </TestProviders>
+      );
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find('[data-test-subj="body-data-grid"]')
+          .first()
+          .prop<EuiDataGridColumn[]>('columns')
+          .find((c) => c.id === 'signal.rule.risk_score')?.cellActions
+      ).toBeUndefined();
+    });
+
+    test("signal.reason column doesn't render cell actions", () => {
+      const columnHeaders = [
+        {
+          category: 'signal',
+          columnHeaderType: defaultColumnHeaderType,
+          id: 'signal.reason',
+          type: 'string',
+          aggregatable: true,
+          initialWidth: 450,
+        },
+      ];
+      const testProps = {
+        ...props,
+        columnHeaders,
+        data: mockTimelineData.slice(0, 1),
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <BodyComponent {...testProps} />
+        </TestProviders>
+      );
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find('[data-test-subj="body-data-grid"]')
+          .first()
+          .prop<EuiDataGridColumn[]>('columns')
+          .find((c) => c.id === 'signal.reason')?.cellActions
+      ).toBeUndefined();
+    });
+  });
+
+  test("signal.rule.risk_score column doesn't render cell actions", () => {
+    const columnHeaders = [
+      {
+        category: 'signal',
+        columnHeaderType: defaultColumnHeaderType,
+        id: 'signal.rule.risk_score',
+        type: 'number',
+        aggregatable: true,
+        initialWidth: 105,
+      },
+    ];
+    const testProps = {
+      ...props,
+      columnHeaders,
+      data: mockTimelineData.slice(0, 1),
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <BodyComponent {...testProps} />
+      </TestProviders>
+    );
+    wrapper.update();
+
+    expect(
+      wrapper
+        .find('[data-test-subj="body-data-grid"]')
+        .first()
+        .prop<EuiDataGridColumn[]>('columns')
+        .find((c) => c.id === 'signal.rule.risk_score')?.cellActions
+    ).toBeUndefined();
+  });
+
+  test('it does NOT render switches for hiding columns in the `EuiDataGrid` `Columns` popover', async () => {
+    render(
+      <TestProviders>
+        <BodyComponent {...props} />
+      </TestProviders>
+    );
+
+    // Click the `EuidDataGrid` `Columns` button to open the popover:
+    fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+
+    // `EuiDataGrid` renders switches for hiding in the `Columns` popover when `showColumnSelector.allowHide` is `true`
+    const switches = await screen.queryAllByRole('switch');
+
+    expect(switches.length).toBe(0); // no switches are rendered, because `allowHide` is `false`
+  });
+
+  test('it dispatches the `REMOVE_COLUMN` action when a user clicks `Remove column` in the column header popover', async () => {
+    render(
+      <TestProviders>
+        <BodyComponent {...props} />
+      </TestProviders>
+    );
+
+    // click the `@timestamp` column header to display the popover
+    fireEvent.click(screen.getByText('@timestamp'));
+
+    // click the `Remove column` action in the popover
+    fireEvent.click(await screen.getByText(REMOVE_COLUMN));
+
+    expect(mockDispatch).toBeCalledWith({
+      payload: { columnId: '@timestamp', id: 'timeline-test' },
+      type: 'x-pack/timelines/t-grid/REMOVE_COLUMN',
+    });
+  });
+
+  test('it dispatches the `UPDATE_COLUMN_WIDTH` action when a user resizes a column', async () => {
+    render(
+      <TestProviders>
+        <BodyComponent {...props} />
+      </TestProviders>
+    );
+
+    // simulate resizing the column
+    fireEvent.mouseDown(screen.getAllByTestId('dataGridColumnResizer')[0]);
+    fireEvent.mouseMove(screen.getAllByTestId('dataGridColumnResizer')[0]);
+    fireEvent.mouseUp(screen.getAllByTestId('dataGridColumnResizer')[0]);
+
+    expect(mockDispatch).toBeCalledWith({
+      payload: { columnId: '@timestamp', id: 'timeline-test', width: NaN },
+      type: 'x-pack/timelines/t-grid/UPDATE_COLUMN_WIDTH',
     });
   });
 });

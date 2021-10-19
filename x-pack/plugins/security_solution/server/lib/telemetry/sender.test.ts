@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable dot-notation */
-import { TelemetryEventsSender, copyAllowlistedFields } from './sender';
+import { TelemetryEventsSender } from './sender';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import { URL } from 'url';
@@ -35,6 +35,11 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+          },
+          dns: {
+            question: {
+              name: 'test-dns',
+            },
           },
           agent: {
             name: 'test',
@@ -79,6 +84,7 @@ describe('TelemetryEventsSender', () => {
             nope: 'nope',
             executable: null, // null fields are never allowlisted
             working_directory: '/some/usr/dir',
+            entity_id: 'some_entity_id',
           },
           Responses: '{ "result": 0 }', // >= 7.15
           Target: {
@@ -101,6 +107,11 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+          },
+          dns: {
+            question: {
+              name: 'test-dns',
+            },
           },
           agent: {
             name: 'test',
@@ -139,6 +150,7 @@ describe('TelemetryEventsSender', () => {
           process: {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
+            entity_id: 'some_entity_id',
           },
           Responses: '{ "result": 0 }',
           Target: {
@@ -216,123 +228,6 @@ describe('TelemetryEventsSender', () => {
 
       expect(sender['queue'].length).toBe(0);
       expect(sender['sendEvents']).toBeCalledTimes(0);
-    });
-  });
-});
-
-describe('allowlistEventFields', () => {
-  const allowlist = {
-    a: true,
-    b: true,
-    c: {
-      d: true,
-    },
-  };
-
-  it('filters top level', () => {
-    const event = {
-      a: 'a',
-      a1: 'a1',
-      b: 'b',
-      b1: 'b1',
-    };
-    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
-      a: 'a',
-      b: 'b',
-    });
-  });
-
-  it('filters nested', () => {
-    const event = {
-      a: {
-        a1: 'a1',
-      },
-      a1: 'a1',
-      b: {
-        b1: 'b1',
-      },
-      b1: 'b1',
-      c: {
-        d: 'd',
-        e: 'e',
-        f: 'f',
-      },
-    };
-    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
-      a: {
-        a1: 'a1',
-      },
-      b: {
-        b1: 'b1',
-      },
-      c: {
-        d: 'd',
-      },
-    });
-  });
-
-  it('filters arrays of objects', () => {
-    const event = {
-      a: [
-        {
-          a1: 'a1',
-        },
-      ],
-      b: {
-        b1: 'b1',
-      },
-      c: [
-        {
-          d: 'd1',
-          e: 'e1',
-          f: 'f1',
-        },
-        {
-          d: 'd2',
-          e: 'e2',
-          f: 'f2',
-        },
-        {
-          d: 'd3',
-          e: 'e3',
-          f: 'f3',
-        },
-      ],
-    };
-    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
-      a: [
-        {
-          a1: 'a1',
-        },
-      ],
-      b: {
-        b1: 'b1',
-      },
-      c: [
-        {
-          d: 'd1',
-        },
-        {
-          d: 'd2',
-        },
-        {
-          d: 'd3',
-        },
-      ],
-    });
-  });
-
-  it("doesn't create empty objects", () => {
-    const event = {
-      a: 'a',
-      b: 'b',
-      c: {
-        e: 'e',
-      },
-    };
-    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
-      a: 'a',
-      b: 'b',
     });
   });
 });

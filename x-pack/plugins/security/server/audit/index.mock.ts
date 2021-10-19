@@ -10,11 +10,11 @@ import type { SecurityAuditLogger } from './security_audit_logger';
 
 export const securityAuditLoggerMock = {
   create() {
-    return ({
+    return {
       savedObjectsAuthorizationFailure: jest.fn(),
       savedObjectsAuthorizationSuccess: jest.fn(),
       accessAgreementAcknowledged: jest.fn(),
-    } as unknown) as jest.Mocked<SecurityAuditLogger>;
+    } as unknown as jest.Mocked<SecurityAuditLogger>;
   },
 };
 

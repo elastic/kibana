@@ -16,12 +16,12 @@ const tagsPartial = {
 };
 
 const matchedIndices = {
-  allIndices: ([
+  allIndices: [
     { name: 'kibana', ...tagsPartial },
     { name: 'es', ...tagsPartial },
-  ] as unknown) as MatchedItem[],
+  ] as unknown as MatchedItem[],
   exactMatchedIndices: [] as MatchedItem[],
-  partialMatchedIndices: ([{ name: 'kibana', ...tagsPartial }] as unknown) as MatchedItem[],
+  partialMatchedIndices: [{ name: 'kibana', ...tagsPartial }] as unknown as MatchedItem[],
   visibleIndices: [],
 };
 
@@ -42,7 +42,7 @@ describe('StatusMessage', () => {
   it('should render with exact matches', () => {
     const localMatchedIndices = {
       ...matchedIndices,
-      exactMatchedIndices: ([{ name: 'kibana', ...tagsPartial }] as unknown) as MatchedItem[],
+      exactMatchedIndices: [{ name: 'kibana', ...tagsPartial }] as unknown as MatchedItem[],
     };
 
     const component = shallow(

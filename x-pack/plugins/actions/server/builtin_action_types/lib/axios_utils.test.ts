@@ -20,7 +20,7 @@ const TestUrl = 'https://elastic.co/foo/bar/baz';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 let configurationUtilities = actionsConfigMock.create();
 jest.mock('axios');
-const axiosMock = (axios as unknown) as jest.Mock;
+const axiosMock = axios as unknown as jest.Mock;
 
 describe('addTimeZoneToDate', () => {
   test('adds timezone with default', () => {

@@ -29,25 +29,29 @@ function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode
   try {
     return filters
       .filter((filter) => filter !== undefined)
-      .reduce((acc: KueryNode | undefined, kuery: string | KueryNode | undefined):
-        | KueryNode
-        | undefined => {
-        if (kuery === undefined) {
-          return acc;
-        }
-        const kueryNode: KueryNode =
-          typeof kuery === 'string' ? fromKueryExpression(removeSOAttributes(kuery)) : kuery;
+      .reduce(
+        (
+          acc: KueryNode | undefined,
+          kuery: string | KueryNode | undefined
+        ): KueryNode | undefined => {
+          if (kuery === undefined) {
+            return acc;
+          }
+          const kueryNode: KueryNode =
+            typeof kuery === 'string' ? fromKueryExpression(removeSOAttributes(kuery)) : kuery;
 
-        if (!acc) {
-          return kueryNode;
-        }
+          if (!acc) {
+            return kueryNode;
+          }
 
-        return {
-          type: 'function',
-          function: 'and',
-          arguments: [acc, kueryNode],
-        };
-      }, undefined as KueryNode | undefined);
+          return {
+            type: 'function',
+            function: 'and',
+            arguments: [acc, kueryNode],
+          };
+        },
+        undefined as KueryNode | undefined
+      );
   } catch (err) {
     throw new IngestManagerError(`Kuery is malformed: ${err.message}`);
   }

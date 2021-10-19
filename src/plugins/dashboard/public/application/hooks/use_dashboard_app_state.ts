@@ -38,6 +38,7 @@ import {
   syncDashboardUrlState,
   diffDashboardState,
   areTimeRangesEqual,
+  areRefreshIntervalsEqual,
 } from '../lib';
 
 export interface UseDashboardStateProps {
@@ -91,6 +92,8 @@ export const useDashboardAppState = ({
     dashboardCapabilities,
     dashboardSessionStorage,
     scopedHistory,
+    spacesService,
+    screenshotModeService,
   } = services;
   const { docTitle } = chrome;
   const { notifications } = core;
@@ -147,6 +150,25 @@ export const useDashboardAppState = ({
       });
       if (canceled || !loadSavedDashboardResult) return;
       const { savedDashboard, savedDashboardState } = loadSavedDashboardResult;
+
+      // If the saved dashboard is an alias match, then we will redirect
+      if (savedDashboard.outcome === 'aliasMatch' && savedDashboard.id && savedDashboard.aliasId) {
+        // We want to keep the "query" params on our redirect.
+        // But, these aren't true query params, they are technically part of the hash
+        // So, to get the new path, we will just replace the current id in the hash
+        // with the alias id
+        const path = scopedHistory().location.hash.replace(
+          savedDashboard.id,
+          savedDashboard.aliasId
+        );
+        if (screenshotModeService?.isScreenshotMode()) {
+          scopedHistory().replace(path);
+        } else {
+          await spacesService?.ui.redirectLegacyUrl(path);
+        }
+        // Return so we don't run any more of the hook and let it rerun after the redirect that just happened
+        return;
+      }
 
       /**
        * Combine initial state from the saved object, session storage, and URL, then dispatch it to Redux.
@@ -237,27 +259,29 @@ export const useDashboardAppState = ({
         .pipe(debounceTime(DashboardConstants.CHANGE_CHECK_DEBOUNCE))
         .subscribe((states) => {
           const [lastSaved, current] = states;
-          const unsavedChanges =
-            current.viewMode === ViewMode.EDIT ? diffDashboardState(lastSaved, current) : {};
+          const unsavedChanges = diffDashboardState(lastSaved, current);
 
-          let savedTimeChanged = false;
+          const savedTimeChanged =
+            lastSaved.timeRestore &&
+            (!areTimeRangesEqual(
+              {
+                from: savedDashboard?.timeFrom,
+                to: savedDashboard?.timeTo,
+              },
+              timefilter.getTime()
+            ) ||
+              !areRefreshIntervalsEqual(
+                savedDashboard?.refreshInterval,
+                timefilter.getRefreshInterval()
+              ));
 
           /**
-           * changes to the time filter should only be considered 'unsaved changes' when
+           * changes to the dashboard should only be considered 'unsaved changes' when
            * editing the dashboard
            */
-          if (current.viewMode === ViewMode.EDIT) {
-            savedTimeChanged =
-              lastSaved.timeRestore &&
-              !areTimeRangesEqual(
-                {
-                  from: savedDashboard?.timeFrom,
-                  to: savedDashboard?.timeTo,
-                },
-                timefilter.getTime()
-              );
-          }
-          const hasUnsavedChanges = Object.keys(unsavedChanges).length > 0 || savedTimeChanged;
+          const hasUnsavedChanges =
+            current.viewMode === ViewMode.EDIT &&
+            (Object.keys(unsavedChanges).length > 0 || savedTimeChanged);
           setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
 
           unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.
@@ -337,6 +361,8 @@ export const useDashboardAppState = ({
     search,
     query,
     data,
+    spacesService?.ui,
+    screenshotModeService,
   ]);
 
   /**

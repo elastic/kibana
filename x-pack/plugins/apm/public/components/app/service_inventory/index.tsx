@@ -64,7 +64,7 @@ function useServicesFetcher() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services',
+          endpoint: 'GET /internal/apm/services',
           params: {
             query: {
               environment,
@@ -90,7 +90,7 @@ function useServicesFetcher() {
     (callApmApi) => {
       if (start && end && mainStatisticsData.items.length) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/detailed_statistics',
+          endpoint: 'GET /internal/apm/services/detailed_statistics',
           params: {
             query: {
               environment,
@@ -159,16 +159,11 @@ function useServicesFetcher() {
 export function ServiceInventory() {
   const { core } = useApmPluginContext();
 
-  const {
-    mainStatisticsData,
-    mainStatisticsStatus,
-    comparisonData,
-  } = useServicesFetcher();
+  const { mainStatisticsData, mainStatisticsStatus, comparisonData } =
+    useServicesFetcher();
 
-  const {
-    anomalyDetectionJobsData,
-    anomalyDetectionJobsStatus,
-  } = useAnomalyDetectionJobsContext();
+  const { anomalyDetectionJobsData, anomalyDetectionJobsStatus } =
+    useAnomalyDetectionJobsContext();
 
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.userHasDismissedServiceInventoryMlCallout',

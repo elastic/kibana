@@ -73,11 +73,10 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
     [dispatch, element, expressionIndex, pageId]
   );
 
-  const updateContext = useCallback(() => dispatch(fetchContext(expressionIndex, element)), [
-    dispatch,
-    element,
-    expressionIndex,
-  ]);
+  const updateContext = useCallback(
+    () => dispatch(fetchContext(expressionIndex, element)),
+    [dispatch, element, expressionIndex]
+  );
 
   const setArgument = useCallback(
     (argName: string, valueIndex: number) => (value: string | Ast | null) => {

@@ -14,16 +14,20 @@ type ReturnTypeAdjustTimeRange = ReturnType<typeof adjustTimeRange>;
 describe('adjust_timerange', () => {
   beforeEach(() => {
     // Adds extra switch to suppress deprecation warnings that moment does not expose in TypeScript
-    (moment as typeof moment & {
-      suppressDeprecationWarnings: boolean;
-    }).suppressDeprecationWarnings = true;
+    (
+      moment as typeof moment & {
+        suppressDeprecationWarnings: boolean;
+      }
+    ).suppressDeprecationWarnings = true;
   });
 
   afterEach(() => {
     // Adds extra switch to suppress deprecation warnings that moment does not expose in TypeScript
-    (moment as typeof moment & {
-      suppressDeprecationWarnings: boolean;
-    }).suppressDeprecationWarnings = false;
+    (
+      moment as typeof moment & {
+        suppressDeprecationWarnings: boolean;
+      }
+    ).suppressDeprecationWarnings = false;
   });
 
   test('it will adjust the time range from by rounding down by an hour within "from"', () => {

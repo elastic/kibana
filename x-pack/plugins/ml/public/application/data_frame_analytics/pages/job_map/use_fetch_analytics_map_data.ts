@@ -30,11 +30,8 @@ export const useFetchAnalyticsMapData = () => {
   const fetchAndSetElements = async (idToUse: string, treatAsRoot: boolean, type?: string) => {
     setIsLoading(true);
     // Pass in treatAsRoot flag - endpoint will take job or index to grab jobs created from it
-    const analyticsMap: AnalyticsMapReturnType = await ml.dataFrameAnalytics.getDataFrameAnalyticsMap(
-      idToUse,
-      treatAsRoot,
-      type
-    );
+    const analyticsMap: AnalyticsMapReturnType =
+      await ml.dataFrameAnalytics.getDataFrameAnalyticsMap(idToUse, treatAsRoot, type);
 
     const { elements: nodeElements, details, error: fetchError } = analyticsMap;
 

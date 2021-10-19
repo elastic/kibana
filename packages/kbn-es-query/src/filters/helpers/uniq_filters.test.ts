@@ -13,8 +13,8 @@ describe('filter manager utilities', () => {
   describe('niqFilter', () => {
     test('should filter out dups', () => {
       const before: Filter[] = [
-        buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
-        buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
       ];
       const results = uniqFilters(before);
 
@@ -23,8 +23,8 @@ describe('filter manager utilities', () => {
 
     test('should filter out duplicates, ignoring meta attributes', () => {
       const before: Filter[] = [
-        buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index1', ''),
-        buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index2', ''),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', ''),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'index2', ''),
       ];
       const results = uniqFilters(before);
 
@@ -35,19 +35,11 @@ describe('filter manager utilities', () => {
       const before: Filter[] = [
         {
           $state: { store: FilterStateStore.APP_STATE },
-          ...buildQueryFilter(
-            { _type: { match: { query: 'apache', type: 'phrase' } } },
-            'index',
-            ''
-          ),
+          ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
         },
         {
           $state: { store: FilterStateStore.GLOBAL_STATE },
-          ...buildQueryFilter(
-            { _type: { match: { query: 'apache', type: 'phrase' } } },
-            'index',
-            ''
-          ),
+          ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
         },
       ];
       const results = uniqFilters(before);

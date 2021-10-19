@@ -9,8 +9,8 @@ The `first_client.p12` and `second_client.p12` files were generated the same tim
 following commands:
 
 ```
-bin/elasticsearch-certutil cert -days 18250 --ca elastic-stack-ca.p12 --ca-pass castorepass --name first_client --pass ""
-bin/elasticsearch-certutil cert -days 18250 --ca elastic-stack-ca.p12 --ca-pass castorepass --name second_client --pass ""
+bin/elasticsearch-certutil cert -days 18250 --ca $KIBANA_HOME/packages/kbn-dev-utils/certs/ca.p12 --ca-pass castorepass --name first_client --pass ""
+bin/elasticsearch-certutil cert -days 18250 --ca $KIBANA_HOME/packages/kbn-dev-utils/certs/ca.p12 --ca-pass castorepass --name second_client --pass ""
 ```
 
 If that CA is ever changed, these two files must be regenerated.

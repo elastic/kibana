@@ -14,20 +14,16 @@ import { MapServiceSettings } from './vega_view/vega_map_view/map_service_settin
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
+export const [getNotifications, setNotifications] =
+  createGetterSetter<NotificationsStart>('Notifications');
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
-export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
-  CoreStart['injectedMetadata']
->('InjectedMetadata');
+export const [getInjectedMetadata, setInjectedMetadata] =
+  createGetterSetter<CoreStart['injectedMetadata']>('InjectedMetadata');
 
-export const [
-  getMapServiceSettings,
-  setMapServiceSettings,
-] = createGetterSetter<MapServiceSettings>('MapServiceSettings');
+export const [getMapServiceSettings, setMapServiceSettings] =
+  createGetterSetter<MapServiceSettings>('MapServiceSettings');
 
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
   enableExternalUrls: boolean;

@@ -6,11 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
+import { ApiResponse } from '@elastic/elasticsearch';
+import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/api/types';
 
 import { TypeOf } from '@kbn/config-schema';
 import {
   IKibanaResponse,
   IScopedClusterClient,
+  KibanaRequest,
   KibanaResponseFactory,
   Logger,
   RequestHandler,
@@ -19,18 +22,24 @@ import {
 import {
   HostInfo,
   HostMetadata,
+  UnitedAgentMetadata,
   HostResultList,
   HostStatus,
 } from '../../../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
-import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
-import { Agent, PackagePolicy } from '../../../../../fleet/common/types/models';
+import {
+  getESQueryHostMetadataByID,
+  kibanaRequestToMetadataListESQuery,
+  buildUnitedIndexQuery,
+} from './query_builders';
+import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common/types/models';
 import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
-import { findAgentIDsByStatus } from './support/agent_status';
+import { getAllEndpointPackagePolicies } from './support/endpoint_package_policies';
+import { findAgentIdsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
 import {
@@ -104,41 +113,33 @@ export const getMetadataListRequestHandler = function (
       throw new Error('agentService not available');
     }
 
-    const metadataRequestContext: MetadataRequestContext = {
-      esClient: context.core.elasticsearch.client,
-      endpointAppContextService: endpointAppContext.service,
-      logger,
-      requestHandlerContext: context,
-      savedObjectsClient: context.core.savedObjects.client,
-    };
-
-    const unenrolledAgentIds = await findAllUnenrolledAgentIds(
-      agentService,
+    const endpointPolicies = await getAllEndpointPackagePolicies(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       endpointAppContext.service.getPackagePolicyService()!,
-      context.core.savedObjects.client,
-      context.core.elasticsearch.client.asCurrentUser
+      context.core.savedObjects.client
     );
 
-    const statusIDs = request?.body?.filters?.host_status?.length
-      ? await findAgentIDsByStatus(
-          agentService,
-          context.core.savedObjects.client,
-          context.core.elasticsearch.client.asCurrentUser,
-          request.body?.filters?.host_status
-        )
-      : undefined;
-
-    const queryParams = await kibanaRequestToMetadataListESQuery(request, endpointAppContext, {
-      unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
-      statusAgentIDs: statusIDs,
-    });
-
-    const result = await context.core.elasticsearch.client.asCurrentUser.search<HostMetadata>(
-      queryParams
+    const { unitedIndexExists, unitedQueryResponse } = await queryUnitedIndex(
+      context,
+      request,
+      endpointAppContext,
+      logger,
+      endpointPolicies
     );
-    const hostListQueryResult = queryResponseToHostListResult(result.body);
+    if (unitedIndexExists) {
+      return response.ok({
+        body: unitedQueryResponse,
+      });
+    }
+
     return response.ok({
-      body: await mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext),
+      body: await legacyListMetadataQuery(
+        context,
+        request,
+        endpointAppContext,
+        logger,
+        endpointPolicies
+      ),
     });
   };
 };
@@ -344,6 +345,7 @@ export async function enrichHostMetadata(
     const status = await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
       ?.getAgentStatusById(esClient.asCurrentUser, elasticAgentId);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     hostStatus = fleetAgentStatusToEndpointHostStatus(status!);
   } catch (e) {
     if (e instanceof AgentNotFoundError) {
@@ -361,6 +363,7 @@ export async function enrichHostMetadata(
       ?.getAgent(esClient.asCurrentUser, elasticAgentId);
     const agentPolicy = await metadataRequestContext.endpointAppContextService
       .getAgentPolicyService()
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       ?.get(esSavedObjectClient, agent?.policy_id!, true);
     const endpointPolicy = ((agentPolicy?.package_policies || []) as PackagePolicy[]).find(
       (policy: PackagePolicy) => policy.package?.name === 'endpoint'
@@ -393,5 +396,164 @@ export async function enrichHostMetadata(
     metadata: hostMetadata,
     host_status: hostStatus,
     policy_info: policyInfo,
+  };
+}
+
+async function legacyListMetadataQuery(
+  context: SecuritySolutionRequestHandlerContext,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  request: KibanaRequest<any, any, any>,
+  endpointAppContext: EndpointAppContext,
+  logger: Logger,
+  endpointPolicies: PackagePolicy[]
+): Promise<HostResultList> {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const agentService = endpointAppContext.service.getAgentService()!;
+
+  const metadataRequestContext: MetadataRequestContext = {
+    esClient: context.core.elasticsearch.client,
+    endpointAppContextService: endpointAppContext.service,
+    logger,
+    requestHandlerContext: context,
+    savedObjectsClient: context.core.savedObjects.client,
+  };
+
+  const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
+  const unenrolledAgentIds = await findAllUnenrolledAgentIds(
+    agentService,
+    context.core.elasticsearch.client.asCurrentUser,
+    endpointPolicyIds
+  );
+
+  const statusesToFilter = request?.body?.filters?.host_status ?? [];
+  const statusIds = await findAgentIdsByStatus(
+    agentService,
+    context.core.elasticsearch.client.asCurrentUser,
+    statusesToFilter
+  );
+
+  const queryParams = await kibanaRequestToMetadataListESQuery(request, endpointAppContext, {
+    unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
+    statusAgentIds: statusIds,
+  });
+
+  const result = await context.core.elasticsearch.client.asCurrentUser.search<HostMetadata>(
+    queryParams
+  );
+  const hostListQueryResult = queryResponseToHostListResult(result.body);
+  return mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext);
+}
+
+async function queryUnitedIndex(
+  context: SecuritySolutionRequestHandlerContext,
+  request: KibanaRequest,
+  endpointAppContext: EndpointAppContext,
+  logger: Logger,
+  endpointPolicies: PackagePolicy[]
+): Promise<{
+  unitedIndexExists: boolean;
+  unitedQueryResponse: HostResultList;
+}> {
+  const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
+  const unitedIndexQuery = await buildUnitedIndexQuery(
+    request,
+    endpointAppContext,
+    IGNORED_ELASTIC_AGENT_IDS,
+    endpointPolicyIds
+  );
+
+  let unitedMetadataQueryResponse: ApiResponse<SearchResponse<UnitedAgentMetadata>>;
+  try {
+    unitedMetadataQueryResponse =
+      await context.core.elasticsearch.client.asCurrentUser.search<UnitedAgentMetadata>(
+        unitedIndexQuery
+      );
+  } catch (error) {
+    const errorType = error?.meta?.body?.error?.type ?? '';
+
+    // no united index means that the endpoint package hasn't been upgraded yet
+    // this is expected so we fall back to the legacy query
+    // errors other than index_not_found_exception are unexpected
+    if (errorType !== 'index_not_found_exception') {
+      logger.error(error);
+      throw error;
+    }
+    return {
+      unitedIndexExists: false,
+      unitedQueryResponse: {} as HostResultList,
+    };
+  }
+
+  const { hits: docs, total: docsCount } = unitedMetadataQueryResponse?.body?.hits || {};
+  const agentPolicyIds: string[] = docs.map((doc) => doc._source?.united?.agent?.policy_id ?? '');
+
+  const agentPolicies =
+    (await endpointAppContext.service
+      .getAgentPolicyService()
+      ?.getByIds(context.core.savedObjects.client, agentPolicyIds)) ?? [];
+
+  const agentPoliciesMap: Record<string, AgentPolicy> = agentPolicies.reduce(
+    (acc, agentPolicy) => ({
+      ...acc,
+      [agentPolicy.id]: {
+        ...agentPolicy,
+      },
+    }),
+    {}
+  );
+
+  const endpointPoliciesMap: Record<string, PackagePolicy> = endpointPolicies.reduce(
+    (acc, packagePolicy) => ({
+      ...acc,
+      [packagePolicy.policy_id]: packagePolicy,
+    }),
+    {}
+  );
+
+  const hosts = docs
+    .filter((doc) => {
+      const { endpoint: metadata, agent } = doc?._source?.united ?? {};
+      return metadata && agent;
+    })
+    .map((doc) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const { endpoint: metadata, agent } = doc!._source!.united!;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const agentPolicy = agentPoliciesMap[agent.policy_id!];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const endpointPolicy = endpointPoliciesMap[agent.policy_id!];
+      return {
+        metadata,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        host_status: fleetAgentStatusToEndpointHostStatus(agent.last_checkin_status!),
+        policy_info: {
+          agent: {
+            applied: {
+              id: agent.policy_id || '',
+              revision: agent.policy_revision || 0,
+            },
+            configured: {
+              id: agentPolicy?.id || '',
+              revision: agentPolicy?.revision || 0,
+            },
+          },
+          endpoint: {
+            id: endpointPolicy?.id || '',
+            revision: endpointPolicy?.revision || 0,
+          },
+        },
+      } as HostInfo;
+    });
+
+  const unitedQueryResponse: HostResultList = {
+    request_page_size: unitedIndexQuery.size,
+    request_page_index: unitedIndexQuery.from,
+    total: (docsCount as SearchTotalHits).value,
+    hosts,
+  };
+
+  return {
+    unitedIndexExists: true,
+    unitedQueryResponse,
   };
 }

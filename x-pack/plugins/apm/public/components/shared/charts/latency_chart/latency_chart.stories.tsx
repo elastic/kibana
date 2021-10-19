@@ -42,8 +42,8 @@ import {
 import { LatencyChart } from './';
 
 interface Args {
-  alertsResponse: APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>;
-  latencyChartResponse: APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
+  alertsResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>;
+  latencyChartResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
 }
 
 export default {
@@ -61,7 +61,7 @@ export default {
       const { alertsResponse, latencyChartResponse } = args as Args;
       const serviceName = 'testService';
 
-      const apmPluginContextMock = ({
+      const apmPluginContextMock = {
         core: {
           notifications: {
             toasts: { addWarning: () => {}, addDanger: () => {} },
@@ -70,7 +70,7 @@ export default {
             basePath: { prepend: () => {} },
             get: (endpoint: string) => {
               switch (endpoint) {
-                case `/api/apm/services/${serviceName}/transactions/charts/latency`:
+                case `/internal/apm/services/${serviceName}/transactions/charts/latency`:
                   return latencyChartResponse;
                 default:
                   return {};
@@ -81,7 +81,7 @@ export default {
         },
         plugins: { observability: { isAlertingExperienceEnabled: () => true } },
         observabilityRuleTypeRegistry: { getFormatter: () => undefined },
-      } as unknown) as ApmPluginContextValue;
+      } as unknown as ApmPluginContextValue;
 
       createCallApmApi(apmPluginContextMock.core);
 

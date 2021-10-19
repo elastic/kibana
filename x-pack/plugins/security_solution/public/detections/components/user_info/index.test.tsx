@@ -70,7 +70,7 @@ describe('useUserInfo', () => {
       <TestProviders>
         <UserPrivilegesProvider
           kibanaCapabilities={
-            ({ siem: { crud_alerts: true, read_alerts: true } } as unknown) as Capabilities
+            { siem: { crud_alerts: true, read_alerts: true } } as unknown as Capabilities
           }
         >
           <ManageUserInfo>{children}</ManageUserInfo>

@@ -17,8 +17,7 @@ export const Unicorn = createShape({
   },
   shapeType: SvgElementTypes.path,
   shapeProps: {
-    d:
-      'M 123 189 C 93 141 129 126 102 96 L 78 102 L 48 117 L 42 129 Q 30 132 21 126 L 18 114 L 27 90 L 42 72 L 48 57 L 3 6 L 57 42 L 63 33 L 60 15 L 69 27 L 69 15 L 84 27 Q 162 36 195 108 Q 174 159 123 189 Z',
+    d: 'M 123 189 C 93 141 129 126 102 96 L 78 102 L 48 117 L 42 129 Q 30 132 21 126 L 18 114 L 27 90 L 42 72 L 48 57 L 3 6 L 57 42 L 63 33 L 60 15 L 69 27 L 69 15 L 84 27 Q 162 36 195 108 Q 174 159 123 189 Z',
   },
   textAttributes: {
     x: '0',

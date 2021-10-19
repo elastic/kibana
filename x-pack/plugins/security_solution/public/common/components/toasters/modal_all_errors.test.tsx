@@ -58,7 +58,7 @@ describe('Modal all errors', () => {
     // This test exists to ensure that errors will work if it is a non-array which can happen in rare corner cases.
     test('it doesnt cause errors when errors is not an array which can be the rare case in corner cases', () => {
       const mockToastWithTwoError = cloneDeep(mockToast);
-      mockToastWithTwoError.errors = ('' as unknown) as string[];
+      mockToastWithTwoError.errors = '' as unknown as string[];
       const wrapper = shallow(
         <ModalAllErrors isShowing={true} toast={mockToastWithTwoError} toggle={toggle} />
       );

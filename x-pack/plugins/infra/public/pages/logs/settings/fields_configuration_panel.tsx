@@ -118,18 +118,20 @@ export const FieldsConfigurationPanel = ({
               defaultMessage="Timestamp"
             />
           }
-          {...useMemo(() => getFormRowProps(timestampFieldFormElement), [
-            timestampFieldFormElement,
-          ])}
+          {...useMemo(
+            () => getFormRowProps(timestampFieldFormElement),
+            [timestampFieldFormElement]
+          )}
         >
           <EuiFieldText
             fullWidth
             disabled={isLoading || isTimestampValueDefault}
             readOnly={isReadOnly}
             isLoading={isLoading}
-            {...useMemo(() => getStringInputFieldProps(timestampFieldFormElement), [
-              timestampFieldFormElement,
-            ])}
+            {...useMemo(
+              () => getStringInputFieldProps(timestampFieldFormElement),
+              [timestampFieldFormElement]
+            )}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -166,18 +168,20 @@ export const FieldsConfigurationPanel = ({
               defaultMessage="Tiebreaker"
             />
           }
-          {...useMemo(() => getFormRowProps(tiebreakerFieldFormElement), [
-            tiebreakerFieldFormElement,
-          ])}
+          {...useMemo(
+            () => getFormRowProps(tiebreakerFieldFormElement),
+            [tiebreakerFieldFormElement]
+          )}
         >
           <EuiFieldText
             fullWidth
             disabled={isLoading || isTiebreakerValueDefault}
             readOnly={isReadOnly}
             isLoading={isLoading}
-            {...useMemo(() => getStringInputFieldProps(tiebreakerFieldFormElement), [
-              tiebreakerFieldFormElement,
-            ])}
+            {...useMemo(
+              () => getStringInputFieldProps(tiebreakerFieldFormElement),
+              [tiebreakerFieldFormElement]
+            )}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

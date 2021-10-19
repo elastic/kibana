@@ -41,7 +41,7 @@ export interface TagcloudRendererConfig {
 }
 
 interface Arguments extends TagCloudVisConfig {
-  palette: string;
+  palette: PaletteOutput;
 }
 
 export type ExpressionTagcloudFunction = () => ExpressionFunctionDefinition<

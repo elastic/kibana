@@ -393,11 +393,13 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
 
     const { body } = await asInternalUser.search<Annotation>(params);
 
-    const annotations = (body.aggregations!.by_job as estypes.AggregationsTermsAggregate<{
-      key: string;
-      doc_count: number;
-      latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
-    }>).buckets.map((bucket) => {
+    const annotations = (
+      body.aggregations!.by_job as estypes.AggregationsTermsAggregate<{
+        key: string;
+        doc_count: number;
+        latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
+      }>
+    ).buckets.map((bucket) => {
       return bucket.latest_delayed.hits.hits[0]._source!;
     });
 

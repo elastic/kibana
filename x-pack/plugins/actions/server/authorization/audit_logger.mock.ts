@@ -8,11 +8,11 @@
 import { ActionsAuthorizationAuditLogger } from './audit_logger';
 
 const createActionsAuthorizationAuditLoggerMock = () => {
-  const mocked = ({
+  const mocked = {
     getAuthorizationMessage: jest.fn(),
     actionsAuthorizationFailure: jest.fn(),
     actionsAuthorizationSuccess: jest.fn(),
-  } as unknown) as jest.Mocked<ActionsAuthorizationAuditLogger>;
+  } as unknown as jest.Mocked<ActionsAuthorizationAuditLogger>;
   return mocked;
 };
 

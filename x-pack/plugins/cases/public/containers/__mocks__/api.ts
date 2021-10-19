@@ -21,6 +21,7 @@ import {
   basicCase,
   basicCaseCommentPatch,
   basicCasePost,
+  basicResolvedCase,
   casesStatus,
   caseUserActions,
   pushedCase,
@@ -33,6 +34,7 @@ import {
   CommentRequest,
   User,
   CaseStatuses,
+  ResolvedCase,
 } from '../../../common';
 
 export const getCase = async (
@@ -40,6 +42,12 @@ export const getCase = async (
   includeComments: boolean = true,
   signal: AbortSignal
 ): Promise<Case> => Promise.resolve(basicCase);
+
+export const resolveCase = async (
+  caseId: string,
+  includeComments: boolean = true,
+  signal: AbortSignal
+): Promise<ResolvedCase> => Promise.resolve(basicResolvedCase);
 
 export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> =>
   Promise.resolve(casesStatus);

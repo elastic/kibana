@@ -11,7 +11,7 @@ export const mockGroupValues = {
   group: {} as GroupDetails,
   dataLoading: true,
   managerModalFormErrors: [],
-  sharedSourcesModalVisible: false,
+  orgSourcesModalVisible: false,
   confirmDeleteModalVisible: false,
   groupNameInputValue: '',
   selectedGroupSources: [],

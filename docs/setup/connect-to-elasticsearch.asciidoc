@@ -1,21 +1,21 @@
 [[connect-to-elasticsearch]]
-== Add data
+== Add your data
 ++++
 <titleabbrev>Add data</titleabbrev>
 ++++
 
 To start working with your data in {kib}, use one of the many ingest options,
 available from the home page.
-You can collect data from an app or service
+You can collect data from an app or service,
 or upload a file that contains your data.  If you're not ready to use your own data,
 add a sample data set and give {kib} a test drive.
 
 [role="screenshot"]
-image::images/add-data-home.png[Built-in options for adding data to Kibana:  Add data, Add Elastic Agent, Upload a file]
+image::images/addData_home_7.15.0.png[Built-in options for adding data to Kibana:  Add data, Add Elastic Agent, Upload a file]
 
 [float]
 [[add-data-tutorial-kibana]]
-===  Add data
+=== Add data
 
 Want to ingest logs, metrics, security, or application data?
 Install and configure a Beats data shipper or other module to periodically collect the data
@@ -30,17 +30,24 @@ image::images/add-data-tutorials.png[Add Data tutorials]
 *Elastic Agent* is the next generation of
 data integration modules, offering
 a centralized way to set up your integrations.
+
 With *Fleet*, you can add
 and manage integrations for popular services and platforms, providing
-an easy way to collect your data. The integrations
+an easy way to collect your data, and manage {elastic-agent} installations in standalone or {fleet} mode. The integrations
 ship with dashboards and visualizations,
-so you can quickly get insights into your data.
+so you can quickly get insights into your data, and {fleet} mode offers several advantages:
+
+* A central place to configure and monitor your {agents}.
+
+* An overview of the data ingest in your {es} cluster.
+
+* Multiple integrations to collect and transform data.
+
+[role="screenshot"]
+image::images/addData_fleet_7.15.0.png[Add data using Fleet]
 
 To get started, refer to
 {fleet-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack].
-
-[role="screenshot"]
-image::images/add-data-fleet.png[Add data using Fleet]
 
 [discrete]
 [[upload-data-kibana]]

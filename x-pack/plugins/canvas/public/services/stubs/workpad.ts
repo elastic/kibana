@@ -39,14 +39,16 @@ const getWorkpads = (count = 3) => {
 
 export const getSomeWorkpads = (count = 3) => getWorkpads(count);
 
-export const findSomeWorkpads = (count = 3, timeout = TIMEOUT) => (_term: string) => {
-  return Promise.resolve()
-    .then(promiseTimeout(timeout))
-    .then(() => ({
-      total: count,
-      workpads: getSomeWorkpads(count),
-    }));
-};
+export const findSomeWorkpads =
+  (count = 3, timeout = TIMEOUT) =>
+  (_term: string) => {
+    return Promise.resolve()
+      .then(promiseTimeout(timeout))
+      .then(() => ({
+        total: count,
+        workpads: getSomeWorkpads(count),
+      }));
+  };
 
 const templates: CanvasTemplate[] = [
   {
@@ -65,32 +67,40 @@ const templates: CanvasTemplate[] = [
   },
 ];
 
-export const findNoWorkpads = (timeout = TIMEOUT) => (_term: string) => {
-  return Promise.resolve()
-    .then(promiseTimeout(timeout))
-    .then(() => ({
-      total: 0,
-      workpads: [],
-    }));
-};
+export const findNoWorkpads =
+  (timeout = TIMEOUT) =>
+  (_term: string) => {
+    return Promise.resolve()
+      .then(promiseTimeout(timeout))
+      .then(() => ({
+        total: 0,
+        workpads: [],
+      }));
+  };
 
-export const findSomeTemplates = (timeout = TIMEOUT) => () => {
-  return Promise.resolve()
-    .then(promiseTimeout(timeout))
-    .then(() => getSomeTemplates());
-};
+export const findSomeTemplates =
+  (timeout = TIMEOUT) =>
+  () => {
+    return Promise.resolve()
+      .then(promiseTimeout(timeout))
+      .then(() => getSomeTemplates());
+  };
 
-export const findNoTemplates = (timeout = TIMEOUT) => () => {
-  return Promise.resolve()
-    .then(promiseTimeout(timeout))
-    .then(() => getNoTemplates());
-};
+export const findNoTemplates =
+  (timeout = TIMEOUT) =>
+  () => {
+    return Promise.resolve()
+      .then(promiseTimeout(timeout))
+      .then(() => getNoTemplates());
+  };
 
 export const getNoTemplates = () => ({ templates: [] });
 export const getSomeTemplates = () => ({ templates });
 
 export const workpadServiceFactory: CanvasWorkpadServiceFactory = () => ({
   get: (id: string) => Promise.resolve({ ...getDefaultWorkpad(), id }),
+  resolve: (id: string) =>
+    Promise.resolve({ outcome: 'exactMatch', workpad: { ...getDefaultWorkpad(), id } }),
   findTemplates: findNoTemplates(),
   create: (workpad) => Promise.resolve(workpad),
   createFromTemplate: (_templateId: string) => Promise.resolve(getDefaultWorkpad()),

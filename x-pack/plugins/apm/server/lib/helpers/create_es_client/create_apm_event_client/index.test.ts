@@ -29,7 +29,8 @@ describe('createApmEventClient', () => {
     });
     const { server: innerServer, createRouter } = await server.setup({
       context: contextServiceMock.createSetupContract(),
-      executionContext: executionContextServiceMock.createInternalSetupContract(),
+      executionContext:
+        executionContextServiceMock.createInternalSetupContract(),
     });
     const router = createRouter('/');
 

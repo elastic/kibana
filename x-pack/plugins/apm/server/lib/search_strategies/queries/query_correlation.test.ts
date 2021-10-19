@@ -48,9 +48,11 @@ describe('query_correlation', () => {
       expect(query?.body?.aggs?.latency_ranges?.range?.ranges).toEqual(ranges);
 
       expect(
-        (query?.body?.aggs?.transaction_duration_correlation as {
-          bucket_correlation: BucketCorrelation;
-        })?.bucket_correlation.function.count_correlation.indicator
+        (
+          query?.body?.aggs?.transaction_duration_correlation as {
+            bucket_correlation: BucketCorrelation;
+          }
+        )?.bucket_correlation.function.count_correlation.indicator
       ).toEqual({
         fractions,
         expectations,
@@ -69,27 +71,31 @@ describe('query_correlation', () => {
       const transactionDurationCorrelationValue = 0.45;
       const KsTestLess = 0.01;
 
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
-        body: estypes.SearchResponse;
-      } => {
-        return {
-          body: ({
-            aggregations: {
-              latency_ranges: {
-                buckets: latencyRangesBuckets,
+      const esClientSearchMock = jest.fn(
+        (
+          req: estypes.SearchRequest
+        ): {
+          body: estypes.SearchResponse;
+        } => {
+          return {
+            body: {
+              aggregations: {
+                latency_ranges: {
+                  buckets: latencyRangesBuckets,
+                },
+                transaction_duration_correlation: {
+                  value: transactionDurationCorrelationValue,
+                },
+                ks_test: { less: KsTestLess },
               },
-              transaction_duration_correlation: {
-                value: transactionDurationCorrelationValue,
-              },
-              ks_test: { less: KsTestLess },
-            },
-          } as unknown) as estypes.SearchResponse,
-        };
-      });
+            } as unknown as estypes.SearchResponse,
+          };
+        }
+      );
 
-      const esClientMock = ({
+      const esClientMock = {
         search: esClientSearchMock,
-      } as unknown) as ElasticsearchClient;
+      } as unknown as ElasticsearchClient;
 
       const resp = await fetchTransactionDurationCorrelation(
         esClientMock,

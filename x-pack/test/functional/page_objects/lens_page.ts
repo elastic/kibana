@@ -247,6 +247,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async waitForEmptyWorkspace() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`empty-workspace`);
+      });
+    },
+
+    async waitForWorkspaceWithVisualization() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`lnsVisualizationContainer`);
+      });
+    },
+
     async waitForFieldMissing(field: string) {
       await retry.try(async () => {
         await testSubjects.missingOrFail(`lnsFieldListPanelField-${field}`);
@@ -645,8 +657,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Adds a new layer to the chart, fails if the chart does not support new layers
      */
-    async createLayer() {
+    async createLayer(layerType: string = 'data') {
       await testSubjects.click('lnsLayerAddButton');
+      const layerCount = (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`))
+        .length;
+
+      await retry.waitFor('check for layer type support', async () => {
+        const fasterChecks = await Promise.all([
+          (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length > layerCount,
+          testSubjects.exists(`lnsLayerAddButton-${layerType}`),
+        ]);
+        return fasterChecks.filter(Boolean).length > 0;
+      });
+      if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
+        await testSubjects.click(`lnsLayerAddButton-${layerType}`);
+      }
     },
 
     /**
@@ -1075,8 +1100,23 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lens-dimensionTabs-formula');
     },
 
+    async switchToStaticValue() {
+      await testSubjects.click('lens-dimensionTabs-static_value');
+    },
+
     async toggleFullscreen() {
       await testSubjects.click('lnsFormula-fullscreen');
+    },
+
+    async goToListingPageViaBreadcrumbs() {
+      await retry.try(async () => {
+        await testSubjects.click('breadcrumb first');
+        if (await testSubjects.exists('appLeaveConfirmModal')) {
+          await testSubjects.exists('confirmModalConfirmButton');
+          await testSubjects.click('confirmModalConfirmButton');
+        }
+        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 3000 });
+      });
     },
 
     async typeFormula(formula: string) {

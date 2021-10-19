@@ -55,9 +55,8 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   const { i18n, history } = useServices();
   const { docLinks } = useCore();
 
-  const [showRepositoryNotFoundWarning, setShowRepositoryNotFoundWarning] = useState<boolean>(
-    false
-  );
+  const [showRepositoryNotFoundWarning, setShowRepositoryNotFoundWarning] =
+    useState<boolean>(false);
 
   // State for touched inputs
   const [touched, setTouched] = useState({

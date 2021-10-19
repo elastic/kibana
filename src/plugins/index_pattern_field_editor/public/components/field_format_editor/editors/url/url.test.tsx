@@ -15,14 +15,8 @@ import { createKibanaReactContext } from '../../../../../../kibana_react/public'
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@elastic/eui/lib/services/accessibility', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
-
 const fieldType = 'string';
-const format = ({
+const format = {
   getConverterFor: jest
     .fn()
     .mockImplementation(() => (input: string) => `converted url for ${input}`),
@@ -33,7 +27,7 @@ const format = ({
       { kind: 'audio', text: 'Audio' },
     ],
   },
-} as unknown) as FieldFormat;
+} as unknown as FieldFormat;
 const formatParams = {
   openLinkInCurrentTab: true,
   urlTemplate: '',

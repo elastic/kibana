@@ -23,7 +23,7 @@ export function RegionMapEditor(props: VisEditorOptionsProps) {
 
     const query = getData().query;
     locator.navigate({
-      ...extractLayerDescriptorParams((props.vis as unknown) as Vis<RegionMapVisParams>),
+      ...extractLayerDescriptorParams(props.vis as unknown as Vis<RegionMapVisParams>),
       filters: query.filterManager.getFilters(),
       query: query.queryString.getQuery(),
       timeRange: query.timefilter.timefilter.getTime(),

@@ -132,9 +132,9 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
-        const isAnonymousAccessEnabled = (config.get(
-          'esTestCluster.serverArgs'
-        ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
+        const isAnonymousAccessEnabled = (config.get('esTestCluster.serverArgs') as string[]).some(
+          (setting) => setting.startsWith('xpack.security.authc.anonymous')
+        );
 
         // `superuser_anonymous` role is derived from the enabled anonymous access.
         const expectedUserRoles = isAnonymousAccessEnabled

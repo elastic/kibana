@@ -8,17 +8,21 @@
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeQuery } from '../../../../observability/server';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
 export async function getServiceCount({
   setup,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
     apm: {

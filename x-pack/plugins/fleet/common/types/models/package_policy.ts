@@ -25,6 +25,11 @@ export interface NewPackagePolicyInputStream {
   data_stream: {
     dataset: string;
     type: string;
+    elasticsearch?: {
+      privileges?: {
+        indices?: string[];
+      };
+    };
   };
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;

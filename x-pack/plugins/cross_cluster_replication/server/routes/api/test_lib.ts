@@ -9,7 +9,7 @@ import { RequestHandlerContext } from 'src/core/server';
 import { License } from '../../shared_imports';
 
 export function mockRouteContext(mockedFunctions: unknown): RequestHandlerContext {
-  const routeContextMock = ({
+  const routeContextMock = {
     core: {
       elasticsearch: {
         client: {
@@ -17,7 +17,7 @@ export function mockRouteContext(mockedFunctions: unknown): RequestHandlerContex
         },
       },
     },
-  } as unknown) as RequestHandlerContext;
+  } as unknown as RequestHandlerContext;
 
   return routeContextMock;
 }

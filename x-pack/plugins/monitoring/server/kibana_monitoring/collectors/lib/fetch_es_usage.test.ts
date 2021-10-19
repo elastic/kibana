@@ -11,7 +11,7 @@ import { fetchESUsage } from './fetch_es_usage';
 describe('fetchESUsage', () => {
   const clusterUuid = '1abcde2';
   const index = '.monitoring-es-*';
-  const callCluster = ({
+  const callCluster = {
     search: jest.fn().mockImplementation(() => ({
       body: {
         hits: {
@@ -40,7 +40,7 @@ describe('fetchESUsage', () => {
         },
       },
     })),
-  } as unknown) as ElasticsearchClient;
+  } as unknown as ElasticsearchClient;
 
   it('should return usage data for Elasticsearch', async () => {
     const result = await fetchESUsage(callCluster, clusterUuid, index);
@@ -52,7 +52,7 @@ describe('fetchESUsage', () => {
   });
 
   it('should handle some indices coming from Metricbeat', async () => {
-    const customCallCluster = ({
+    const customCallCluster = {
       search: jest.fn().mockImplementation(() => ({
         body: {
           hits: {
@@ -81,7 +81,7 @@ describe('fetchESUsage', () => {
           },
         },
       })),
-    } as unknown) as ElasticsearchClient;
+    } as unknown as ElasticsearchClient;
     const result = await fetchESUsage(customCallCluster, clusterUuid, index);
     expect(result).toStrictEqual({
       count: 10,
@@ -91,7 +91,7 @@ describe('fetchESUsage', () => {
   });
 
   it('should handle no monitoring data', async () => {
-    const customCallCluster = ({
+    const customCallCluster = {
       search: jest.fn().mockImplementation(() => ({
         body: {
           hits: {
@@ -99,7 +99,7 @@ describe('fetchESUsage', () => {
           },
         },
       })),
-    } as unknown) as ElasticsearchClient;
+    } as unknown as ElasticsearchClient;
     const result = await fetchESUsage(customCallCluster, clusterUuid, index);
     expect(result).toStrictEqual({
       count: 0,

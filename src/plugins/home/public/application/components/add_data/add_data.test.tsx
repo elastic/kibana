@@ -27,7 +27,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const applicationStartMock = ({} as unknown) as ApplicationStart;
+const applicationStartMock = {} as unknown as ApplicationStart;
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 

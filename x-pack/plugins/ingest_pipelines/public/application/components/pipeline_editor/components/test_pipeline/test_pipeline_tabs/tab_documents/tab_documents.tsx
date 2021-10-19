@@ -179,7 +179,7 @@ export const DocumentsTab: FunctionComponent<Props> = ({
               values={{
                 learnMoreLink: (
                   <EuiLink
-                    href={`${services.documentation.getEsDocsBasePath()}/simulate-pipeline-api.html`}
+                    href={services.documentation.getSimulatePipelineApiUrl()}
                     target="_blank"
                     external
                   >

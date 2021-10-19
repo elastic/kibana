@@ -25,9 +25,7 @@ export const ES_QUERY_ID = '.es-query';
 export const ActionGroupId = 'query matched';
 export const ConditionMetAlertInstanceId = 'query matched';
 
-export function getAlertType(
-  logger: Logger
-): AlertType<
+export function getAlertType(logger: Logger): AlertType<
   EsQueryAlertParams,
   never, // Only use if defining useSavedObjectReferences hook
   EsQueryAlertState,

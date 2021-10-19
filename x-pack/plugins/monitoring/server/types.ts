@@ -142,9 +142,7 @@ export interface LegacyServer {
       };
     };
     elasticsearch: {
-      getCluster: (
-        name: string
-      ) => {
+      getCluster: (name: string) => {
         callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
       };
     };

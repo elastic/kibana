@@ -126,6 +126,7 @@ export function EnvironmentFilter({
 
   return (
     <EuiSelect
+      fullWidth
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
         defaultMessage: 'Environment',
       })}

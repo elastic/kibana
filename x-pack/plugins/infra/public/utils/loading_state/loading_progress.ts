@@ -25,17 +25,19 @@ export const isRunningLoadingProgress = <P>(
   loadingProgress: LoadingProgress<P>
 ): loadingProgress is RunningLoadingProgress<P> => loadingProgress.progress === 'running';
 
-export const createIdleProgressReducer = <Parameters>() => (
-  state: LoadingProgress<Parameters>
-): IdleLoadingProgress => ({
-  progress: 'idle',
-});
+export const createIdleProgressReducer =
+  <Parameters>() =>
+  (state: LoadingProgress<Parameters>): IdleLoadingProgress => ({
+    progress: 'idle',
+  });
 
-export const createRunningProgressReducer = <Parameters>() => (
-  state: LoadingProgress<Parameters>,
-  parameters: Parameters
-): RunningLoadingProgress<Parameters> => ({
-  parameters,
-  progress: 'running',
-  time: Date.now(),
-});
+export const createRunningProgressReducer =
+  <Parameters>() =>
+  (
+    state: LoadingProgress<Parameters>,
+    parameters: Parameters
+  ): RunningLoadingProgress<Parameters> => ({
+    parameters,
+    progress: 'running',
+    time: Date.now(),
+  });

@@ -34,9 +34,10 @@ const promiseTimeout = (time: number) => () => new Promise((resolve) => setTimeo
 const { findNoTemplates, findNoWorkpads, findSomeTemplates } = stubs;
 
 const getRandomName = () => {
-  const lorem = 'Lorem ipsum dolor sit amet consectetur adipiscing elit Fusce lobortis aliquet arcu ut turpis duis'.split(
-    ' '
-  );
+  const lorem =
+    'Lorem ipsum dolor sit amet consectetur adipiscing elit Fusce lobortis aliquet arcu ut turpis duis'.split(
+      ' '
+    );
   return [1, 2, 3].map(() => lorem[Math.floor(Math.random() * lorem.length)]).join(' ');
 };
 
@@ -56,16 +57,16 @@ export const getSomeWorkpads = (count = 3) =>
     name: getRandomName(),
   }));
 
-export const findSomeWorkpads = (count = 3, useStaticData = false, timeout = TIMEOUT) => (
-  _term: string
-) => {
-  return Promise.resolve()
-    .then(promiseTimeout(timeout))
-    .then(() => ({
-      total: count,
-      workpads: useStaticData ? stubs.getSomeWorkpads(count) : getSomeWorkpads(count),
-    }));
-};
+export const findSomeWorkpads =
+  (count = 3, useStaticData = false, timeout = TIMEOUT) =>
+  (_term: string) => {
+    return Promise.resolve()
+      .then(promiseTimeout(timeout))
+      .then(() => ({
+        total: count,
+        workpads: useStaticData ? stubs.getSomeWorkpads(count) : getSomeWorkpads(count),
+      }));
+  };
 
 export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({
   workpadCount,
@@ -75,6 +76,10 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({
   get: (id: string) => {
     action('workpadService.get')(id);
     return Promise.resolve({ ...getDefaultWorkpad(), id });
+  },
+  resolve: (id: string) => {
+    action('workpadService.resolve')(id);
+    return Promise.resolve({ outcome: 'exactMatch', workpad: { ...getDefaultWorkpad(), id } });
   },
   findTemplates: () => {
     action('workpadService.findTemplates')();

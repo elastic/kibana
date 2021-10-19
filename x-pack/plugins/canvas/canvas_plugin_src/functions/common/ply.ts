@@ -58,9 +58,9 @@ export function ply(): ExpressionFunctionDefinition<'ply', Datatable, Arguments,
         }) ?? [];
 
       const originalDatatables = args.by
-        ? Object.values(
-            groupBy(input.rows, (row) => JSON.stringify(pick(row, args.by!)))
-          ).map((rows) => ({ ...input, rows }))
+        ? Object.values(groupBy(input.rows, (row) => JSON.stringify(pick(row, args.by!)))).map(
+            (rows) => ({ ...input, rows })
+          )
         : [input];
 
       const datatables$ = originalDatatables.map((originalDatatable) =>

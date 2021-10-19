@@ -32,6 +32,7 @@ export interface CommonAlertState {
 export interface CommonAlertFilter {
   nodeUuid?: string;
   shardId?: string;
+  shardIndex?: string;
 }
 
 export interface CommonAlertParamDetail {
@@ -48,12 +49,16 @@ export interface CommonAlertParams {
   duration: string;
   threshold?: number;
   limit?: string;
+  filterQuery?: string;
+  filterQueryText?: string;
   [key: string]: unknown;
 }
 
 export interface ThreadPoolRejectionsAlertParams {
   threshold: number;
   duration: string;
+  filterQuery?: string;
+  filterQueryText?: string;
 }
 
 export interface AlertEnableAction {
@@ -203,9 +208,11 @@ export interface CCRReadExceptionsUIMeta extends CCRReadExceptionsStats {
   itemLabel: string;
 }
 
-export interface IndexShardSizeStats extends AlertNodeStats {
+export interface IndexShardSizeStats {
   shardIndex: string;
   shardSize: number;
+  clusterUuid: string;
+  ccs?: string;
 }
 
 export interface IndexShardSizeUIMeta extends IndexShardSizeStats {

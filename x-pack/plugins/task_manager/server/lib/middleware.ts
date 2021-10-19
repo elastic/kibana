@@ -31,8 +31,10 @@ export function addMiddlewareToChain(prev: Middleware, next: Partial<Middleware>
   };
 }
 
-const chain = <T>(prev: Mapper<T>, next: Mapper<T>): Mapper<T> => (params) =>
-  next(params).then(prev);
+const chain =
+  <T>(prev: Mapper<T>, next: Mapper<T>): Mapper<T> =>
+  (params) =>
+    next(params).then(prev);
 
 export function createInitialMiddleware(): Middleware {
   return {

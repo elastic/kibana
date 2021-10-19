@@ -42,9 +42,9 @@ import {
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
-import { isDraggedField, normalizeOperationDataType } from './utils';
+import { isColumnInvalid, isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
-import { IndexPatternColumn, getErrorMessages } from './operations';
+import { IndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -192,6 +192,27 @@ export function getIndexPatternDatasource({
       });
     },
 
+    initializeDimension(state, layerId, { columnId, groupId, label, dataType, staticValue }) {
+      const indexPattern = state.indexPatterns[state.layers[layerId]?.indexPatternId];
+      if (staticValue == null) {
+        return state;
+      }
+      return mergeLayer({
+        state,
+        layerId,
+        newLayer: insertNewColumn({
+          layer: state.layers[layerId],
+          op: 'static_value',
+          columnId,
+          field: undefined,
+          indexPattern,
+          visualizationGroups: [],
+          initialParams: { params: { value: staticValue } },
+          targetGroup: groupId,
+        }),
+      });
+    },
+
     toExpression: (state, layerId) => toExpression(state, layerId, uiSettings),
 
     renderDataPanel(
@@ -245,6 +266,11 @@ export function getIndexPatternDatasource({
       });
 
       return columnLabelMap;
+    },
+
+    isValidColumn: (state: IndexPatternPrivateState, layerId: string, columnId: string) => {
+      const layer = state.layers[layerId];
+      return !isColumnInvalid(layer, columnId, state.indexPatterns[layer.indexPatternId]);
     },
 
     renderDimensionTrigger: (
@@ -404,9 +430,14 @@ export function getIndexPatternDatasource({
         },
       };
     },
-    getDatasourceSuggestionsForField(state, draggedField) {
+    getDatasourceSuggestionsForField(state, draggedField, filterLayers) {
       return isDraggedField(draggedField)
-        ? getDatasourceSuggestionsForField(state, draggedField.indexPatternId, draggedField.field)
+        ? getDatasourceSuggestionsForField(
+            state,
+            draggedField.indexPatternId,
+            draggedField.field,
+            filterLayers
+          )
         : [];
     },
     getDatasourceSuggestionsFromCurrentState,

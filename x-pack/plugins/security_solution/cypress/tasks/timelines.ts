@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LOADING_INDICATOR } from '../screens/security_header';
 import {
   TIMELINE_CHECKBOX,
   BULK_ACTIONS,
@@ -24,6 +25,8 @@ export const openTimeline = (id: string) => {
   cy.get(TIMELINE(id)).should('be.visible').pipe(click);
 };
 
-export const waitForTimelinesPanelToBeLoaded = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(TIMELINES_TABLE).should('exist');
+export const waitForTimelinesPanelToBeLoaded = () => {
+  cy.get(LOADING_INDICATOR).should('exist');
+  cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.get(TIMELINES_TABLE).should('exist');
 };

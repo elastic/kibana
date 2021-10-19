@@ -56,15 +56,15 @@ describe('VectorTileLayer', () => {
 
     let actualMeta;
     let actualErrorMessage;
-    const mockContext = ({
+    const mockContext = {
       startLoading: (requestId: string, token: string, meta: unknown) => {
         actualMeta = meta;
       },
       onLoadError: (requestId: string, token: string, message: string) => {
         actualErrorMessage = message;
       },
-      dataFilters: ({ foo: 'bar' } as unknown) as DataFilters,
-    } as unknown) as DataRequestContext;
+      dataFilters: { foo: 'bar' } as unknown as DataFilters,
+    } as unknown as DataRequestContext;
 
     await layer.syncData(mockContext);
 

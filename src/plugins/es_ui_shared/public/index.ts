@@ -45,6 +45,7 @@ export {
   PageError,
   Error,
   useAuthorizationContext,
+  Authorization,
 } from './authorization';
 
 export { Forms, ace, GlobalFlyout, XJson };

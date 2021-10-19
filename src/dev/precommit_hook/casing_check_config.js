@@ -23,8 +23,6 @@ export const IGNORE_FILE_GLOBS = [
   '**/+([A-Z_]).asciidoc',
   '**/LICENSE',
   '**/*.txt',
-  '**/Gruntfile.js',
-  'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/canvas/tasks/**/*',
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
@@ -68,7 +66,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/BUILD.bazel',
 
   // Buildkite
-  '.buildkite/*',
+  '.buildkite/**/*',
 ];
 
 /**

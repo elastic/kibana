@@ -64,6 +64,8 @@ const DefaultYAxis = () => (
     id="left"
     domain={withStaticPadding({
       fit: false,
+      min: NaN,
+      max: NaN,
     })}
     position={Position.Left}
     groupId={`${MAIN_GROUP_ID}`}
@@ -132,9 +134,10 @@ const TimelionVisComponent = ({
     [renderComplete]
   );
 
-  const title: string = useMemo(() => last(compact(map(seriesList.list, '_title'))) || '', [
-    seriesList.list,
-  ]);
+  const title: string = useMemo(
+    () => last(compact(map(seriesList.list, '_title'))) || '',
+    [seriesList.list]
+  );
 
   const tickFormat = useMemo(
     () => createTickFormat(interval, kibana.services.timefilter, kibana.services.uiSettings),
@@ -153,8 +156,11 @@ const TimelionVisComponent = ({
 
     chart.forEach((series) => {
       if (series._global?.legend) {
-        const { show = true, position, noColumns = legendPosition.floatingColumns } =
-          series._global?.legend ?? {};
+        const {
+          show = true,
+          position,
+          noColumns = legendPosition.floatingColumns,
+        } = series._global?.legend ?? {};
 
         if (validateLegendPositionValue(position)) {
           const [vAlign, hAlign] = position.split('');

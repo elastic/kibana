@@ -72,20 +72,18 @@ function preprocessLegacyFields({
 
 function getApmPackageInputVars(options: GetApmPackagePolicyDefinitionOptions) {
   const { apmServerSchema } = options;
-  const apmServerConfigs = Object.entries(
-    apmConfigMapping
-  ).map(([key, { name, type, getValue }]) => ({ key, name, type, getValue }));
+  const apmServerConfigs = Object.entries(apmConfigMapping).map(
+    ([key, { name, type, getValue }]) => ({ key, name, type, getValue })
+  );
 
-  const inputVars: Record<
-    string,
-    { type: string; value: any }
-  > = apmServerConfigs.reduce((acc, { key, name, type, getValue }) => {
-    const value = (getValue ? getValue(options) : apmServerSchema[key]) ?? ''; // defaults to an empty string to be edited in Fleet UI
-    return {
-      ...acc,
-      [name]: { type, value },
-    };
-  }, {});
+  const inputVars: Record<string, { type: string; value: any }> =
+    apmServerConfigs.reduce((acc, { key, name, type, getValue }) => {
+      const value = (getValue ? getValue(options) : apmServerSchema[key]) ?? ''; // defaults to an empty string to be edited in Fleet UI
+      return {
+        ...acc,
+        [name]: { type, value },
+      };
+    }, {});
   return inputVars;
 }
 

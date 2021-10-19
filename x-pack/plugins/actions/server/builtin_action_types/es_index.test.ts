@@ -174,8 +174,9 @@ describe('execute()', () => {
       params,
       services,
     };
-    const scopedClusterClient = elasticsearchClientMock.createClusterClient().asScoped()
-      .asCurrentUser;
+    const scopedClusterClient = elasticsearchClientMock
+      .createClusterClient()
+      .asScoped().asCurrentUser;
     await actionType.executor({
       ...executorOptions,
       services: { ...services, scopedClusterClient },
@@ -553,8 +554,9 @@ describe('execute()', () => {
     };
 
     const actionId = 'some-id';
-    const scopedClusterClient = elasticsearchClientMock.createClusterClient().asScoped()
-      .asCurrentUser;
+    const scopedClusterClient = elasticsearchClientMock
+      .createClusterClient()
+      .asScoped().asCurrentUser;
     scopedClusterClient.bulk.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 0,

@@ -41,14 +41,14 @@ const mockVisualizations = {
 };
 
 describe('vis_type_table getStats', () => {
-  const mockSoClient = ({
+  const mockSoClient = {
     createPointInTimeFinder: jest.fn().mockResolvedValue({
       close: jest.fn(),
       find: function* asyncGenerator() {
         yield mockVisualizations;
       },
     }),
-  } as unknown) as SavedObjectsClientContract;
+  } as unknown as SavedObjectsClientContract;
 
   test('Returns stats from saved objects for table vis only', async () => {
     const result = await getStats(mockSoClient);

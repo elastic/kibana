@@ -8,9 +8,13 @@
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
-import { TLSFields, TLSRole } from './tls_fields';
+import { TLSFields } from './tls_fields';
 import { ConfigKeys, VerificationMode } from './types';
-import { TLSFieldsContextProvider, defaultTLSFields as defaultValues } from './contexts';
+import {
+  TLSFieldsContextProvider,
+  PolicyConfigContextProvider,
+  defaultTLSFields as defaultValues,
+} from './contexts';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -18,17 +22,13 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 }));
 
 describe('<TLSFields />', () => {
-  const WrappedComponent = ({
-    tlsRole = TLSRole.CLIENT,
-    isEnabled = true,
-  }: {
-    tlsRole?: TLSRole;
-    isEnabled?: boolean;
-  }) => {
+  const WrappedComponent = ({ isEnabled = true }: { isEnabled?: boolean }) => {
     return (
-      <TLSFieldsContextProvider defaultValues={defaultValues}>
-        <TLSFields tlsRole={tlsRole} isEnabled={isEnabled} />
-      </TLSFieldsContextProvider>
+      <PolicyConfigContextProvider defaultIsTLSEnabled={isEnabled}>
+        <TLSFieldsContextProvider defaultValues={defaultValues}>
+          <TLSFields />
+        </TLSFieldsContextProvider>
+      </PolicyConfigContextProvider>
     );
   };
   it('renders TLSFields', () => {
@@ -40,15 +40,6 @@ describe('<TLSFields />', () => {
     expect(getByLabelText('Client key')).toBeInTheDocument();
     expect(getByLabelText('Certificate authorities')).toBeInTheDocument();
     expect(getByLabelText('Verification mode')).toBeInTheDocument();
-  });
-
-  it('handles role', () => {
-    const { getByLabelText, rerender } = render(<WrappedComponent tlsRole={TLSRole.SERVER} />);
-
-    expect(getByLabelText('Server certificate')).toBeInTheDocument();
-    expect(getByLabelText('Server key')).toBeInTheDocument();
-
-    rerender(<WrappedComponent tlsRole={TLSRole.CLIENT} />);
   });
 
   it('updates fields and calls onChange', async () => {

@@ -10,7 +10,7 @@ import { useFetcher } from './use_fetcher';
 export function useDynamicIndexPatternFetcher() {
   const { data, status } = useFetcher((callApmApi) => {
     return callApmApi({
-      endpoint: 'GET /api/apm/index_pattern/dynamic',
+      endpoint: 'GET /internal/apm/index_pattern/dynamic',
       isCachable: true,
     });
   }, []);

@@ -179,7 +179,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const editField = useCallback(
     (fieldName?: string) => {
-      const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
+      const indexPatternFieldEditPermission =
+        indexPatternFieldEditor?.userPermissions.editIndexPattern();
       const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
       if (!canEditIndexPatternField || !selectedIndexPattern) {
         return;
@@ -216,7 +217,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   return (
     <>
-      {props.isClosed ? null : (
+      {!props.isClosed && (
         <EuiHideFor sizes={['xs', 's']}>
           <DiscoverSidebar
             {...props}

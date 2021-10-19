@@ -62,7 +62,7 @@ describe('disableUnknownTypeMappingFields', () => {
       properties: {
         new_field: { type: 'binary' },
         field_1: { type: 'keyword' }, // was type text in source mappings
-        // old_field was present in source but ommited in active mappings
+        // old_field was present in source but omitted in active mappings
       },
     });
   });
@@ -73,5 +73,19 @@ describe('disableUnknownTypeMappingFields', () => {
         known_type: 'md5hash',
       },
     });
+  });
+
+  it('does not fail if the source mapping does not have `properties` defined', () => {
+    const missingPropertiesMappings = {
+      ...sourceMappings,
+      properties: undefined,
+    };
+    const result = disableUnknownTypeMappingFields(
+      activeMappings,
+      // @ts-expect-error `properties` should not be undefined
+      missingPropertiesMappings
+    );
+
+    expect(Object.keys(result.properties)).toEqual(['known_type']);
   });
 });

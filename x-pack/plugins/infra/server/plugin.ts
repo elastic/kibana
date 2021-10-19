@@ -9,7 +9,12 @@ import { Server } from '@hapi/hapi';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
-import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/server';
+import {
+  CoreSetup,
+  PluginInitializerContext,
+  Plugin,
+  PluginConfigDescriptor,
+} from 'src/core/server';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
@@ -36,9 +41,8 @@ import { createGetLogQueryFields } from './services/log_queries/get_log_query_fi
 import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
 import { RulesService } from './services/rules';
 
-export const config = {
+export const config: PluginConfigDescriptor = {
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     inventory: schema.object({
       compositeSize: schema.number({ defaultValue: 2000 }),
     }),

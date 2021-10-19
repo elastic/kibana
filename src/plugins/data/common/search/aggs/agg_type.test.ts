@@ -13,7 +13,7 @@ describe('AggType Class', () => {
   describe('constructor', () => {
     test("requires a valid config object as it's first param", () => {
       expect(() => {
-        const aggConfig: AggTypeConfig = (undefined as unknown) as AggTypeConfig;
+        const aggConfig: AggTypeConfig = undefined as unknown as AggTypeConfig;
         new AggType(aggConfig);
       }).toThrowError();
     });
@@ -136,7 +136,7 @@ describe('AggType Class', () => {
 
     describe('getSerializedFormat', () => {
       test('returns the default serialized field format if it exists', () => {
-        const aggConfig = ({
+        const aggConfig = {
           params: {
             field: {
               format: {
@@ -147,7 +147,7 @@ describe('AggType Class', () => {
           aggConfigs: {
             indexPattern: { getFormatterForField: () => ({ toJSON: () => ({ id: 'format' }) }) },
           },
-        } as unknown) as IAggConfig;
+        } as unknown as IAggConfig;
         const aggType = new AggType({
           name: 'name',
           expressionName: 'aggName',
@@ -161,9 +161,9 @@ describe('AggType Class', () => {
       });
 
       test('returns an empty object if a field param does not exist', () => {
-        const aggConfig = ({
+        const aggConfig = {
           params: {},
-        } as unknown) as IAggConfig;
+        } as unknown as IAggConfig;
         const aggType = new AggType({
           name: 'name',
           expressionName: 'aggName',
@@ -173,7 +173,7 @@ describe('AggType Class', () => {
       });
 
       test('uses a custom getSerializedFormat function if defined', () => {
-        const aggConfig = ({
+        const aggConfig = {
           params: {
             field: {
               format: {
@@ -181,7 +181,7 @@ describe('AggType Class', () => {
               },
             },
           },
-        } as unknown) as IAggConfig;
+        } as unknown as IAggConfig;
         const getSerializedFormat = jest.fn().mockReturnValue({ id: 'hello' });
         const aggType = new AggType({
           name: 'name',

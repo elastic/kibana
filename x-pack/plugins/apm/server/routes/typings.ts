@@ -19,6 +19,7 @@ import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { APMConfig } from '..';
 import { APMPluginDependencies } from '../types';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+import { UxUIFilters } from '../../typings/ui_filters';
 
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
@@ -49,6 +50,9 @@ export interface APMRouteHandlerResources {
   params: {
     query: {
       _inspect: boolean;
+      start?: number;
+      end?: number;
+      uiFilters?: UxUIFilters;
     };
   };
   config: APMConfig;

@@ -24,7 +24,7 @@ describe('Elasticsearch Cluster Settings', () => {
   };
 
   const getReq = (response: ClusterGetSettingsResponse) => {
-    return ({
+    return {
       server: {
         newPlatform: {
           setup: {
@@ -45,7 +45,7 @@ describe('Elasticsearch Cluster Settings', () => {
           },
         },
       },
-    } as unknown) as LegacyRequest;
+    } as unknown as LegacyRequest;
   };
 
   it('should find default collection interval reason', async () => {

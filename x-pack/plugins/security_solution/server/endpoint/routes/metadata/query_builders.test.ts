@@ -6,12 +6,19 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '../../../../../../../src/core/server/mocks';
-import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
+import {
+  kibanaRequestToMetadataListESQuery,
+  getESQueryHostMetadataByID,
+  buildUnitedIndexQuery,
+} from './query_builders';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { get } from 'lodash';
+import { KibanaRequest } from 'kibana/server';
+import { EndpointAppContext } from '../../types';
+import { expectedCompleteUnitedIndexQuery } from './query_builders.fixtures';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -198,6 +205,70 @@ describe('query builder', () => {
       expect(get(query, 'body.query.bool.filter.0.bool.should')).toContainEqual({
         term: { 'HostDetails.agent.id': mockID },
       });
+    });
+  });
+
+  describe('buildUnitedIndexQuery', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let mockRequest: KibanaRequest<any, any, any>;
+    let mockEndpointAppContext: EndpointAppContext;
+    const filters = { kql: '', host_status: [] };
+    beforeEach(() => {
+      mockRequest = httpServerMock.createKibanaRequest({ body: { filters } });
+      mockEndpointAppContext = {
+        logFactory: loggingSystemMock.create(),
+        service: new EndpointAppContextService(),
+        config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
+      };
+    });
+
+    it('correctly builds empty query', async () => {
+      const query = await buildUnitedIndexQuery(mockRequest, mockEndpointAppContext, [], []);
+      const expected = {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'united.agent.policy_id': [],
+              },
+            },
+            {
+              exists: {
+                field: 'united.endpoint.agent.id',
+              },
+            },
+            {
+              exists: {
+                field: 'united.agent.agent.id',
+              },
+            },
+            {
+              term: {
+                'united.agent.active': {
+                  value: true,
+                },
+              },
+            },
+          ],
+        },
+      };
+      expect(query.body.query).toEqual(expected);
+    });
+
+    it('correctly builds query', async () => {
+      mockRequest.body.filters.kql = 'united.endpoint.host.os.name : *';
+      mockRequest.body.filters.host_status = ['healthy'];
+      const ignoredAgentIds: string[] = ['test-agent-id'];
+      const endpointPolicyIds: string[] = ['test-endpoint-policy-id'];
+      const query = await buildUnitedIndexQuery(
+        mockRequest,
+        mockEndpointAppContext,
+        ignoredAgentIds,
+        endpointPolicyIds
+      );
+      const expected = expectedCompleteUnitedIndexQuery;
+      expect(query.body.query).toEqual(expected);
     });
   });
 });

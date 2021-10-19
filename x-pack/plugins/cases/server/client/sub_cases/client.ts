@@ -100,13 +100,8 @@ export function createSubCasesClient(
 
 async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   try {
-    const {
-      unsecuredSavedObjectsClient,
-      user,
-      userActionService,
-      caseService,
-      attachmentService,
-    } = clientArgs;
+    const { unsecuredSavedObjectsClient, user, userActionService, caseService, attachmentService } =
+      clientArgs;
 
     const [comments, subCases] = await Promise.all([
       caseService.getAllSubCaseComments({ unsecuredSavedObjectsClient, id: ids }),

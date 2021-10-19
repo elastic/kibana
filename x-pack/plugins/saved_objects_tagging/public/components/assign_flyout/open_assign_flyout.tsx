@@ -38,28 +38,30 @@ const LazyAssignFlyout = React.lazy(() =>
   import('./assign_flyout').then(({ AssignFlyout }) => ({ default: AssignFlyout }))
 );
 
-export const getAssignFlyoutOpener = ({
-  overlays,
-  notifications,
-  tagCache,
-  assignmentService,
-  assignableTypes,
-}: GetAssignFlyoutOpenerOptions): AssignFlyoutOpener => async ({ tagIds }) => {
-  const flyout = overlays.openFlyout(
-    toMountPoint(
-      <React.Suspense fallback={<LoadingIndicator />}>
-        <LazyAssignFlyout
-          tagIds={tagIds}
-          tagCache={tagCache}
-          notifications={notifications}
-          allowedTypes={assignableTypes}
-          assignmentService={assignmentService}
-          onClose={() => flyout.close()}
-        />
-      </React.Suspense>
-    ),
-    { size: 'm', maxWidth: 600 }
-  );
+export const getAssignFlyoutOpener =
+  ({
+    overlays,
+    notifications,
+    tagCache,
+    assignmentService,
+    assignableTypes,
+  }: GetAssignFlyoutOpenerOptions): AssignFlyoutOpener =>
+  async ({ tagIds }) => {
+    const flyout = overlays.openFlyout(
+      toMountPoint(
+        <React.Suspense fallback={<LoadingIndicator />}>
+          <LazyAssignFlyout
+            tagIds={tagIds}
+            tagCache={tagCache}
+            notifications={notifications}
+            allowedTypes={assignableTypes}
+            assignmentService={assignmentService}
+            onClose={() => flyout.close()}
+          />
+        </React.Suspense>
+      ),
+      { size: 'm', maxWidth: 600 }
+    );
 
-  return flyout;
-};
+    return flyout;
+  };

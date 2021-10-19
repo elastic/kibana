@@ -16,9 +16,10 @@ function getResultHeaders(headers: HeadersInit) {
   };
 }
 
-function getFetchOptions(
-  options: HttpFetchOptionsWithPath
-): { path: string; fetchOptions: HttpFetchOptions } {
+function getFetchOptions(options: HttpFetchOptionsWithPath): {
+  path: string;
+  fetchOptions: HttpFetchOptions;
+} {
   if (!options.path) {
     throw new Error('URL path is missing');
   }
@@ -121,9 +122,10 @@ export class HttpService {
     } as HeadersInit;
   }
 
-  private getFetchOptions(
-    options: HttpFetchOptionsWithPath
-  ): { path: string; fetchOptions: HttpFetchOptions } {
+  private getFetchOptions(options: HttpFetchOptionsWithPath): {
+    path: string;
+    fetchOptions: HttpFetchOptions;
+  } {
     if (!options.path) {
       throw new Error('URL path is missing');
     }

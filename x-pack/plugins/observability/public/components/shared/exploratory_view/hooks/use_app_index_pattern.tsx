@@ -27,7 +27,7 @@ interface ProviderProps {
 }
 
 type HasAppDataState = Record<AppDataType, boolean | null>;
-type IndexPatternState = Record<AppDataType, IndexPattern>;
+export type IndexPatternState = Record<AppDataType, IndexPattern>;
 type LoadingState = Record<AppDataType, boolean>;
 
 export function IndexPatternContextProvider({ children }: ProviderProps) {
@@ -65,7 +65,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
             case 'mobile':
               const resultApm = await getDataHandler('apm')?.hasData();
               hasDataT = Boolean(resultApm?.hasData);
-              indices = resultApm?.indices['apm_oss.transactionIndices'];
+              indices = resultApm?.indices.transaction;
               break;
           }
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));
@@ -101,7 +101,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
 
 export const useAppIndexPatternContext = (dataType?: AppDataType) => {
   const { loading, hasAppData, loadIndexPattern, indexPatterns } = useContext(
-    (IndexPatternContext as unknown) as Context<IndexPatternContext>
+    IndexPatternContext as unknown as Context<IndexPatternContext>
   );
 
   if (dataType && !indexPatterns?.[dataType] && !loading) {

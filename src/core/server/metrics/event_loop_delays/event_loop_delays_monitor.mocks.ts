@@ -32,13 +32,13 @@ function createMockHistogram(overwrites: Partial<IntervalHistogram> = {}): Inter
 
 function createMockEventLoopDelaysMonitor() {
   const mockCollect = jest.fn();
-  const MockEventLoopDelaysMonitor: jest.MockedClass<
-    typeof EventLoopDelaysMonitor
-  > = jest.fn().mockReturnValue({
-    collect: mockCollect,
-    reset: jest.fn(),
-    stop: jest.fn(),
-  });
+  const MockEventLoopDelaysMonitor: jest.MockedClass<typeof EventLoopDelaysMonitor> = jest
+    .fn()
+    .mockReturnValue({
+      collect: mockCollect,
+      reset: jest.fn(),
+      stop: jest.fn(),
+    });
 
   mockCollect.mockReturnValue(createMockHistogram());
 

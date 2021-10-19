@@ -27,6 +27,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Object {
@@ -65,6 +66,7 @@ describe('config schema', () => {
           "idleTimeout": "PT1H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
 
@@ -79,6 +81,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Object {
@@ -117,6 +120,7 @@ describe('config schema', () => {
           "idleTimeout": "PT1H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
 
@@ -131,6 +135,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Object {
@@ -168,6 +173,7 @@ describe('config schema', () => {
           "idleTimeout": "PT1H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
   });
@@ -308,6 +314,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "oidc": Object {
@@ -339,6 +346,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "oidc": Object {
@@ -370,6 +378,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Array [
@@ -388,6 +397,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Array [
@@ -409,6 +419,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Array [
@@ -1482,6 +1493,7 @@ describe('createConfig()', () => {
           "enabled": true,
           "schemes": Array [
             "apikey",
+            "bearer",
           ],
         },
         "providers": Object {
@@ -1729,7 +1741,7 @@ describe('createConfig()', () => {
           },
         },
       })
-    ).toThrow('[audit.appender.2.type]: expected value to equal [legacy-appender]');
+    ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
   });
 
   it('rejects an ignore_filter when no appender is configured', () => {

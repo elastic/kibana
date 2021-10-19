@@ -39,6 +39,7 @@ import { DataFrameAnalyticsListColumn } from './components/analytics_list/common
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana } from '../../../contexts/kibana';
+import { useRefreshAnalyticsList } from '../../common';
 
 export const getDefaultDFAListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -57,6 +58,8 @@ export const Page: FC = () => {
   );
 
   useRefreshInterval(setBlockRefresh);
+  const [isLoading, setIsLoading] = useState(false);
+  const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
 
   const location = useLocation();
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
@@ -99,7 +102,11 @@ export const Page: FC = () => {
           </EuiPageHeader>
 
           <NodeAvailableWarning />
-          <SavedObjectsWarning jobType="data-frame-analytics" />
+          <SavedObjectsWarning
+            jobType="data-frame-analytics"
+            onCloseFlyout={refresh}
+            forceRefresh={isLoading}
+          />
           <UpgradeWarning />
 
           <EuiPageContent>

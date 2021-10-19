@@ -73,7 +73,7 @@ export const indexFleetAgentForHost = async (
     .index<FleetServerAgent>({
       index: agentDoc._index,
       id: agentDoc._id,
-      body: agentDoc._source!,
+      body: agentDoc._source,
       op_type: 'create',
     })
     .catch(wrapErrorAndRejectPromise);
@@ -87,12 +87,14 @@ export const indexFleetAgentForHost = async (
 };
 
 const fetchFleetAgent = async (kbnClient: KbnClient, agentId: string): Promise<Agent> => {
-  return ((await kbnClient
-    .request({
-      path: AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
-      method: 'GET',
-    })
-    .catch(wrapErrorAndRejectPromise)) as AxiosResponse<GetOneAgentResponse>).data.item;
+  return (
+    (await kbnClient
+      .request({
+        path: AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
+        method: 'GET',
+      })
+      .catch(wrapErrorAndRejectPromise)) as AxiosResponse<GetOneAgentResponse>
+  ).data.item;
 };
 
 export interface DeleteIndexedFleetAgentsResponse {

@@ -28,6 +28,7 @@ export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
  */
 export enum ReadOperations {
   GetCase = 'getCase',
+  ResolveCase = 'resolveCase',
   FindCases = 'findCases',
   GetCaseIDsByAlertID = 'getCaseIDsByAlertID',
   GetCaseStatuses = 'getCaseStatuses',

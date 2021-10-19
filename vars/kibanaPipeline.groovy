@@ -203,7 +203,6 @@ def withGcsArtifactUpload(workerName, closure) {
     'x-pack/test/**/screenshots/diff/*.png',
     'x-pack/test/**/screenshots/failure/*.png',
     'x-pack/test/**/screenshots/session/*.png',
-    'x-pack/test/functional/apps/reporting/reports/session/*.pdf',
     'x-pack/test/functional/failure_debug/html/*.html',
     '.es/**/*.hprof'
   ]
@@ -351,7 +350,7 @@ def runErrorReporter(workspaces) {
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests ${dryRun} ${globs}
+      node scripts/report_failed_tests --no-index-errors ${dryRun} ${globs}
     """,
     "Report failed tests, if necessary"
   )

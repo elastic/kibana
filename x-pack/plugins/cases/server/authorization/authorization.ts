@@ -204,9 +204,7 @@ export class Authorization {
     };
   }
 
-  private async getAuthorizedOwners(
-    operations: OperationDetails[]
-  ): Promise<{
+  private async getAuthorizedOwners(operations: OperationDetails[]): Promise<{
     username?: string;
     hasAllRequested: boolean;
     authorizedOwners: string[];

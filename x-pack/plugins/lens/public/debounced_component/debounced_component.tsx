@@ -14,7 +14,7 @@ import { debounce } from 'lodash';
  * During the debounce phase, it will return the previously rendered value.
  */
 export function debouncedComponent<TProps>(component: FunctionComponent<TProps>, delay = 256) {
-  const MemoizedComponent = (memo(component) as unknown) as FunctionComponent<TProps>;
+  const MemoizedComponent = memo(component) as unknown as FunctionComponent<TProps>;
 
   return (props: TProps) => {
     const [cachedProps, setCachedProps] = useState(props);

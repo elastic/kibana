@@ -565,6 +565,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           "data-test-subj": "homeLink",
                           "href": "/",
                           "iconType": "home",
+                          "isActive": false,
                           "label": "Home",
                           "onClick": [Function],
                         },
@@ -587,6 +588,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         data-test-subj="homeLink"
                         href="/"
                         iconType="home"
+                        isActive={false}
                         key="title-0"
                         label="Home"
                         onClick={[Function]}

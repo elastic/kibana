@@ -15,12 +15,13 @@ import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_
 export async function getExistingEnvironmentsForService({
   serviceName,
   setup,
+  size,
 }: {
   serviceName: string | undefined;
   setup: Setup;
+  size: number;
 }) {
-  const { internalClient, indices, config } = setup;
-  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
+  const { internalClient, indices } = setup;
 
   const bool = serviceName
     ? { filter: [{ term: { [SERVICE_NAME]: serviceName } }] }
@@ -36,7 +37,7 @@ export async function getExistingEnvironmentsForService({
           terms: {
             field: SERVICE_ENVIRONMENT,
             missing: ALL_OPTION_VALUE,
-            size: maxServiceEnvironments,
+            size,
           },
         },
       },

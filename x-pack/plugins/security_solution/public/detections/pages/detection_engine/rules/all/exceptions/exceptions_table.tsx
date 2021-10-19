@@ -76,21 +76,17 @@ export const ExceptionListsTable = React.memo(() => {
     exceptionReferenceModalInitialState
   );
   const [filters, setFilters] = useState<ExceptionListFilter | undefined>(undefined);
-  const [
-    loadingExceptions,
-    exceptions,
-    pagination,
-    setPagination,
-    refreshExceptions,
-  ] = useExceptionLists({
-    errorMessage: i18n.ERROR_EXCEPTION_LISTS,
-    filterOptions: filters,
-    http,
-    namespaceTypes: ['single', 'agnostic'],
-    notifications,
-    showTrustedApps: false,
-    showEventFilters: false,
-  });
+  const [loadingExceptions, exceptions, pagination, setPagination, refreshExceptions] =
+    useExceptionLists({
+      errorMessage: i18n.ERROR_EXCEPTION_LISTS,
+      filterOptions: filters,
+      http,
+      namespaceTypes: ['single', 'agnostic'],
+      notifications,
+      showTrustedApps: false,
+      showEventFilters: false,
+      showHostIsolationExceptions: false,
+    });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
   });
@@ -121,49 +117,42 @@ export const ExceptionListsTable = React.memo(() => {
   );
 
   const handleDelete = useCallback(
-    ({
-      id,
-      listId,
-      namespaceType,
-    }: {
-      id: string;
-      listId: string;
-      namespaceType: NamespaceType;
-    }) => async () => {
-      try {
-        setDeletingListIds((ids) => [...ids, id]);
-        if (refreshExceptions != null) {
-          refreshExceptions();
-        }
-
-        if (exceptionsListsRef[id] != null && exceptionsListsRef[id].rules.length === 0) {
-          await deleteExceptionList({
-            id,
-            namespaceType,
-            onError: handleDeleteError,
-            onSuccess: handleDeleteSuccess(listId),
-          });
-
+    ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
+      async () => {
+        try {
+          setDeletingListIds((ids) => [...ids, id]);
           if (refreshExceptions != null) {
             refreshExceptions();
           }
-        } else {
-          setReferenceModalState({
-            contentText: i18n.referenceErrorMessage(exceptionsListsRef[id].rules.length),
-            rulesReferences: exceptionsListsRef[id].rules.map(({ name }) => name),
-            isLoading: true,
-            listId: id,
-            listNamespaceType: namespaceType,
-          });
-          setShowReferenceErrorModal(true);
+
+          if (exceptionsListsRef[id] != null && exceptionsListsRef[id].rules.length === 0) {
+            await deleteExceptionList({
+              id,
+              namespaceType,
+              onError: handleDeleteError,
+              onSuccess: handleDeleteSuccess(listId),
+            });
+
+            if (refreshExceptions != null) {
+              refreshExceptions();
+            }
+          } else {
+            setReferenceModalState({
+              contentText: i18n.referenceErrorMessage(exceptionsListsRef[id].rules.length),
+              rulesReferences: exceptionsListsRef[id].rules.map(({ name }) => name),
+              isLoading: true,
+              listId: id,
+              listNamespaceType: namespaceType,
+            });
+            setShowReferenceErrorModal(true);
+          }
+          // route to patch rules with associated exception list
+        } catch (error) {
+          handleDeleteError(error);
+        } finally {
+          setDeletingListIds((ids) => ids.filter((_id) => _id !== id));
         }
-        // route to patch rules with associated exception list
-      } catch (error) {
-        handleDeleteError(error);
-      } finally {
-        setDeletingListIds((ids) => ids.filter((_id) => _id !== id));
-      }
-    },
+      },
     [
       deleteExceptionList,
       exceptionsListsRef,
@@ -174,9 +163,10 @@ export const ExceptionListsTable = React.memo(() => {
   );
 
   const handleExportSuccess = useCallback(
-    (listId: string) => (blob: Blob): void => {
-      setExportDownload({ name: listId, blob });
-    },
+    (listId: string) =>
+      (blob: Blob): void => {
+        setExportDownload({ name: listId, blob });
+      },
     []
   );
 
@@ -188,24 +178,17 @@ export const ExceptionListsTable = React.memo(() => {
   );
 
   const handleExport = useCallback(
-    ({
-      id,
-      listId,
-      namespaceType,
-    }: {
-      id: string;
-      listId: string;
-      namespaceType: NamespaceType;
-    }) => async () => {
-      setExportingListIds((ids) => [...ids, id]);
-      await exportExceptionList({
-        id,
-        listId,
-        namespaceType,
-        onError: handleExportError,
-        onSuccess: handleExportSuccess(listId),
-      });
-    },
+    ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
+      async () => {
+        setExportingListIds((ids) => [...ids, id]);
+        await exportExceptionList({
+          id,
+          listId,
+          namespaceType,
+          onError: handleExportError,
+          onSuccess: handleExportSuccess(listId),
+        });
+      },
     [exportExceptionList, handleExportError, handleExportSuccess]
   );
 

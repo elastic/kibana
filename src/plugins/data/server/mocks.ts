@@ -40,9 +40,9 @@ function createStartContract() {
 }
 
 function createRequestHandlerContext() {
-  return ({
+  return {
     search: createSearchRequestHandlerContext(),
-  } as unknown) as jest.Mocked<DataRequestHandlerContext>;
+  } as unknown as jest.Mocked<DataRequestHandlerContext>;
 }
 
 export const dataPluginMock = {

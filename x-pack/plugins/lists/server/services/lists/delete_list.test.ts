@@ -26,7 +26,7 @@ describe('delete_list', () => {
   });
 
   test('Delete returns a null if the list is also null', async () => {
-    ((getList as unknown) as jest.Mock).mockResolvedValueOnce(null);
+    (getList as unknown as jest.Mock).mockResolvedValueOnce(null);
     const options = getDeleteListOptionsMock();
     const deletedList = await deleteList(options);
     expect(deletedList).toEqual(null);
@@ -34,7 +34,7 @@ describe('delete_list', () => {
 
   test('Delete returns the list if a list is returned from getList', async () => {
     const list = getListResponseMock();
-    ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
+    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
     const deletedList = await deleteList(options);
     expect(deletedList).toEqual(list);
@@ -42,7 +42,7 @@ describe('delete_list', () => {
 
   test('Delete calls "deleteByQuery" and "delete" if a list is returned from getList', async () => {
     const list = getListResponseMock();
-    ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
+    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
     await deleteList(options);
     const deleteByQuery = {
@@ -55,7 +55,7 @@ describe('delete_list', () => {
 
   test('Delete calls "delete" second if a list is returned from getList', async () => {
     const list = getListResponseMock();
-    ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
+    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
     await deleteList(options);
     const deleteQuery = {
@@ -67,7 +67,7 @@ describe('delete_list', () => {
   });
 
   test('Delete does not call data client if the list returns null', async () => {
-    ((getList as unknown) as jest.Mock).mockResolvedValueOnce(null);
+    (getList as unknown as jest.Mock).mockResolvedValueOnce(null);
     const options = getDeleteListOptionsMock();
     await deleteList(options);
     expect(options.esClient.delete).not.toHaveBeenCalled();

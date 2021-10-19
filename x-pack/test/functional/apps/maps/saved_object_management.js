@@ -120,7 +120,7 @@ export default function ({ getPageObjects, getService }) {
           const currentUrl = await browser.getCurrentUrl();
           const appState = currentUrl.substring(currentUrl.indexOf('_a='));
           expect(appState).to.equal(
-            '_a=(filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:c698b940-e149-11e8-a35a-370a8516603a,key:machine.os.raw,negate:!f,params:(query:ios),type:phrase),query:(match:(machine.os.raw:(query:ios,type:phrase))))),query:(language:kuery,query:%27%27))'
+            '_a=(filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:c698b940-e149-11e8-a35a-370a8516603a,key:machine.os.raw,negate:!f,params:(query:ios),type:phrase),query:(match_phrase:(machine.os.raw:(query:ios))))),query:(language:kuery,query:%27%27))'
           );
         });
 

@@ -38,8 +38,7 @@ export function registerCrawlerCrawlRulesRoutes({
 
   router.put(
     {
-      path:
-        '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -64,8 +63,7 @@ export function registerCrawlerCrawlRulesRoutes({
 
   router.delete(
     {
-      path:
-        '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/crawl_rules/{crawlRuleId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),

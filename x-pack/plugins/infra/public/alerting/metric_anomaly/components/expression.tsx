@@ -66,9 +66,10 @@ export const Expression: React.FC<Props> = (props) => {
     toastWarning: notifications.toasts.addWarning,
   });
 
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
-    createDerivedIndexPattern,
-  ]);
+  const derivedIndexPattern = useMemo(
+    () => createDerivedIndexPattern(),
+    [createDerivedIndexPattern]
+  );
 
   const [influencerFieldName, updateInfluencerFieldName] = useState(
     alertParams.influencerFilter?.fieldName ?? 'host.name'

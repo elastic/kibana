@@ -27,8 +27,8 @@ export const diffDashboardContainerInput = (
   newInput: DashboardContainerInput
 ) => {
   return commonDiffFilters<DashboardContainerInput>(
-    (originalInput as unknown) as DashboardDiffCommonFilters,
-    (newInput as unknown) as DashboardDiffCommonFilters,
+    originalInput as unknown as DashboardDiffCommonFilters,
+    newInput as unknown as DashboardDiffCommonFilters,
     ['searchSessionId', 'lastReloadRequestTime', 'executionContext']
   );
 };
@@ -38,8 +38,8 @@ export const diffDashboardState = (
   newState: DashboardState
 ): Partial<DashboardState> => {
   const common = commonDiffFilters<DashboardState>(
-    (original as unknown) as DashboardDiffCommonFilters,
-    (newState as unknown) as DashboardDiffCommonFilters,
+    original as unknown as DashboardDiffCommonFilters,
+    newState as unknown as DashboardDiffCommonFilters,
     ['viewMode', 'panels', 'options', 'savedQuery', 'expandedPanelId'],
     true
   );
@@ -55,8 +55,8 @@ const optionsAreEqual = (optionsA: DashboardOptions, optionsB: DashboardOptions)
   const optionKeys = [...Object.keys(optionsA), ...Object.keys(optionsB)];
   for (const key of optionKeys) {
     if (
-      Boolean(((optionsA as unknown) as { [key: string]: boolean })[key]) !==
-      Boolean(((optionsB as unknown) as { [key: string]: boolean })[key])
+      Boolean((optionsA as unknown as { [key: string]: boolean })[key]) !==
+      Boolean((optionsB as unknown as { [key: string]: boolean })[key])
     ) {
       return false;
     }
@@ -78,8 +78,8 @@ const panelsAreEqual = (panelsA: DashboardPanelMap, panelsB: DashboardPanelMap):
     if (
       Object.keys(
         commonDiff<DashboardPanelState>(
-          (panelsA[id] as unknown) as DashboardDiffCommon,
-          (panelsB[id] as unknown) as DashboardDiffCommon,
+          panelsA[id] as unknown as DashboardDiffCommon,
+          panelsB[id] as unknown as DashboardDiffCommon,
           ['panelRefName']
         )
       ).length > 0

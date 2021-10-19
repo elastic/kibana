@@ -50,6 +50,7 @@ describe('CurationsLogic', () => {
     dataLoading: true,
     curations: [],
     meta: DEFAULT_META,
+    selectedPageTab: 'overview',
   };
 
   beforeEach(() => {
@@ -86,6 +87,19 @@ describe('CurationsLogic', () => {
         expect(CurationsLogic.values).toEqual({
           ...DEFAULT_VALUES,
           meta: { page: { ...DEFAULT_VALUES.meta.page, current: 3 } },
+        });
+      });
+    });
+
+    describe('onSelectPageTab', () => {
+      it('should set the selected page tab', () => {
+        mount();
+
+        CurationsLogic.actions.onSelectPageTab('settings');
+
+        expect(CurationsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          selectedPageTab: 'settings',
         });
       });
     });

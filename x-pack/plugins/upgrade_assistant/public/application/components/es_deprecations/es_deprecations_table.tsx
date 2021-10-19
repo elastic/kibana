@@ -160,11 +160,10 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
     getSortedItems(deprecations, sortConfig)
   );
 
-  const pager = useMemo(() => new Pager(deprecations.length, itemsPerPage, currentPageIndex), [
-    currentPageIndex,
-    deprecations,
-    itemsPerPage,
-  ]);
+  const pager = useMemo(
+    () => new Pager(deprecations.length, itemsPerPage, currentPageIndex),
+    [currentPageIndex, deprecations, itemsPerPage]
+  );
 
   const visibleDeprecations = useMemo(
     () => filteredDeprecations.slice(pager.firstItemIndex, pager.lastItemIndex + 1),
@@ -225,9 +224,9 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
                 field: 'type',
                 name: i18nTexts.typeFilterLabel,
                 multiSelect: false,
-                options: (Object.keys(DEPRECATION_TYPE_MAP) as Array<
-                  keyof typeof DEPRECATION_TYPE_MAP
-                >).map((type) => ({
+                options: (
+                  Object.keys(DEPRECATION_TYPE_MAP) as Array<keyof typeof DEPRECATION_TYPE_MAP>
+                ).map((type) => ({
                   value: type,
                   name: DEPRECATION_TYPE_MAP[type],
                 })),

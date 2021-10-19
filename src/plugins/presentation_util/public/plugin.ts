@@ -23,7 +23,8 @@ export class PresentationUtilPlugin
       PresentationUtilPluginStart,
       PresentationUtilPluginSetupDeps,
       PresentationUtilPluginStartDeps
-    > {
+    >
+{
   public setup(
     _coreSetup: CoreSetup<PresentationUtilPluginSetup>,
     _setupPlugins: PresentationUtilPluginSetupDeps
@@ -38,6 +39,7 @@ export class PresentationUtilPlugin
     pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
     return {
       ContextProvider: pluginServices.getContextProvider(),
+      controlsService: pluginServices.getServices().controls,
       labsService: pluginServices.getServices().labs,
     };
   }

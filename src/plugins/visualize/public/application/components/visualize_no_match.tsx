@@ -24,7 +24,7 @@ export const VisualizeNoMatch = () => {
     services.restorePreviousUrl();
 
     const { navigated } = services.urlForwarding.navigateToLegacyKibanaUrl(
-      services.history.location.pathname
+      services.history.location.pathname + services.history.location.search
     );
 
     if (!navigated) {

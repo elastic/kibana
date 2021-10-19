@@ -48,7 +48,7 @@ describe('inject_exceptions_list', () => {
   test('logs expect error message if the exceptionsList is undefined', () => {
     injectExceptionsReferences({
       logger,
-      exceptionsList: (undefined as unknown) as RuleParams['exceptionsList'],
+      exceptionsList: undefined as unknown as RuleParams['exceptionsList'],
       savedObjectReferences: mockSavedObjectReferences(),
     });
     expect(logger.error).toBeCalledWith(

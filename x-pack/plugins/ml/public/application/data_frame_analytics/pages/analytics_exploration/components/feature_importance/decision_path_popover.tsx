@@ -58,7 +58,11 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   const docLink = docLinks.links.ml.featureImportance;
 
   if (featureImportance.length < 2) {
-    return <DecisionPathJSONViewer featureImportance={featureImportance} />;
+    return (
+      <div data-test-subj="mlDFADecisionPathJSONViewer">
+        <DecisionPathJSONViewer featureImportance={featureImportance} />
+      </div>
+    );
   }
 
   const tabs = [

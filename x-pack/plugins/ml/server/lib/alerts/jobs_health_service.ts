@@ -352,14 +352,10 @@ export function jobsHealthServiceProvider(
             'memory_status'
           );
 
-          const {
-            count: hardLimitCount,
-            jobsString: hardLimitJobsString,
-          } = getJobsAlertingMessageValues(hardLimitJobs);
-          const {
-            count: softLimitCount,
-            jobsString: softLimitJobsString,
-          } = getJobsAlertingMessageValues(softLimitJobs);
+          const { count: hardLimitCount, jobsString: hardLimitJobsString } =
+            getJobsAlertingMessageValues(hardLimitJobs);
+          const { count: softLimitCount, jobsString: softLimitJobsString } =
+            getJobsAlertingMessageValues(softLimitJobs);
 
           let message = '';
 

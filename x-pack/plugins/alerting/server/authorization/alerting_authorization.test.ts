@@ -47,9 +47,11 @@ function mockSecurity() {
   const security = securityMock.createSetup();
   const authorization = security.authz;
   // typescript is having trouble inferring jest's automocking
-  (authorization.actions.alerting.get as jest.MockedFunction<
-    typeof authorization.actions.alerting.get
-  >).mockImplementation(mockAuthorizationAction);
+  (
+    authorization.actions.alerting.get as jest.MockedFunction<
+      typeof authorization.actions.alerting.get
+    >
+  ).mockImplementation(mockAuthorizationAction);
   authorization.mode.useRbacForRequest.mockReturnValue(true);
   return { authorization };
 }
@@ -933,16 +935,14 @@ describe('AlertingAuthorization', () => {
         getSpace,
         getSpaceId,
       });
-      const {
-        filter,
-        ensureRuleTypeIsAuthorized,
-      } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
-        type: AlertingAuthorizationFilterType.KQL,
-        fieldNames: {
-          ruleTypeId: 'ruleId',
-          consumer: 'consumer',
-        },
-      });
+      const { filter, ensureRuleTypeIsAuthorized } =
+        await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'ruleId',
+            consumer: 'consumer',
+          },
+        });
       expect(() => ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule')).not.toThrow();
       expect(filter).toEqual(undefined);
     });
@@ -1242,16 +1242,14 @@ describe('AlertingAuthorization', () => {
         getSpaceId,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-      const {
-        ensureRuleTypeIsAuthorized,
-        logSuccessfulAuthorization,
-      } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
-        type: AlertingAuthorizationFilterType.KQL,
-        fieldNames: {
-          ruleTypeId: 'ruleId',
-          consumer: 'consumer',
-        },
-      });
+      const { ensureRuleTypeIsAuthorized, logSuccessfulAuthorization } =
+        await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'ruleId',
+            consumer: 'consumer',
+          },
+        });
       expect(() => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
         ensureRuleTypeIsAuthorized('mySecondAppAlertType', 'myOtherApp', 'rule');

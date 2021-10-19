@@ -55,7 +55,7 @@ describe('Terms Agg', () => {
         ],
       } as IndexPattern;
 
-      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
       indexPattern.fields.filter = () => indexPattern.fields;
 
       return new AggConfigs(
@@ -257,7 +257,7 @@ describe('Terms Agg', () => {
         ],
       } as IndexPattern;
 
-      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
       indexPattern.fields.filter = () => indexPattern.fields;
 
       const aggConfigs = new AggConfigs(

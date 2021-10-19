@@ -92,10 +92,6 @@ export function columnLayout(el, data) {
             },
             {
               type: 'div',
-              class: 'visWrapper__alerts',
-            },
-            {
-              type: 'div',
               class: 'visAxis--x visAxis__column--bottom',
               children: [
                 {

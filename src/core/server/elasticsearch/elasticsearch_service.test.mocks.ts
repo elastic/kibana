@@ -8,3 +8,8 @@
 
 export const MockClusterClient = jest.fn();
 jest.mock('./client/cluster_client', () => ({ ClusterClient: MockClusterClient }));
+
+export const isScriptingEnabledMock = jest.fn();
+jest.doMock('./is_scripting_enabled', () => ({
+  isInlineScriptingEnabled: isScriptingEnabledMock,
+}));

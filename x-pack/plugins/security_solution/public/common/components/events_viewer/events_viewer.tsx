@@ -121,7 +121,6 @@ interface Props {
   end: string;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
-  height?: number;
   id: TimelineId;
   indexNames: string[];
   indexPattern: IIndexPattern;
@@ -218,10 +217,10 @@ const EventsViewerComponent: React.FC<Props> = ({
     [isLoadingIndexPattern, combinedQueries, start, end]
   );
 
-  const fields = useMemo(() => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])], [
-    columnsHeader,
-    queryFields,
-  ]);
+  const fields = useMemo(
+    () => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])],
+    [columnsHeader, queryFields]
+  );
 
   const sortField = useMemo(
     () =>
@@ -233,21 +232,19 @@ const EventsViewerComponent: React.FC<Props> = ({
     [sort]
   );
 
-  const [
-    loading,
-    { events, updatedAt, inspect, loadPage, pageInfo, refetch, totalCount = 0 },
-  ] = useTimelineEvents({
-    docValueFields,
-    fields,
-    filterQuery: combinedQueries!.filterQuery,
-    id,
-    indexNames,
-    limit: itemsPerPage,
-    sort: sortField,
-    startDate: start,
-    endDate: end,
-    skip: !canQueryTimeline || combinedQueries?.filterQuery === undefined, // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
-  });
+  const [loading, { events, updatedAt, inspect, loadPage, pageInfo, refetch, totalCount = 0 }] =
+    useTimelineEvents({
+      docValueFields,
+      fields,
+      filterQuery: combinedQueries?.filterQuery,
+      id,
+      indexNames,
+      limit: itemsPerPage,
+      sort: sortField,
+      startDate: start,
+      endDate: end,
+      skip: !canQueryTimeline || combinedQueries?.filterQuery === undefined, // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
+    });
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -264,10 +261,10 @@ const EventsViewerComponent: React.FC<Props> = ({
     [showTotalCount, totalCountMinusDeleted, unit]
   );
 
-  const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
-    deletedEventIds,
-    events,
-  ]);
+  const nonDeletedEvents = useMemo(
+    () => events.filter((e) => !deletedEventIds.includes(e._id)),
+    [deletedEventIds, events]
+  );
 
   const HeaderSectionContent = useMemo(
     () =>
@@ -303,7 +300,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
               subtitle={utilityBar ? undefined : subtitle}
               title={globalFullScreen ? titleWithExitFullScreen : justTitle}
-              isInspectDisabled={combinedQueries!.filterQuery === undefined}
+              isInspectDisabled={combinedQueries?.filterQuery === undefined}
             >
               {HeaderSectionContent}
             </HeaderSection>

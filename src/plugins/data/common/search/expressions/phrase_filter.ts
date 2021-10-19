@@ -62,7 +62,7 @@ export const phraseFilterFunction: ExpressionFunctionPhraseFilter = {
       return {
         type: 'kibana_filter',
         ...buildFilter(
-          ({} as any) as IndexPattern,
+          {} as any as IndexPattern,
           args.field.spec,
           FILTERS.PHRASE,
           args.negate || false,
@@ -76,7 +76,7 @@ export const phraseFilterFunction: ExpressionFunctionPhraseFilter = {
     return {
       type: 'kibana_filter',
       ...buildFilter(
-        ({} as any) as IndexPattern,
+        {} as any as IndexPattern,
         args.field.spec,
         FILTERS.PHRASES,
         args.negate || false,

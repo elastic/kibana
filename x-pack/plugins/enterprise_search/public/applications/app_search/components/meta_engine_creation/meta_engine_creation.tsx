@@ -57,16 +57,11 @@ export const MetaEngineCreation: React.FC = () => {
     },
   } = useValues(AppLogic);
 
-  const {
-    fetchIndexedEngineNames,
-    setRawName,
-    setSelectedIndexedEngineNames,
-    submitEngine,
-  } = useActions(MetaEngineCreationLogic);
+  const { fetchIndexedEngineNames, setRawName, setSelectedIndexedEngineNames, submitEngine } =
+    useActions(MetaEngineCreationLogic);
 
-  const { rawName, name, indexedEngineNames, selectedIndexedEngineNames, isLoading } = useValues(
-    MetaEngineCreationLogic
-  );
+  const { rawName, name, indexedEngineNames, selectedIndexedEngineNames, isLoading } =
+    useValues(MetaEngineCreationLogic);
 
   useEffect(() => {
     fetchIndexedEngineNames();

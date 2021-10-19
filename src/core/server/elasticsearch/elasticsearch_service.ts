@@ -18,7 +18,6 @@ import { ClusterClient, ElasticsearchClientConfig } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import type { InternalHttpServiceSetup, GetAuthHeaders } from '../http';
 import type { InternalExecutionContextSetup, IExecutionContext } from '../execution_context';
-import type { InternalDeprecationsServiceSetup } from '../deprecations';
 import {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
@@ -28,17 +27,17 @@ import type { NodesVersionCompatibility } from './version_check/ensure_es_versio
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
 import { isValidConnection } from './is_valid_connection';
-import { getElasticsearchDeprecationsProvider } from './deprecations';
+import { isInlineScriptingEnabled } from './is_scripting_enabled';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
-  deprecations: InternalDeprecationsServiceSetup;
   executionContext: InternalExecutionContextSetup;
 }
 
 /** @internal */
 export class ElasticsearchService
-  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart> {
+  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart>
+{
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private stop$ = new Subject();
@@ -81,10 +80,6 @@ export class ElasticsearchService
     this.executionContextClient = deps.executionContext;
     this.client = this.createClusterClient('data', config);
 
-    deps.deprecations
-      .getRegistry('elasticsearch')
-      .registerDeprecations(getElasticsearchDeprecationsProvider());
-
     const esNodesCompatibility$ = pollEsNodesVersion({
       internalClient: this.client.asInternalUser,
       log: this.log,
@@ -121,6 +116,18 @@ export class ElasticsearchService
     if (!config.skipStartupConnectionCheck) {
       // Ensure that the connection is established and the product is valid before moving on
       await isValidConnection(this.esNodesCompatibility$);
+
+      // Ensure inline scripting is enabled on the ES cluster
+      const scriptingEnabled = await isInlineScriptingEnabled({
+        client: this.client.asInternalUser,
+      });
+      if (!scriptingEnabled) {
+        throw new Error(
+          'Inline scripting is disabled on the Elasticsearch cluster, and is mandatory for Kibana to function. ' +
+            'Please enabled inline scripting, then restart Kibana. ' +
+            'Refer to https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-security.html for more info.'
+        );
+      }
     }
 
     return {

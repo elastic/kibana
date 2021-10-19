@@ -103,7 +103,7 @@ export function registerPolicyRoutes({
         const response = await clusterClient.asCurrentUser.slm.putLifecycle({
           policy_id: name,
           // TODO: bring {@link SlmPolicyEs['policy']} in line with {@link PutSnapshotLifecycleRequest['body']}
-          body: (serializePolicy(policy) as unknown) as estypes.SlmPutLifecycleRequest['body'],
+          body: serializePolicy(policy) as unknown as estypes.SlmPutLifecycleRequest['body'],
         });
 
         return res.ok({ body: response.body });
@@ -133,7 +133,7 @@ export function registerPolicyRoutes({
         const response = await clusterClient.asCurrentUser.slm.putLifecycle({
           policy_id: name,
           // TODO: bring {@link SlmPolicyEs['policy']} in line with {@link PutSnapshotLifecycleRequest['body']}
-          body: (serializePolicy(policy) as unknown) as estypes.SlmPutLifecycleRequest['body'],
+          body: serializePolicy(policy) as unknown as estypes.SlmPutLifecycleRequest['body'],
         });
 
         return res.ok({ body: response.body });

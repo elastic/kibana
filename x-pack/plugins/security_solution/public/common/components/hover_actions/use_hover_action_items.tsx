@@ -85,9 +85,10 @@ export const useHoverActionItems = ({
     getFilterOutValueButton,
     getOverflowButton,
   } = timelines.getHoverActions();
-  const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
-    kibana.services.data.query.filterManager,
-  ]);
+  const filterManagerBackup = useMemo(
+    () => kibana.services.data.query.filterManager,
+    [kibana.services.data.query.filterManager]
+  );
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
     getManageTimeline(state, timelineId ?? '')

@@ -5,31 +5,33 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import { SERVICE_NODE_NAME } from '../../common/elasticsearch_fieldnames';
 import { mergeProjection } from './util/merge_projection';
 import { getMetricsProjection } from './metrics';
 
 export function getServiceNodesProjection({
-  setup,
   serviceName,
   serviceNodeName,
   environment,
   kuery,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
   environment: string;
   kuery: string;
+  start: number;
+  end: number;
 }) {
   return mergeProjection(
     getMetricsProjection({
-      setup,
       serviceName,
       serviceNodeName,
       environment,
       kuery,
+      start,
+      end,
     }),
     {
       body: {

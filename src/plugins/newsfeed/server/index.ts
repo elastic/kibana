@@ -17,7 +17,6 @@ export const config: PluginConfigDescriptor<NewsfeedConfigType> = {
     mainInterval: true,
     fetchInterval: true,
   },
-  deprecations: ({ unused }) => [unused('defaultLanguage')],
 };
 
 export function plugin() {

@@ -277,8 +277,7 @@ describe('NodesChangedAlert', () => {
             ui: {
               isFiring: true,
               message: {
-                text:
-                  "Elasticsearch nodes 'newNodeName' added to this cluster. Elasticsearch nodes 'removedNodeName' removed from this cluster. Elasticsearch nodes 'test' restarted in this cluster.",
+                text: "Elasticsearch nodes 'newNodeName' added to this cluster. Elasticsearch nodes 'removedNodeName' removed from this cluster. Elasticsearch nodes 'test' restarted in this cluster.",
               },
               severity: 'warning',
               triggeredMS: 1,

@@ -17,9 +17,9 @@ import { ManagementService } from './management_service';
 describe('ManagementService', () => {
   describe('#setup', () => {
     it('registers the spaces management page under the kibana section', () => {
-      const mockKibanaSection = ({
+      const mockKibanaSection = {
         registerApp: jest.fn(),
-      } as unknown) as ManagementSection;
+      } as unknown as ManagementSection;
       const managementMockSetup = managementPluginMock.createSetupContract();
       managementMockSetup.sections.section.kibana = mockKibanaSection;
       const deps = {
@@ -57,9 +57,9 @@ describe('ManagementService', () => {
   describe('#stop', () => {
     it('disables the spaces management page', () => {
       const mockSpacesManagementPage = { disable: jest.fn() };
-      const mockKibanaSection = ({
+      const mockKibanaSection = {
         registerApp: jest.fn().mockReturnValue(mockSpacesManagementPage),
-      } as unknown) as ManagementSection;
+      } as unknown as ManagementSection;
       const managementMockSetup = managementPluginMock.createSetupContract();
       managementMockSetup.sections.section.kibana = mockKibanaSection;
 

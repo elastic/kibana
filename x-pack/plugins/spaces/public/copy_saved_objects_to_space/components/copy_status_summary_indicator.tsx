@@ -41,12 +41,8 @@ const renderIcon = (props: Props) => {
     return <EuiLoadingSpinner data-test-subj={getDataTestSubj('loading')} />;
   }
 
-  const {
-    successful,
-    hasUnresolvableErrors,
-    hasMissingReferences,
-    hasConflicts,
-  } = summarizedCopyResult;
+  const { successful, hasUnresolvableErrors, hasMissingReferences, hasConflicts } =
+    summarizedCopyResult;
 
   if (successful) {
     return (

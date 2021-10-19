@@ -106,7 +106,7 @@ export class ExportCSVAction implements Action<ExportContext> {
 
       // useful for testing
       if (context.asString) {
-        return (content as unknown) as Promise<void>;
+        return content as unknown as Promise<void>;
       }
 
       if (content) {

@@ -20,6 +20,7 @@ import {
 } from '@elastic/charts';
 import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartFixedAxisContainer } from './styles';
+import { WaterfallChartMarkers } from './waterfall_markers';
 
 interface Props {
   tickFormat: TickFormatter;
@@ -59,6 +60,7 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
           styleAccessor={barStyleAccessor}
           data={[{ x: 0, y0: 0, y1: 1 }]}
         />
+        <WaterfallChartMarkers />
       </Chart>
     </WaterfallChartFixedAxisContainer>
   );

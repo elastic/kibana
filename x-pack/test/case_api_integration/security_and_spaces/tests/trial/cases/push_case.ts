@@ -7,6 +7,8 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import http from 'http';
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
@@ -32,11 +34,8 @@ import {
   getServiceNowConnector,
   getConnectorMappingsFromES,
   getCase,
+  getServiceNowSimulationServer,
 } from '../../../../common/lib/utils';
-import {
-  ExternalServiceSimulator,
-  getExternalServiceSimulatorPath,
-} from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 import {
   CaseConnector,
   CaseStatuses,
@@ -55,17 +54,17 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
   const es = getService('es');
 
   describe('push_case', () => {
     const actionsRemover = new ActionsRemover(supertest);
+    let serviceNowSimulatorURL: string = '';
+    let serviceNowServer: http.Server;
 
-    let servicenowSimulatorURL: string = '<could not determine kibana url>';
-    before(() => {
-      servicenowSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
-      );
+    before(async () => {
+      const { server, url } = await getServiceNowSimulationServer();
+      serviceNowServer = server;
+      serviceNowSimulatorURL = url;
     });
 
     afterEach(async () => {
@@ -73,10 +72,14 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
+    after(async () => {
+      serviceNowServer.close();
+    });
+
     it('should push a case', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
         supertest,
-        servicenowSimulatorURL,
+        serviceNowSimulatorURL,
         actionsRemover,
       });
       const theCase = await pushCase({
@@ -95,18 +98,13 @@ export default ({ getService }: FtrProviderContext): void => {
         external_title: 'INC01',
       });
 
-      // external_url is of the form http://elastic:changeme@localhost:5620 which is different between various environments like Jekins
-      expect(
-        external_url.includes(
-          'api/_actions-FTS-external-service-simulators/servicenow/nav_to.do?uri=incident.do?sys_id=123'
-        )
-      ).to.equal(true);
+      expect(external_url.includes('nav_to.do?uri=incident.do?sys_id=123')).to.equal(true);
     });
 
     it('preserves the connector.id after pushing a case', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
         supertest,
-        servicenowSimulatorURL,
+        serviceNowSimulatorURL,
         actionsRemover,
       });
       const theCase = await pushCase({
@@ -121,7 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('preserves the external_service.connector_id after updating the connector', async () => {
       const { postedCase, connector: pushConnector } = await createCaseWithConnector({
         supertest,
-        servicenowSimulatorURL,
+        serviceNowSimulatorURL,
         actionsRemover,
       });
 
@@ -135,7 +133,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         req: {
           ...getServiceNowConnector(),
-          config: { apiUrl: servicenowSimulatorURL },
+          config: { apiUrl: serviceNowSimulatorURL },
         },
       });
 
@@ -175,7 +173,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         req: {
           ...getServiceNowConnector(),
-          config: { apiUrl: servicenowSimulatorURL },
+          config: { apiUrl: serviceNowSimulatorURL },
         },
       });
 
@@ -222,7 +220,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('pushes a comment appropriately', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
         supertest,
-        servicenowSimulatorURL,
+        serviceNowSimulatorURL,
         actionsRemover,
       });
       await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq });
@@ -241,7 +239,7 @@ export default ({ getService }: FtrProviderContext): void => {
           closure_type: 'close-by-pushing',
         },
         supertest,
-        servicenowSimulatorURL,
+        serviceNowSimulatorURL,
         actionsRemover,
       });
       const theCase = await pushCase({
@@ -256,7 +254,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should create the correct user action', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
         supertest,
-        servicenowSimulatorURL,
+        serviceNowSimulatorURL,
         actionsRemover,
       });
       const pushedCase = await pushCase({
@@ -275,6 +273,8 @@ export default ({ getService }: FtrProviderContext): void => {
         action: 'push-to-service',
         action_by: defaultUser,
         old_value: null,
+        old_val_connector_id: null,
+        new_val_connector_id: connector.id,
         case_id: `${postedCase.id}`,
         comment_id: null,
         sub_case_id: '',
@@ -284,11 +284,10 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(parsedNewValue).to.eql({
         pushed_at: pushedCase.external_service!.pushed_at,
         pushed_by: defaultUser,
-        connector_id: connector.id,
         connector_name: connector.name,
         external_id: '123',
         external_title: 'INC01',
-        external_url: `${servicenowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
+        external_url: `${serviceNowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
       });
     });
 
@@ -296,7 +295,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it.skip('should push a collection case but not close it when closure_type: close-by-pushing', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
         supertest,
-        servicenowSimulatorURL,
+        serviceNowSimulatorURL,
         actionsRemover,
         configureReq: {
           closure_type: 'close-by-pushing',
@@ -336,7 +335,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('unhappy path = 409s when case is closed', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
         supertest,
-        servicenowSimulatorURL,
+        serviceNowSimulatorURL,
         actionsRemover,
       });
       await updateCase({
@@ -366,7 +365,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should push a case that the user has permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
           supertest,
-          servicenowSimulatorURL,
+          serviceNowSimulatorURL,
           actionsRemover,
           auth: superUserSpace1Auth,
         });
@@ -382,7 +381,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should not push a case that the user does not have permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
           supertest,
-          servicenowSimulatorURL,
+          serviceNowSimulatorURL,
           actionsRemover,
           auth: superUserSpace1Auth,
           createCaseReq: getPostCaseRequest({ owner: 'observabilityFixture' }),
@@ -403,7 +402,7 @@ export default ({ getService }: FtrProviderContext): void => {
         } with role(s) ${user.roles.join()} - should NOT push a case`, async () => {
           const { postedCase, connector } = await createCaseWithConnector({
             supertest,
-            servicenowSimulatorURL,
+            serviceNowSimulatorURL,
             actionsRemover,
             auth: superUserSpace1Auth,
           });
@@ -421,7 +420,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should not push a case in a space that the user does not have permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
           supertest,
-          servicenowSimulatorURL,
+          serviceNowSimulatorURL,
           actionsRemover,
           auth: { user: superUser, space: 'space2' },
         });

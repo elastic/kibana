@@ -102,9 +102,11 @@ describe('GroupAssignmentSelector', () => {
   it('handles group checkbox click', async () => {
     const wrapper = shallow(<GroupAssignmentSelector />);
     await waitFor(() =>
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ label: groups[0].name, value: groups[0].name }])
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: groups[0].name, value: groups[0].name }])
     );
     wrapper.update();
 

@@ -120,7 +120,7 @@ describe('#createSavedObjects', () => {
     }),
     conflict: (type: string, id: string) => {
       const error = SavedObjectsErrorHelpers.createConflictError(type, id).output.payload;
-      return ({ type, id, error } as unknown) as SavedObject;
+      return { type, id, error } as unknown as SavedObject;
     },
     unresolvableConflict: (type: string, id: string) => {
       const conflictMock = getResultMock.conflict(type, id);
@@ -253,7 +253,7 @@ describe('#createSavedObjects', () => {
     expectBulkCreateArgs.objects(1, argObjs);
   };
   const testBulkCreateOptions = async (namespace?: string) => {
-    const overwrite = (Symbol() as unknown) as boolean;
+    const overwrite = Symbol() as unknown as boolean;
     const options = setupParams({ objects: objs, namespace, overwrite });
     setupMockResults(options);
 

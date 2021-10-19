@@ -59,7 +59,7 @@ discover-app {
       align-items: flex-end;
     }
 
-    .dscResuntCount__title,
+    .dscResultCount__title,
     .dscResultCount__actions {
       margin-bottom: 0 !important;
     }
@@ -78,9 +78,13 @@ discover-app {
 }
 
 .dscHistogram {
-  display: flex;
   height: $euiSize * 8;
-  padding: $euiSizeS $euiSizeS 0 $euiSizeS;
+  padding: $euiSizeS $euiSizeS $euiSizeS $euiSizeS;
+}
+
+.dscHistogramTimeRange {
+  padding: 0 $euiSizeS 0 $euiSizeS;
+  margin-top: - $euiSizeS;
 }
 
 .dscTable {

@@ -26,15 +26,15 @@ const getRegisterRouteDependencies = () => {
     put,
   });
 
-  const coreSetup = ({
+  const coreSetup = {
     http: {
       createRouter,
     },
-  } as unknown) as CoreSetup;
+  } as unknown as CoreSetup;
 
-  const logger = ({
+  const logger = {
     error: jest.fn(),
-  } as unknown) as Logger;
+  } as unknown as Logger;
 
   return {
     mocks: {
@@ -45,14 +45,14 @@ const getRegisterRouteDependencies = () => {
       coreSetup,
       logger,
     },
-    dependencies: ({
+    dependencies: {
       core: {
         setup: coreSetup,
       },
       logger,
       config: {} as APMConfig,
       plugins: {},
-    } as unknown) as RegisterRouteDependencies,
+    } as unknown as RegisterRouteDependencies,
   };
 };
 

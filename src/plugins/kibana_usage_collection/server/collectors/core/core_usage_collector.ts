@@ -495,6 +495,46 @@ export function getCoreUsageCollector(
             'How many times this API has been called by a non-Kibana client in a custom space.',
         },
       },
+      'apiCalls.savedObjectsBulkResolve.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called.' },
+      },
+      'apiCalls.savedObjectsBulkResolve.namespace.default.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called in the Default space.' },
+      },
+      'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by the Kibana client in the Default space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by a non-Kibana client in the Default space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkResolve.namespace.custom.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called in a custom space.' },
+      },
+      'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by the Kibana client in a custom space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by a non-Kibana client in a custom space.',
+        },
+      },
       'apiCalls.savedObjectsBulkUpdate.total': {
         type: 'long',
         _meta: { description: 'How many times this API has been called.' },

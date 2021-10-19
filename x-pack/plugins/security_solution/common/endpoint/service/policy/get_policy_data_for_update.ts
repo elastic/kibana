@@ -21,10 +21,9 @@ export const getPolicyDataForUpdate = (policy: MaybeImmutable<PolicyData>): NewP
   const endpointPolicy = policyDataForUpdate.inputs[0].config.policy.value;
 
   // trim custom malware notification string
-  [
-    endpointPolicy.windows.popup.malware,
-    endpointPolicy.mac.popup.malware,
-  ].forEach((objWithMessage) => objWithMessage.message.trim());
+  [endpointPolicy.windows.popup.malware, endpointPolicy.mac.popup.malware].forEach(
+    (objWithMessage) => objWithMessage.message.trim()
+  );
 
   return policyDataForUpdate;
 };

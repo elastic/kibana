@@ -38,9 +38,7 @@ export function getKibanaContext({
 
     const [{ savedObjects }] = await getStartServices();
     return {
-      savedObjectsClient: (savedObjects.getScopedClient(
-        request
-      ) as any) as SavedObjectsClientCommon,
+      savedObjectsClient: savedObjects.getScopedClient(request) as any as SavedObjectsClientCommon,
     };
   });
 }

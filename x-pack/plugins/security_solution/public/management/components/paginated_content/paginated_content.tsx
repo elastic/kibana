@@ -200,9 +200,10 @@ export const PaginatedContent = memo(
           let key: Key;
 
           if (itemId) {
-            key = (item[itemId] as unknown) as Key;
+            key = item[itemId] as unknown as Key;
           } else {
             if (itemKeys.has(item)) {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               key = itemKeys.get(item)!;
             } else {
               key = generateUUI();

@@ -37,7 +37,8 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
     data: dataPluginMock.createStartContract(),
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
-    security: securityMock.createStart(),
+    securitySetup: securityMock.createSetup(),
+    securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
     isProductionMode: true,
     configInitialValue: {

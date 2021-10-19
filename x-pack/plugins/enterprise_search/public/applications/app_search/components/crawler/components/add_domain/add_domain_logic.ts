@@ -57,9 +57,9 @@ export interface AddDomainLogicActions {
     checks: string[];
   };
   setAddDomainFormInputValue(newValue: string): string;
-  setDomainValidationResult(
-    change: CrawlerDomainValidationResultChange
-  ): { change: CrawlerDomainValidationResultChange };
+  setDomainValidationResult(change: CrawlerDomainValidationResultChange): {
+    change: CrawlerDomainValidationResultChange;
+  };
   startDomainValidation(): void;
   submitNewDomain(): void;
   validateDomainInitialVerification(

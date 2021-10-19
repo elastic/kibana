@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { getBeatSummary } from '../../../../lib/beats';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';

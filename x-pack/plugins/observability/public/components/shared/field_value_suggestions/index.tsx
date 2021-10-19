@@ -28,9 +28,12 @@ export function FieldValueSuggestions({
   singleSelection,
   compressed,
   asFilterButton,
+  usePrependLabel,
   allowAllValuesSelection,
+  required,
+  allowExclusions = true,
   cardinalityField,
-  allowExclusions,
+  inspector,
   asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
@@ -42,7 +45,9 @@ export function FieldValueSuggestions({
     sourceField,
     filters,
     time,
+    inspector,
     cardinalityField,
+    label,
     keepHistory: true,
   });
 
@@ -67,8 +72,10 @@ export function FieldValueSuggestions({
       width={width}
       compressed={compressed}
       asFilterButton={asFilterButton}
-      allowAllValuesSelection={allowAllValuesSelection}
+      usePrependLabel={usePrependLabel}
       allowExclusions={allowExclusions}
+      allowAllValuesSelection={allowAllValuesSelection}
+      required={required}
     />
   );
 }

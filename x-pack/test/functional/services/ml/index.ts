@@ -51,6 +51,7 @@ import { SwimLaneProvider } from './swim_lane';
 import { MachineLearningDashboardJobSelectionTableProvider } from './dashboard_job_selection_table';
 import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embeddables';
 import { TrainedModelsProvider } from './trained_models';
+import { TrainedModelsTableProvider } from './trained_models_table';
 import { MachineLearningJobAnnotationsProvider } from './job_annotations_table';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
@@ -89,10 +90,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
 
   const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, commonUI);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
-  const dataVisualizerIndexPatternManagement = MachineLearningDataVisualizerIndexPatternManagementProvider(
-    context,
-    dataVisualizerTable
-  );
+  const dataVisualizerIndexPatternManagement =
+    MachineLearningDataVisualizerIndexPatternManagementProvider(context, dataVisualizerTable);
 
   const jobAnnotations = MachineLearningJobAnnotationsProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
@@ -123,6 +122,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const alerting = MachineLearningAlertingProvider(context, commonUI);
   const swimLane = SwimLaneProvider(context);
   const trainedModels = TrainedModelsProvider(context, api, commonUI);
+  const trainedModelsTable = TrainedModelsTableProvider(context);
 
   return {
     anomaliesTable,
@@ -170,5 +170,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     testExecution,
     testResources,
     trainedModels,
+    trainedModelsTable,
   };
 }

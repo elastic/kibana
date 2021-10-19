@@ -26,9 +26,8 @@ export interface AppProps {
 
 export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
   const [page, setPage] = useState<'token' | 'manual' | 'success'>('token');
-  const [cluster, setCluster] = useState<
-    Omit<ClusterConfigurationFormProps, 'onCancel' | 'onSuccess'>
-  >();
+  const [cluster, setCluster] =
+    useState<Omit<ClusterConfigurationFormProps, 'onCancel' | 'onSuccess'>>();
 
   return (
     <div className="interactiveSetup">

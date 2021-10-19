@@ -60,7 +60,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreStart](./kibana-plugin-core-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [DeprecationsServiceStart](./kibana-plugin-core-public.deprecationsservicestart.md) | DeprecationsService provides methods to fetch domain deprecation details from the Kibana server. |
 |  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
-|  [DomainDeprecationDetails](./kibana-plugin-core-public.domaindeprecationdetails.md) |  |
 |  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error APIs. |
 |  [FatalErrorInfo](./kibana-plugin-core-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
@@ -107,6 +106,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBatchResponse](./kibana-plugin-core-public.savedobjectsbatchresponse.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-core-public.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkCreateOptions](./kibana-plugin-core-public.savedobjectsbulkcreateoptions.md) |  |
+|  [SavedObjectsBulkResolveObject](./kibana-plugin-core-public.savedobjectsbulkresolveobject.md) |  |
+|  [SavedObjectsBulkResolveResponse](./kibana-plugin-core-public.savedobjectsbulkresolveresponse.md) |  |
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-core-public.savedobjectsbulkupdateobject.md) |  |
 |  [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-public.savedobjectsbulkupdateoptions.md) |  |
 |  [SavedObjectsCollectMultiNamespaceReferencesResponse](./kibana-plugin-core-public.savedobjectscollectmultinamespacereferencesresponse.md) | The response when object references are collected. |

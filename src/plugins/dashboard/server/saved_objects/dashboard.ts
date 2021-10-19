@@ -27,9 +27,6 @@ export const createDashboardSavedObjectType = ({
     getTitle(obj) {
       return obj.attributes.title;
     },
-    getEditUrl(obj) {
-      return `/management/kibana/objects/savedDashboards/${encodeURIComponent(obj.id)}`;
-    },
     getInAppUrl(obj) {
       return {
         path: `/app/dashboards#/view/${encodeURIComponent(obj.id)}`,

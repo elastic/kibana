@@ -205,23 +205,21 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     );
   }, [dispatch, timelineId]);
 
-  const [
-    isQueryLoading,
-    { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch },
-  ] = useTimelineEvents({
-    docValueFields,
-    endDate: end,
-    eqlOptions: restEqlOption,
-    id: timelineId,
-    indexNames: selectedPatterns,
-    fields: getTimelineQueryFields(),
-    language: 'eql',
-    limit: itemsPerPage,
-    filterQuery: eqlQuery ?? '',
-    startDate: start,
-    skip: !canQueryTimeline(),
-    timerangeKind,
-  });
+  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+    useTimelineEvents({
+      docValueFields,
+      endDate: end,
+      eqlOptions: restEqlOption,
+      id: timelineId,
+      indexNames: selectedPatterns,
+      fields: getTimelineQueryFields(),
+      language: 'eql',
+      limit: itemsPerPage,
+      filterQuery: eqlQuery ?? '',
+      startDate: start,
+      skip: !canQueryTimeline(),
+      timerangeKind,
+    });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.eql, timelineId });

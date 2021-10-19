@@ -14,7 +14,7 @@ let stream: jest.Mocked<Writable>;
 describe('MaxSizeStringBuilder', function () {
   beforeEach(() => {
     content = '';
-    stream = ({ write: jest.fn((chunk) => (content += chunk)) } as unknown) as typeof stream;
+    stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
   });
 
   describe('tryAppend', function () {

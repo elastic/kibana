@@ -15,13 +15,8 @@ const API_BASE_PATH = '/api/ingest_pipelines';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const {
-    createPipeline,
-    deletePipeline,
-    cleanupPipelines,
-    createIndex,
-    deleteIndex,
-  } = registerEsHelpers(getService);
+  const { createPipeline, deletePipeline, cleanupPipelines, createIndex, deleteIndex } =
+    registerEsHelpers(getService);
 
   describe('Pipelines', function () {
     after(async () => {
@@ -150,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
           await createPipeline({ body: PIPELINE, id: PIPELINE_ID }, true);
         } catch (err) {
           // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating ingest node pipeline');
+          console.log('[Setup error] Error creating ingest pipeline');
           throw err;
         }
       });
@@ -230,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
           await createPipeline({ body: PIPELINE, id: PIPELINE_ID }, true);
         } catch (err) {
           // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating ingest node pipeline');
+          console.log('[Setup error] Error creating ingest pipeline');
           throw err;
         }
       });

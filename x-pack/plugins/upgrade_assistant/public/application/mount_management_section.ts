@@ -20,9 +20,8 @@ export async function mountManagementSection(
   readonly: boolean,
   services: AppServicesContext
 ) {
-  const [
-    { i18n, docLinks, notifications, application, deprecations },
-  ] = await coreSetup.getStartServices();
+  const [{ i18n, docLinks, notifications, application, deprecations }] =
+    await coreSetup.getStartServices();
 
   const { element, history, setBreadcrumbs } = params;
   const { http } = coreSetup;

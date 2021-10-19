@@ -128,12 +128,12 @@ describe('canSkipSourceUpdate', () => {
       it('can skip update when filter changes', async () => {
         const nextRequestMeta = {
           applyGlobalQuery: prevApplyGlobalQuery,
-          filters: [({} as unknown) as Filter],
+          filters: [{} as unknown as Filter],
           query: prevQuery,
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (queryAwareSourceMock as unknown) as ISource,
+          source: queryAwareSourceMock as unknown as ISource,
           prevDataRequest,
           nextRequestMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
@@ -154,7 +154,7 @@ describe('canSkipSourceUpdate', () => {
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (queryAwareSourceMock as unknown) as ISource,
+          source: queryAwareSourceMock as unknown as ISource,
           prevDataRequest,
           nextRequestMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
@@ -174,7 +174,7 @@ describe('canSkipSourceUpdate', () => {
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (queryAwareSourceMock as unknown) as ISource,
+          source: queryAwareSourceMock as unknown as ISource,
           prevDataRequest,
           nextRequestMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
@@ -194,7 +194,7 @@ describe('canSkipSourceUpdate', () => {
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (queryAwareSourceMock as unknown) as ISource,
+          source: queryAwareSourceMock as unknown as ISource,
           prevDataRequest,
           nextRequestMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
@@ -212,7 +212,7 @@ describe('canSkipSourceUpdate', () => {
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (queryAwareSourceMock as unknown) as ISource,
+          source: queryAwareSourceMock as unknown as ISource,
           prevDataRequest,
           nextRequestMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
@@ -239,12 +239,12 @@ describe('canSkipSourceUpdate', () => {
       it('can not skip update when filter changes', async () => {
         const nextRequestMeta = {
           applyGlobalQuery: prevApplyGlobalQuery,
-          filters: [({} as unknown) as Filter],
+          filters: [{} as unknown as Filter],
           query: prevQuery,
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (queryAwareSourceMock as unknown) as ISource,
+          source: queryAwareSourceMock as unknown as ISource,
           prevDataRequest,
           nextRequestMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
@@ -265,7 +265,7 @@ describe('canSkipSourceUpdate', () => {
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (queryAwareSourceMock as unknown) as ISource,
+          source: queryAwareSourceMock as unknown as ISource,
           prevDataRequest,
           nextRequestMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
@@ -285,7 +285,7 @@ describe('canSkipSourceUpdate', () => {
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (queryAwareSourceMock as unknown) as ISource,
+          source: queryAwareSourceMock as unknown as ISource,
           prevDataRequest,
           nextRequestMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
@@ -303,7 +303,7 @@ describe('canSkipSourceUpdate', () => {
         };
 
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (queryAwareSourceMock as unknown) as ISource,
+          source: queryAwareSourceMock as unknown as ISource,
           prevDataRequest,
           nextRequestMeta,
           extentAware: queryAwareSourceMock.isFilterByMapBounds(),
@@ -339,7 +339,7 @@ describe('canSkipSourceUpdate', () => {
     describe('applyGlobalTime', () => {
       it('can not skip update when applyGlobalTime changes', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (createSourceMock() as unknown) as ISource,
+          source: createSourceMock() as unknown as ISource,
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataRequestMeta: {
@@ -359,7 +359,7 @@ describe('canSkipSourceUpdate', () => {
 
       it('can skip update when applyGlobalTime does not change', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (createSourceMock() as unknown) as ISource,
+          source: createSourceMock() as unknown as ISource,
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataRequestMeta: {
@@ -381,7 +381,7 @@ describe('canSkipSourceUpdate', () => {
     describe('timeFilters', () => {
       it('can not skip update when time range changes', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (createSourceMock() as unknown) as ISource,
+          source: createSourceMock() as unknown as ISource,
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataRequestMeta: {
@@ -409,7 +409,7 @@ describe('canSkipSourceUpdate', () => {
 
       it('can skip update when time range does not change', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (createSourceMock() as unknown) as ISource,
+          source: createSourceMock() as unknown as ISource,
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataRequestMeta: {
@@ -437,7 +437,7 @@ describe('canSkipSourceUpdate', () => {
 
       it('can skip update when time range changes but applyGlobalTime is false', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (createSourceMock() as unknown) as ISource,
+          source: createSourceMock() as unknown as ISource,
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataRequestMeta: {
@@ -468,7 +468,7 @@ describe('canSkipSourceUpdate', () => {
       const mockSource = createSourceMock();
       it('can not skip update when timeslice changes (undefined => provided)', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (mockSource as unknown) as ISource,
+          source: mockSource as unknown as ISource,
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataRequestMeta: {
@@ -500,7 +500,7 @@ describe('canSkipSourceUpdate', () => {
 
       it('can not skip update when timeslice changes', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (mockSource as unknown) as ISource,
+          source: mockSource as unknown as ISource,
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataRequestMeta: {
@@ -536,7 +536,7 @@ describe('canSkipSourceUpdate', () => {
 
       it('can not skip update when timeslice changes (provided => undefined)', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (mockSource as unknown) as ISource,
+          source: mockSource as unknown as ISource,
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataRequestMeta: {
@@ -568,7 +568,7 @@ describe('canSkipSourceUpdate', () => {
 
       it('can skip update when timeslice does not change', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (mockSource as unknown) as ISource,
+          source: mockSource as unknown as ISource,
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataRequestMeta: {
@@ -604,7 +604,7 @@ describe('canSkipSourceUpdate', () => {
 
       it('can skip update when timeslice changes but applyGlobalTime is false', async () => {
         const canSkipUpdate = await canSkipSourceUpdate({
-          source: (mockSource as unknown) as ISource,
+          source: mockSource as unknown as ISource,
           prevDataRequest: new DataRequest({
             dataId: SOURCE_DATA_REQUEST_ID,
             dataRequestMeta: {

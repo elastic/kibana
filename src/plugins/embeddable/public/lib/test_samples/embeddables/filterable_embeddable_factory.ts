@@ -16,7 +16,8 @@ import { EmbeddableFactoryDefinition } from '../../embeddables';
 import { IContainer } from '../../containers';
 
 export class FilterableEmbeddableFactory
-  implements EmbeddableFactoryDefinition<FilterableEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<FilterableEmbeddableInput>
+{
   public readonly type = FILTERABLE_EMBEDDABLE;
 
   public async isEditable() {

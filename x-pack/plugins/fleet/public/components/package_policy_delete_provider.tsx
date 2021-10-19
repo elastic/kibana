@@ -63,15 +63,16 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   );
 
   const deletePackagePoliciesPrompt = useMemo(
-    (): DeletePackagePoliciesPrompt => (packagePoliciesToDelete, onSuccess = () => undefined) => {
-      if (!Array.isArray(packagePoliciesToDelete) || packagePoliciesToDelete.length === 0) {
-        throw new Error('No package policies specified for deletion');
-      }
-      setIsModalOpen(true);
-      setPackagePolicies(packagePoliciesToDelete);
-      fetchAgentsCount();
-      onSuccessCallback.current = onSuccess;
-    },
+    (): DeletePackagePoliciesPrompt =>
+      (packagePoliciesToDelete, onSuccess = () => undefined) => {
+        if (!Array.isArray(packagePoliciesToDelete) || packagePoliciesToDelete.length === 0) {
+          throw new Error('No package policies specified for deletion');
+        }
+        setIsModalOpen(true);
+        setPackagePolicies(packagePoliciesToDelete);
+        fetchAgentsCount();
+        onSuccessCallback.current = onSuccess;
+      },
     [fetchAgentsCount]
   );
 

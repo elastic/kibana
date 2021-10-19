@@ -48,15 +48,12 @@ export const useTimelineEventsDetails = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    timelineDetailsRequest,
-    setTimelineDetailsRequest,
-  ] = useState<TimelineEventsDetailsRequestOptions | null>(null);
+  const [timelineDetailsRequest, setTimelineDetailsRequest] =
+    useState<TimelineEventsDetailsRequestOptions | null>(null);
   const { addError, addWarning } = useAppToasts();
 
-  const [timelineDetailsResponse, setTimelineDetailsResponse] = useState<EventsArgs['detailsData']>(
-    null
-  );
+  const [timelineDetailsResponse, setTimelineDetailsResponse] =
+    useState<EventsArgs['detailsData']>(null);
 
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
