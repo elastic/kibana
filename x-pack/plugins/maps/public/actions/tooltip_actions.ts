@@ -81,9 +81,6 @@ export function updateTooltipStateForLayer(layerId: string, layerFeatures: Featu
             return (
               isVisible && layerFeature.properties![FEATURE_ID_PROPERTY_NAME] === tooltipFeature.id
             );
-            return (
-              isVisible && layerFeature.properties![FEATURE_ID_PROPERTY_NAME] === tooltipFeature.id
-            );
           });
 
           if (updatedFeature) {
