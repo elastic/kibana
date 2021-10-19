@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }) {
   const find = getService('find');
   const security = getService('security');
 
-  // Failing: See https://github.com/elastic/kibana/issues/115262
   describe('geo top hits', () => {
     describe('split on string field', () => {
       before(async () => {
