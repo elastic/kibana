@@ -10,6 +10,7 @@ import React from 'react';
 import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
 import { ApmMainTemplate } from './apm_main_template';
 import { SpanIcon } from '../../shared/span_icon';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 interface Props {
   title: string;
@@ -18,11 +19,14 @@ interface Props {
 
 export function BackendDetailTemplate({ title, children }: Props) {
   const {
-    backendName,
     metadata: { data },
   } = useApmBackendContext();
 
   const metadata = data?.metadata;
+
+  const {
+    query: { backendName },
+  } = useApmParams('/backends/overview');
 
   return (
     <ApmMainTemplate

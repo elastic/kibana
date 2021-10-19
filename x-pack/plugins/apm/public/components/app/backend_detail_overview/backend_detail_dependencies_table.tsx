@@ -13,7 +13,6 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { DependenciesTable } from '../../shared/dependencies_table';
-import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
 import { ServiceLink } from '../../shared/service_link';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
@@ -23,7 +22,7 @@ export function BackendDetailDependenciesTable() {
   } = useUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, kuery, environment },
+    query: { backendName, rangeFrom, rangeTo, kuery, environment },
   } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -34,8 +33,6 @@ export function BackendDetailDependenciesTable() {
     comparisonEnabled,
     comparisonType,
   });
-
-  const { backendName } = useApmBackendContext();
 
   const { data, status } = useFetcher(
     (callApmApi) => {

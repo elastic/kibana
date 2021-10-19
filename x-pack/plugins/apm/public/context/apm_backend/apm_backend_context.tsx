@@ -13,7 +13,6 @@ import { useTimeRange } from '../../hooks/use_time_range';
 
 export const ApmBackendContext = createContext<
   | {
-      backendName: string;
       metadata: {
         data?: APIReturnType<'GET /internal/apm/backends/{backendName}/metadata'>;
         status?: FETCH_STATUS;
@@ -57,13 +56,12 @@ export function ApmBackendContextProvider({
 
   const value = useMemo(() => {
     return {
-      backendName,
       metadata: {
         data: backendMetadataFetch.data,
         status: backendMetadataFetch.status,
       },
     };
-  }, [backendName, backendMetadataFetch.data, backendMetadataFetch.status]);
+  }, [backendMetadataFetch.data, backendMetadataFetch.status]);
 
   return (
     <ApmBackendContext.Provider value={value}>
