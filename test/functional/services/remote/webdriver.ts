@@ -140,18 +140,21 @@ async function attemptToCreateCommand(
   const buildDriverInstance = async () => {
     switch (browserType) {
       case 'chrome': {
-        const chromeOptions = initChromiumOptions(browserType, config.acceptInsecureCerts);
+        const chromeOptions = initChromiumOptions(
+          browserType,
+          config.acceptInsecureCerts
+        ) as chrome.Options;
         let session;
         if (remoteSessionUrl) {
           session = await new Builder()
             .forBrowser(browserType)
-            .setChromeOptions(chromeOptions as chrome.Options)
+            .setChromeOptions(chromeOptions)
             .usingServer(remoteSessionUrl)
             .build();
         } else {
           session = await new Builder()
             .forBrowser(browserType)
-            .setChromeOptions(chromeOptions as chrome.Options)
+            .setChromeOptions(chromeOptions)
             .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
             .build();
         }
@@ -175,10 +178,13 @@ async function attemptToCreateCommand(
 
       case 'msedge': {
         if (edgePaths && edgePaths.browserPath && edgePaths.driverPath) {
-          const edgeOptions = initChromiumOptions(browserType, config.acceptInsecureCerts);
+          const edgeOptions = initChromiumOptions(
+            browserType,
+            config.acceptInsecureCerts
+          ) as edge.Options;
           const session = await new Builder()
             .forBrowser('MicrosoftEdge')
-            .setEdgeOptions(edgeOptions as edge.Options)
+            .setEdgeOptions(edgeOptions)
             .setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath))
             .build();
           return {
