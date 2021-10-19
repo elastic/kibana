@@ -111,7 +111,6 @@ export class TooltipPopover extends Component<Props, State> {
     } else if (targetFeature?.properties) {
       properties = targetFeature?.properties;
     }
-    // const properties = targetFeature ? targetFeature.properties : mbProperties;
     return await tooltipLayer.getPropertiesForTooltip(properties);
   };
 
