@@ -32,7 +32,7 @@ import {
   getEventHandlers,
   ResultMeta,
 } from '../reducers/non_serializable_instances';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
+import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
@@ -301,7 +301,7 @@ function endDataLoad(
         });
       }
 
-      dispatch(cleanTooltipStateForLayer(layerId, features));
+      dispatch(updateTooltipStateForLayer(layerId, features));
     }
 
     dispatch({
@@ -344,7 +344,7 @@ function onDataLoadError(
         });
       }
 
-      dispatch(cleanTooltipStateForLayer(layerId));
+      dispatch(updateTooltipStateForLayer(layerId));
     }
 
     dispatch({
@@ -368,7 +368,7 @@ export function updateSourceDataRequest(layerId: string, newData: object) {
     });
 
     if ('features' in newData) {
-      dispatch(cleanTooltipStateForLayer(layerId, (newData as FeatureCollection).features));
+      dispatch(updateTooltipStateForLayer(layerId, (newData as FeatureCollection).features));
     }
 
     dispatch(updateStyleMeta(layerId));
