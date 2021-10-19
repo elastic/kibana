@@ -19,6 +19,7 @@ const OverviewEmptyComponent: React.FC = () => {
   const { docLinks } = useKibana().services;
 
   const agentAction: NoDataPageActionsProps = {
+    category: 'security',
     elasticAgent: {
       title: i18n.translate('xpack.securitySolution.pages.emptyPage.beatsCard.title', {
         defaultMessage: 'Add a Security integration',
