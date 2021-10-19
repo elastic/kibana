@@ -43,6 +43,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/visualize.json'
+      );
+      await kibanaServer.uiSettings.unset('defaultIndex');
+    });
+
     it('should not get the field referer', async function () {
       const fieldNames = await PageObjects.discover.getAllFieldNames();
       expect(fieldNames).to.not.contain('referer');
