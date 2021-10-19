@@ -4,5 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { CustomColorPalette } from '../types';
+import { ColorPalette } from '../../../../common/lib/palettes';
 
-export { PaletteArgInput, SimplePaletteArgInput, palette, extendedPalette } from './palette';
+export type Palette = ColorPalette | CustomColorPalette;
+export type PaletteColorStops = Pick<Palette, 'stops' | 'colors'>;

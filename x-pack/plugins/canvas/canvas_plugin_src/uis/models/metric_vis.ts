@@ -31,10 +31,9 @@ export const metricVis = () => ({
     },
     {
       name: 'palette',
-      argType: 'stops_palette',
-      default: `{palette}`,
+      argType: 'extended_palette',
       options: {
-        confirm: true,
+        type: 'stops',
       },
     },
     {

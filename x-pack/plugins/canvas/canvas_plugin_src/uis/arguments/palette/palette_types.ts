@@ -6,14 +6,18 @@
  */
 
 import { FC } from 'react';
-import { PalettePicker, PalettePickerProps } from '../../../../public/components/palette_picker';
+import {
+  PalettePicker,
+  PalettePickerProps,
+  StopsPalettePicker,
+} from '../../../../public/components/palette_picker';
 
 const DEFAULT_PALETTE = 'default';
 const STOPS_PALETTE = 'stops';
 
 const paletteTypes: Record<string, FC<PalettePickerProps>> = {
   [DEFAULT_PALETTE]: PalettePicker,
-  [STOPS_PALETTE]: PalettePicker,
+  [STOPS_PALETTE]: StopsPalettePicker,
 };
 
 export const getPaletteType = (type: string = '') =>

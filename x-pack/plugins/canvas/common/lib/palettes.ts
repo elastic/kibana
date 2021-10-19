@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { difference, isEqual } from 'lodash';
 import { LibStrings } from '../../i18n';
 
 const { Palettes: strings } = LibStrings;
@@ -50,6 +50,15 @@ export const identifyPalette = (
   return palettes.find((palette) => {
     const { colors, gradient } = palette;
     return gradient === input.gradient && isEqual(colors, input.colors);
+  });
+};
+
+export const identifyPartialPalette = (
+  input: Pick<ColorPalette, 'colors' | 'gradient'>
+): ColorPalette | undefined => {
+  return palettes.find((palette) => {
+    const { colors, gradient } = palette;
+    return gradient === input.gradient && difference(input.colors, colors).length === 0;
   });
 };
 

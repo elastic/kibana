@@ -56,7 +56,6 @@ export const PaletteArgInput: FC<Props> = ({
   };
 
   const palette = astToPalette(argValue, renderError);
-
   if (!palette) {
     renderError();
     return null;
@@ -66,6 +65,20 @@ export const PaletteArgInput: FC<Props> = ({
   return <PalettePicker id={argId} palette={palette} onChange={handleChange} />;
 };
 
+export const SimplePaletteArgInput: FC<Props> = (props) => {
+  const { typeInstance } = props;
+  const { type, ...restOptions } = typeInstance.options ?? {};
+  return (
+    <PaletteArgInput
+      {...props}
+      typeInstance={{
+        ...props.typeInstance,
+        options: restOptions,
+      }}
+    />
+  );
+};
+
 PaletteArgInput.propTypes = {
   argId: PropTypes.string,
   onValueChange: PropTypes.func.isRequired,
@@ -73,11 +86,21 @@ PaletteArgInput.propTypes = {
   renderError: PropTypes.func,
 };
 
-export const palette = () => ({
-  name: 'palette',
+const defaultPaletteOptions = {
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
   default:
     '{palette #882E72 #B178A6 #D6C1DE #1965B0 #5289C7 #7BAFDE #4EB265 #90C987 #CAE0AB #F7EE55 #F6C141 #F1932D #E8601C #DC050C}',
-  simpleTemplate: templateFromReactComponent(PaletteArgInput),
+};
+
+export const palette = () => ({
+  name: 'palette',
+  simpleTemplate: templateFromReactComponent(SimplePaletteArgInput),
+  ...defaultPaletteOptions,
+});
+
+export const extendedPalette = () => ({
+  name: 'extended_palette',
+  template: templateFromReactComponent(PaletteArgInput),
+  ...defaultPaletteOptions,
 });

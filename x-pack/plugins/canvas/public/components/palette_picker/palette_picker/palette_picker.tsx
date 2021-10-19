@@ -8,8 +8,8 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { ClearablePalettePicker } from './clearable_palette_picker';
-import { palettes as defaultPalettes } from '../../../common/lib/palettes';
-import { PalettePickerProps } from './types';
+import { palettes as defaultPalettes } from '../../../../common/lib/palettes';
+import { PalettePickerProps } from '../types';
 import { DefaultPalettePicker } from './default_palette_picker';
 
 export const PalettePicker: FC<PalettePickerProps> = (props) => {

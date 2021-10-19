@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import { getType } from '@kbn/interpreter/common';
 import { ExpressionAstArgument, ExpressionAstFunction } from 'src/plugins/expressions';
-import { identifyPalette, ColorPalette } from '../../../../common/lib';
+import { identifyPalette, ColorPalette, identifyPartialPalette } from '../../../../common/lib';
 import { ArgumentStrings } from '../../../../i18n';
 
 const { Palette: strings } = ArgumentStrings;
@@ -55,16 +55,18 @@ export const astToPalette = (
   }
 
   try {
-    const colors = chain[0].arguments._.reduce<string[]>((args, arg) => {
-      return reduceElementsWithType(args, arg, 'string', onError);
-    }, []);
+    const colors =
+      chain[0].arguments._?.reduce<string[]>((args, arg) => {
+        return reduceElementsWithType(args, arg, 'string', onError);
+      }, []) ?? [];
 
-    const stops = chain[0].arguments.stops.reduce<number[]>((args, arg) => {
-      return reduceElementsWithType(args, arg, 'number', onError);
-    }, []);
+    const stops =
+      chain[0].arguments.stop?.reduce<number[]>((args, arg) => {
+        return reduceElementsWithType(args, arg, 'number', onError);
+      }, []) ?? [];
 
     const gradient = !!get(chain[0].arguments.gradient, '[0]');
-    const palette = identifyPalette({ colors, gradient });
+    const palette = (stops.length ? identifyPartialPalette : identifyPalette)({ colors, gradient });
 
     if (palette) {
       return {

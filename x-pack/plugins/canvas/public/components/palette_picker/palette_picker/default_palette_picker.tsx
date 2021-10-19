@@ -8,8 +8,8 @@
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { RequiredComponentProps } from './types';
-import { findPalette, prepareColorPalette } from './utils';
+import { RequiredComponentProps } from '../types';
+import { findPalette, prepareColorPalette } from '../utils';
 
 const strings = {
   getNoPaletteFoundErrorTitle: () =>

@@ -12,7 +12,7 @@ export type CustomColorPalette = ColorPalette<'custom'>;
 export interface RequiredProps {
   id?: string;
   onChange?: (palette: ColorPalette | CustomColorPalette) => void;
-  palette?: ColorPalette | CustomColorPalette;
+  palette: ColorPalette | CustomColorPalette;
   clearable?: false;
   additionalPalettes?: Array<ColorPalette | CustomColorPalette>;
 }
@@ -26,6 +26,7 @@ export interface ClearableProps {
 }
 
 export type PalettePickerProps = RequiredProps | ClearableProps;
+export type StopsPalettePickerProps = RequiredProps;
 
 export type ClearableComponentProps = {
   palettes: Array<ColorPalette | CustomColorPalette>;
@@ -35,3 +36,8 @@ export type ClearableComponentProps = {
 export type RequiredComponentProps = {
   palettes: Array<ColorPalette | CustomColorPalette>;
 } & Partial<Pick<RequiredProps, 'onChange' | 'palette' | 'id'>>;
+
+export interface ColorStop {
+  color: string;
+  stop: number;
+}
