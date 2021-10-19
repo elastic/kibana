@@ -13,7 +13,7 @@ const esUpgradeSystemIndicesStatusMock: SystemIndicesMigrationStatus = {
     {
       feature_name: 'machine_learning',
       minimum_index_version: '7.1.1',
-      upgrade_status: 'UPGRADE_NEEDED',
+      migration_status: 'MIGRATION_NEEDED',
       indices: [
         {
           index: '.ml-config',
@@ -28,7 +28,7 @@ const esUpgradeSystemIndicesStatusMock: SystemIndicesMigrationStatus = {
     {
       feature_name: 'security',
       minimum_index_version: '7.1.1',
-      upgrade_status: 'UPGRADE_NEEDED',
+      migration_status: 'MIGRATION_NEEDED',
       indices: [
         {
           index: '.ml-config',
@@ -37,7 +37,7 @@ const esUpgradeSystemIndicesStatusMock: SystemIndicesMigrationStatus = {
       ],
     },
   ],
-  upgrade_status: 'UPGRADE_NEEDED',
+  migration_status: 'MIGRATION_NEEDED',
 };
 
 describe('convertFeaturesToIndicesArray', () => {

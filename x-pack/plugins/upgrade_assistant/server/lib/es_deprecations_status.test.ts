@@ -46,7 +46,7 @@ describe('getESUpgradeStatus', () => {
         {
           feature_name: 'machine_learning',
           minimum_index_version: '7.1.1',
-          upgrade_status: 'UPGRADE_NEEDED',
+          migration_status: 'MIGRATION_NEEDED',
           indices: [
             {
               index: '.ml-config',
@@ -55,7 +55,7 @@ describe('getESUpgradeStatus', () => {
           ],
         },
       ],
-      upgrade_status: 'UPGRADE_NEEDED',
+      migration_status: 'MIGRATION_NEEDED',
     })
   );
 

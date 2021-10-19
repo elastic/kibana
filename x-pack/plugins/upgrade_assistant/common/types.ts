@@ -230,12 +230,12 @@ export interface DeprecationLoggingStatus {
   isDeprecationLoggingEnabled: boolean;
 }
 
-export type UPGRADE_STATUS = 'UPGRADE_NEEDED' | 'NO_UPGRADE_NEEDED' | 'IN_PROGRESS' | 'ERROR';
+export type MIGRATION_STATUS = 'MIGRATION_NEEDED' | 'NO_MIGRATION_NEEDED' | 'IN_PROGRESS' | 'ERROR';
 export interface SystemIndicesMigrationFeature {
   id?: string;
   feature_name: string;
   minimum_index_version: string;
-  upgrade_status: UPGRADE_STATUS;
+  migration_status: MIGRATION_STATUS;
   indices: Array<{
     index: string;
     version: string;
@@ -243,7 +243,7 @@ export interface SystemIndicesMigrationFeature {
 }
 export interface SystemIndicesMigrationStatus {
   features: SystemIndicesMigrationFeature[];
-  upgrade_status: UPGRADE_STATUS;
+  migration_status: MIGRATION_STATUS;
 }
 export interface SystemIndicesMigrationStarted {
   features: SystemIndicesMigrationFeature[];
