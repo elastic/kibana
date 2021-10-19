@@ -23,7 +23,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('test metadata api', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/106051
+  describe.skip('test metadata api', () => {
     describe(`POST ${HOST_METADATA_LIST_ROUTE} when index is empty`, () => {
       it('metadata api should return empty result when index is empty', async () => {
         await deleteMetadataStream(getService);
