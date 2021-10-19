@@ -17,7 +17,6 @@ import { getIndexAliases } from '@kbn/securitysolution-es-utils';
 import { getTemplateVersion } from '../index/check_template_version';
 import { createSignalsMigrationRoute } from './create_signals_migration_route';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
-import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 
 jest.mock('../index/check_template_version');
 jest.mock('@kbn/securitysolution-es-utils', () => {
@@ -44,7 +43,6 @@ describe('creating signals migrations route', () => {
     (getIndexVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': -1 });
     (getSignalVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': [] });
 
-    const telemetrySenderMock = createMockTelemetryEventsSender();
     const securityMock = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
