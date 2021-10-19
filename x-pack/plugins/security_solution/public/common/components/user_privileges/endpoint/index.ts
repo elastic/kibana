@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './angular_config';
-// @ts-ignore
-export { createTopNavDirective, createTopNavHelper, loadKbnTopNavDirectives } from './kbn_top_nav';
+export * from './use_endpoint_privileges';
+export { getEndpointPrivilegesInitialState } from './utils';
