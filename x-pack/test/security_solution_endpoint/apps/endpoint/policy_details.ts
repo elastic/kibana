@@ -6,9 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import { DeepPartial } from 'utility-types';
+import { merge } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
+import { FullAgentPolicyInput } from '../../../../plugins/fleet/common';
+import { PolicyConfig } from '../../../../plugins/security_solution/common/endpoint/types';
+import { ManifestSchema } from '../../../../plugins/security_solution/common/endpoint/schema/manifest';
+import { policyFactory } from '../../../../plugins/security_solution/common/endpoint/models/policy_config';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -23,6 +29,210 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
+
+  type FullAgentPolicyEndpointInput = Omit<FullAgentPolicyInput, 'streams'> & {
+    policy: PolicyConfig;
+    artifact_manifest: ManifestSchema;
+  };
+
+  /**
+   * Returns the Fleet Agent Policy Input that represents an Endpoint Policy. Use it to
+   * validate expecte output when looking at the Fleet Agent policy to validate that updates
+   * to the Endpoint Policy are making it through to the overall Fleet Agent Policy
+   *
+   * @param overrides
+   */
+  const getExpectedAgentPolicyEndpointInput = (
+    overrides: DeepPartial<FullAgentPolicyEndpointInput> = {}
+  ): FullAgentPolicyInput => {
+    return merge(
+      {
+        id: '123',
+        revision: 2,
+        data_stream: { namespace: 'default' },
+        name: 'Protect East Coast',
+        meta: {
+          package: {
+            name: 'endpoint',
+            version: '1.0',
+          },
+        },
+        artifact_manifest: {
+          artifacts: {
+            'endpoint-exceptionlist-linux-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-exceptionlist-macos-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-exceptionlist-windows-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-hostisolationexceptionlist-linux-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-hostisolationexceptionlist-macos-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-hostisolationexceptionlist-windows-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-trustlist-linux-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-trustlist-macos-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-trustlist-windows-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-eventfilterlist-linux-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-eventfilterlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-eventfilterlist-macos-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-eventfilterlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+            'endpoint-eventfilterlist-windows-v1': {
+              compression_algorithm: 'zlib',
+              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+              decoded_size: 14,
+              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+              encoded_size: 22,
+              encryption_algorithm: 'none',
+              relative_url:
+                '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+            },
+          },
+          manifest_version: '1',
+          schema_version: 'v1',
+        },
+        policy: merge(policyFactory(), {
+          windows: {
+            popup: {
+              malware: {
+                message: 'Elastic Security {action} {filename}',
+              },
+              ransomware: {
+                message: 'Elastic Security {action} {filename}',
+              },
+              memory_protection: {
+                message: 'Elastic Security {action} {rule}',
+              },
+              behavior_protection: {
+                message: 'Elastic Security {action} {rule}',
+              },
+            },
+          },
+          mac: {
+            popup: {
+              malware: {
+                message: 'Elastic Security {action} {filename}',
+              },
+              behavior_protection: {
+                message: 'Elastic Security {action} {rule}',
+              },
+              memory_protection: {
+                message: 'Elastic Security {action} {rule}',
+              },
+            },
+          },
+          linux: {
+            popup: {
+              malware: {
+                message: 'Elastic Security {action} {filename}',
+              },
+              behavior_protection: {
+                message: 'Elastic Security {action} {rule}',
+              },
+              memory_protection: {
+                message: 'Elastic Security {action} {rule}',
+              },
+            },
+          },
+        }),
+        type: 'endpoint',
+        use_output: 'default',
+      },
+      overrides
+    );
+  };
 
   describe('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -181,256 +391,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         expect(agentFullPolicy.inputs).to.eql([
-          {
+          getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
-            revision: 2,
-            data_stream: { namespace: 'default' },
-            name: 'Protect East Coast',
             meta: {
               package: {
-                name: 'endpoint',
                 version: policyInfo.packageInfo.version,
               },
             },
             artifact_manifest: {
-              artifacts: {
-                'endpoint-exceptionlist-linux-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-exceptionlist-macos-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-exceptionlist-windows-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-hostisolationexceptionlist-linux-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-hostisolationexceptionlist-macos-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-hostisolationexceptionlist-windows-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-trustlist-linux-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-trustlist-macos-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-trustlist-windows-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-eventfilterlist-linux-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-eventfilterlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-eventfilterlist-macos-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-eventfilterlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-eventfilterlist-windows-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-              },
-              // The manifest version could have changed when the Policy was updated because the
-              // policy details page ensures that a save action applies the udpated policy on top
-              // of the latest Package Policy. So we just ignore the check against this value by
-              // forcing it to be the same as the value returned in the full agent policy.
               manifest_version: agentFullPolicy.inputs[0].artifact_manifest.manifest_version,
-              schema_version: 'v1',
             },
             policy: {
               linux: {
-                events: { file: false, network: true, process: true },
-                logging: { file: 'info' },
-                advanced: { agent: { connection_delay: 'true' } },
-                malware: { mode: 'prevent' },
-                behavior_protection: { mode: 'prevent', supported: true },
-                memory_protection: { mode: 'prevent', supported: true },
-                popup: {
-                  malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  behavior_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                  memory_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
+                events: {
+                  file: false,
+                },
+                advanced: {
+                  agent: {
+                    connection_delay: 'true',
                   },
                 },
               },
               mac: {
-                events: { file: false, network: true, process: true },
-                logging: { file: 'info' },
-                malware: { mode: 'prevent' },
-                behavior_protection: { mode: 'prevent', supported: true },
-                memory_protection: { mode: 'prevent', supported: true },
-                popup: {
-                  malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  behavior_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                  memory_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                },
+                events: { file: false },
               },
-              windows: {
-                events: {
-                  dll_and_driver_load: true,
-                  dns: true,
-                  file: false,
-                  network: true,
-                  process: true,
-                  registry: true,
-                  security: true,
-                },
-                logging: { file: 'info' },
-                malware: { mode: 'prevent' },
-                memory_protection: { mode: 'prevent', supported: true },
-                behavior_protection: { mode: 'prevent', supported: true },
-                ransomware: { mode: 'prevent', supported: true },
-                popup: {
-                  malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  memory_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                  behavior_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                  ransomware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                },
-                antivirus_registration: {
-                  enabled: false,
-                },
-              },
+              windows: { events: { file: false } },
             },
-            type: 'endpoint',
-            use_output: 'default',
-          },
+          }),
         ]);
       });
 
@@ -450,256 +437,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         expect(agentFullPolicy.inputs).to.eql([
-          {
+          getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
-            revision: 2,
-            data_stream: { namespace: 'default' },
-            name: 'Protect East Coast',
             meta: {
               package: {
-                name: 'endpoint',
                 version: policyInfo.packageInfo.version,
               },
             },
             artifact_manifest: {
-              artifacts: {
-                'endpoint-exceptionlist-linux-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-exceptionlist-macos-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-exceptionlist-windows-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-hostisolationexceptionlist-linux-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-hostisolationexceptionlist-macos-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-hostisolationexceptionlist-windows-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-trustlist-linux-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-trustlist-macos-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-trustlist-windows-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-eventfilterlist-linux-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-eventfilterlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-eventfilterlist-macos-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-eventfilterlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-eventfilterlist-windows-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-              },
-              // The manifest version could have changed when the Policy was updated because the
-              // policy details page ensures that a save action applies the udpated policy on top
-              // of the latest Package Policy. So we just ignore the check against this value by
-              // forcing it to be the same as the value returned in the full agent policy.
               manifest_version: agentFullPolicy.inputs[0].artifact_manifest.manifest_version,
-              schema_version: 'v1',
             },
             policy: {
               linux: {
-                events: { file: true, network: true, process: true },
-                logging: { file: 'info' },
-                advanced: { agent: { connection_delay: 'true' } },
-                malware: { mode: 'prevent' },
-                behavior_protection: { mode: 'prevent', supported: true },
-                memory_protection: { mode: 'prevent', supported: true },
-                popup: {
-                  malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
+                advanced: {
+                  agent: {
+                    connection_delay: 'true',
                   },
-                  behavior_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                  memory_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                },
-              },
-              mac: {
-                events: { file: true, network: true, process: true },
-                logging: { file: 'info' },
-                malware: { mode: 'prevent' },
-                behavior_protection: { mode: 'prevent', supported: true },
-                memory_protection: { mode: 'prevent', supported: true },
-                popup: {
-                  malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  behavior_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                  memory_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                },
-              },
-              windows: {
-                events: {
-                  dll_and_driver_load: true,
-                  dns: true,
-                  file: true,
-                  network: true,
-                  process: true,
-                  registry: true,
-                  security: true,
-                },
-                logging: { file: 'info' },
-                malware: { mode: 'prevent' },
-                memory_protection: { mode: 'prevent', supported: true },
-                behavior_protection: { mode: 'prevent', supported: true },
-                ransomware: { mode: 'prevent', supported: true },
-                popup: {
-                  malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  memory_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                  behavior_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                  ransomware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                },
-                antivirus_registration: {
-                  enabled: false,
                 },
               },
             },
-            type: 'endpoint',
-            use_output: 'default',
-          },
+          }),
         ]);
 
         // Clear the value
@@ -718,255 +475,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         expect(agentFullPolicyUpdated.inputs).to.eql([
-          {
+          getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
             revision: 3,
-            data_stream: { namespace: 'default' },
-            name: 'Protect East Coast',
             meta: {
               package: {
-                name: 'endpoint',
                 version: policyInfo.packageInfo.version,
               },
             },
             artifact_manifest: {
-              artifacts: {
-                'endpoint-exceptionlist-linux-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-exceptionlist-macos-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-exceptionlist-windows-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-hostisolationexceptionlist-linux-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-hostisolationexceptionlist-macos-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-hostisolationexceptionlist-windows-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-trustlist-linux-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-trustlist-macos-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-trustlist-windows-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-eventfilterlist-linux-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-eventfilterlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-eventfilterlist-macos-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-eventfilterlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-                'endpoint-eventfilterlist-windows-v1': {
-                  compression_algorithm: 'zlib',
-                  decoded_sha256:
-                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                  decoded_size: 14,
-                  encoded_sha256:
-                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-                  encoded_size: 22,
-                  encryption_algorithm: 'none',
-                  relative_url:
-                    '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-                },
-              },
-              // The manifest version could have changed when the Policy was updated because the
-              // policy details page ensures that a save action applies the udpated policy on top
-              // of the latest Package Policy. So we just ignore the check against this value by
-              // forcing it to be the same as the value returned in the full agent policy.
               manifest_version: agentFullPolicy.inputs[0].artifact_manifest.manifest_version,
-              schema_version: 'v1',
             },
-            policy: {
-              linux: {
-                events: { file: true, network: true, process: true },
-                logging: { file: 'info' },
-                malware: { mode: 'prevent' },
-                behavior_protection: { mode: 'prevent', supported: true },
-                memory_protection: { mode: 'prevent', supported: true },
-                popup: {
-                  malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  behavior_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                  memory_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                },
-              },
-              mac: {
-                events: { file: true, network: true, process: true },
-                logging: { file: 'info' },
-                malware: { mode: 'prevent' },
-                behavior_protection: { mode: 'prevent', supported: true },
-                memory_protection: { mode: 'prevent', supported: true },
-                popup: {
-                  malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  behavior_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                  memory_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                },
-              },
-              windows: {
-                events: {
-                  dll_and_driver_load: true,
-                  dns: true,
-                  file: true,
-                  network: true,
-                  process: true,
-                  registry: true,
-                  security: true,
-                },
-                logging: { file: 'info' },
-                malware: { mode: 'prevent' },
-                memory_protection: { mode: 'prevent', supported: true },
-                behavior_protection: { mode: 'prevent', supported: true },
-                ransomware: { mode: 'prevent', supported: true },
-                popup: {
-                  malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  memory_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                  behavior_protection: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {rule}',
-                  },
-                  ransomware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                },
-                antivirus_registration: {
-                  enabled: false,
-                },
-              },
-            },
-            type: 'endpoint',
-            use_output: 'default',
-          },
+          }),
         ]);
       });
     });
