@@ -12,8 +12,6 @@ import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
 import { getServices } from '../../kibana_services';
 import { formatFieldValue } from './format_value';
 
-// TODO: Test coverage
-
 const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();
 
 type FormattedHit = Array<[fieldName: string, formattedValue: string]>;
