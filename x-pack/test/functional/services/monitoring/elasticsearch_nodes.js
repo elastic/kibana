@@ -45,14 +45,23 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
 
   const SUBJ_NODE_LINK_PREFIX = `${SUBJ_TABLE_BODY} > nodeLink-`;
 
+  const SUBJ_PAGE_LOADING = 'monitoringPageLoading';
+
   return new (class ElasticsearchIndices {
     async isOnListing() {
       const pageId = await retry.try(() => testSubjects.find(SUBJ_LISTING_PAGE));
       return pageId !== null;
     }
 
-    clickRowByResolver(nodeResolver) {
-      return testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver);
+    async clickRowByResolver(nodeResolver) {
+      await this.waitForPageToFinishLoading();
+      await testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver);
+    }
+
+    async waitForPageToFinishLoading() {
+      await retry.try(async () => {
+        await find.waitForDeletedByCssSelector(`[data-test-subj="${SUBJ_PAGE_LOADING}"]`, 5000);
+      });
     }
 
     async waitForTableToFinishLoading() {
