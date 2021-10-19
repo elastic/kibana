@@ -536,14 +536,74 @@ describe('signal_rule_alert_type', () => {
         errors: ['Error that bubbled up.'],
       };
       (queryExecutor as jest.Mock).mockResolvedValue(result);
-      await alert.executor(payload);
+      const ruleAlert = getAlertMock(false, getQueryRuleParams());
+      ruleAlert.throttle = '1h';
+      const payLoadWithThrottle = getPayload(
+        ruleAlert,
+        alertServices
+      ) as jest.Mocked<RuleExecutorOptions>;
+      payLoadWithThrottle.rule.throttle = '1h';
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      await alert.executor(payLoadWithThrottle);
       expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should NOT call scheduleThrottledNotificationActions if result is false and the throttle is not set', async () => {
+      const result: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        lastLookBackDate: null,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        warningMessages: [],
+        errors: ['Error that bubbled up.'],
+      };
+      (queryExecutor as jest.Mock).mockResolvedValue(result);
+      await alert.executor(payload);
+      expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(0);
     });
 
     it('should call scheduleThrottledNotificationActions if an error was thrown to prevent the throttle from being reset', async () => {
       (queryExecutor as jest.Mock).mockRejectedValue({});
-      await alert.executor(payload);
+      const ruleAlert = getAlertMock(false, getQueryRuleParams());
+      ruleAlert.throttle = '1h';
+      const payLoadWithThrottle = getPayload(
+        ruleAlert,
+        alertServices
+      ) as jest.Mocked<RuleExecutorOptions>;
+      payLoadWithThrottle.rule.throttle = '1h';
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      await alert.executor(payLoadWithThrottle);
       expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should NOT call scheduleThrottledNotificationActions if an error was thrown to prevent the throttle from being reset if throttle is not defined', async () => {
+      const result: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        lastLookBackDate: null,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        warningMessages: [],
+        errors: ['Error that bubbled up.'],
+      };
+      (queryExecutor as jest.Mock).mockRejectedValue(result);
+      await alert.executor(payload);
+      expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(0);
     });
   });
 });
