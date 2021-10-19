@@ -23,14 +23,9 @@ import { getSignalsTemplate, SIGNALS_TEMPLATE_VERSION } from './get_signals_temp
 import previewPolicy from './preview_policy.json';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
-import { ConfigType } from '../../../../config';
-import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 import { templateNeedsUpdate } from './check_template_version';
 
-export const createPreviewIndexRoute = (
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType
-) => {
+export const createPreviewIndexRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
     {
       path: DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL,
@@ -41,14 +36,13 @@ export const createPreviewIndexRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
 
       try {
         const siemClient = context.securitySolution?.getAppClient();
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        await createPreviewIndex(context, siemClient, ruleRegistryEnabled);
+        await createPreviewIndex(context, siemClient);
 
         return response.ok({ body: { acknowledged: true } });
       } catch (err) {
@@ -64,17 +58,12 @@ export const createPreviewIndexRoute = (
 
 export const createPreviewIndex = async (
   context: SecuritySolutionRequestHandlerContext,
-  siemClient: AppClient,
-  ruleRegistryEnabled: boolean
+  siemClient: AppClient
 ) => {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const index = siemClient.getPreviewIndex();
 
   const indexExists = await getIndexExists(esClient, index);
-  // If using the rule registry implementation, we don't want to create new .siem-signals indices
-  if (ruleRegistryEnabled) {
-    return;
-  }
 
   const policyExists = await getPolicyExists(esClient, index);
   if (!policyExists) {

@@ -36,6 +36,8 @@ import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_ru
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
+import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
+import { createPreviewIndexRoute } from '../lib/detection_engine/routes/index/create_preview_index_route';
 import {
   createTimelinesRoute,
   deleteTimelinesRoute,
@@ -57,11 +59,9 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
-import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
 import { PreviewRuleOptions } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
-import { createPreviewIndexRoute } from '../lib/detection_engine/routes/index/create_preview_index_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -95,12 +95,12 @@ export const initRoutes = (
   updateRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   patchRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesBulkRoute(router, isRuleRegistryEnabled);
-  performBulkActionRoute(router, ml, isRuleRegistryEnabled);
+  performBulkActionRoute(router, ml, logger, isRuleRegistryEnabled);
 
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);
   importRulesRoute(router, config, ml, isRuleRegistryEnabled);
-  exportRulesRoute(router, config, isRuleRegistryEnabled);
+  exportRulesRoute(router, config, logger, isRuleRegistryEnabled);
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);
@@ -136,7 +136,7 @@ export const initRoutes = (
   deleteIndexRoute(router);
 
   // Detection Engine Preview Index  /api/detection_engine/preview/index
-  createPreviewIndexRoute(router, config);
+  createPreviewIndexRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
   readTagsRoute(router, isRuleRegistryEnabled);

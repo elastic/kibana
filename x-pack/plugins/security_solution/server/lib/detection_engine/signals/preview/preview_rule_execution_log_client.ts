@@ -8,7 +8,7 @@
 import { SavedObjectsFindResult } from 'kibana/server';
 import {
   LogExecutionMetricsArgs,
-  RuleExecutionLogClient,
+  IRuleExecutionLogClient,
   FindBulkExecutionLogArgs,
   FindBulkExecutionLogResponse,
   FindExecutionLogArgs,
@@ -20,10 +20,7 @@ import { IRuleStatusSOAttributes } from '../../rules/types';
 export const createWarningsAndErrors = () => {
   const warningsAndErrorsStore: LogStatusChangeArgs[] = [];
 
-  const previewRuleExecutionLogClient: RuleExecutionLogClient = {
-    // TODO: how can we remove the ts-ignore below?
-    // @ts-ignore
-    client: undefined,
+  const previewRuleExecutionLogClient: IRuleExecutionLogClient = {
     async delete(id: string): Promise<void> {
       return Promise.resolve(undefined);
     },

@@ -14,7 +14,6 @@
     }
   ],
   "enabled": false,
-  "invocationCount": 500,
   "index": ["custom-events"],
   "interval": "5m",
   "query": "file.hash.md5 : *",

@@ -55,6 +55,12 @@ export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
       { value: 'd', text: i18n.LAST_DAY },
       { value: 'w', text: i18n.LAST_WEEK },
     ];
+  } else if (ruleType === 'threat_match') {
+    return [
+      { value: 'h', text: i18n.LAST_HOUR },
+      { value: 'd', text: i18n.LAST_DAY },
+      { value: 'w', text: i18n.LAST_WEEK },
+    ];
   } else {
     return [
       { value: 'h', text: i18n.LAST_HOUR },
