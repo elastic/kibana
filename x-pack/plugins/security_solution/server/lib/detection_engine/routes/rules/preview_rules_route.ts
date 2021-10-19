@@ -191,6 +191,7 @@ export const previewRulesRoute = async (
           eventLogService: {} as unknown as IEventLogService,
           eventsTelemetry: undefined,
           ml: undefined,
+          refreshOverride: 'wait_for',
         });
 
         await runExecutors(

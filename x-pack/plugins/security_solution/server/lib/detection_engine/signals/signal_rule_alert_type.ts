@@ -90,6 +90,7 @@ export const signalRulesAlertType = ({
   eventLogService,
   indexNameOverride,
   ruleExecutionLogClientOverride,
+  refreshOverride,
 }: {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
@@ -100,6 +101,7 @@ export const signalRulesAlertType = ({
   config: ConfigType;
   eventLogService: IEventLogService;
   indexNameOverride?: string;
+  refreshOverride?: string;
   ruleExecutionLogClientOverride?: IRuleExecutionLogClient;
 }): SignalRuleAlertTypeDefinition => {
   const { alertMergeStrategy: mergeStrategy, alertIgnoreFields: ignoreFields } = config;
@@ -167,7 +169,7 @@ export const signalRulesAlertType = ({
         ruleTypeId,
       } = completeRule.ruleConfig;
 
-      const refresh = actions.length ? 'wait_for' : false;
+      const refresh = refreshOverride ?? actions.length ? 'wait_for' : false;
       const buildRuleMessage = buildRuleMessageFactory({
         id: alertId,
         ruleId,

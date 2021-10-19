@@ -30,7 +30,6 @@ interface PreviewHistogramProps {
   timeFrame: Unit;
   previewId: string;
   addNoiseWarning: () => void;
-  isPreviewRequestInProgress: boolean;
   spaceId: string;
 }
 
@@ -40,7 +39,6 @@ export const PreviewHistogram = ({
   timeFrame,
   previewId,
   addNoiseWarning,
-  isPreviewRequestInProgress,
   spaceId,
 }: PreviewHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
@@ -65,9 +63,9 @@ export const PreviewHistogram = ({
 
   useEffect((): void => {
     if (!isLoading && !isInitializing) {
-      setQuery({ id: ID, inspect, loading: isLoading, refetch });
+      setQuery({ id: `${ID}-${previewId}`, inspect, loading: isLoading, refetch });
     }
-  }, [setQuery, inspect, isLoading, isInitializing, refetch]);
+  }, [setQuery, inspect, isLoading, isInitializing, refetch, previewId]);
 
   const barConfig = useMemo(
     (): ChartSeriesConfigs => getHistogramConfig(to, from, true),
@@ -87,14 +85,14 @@ export const PreviewHistogram = ({
       <EuiFlexGroup gutterSize="none" direction="column">
         <EuiFlexItem grow={1}>
           <HeaderSection
-            id={ID}
+            id={`${ID}-${previewId}`}
             title={i18n.QUERY_GRAPH_HITS_TITLE}
             titleSize="xs"
             subtitle={subtitle}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          {isLoading || isPreviewRequestInProgress ? (
+          {isLoading ? (
             <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
           ) : (
             <BarChart

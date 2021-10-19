@@ -24,6 +24,7 @@ import { PreviewHistogram } from './preview_histogram';
 import { getTimeframeOptions } from './helpers';
 import { CalloutGroup } from './callout_group';
 import { useKibana } from '../../../../common/lib/kibana';
+import { LoadingHistogram } from './loading_histogram';
 
 export interface RulePreviewProps {
   index: string[];
@@ -115,9 +116,9 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         </EuiFlexGroup>
       </EuiFormRow>
       <EuiSpacer size="s" />
-      {previewId && spaceId && (
+      {isPreviewRequestInProgress && <LoadingHistogram />}
+      {!isPreviewRequestInProgress && previewId && spaceId && (
         <PreviewHistogram
-          isPreviewRequestInProgress={isPreviewRequestInProgress}
           timeFrame={timeFrame}
           previewId={previewId}
           addNoiseWarning={addNoiseWarning}
