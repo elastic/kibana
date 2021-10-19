@@ -32,7 +32,7 @@ export {
   LifecycleAlertServices,
   createLifecycleExecutor,
 } from './utils/create_lifecycle_executor';
-export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
+export { createPersistenceRuleTypeWrapper } from './utils/create_persistence_rule_type_wrapper';
 export * from './utils/persistence_types';
 export type { AlertsClient } from './alert_data_client/alerts_client';
 

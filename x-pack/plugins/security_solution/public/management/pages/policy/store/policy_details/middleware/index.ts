@@ -6,9 +6,10 @@
  */
 
 import { ImmutableMiddlewareFactory } from '../../../../../../common/store';
-import { PolicyDetailsState } from '../../../types';
+import { MiddlewareRunnerContext, PolicyDetailsState } from '../../../types';
 import { policyTrustedAppsMiddlewareRunner } from './policy_trusted_apps_middleware';
 import { policySettingsMiddlewareRunner } from './policy_settings_middleware';
+import { TrustedAppsHttpService } from '../../../../trusted_apps/service';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
   coreStart
@@ -16,7 +17,13 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
   return (store) => (next) => async (action) => {
     next(action);
 
-    policySettingsMiddlewareRunner(coreStart, store, action);
-    policyTrustedAppsMiddlewareRunner(coreStart, store, action);
+    const trustedAppsService = new TrustedAppsHttpService(coreStart.http);
+    const middlewareContext: MiddlewareRunnerContext = {
+      coreStart,
+      trustedAppsService,
+    };
+
+    policySettingsMiddlewareRunner(middlewareContext, store, action);
+    policyTrustedAppsMiddlewareRunner(middlewareContext, store, action);
   };
 };

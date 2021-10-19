@@ -57,5 +57,6 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['datastore', 'message_queue'],
   };
 }

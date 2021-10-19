@@ -38,13 +38,14 @@ export default function ({ getService }: FtrProviderContext) {
             osquery: ['all', 'read'],
             ml: ['all', 'read'],
             siem: ['all', 'read'],
+            securitySolutionCases: ['all', 'read'],
             fleet: ['all', 'read'],
             stackAlerts: ['all', 'read'],
             actions: ['all', 'read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
-          reserved: ['ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+          reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
         };
 
         await supertest

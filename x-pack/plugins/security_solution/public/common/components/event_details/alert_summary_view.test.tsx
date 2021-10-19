@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { waitFor, render } from '@testing-library/react';
 
 import { AlertSummaryView } from './alert_summary_view';
 import { mockAlertDetailsData } from './__mocks__';
@@ -15,7 +15,6 @@ import { useRuleWithFallback } from '../../../detections/containers/detection_en
 
 import { TestProviders, TestProvidersComponent } from '../../mock';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/kibana');
 
@@ -33,8 +32,6 @@ const props = {
 };
 
 describe('AlertSummaryView', () => {
-  const mount = useMountAppended();
-
   beforeEach(() => {
     jest.clearAllMocks();
     (useRuleWithFallback as jest.Mock).mockReturnValue({
@@ -44,23 +41,12 @@ describe('AlertSummaryView', () => {
     });
   });
   test('render correct items', () => {
-    const wrapper = mount(
+    const { getByTestId } = render(
       <TestProviders>
         <AlertSummaryView {...props} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="summary-view"]').exists()).toEqual(true);
-  });
-
-  test('render investigation guide', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AlertSummaryView {...props} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(true);
-    });
+    expect(getByTestId('summary-view')).toBeInTheDocument();
   });
 
   test("render no investigation guide if it doesn't exist", async () => {
@@ -69,13 +55,13 @@ describe('AlertSummaryView', () => {
         note: null,
       },
     });
-    const wrapper = mount(
+    const { queryByTestId } = render(
       <TestProviders>
         <AlertSummaryView {...props} />
       </TestProviders>
     );
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(false);
+      expect(queryByTestId('summary-view-guide')).not.toBeInTheDocument();
     });
   });
   test('Memory event code renders additional summary rows', () => {
@@ -93,12 +79,12 @@ describe('AlertSummaryView', () => {
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const wrapper = mount(
+    const { container } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    expect(wrapper.find('div[data-test-subj="summary-view"]').render()).toMatchSnapshot();
+    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
   });
   test('Behavior event code renders additional summary rows', () => {
     const renderProps = {
@@ -115,11 +101,36 @@ describe('AlertSummaryView', () => {
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const wrapper = mount(
+    const { container } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    expect(wrapper.find('div[data-test-subj="summary-view"]').render()).toMatchSnapshot();
+    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
+  });
+
+  test("doesn't render empty fields", () => {
+    const renderProps = {
+      ...props,
+      data: mockAlertDetailsData.map((item) => {
+        if (item.category === 'signal' && item.field === 'signal.rule.name') {
+          return {
+            category: 'signal',
+            field: 'signal.rule.name',
+            values: undefined,
+            originalValue: undefined,
+          };
+        }
+        return item;
+      }) as TimelineEventsDetailsItem[],
+    };
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <AlertSummaryView {...renderProps} />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('event-field-signal.rule.name')).not.toBeInTheDocument();
   });
 });

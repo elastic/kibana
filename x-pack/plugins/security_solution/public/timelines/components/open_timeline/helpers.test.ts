@@ -939,17 +939,46 @@ describe('helpers', () => {
   });
 
   describe('queryTimelineById', () => {
+    describe('encounters failure when retrieving a timeline', () => {
+      const onError = jest.fn();
+      const mockError = new Error('failed');
+
+      const args = {
+        timelineId: '123',
+        onError,
+        updateIsLoading: jest.fn(),
+        updateTimeline: jest.fn(),
+      };
+
+      beforeAll(async () => {
+        (getTimeline as jest.Mock).mockRejectedValue(mockError);
+        queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
+      });
+
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
+      test('calls onError with the error', () => {
+        expect(onError).toHaveBeenCalledWith(mockError, '123');
+      });
+    });
+
     describe('open a timeline', () => {
-      const updateIsLoading = jest.fn();
       const selectedTimeline = {
         ...mockSelectedTimeline,
       };
+
+      const updateIsLoading = jest.fn();
       const onOpenTimeline = jest.fn();
+      const onError = jest.fn();
+
       const args = {
         duplicate: false,
         graphEventId: '',
         timelineId: '',
         timelineType: TimelineType.default,
+        onError,
         onOpenTimeline,
         openTimeline: true,
         updateIsLoading,
@@ -974,6 +1003,10 @@ describe('helpers', () => {
 
       test('get timeline by Id', () => {
         expect(getTimeline).toHaveBeenCalled();
+      });
+
+      test('it does not call onError when an error does not occur', () => {
+        expect(onError).not.toHaveBeenCalled();
       });
 
       test('Do not override daterange if TimelineStatus is active', () => {

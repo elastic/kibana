@@ -26,6 +26,10 @@ export function isPercentageSeries(seriesType: SeriesType) {
   );
 }
 
+export function isStackedChart(seriesType: SeriesType) {
+  return seriesType.includes('stacked');
+}
+
 export function isHorizontalChart(layers: Array<{ seriesType: SeriesType }>) {
   return layers.every((l) => isHorizontalSeries(l.seriesType));
 }

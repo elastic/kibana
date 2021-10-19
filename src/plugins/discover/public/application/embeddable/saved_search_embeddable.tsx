@@ -165,7 +165,7 @@ export class SavedSearchEmbeddable
     const executionContext = {
       type: this.type,
       name: 'discover',
-      id: this.savedSearch.id,
+      id: this.savedSearch.id!,
       description: this.output.title || this.output.defaultTitle || '',
       url: this.output.editUrl,
       parent: this.input.executionContext,
@@ -216,7 +216,7 @@ export class SavedSearchEmbeddable
     if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
       this.savedSearch.sort = getDefaultSort(
         indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
       );
     }
 
@@ -226,13 +226,13 @@ export class SavedSearchEmbeddable
       isLoading: false,
       sort: getDefaultSort(
         indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
       ),
       rows: [],
       searchDescription: this.savedSearch.description,
       description: this.savedSearch.description,
       inspectorAdapters: this.inspectorAdapters,
-      searchTitle: this.savedSearch.lastSavedTitle,
+      searchTitle: this.savedSearch.title,
       services: this.services,
       onAddColumn: (columnName: string) => {
         if (!props.columns) {
@@ -402,9 +402,12 @@ export class SavedSearchEmbeddable
     return this.inspectorAdapters;
   }
 
+  public getDescription() {
+    return this.savedSearch.description;
+  }
+
   public destroy() {
     super.destroy();
-    this.savedSearch.destroy();
     if (this.searchProps) {
       delete this.searchProps;
     }

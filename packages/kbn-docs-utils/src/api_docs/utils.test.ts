@@ -6,18 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import Path from 'path';
 import { Project } from 'ts-morph';
 import { findPlugins } from './find_plugins';
 import { getPluginApi } from './get_plugin_api';
 import { getKibanaPlatformPlugin } from './tests/kibana_platform_plugin_mock';
-import { PluginApi } from './types';
-import { getPluginForPath, getServiceForPath, removeBrokenLinks } from './utils';
+import { PluginApi, PluginOrPackage } from './types';
+import { getPluginForPath, getServiceForPath, removeBrokenLinks, getFileName } from './utils';
 
 const log = new ToolingLog({
   level: 'debug',
   writeTo: process.stdout,
+});
+
+it('getFileName', () => {
+  expect(getFileName('@elastic/datemath')).toBe('elastic_datemath');
 });
 
 it('test getPluginForPath', () => {
@@ -65,7 +69,7 @@ it('test removeBrokenLinks', () => {
 
   const pluginA = getKibanaPlatformPlugin('pluginA');
   pluginA.manifest.serviceFolders = ['foo'];
-  const plugins: KibanaPlatformPlugin[] = [pluginA];
+  const plugins: PluginOrPackage[] = [pluginA];
 
   const pluginApiMap: { [key: string]: PluginApi } = {};
   plugins.map((plugin) => {

@@ -13,7 +13,7 @@ import { createApmServerRouteRepository } from './create_apm_server_route_reposi
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 
 const metricsChartsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/metrics/charts',
+  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -35,7 +35,8 @@ const metricsChartsRoute = createApmServerRoute({
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName } = params.path;
-    const { agentName, environment, kuery, serviceNodeName } = params.query;
+    const { agentName, environment, kuery, serviceNodeName, start, end } =
+      params.query;
     return await getMetricsChartDataByAgent({
       environment,
       kuery,
@@ -43,6 +44,8 @@ const metricsChartsRoute = createApmServerRoute({
       serviceName,
       agentName,
       serviceNodeName,
+      start,
+      end,
     });
   },
 });

@@ -1,16 +1,15 @@
-# Inspired on https://github.com/angular/angular/blob/master/.circleci/bazel.linux.rc
-# These options are only enabled when running on CI
-# That is done by copying this file into "$HOME/.bazelrc" which loads after the .bazelrc into the workspace
+# Used in the on-merge job to persist the Bazel cache to BuildBuddy
+# from: .buildkite/scripts/common/persist_bazel_cache.sh
 
-# Import and load bazelrc common settings for ci env
-try-import %workspace%/src/dev/ci_setup/.bazelrc-ci.common
+import %workspace%/.bazelrc.common
 
 # BuildBuddy settings
-## Remote settings including cache
 build --bes_results_url=https://app.buildbuddy.io/invocation/
 build --bes_backend=grpcs://cloud.buildbuddy.io
 build --remote_cache=grpcs://cloud.buildbuddy.io
 build --remote_timeout=3600
+# --remote_header=x-buildbuddy-api-key= # appended in CI script
 
-## Metadata settings
+# Metadata settings
 build --build_metadata=ROLE=CI
+build --workspace_status_command="node ./src/dev/bazel_workspace_status.js"

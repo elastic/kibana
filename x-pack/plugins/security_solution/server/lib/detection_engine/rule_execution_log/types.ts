@@ -5,27 +5,15 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import { Duration } from 'moment';
 import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
-import { RuleDataPluginService } from '../../../../../rule_registry/server';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { IRuleStatusSOAttributes } from '../rules/types';
 
-export enum ExecutionMetric {
-  'executionGap' = 'executionGap',
-  'searchDurationMax' = 'searchDurationMax',
-  'indexingDurationMax' = 'indexingDurationMax',
-  'indexingLookback' = 'indexingLookback',
+export enum UnderlyingLogClient {
+  'savedObjects' = 'savedObjects',
+  'eventLog' = 'eventLog',
 }
-
-export type IRuleDataPluginService = PublicMethodsOf<RuleDataPluginService>;
-
-export type ExecutionMetricValue<T extends ExecutionMetric> = {
-  [ExecutionMetric.executionGap]: number;
-  [ExecutionMetric.searchDurationMax]: number;
-  [ExecutionMetric.indexingDurationMax]: number;
-  [ExecutionMetric.indexingLookback]: Date;
-}[T];
 
 export interface FindExecutionLogArgs {
   ruleId: string;
@@ -39,29 +27,35 @@ export interface FindBulkExecutionLogArgs {
   logsCount?: number;
 }
 
-/**
- * @deprecated LegacyMetrics are only kept here for backward compatibility
- * and should be replaced by ExecutionMetric in the future
- */
-export interface LegacyMetrics {
-  searchAfterTimeDurations?: string[];
-  bulkCreateTimeDurations?: string[];
+export interface ExecutionMetrics {
+  searchDurations?: string[];
+  indexingDurations?: string[];
+  /**
+   * @deprecated lastLookBackDate is logged only by SavedObjectsAdapter and should be removed in the future
+   */
   lastLookBackDate?: string;
-  gap?: string;
+  executionGap?: Duration;
 }
 
 export interface LogStatusChangeArgs {
   ruleId: string;
+  ruleName: string;
+  ruleType: string;
   spaceId: string;
   newStatus: RuleExecutionStatus;
-  namespace?: string;
   message?: string;
-  metrics?: LegacyMetrics;
+  /**
+   * @deprecated Use RuleExecutionLogClient.logExecutionMetrics to write metrics instead
+   */
+  metrics?: ExecutionMetrics;
 }
 
 export interface UpdateExecutionLogArgs {
   id: string;
   attributes: IRuleStatusSOAttributes;
+  ruleId: string;
+  ruleName: string;
+  ruleType: string;
   spaceId: string;
 }
 
@@ -70,12 +64,12 @@ export interface CreateExecutionLogArgs {
   spaceId: string;
 }
 
-export interface ExecutionMetricArgs<T extends ExecutionMetric> {
+export interface LogExecutionMetricsArgs {
   ruleId: string;
+  ruleName: string;
+  ruleType: string;
   spaceId: string;
-  namespace?: string;
-  metric: T;
-  value: ExecutionMetricValue<T>;
+  metrics: ExecutionMetrics;
 }
 
 export interface FindBulkExecutionLogResponse {
@@ -90,5 +84,5 @@ export interface IRuleExecutionLogClient {
   update: (args: UpdateExecutionLogArgs) => Promise<void>;
   delete: (id: string) => Promise<void>;
   logStatusChange: (args: LogStatusChangeArgs) => Promise<void>;
-  logExecutionMetric: <T extends ExecutionMetric>(args: ExecutionMetricArgs<T>) => Promise<void>;
+  logExecutionMetrics: (args: LogExecutionMetricsArgs) => Promise<void>;
 }

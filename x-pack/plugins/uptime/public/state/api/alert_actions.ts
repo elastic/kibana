@@ -189,6 +189,8 @@ function getServiceNowActionParams(): ServiceNowActionParams {
         category: null,
         subcategory: null,
         externalId: null,
+        correlation_id: null,
+        correlation_display: null,
       },
       comments: [],
     },

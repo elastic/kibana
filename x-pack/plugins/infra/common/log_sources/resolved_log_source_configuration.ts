@@ -6,7 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { IndexPattern, IndexPatternsContract } from '../../../../../src/plugins/data/common';
+import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/common';
 import { ObjectEntries } from '../utility_types';
 import { ResolveLogSourceConfigurationError } from './errors';
 import {
@@ -21,14 +21,14 @@ export interface ResolvedLogSourceConfiguration {
   timestampField: string;
   tiebreakerField: string;
   messageField: string[];
-  fields: IndexPattern['fields'];
+  fields: DataView['fields'];
   runtimeMappings: estypes.MappingRuntimeFields;
   columns: LogSourceColumnConfiguration[];
 }
 
 export const resolveLogSourceConfiguration = async (
   sourceConfiguration: LogSourceConfigurationProperties,
-  indexPatternsService: IndexPatternsContract
+  indexPatternsService: DataViewsContract
 ): Promise<ResolvedLogSourceConfiguration> => {
   if (sourceConfiguration.logIndices.type === 'index_name') {
     return await resolveLegacyReference(sourceConfiguration, indexPatternsService);
@@ -39,7 +39,7 @@ export const resolveLogSourceConfiguration = async (
 
 const resolveLegacyReference = async (
   sourceConfiguration: LogSourceConfigurationProperties,
-  indexPatternsService: IndexPatternsContract
+  indexPatternsService: DataViewsContract
 ): Promise<ResolvedLogSourceConfiguration> => {
   if (sourceConfiguration.logIndices.type !== 'index_name') {
     throw new Error('This function can only resolve legacy references');
@@ -74,7 +74,7 @@ const resolveLegacyReference = async (
 
 const resolveKibanaIndexPatternReference = async (
   sourceConfiguration: LogSourceConfigurationProperties,
-  indexPatternsService: IndexPatternsContract
+  indexPatternsService: DataViewsContract
 ): Promise<ResolvedLogSourceConfiguration> => {
   if (sourceConfiguration.logIndices.type !== 'index_pattern') {
     throw new Error('This function can only resolve Kibana Index Pattern references');
@@ -103,7 +103,7 @@ const resolveKibanaIndexPatternReference = async (
 };
 
 // this might take other sources of runtime fields into account in the future
-const resolveRuntimeMappings = (indexPattern: IndexPattern): estypes.MappingRuntimeFields => {
+const resolveRuntimeMappings = (indexPattern: DataView): estypes.MappingRuntimeFields => {
   const { runtimeFields } = indexPattern.getComputedFields();
 
   const runtimeMappingsFromIndexPattern = (

@@ -8,17 +8,14 @@
 
 import { EcsGeo } from './geo';
 import { EcsOs } from './os';
-import { EcsNestedUser } from './user';
 
 interface NestedFields {
   geo?: EcsGeo;
   os?: EcsOs;
-  /** @deprecated */
-  user?: EcsNestedUser;
 }
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-host.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-host.html
  *
  * @internal
  */

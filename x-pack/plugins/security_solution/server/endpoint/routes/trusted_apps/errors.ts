@@ -25,7 +25,6 @@ export class TrustedAppPolicyNotExistsError extends Error {
     );
   }
 }
-
 export class TrustedAppVersionConflictError extends Error {
   constructor(id: string, public sourceError: Error) {
     super(`Trusted Application (${id}) has been updated since last retrieved`);

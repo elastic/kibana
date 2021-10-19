@@ -8,12 +8,12 @@
 import React from 'react';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { ThreatIntelPanelView } from './threat_intel_panel_view';
-import { CtiInnerPanel } from './cti_inner_panel';
+import { InnerLinkPanel } from '../link_panel';
 import * as i18n from './translations';
 import { emptyEventCountsByDataset } from '../../containers/overview_cti_links/helpers';
 
 const warning = (
-  <CtiInnerPanel
+  <InnerLinkPanel
     color={'warning'}
     title={i18n.WARNING_TITLE}
     body={i18n.WARNING_BODY}
@@ -22,7 +22,7 @@ const warning = (
 );
 
 export const CtiNoEventsComponent = ({ to, from }: { to: string; from: string }) => {
-  const { buttonHref, listItems, isDashboardPluginDisabled } = useCtiDashboardLinks(
+  const { buttonHref, listItems, isPluginDisabled } = useCtiDashboardLinks(
     emptyEventCountsByDataset,
     to,
     from
@@ -33,12 +33,10 @@ export const CtiNoEventsComponent = ({ to, from }: { to: string; from: string })
       buttonHref={buttonHref}
       listItems={listItems}
       splitPanel={warning}
-      totalEventCount={0}
-      isDashboardPluginDisabled={isDashboardPluginDisabled}
+      isPluginDisabled={isPluginDisabled}
     />
   );
 };
 
-CtiNoEventsComponent.displayName = 'CtiNoEvents';
-
 export const CtiNoEvents = React.memo(CtiNoEventsComponent);
+CtiNoEvents.displayName = 'CtiNoEvents';

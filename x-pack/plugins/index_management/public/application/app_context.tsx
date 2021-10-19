@@ -7,6 +7,7 @@
 
 import React, { createContext, useContext } from 'react';
 import { ScopedHistory } from 'kibana/public';
+import SemVer from 'semver/classes/semver';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
@@ -37,6 +38,7 @@ export interface AppDependencies {
   uiSettings: CoreSetup['uiSettings'];
   url: SharePluginStart['url'];
   docLinks: CoreStart['docLinks'];
+  kibanaVersion: SemVer;
 }
 
 export const AppContextProvider = ({

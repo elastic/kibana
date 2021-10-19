@@ -9,6 +9,7 @@
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test/jest';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
+import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { Relationships, RelationshipsProps } from './relationships';
 
 jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
@@ -18,6 +19,15 @@ jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
 jest.mock('../../../lib/fetch_export_objects', () => ({
   fetchExportObjects: jest.fn(),
 }));
+
+const allowedTypes: SavedObjectManagementTypeInfo[] = [
+  {
+    name: 'index-pattern',
+    displayName: 'index-pattern',
+    namespaceType: 'single',
+    hidden: false,
+  },
+];
 
 describe('Relationships', () => {
   it('should render index patterns normally', async () => {
@@ -32,7 +42,6 @@ describe('Relationships', () => {
             id: '1',
             relationship: 'parent',
             meta: {
-              editUrl: '/management/kibana/objects/savedSearches/1',
               icon: 'search',
               inAppUrl: {
                 path: '/app/discover#//1',
@@ -46,7 +55,6 @@ describe('Relationships', () => {
             id: '2',
             relationship: 'parent',
             meta: {
-              editUrl: '/management/kibana/objects/savedVisualizations/2',
               icon: 'visualizeApp',
               inAppUrl: {
                 path: '/app/visualize#/edit/2',
@@ -73,6 +81,7 @@ describe('Relationships', () => {
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -116,7 +125,6 @@ describe('Relationships', () => {
             id: '2',
             relationship: 'parent',
             meta: {
-              editUrl: '/management/kibana/objects/savedVisualizations/2',
               icon: 'visualizeApp',
               inAppUrl: {
                 path: '/app/visualize#/edit/2',
@@ -136,13 +144,13 @@ describe('Relationships', () => {
         meta: {
           title: 'MySearch',
           icon: 'search',
-          editUrl: '/management/kibana/objects/savedSearches/1',
           inAppUrl: {
             path: '/discover/1',
             uiCapabilitiesPath: 'discover.show',
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -172,7 +180,6 @@ describe('Relationships', () => {
             id: '1',
             relationship: 'parent',
             meta: {
-              editUrl: '/management/kibana/objects/savedDashboards/1',
               icon: 'dashboardApp',
               inAppUrl: {
                 path: '/app/kibana#/dashboard/1',
@@ -186,7 +193,6 @@ describe('Relationships', () => {
             id: '2',
             relationship: 'parent',
             meta: {
-              editUrl: '/management/kibana/objects/savedDashboards/2',
               icon: 'dashboardApp',
               inAppUrl: {
                 path: '/app/kibana#/dashboard/2',
@@ -206,13 +212,13 @@ describe('Relationships', () => {
         meta: {
           title: 'MyViz',
           icon: 'visualizeApp',
-          editUrl: '/management/kibana/objects/savedVisualizations/1',
           inAppUrl: {
             path: '/edit/1',
             uiCapabilitiesPath: 'visualize.show',
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -242,7 +248,6 @@ describe('Relationships', () => {
             id: '1',
             relationship: 'child',
             meta: {
-              editUrl: '/management/kibana/objects/savedVisualizations/1',
               icon: 'visualizeApp',
               inAppUrl: {
                 path: '/app/visualize#/edit/1',
@@ -256,7 +261,6 @@ describe('Relationships', () => {
             id: '2',
             relationship: 'child',
             meta: {
-              editUrl: '/management/kibana/objects/savedVisualizations/2',
               icon: 'visualizeApp',
               inAppUrl: {
                 path: '/app/visualize#/edit/2',
@@ -276,13 +280,13 @@ describe('Relationships', () => {
         meta: {
           title: 'MyDashboard',
           icon: 'dashboardApp',
-          editUrl: '/management/kibana/objects/savedDashboards/1',
           inAppUrl: {
             path: '/dashboard/1',
             uiCapabilitiesPath: 'dashboard.show',
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -316,13 +320,13 @@ describe('Relationships', () => {
         meta: {
           title: 'MyDashboard',
           icon: 'dashboardApp',
-          editUrl: '/management/kibana/objects/savedDashboards/1',
           inAppUrl: {
             path: '/dashboard/1',
             uiCapabilitiesPath: 'dashboard.show',
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -368,6 +372,7 @@ describe('Relationships', () => {
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 

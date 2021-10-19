@@ -214,16 +214,17 @@ describe('suggestion_panel', () => {
     act(() => {
       instance.find('button[data-test-subj="lnsSuggestion"]').at(1).simulate('click');
     });
-    // instance.update();
 
     expect(lensStore.dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'lens/selectSuggestion',
+        type: 'lens/switchVisualization',
         payload: {
-          datasourceId: undefined,
-          datasourceState: {},
-          initialState: { suggestion1: true },
-          newVisualizationId: 'testVis',
+          suggestion: {
+            datasourceId: undefined,
+            datasourceState: {},
+            visualizationState: { suggestion1: true },
+            newVisualizationId: 'testVis',
+          },
         },
       })
     );

@@ -10,6 +10,17 @@ import { WaterfallData, WaterfallDataEntry, WaterfallMetadata } from '../types';
 import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../components/use_flyout';
 import { SidebarItems } from '../../step_detail/waterfall/types';
 
+export type MarkerItems = Array<{
+  id:
+    | 'domContentLoaded'
+    | 'firstContentfulPaint'
+    | 'largestContentfulPaint'
+    | 'layoutShift'
+    | 'loadEvent'
+    | 'navigationStart';
+  offset: number;
+}>;
+
 export interface IWaterfallContext {
   totalNetworkRequests: number;
   highlightedNetworkRequests: number;
@@ -26,6 +37,7 @@ export interface IWaterfallContext {
     item: WaterfallDataEntry['config']['tooltipProps'],
     index?: number
   ) => JSX.Element;
+  markerItems?: MarkerItems;
 }
 
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
@@ -43,11 +55,13 @@ interface ProviderProps {
   legendItems?: IWaterfallContext['legendItems'];
   metadata: IWaterfallContext['metadata'];
   renderTooltipItem: IWaterfallContext['renderTooltipItem'];
+  markerItems?: MarkerItems;
 }
 
 export const WaterfallProvider: React.FC<ProviderProps> = ({
   children,
   data,
+  markerItems,
   onElementClick,
   onProjectionClick,
   onSidebarClick,
@@ -64,6 +78,7 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
     <WaterfallContext.Provider
       value={{
         data,
+        markerItems,
         showOnlyHighlightedNetworkRequests,
         sidebarItems,
         legendItems,

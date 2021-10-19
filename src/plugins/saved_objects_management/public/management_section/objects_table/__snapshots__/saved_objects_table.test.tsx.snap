@@ -2,6 +2,34 @@
 
 exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
 <DeleteConfirmModal
+  allowedTypes={
+    Array [
+      Object {
+        "displayName": "index-pattern",
+        "hidden": false,
+        "name": "index-pattern",
+        "namespaceType": "single",
+      },
+      Object {
+        "displayName": "visualization",
+        "hidden": false,
+        "name": "visualization",
+        "namespaceType": "single",
+      },
+      Object {
+        "displayName": "dashboard",
+        "hidden": false,
+        "name": "dashboard",
+        "namespaceType": "single",
+      },
+      Object {
+        "displayName": "search",
+        "hidden": false,
+        "name": "search",
+        "namespaceType": "single",
+      },
+    ]
+  }
   isDeleting={false}
   onCancel={[Function]}
   onConfirm={[Function]}
@@ -117,6 +145,34 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "getAll": [MockFunction],
           "has": [MockFunction],
         }
+      }
+      allowedTypes={
+        Array [
+          Object {
+            "displayName": "index-pattern",
+            "hidden": false,
+            "name": "index-pattern",
+            "namespaceType": "single",
+          },
+          Object {
+            "displayName": "visualization",
+            "hidden": false,
+            "name": "visualization",
+            "namespaceType": "single",
+          },
+          Object {
+            "displayName": "dashboard",
+            "hidden": false,
+            "name": "dashboard",
+            "namespaceType": "single",
+          },
+          Object {
+            "displayName": "search",
+            "hidden": false,
+            "name": "search",
+            "namespaceType": "single",
+          },
+        ]
       }
       basePath={
         BasePath {

@@ -114,7 +114,7 @@ class PackagePolicyService {
         'There is already a package with the same name on this agent policy'
       );
     }
-
+    let elasticsearch: PackagePolicy['elasticsearch'];
     // Add ids to stream
     const packagePolicyId = options?.id || uuid.v4();
     let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
@@ -155,7 +155,15 @@ class PackagePolicyService {
         }
       }
 
-      inputs = await this.compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+      const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      inputs = await this._compilePackagePolicyInputs(
+        registryPkgInfo,
+        pkgInfo,
+        packagePolicy.vars || {},
+        inputs
+      );
+
+      elasticsearch = registryPkgInfo.elasticsearch;
     }
 
     const isoDate = new Date().toISOString();
@@ -164,6 +172,7 @@ class PackagePolicyService {
       {
         ...packagePolicy,
         inputs,
+        elasticsearch,
         revision: 1,
         created_at: isoDate,
         created_by: options?.user?.username ?? 'system',
@@ -375,15 +384,21 @@ class PackagePolicyService {
     );
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs);
-
+    let elasticsearch: PackagePolicy['elasticsearch'];
     if (packagePolicy.package?.name) {
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
-
-      inputs = await this.compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+      const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      inputs = await this._compilePackagePolicyInputs(
+        registryPkgInfo,
+        pkgInfo,
+        packagePolicy.vars || {},
+        inputs
+      );
+      elasticsearch = registryPkgInfo.elasticsearch;
     }
 
     await soClient.update<PackagePolicySOAttributes>(
@@ -392,6 +407,7 @@ class PackagePolicyService {
       {
         ...restOfPackagePolicy,
         inputs,
+        elasticsearch,
         revision: oldPackagePolicy.revision + 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username ?? 'system',
@@ -563,12 +579,14 @@ class PackagePolicyService {
           packageInfo,
           packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
         );
-
-        updatePackagePolicy.inputs = await this.compilePackagePolicyInputs(
+        const registryPkgInfo = await Registry.fetchInfo(packageInfo.name, packageInfo.version);
+        updatePackagePolicy.inputs = await this._compilePackagePolicyInputs(
+          registryPkgInfo,
           packageInfo,
           updatePackagePolicy.vars || {},
           updatePackagePolicy.inputs as PackagePolicyInput[]
         );
+        updatePackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
 
         await this.update(soClient, esClient, id, updatePackagePolicy, options);
         result.push({
@@ -618,12 +636,14 @@ class PackagePolicyService {
         packageToPackagePolicyInputs(packageInfo) as InputsOverride[],
         true
       );
-
-      updatedPackagePolicy.inputs = await this.compilePackagePolicyInputs(
+      const registryPkgInfo = await Registry.fetchInfo(packageInfo.name, packageInfo.version);
+      updatedPackagePolicy.inputs = await this._compilePackagePolicyInputs(
+        registryPkgInfo,
         packageInfo,
         updatedPackagePolicy.vars || {},
         updatedPackagePolicy.inputs as PackagePolicyInput[]
       );
+      updatedPackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
 
       const hasErrors = 'errors' in updatedPackagePolicy;
 
@@ -663,12 +683,12 @@ class PackagePolicyService {
     }
   }
 
-  public async compilePackagePolicyInputs(
+  public async _compilePackagePolicyInputs(
+    registryPkgInfo: RegistryPackage,
     pkgInfo: PackageInfo,
     vars: PackagePolicy['vars'],
     inputs: PackagePolicyInput[]
   ): Promise<PackagePolicyInput[]> {
-    const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
     const inputsPromises = inputs.map(async (input) => {
       const compiledInput = await _compilePackagePolicyInput(registryPkgInfo, pkgInfo, vars, input);
       const compiledStreams = await _compilePackageStreams(registryPkgInfo, pkgInfo, vars, input);
@@ -980,7 +1000,7 @@ export function overridePackageInputs(
         ({ name }) => name === input.policy_template
       );
 
-      // Ignore any policy template removes in the new package version
+      // Ignore any policy templates removed in the new package version
       if (!policyTemplate) {
         return false;
       }
@@ -996,21 +1016,30 @@ export function overridePackageInputs(
   ];
 
   for (const override of inputsOverride) {
-    let originalInput = inputs.find((i) => i.type === override.type);
+    // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
+    // policy template, so we only match on `type` in that case.
+    let originalInput = override.policy_template
+      ? inputs.find(
+          (i) => i.type === override.type && i.policy_template === override.policy_template
+        )
+      : inputs.find((i) => i.type === override.type);
 
     // If there's no corresponding input on the original package policy, just
     // take the override value from the new package as-is. This case typically
-    // occurs when inputs or package policies are added/removed between versions.
+    // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
       inputs.push(override as NewPackagePolicyInput);
       continue;
     }
 
-    if (typeof override.enabled !== 'undefined') {
+    // For flags like this, we only want to override the original value if it was set
+    // as `undefined` in the original object. An explicit true/false value should be
+    // persisted from the original object to the result after the override process is complete.
+    if (originalInput.enabled === undefined && override.enabled !== undefined) {
       originalInput.enabled = override.enabled;
     }
 
-    if (typeof override.keep_enabled !== 'undefined') {
+    if (originalInput.keep_enabled === undefined && override.keep_enabled !== undefined) {
       originalInput.keep_enabled = override.keep_enabled;
     }
 
@@ -1029,7 +1058,7 @@ export function overridePackageInputs(
           continue;
         }
 
-        if (typeof stream.enabled !== 'undefined' && originalStream) {
+        if (originalStream?.enabled === undefined) {
           originalStream.enabled = stream.enabled;
         }
 
@@ -1092,7 +1121,14 @@ function deepMergeVars(original: any, override: any): any {
 
   for (const { name, ...overrideVal } of overrideVars) {
     const originalVar = original.vars[name];
-    result.vars[name] = { ...overrideVal, ...originalVar };
+
+    result.vars[name] = { ...originalVar, ...overrideVal };
+
+    // Ensure that any value from the original object is persisted on the newly merged resulting object,
+    // even if we merge other data about the given variable
+    if (originalVar?.value) {
+      result.vars[name].value = originalVar.value;
+    }
   }
 
   return result;

@@ -47,11 +47,11 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
   };
 
   const handleEvents = (event: any) => {
-    if (event.id !== 'NAVIGATE') return;
+    if (event.name !== 'NAVIGATE') return;
     // enrich event context with some extra data
     event.baseUrl = 'http://www.google.com';
 
-    actions.executeTriggerActions(NAVIGATE_TRIGGER_ID, event.value);
+    actions.executeTriggerActions(NAVIGATE_TRIGGER_ID, event.data);
   };
 
   return (

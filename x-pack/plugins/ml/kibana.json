@@ -8,6 +8,7 @@
   ],
   "requiredPlugins": [
     "data",
+    "dataViews",
     "cloud",
     "features",
     "dataVisualizer",

@@ -53,6 +53,9 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
+import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
+import { CorrelationsContextPopover } from './context_popover';
+import { OnAddFilter } from './context_popover/top_values';
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const {
@@ -73,6 +76,13 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     response,
     progress.isRunning
   );
+
+  const fieldStats: Record<string, FieldStats> | undefined = useMemo(() => {
+    return response.fieldStats?.reduce((obj, field) => {
+      obj[field.fieldName] = field;
+      return obj;
+    }, {} as Record<string, FieldStats>);
+  }, [response?.fieldStats]);
 
   useEffect(() => {
     if (isErrorMessage(progress.error)) {
@@ -103,6 +113,28 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const history = useHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
+
+  const onAddFilter = useCallback<OnAddFilter>(
+    ({ fieldName, fieldValue, include }) => {
+      if (include) {
+        push(history, {
+          query: {
+            kuery: `${fieldName}:"${fieldValue}"`,
+          },
+        });
+        trackApmEvent({ metric: 'correlations_term_include_filter' });
+      } else {
+        push(history, {
+          query: {
+            kuery: `not ${fieldName}:"${fieldValue}"`,
+          },
+        });
+        trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+      }
+      onFilter();
+    },
+    [onFilter, history, trackApmEvent]
+  );
 
   const mlCorrelationColumns: Array<EuiBasicTableColumn<LatencyCorrelation>> =
     useMemo(
@@ -147,6 +179,17 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldNameLabel',
             { defaultMessage: 'Field name' }
           ),
+          render: (_, { fieldName, fieldValue }) => (
+            <>
+              {fieldName}
+              <CorrelationsContextPopover
+                fieldName={fieldName}
+                fieldValue={fieldValue}
+                topValueStats={fieldStats ? fieldStats[fieldName] : undefined}
+                onAddFilter={onAddFilter}
+              />
+            </>
+          ),
           sortable: true,
         },
         {
@@ -172,15 +215,12 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               ),
               icon: 'plusInCircle',
               type: 'icon',
-              onClick: (term: LatencyCorrelation) => {
-                push(history, {
-                  query: {
-                    kuery: `${term.fieldName}:"${term.fieldValue}"`,
-                  },
-                });
-                onFilter();
-                trackApmEvent({ metric: 'correlations_term_include_filter' });
-              },
+              onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
+                onAddFilter({
+                  fieldName,
+                  fieldValue,
+                  include: true,
+                }),
             },
             {
               name: i18n.translate(
@@ -193,15 +233,12 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               ),
               icon: 'minusInCircle',
               type: 'icon',
-              onClick: (term: LatencyCorrelation) => {
-                push(history, {
-                  query: {
-                    kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
-                  },
-                });
-                onFilter();
-                trackApmEvent({ metric: 'correlations_term_exclude_filter' });
-              },
+              onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
+                onAddFilter({
+                  fieldName,
+                  fieldValue,
+                  include: false,
+                }),
             },
           ],
           name: i18n.translate(
@@ -210,7 +247,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           ),
         },
       ],
-      [history, onFilter, trackApmEvent]
+      [fieldStats, onAddFilter]
     );
 
   const [sortField, setSortField] =

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useMemo, useCallback } from 'react';
+
 import { outputRoutesService } from '../../services';
 import type { PutOutputRequest, GetOutputsResponse } from '../../types';
 
@@ -15,6 +17,21 @@ export function useGetOutputs() {
     method: 'get',
     path: outputRoutesService.getListPath(),
   });
+}
+
+export function useDefaultOutput() {
+  const outputsRequest = useGetOutputs();
+  const output = useMemo(() => {
+    return outputsRequest.data?.items.find((o) => o.is_default);
+  }, [outputsRequest.data]);
+
+  const refresh = useCallback(() => {
+    return outputsRequest.resendRequest();
+  }, [outputsRequest]);
+
+  return useMemo(() => {
+    return { output, refresh };
+  }, [output, refresh]);
 }
 
 export function sendPutOutput(outputId: string, body: PutOutputRequest['body']) {

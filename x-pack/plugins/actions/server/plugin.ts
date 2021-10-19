@@ -260,7 +260,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         this.telemetryLogger,
         plugins.taskManager,
         core,
-        this.kibanaIndexConfig.kibana.index
+        this.kibanaIndexConfig.kibana.index,
+        this.preconfiguredActions
       );
     }
 

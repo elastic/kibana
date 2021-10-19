@@ -6,7 +6,6 @@
  */
 
 import type { UnwrapPromise } from '@kbn/utility-types';
-import type { Request } from '../../../../src/plugins/inspector/common';
 import '../../../typings/rison_node';
 import '../../infra/types/eui';
 // EUIBasicTable
@@ -29,4 +28,10 @@ export type PromiseValueType<T extends Promise<any>> = UnwrapPromise<T>;
 
 export type Maybe<T> = T | null | undefined;
 
-export type InspectResponse = Request[];
+export type RecursivePartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer U>
+    ? Array<RecursivePartial<U>>
+    : T[P] extends object
+    ? RecursivePartial<T[P]>
+    : T[P];
+};

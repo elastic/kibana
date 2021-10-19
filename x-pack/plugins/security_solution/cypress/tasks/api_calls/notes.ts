@@ -8,7 +8,7 @@
 export const addNoteToTimeline = (
   note: string,
   timelineId: string
-): Cypress.Chainable<Cypress.Response> =>
+): Cypress.Chainable<Cypress.Response<unknown>> =>
   cy.request({
     method: 'PATCH',
     url: '/api/note',

@@ -9,9 +9,9 @@ import React from 'react';
 import { addDecorator } from '@storybook/react';
 import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs/blocks';
 
-import { contextDecorator } from './decorator';
+import { decorator } from './decorator';
 
-addDecorator(contextDecorator);
+addDecorator(decorator);
 
 export const parameters = {
   docs: {
