@@ -7,3 +7,4 @@
  */
 
 export { LocatorDefinition, LocatorPublic, useLocatorUrl, formatSearchParams } from './url_service';
+export type { AnonymousAccessServiceContract, AnonymousAccessState } from './anonymous_access';

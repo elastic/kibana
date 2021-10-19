@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ComponentProps } from '../../route_init';
 import { BeatsTemplate } from './beats_template';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 // @ts-ignore
@@ -72,14 +72,8 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   };
 
   return (
-    <BeatsTemplate
-      title={title}
-      pageTitle={pageTitle}
-      getPageData={getPageData}
-      data-test-subj="beatsOverviewPage"
-      cluster={cluster}
-    >
-      <div data-test-subj="beatsOverviewPage">{renderOverview(data)}</div>
+    <BeatsTemplate title={title} pageTitle={pageTitle} getPageData={getPageData}>
+      <div>{renderOverview(data)}</div>
     </BeatsTemplate>
   );
 };

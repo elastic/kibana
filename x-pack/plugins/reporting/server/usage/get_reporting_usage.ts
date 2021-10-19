@@ -8,6 +8,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import type { ReportingConfig } from '../';
+import { REPORTING_SYSTEM_INDEX } from '../../common/constants';
 import type { ExportTypesRegistry } from '../lib/export_types_registry';
 import type { GetLicense } from './';
 import { getExportStats } from './get_export_stats';
@@ -144,7 +145,7 @@ export async function getReportingUsage(
   esClient: ElasticsearchClient,
   exportTypesRegistry: ExportTypesRegistry
 ): Promise<ReportingUsageType> {
-  const reportingIndex = config.get('index');
+  const reportingIndex = REPORTING_SYSTEM_INDEX;
   const params = {
     index: `${reportingIndex}-*`,
     filterPath: 'aggregations.*.buckets',

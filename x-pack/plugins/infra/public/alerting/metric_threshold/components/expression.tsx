@@ -260,6 +260,28 @@ export const Expressions: React.FC<Props> = (props) => {
     [alertParams.groupBy]
   );
 
+  const groupByFilterTestPatterns = useMemo(() => {
+    if (!alertParams.groupBy) return null;
+    const groups = !Array.isArray(alertParams.groupBy)
+      ? [alertParams.groupBy]
+      : alertParams.groupBy;
+    return groups.map((group: string) => ({
+      groupName: group,
+      pattern: new RegExp(`{"match(_phrase)?":{"${group}":"(.*?)"}}`),
+    }));
+  }, [alertParams.groupBy]);
+
+  const redundantFilterGroupBy = useMemo(() => {
+    if (!alertParams.filterQuery || !groupByFilterTestPatterns) return [];
+    return groupByFilterTestPatterns
+      .map(({ groupName, pattern }) => {
+        if (pattern.test(alertParams.filterQuery!)) {
+          return groupName;
+        }
+      })
+      .filter((g) => typeof g === 'string') as string[];
+  }, [alertParams.filterQuery, groupByFilterTestPatterns]);
+
   return (
     <>
       <EuiSpacer size={'m'} />
@@ -425,8 +447,24 @@ export const Expressions: React.FC<Props> = (props) => {
             ...options,
             groupBy: alertParams.groupBy || undefined,
           }}
+          errorOptions={redundantFilterGroupBy}
         />
       </EuiFormRow>
+      {redundantFilterGroupBy.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="danger">
+            <FormattedMessage
+              id="xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError"
+              defaultMessage="This rule will only alert per one {matchedGroups} because the filter query contains an exact match for {groupCount, plural, one {this field} other {these fields}}."
+              values={{
+                matchedGroups: <strong>{redundantFilterGroupBy.join(', ')}</strong>,
+                groupCount: redundantFilterGroupBy.length,
+              }}
+            />
+          </EuiText>
+        </>
+      )}
       <EuiSpacer size={'s'} />
       <EuiCheckbox
         id="metrics-alert-group-disappear-toggle"

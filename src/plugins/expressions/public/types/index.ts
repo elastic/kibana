@@ -36,7 +36,7 @@ export interface ExpressionInterpreter {
 export interface IExpressionLoaderParams {
   searchContext?: SerializableRecord;
   context?: ExpressionValue;
-  variables?: Record<string, any>;
+  variables?: Record<string, unknown>;
   // Enables debug tracking on each expression in the AST
   debug?: boolean;
   disableCaching?: boolean;

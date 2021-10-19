@@ -1,10 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AlertSummaryView Behavior event code renders additional summary rows 1`] = `
-.c1 {
-  line-height: 1.7rem;
-}
-
 .c0 .euiTableHeaderCell,
 .c0 .euiTableRowCell {
   border: none;
@@ -22,6 +18,10 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
 .c0 .flyoutOverviewDescription:hover .timelines__hoverActionButton,
 .c0 .flyoutOverviewDescription:hover .securitySolution__hoverActionButton {
   opacity: 1;
+}
+
+.c1 {
+  line-height: 1.7rem;
 }
 
 .c2 {
@@ -51,10 +51,6 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
 .c2 .timelines__hoverActionButton:focus,
 .c2 .securitySolution__hoverActionButton:focus {
   opacity: 1;
-}
-
-.c3 {
-  padding: 4px 0;
 }
 
 <div
@@ -141,11 +137,18 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-signal.status"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  open
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    open
+                  </div>
                 </div>
               </div>
               <div
@@ -205,12 +208,15 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-@timestamp"
+              >
                 <div
-                  class="eventFieldsTable__fieldValue"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
                   <span
-                    class="euiToolTipAnchor"
+                    class="euiToolTipAnchor eui-textTruncate eui-alignMiddle"
                   >
                     Nov 25, 2020 @ 15:42:39.417
                   </span>
@@ -273,11 +279,18 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-signal.rule.name"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  xxx
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    xxx
+                  </div>
                 </div>
               </div>
               <div
@@ -337,11 +350,18 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-signal.rule.severity"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  low
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    low
+                  </div>
                 </div>
               </div>
               <div
@@ -401,11 +421,18 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-signal.rule.risk_score"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  21
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    21
+                  </div>
                 </div>
               </div>
               <div
@@ -465,11 +492,18 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-host.name"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  windows-native
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    windows-native
+                  </div>
                 </div>
               </div>
               <div
@@ -529,11 +563,18 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-user.name"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  administrator
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    administrator
+                  </div>
                 </div>
               </div>
               <div
@@ -593,9 +634,12 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-source.ip"
+              >
                 <div
-                  class="eventFieldsTable__fieldValue"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
                   <span
                     class="euiToolTipAnchor"
@@ -640,161 +684,6 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Overflow button
                   </div>
                 </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                destination.ip
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Threshold Count
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Threshold Terms
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Threshold Cardinality
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Rule description
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
               </div>
             </div>
           </td>
@@ -806,10 +695,6 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
 `;
 
 exports[`AlertSummaryView Memory event code renders additional summary rows 1`] = `
-.c1 {
-  line-height: 1.7rem;
-}
-
 .c0 .euiTableHeaderCell,
 .c0 .euiTableRowCell {
   border: none;
@@ -827,6 +712,10 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
 .c0 .flyoutOverviewDescription:hover .timelines__hoverActionButton,
 .c0 .flyoutOverviewDescription:hover .securitySolution__hoverActionButton {
   opacity: 1;
+}
+
+.c1 {
+  line-height: 1.7rem;
 }
 
 .c2 {
@@ -856,10 +745,6 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
 .c2 .timelines__hoverActionButton:focus,
 .c2 .securitySolution__hoverActionButton:focus {
   opacity: 1;
-}
-
-.c3 {
-  padding: 4px 0;
 }
 
 <div
@@ -946,11 +831,18 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-signal.status"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  open
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    open
+                  </div>
                 </div>
               </div>
               <div
@@ -1010,12 +902,15 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-@timestamp"
+              >
                 <div
-                  class="eventFieldsTable__fieldValue"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
                   <span
-                    class="euiToolTipAnchor"
+                    class="euiToolTipAnchor eui-textTruncate eui-alignMiddle"
                   >
                     Nov 25, 2020 @ 15:42:39.417
                   </span>
@@ -1078,11 +973,18 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-signal.rule.name"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  xxx
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    xxx
+                  </div>
                 </div>
               </div>
               <div
@@ -1142,11 +1044,18 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-signal.rule.severity"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  low
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    low
+                  </div>
                 </div>
               </div>
               <div
@@ -1206,11 +1115,18 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-signal.rule.risk_score"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  21
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    21
+                  </div>
                 </div>
               </div>
               <div
@@ -1270,11 +1186,18 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-host.name"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  windows-native
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    windows-native
+                  </div>
                 </div>
               </div>
               <div
@@ -1334,11 +1257,18 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-user.name"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  administrator
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    administrator
+                  </div>
                 </div>
               </div>
               <div
@@ -1398,9 +1328,12 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-source.ip"
+              >
                 <div
-                  class="eventFieldsTable__fieldValue"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
                   <span
                     class="euiToolTipAnchor"
@@ -1445,192 +1378,6 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Overflow button
                   </div>
                 </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                destination.ip
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Threshold Count
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Threshold Terms
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Threshold Cardinality
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Rule name
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Import Hash
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
               </div>
             </div>
           </td>

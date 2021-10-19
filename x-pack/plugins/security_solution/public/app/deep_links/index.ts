@@ -30,6 +30,10 @@ import {
   CASE,
   MANAGE,
   UEBA,
+  HOST_ISOLATION_EXCEPTIONS,
+  EVENT_FILTERS,
+  TRUSTED_APPLICATIONS,
+  ENDPOINTS,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -44,6 +48,8 @@ import {
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
   UEBA_PATH,
+  CASES_FEATURE_ID,
+  HOST_ISOLATION_EXCEPTIONS_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
@@ -313,25 +319,24 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
       {
         id: SecurityPageName.endpoints,
         navLinkStatus: AppNavLinkStatus.visible,
-        title: i18n.translate('xpack.securitySolution.search.administration.endpoints', {
-          defaultMessage: 'Endpoints',
-        }),
+        title: ENDPOINTS,
         order: 9006,
         path: ENDPOINTS_PATH,
       },
       {
         id: SecurityPageName.trustedApps,
-        title: i18n.translate('xpack.securitySolution.search.administration.trustedApps', {
-          defaultMessage: 'Trusted applications',
-        }),
+        title: TRUSTED_APPLICATIONS,
         path: TRUSTED_APPS_PATH,
       },
       {
         id: SecurityPageName.eventFilters,
-        title: i18n.translate('xpack.securitySolution.search.administration.eventFilters', {
-          defaultMessage: 'Event filters',
-        }),
+        title: EVENT_FILTERS,
         path: EVENT_FILTERS_PATH,
+      },
+      {
+        id: SecurityPageName.hostIsolationExceptions,
+        title: HOST_ISOLATION_EXCEPTIONS,
+        path: HOST_ISOLATION_EXCEPTIONS_PATH,
       },
     ],
   },
@@ -358,7 +363,7 @@ export function getDeepLinks(
           return false;
         }
         if (deepLink.id === SecurityPageName.case) {
-          return capabilities == null || capabilities.siem.read_cases === true;
+          return capabilities == null || capabilities[CASES_FEATURE_ID].read_cases === true;
         }
         if (deepLink.id === SecurityPageName.ueba) {
           return enableExperimental.uebaEnabled;
@@ -369,7 +374,7 @@ export function getDeepLinks(
         if (
           deepLink.id === SecurityPageName.case &&
           capabilities != null &&
-          capabilities.siem.crud_cases === false
+          capabilities[CASES_FEATURE_ID].crud_cases === false
         ) {
           return {
             ...deepLink,

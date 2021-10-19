@@ -557,7 +557,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'Pipeline',
     }),
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.pipeline', {
-      defaultMessage: 'Runs another ingest node pipeline.',
+      defaultMessage: 'Runs another ingest pipeline.',
     }),
     getDefaultDescription: ({ name }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.pipeline', {

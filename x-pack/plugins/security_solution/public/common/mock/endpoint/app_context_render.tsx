@@ -24,8 +24,8 @@ import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { PLUGIN_ID } from '../../../../../fleet/common';
 import { APP_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
-import { fleetGetPackageListHttpMock } from '../../../management/pages/endpoint_hosts/mocks';
 import { getDeepLinks } from '../../../app/deep_links';
+import { fleetGetPackageListHttpMock } from '../../../management/pages/mocks';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -78,7 +78,7 @@ const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeatu
     return {
       ...state,
       enableExperimental: {
-        ...state.enableExperimental!,
+        ...state.enableExperimental,
         ...action.payload,
       },
     };
@@ -98,10 +98,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
   const { storage } = createSecuritySolutionStorageMock();
-  const startServices: StartServices = {
-    ...createStartServicesMock(),
-    ...coreStart,
-  };
+  const startServices: StartServices = createStartServicesMock(coreStart);
 
   const storeReducer = {
     ...SUB_PLUGINS_REDUCER,

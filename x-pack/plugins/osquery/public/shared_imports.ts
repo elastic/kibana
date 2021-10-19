@@ -34,6 +34,7 @@ export {
   ComboBoxField,
   ToggleField,
   SelectField,
+  JsonEditorField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 export { fieldValidators } from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
 export { ERROR_CODE } from '../../../../src/plugins/es_ui_shared/static/forms/helpers/field_validators/types';

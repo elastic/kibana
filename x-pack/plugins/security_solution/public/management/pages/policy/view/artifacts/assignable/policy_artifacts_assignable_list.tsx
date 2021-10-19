@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 
 import {
-  GetTrustedListAppsResponse,
+  GetTrustedAppsListResponse,
   Immutable,
   TrustedApp,
 } from '../../../../../../../common/endpoint/types';
@@ -16,7 +16,7 @@ import { Loader } from '../../../../../../common/components/loader';
 import { ArtifactEntryCardMinified } from '../../../../../components/artifact_entry_card';
 
 export interface PolicyArtifactsAssignableListProps {
-  artifacts: Immutable<GetTrustedListAppsResponse | undefined>; // Or other artifacts type like Event Filters or Endpoint Exceptions
+  artifacts: Immutable<GetTrustedAppsListResponse | undefined>; // Or other artifacts type like Event Filters or Endpoint Exceptions
   selectedArtifactIds: string[];
   selectedArtifactsUpdated: (id: string, selected: boolean) => void;
   isListLoading: boolean;

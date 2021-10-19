@@ -17,7 +17,7 @@ import { Case, SubCase } from '../../../../../../cases/common';
 import { observabilityFeatureId } from '../../../../../common';
 
 export interface AddToCaseProps {
-  timeRange: { from: string; to: string };
+  timeRange?: { from: string; to: string };
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 
@@ -54,6 +54,7 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
   return (
     <>
       <EuiButton
+        size="s"
         isLoading={isSaving}
         fullWidth={false}
         isDisabled={lensAttributes === null}

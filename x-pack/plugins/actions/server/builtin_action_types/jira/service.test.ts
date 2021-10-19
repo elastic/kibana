@@ -316,6 +316,57 @@ describe('Jira service', () => {
       });
     });
 
+    test('removes newline characters and trialing spaces from summary', async () => {
+      requestMock.mockImplementationOnce(() => ({
+        data: {
+          capabilities: {
+            navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
+          },
+        },
+      }));
+
+      // getIssueType mocks
+      requestMock.mockImplementationOnce(() => issueTypesResponse);
+
+      // getIssueType mocks
+      requestMock.mockImplementationOnce(() => ({
+        data: { id: '1', key: 'CK-1', fields: { summary: 'test', description: 'description' } },
+      }));
+
+      requestMock.mockImplementationOnce(() => ({
+        data: { id: '1', key: 'CK-1', fields: { created: '2020-04-27T10:59:46.202Z' } },
+      }));
+
+      await service.createIncident({
+        incident: {
+          summary: 'title \n      \n \n howdy   \r \r \n \r test',
+          description: 'desc',
+          labels: [],
+          priority: 'High',
+          issueType: null,
+          parent: null,
+        },
+      });
+
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+        logger,
+        method: 'post',
+        configurationUtilities,
+        data: {
+          fields: {
+            summary: 'title, howdy, test',
+            description: 'desc',
+            project: { key: 'CK' },
+            issuetype: { id: '10006' },
+            labels: [],
+            priority: { name: 'High' },
+          },
+        },
+      });
+    });
+
     test('it should call request with correct arguments', async () => {
       requestMock.mockImplementation(() => ({
         data: {

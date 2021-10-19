@@ -38,7 +38,7 @@ export interface DiscoverMainProps {
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { services, history, indexPatternList } = props;
+  const { savedSearch, services, history, indexPatternList } = props;
   const { chrome, docLinks, uiSettings: config, data } = services;
   const navigateTo = useCallback(
     (path: string) => {
@@ -46,7 +46,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     },
     [history]
   );
-  const savedSearch = props.savedSearch;
 
   /**
    * State related logic

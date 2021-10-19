@@ -64,7 +64,6 @@ export function AddLayerButton({
         <EuiButton
           className="lnsConfigPanel__addLayerBtn"
           fullWidth
-          size="s"
           data-test-subj="lnsLayerAddButton"
           aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
             defaultMessage: 'Add layer',
@@ -89,7 +88,6 @@ export function AddLayerButton({
         <EuiButton
           className="lnsConfigPanel__addLayerBtn"
           fullWidth
-          size="s"
           data-test-subj="lnsLayerAddButton"
           aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
             defaultMessage: 'Add layer',

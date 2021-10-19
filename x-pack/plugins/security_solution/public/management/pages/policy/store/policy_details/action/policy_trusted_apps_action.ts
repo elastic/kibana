@@ -5,26 +5,32 @@
  * 2.0.
  */
 
+import { Action } from 'redux';
 import { AsyncResourceState } from '../../../../../state';
 import {
-  PostTrustedAppCreateResponse,
-  GetTrustedListAppsResponse,
+  PutTrustedAppUpdateResponse,
+  GetTrustedAppsListResponse,
+  TrustedApp,
+  MaybeImmutable,
 } from '../../../../../../../common/endpoint/types';
+import { PolicyArtifactsState } from '../../../types';
+
 export interface PolicyArtifactsAssignableListPageDataChanged {
   type: 'policyArtifactsAssignableListPageDataChanged';
-  payload: AsyncResourceState<GetTrustedListAppsResponse>;
+  payload: AsyncResourceState<GetTrustedAppsListResponse>;
 }
 
 export interface PolicyArtifactsUpdateTrustedApps {
   type: 'policyArtifactsUpdateTrustedApps';
   payload: {
-    trustedAppIds: string[];
+    action: 'assign' | 'remove';
+    artifacts: MaybeImmutable<TrustedApp[]>;
   };
 }
 
 export interface PolicyArtifactsUpdateTrustedAppsChanged {
   type: 'policyArtifactsUpdateTrustedAppsChanged';
-  payload: AsyncResourceState<PostTrustedAppCreateResponse[]>;
+  payload: AsyncResourceState<PutTrustedAppUpdateResponse[]>;
 }
 
 export interface PolicyArtifactsAssignableListExistDataChanged {
@@ -37,9 +43,43 @@ export interface PolicyArtifactsAssignableListPageDataFilter {
   payload: { filter: string };
 }
 
+export interface PolicyArtifactsDeosAnyTrustedAppExists {
+  type: 'policyArtifactsDeosAnyTrustedAppExists';
+  payload: AsyncResourceState<boolean>;
+}
+
+export interface AssignedTrustedAppsListStateChanged
+  extends Action<'assignedTrustedAppsListStateChanged'> {
+  payload: PolicyArtifactsState['assignedList'];
+}
+
+export interface PolicyDetailsListOfAllPoliciesStateChanged
+  extends Action<'policyDetailsListOfAllPoliciesStateChanged'> {
+  payload: PolicyArtifactsState['policies'];
+}
+
+export type PolicyDetailsTrustedAppsForceListDataRefresh =
+  Action<'policyDetailsTrustedAppsForceListDataRefresh'>;
+
+export type PolicyDetailsArtifactsResetRemove = Action<'policyDetailsArtifactsResetRemove'>;
+
+export interface PolicyDetailsTrustedAppsRemoveListStateChanged
+  extends Action<'policyDetailsTrustedAppsRemoveListStateChanged'> {
+  payload: PolicyArtifactsState['removeList'];
+}
+
+/**
+ * All of the possible actions for Trusted Apps under the Policy Details store
+ */
 export type PolicyTrustedAppsAction =
   | PolicyArtifactsAssignableListPageDataChanged
   | PolicyArtifactsUpdateTrustedApps
   | PolicyArtifactsUpdateTrustedAppsChanged
   | PolicyArtifactsAssignableListExistDataChanged
-  | PolicyArtifactsAssignableListPageDataFilter;
+  | PolicyArtifactsAssignableListPageDataFilter
+  | PolicyArtifactsDeosAnyTrustedAppExists
+  | AssignedTrustedAppsListStateChanged
+  | PolicyDetailsListOfAllPoliciesStateChanged
+  | PolicyDetailsTrustedAppsForceListDataRefresh
+  | PolicyDetailsTrustedAppsRemoveListStateChanged
+  | PolicyDetailsArtifactsResetRemove;

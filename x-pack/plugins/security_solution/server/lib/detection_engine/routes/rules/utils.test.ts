@@ -38,7 +38,8 @@ import {
 } from '../../schemas/rule_schemas.mock';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRuleAlertAction } from '../../rule_actions/legacy_types';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -306,7 +307,7 @@ describe.each([
     });
 
     test('outputs 200 if the data is of type siem alert and has a legacy rule action', () => {
-      const actions: RuleAlertAction[] = [
+      const actions: LegacyRuleAlertAction[] = [
         {
           id: '456',
           params: {},

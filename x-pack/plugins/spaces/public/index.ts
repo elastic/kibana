@@ -20,8 +20,9 @@ export type {
   CopyToSpaceSavedObjectTarget,
 } from './copy_saved_objects_to_space';
 
+export type { LegacyUrlConflictProps, EmbeddableLegacyUrlConflictProps } from './legacy_urls';
+
 export type {
-  LegacyUrlConflictProps,
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
 } from './share_saved_objects_to_space';

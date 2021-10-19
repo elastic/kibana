@@ -24,7 +24,7 @@ function stringToDuration(text: string) {
     return numberToDuration(number);
   }
 
-  const count = parseInt(result[1], 0);
+  const count = parseInt(result[1], 10);
   const unit = result[2] as DurationInputArg2;
 
   return momentDuration(count, unit);

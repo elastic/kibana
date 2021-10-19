@@ -16,8 +16,14 @@ import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 
+import type {
+  CustomIntegrationsStart,
+  CustomIntegrationsSetup,
+} from 'src/plugins/custom_integrations/public';
+
+import type { SharePluginStart } from 'src/plugins/share/public';
+
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
-import type { CustomIntegrationsSetup } from '../../../../src/plugins/custom_integrations/public';
 
 import type {
   DataPublicPluginSetup,
@@ -38,11 +44,7 @@ import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constant
 import { licenseService } from './hooks';
 import { setHttpClient } from './hooks/use_request';
 import { createPackageSearchProvider } from './search_provider';
-import {
-  TutorialDirectoryNotice,
-  TutorialDirectoryHeaderLink,
-  TutorialModuleNotice,
-} from './components/home_integration';
+import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
@@ -76,10 +78,13 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  customIntegrations: CustomIntegrationsStart;
+  share: SharePluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, FleetStartDeps {
   storage: Storage;
+  share: SharePluginStart;
   cloud?: CloudSetup;
 }
 
@@ -129,6 +134,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
+          cloud: deps.cloud,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
@@ -187,7 +193,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     // Register components for home/add data integration
     if (deps.home) {
-      deps.home.tutorials.registerDirectoryNotice(PLUGIN_ID, TutorialDirectoryNotice);
       deps.home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
       deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
 

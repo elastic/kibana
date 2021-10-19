@@ -10,7 +10,7 @@ import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test/jest';
 import { setHeaderActionMenuMounter } from '../../../../../kibana_services';
-import { DiscoverLayout } from './discover_layout';
+import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
@@ -31,14 +31,20 @@ import { FetchStatus } from '../../../../types';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../../../inspector';
 import { Chart } from '../chart/point_series';
+import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function getProps(indexPattern: IndexPattern): DiscoverLayoutProps {
+function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): DiscoverLayoutProps {
   const searchSourceMock = createSearchSourceMock({});
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+  };
+  services.storage.get = (key: string) => {
+    if (key === SIDEBAR_CLOSED_KEY) {
+      return wasSidebarClosed;
+    }
   };
 
   const indexPatternList = [indexPattern].map((ip) => {
@@ -139,10 +145,34 @@ describe('Discover component', () => {
     const component = mountWithIntl(<DiscoverLayout {...getProps(indexPatternMock)} />);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
+
   test('selected index pattern with time field displays chart toggle', () => {
     const component = mountWithIntl(
       <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
     );
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
+  });
+
+  describe('sidebar', () => {
+    test('should be opened if discover:sidebarClosed was not set', () => {
+      const component = mountWithIntl(
+        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
+      );
+      expect(component.find(DiscoverSidebar).length).toBe(1);
+    });
+
+    test('should be opened if discover:sidebarClosed is false', () => {
+      const component = mountWithIntl(
+        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, false)} />
+      );
+      expect(component.find(DiscoverSidebar).length).toBe(1);
+    });
+
+    test('should be closed if discover:sidebarClosed is true', () => {
+      const component = mountWithIntl(
+        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, true)} />
+      );
+      expect(component.find(DiscoverSidebar).length).toBe(0);
+    });
   });
 });

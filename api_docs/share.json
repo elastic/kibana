@@ -362,7 +362,13 @@
         "description": [],
         "signature": [
           "<P extends ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">(locator: ",
           {
             "pluginId": "share",
@@ -617,6 +623,16 @@
         "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.LocatorPublic.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "share",
             "id": "def-public.LocatorPublic.getLocation",
@@ -1886,11 +1902,25 @@
         "UrlGeneratorsSetup",
         "; url: ",
         "UrlService",
-        "; navigate(options: ",
+        "<unknown>; navigate(options: ",
         "RedirectOptions",
         "<",
-        "SerializableRecord",
-        ">): void; }"
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "server",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-server.SerializableRecord",
+          "text": "SerializableRecord"
+        },
+        ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.AnonymousAccessServiceContract",
+          "text": "AnonymousAccessServiceContract"
+        },
+        ") => void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
       "deprecated": false,
@@ -1917,10 +1947,16 @@
         "UrlGeneratorsStart",
         "; url: ",
         "UrlService",
-        "; navigate(options: ",
+        "<unknown>; navigate(options: ",
         "RedirectOptions",
         "<",
-        "SerializableRecord",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "server",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-server.SerializableRecord",
+          "text": "SerializableRecord"
+        },
         ">): void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
@@ -1983,7 +2019,10 @@
           "label": "url",
           "description": [],
           "signature": [
-            "UrlService"
+            "UrlService",
+            "<",
+            "ServerShortUrlClientFactoryCreateParams",
+            ">"
           ],
           "path": "src/plugins/share/server/plugin.ts",
           "deprecated": false
@@ -2010,7 +2049,10 @@
           "label": "url",
           "description": [],
           "signature": [
-            "UrlService"
+            "UrlService",
+            "<",
+            "ServerShortUrlClientFactoryCreateParams",
+            ">"
           ],
           "path": "src/plugins/share/server/plugin.ts",
           "deprecated": false
@@ -2034,7 +2076,13 @@
           "(opts: ",
           "RedirectOptions",
           "<",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">, { lzCompress }: ",
           "FormatSearchParamsOptions",
           ") => URLSearchParams"
@@ -2052,7 +2100,13 @@
             "signature": [
               "RedirectOptions",
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">"
             ],
             "path": "src/plugins/share/common/url_service/locators/redirect/format_search_params.ts",
@@ -2086,7 +2140,13 @@
         "description": [],
         "signature": [
           "<P extends ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">(locator: ",
           {
             "pluginId": "share",
@@ -2172,6 +2232,107 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "share",
+        "id": "def-common.AnonymousAccessServiceContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymousAccessServiceContract",
+        "description": [
+          "\nThe contract that is used to check anonymous access for the purposes of sharing public links. The implementation is intended to be\nprovided by the security plugin."
+        ],
+        "path": "src/plugins/share/common/anonymous_access/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessServiceContract.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [
+              "\nThis function returns the current state of anonymous access."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.AnonymousAccessState",
+                "text": "AnonymousAccessState"
+              },
+              ">"
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessServiceContract.getCapabilities",
+            "type": "Function",
+            "tags": [],
+            "label": "getCapabilities",
+            "description": [
+              "\nThis function returns the capabilities of the anonymous access user."
+            ],
+            "signature": [
+              "() => Promise<",
+              "Capabilities",
+              ">"
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-common.AnonymousAccessState",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymousAccessState",
+        "description": [
+          "\nThe state of anonymous access."
+        ],
+        "path": "src/plugins/share/common/anonymous_access/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessState.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [
+              "\nWhether anonymous access is enabled or not."
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessState.accessURLParameters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessURLParameters",
+            "description": [
+              "\nIf anonymous access is enabled, this reflects what URL parameters need to be added to a Kibana link to make it publicly accessible.\nNote that if anonymous access is the only authentication method, this will be null."
+            ],
+            "signature": [
+              "Record<string, string> | null"
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "share",
         "id": "def-common.LocatorDefinition",
@@ -2283,6 +2444,16 @@
         "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.LocatorPublic.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "share",
             "id": "def-common.LocatorPublic.getLocation",

@@ -9,8 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
-import { ElasticsearchOverview } from '../../../components/elasticsearch';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+// @ts-ignore
+import { ElasticsearchOverviewReact } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
@@ -78,7 +79,7 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
     const shardActivityData = shardActivity && filterShardActivityData(shardActivity); // no filter on data = null
 
     return (
-      <ElasticsearchOverview
+      <ElasticsearchOverviewReact
         clusterStatus={clusterStatus}
         metrics={metrics}
         logs={logs}

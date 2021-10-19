@@ -43,7 +43,6 @@ export const taskExecutionFailureThresholdSchema = schema.object(
 
 export const configSchema = schema.object(
   {
-    enabled: schema.boolean({ defaultValue: true }),
     /* The maximum number of times a task will be attempted before being abandoned as failed */
     max_attempts: schema.number({
       defaultValue: 3,

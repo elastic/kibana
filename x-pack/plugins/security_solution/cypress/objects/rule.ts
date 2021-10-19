@@ -58,6 +58,7 @@ export interface CustomRule {
   lookBack: Interval;
   timeline: CompleteTimeline;
   maxSignals: number;
+  buildingBlockType?: string;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -108,7 +109,7 @@ export const getIndexPatterns = (): string[] => [
   'winlogbeat-*',
 ];
 
-export const getThreatIndexPatterns = (): string[] => ['filebeat-*'];
+export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
 
 const getMitre1 = (): Mitre => ({
   tactic: `${getMockThreatData().tactic.name} (${getMockThreatData().tactic.id})`,
@@ -186,6 +187,25 @@ export const getNewRule = (): CustomRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
+});
+
+export const getBuildingBlockRule = (): CustomRule => ({
+  customQuery: 'host.name: *',
+  index: getIndexPatterns(),
+  name: 'Building Block Rule Test',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+  buildingBlockType: 'default',
 });
 
 export const getUnmappedRule = (): CustomRule => ({
@@ -326,6 +346,24 @@ export const getEqlRule = (): CustomRule => ({
   maxSignals: 100,
 });
 
+export const getCCSEqlRule = (): CustomRule => ({
+  customQuery: 'any where process.name == "run-parts"',
+  name: 'New EQL Rule',
+  index: [`${ccsRemoteName}:run-parts`],
+  description: 'New EQL rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
+
 export const getEqlSequenceRule = (): CustomRule => ({
   customQuery:
     'sequence with maxspan=30s\
@@ -362,7 +400,7 @@ export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   lookBack: getLookBack(),
   indicatorIndexPattern: ['filebeat-*'],
   indicatorMappingField: 'myhash.mysha256',
-  indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
+  indicatorIndexField: 'threat.indicator.file.hash.sha256',
   type: 'file',
   atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
   timeline: getIndicatorMatchTimelineTemplate(),

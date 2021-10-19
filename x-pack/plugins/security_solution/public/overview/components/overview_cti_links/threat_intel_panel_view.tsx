@@ -34,7 +34,6 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     field: 'path',
     truncateText: true,
     width: '80px',
-    // eslint-disable-next-line react/display-name
     render: (path: string) => <Link path={path} copy={LINK_COPY} />,
   },
 ];

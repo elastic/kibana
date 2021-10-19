@@ -14,6 +14,7 @@ import { useTrackMetric, METRIC_TYPE } from '../../../../../../../observability/
 import { WaterfallFilter } from './waterfall_filter';
 import { WaterfallFlyout } from './waterfall_flyout';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
+import { MarkerItems } from '../../waterfall/context/waterfall_chart';
 
 export const renderLegendItem: RenderItem<LegendItem> = (item) => {
   return (
@@ -26,9 +27,10 @@ export const renderLegendItem: RenderItem<LegendItem> = (item) => {
 interface Props {
   total: number;
   data: NetworkItems;
+  markerItems?: MarkerItems;
 }
 
-export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
+export const WaterfallChartWrapper: React.FC<Props> = ({ data, total, markerItems }) => {
   const [query, setQuery] = useState<string>('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [onlyHighlighted, setOnlyHighlighted] = useState(false);
@@ -107,6 +109,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
 
   return (
     <WaterfallProvider
+      markerItems={markerItems}
       totalNetworkRequests={total}
       fetchedNetworkRequests={networkData.length}
       highlightedNetworkRequests={totalHighlightedRequests}

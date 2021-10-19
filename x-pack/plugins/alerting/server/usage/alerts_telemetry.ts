@@ -259,7 +259,7 @@ export async function getTotalCountAggregations(
 
   const totalAlertsCount = Object.keys(aggregations.byAlertTypeId.value.types).reduce(
     (total: number, key: string) =>
-      parseInt(aggregations.byAlertTypeId.value.types[key], 0) + total,
+      parseInt(aggregations.byAlertTypeId.value.types[key], 10) + total,
     0
   );
 
@@ -325,7 +325,7 @@ export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaIn
   return {
     countTotal: Object.keys(aggregations.byAlertTypeId.value.types).reduce(
       (total: number, key: string) =>
-        parseInt(aggregations.byAlertTypeId.value.types[key], 0) + total,
+        parseInt(aggregations.byAlertTypeId.value.types[key], 10) + total,
       0
     ),
     countByType: Object.keys(aggregations.byAlertTypeId.value.types).reduce(

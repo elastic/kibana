@@ -71,9 +71,9 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                 type: 'index-pattern',
                 getIconForSavedObject: () => 'indexPatternApp',
                 name: i18n.translate(
-                  'visualizations.newVisWizard.searchSelection.savedObjectType.dataView',
+                  'visualizations.newVisWizard.searchSelection.savedObjectType.indexPattern',
                   {
-                    defaultMessage: 'Data view',
+                    defaultMessage: 'Index pattern',
                   }
                 ),
               },

@@ -8,13 +8,12 @@
 import React from 'react';
 import { TableHeadReact } from './table_head_react';
 import { TableBody } from './table_body';
-import { labels } from '../lib/labels';
 
 export const ClusterViewReact = (props) => {
   return (
     <table cellPadding="0" cellSpacing="0" className="table">
       <TableHeadReact
-        labels={labels.node}
+        labels={props.labels}
         toggleShowSystemIndices={props.toggleShowSystemIndices}
         showSystemIndices={props.showSystemIndices}
       />
@@ -22,7 +21,7 @@ export const ClusterViewReact = (props) => {
         filter={props.filter}
         totalCount={props.totalCount}
         rows={props.nodesByIndices}
-        cols={labels.node.length}
+        cols={props.labels.length}
         shardStats={props.shardStats}
       />
     </table>

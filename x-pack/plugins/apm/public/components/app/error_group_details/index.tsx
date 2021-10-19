@@ -127,7 +127,7 @@ export function ErrorGroupDetails() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
+          endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}',
           params: {
             path: {
               serviceName,

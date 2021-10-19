@@ -41,30 +41,18 @@ describe('OverviewEmpty', () => {
       (useUserPrivileges as jest.Mock).mockReset();
     });
 
-    test('render with correct actions ', () => {
-      expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
-        beats: {
-          description:
-            'Lightweight Beats can send data from hundreds or thousands of machines and systems',
-          fill: false,
-          label: 'Add data with Beats',
-          url: '/app/home#/tutorial_directory/security',
+    it('render with correct actions ', () => {
+      expect(wrapper.find('[data-test-subj="empty-page"]').prop('noDataConfig')).toEqual({
+        actions: {
+          elasticAgent: {
+            category: 'security',
+            description:
+              'Use Elastic Agent to collect security events and protect your endpoints from threats.',
+            title: 'Add a Security integration',
+          },
         },
-        elasticAgent: {
-          description:
-            'The Elastic Agent provides a simple, unified way to add monitoring to your hosts.',
-          fill: false,
-          label: 'Add data with Elastic Agent',
-          url: 'ingestUrl',
-        },
-        endpoint: {
-          description:
-            'Protect your hosts with threat prevention, detection, and deep security data visibility.',
-          fill: false,
-          label: 'Add Endpoint Security',
-          onClick: undefined,
-          url: `/integrations/endpoint-${endpointPackageVersion}/add-integration`,
-        },
+        docsLink: 'https://www.elastic.co/guide/en/security/mocked-test-branch/index.html',
+        solution: 'Security',
       });
     });
   });
@@ -78,15 +66,18 @@ describe('OverviewEmpty', () => {
       wrapper = shallow(<OverviewEmpty />);
     });
 
-    test('render with correct actions ', () => {
-      expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
-        beats: {
-          description:
-            'Lightweight Beats can send data from hundreds or thousands of machines and systems',
-          fill: false,
-          label: 'Add data with Beats',
-          url: '/app/home#/tutorial_directory/security',
+    it('render with correct actions ', () => {
+      expect(wrapper.find('[data-test-subj="empty-page"]').prop('noDataConfig')).toEqual({
+        actions: {
+          elasticAgent: {
+            category: 'security',
+            description:
+              'Use Elastic Agent to collect security events and protect your endpoints from threats.',
+            title: 'Add a Security integration',
+          },
         },
+        docsLink: 'https://www.elastic.co/guide/en/security/mocked-test-branch/index.html',
+        solution: 'Security',
       });
     });
   });

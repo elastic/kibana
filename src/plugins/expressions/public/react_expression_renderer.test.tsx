@@ -14,6 +14,7 @@ import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader } from './loader';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
+import { IInterpreterRenderHandlers } from '../common';
 import { RenderErrorHandlerFnType } from './types';
 import { ExpressionRendererEvent } from './render';
 
@@ -234,7 +235,7 @@ describe('ExpressionRenderer', () => {
         done: () => {
           renderSubject.next(1);
         },
-      } as any);
+      } as IInterpreterRenderHandlers);
     });
 
     instance.update();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { schema, TypeOf } from '@kbn/config-schema';
+
 import {
   RulesClient,
   PartialAlert,
@@ -102,8 +104,8 @@ export type LegacyNotificationExecutorOptions = AlertExecutorOptions<
 export const legacyIsNotificationAlertExecutor = (
   obj: LegacyNotificationAlertTypeDefinition
 ): obj is AlertType<
-  AlertTypeParams,
-  AlertTypeParams,
+  LegacyRuleNotificationAlertTypeParams,
+  LegacyRuleNotificationAlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext
@@ -116,8 +118,8 @@ export const legacyIsNotificationAlertExecutor = (
  */
 export type LegacyNotificationAlertTypeDefinition = Omit<
   AlertType<
-    AlertTypeParams,
-    AlertTypeParams,
+    LegacyRuleNotificationAlertTypeParams,
+    LegacyRuleNotificationAlertTypeParams,
     AlertTypeState,
     AlertInstanceState,
     AlertInstanceContext,
@@ -131,3 +133,19 @@ export type LegacyNotificationAlertTypeDefinition = Omit<
     state,
   }: LegacyNotificationExecutorOptions) => Promise<AlertTypeState | void>;
 };
+
+/**
+ * This is the notification type used within legacy_rules_notification_alert_type for the alert params.
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ * @see legacy_rules_notification_alert_type
+ */
+export const legacyRulesNotificationParams = schema.object({
+  ruleAlertId: schema.string(),
+});
+
+/**
+ * This legacy rules notification type used within legacy_rules_notification_alert_type for the alert params.
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ * @see legacy_rules_notification_alert_type
+ */
+export type LegacyRulesNotificationParams = TypeOf<typeof legacyRulesNotificationParams>;

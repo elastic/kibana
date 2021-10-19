@@ -37,7 +37,8 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
     data: dataPluginMock.createStartContract(),
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
-    security: securityMock.createStart(),
+    securitySetup: securityMock.createSetup(),
+    securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
     isProductionMode: true,
     configInitialValue: {
@@ -64,7 +65,7 @@ export const xpackMocks = {
 
 export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServiceInterface> => {
   return {
-    compilePackagePolicyInputs: jest.fn(),
+    _compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),

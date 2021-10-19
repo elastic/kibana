@@ -12,7 +12,7 @@ import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 import TutorialConfigAgent from './';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 
-export type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
+export type APIResponseType = APIReturnType<'GET /internal/apm/fleet/agents'>;
 
 interface Args {
   apmAgent: string;
