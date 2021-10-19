@@ -202,13 +202,6 @@
           "properties": {
             "access": {
               "properties": {
-                "body_sent": {
-                  "properties": {
-                    "bytes": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "geoip": {
                   "type": "object"
                 },
@@ -241,16 +234,7 @@
               }
             },
             "error": {
-              "properties": {
-                "level": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "message": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
+              "type": "object"
             }
           }
         },
@@ -11784,13 +11768,6 @@
           "properties": {
             "access": {
               "properties": {
-                "body_sent": {
-                  "properties": {
-                    "bytes": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "geoip": {
                   "type": "object"
                 },
@@ -11830,14 +11807,6 @@
               "properties": {
                 "connection_id": {
                   "type": "long"
-                },
-                "level": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "message": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
                 }
               }
             },
