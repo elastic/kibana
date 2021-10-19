@@ -18,6 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Loading } from '../../../components';
@@ -32,6 +33,7 @@ export interface Props {
   controls?: ReactNode | ReactNode[];
   title?: string;
   list: IntegrationCardItem[];
+  featuredList?: JSX.Element | null;
   initialSearch?: string;
   setSelectedCategory: (category: string) => void;
   onSearchChange: (search: string) => void;
@@ -48,6 +50,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   onSearchChange,
   setSelectedCategory,
   showMissingIntegrationMessage = false,
+  featuredList = null,
   callout,
 }) => {
   const [searchTerm, setSearchTerm] = useState(initialSearch || '');
@@ -106,42 +109,45 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   }
 
   return (
-    <div ref={menuRef}>
-      <EuiFlexGroup alignItems="flexStart" gutterSize="xl">
-        <EuiFlexItem grow={1} className={isSticky ? 'kbnStickyMenu' : ''}>
-          {controlsContent}
-        </EuiFlexItem>
-        <EuiFlexItem grow={5}>
-          <EuiSearchBar
-            query={searchTerm || undefined}
-            box={{
-              placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
-                defaultMessage: 'Search for integrations',
-              }),
-              incremental: true,
-            }}
-            onChange={onQueryChange}
-          />
-          {callout ? (
-            <>
-              <EuiSpacer />
-              {callout}
-            </>
-          ) : null}
-          <EuiSpacer />
-          {gridContent}
-          {showMissingIntegrationMessage && (
-            <>
-              <EuiSpacer />
-              <MissingIntegrationContent
-                resetQuery={resetQuery}
-                setSelectedCategory={setSelectedCategory}
-              />
-            </>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+    <>
+      {featuredList}
+      <div ref={menuRef}>
+        <EuiFlexGroup alignItems="flexStart" gutterSize="xl">
+          <EuiFlexItem grow={1} className={isSticky ? 'kbnStickyMenu' : ''}>
+            {controlsContent}
+          </EuiFlexItem>
+          <EuiFlexItem grow={5}>
+            <EuiSearchBar
+              query={searchTerm || undefined}
+              box={{
+                placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
+                  defaultMessage: 'Search for integrations',
+                }),
+                incremental: true,
+              }}
+              onChange={onQueryChange}
+            />
+            {callout ? (
+              <>
+                <EuiSpacer />
+                {callout}
+              </>
+            ) : null}
+            <EuiSpacer />
+            {gridContent}
+            {showMissingIntegrationMessage && (
+              <>
+                <EuiSpacer />
+                <MissingIntegrationContent
+                  resetQuery={resetQuery}
+                  setSelectedCategory={setSelectedCategory}
+                />
+              </>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    </>
   );
 };
 

@@ -23,7 +23,7 @@ import { ADD_DATA_PATH } from '../../../../common/constants';
 import { isDetectionsPath } from '../../../../public/helpers';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
-  defaultMessage: 'Add data',
+  defaultMessage: 'Add integrations',
 });
 
 /**

@@ -8,7 +8,18 @@
 import React, { memo, useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
-import { EuiHorizontalRule, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiHorizontalRule,
+  EuiFlexItem,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiCard,
+  EuiFlexGroup,
+  EuiIcon,
+} from '@elastic/eui';
+
+import { useStartServices } from '../../../../hooks';
 
 import { pagePathGetters } from '../../../../constants';
 import {
@@ -97,6 +108,9 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 export const AvailablePackages: React.FC = memo(() => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
   useBreadcrumbs('integrations_all');
+
+  const { http } = useStartServices();
+  const addBasePath = http.basePath.prepend;
 
   const { selectedCategory, searchParam } = getParams(
     useParams<CategoryParams>(),
@@ -210,8 +224,56 @@ export const AvailablePackages: React.FC = memo(() => {
     return c.categories.includes(selectedCategory);
   });
 
+  // TODO: Remove this hard coded list of integrations with a suggestion service
+  const featuredList = (
+    <>
+      <EuiFlexGrid columns={3}>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon type="logoSecurity" size="xxl" />}
+            href={addBasePath('/app/integrations/detail/endpoint/')}
+            title={i18n.translate('xpack.observability.home.featuredSecurityTitle', {
+              defaultMessage: 'Endpoint Security',
+            })}
+            description={i18n.translate('xpack.observability.home.featuredSecurityDesc', {
+              defaultMessage:
+                'Protect your hosts with threat prevention, detection, and deep security data visibility.',
+            })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            title={i18n.translate('xpack.observability.home.featuredObsTitle', {
+              defaultMessage: 'Elastic APM',
+            })}
+            description={i18n.translate('xpack.observability.home.featuredObsDesc', {
+              defaultMessage:
+                'Monitor, detect and diagnose complex performance issues from your application.',
+            })}
+            href={addBasePath('/app/integrations/detail/apm')}
+            icon={<EuiIcon type="logoObservability" size="xxl" />}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon type="logoAppSearch" size="xxl" />}
+            href={addBasePath('/app/enterprise_search/app_search')}
+            title={i18n.translate('xpack.observability.home.featuredObsTitle', {
+              defaultMessage: 'Web site crawler',
+            })}
+            description={i18n.translate('xpack.observability.home.featuredObsDesc', {
+              defaultMessage: 'Add search to your website with the App Search web crawler.',
+            })}
+          />
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiSpacer size="xl" />
+    </>
+  );
+
   return (
     <PackageListGrid
+      featuredList={featuredList}
       isLoading={isLoadingAllPackages}
       controls={controls}
       initialSearch={searchParam}

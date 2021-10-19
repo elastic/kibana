@@ -46,7 +46,7 @@ const link = (
 const title = (
   <FormattedMessage
     id="xpack.fleet.epm.integrationPreference.title"
-    defaultMessage="When an integration is available for {link}, show:"
+    defaultMessage="If an integration is available for {link}, show:"
     values={{ link }}
   />
 );
@@ -115,6 +115,7 @@ export const IntegrationPreference = ({ initialType, onChange }: Props) => {
           name="preference"
         />
       </EuiForm>
+      <EuiSpacer size="m" />
     </EuiPanel>
   );
 };

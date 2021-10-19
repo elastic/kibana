@@ -43,6 +43,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       <EuiCard
         paddingSize="l"
         image={image}
+        textAlign="left"
         title={
           <EuiTextColor color="default">
             {i18n.translate('kibana-react.noDataPage.elasticAgentCard.noPermission.title', {
@@ -78,6 +79,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   return (
     <EuiCard
       paddingSize="l"
+      textAlign="left"
       image={image}
       href={href ?? addBasePath(`/app/integrations/browse${hasCategory}`)}
       // Bad hack to fix the need for an a11y title even though the button exists
