@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe.only('When on the Endpoint Policy Details Page', function () {
+  describe('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
@@ -71,13 +71,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('and the show advanced settings button is clicked', async () => {
         await testSubjects.missingOrFail('advancedPolicyPanel');
 
-        let advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
-        await advancedPolicyButton.click();
-
+        // Expand
+        await pageObjects.policy.showAdvancedSettingsSection();
         await testSubjects.existOrFail('advancedPolicyPanel');
 
-        advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
-        await advancedPolicyButton.click();
+        // Collapse
+        await pageObjects.policy.hideAdvancedSettingsSection();
         await testSubjects.missingOrFail('advancedPolicyPanel');
       });
     });
@@ -167,8 +166,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyMacEvent_file'),
         ]);
 
-        const advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
-        await advancedPolicyButton.click();
+        await pageObjects.policy.showAdvancedSettingsSection();
 
         const advancedPolicyField = await pageObjects.policy.findAdvancedPolicyField();
         await advancedPolicyField.clearValue();
@@ -231,6 +229,42 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encryption_algorithm: 'none',
                   relative_url:
                     '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
+                'endpoint-hostisolationexceptionlist-linux-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
+                'endpoint-hostisolationexceptionlist-macos-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
+                'endpoint-hostisolationexceptionlist-windows-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-trustlist-linux-v1': {
                   compression_algorithm: 'zlib',
@@ -401,8 +435,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should have cleared the advanced section when the user deletes the value', async () => {
-        const advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
-        await advancedPolicyButton.click();
+        await pageObjects.policy.showAdvancedSettingsSection();
 
         const advancedPolicyField = await pageObjects.policy.findAdvancedPolicyField();
         await advancedPolicyField.clearValue();
@@ -465,6 +498,42 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encryption_algorithm: 'none',
                   relative_url:
                     '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
+                'endpoint-hostisolationexceptionlist-linux-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
+                'endpoint-hostisolationexceptionlist-macos-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
+                'endpoint-hostisolationexceptionlist-windows-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-trustlist-linux-v1': {
                   compression_algorithm: 'zlib',
@@ -698,6 +767,42 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   relative_url:
                     '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
+                'endpoint-hostisolationexceptionlist-linux-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
+                'endpoint-hostisolationexceptionlist-macos-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
+                'endpoint-hostisolationexceptionlist-windows-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
                 'endpoint-trustlist-linux-v1': {
                   compression_algorithm: 'zlib',
                   decoded_sha256:
@@ -916,12 +1021,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should include updated endpoint data when saved', async () => {
-        const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
-          winDnsEventingCheckbox
+          await testSubjects.find('policyWindowsEvent_dns')
         );
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-        const wasSelected = await winDnsEventingCheckbox.isSelected();
+        const wasSelected = await (await testSubjects.find('policyWindowsEvent_dns')).isSelected();
+
+        expect(wasSelected).to.be(false);
+
         await (await pageObjects.ingestManagerCreatePackagePolicy.findSaveButton(true)).click();
         await pageObjects.ingestManagerCreatePackagePolicy.waitForSaveSuccessNotification(true);
 
@@ -929,6 +1036,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id,
           policyInfo.packagePolicy.id
         );
+
         expect(await testSubjects.isSelected('policyWindowsEvent_dns')).to.be(wasSelected);
       });
 

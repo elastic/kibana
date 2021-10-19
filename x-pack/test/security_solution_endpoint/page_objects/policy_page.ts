@@ -49,6 +49,34 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
       return await testSubjects.find('advancedPolicyButton');
     },
 
+    async isAdvancedSettingsExpanded() {
+      return await testSubjects.exists('advancedPolicyPanel');
+    },
+
+    /**
+     * shows the advanced settings section and scrolls it into view
+     */
+    async showAdvancedSettingsSection() {
+      if (!(await this.isAdvancedSettingsExpanded())) {
+        const expandButton = await this.findAdvancedPolicyButton();
+        await expandButton.click();
+      }
+
+      await testSubjects.existOrFail('advancedPolicyPanel');
+      await testSubjects.scrollIntoView('advancedPolicyPanel');
+    },
+
+    /**
+     * Hides the advanced settings section
+     */
+    async hideAdvancedSettingsSection() {
+      if (await this.isAdvancedSettingsExpanded()) {
+        const expandButton = await this.findAdvancedPolicyButton();
+        await expandButton.click();
+      }
+      await testSubjects.missingOrFail('advancedPolicyPanel');
+    },
+
     /**
      * Finds and returns the linux connection_delay Advanced Policy field
      */
