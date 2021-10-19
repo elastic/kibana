@@ -174,7 +174,6 @@ export const getColumns = ({
           {value}
         </LinkAnchor>
       ),
-      truncateText: true,
       width: '20%',
       sortable: true,
     },
@@ -344,7 +343,6 @@ export const getMonitoringColumns = (
           </LinkAnchor>
         );
       },
-      truncateText: true,
       width: '24%',
     },
     {

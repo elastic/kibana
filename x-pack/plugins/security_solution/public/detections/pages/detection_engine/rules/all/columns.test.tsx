@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { scopedHistoryMock } from 'src/core/public/mocks';
 import uuid from 'uuid';
+
+import type { DocLinksStart } from 'src/core/public';
+import { scopedHistoryMock } from 'src/core/public/mocks';
 import '../../../../../common/mock/match_media';
 import { deleteRulesAction, duplicateRulesAction, editRuleAction } from './actions';
-import { getActions } from './columns';
+import { getActions, getColumns, getMonitoringColumns } from './columns';
 import { mockRule } from './__mocks__/mock';
 
 jest.mock('./actions', () => ({
@@ -24,12 +26,15 @@ const deleteRulesActionMock = deleteRulesAction as jest.Mock;
 const editRuleActionMock = editRuleAction as jest.Mock;
 
 describe('AllRulesTable Columns', () => {
+  const dispatch = jest.fn();
+  const dispatchToaster = jest.fn();
+  const reFetchRules = jest.fn();
+  const refetchPrePackagedRulesStatus = jest.fn();
+  const formatUrl = jest.fn();
+  const navigateToApp = jest.fn();
+
   describe('getActions', () => {
     const rule = mockRule(uuid.v4());
-    const dispatch = jest.fn();
-    const dispatchToaster = jest.fn();
-    const reFetchRules = jest.fn();
-    const refetchPrePackagedRulesStatus = jest.fn();
 
     beforeEach(() => {
       duplicateRulesActionMock.mockClear();
@@ -39,7 +44,6 @@ describe('AllRulesTable Columns', () => {
 
     test('duplicate rule onClick should call rule edit after the rule is duplicated', async () => {
       const ruleDuplicate = mockRule('newRule');
-      const navigateToApp = jest.fn();
       duplicateRulesActionMock.mockImplementation(() => Promise.resolve([ruleDuplicate]));
 
       const duplicateRulesActionObject = getActions(
@@ -57,8 +61,6 @@ describe('AllRulesTable Columns', () => {
     });
 
     test('delete rule onClick should call refetch after the rule is deleted', async () => {
-      const navigateToApp = jest.fn();
-
       const deleteRulesActionObject = getActions(
         dispatch,
         dispatchToaster,
@@ -74,6 +76,38 @@ describe('AllRulesTable Columns', () => {
       expect(deleteRulesActionMock.mock.invocationCallOrder[0]).toBeLessThan(
         reFetchRules.mock.invocationCallOrder[0]
       );
+    });
+  });
+
+  describe('getColumns', () => {
+    test('should not set truncated text option for name column', () => {
+      const [nameColumn] = getColumns({
+        dispatch,
+        dispatchToaster,
+        history,
+        formatUrl,
+        navigateToApp,
+        reFetchRules,
+        refetchPrePackagedRulesStatus,
+        hasMlPermissions: false,
+        hasPermissions: false,
+        loadingRuleIds: [],
+        hasReadActionsPrivileges: false,
+      });
+
+      expect(nameColumn).toHaveProperty('field', 'name');
+      expect(nameColumn).not.toHaveProperty('truncateText');
+    });
+  });
+
+  describe('getMonitoringColumns', () => {
+    test('should not set truncated text option for name column', () => {
+      const docsLinksStartMock = { links: { siem: { troubleshootGaps: 'mock' } } } as DocLinksStart;
+
+      const [nameColumn] = getMonitoringColumns(navigateToApp, formatUrl, docsLinksStartMock);
+
+      expect(nameColumn).toHaveProperty('field', 'name');
+      expect(nameColumn).not.toHaveProperty('truncateText');
     });
   });
 });
