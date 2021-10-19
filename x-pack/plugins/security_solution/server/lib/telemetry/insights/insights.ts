@@ -19,18 +19,15 @@ interface AlertStatusAction {
   action_timestamp: string;
 }
 
-type InsightsContext = AlertContext;
-type InsightsAction = AlertStatusAction;
-
 export interface InsightsPayload {
   state: {
     page: string;
     cluster_id: string;
     user_id: string;
     session_id: string;
-    context: InsightsContext;
+    context: AlertContext;
   };
-  action: InsightsAction;
+  action: AlertStatusAction;
 }
 
 // Generic insights service class that works with the insights observable
@@ -80,28 +77,21 @@ export class InsightsService {
     status: string,
     ruleId?: string
   ): InsightsPayload[] {
-    const payloads: InsightsPayload[] = [];
-    const hashedId = this.getUserHash(username);
-    for (let i = 0; i < alertIds.length; i++) {
-      const now = moment().toISOString();
-      const payload = {
-        state: {
-          page,
-          cluster_id: this.clusterId,
-          user_id: hashedId,
-          session_id: sessionId,
-          context: {
-            alert_id: alertIds[i],
-            rule_id: ruleId,
-          },
+    return alertIds.map((alertId) => ({
+      state: {
+        page,
+        cluster_id: this.clusterId,
+        user_id: this.getUserHash(username),
+        session_id: sessionId,
+        context: {
+          alert_id: alertId,
+          rule_id: ruleId,
         },
-        action: {
-          alert_status: status,
-          action_timestamp: now,
-        },
-      };
-      payloads.push(payload);
-    }
-    return payloads;
+      },
+      action: {
+        alert_status: status,
+        action_timestamp: moment().toISOString(),
+      },
+    }));
   }
 }
