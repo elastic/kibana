@@ -4,11 +4,16 @@ exports[`ElasticAgentCard props button 1`] = `
 <EuiCard
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
   footer={
-    <EuiButton
-      fill={true}
+    <div
+      className="eui-textCenter"
     >
       Button
-    </EuiButton>
+      <EuiButton
+        fill={true}
+      >
+        Button
+      </EuiButton>
+    </div>
   }
   href="/app/integrations/browse"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
@@ -28,11 +33,15 @@ exports[`ElasticAgentCard props category 1`] = `
 <EuiCard
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
   footer={
-    <EuiButton
-      fill={true}
+    <div
+      className="eui-textCenter"
     >
-      Add Elastic Agent
-    </EuiButton>
+      <EuiButton
+        fill={true}
+      >
+        Add Elastic Agent
+      </EuiButton>
+    </div>
   }
   href="/app/integrations/browse/custom"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
@@ -52,11 +61,16 @@ exports[`ElasticAgentCard props href 1`] = `
 <EuiCard
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
   footer={
-    <EuiButton
-      fill={true}
+    <div
+      className="eui-textCenter"
     >
       Button
-    </EuiButton>
+      <EuiButton
+        fill={true}
+      >
+        Button
+      </EuiButton>
+    </div>
   }
   href="#"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
@@ -77,11 +91,15 @@ exports[`ElasticAgentCard props recommended 1`] = `
   betaBadgeLabel="Recommended"
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
   footer={
-    <EuiButton
-      fill={true}
+    <div
+      className="eui-textCenter"
     >
-      Add Elastic Agent
-    </EuiButton>
+      <EuiButton
+        fill={true}
+      >
+        Add Elastic Agent
+      </EuiButton>
+    </div>
   }
   href="/app/integrations/browse"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
@@ -101,11 +119,15 @@ exports[`ElasticAgentCard renders 1`] = `
 <EuiCard
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
   footer={
-    <EuiButton
-      fill={true}
+    <div
+      className="eui-textCenter"
     >
-      Add Elastic Agent
-    </EuiButton>
+      <EuiButton
+        fill={true}
+      >
+        Add Elastic Agent
+      </EuiButton>
+    </div>
   }
   href="/app/integrations/browse"
   image="/plugins/kibanaReact/assets/elastic_agent_card.svg"

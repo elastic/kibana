@@ -35,7 +35,7 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
         defaultMessage: `Proceed without collecting data`,
       })}
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
-      footer={footer}
+      footer={<div className="eui-textCenter">{footer}</div>}
       layout={layout as 'vertical' | undefined}
       {...cardRest}
     />
