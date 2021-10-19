@@ -26,6 +26,7 @@ Object {
   "type": "render",
   "value": Object {
     "visConfig": Object {
+      "autoFitRowToContent": false,
       "buckets": Array [],
       "metrics": Array [
         Object {

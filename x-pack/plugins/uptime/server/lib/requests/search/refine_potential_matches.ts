@@ -165,5 +165,5 @@ export const query = async (
     },
   };
 
-  return await queryContext.search(params);
+  return await queryContext.search(params, 'getMonitorList-refinePotentialMatches');
 };
