@@ -50,15 +50,18 @@ import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { transformFilters, filterTransforms } from './transform_search_bar_filters';
 import { useTableSettings } from './use_table_settings';
+import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
+import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
-  transforms: TransformListRow[]
+  transforms: TransformListRow[],
+  onAlertEdit: (alertRule: TransformHealthAlertRule) => void
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce((m: ItemIdToExpandedRowMap, transformId: TransformId) => {
     const item = transforms.find((transform) => transform.config.id === transformId);
     if (item !== undefined) {
-      m[transformId] = <ExpandedRow item={item} />;
+      m[transformId] = <ExpandedRow item={item} onAlertEdit={onAlertEdit} />;
     }
     return m;
   }, {} as ItemIdToExpandedRowMap);
@@ -79,6 +82,7 @@ export const TransformList: FC<TransformListProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
+  const { setEditAlertRule } = useAlertRuleFlyout();
 
   const [filterActive, setFilterActive] = useState(false);
 
@@ -171,7 +175,11 @@ export const TransformList: FC<TransformListProps> = ({
     );
   }
 
-  const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, transforms);
+  const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(
+    expandedRowItemIds,
+    transforms,
+    setEditAlertRule
+  );
 
   const bulkActionMenuItems = [
     <div key="startAction" className="transform__BulkActionItem">

@@ -23,6 +23,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 import {
@@ -52,7 +53,8 @@ import {
 } from '../../../../../../common/api_schemas/transforms';
 import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common';
 import { isPopulatedObject } from '../../../../../../common/shared_imports';
-import { isLatestTransform } from '../../../../../../common/types/transform';
+import { isContinuousTransform, isLatestTransform } from '../../../../../../common/types/transform';
+import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -86,6 +88,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [loading, setLoading] = useState(false);
     const [created, setCreated] = useState(defaults.created);
     const [started, setStarted] = useState(defaults.started);
+    const [alertFlyoutVisible, setAlertFlyoutVisible] = useState(false);
     const [indexPatternId, setIndexPatternId] = useState(defaults.indexPatternId);
     const [progressPercentComplete, setProgressPercentComplete] = useState<undefined | number>(
       undefined
@@ -398,6 +401,31 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
+          {isContinuousTransform(transformConfig) && created ? (
+            <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
+              <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
+                <EuiButton
+                  fill
+                  isDisabled={loading}
+                  onClick={setAlertFlyoutVisible.bind(null, true)}
+                  data-test-subj="transformWizardCreateAlertButton"
+                >
+                  <FormattedMessage
+                    id="xpack.transform.stepCreateForm.createAlertRuleButton"
+                    defaultMessage="Create alert rule"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  {i18n.translate('xpack.transform.stepCreateForm.createAlertRuleDescription', {
+                    defaultMessage:
+                      'Opens a wizard to create an alert rule for monitoring transform health.',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null}
           <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
             <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
               <EuiButton
@@ -414,7 +442,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.transform.stepCreateForm.createTransformDescription', {
                   defaultMessage:
-                    'Create the transform without starting it. You will be able to start the transform later by returning to the transforms list.',
+                    'Creates the transform without starting it. You will be able to start the transform later by returning to the transforms list.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -535,6 +563,12 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
             </Fragment>
           )}
         </EuiForm>
+        {alertFlyoutVisible ? (
+          <TransformAlertFlyout
+            ruleParams={{ includeTransforms: [transformId] }}
+            onCloseFlyout={setAlertFlyoutVisible.bind(null, false)}
+          />
+        ) : null}
       </div>
     );
   }

@@ -12,7 +12,7 @@ import type { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import type { Dictionary } from '../types/common';
 import type { PivotAggDict } from '../types/pivot_aggs';
 import type { PivotGroupByDict } from '../types/pivot_group_by';
-import type { TransformId, TransformPivotConfig } from '../types/transform';
+import type { TransformId, TransformConfigUnion } from '../types/transform';
 
 import { transformStateSchema, runtimeMappingsSchema } from './common';
 
@@ -33,7 +33,7 @@ export type GetTransformsRequestSchema = TypeOf<typeof getTransformsRequestSchem
 
 export interface GetTransformsResponseSchema {
   count: number;
-  transforms: TransformPivotConfig[];
+  transforms: TransformConfigUnion[];
 }
 
 // schemas shared by parts of the preview, create and update endpoint

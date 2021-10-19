@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TransformId, TransformPivotConfig } from '../../../../../../common/types/transform';
+import type { TransformConfigUnion, TransformId } from '../../../../../../common/types/transform';
 
 export type EsIndexName = string;
 export type IndexPatternTitle = string;
@@ -55,7 +55,7 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
 
 export function applyTransformConfigToDetailsState(
   state: StepDetailsExposedState,
-  transformConfig?: TransformPivotConfig
+  transformConfig?: TransformConfigUnion
 ): StepDetailsExposedState {
   // apply the transform configuration to wizard DETAILS state
   if (transformConfig !== undefined) {
