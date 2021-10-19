@@ -175,9 +175,7 @@ export const DeprecationDetailsFlyout = ({
                   color="primary"
                   iconType="iInCircle"
                   data-test-subj="quickResolveCallout"
-                >
-                  <p>{i18nTexts.quickResolveCalloutDescription}</p>
-                </EuiCallOut>
+                />
 
                 <EuiSpacer />
               </>

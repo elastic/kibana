@@ -110,12 +110,10 @@ export const Overview: FunctionComponent = () => {
               setIsComplete: setCompletedStep.bind(null, 'backup'),
             }),
             getMigrateSystemIndicesStep({
-              nextMajor,
               isComplete: isStepComplete('migrate_system_indices'),
               setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
             }),
             getFixIssuesStep({
-              nextMajor,
               isComplete: isStepComplete('fix_issues'),
               setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
             }),
@@ -123,7 +121,7 @@ export const Overview: FunctionComponent = () => {
               isComplete: isStepComplete('fix_logs'),
               setIsComplete: setCompletedStep.bind(null, 'fix_logs'),
             }),
-            getUpgradeStep({ nextMajor }),
+            getUpgradeStep(),
           ]}
         />
       </EuiPageContent>

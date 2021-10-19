@@ -20,11 +20,9 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { useAppContext } from '../../../app_context';
 
 const i18nTexts = {
-  upgradeStepTitle: (nextMajor: number) =>
-    i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
-      defaultMessage: 'Upgrade to Elastic Stack 8',
-      values: { nextMajor },
-    }),
+  upgradeStepTitle: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
+    defaultMessage: 'Upgrade to Elastic Stack 8',
+  }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
     defaultMessage:
       'Once you’ve resolved all critical issues and verified that your applications are ready, you can upgrade to 8.0. Be sure to back up your data again before upgrading.',
@@ -117,9 +115,9 @@ const UpgradeStep = () => {
   );
 };
 
-export const getUpgradeStep = ({ nextMajor }: { nextMajor: number }): EuiStepProps => {
+export const getUpgradeStep = (): EuiStepProps => {
   return {
-    title: i18nTexts.upgradeStepTitle(nextMajor),
+    title: i18nTexts.upgradeStepTitle,
     status: 'incomplete',
     'data-test-subj': 'upgradeStep',
     children: <UpgradeStep />,
