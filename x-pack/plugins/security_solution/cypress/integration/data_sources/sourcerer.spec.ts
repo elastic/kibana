@@ -51,7 +51,8 @@ describe('Sourcerer', () => {
       cy.get(TOASTER).should('have.text', 'Write role required to generate data');
     });
   });
-
+  // Originially written in December 2020, flakey from day1
+  // has always been skipped with intentions to fix, see note at top of file
   describe.skip('Default scope', () => {
     beforeEach(() => {
       cy.clearLocalStorage();
@@ -91,7 +92,8 @@ describe('Sourcerer', () => {
       isNotSourcererSelection(`metrics-*`);
     });
   });
-
+  // Originially written in December 2020, flakey from day1
+  // has always been skipped with intentions to fix
   describe.skip('Timeline scope', () => {
     beforeEach(() => {
       cy.clearLocalStorage();
