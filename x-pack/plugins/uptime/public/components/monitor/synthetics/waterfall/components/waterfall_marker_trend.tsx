@@ -8,11 +8,34 @@ import React from 'react';
 
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { useUptimeStartPlugins } from '../../../../../contexts/uptime_startup_plugins_context';
 import { useUptimeSettingsContext } from '../../../../../contexts/uptime_settings_context';
 import { AllSeries, createExploratoryViewUrl } from '../../../../../../../observability/public';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useWaterfallContext } from '../context/waterfall_chart';
+import { JourneyStep } from '../../../../../../common/runtime_types';
+
+const getLast48Intervals = (activeStep: JourneyStep) => {
+  const { lt, gte } = activeStep.monitor.timespan!;
+  const inDays = moment(lt).diff(moment(gte), 'days');
+  if (inDays > 0) {
+    return { to: 'now', from: `now-${inDays * 48}d` };
+  }
+
+  const inHours = moment(lt).diff(moment(gte), 'hours');
+  if (inHours > 0) {
+    return { to: 'now', from: `now-${inHours * 48}h` };
+  }
+
+  const inMinutes = moment(lt).diff(moment(gte), 'minutes');
+  if (inMinutes > 0) {
+    return { to: 'now', from: `now-${inMinutes * 48}m` };
+  }
+
+  const inSeconds = moment(lt).diff(moment(gte), 'seconds');
+  return { to: 'now', from: `now-${inSeconds * 48}s` };
+};
 
 export function WaterfallMarkerTrend({ title, field }: { title: string; field: string }) {
   const { observability } = useUptimeStartPlugins();
@@ -31,7 +54,7 @@ export function WaterfallMarkerTrend({ title, field }: { title: string; field: s
     {
       name: `${title}(${activeStep.synthetics.step?.name!})`,
       selectedMetricField: field,
-      time: { from: 'now-1d', to: 'now' },
+      time: getLast48Intervals(activeStep),
       seriesType: 'area',
       dataType: 'synthetics',
       reportDefinitions: {
