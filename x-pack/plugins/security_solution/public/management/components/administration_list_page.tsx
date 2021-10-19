@@ -63,31 +63,35 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
 
     const getTestId = useTestIdGenerator(otherProps['data-test-subj']);
 
-    return !hideHeader ? (
+    return (
       <div {...otherProps}>
-        <EuiPageHeader
-          pageTitle={header}
-          description={description}
-          bottomBorder={hasBottomBorder}
-          rightSideItems={actions ? [actions] : undefined}
-          restrictWidth={restrictWidth}
-          data-test-subj={getTestId('header')}
-        />
-        <EuiSpacer size="l" />
-        <EuiPageContent
-          hasBorder={false}
-          hasShadow={false}
-          paddingSize="none"
-          color="transparent"
-          borderRadius="none"
-        >
-          <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
-        </EuiPageContent>
+        {!hideHeader ? (
+          <>
+            <EuiPageHeader
+              pageTitle={header}
+              description={description}
+              bottomBorder={hasBottomBorder}
+              rightSideItems={actions ? [actions] : undefined}
+              restrictWidth={restrictWidth}
+              data-test-subj={getTestId('header')}
+            />
+            <EuiSpacer size="l" />
+            <EuiPageContent
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="none"
+              color="transparent"
+              borderRadius="none"
+            >
+              <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
+            </EuiPageContent>
 
-        <SpyRoute pageName={SecurityPageName.administration} />
+            <SpyRoute pageName={SecurityPageName.administration} />
+          </>
+        ) : (
+          children
+        )}
       </div>
-    ) : (
-      children
     );
   }
 );
