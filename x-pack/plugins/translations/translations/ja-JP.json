@@ -2534,7 +2534,6 @@
     "discover.localMenu.openSavedSearchDescription": "保存された検索を開きます",
     "discover.localMenu.openTitle": "開く",
     "discover.localMenu.optionsDescription": "オプション",
-    "discover.localMenu.saveSaveSearchDescription": "ビジュアライゼーションとダッシュボードで使用できるように Discover の検索を保存します",
     "discover.localMenu.saveSaveSearchObjectType": "検索",
     "discover.localMenu.saveSearchDescription": "検索を保存します",
     "discover.localMenu.saveTitle": "保存",
