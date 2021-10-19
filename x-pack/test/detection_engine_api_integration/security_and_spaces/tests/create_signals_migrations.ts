@@ -31,6 +31,10 @@ interface CreateResponse {
   migration_id: string;
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -60,6 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
     afterEach(async () => {
       // Finalize the migration after each test so that the .siem-signals alias gets added to the migrated index -
       // this allows deleteSignalsIndex to find and delete the migrated index
+      await sleep(5000);
       await supertest
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
