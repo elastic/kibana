@@ -26,7 +26,7 @@ export function ObservabilityHeaderMenu(): React.ReactElement | null {
       <EuiHeaderLinks>
         <EuiHeaderLink
           color="primary"
-          href={prepend('/app/home#/tutorial_directory/logging')}
+          href={prepend('/app/integrations/browse')}
           iconType="indexOpen"
         >
           {addDataLinkText}
