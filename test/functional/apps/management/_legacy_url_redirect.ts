@@ -12,8 +12,19 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('legacy urls redirect correctly', () => {
+    before(async function () {
+      await browser.setWindowSize(1200, 800);
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.uiSettings.replace({});
+    });
+
+    after(async function afterAll() {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+    });
+
     it('redirects correctly', async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
