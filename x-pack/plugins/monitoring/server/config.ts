@@ -50,7 +50,6 @@ export const configSchema = schema.object({
     }),
     min_interval_seconds: schema.number({ defaultValue: 10 }),
     show_license_expiration: schema.boolean({ defaultValue: true }),
-    render_react_app: schema.boolean({ defaultValue: true }),
   }),
   kibana: schema.object({
     collection: schema.object({
