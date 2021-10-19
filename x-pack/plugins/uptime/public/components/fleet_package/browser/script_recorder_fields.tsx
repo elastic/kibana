@@ -98,12 +98,12 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
         <EuiFlyout
           ownFocus
           onClose={() => setShowScript(false)}
-          aria-labelledby="syntheticsBrowerScriptBlockHeader"
+          aria-labelledby="syntheticsBrowserScriptBlockHeader"
           closeButtonAriaLabel={CLOSE_BUTTON_LABEL}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <span id="syntheticsBrowerScriptBlockHeader">
+              <span id="syntheticsBrowserScriptBlockHeader">
                 {fileName || PLACEHOLDER_FILE_NAME}
               </span>
             </EuiTitle>

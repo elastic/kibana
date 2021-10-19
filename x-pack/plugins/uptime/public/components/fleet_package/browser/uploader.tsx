@@ -49,18 +49,16 @@ export function Uploader({ onUpload }: Props) {
   };
 
   return (
-    <>
-      <EuiFormRow isInvalid={Boolean(error)} error={error} label={TESTING_SCRIPT_LABEL}>
-        <EuiFilePicker
-          id="syntheticsFleetScriptRecorderUploader"
-          data-test-subj="syntheticsFleetScriptRecorderUploader"
-          ref={filePickerRef}
-          initialPromptText={PROMPT_TEXT}
-          onChange={handleFileChosen}
-          display={'large'}
-        />
-      </EuiFormRow>
-    </>
+    <EuiFormRow isInvalid={Boolean(error)} error={error} label={TESTING_SCRIPT_LABEL}>
+      <EuiFilePicker
+        id="syntheticsFleetScriptRecorderUploader"
+        data-test-subj="syntheticsFleetScriptRecorderUploader"
+        ref={filePickerRef}
+        initialPromptText={PROMPT_TEXT}
+        onChange={handleFileChosen}
+        display={'large'}
+      />
+    </EuiFormRow>
   );
 }
 
