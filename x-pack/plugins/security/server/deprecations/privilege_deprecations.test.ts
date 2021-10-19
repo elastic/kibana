@@ -23,6 +23,63 @@ describe('#getPrivilegeDeprecationsService', () => {
 
     const { getKibanaRoles } = getPrivilegeDeprecationsService(authz, mockLicense, mockLogger);
 
+    it('returns all roles when the "feature" parameter is not provided', async () => {
+      mockAsCurrentUser.asCurrentUser.security.getRole.mockResolvedValue(
+        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+          first_role: {
+            cluster: [],
+            indices: [],
+            applications: [
+              {
+                application,
+                privileges: ['feature_siem.all', 'feature_siem.cases_read'],
+                resources: ['space:securitySolutions'],
+              },
+            ],
+            run_as: [],
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+          second_role: {
+            cluster: [],
+            indices: [],
+            applications: [
+              {
+                application,
+                privileges: ['all'],
+                resources: ['*'],
+              },
+            ],
+            run_as: [],
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        })
+      );
+
+      const mockContext = {
+        esClient: mockAsCurrentUser,
+        savedObjectsClient: jest.fn(),
+      } as unknown as GetDeprecationsContext;
+
+      const resp = await getKibanaRoles({ context: mockContext });
+      expect(resp).not.toHaveProperty('errors');
+      expect(resp.roles?.map((r) => r.name)).toMatchInlineSnapshot(`
+        Array [
+          "first_role",
+          "second_role",
+        ]
+      `);
+    });
+
     it('happy path to find siem roles with feature_siem privileges', async () => {
       mockAsCurrentUser.asCurrentUser.security.getRole.mockResolvedValue(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
