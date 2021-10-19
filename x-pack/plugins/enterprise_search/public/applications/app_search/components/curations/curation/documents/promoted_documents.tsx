@@ -96,35 +96,39 @@ export const PromotedDocuments: React.FC = () => {
             spacing="m"
             className="promotedDocuments--results"
           >
-            {documents.map((document, index) => (
-              <EuiDraggable
-                index={index}
-                key={document.id}
-                draggableId={document.id}
-                customDragHandle
-                spacing="none"
-                isDragDisabled={isAutomated}
-              >
-                {(provided) => (
-                  <CurationResult
-                    key={document.id}
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {documents.map((document, index) => (
+                <EuiFlexItem>
+                  <EuiDraggable
                     index={index}
-                    result={convertToResultFormat(document)}
-                    actions={
-                      isAutomated
-                        ? []
-                        : [
-                            {
-                              ...DEMOTE_DOCUMENT_ACTION,
-                              onClick: () => removePromotedId(document.id),
-                            },
-                          ]
-                    }
-                    dragHandleProps={provided.dragHandleProps}
-                  />
-                )}
-              </EuiDraggable>
-            ))}
+                    key={document.id}
+                    draggableId={document.id}
+                    customDragHandle
+                    spacing="none"
+                    isDragDisabled={isAutomated}
+                  >
+                    {(provided) => (
+                      <CurationResult
+                        key={document.id}
+                        index={index}
+                        result={convertToResultFormat(document)}
+                        actions={
+                          isAutomated
+                            ? []
+                            : [
+                                {
+                                  ...DEMOTE_DOCUMENT_ACTION,
+                                  onClick: () => removePromotedId(document.id),
+                                },
+                              ]
+                        }
+                        dragHandleProps={provided.dragHandleProps}
+                      />
+                    )}
+                  </EuiDraggable>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
           </EuiDroppable>
         </EuiDragDropContext>
       ) : (
