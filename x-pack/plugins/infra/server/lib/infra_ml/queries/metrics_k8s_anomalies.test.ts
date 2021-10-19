@@ -29,7 +29,7 @@ describe('createMetricsK8sAnomaliesQuery', () => {
     ).toMatchObject({
       allow_no_indices: true,
       ignore_unavailable: true,
-      trackScores: false,
+      track_scores: false,
       trackTotalHits: false,
       body: {
         query: {
