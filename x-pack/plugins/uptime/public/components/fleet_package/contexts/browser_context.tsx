@@ -38,13 +38,12 @@ export const initialValues: IBrowserSimpleFields = {
   [ConfigKeys.SOURCE_ZIP_PROXY_URL]: '',
   [ConfigKeys.SOURCE_INLINE]: '',
   [ConfigKeys.PARAMS]: '',
-  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]:
-    tlsDefaultValues[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
-  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE]: tlsDefaultValues[ConfigKeys.TLS_CERTIFICATE],
-  [ConfigKeys.ZIP_URL_TLS_KEY]: tlsDefaultValues[ConfigKeys.TLS_KEY],
-  [ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]: tlsDefaultValues[ConfigKeys.TLS_KEY_PASSPHRASE],
-  [ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]: tlsDefaultValues[ConfigKeys.TLS_VERIFICATION_MODE],
-  [ConfigKeys.ZIP_URL_TLS_VERSION]: tlsDefaultValues[ConfigKeys.TLS_VERSION],
+  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: undefined,
+  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE]: undefined,
+  [ConfigKeys.ZIP_URL_TLS_KEY]: undefined,
+  [ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]: undefined,
+  [ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]: undefined,
+  [ConfigKeys.ZIP_URL_TLS_VERSION]: undefined,
 };
 
 const defaultContext: IBrowserSimpleFieldsContext = {
