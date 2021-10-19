@@ -5,7 +5,11 @@ exports[`Source Viewer component renders error state 1`] = `
   hasLineNumbers={true}
   id="1"
   index="index1"
-  indexPatternId="xyz"
+  indexPattern={
+    Object {
+      "getComputedFields": [Function],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -264,7 +268,11 @@ exports[`Source Viewer component renders json code editor 1`] = `
   hasLineNumbers={true}
   id="1"
   index="index1"
-  indexPatternId="xyz"
+  indexPattern={
+    Object {
+      "getComputedFields": [Function],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -619,7 +627,11 @@ exports[`Source Viewer component renders loading state 1`] = `
   hasLineNumbers={true}
   id="1"
   index="index1"
-  indexPatternId="xyz"
+  indexPattern={
+    Object {
+      "getComputedFields": [Function],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},

@@ -14,6 +14,7 @@ import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../../common';
+import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 
 const mockSearchApi = jest.fn();
 
@@ -74,21 +75,11 @@ const waitForPromises = async () =>
  * this works but logs ugly error messages until we're using React 16.9
  * should be adapted when we upgrade
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function mountDoc(update = false, indexPatternGetter: any = null) {
-  const indexPattern = {
-    getComputedFields: () => [],
-  };
-  const indexPatternService = {
-    get: indexPatternGetter ? indexPatternGetter : jest.fn(() => Promise.resolve(indexPattern)),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any;
-
+async function mountDoc(update = false) {
   const props = {
     id: '1',
     index: 'index1',
-    indexPatternId: 'xyz',
-    indexPatternService,
+    indexPattern: indexPatternMock,
   } as DocProps;
   let comp!: ReactWrapper;
   await act(async () => {
@@ -106,12 +97,6 @@ describe('Test of <Doc /> of Discover', () => {
   test('renders loading msg', async () => {
     const comp = await mountDoc();
     expect(findTestSubject(comp, 'doc-msg-loading').length).toBe(1);
-  });
-
-  test('renders IndexPattern notFound msg', async () => {
-    const indexPatternGetter = jest.fn(() => Promise.reject({ savedObjectId: '007' }));
-    const comp = await mountDoc(true, indexPatternGetter);
-    expect(findTestSubject(comp, 'doc-msg-notFoundIndexPattern').length).toBe(1);
   });
 
   test('renders notFound msg', async () => {
