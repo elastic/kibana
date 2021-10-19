@@ -191,6 +191,25 @@ describe('KbnUrlStateStorage', () => {
     });
   });
 
+  describe('useHashQuery: true', () => {
+    let urlStateStorage: IKbnUrlStateStorage;
+    let history: History;
+    const getCurrentUrl = () => history.createHref(history.location);
+    beforeEach(() => {
+      history = createBrowserHistory();
+      history.push('/');
+      urlStateStorage = createKbnUrlStateStorage({ useHash: false, history, useHashQuery: false });
+    });
+
+    it('should persist state to url', async () => {
+      const state = { test: 'test', ok: 1 };
+      const key = '_s';
+      await urlStateStorage.set(key, state);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/?_s=(ok:1,test:test)"`);
+      expect(urlStateStorage.get(key)).toEqual(state);
+    });
+  });
+
   describe('ScopedHistory integration', () => {
     let urlStateStorage: IKbnUrlStateStorage;
     let history: ScopedHistory;
