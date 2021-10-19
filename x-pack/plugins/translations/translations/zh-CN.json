@@ -4658,8 +4658,6 @@
     "telemetry.optInNoticeSeenErrorToastText": "关闭声明时发生错误",
     "telemetry.optInSuccessOff": "使用情况数据收集已关闭。",
     "telemetry.optInSuccessOn": "使用情况数据收集已打开。",
-    "telemetry.provideUsageStatisticsAriaName": "提供使用情况统计",
-    "telemetry.provideUsageStatisticsTitle": "提供使用情况统计",
     "telemetry.readOurUsageDataPrivacyStatementLinkText": "隐私声明",
     "telemetry.securityData": "终端安全数据",
     "telemetry.telemetryBannerDescription": "想帮助我们改进 Elastic Stack？数据使用情况收集当前已禁用。启用使用情况数据收集可帮助我们管理并改善产品和服务。有关更多详情，请参阅我们的{privacyStatementLink}。",
