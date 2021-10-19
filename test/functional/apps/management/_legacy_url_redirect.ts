@@ -39,6 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('redirects correctly to specific index pattern', async () => {
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
 
       const url = await (await browser.getCurrentUrl()).split('#')[0];
