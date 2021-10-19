@@ -115,7 +115,7 @@ class PackagePolicyService {
         'There is already a package with the same name on this agent policy'
       );
     }
-
+    let elasticsearch: PackagePolicy['elasticsearch'];
     // Add ids to stream
     const packagePolicyId = options?.id || uuid.v4();
     let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
@@ -156,7 +156,15 @@ class PackagePolicyService {
         }
       }
 
-      inputs = await this.compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+      const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      inputs = await this._compilePackagePolicyInputs(
+        registryPkgInfo,
+        pkgInfo,
+        packagePolicy.vars || {},
+        inputs
+      );
+
+      elasticsearch = registryPkgInfo.elasticsearch;
     }
 
     const isoDate = new Date().toISOString();
@@ -165,6 +173,7 @@ class PackagePolicyService {
       {
         ...packagePolicy,
         inputs,
+        elasticsearch,
         revision: 1,
         created_at: isoDate,
         created_by: options?.user?.username ?? 'system',
@@ -376,15 +385,21 @@ class PackagePolicyService {
     );
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs);
-
+    let elasticsearch: PackagePolicy['elasticsearch'];
     if (packagePolicy.package?.name) {
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
-
-      inputs = await this.compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+      const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      inputs = await this._compilePackagePolicyInputs(
+        registryPkgInfo,
+        pkgInfo,
+        packagePolicy.vars || {},
+        inputs
+      );
+      elasticsearch = registryPkgInfo.elasticsearch;
     }
 
     await soClient.update<PackagePolicySOAttributes>(
@@ -393,6 +408,7 @@ class PackagePolicyService {
       {
         ...restOfPackagePolicy,
         inputs,
+        elasticsearch,
         revision: oldPackagePolicy.revision + 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username ?? 'system',
@@ -564,12 +580,14 @@ class PackagePolicyService {
           packageInfo,
           packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
         );
-
-        updatePackagePolicy.inputs = await this.compilePackagePolicyInputs(
+        const registryPkgInfo = await Registry.fetchInfo(packageInfo.name, packageInfo.version);
+        updatePackagePolicy.inputs = await this._compilePackagePolicyInputs(
+          registryPkgInfo,
           packageInfo,
           updatePackagePolicy.vars || {},
           updatePackagePolicy.inputs as PackagePolicyInput[]
         );
+        updatePackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
 
         await this.update(soClient, esClient, id, updatePackagePolicy, options);
         result.push({
@@ -632,12 +650,14 @@ class PackagePolicyService {
         packageToPackagePolicyInputs(packageInfo) as InputsOverride[],
         true
       );
-
-      updatedPackagePolicy.inputs = await this.compilePackagePolicyInputs(
+      const registryPkgInfo = await Registry.fetchInfo(packageInfo.name, packageInfo.version);
+      updatedPackagePolicy.inputs = await this._compilePackagePolicyInputs(
+        registryPkgInfo,
         packageInfo,
         updatedPackagePolicy.vars || {},
         updatedPackagePolicy.inputs as PackagePolicyInput[]
       );
+      updatedPackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
 
       const hasErrors = 'errors' in updatedPackagePolicy;
 
@@ -693,12 +713,12 @@ class PackagePolicyService {
     }
   }
 
-  public async compilePackagePolicyInputs(
+  public async _compilePackagePolicyInputs(
+    registryPkgInfo: RegistryPackage,
     pkgInfo: PackageInfo,
     vars: PackagePolicy['vars'],
     inputs: PackagePolicyInput[]
   ): Promise<PackagePolicyInput[]> {
-    const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
     const inputsPromises = inputs.map(async (input) => {
       const compiledInput = await _compilePackagePolicyInput(registryPkgInfo, pkgInfo, vars, input);
       const compiledStreams = await _compilePackageStreams(registryPkgInfo, pkgInfo, vars, input);

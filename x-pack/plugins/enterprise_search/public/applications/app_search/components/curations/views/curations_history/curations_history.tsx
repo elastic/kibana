@@ -9,11 +9,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import {
-  CurationChangesPanel,
-  IgnoredSuggestionsPanel,
-  RejectedCurationsPanel,
-} from './components';
+import { CurationChangesPanel, IgnoredQueriesPanel, RejectedCurationsPanel } from './components';
 
 export const CurationsHistory: React.FC = () => {
   return (
@@ -29,7 +25,7 @@ export const CurationsHistory: React.FC = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
-        <IgnoredSuggestionsPanel />
+        <IgnoredQueriesPanel />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
