@@ -21,7 +21,8 @@ export const config: PluginConfigDescriptor<LicenseConfigType> = {
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot(
       'xpack.xpack_main.xpack_api_polling_frequency_millis',
-      'xpack.licensing.api_polling_frequency'
+      'xpack.licensing.api_polling_frequency',
+      { level: 'critical' }
     ),
   ],
 };

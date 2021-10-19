@@ -19,7 +19,9 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('kibana.disableWelcomeScreen', 'home.disableWelcomeScreen'),
+    renameFromRoot('kibana.disableWelcomeScreen', 'home.disableWelcomeScreen', {
+      level: 'critical',
+    }),
   ],
 };
 
