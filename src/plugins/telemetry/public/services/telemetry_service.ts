@@ -147,15 +147,11 @@ export class TelemetryService {
    * Fetches telemetry payload
    * @param unencrypted Default `false`. Whether the returned payload should be encrypted or not.
    */
-  public fetchTelemetry = async <T extends boolean>({
-    unencrypted,
-  }: { unencrypted?: T } = {}): Promise<
-    T extends true ? UnencryptedTelemetryPayload : EncryptedTelemetryPayload
-  > => {
+  public fetchTelemetry = async <T = EncryptedTelemetryPayload | UnencryptedTelemetryPayload>({
+    unencrypted = false,
+  } = {}): Promise<T> => {
     return this.http.post('/api/telemetry/v2/clusters/_stats', {
-      body: JSON.stringify({
-        unencrypted: !!unencrypted,
-      }),
+      body: JSON.stringify({ unencrypted }),
     });
   };
 

@@ -13,6 +13,7 @@ import {
 } from '../../common/constants';
 import { TelemetryService } from './telemetry_service';
 import { Storage } from '../../../kibana_utils/public';
+import type { EncryptedTelemetryPayload } from '../../common/types';
 
 export class TelemetrySender {
   private readonly telemetryService: TelemetryService;
@@ -61,7 +62,8 @@ export class TelemetrySender {
     this.isSending = true;
     try {
       const telemetryUrl = this.telemetryService.getTelemetryUrl();
-      const telemetryPayload = await this.telemetryService.fetchTelemetry({ unencrypted: false });
+      const telemetryPayload: EncryptedTelemetryPayload =
+        await this.telemetryService.fetchTelemetry();
 
       await Promise.all(
         telemetryPayload.map(

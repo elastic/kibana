@@ -189,7 +189,7 @@ export class TelemetryCollectionManagerPlugin
             statsCollectionConfig
           );
 
-          this.logger.debug(`Got Opt In stats using ${collection.title} collection.`);
+          this.logger.debug(`Received Opt In stats using ${collection.title} collection.`);
 
           return await Promise.all(
             optInStats.map(async (clusterStats) => {
@@ -254,11 +254,14 @@ export class TelemetryCollectionManagerPlugin
       if (statsCollectionConfig) {
         try {
           const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
-          this.logger.debug(`Got Usage using ${collection.title} collection.`);
+          this.logger.debug(`Received Usage using ${collection.title} collection.`);
 
           return await Promise.all(
             usageData.map(async (clusterStats) => {
-              const clusterUuid = clusterStats.cluster_stats.cluster_uuid as string;
+              const { cluster_uuid: clusterUuid } = clusterStats.cluster_stats as Record<
+                string,
+                string
+              >;
 
               return {
                 clusterUuid,

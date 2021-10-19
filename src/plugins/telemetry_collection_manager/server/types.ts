@@ -65,7 +65,7 @@ export interface BasicStatsPayload {
   cluster_uuid: string;
   cluster_name: string;
   version: string;
-  cluster_stats: Record<string, unknown>;
+  cluster_stats: object;
   collection?: string;
   stack_stats: object;
 }

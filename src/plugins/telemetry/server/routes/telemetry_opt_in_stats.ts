@@ -16,6 +16,7 @@ import {
 } from 'src/plugins/telemetry_collection_manager/server';
 import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
+import type { UnencryptedTelemetryPayload } from '../../common/types';
 
 interface SendTelemetryOptInStatusConfig {
   sendUsageTo: 'staging' | 'prod';
@@ -34,16 +35,14 @@ export async function sendTelemetryOptInStatus(
     channelName: 'optInStatus',
   });
 
-  const optInStatusPayload = await telemetryCollectionManager.getOptInStats(
-    newOptInStatus,
-    statsGetterConfig
-  );
+  const optInStatusPayload: UnencryptedTelemetryPayload =
+    await telemetryCollectionManager.getOptInStats(newOptInStatus, statsGetterConfig);
 
   await Promise.all(
     optInStatusPayload.map(async ({ clusterUuid, stats }) => {
       return await fetch(optInStatusUrl, {
         method: 'post',
-        body: JSON.stringify(stats),
+        body: typeof stats === 'string' ? stats : JSON.stringify(stats),
         headers: {
           'Content-Type': 'application/json',
           'X-Elastic-Stack-Version': currentKibanaVersion,

@@ -282,7 +282,7 @@ describe('TelemetryService', () => {
       const telemetryService = mockTelemetryService({
         config: { userCanChangeSettings: undefined },
       });
-      const mockPayload = ['mock_hashed_opt_in_status_payload'];
+      const mockPayload = [{ clusterUuid: 'mk_uuid', stats: 'mock_hashed_opt_in_status_payload' }];
       const mockUrl = 'mock_telemetry_optin_status_url';
 
       const mockGetOptInStatusUrl = jest.fn().mockReturnValue(mockUrl);
