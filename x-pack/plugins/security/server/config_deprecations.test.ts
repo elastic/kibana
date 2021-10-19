@@ -54,7 +54,7 @@ describe('Config Deprecations', () => {
       Array [
         Object {
           "level": "warning",
-          "message": "User sessions will automatically time out after 1 hour of inactivity starting in 8.0. Override this value to change the timeout.",
+          "message": "User sessions will automatically time out after 8 hours of inactivity starting in 8.0. Override this value to change the timeout.",
         },
         Object {
           "level": "warning",
@@ -72,7 +72,7 @@ describe('Config Deprecations', () => {
       Array [
         Object {
           "level": "warning",
-          "message": "User sessions will automatically time out after 1 hour of inactivity starting in 8.0. Override this value to change the timeout.",
+          "message": "User sessions will automatically time out after 8 hours of inactivity starting in 8.0. Override this value to change the timeout.",
         },
       ]
     `);

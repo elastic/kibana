@@ -231,11 +231,11 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
         configPath: 'xpack.security.session.idleTimeout',
         level: 'warning',
         title: i18n.translate('xpack.security.deprecations.idleTimeoutTitle', {
-          defaultMessage: '"xpack.security.session.idleTimeout" is now 1 hour',
+          defaultMessage: '"xpack.security.session.idleTimeout" is now 8 hours',
         }),
         message: i18n.translate('xpack.security.deprecations.idleTimeoutMessage', {
           defaultMessage:
-            'User sessions will automatically time out after 1 hour of inactivity starting in 8.0. Override this value to change the timeout.',
+            'User sessions will automatically time out after 8 hours of inactivity starting in 8.0. Override this value to change the timeout.',
         }),
         correctiveActions: {
           manualSteps: [
