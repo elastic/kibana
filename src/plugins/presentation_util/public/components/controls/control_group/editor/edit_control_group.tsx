@@ -139,7 +139,7 @@ export const EditControlGroup = ({ closeFlyout }: { closeFlyout: () => void }) =
         </EuiButtonEmpty>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               aria-label={`cancel-editing-group`}

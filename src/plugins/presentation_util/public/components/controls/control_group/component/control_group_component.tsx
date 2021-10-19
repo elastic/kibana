@@ -110,7 +110,13 @@ export const ControlGroup = () => {
       })}
     >
       {idsInOrder.length > 0 ? (
-        <EuiFlexGroup gutterSize="m" wrap={false} direction="row" alignItems="center">
+        <EuiFlexGroup
+          wrap={false}
+          gutterSize="m"
+          direction="row"
+          responsive={false}
+          alignItems="center"
+        >
           <EuiFlexItem>
             <DndContext
               onDragStart={({ active }) => setDraggingId(active.id)}
@@ -147,7 +153,7 @@ export const ControlGroup = () => {
             </DndContext>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup className="groupEditActions" gutterSize="xs">
+            <EuiFlexGroup responsive={false} className="groupEditActions" gutterSize="xs">
               <EuiFlexItem>
                 <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
                   <EuiButtonIcon
