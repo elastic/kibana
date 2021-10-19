@@ -19,33 +19,20 @@ import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { ENGINE_CURATIONS_PATH, ENGINE_CURATION_PATH } from '../../../../routes';
 import { EngineLogic, generateEnginePath } from '../../../engine';
-import { Result } from '../../../result/types';
-import { Curation, CurationSuggestion } from '../../types';
+import { CurationSuggestion, HydratedCurationSuggestion } from '../../types';
 
 interface Error {
   error: string;
 }
 interface CurationSuggestionValues {
   dataLoading: boolean;
-  suggestion: CurationSuggestion | null;
-  suggestedPromotedDocuments: Result[];
-  curation: Curation | null;
+  suggestion: HydratedCurationSuggestion | null;
 }
 
 interface CurationSuggestionActions {
   loadSuggestion(): void;
-  onSuggestionLoaded({
-    suggestion,
-    suggestedPromotedDocuments,
-    curation,
-  }: {
-    suggestion: CurationSuggestion;
-    suggestedPromotedDocuments: Result[];
-    curation: Curation;
-  }): {
-    suggestion: CurationSuggestion;
-    suggestedPromotedDocuments: Result[];
-    curation: Curation;
+  onSuggestionLoaded({ suggestion }: { suggestion: HydratedCurationSuggestion }): {
+    suggestion: HydratedCurationSuggestion;
   };
   acceptSuggestion(): void;
   acceptAndAutomateSuggestion(): void;
@@ -63,10 +50,8 @@ export const CurationSuggestionLogic = kea<
   path: ['enterprise_search', 'app_search', 'curations', 'suggestion_logic'],
   actions: () => ({
     loadSuggestion: true,
-    onSuggestionLoaded: ({ suggestion, suggestedPromotedDocuments, curation }) => ({
+    onSuggestionLoaded: ({ suggestion }) => ({
       suggestion,
-      suggestedPromotedDocuments,
-      curation,
     }),
     acceptSuggestion: true,
     acceptAndAutomateSuggestion: true,
@@ -87,18 +72,6 @@ export const CurationSuggestionLogic = kea<
         onSuggestionLoaded: (_, { suggestion }) => suggestion,
       },
     ],
-    suggestedPromotedDocuments: [
-      [],
-      {
-        onSuggestionLoaded: (_, { suggestedPromotedDocuments }) => suggestedPromotedDocuments,
-      },
-    ],
-    curation: [
-      null,
-      {
-        onSuggestionLoaded: (_, { curation }) => curation,
-      },
-    ],
   }),
   listeners: ({ actions, values, props }) => ({
     loadSuggestion: async () => {
@@ -106,34 +79,41 @@ export const CurationSuggestionLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        const suggestion = await getSuggestion(http, engineName, props.query);
-        if (!suggestion) return;
-        const promotedIds: string[] = suggestion.promoted;
-        const documentDetailsResopnse = getDocumentDetails(http, engineName, promotedIds);
+        const suggestionResponse = await http.get(
+          `/internal/app_search/engines/${engineName}/search_relevance_suggestions/${props.query}`,
+          {
+            query: {
+              type: 'curation',
+            },
+          }
+        );
 
-        let promises = [documentDetailsResopnse];
-        if (suggestion.curation_id) {
-          promises = [...promises, getCuration(http, engineName, suggestion.curation_id)];
-        }
-
-        const [documentDetails, curation] = await Promise.all(promises);
-
-        // Filter out docs that were not found and maintain promoted order
-        const suggestedPromotedDocuments = promotedIds.reduce((acc: Result[], id: string) => {
-          const found = documentDetails.results.find(
-            (documentDetail: Result) => documentDetail.id.raw === id
-          );
-          if (!found) return acc;
-          return [...acc, found];
-        }, []);
+        // We pull the `organic` and `promoted` fields up to the main body of the suggestion,
+        // out of the nested `suggestion` field on the response
+        const { suggestion, ...baseSuggestion } = suggestionResponse;
+        const suggestionData = {
+          ...baseSuggestion,
+          promoted: suggestion.promoted,
+          organic: suggestion.organic,
+        };
 
         actions.onSuggestionLoaded({
-          suggestion,
-          suggestedPromotedDocuments,
-          curation: curation || null,
+          suggestion: suggestionData,
         });
       } catch (e) {
-        flashAPIErrors(e);
+        if (e.response?.status === 404) {
+          const message = i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.notFoundError',
+            {
+              defaultMessage:
+                'Could not find suggestion, it may have already been applied or rejected.',
+            }
+          );
+          setQueuedErrorMessage(message);
+          KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
+        } else {
+          flashAPIErrors(e);
+        }
       }
     },
     acceptSuggestion: async () => {
@@ -287,63 +267,6 @@ const updateSuggestion = async (
   }
 
   return response.results[0] as CurationSuggestion;
-};
-
-const getSuggestion = async (
-  http: HttpSetup,
-  engineName: string,
-  query: string
-): Promise<CurationSuggestion | undefined> => {
-  const response = await http.post(
-    `/internal/app_search/engines/${engineName}/search_relevance_suggestions/${query}`,
-    {
-      body: JSON.stringify({
-        page: {
-          current: 1,
-          size: 1,
-        },
-        filters: {
-          status: ['pending'],
-          type: 'curation',
-        },
-      }),
-    }
-  );
-
-  if (response.results.length < 1) {
-    const message = i18n.translate(
-      'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.notFoundError',
-      {
-        defaultMessage: 'Could not find suggestion, it may have already been applied or rejected.',
-      }
-    );
-    setQueuedErrorMessage(message);
-    KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
-    return;
-  }
-
-  const suggestion = response.results[0] as CurationSuggestion;
-  return suggestion;
-};
-
-const getDocumentDetails = async (http: HttpSetup, engineName: string, documentIds: string[]) => {
-  return http.post(`/internal/app_search/engines/${engineName}/search`, {
-    query: { query: '' },
-    body: JSON.stringify({
-      page: {
-        size: 100,
-      },
-      filters: {
-        id: documentIds,
-      },
-    }),
-  });
-};
-
-const getCuration = async (http: HttpSetup, engineName: string, curationId: string) => {
-  return http.get(`/internal/app_search/engines/${engineName}/curations/${curationId}`, {
-    query: { skip_record_analytics: 'true' },
-  });
 };
 
 const confirmDialog = (msg: string) => {
