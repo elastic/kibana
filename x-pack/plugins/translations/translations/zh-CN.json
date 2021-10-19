@@ -2945,7 +2945,6 @@
     "home.addData.sampleDataButtonLabel": "试用样例数据",
     "home.addData.sectionTitle": "首先添加您的数据",
     "home.addData.text": "要开始使用您的数据，请使用我们众多采集选项中的一个选项。从应用或服务收集数据，或上传文件。如果未准备好使用自己的数据，请添加示例数据集。",
-    "home.breadcrumbs.addDataTitle": "添加数据",
     "home.breadcrumbs.homeTitle": "主页",
     "home.dataManagementDisableCollection": " 要停止收集，",
     "home.dataManagementDisableCollectionLink": "请在此禁用使用情况数据。",

@@ -2916,7 +2916,6 @@
     "home.addData.sampleDataButtonLabel": "サンプルデータを試す",
     "home.addData.sectionTitle": "データを追加して開始する",
     "home.addData.text": "データの操作を開始するには、多数の取り込みオプションのいずれかを使用します。アプリまたはサービスからデータを収集するか、ファイルをアップロードします。独自のデータを使用する準備ができていない場合は、サンプルデータセットを追加してください。",
-    "home.breadcrumbs.addDataTitle": "データの追加",
     "home.breadcrumbs.homeTitle": "ホーム",
     "home.dataManagementDisableCollection": " 収集を停止するには、",
     "home.dataManagementDisableCollectionLink": "ここで使用状況データを無効にします。",
