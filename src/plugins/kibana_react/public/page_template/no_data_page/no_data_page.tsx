@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import { KibanaPageTemplateProps } from '../page_template';
 
-import { ElasticAgentCard, ElasticBeatsCard, NoDataCard } from './no_data_card';
+import { ElasticAgentCard, NoDataCard } from './no_data_card';
 import { KibanaPageTemplateSolutionNavAvatar } from '../solution_nav';
 
 export const NO_DATA_PAGE_MAX_WIDTH = 950;
@@ -57,6 +57,10 @@ export type NoDataPageActions = Partial<EuiCardProps> & {
    * Remapping `onClick` to any element
    */
   onClick?: MouseEventHandler<HTMLElement>;
+  /**
+   * Category to auto-select within Fleet
+   */
+  category?: string;
 };
 
 export type NoDataPageActionsProps = Record<string, NoDataPageActions>;
@@ -110,16 +114,10 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   const actionsKeys = Object.keys(sortedData);
   const renderActions = useMemo(() => {
     return Object.values(sortedData).map((action, i) => {
-      if (actionsKeys[i] === 'elasticAgent') {
+      if (actionsKeys[i] === 'elasticAgent' || actionsKeys[i] === 'beats') {
         return (
           <EuiFlexItem key={`empty-page-agent-action`} className="kbnNoDataPageContents__item">
             <ElasticAgentCard solution={solution} {...action} />
-          </EuiFlexItem>
-        );
-      } else if (actionsKeys[i] === 'beats') {
-        return (
-          <EuiFlexItem key={`empty-page-beats-action`} className="kbnNoDataPageContents__item">
-            <ElasticBeatsCard solution={solution} {...action} />
           </EuiFlexItem>
         );
       } else {
