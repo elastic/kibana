@@ -33,13 +33,11 @@ export const ValidationStepPanel: React.FC<ValidationStepPanelProps> = ({
   action,
 }) => {
   const showErrorMessage = step.state === 'invalid' || step.state === 'warning';
-  const styleOverride = showErrorMessage ? { paddingBottom: 0 } : {};
 
   return (
     <EuiPanel
       hasShadow={false}
       color={domainValidationStateToPanelColor(step.state)}
-      style={styleOverride}
     >
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
