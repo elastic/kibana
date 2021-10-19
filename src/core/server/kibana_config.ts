@@ -18,6 +18,7 @@ const deprecations: ConfigDeprecationProvider = () => [
     if (kibana?.index) {
       addDeprecation({
         configPath: 'kibana.index',
+        level: 'critical',
         title: i18n.translate('core.kibana.index.deprecationTitle', {
           defaultMessage: `Setting "kibana.index" is deprecated`,
         }),

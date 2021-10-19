@@ -21,7 +21,7 @@ const mockedResponse = {
     {
       feature_name: 'security',
       minimum_index_version: '7.1.1',
-      upgrade_status: 'NO_UPGRADE_NEEDED',
+      migration_status: 'NO_MIGRATION_NEEDED',
       indices: [
         {
           index: '.security-7',
@@ -30,7 +30,7 @@ const mockedResponse = {
       ],
     },
   ],
-  upgrade_status: 'UPGRADE_NEEDED',
+  migration_status: 'MIGRATION_NEEDED',
 };
 
 /**
