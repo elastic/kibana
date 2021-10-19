@@ -83,7 +83,7 @@ function waitForSetupModeData() {
   return new Promise((resolve) => process.nextTick(resolve));
 }
 
-describe('setup_mode', () => {
+xdescribe('setup_mode', () => {
   beforeEach(async () => {
     setModulesAndMocks();
   });
