@@ -12,9 +12,9 @@ interface LoggerOptions {
 }
 
 export declare class Logger {
-  constructor(settings: LoggerOptions = {});
+  constructor(settings?: LoggerOptions);
 
-  log(data: string, sameLine = false);
+  log(data: string, sameLine?: boolean);
 
   error(data: string);
 }
