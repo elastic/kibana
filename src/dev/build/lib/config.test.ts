@@ -107,6 +107,7 @@ describe('#getTargetPlatforms()', () => {
         .sort()
     ).toMatchInlineSnapshot(`
       Array [
+        "darwin-arm64",
         "darwin-x64",
         "linux-arm64",
         "linux-x64",
@@ -132,7 +133,7 @@ describe('#getNodePlatforms()', () => {
         .getTargetPlatforms()
         .map((p) => p.getNodeArch())
         .sort()
-    ).toEqual(['darwin-x64', 'linux-arm64', 'linux-x64', 'win32-x64']);
+    ).toEqual(['darwin-arm64', 'darwin-x64', 'linux-arm64', 'linux-x64', 'win32-x64']);
   });
 
   it('returns this platform and linux, when targetAllPlatforms = false', async () => {

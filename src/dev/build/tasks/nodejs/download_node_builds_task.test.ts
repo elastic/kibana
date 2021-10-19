@@ -100,6 +100,15 @@ it('downloads node builds for each platform', async () => {
       ],
       Array [
         Object {
+          "destination": "darwin:downloadPath",
+          "log": <ToolingLog>,
+          "retries": 3,
+          "sha256": "darwin:sha256",
+          "url": "darwin:url",
+        },
+      ],
+      Array [
+        Object {
           "destination": "win32:downloadPath",
           "log": <ToolingLog>,
           "retries": 3,
