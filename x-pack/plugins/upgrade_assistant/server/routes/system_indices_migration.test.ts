@@ -32,7 +32,7 @@ const mockedResponse = {
     {
       feature_name: 'kibana',
       minimum_index_version: '7.1.2',
-      upgrade_status: 'UPGRADE_NEEDED',
+      upgrade_status: 'MIGRATION_NEEDED',
       indices: [
         {
           index: '.kibana',
@@ -89,7 +89,7 @@ describe('Migrate system indices API', () => {
       expect(resp.payload).toEqual({
         ...mockedResponse,
         features: mockedResponse.features.filter(
-          (feature) => feature.upgrade_status !== 'NO_UPGRADE_NEEDED'
+          (feature) => feature.migration_status !== 'NO_MIGRATION_NEEDED'
         ),
       });
     });

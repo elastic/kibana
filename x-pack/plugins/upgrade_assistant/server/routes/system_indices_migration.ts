@@ -37,7 +37,7 @@ export function registerSystemIndicesMigrationRoutes({
             body: {
               ...status,
               features: status.features.filter(
-                (feature) => feature.upgrade_status !== 'NO_UPGRADE_NEEDED'
+                (feature) => feature.migration_status !== 'NO_MIGRATION_NEEDED'
               ),
             },
           });
