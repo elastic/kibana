@@ -8,7 +8,12 @@
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 
-import { SavedObject, SavedObjectAttributes, SavedObjectsFindResult } from 'kibana/server';
+import {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from 'kibana/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -270,12 +275,14 @@ export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   defaultOutputIndex: string;
   ruleUpdate: UpdateRulesSchema;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export interface PatchRulesOptions {
   spaceId: string;
   ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
+  savedObjectsClient: SavedObjectsClientContract;
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -322,7 +329,7 @@ export interface PatchRulesOptions {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
-  rule: SanitizedAlert<RuleParams> | null;
+  rule: SanitizedAlert<RuleParams> | null | undefined;
   namespace?: NamespaceOrUndefined;
 }
 
@@ -349,4 +356,10 @@ export interface FindRuleOptions {
   filter: QueryFilterOrUndefined;
   fields: FieldsOrUndefined;
   sortOrder: SortOrderOrUndefined;
+}
+
+export interface LegacyMigrateParams {
+  rulesClient: RulesClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  rule: SanitizedAlert<RuleParams> | null | undefined;
 }

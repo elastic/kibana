@@ -16,7 +16,7 @@ export const APP_NAME = 'Security' as const;
 export const APP_ICON = 'securityAnalyticsApp' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
-export const ADD_DATA_PATH = `/app/home#/tutorial_directory/security` as const;
+export const ADD_DATA_PATH = `/app/integrations/browse/security`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern' as const;
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -291,15 +291,16 @@ export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID] as const;
 */
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
-  '.slack',
+  '.index',
+  '.jira',
   '.pagerduty',
-  '.swimlane',
-  '.webhook',
+  '.resilient',
   '.servicenow',
   '.servicenow-sir',
-  '.jira',
-  '.resilient',
+  '.slack',
+  '.swimlane',
   '.teams',
+  '.webhook',
 ];
 
 if (ENABLE_CASE_CONNECTOR) {
