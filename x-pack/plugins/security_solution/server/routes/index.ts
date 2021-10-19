@@ -68,7 +68,7 @@ export const initRoutes = (
   security: SetupPlugins['security'],
   telemetrySender: TelemetryEventsSender,
   ml: SetupPlugins['ml'],
-  cloud: SetupPlugins['cloud'],
+  isCloudEnabled: boolean,
   ruleDataService: RuleDataPluginService,
   logger: Logger,
   isRuleRegistryEnabled: boolean
@@ -120,7 +120,7 @@ export const initRoutes = (
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
-  setSignalsStatusRoute(router, security, cloud, telemetrySender);
+  setSignalsStatusRoute(router, security, isCloudEnabled, telemetrySender);
   querySignalsRoute(router, config);
   getSignalsMigrationStatusRoute(router);
   createSignalsMigrationRoute(router, security);
