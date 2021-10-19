@@ -125,74 +125,19 @@ export const getListHandler: RequestHandler = async (context, request, response)
 
     // Query additional information for each data stream
     const dataStreamPromises = dataStreamNames.map(async (dataStreamName) => {
+      const [type, dataset, namespace] = dataStreamName.split('-');
       const dataStream = dataStreams[dataStreamName];
       const dataStreamResponse: DataStream = {
         index: dataStreamName,
-        dataset: '',
-        namespace: '',
-        type: '',
+        dataset,
+        namespace,
+        type,
         package: dataStream._meta?.package?.name || '',
         package_version: '',
         last_activity_ms: dataStream.maximum_timestamp,
         size_in_bytes: dataStream.store_size_bytes,
         dashboards: [],
       };
-
-      // Query backing indices to extract data stream dataset, namespace, and type values
-      const {
-        body: { aggregations: dataStreamAggs },
-      } = await esClient.search({
-        index: dataStream.indices.map((index) => index.index_name),
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              must: [
-                {
-                  exists: {
-                    field: 'data_stream.namespace',
-                  },
-                },
-                {
-                  exists: {
-                    field: 'data_stream.dataset',
-                  },
-                },
-              ],
-            },
-          },
-          aggs: {
-            dataset: {
-              terms: {
-                field: 'data_stream.dataset',
-                size: 1,
-              },
-            },
-            namespace: {
-              terms: {
-                field: 'data_stream.namespace',
-                size: 1,
-              },
-            },
-            type: {
-              terms: {
-                field: 'data_stream.type',
-                size: 1,
-              },
-            },
-          },
-        },
-      });
-
-      const { dataset, namespace, type } = dataStreamAggs as Record<
-        string,
-        estypes.AggregationsMultiBucketAggregate<{ key?: string }>
-      >;
-
-      // Set values from backing indices query
-      dataStreamResponse.dataset = dataset.buckets[0]?.key || '';
-      dataStreamResponse.namespace = namespace.buckets[0]?.key || '';
-      dataStreamResponse.type = type.buckets[0]?.key || '';
 
       // Find package saved object
       const pkgName = dataStreamResponse.package;
