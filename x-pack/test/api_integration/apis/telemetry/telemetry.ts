@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body.length).to.be.greaterThan(1);
         localXPack = body.shift().stats;
-        monitoring = body.stats;
+        monitoring = body;
       });
       after(() => esArchiver.unload(archive));
 
@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
         const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
         try {
           assertTelemetryPayload({ root, plugins }, localXPack);
-          monitoring.forEach((stats) => {
+          monitoring.forEach(({ stats }) => {
             assertTelemetryPayload({ root: monitoringRoot, plugins }, stats);
           });
         } catch (err) {
