@@ -16,7 +16,7 @@ export const APP_NAME = 'Security';
 export const APP_ICON = 'securityAnalyticsApp';
 export const APP_ICON_SOLUTION = 'logoSecurity';
 export const APP_PATH = `/app/security`;
-export const ADD_DATA_PATH = `/app/home#/tutorial_directory/security`;
+export const ADD_DATA_PATH = `/app/integrations/browse/security`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern';
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
@@ -61,10 +61,10 @@ export const DEFAULT_SPACE_ID = 'default';
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.enrichments.
-export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
+export const DEFAULT_INDICATOR_SOURCE_PATH = 'threat.indicator';
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex';
-export const DEFAULT_THREAT_INDEX_VALUE = ['filebeat-*'];
+export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'];
 export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
 
 export enum SecurityPageName {
@@ -301,6 +301,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.swimlane',
   '.webhook',
   '.servicenow',
+  '.servicenow-sir',
   '.jira',
   '.resilient',
   '.teams',

@@ -13,7 +13,7 @@ import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common'
 
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import type { LatencyCorrelationsParams } from '../../../common/search_strategies/latency_correlations/types';
-import type { SearchStrategyClientParams } from '../../../common/search_strategies/types';
+import type { RawSearchStrategyClientParams } from '../../../common/search_strategies/types';
 
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
@@ -90,10 +90,7 @@ const clientSearchMock = (
 };
 
 const getApmIndicesMock = async () =>
-  ({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    'apm_oss.transactionIndices': 'apm-*',
-  } as ApmIndicesConfig);
+  ({ transaction: 'apm-*' } as ApmIndicesConfig);
 
 describe('APM Correlations search strategy', () => {
   describe('strategy interface', () => {
@@ -115,7 +112,7 @@ describe('APM Correlations search strategy', () => {
     let mockDeps: SearchStrategyDependencies;
     let params: Required<
       IKibanaSearchRequest<
-        LatencyCorrelationsParams & SearchStrategyClientParams
+        LatencyCorrelationsParams & RawSearchStrategyClientParams
       >
     >['params'];
 

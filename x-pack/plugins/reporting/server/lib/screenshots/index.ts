@@ -12,6 +12,19 @@ import { LayoutInstance } from '../layouts';
 
 export { getScreenshots$ } from './observable';
 
+export interface PhaseInstance {
+  timeoutValue: number;
+  configValue: string;
+  label: string;
+}
+
+export interface PhaseTimeouts {
+  openUrl: PhaseInstance;
+  waitForElements: PhaseInstance;
+  renderComplete: PhaseInstance;
+  loadDelay: number;
+}
+
 export interface ScreenshotObservableOpts {
   logger: LevelLogger;
   urlsOrUrlLocatorTuples: UrlOrUrlLocatorTuple[];
@@ -49,9 +62,22 @@ export interface Screenshot {
   description: string | null;
 }
 
+export interface PageSetupResults {
+  elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
+  timeRange: string | null;
+  error?: Error;
+}
+
 export interface ScreenshotResults {
   timeRange: string | null;
   screenshots: Screenshot[];
   error?: Error;
+
+  /**
+   * Individual visualizations might encounter errors at runtime. If there are any they are added to this
+   * field. Any text captured here is intended to be shown to the user for debugging purposes, reporting
+   * does no further sanitization on these strings.
+   */
+  renderErrors?: string[];
   elementsPositionAndAttributes?: ElementsPositionAndAttribute[]; // NOTE: for testing
 }

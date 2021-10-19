@@ -8,33 +8,44 @@
 
 import { Fields } from './entity';
 import { Serializable } from './serializable';
-import { generateTraceId } from './utils/generate_id';
+import { Span } from './span';
+import { Transaction } from './transaction';
+import { generateLongId } from './utils/generate_id';
 
 export class BaseSpan extends Serializable {
-  private _children: BaseSpan[] = [];
+  private readonly _children: BaseSpan[] = [];
 
   constructor(fields: Fields) {
     super({
       ...fields,
       'event.outcome': 'unknown',
-      'trace.id': generateTraceId(),
+      'trace.id': generateLongId(),
       'processor.name': 'transaction',
     });
   }
 
-  traceId(traceId: string) {
-    this.fields['trace.id'] = traceId;
+  parent(span: BaseSpan) {
+    this.fields['trace.id'] = span.fields['trace.id'];
+    this.fields['parent.id'] = span.isSpan()
+      ? span.fields['span.id']
+      : span.fields['transaction.id'];
+
+    if (this.isSpan()) {
+      this.fields['transaction.id'] = span.fields['transaction.id'];
+    }
     this._children.forEach((child) => {
-      child.fields['trace.id'] = traceId;
+      child.parent(this);
     });
+
     return this;
   }
 
   children(...children: BaseSpan[]) {
-    this._children.push(...children);
     children.forEach((child) => {
-      child.traceId(this.fields['trace.id']!);
+      child.parent(this);
     });
+
+    this._children.push(...children);
 
     return this;
   }
@@ -51,5 +62,13 @@ export class BaseSpan extends Serializable {
 
   serialize(): Fields[] {
     return [this.fields, ...this._children.flatMap((child) => child.serialize())];
+  }
+
+  isSpan(): this is Span {
+    return this.fields['processor.event'] === 'span';
+  }
+
+  isTransaction(): this is Transaction {
+    return this.fields['processor.event'] === 'transaction';
   }
 }

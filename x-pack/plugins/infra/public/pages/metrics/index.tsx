@@ -11,7 +11,7 @@ import React, { useContext } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
-import { IIndexPattern } from 'src/plugins/data/common';
+import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
@@ -93,9 +93,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
                         <MetricsAlertDropdown />
                         <EuiHeaderLink
-                          href={kibana.services?.application?.getUrlForApp(
-                            '/home#/tutorial_directory/metrics'
-                          )}
+                          href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
                           color="primary"
                           iconType="indexOpen"
                         >
@@ -141,7 +139,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
 const PageContent = (props: {
   configuration: MetricsSourceConfigurationProperties;
-  createDerivedIndexPattern: (type: 'metrics') => IIndexPattern;
+  createDerivedIndexPattern: (type: 'metrics') => DataViewBase;
 }) => {
   const { createDerivedIndexPattern, configuration } = props;
   const { options } = useContext(MetricsExplorerOptionsContainer.Context);
