@@ -56,7 +56,8 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteListsIndex(supertest);
     });
 
-    describe('"is" operator', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/115310
+    describe.skip('"is" operator', () => {
       it('should find all the text from the data set when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['text']);
         const { id } = await createRule(supertest, rule);
