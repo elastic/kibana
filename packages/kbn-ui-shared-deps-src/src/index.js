@@ -30,7 +30,6 @@ exports.externals = {
   /**
    * stateful deps
    */
-  angular: '__kbnSharedDeps__.Angular',
   '@kbn/i18n': '__kbnSharedDeps__.KbnI18n',
   '@kbn/i18n/react': '__kbnSharedDeps__.KbnI18nReact',
   '@emotion/react': '__kbnSharedDeps__.EmotionReact',
