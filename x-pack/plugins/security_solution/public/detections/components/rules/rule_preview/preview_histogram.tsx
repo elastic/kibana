@@ -44,8 +44,8 @@ export const PreviewHistogram = ({
 }: PreviewHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
 
-  const from = `now-1${timeFrame}`;
-  const to = 'now';
+  const from = useMemo(() => `now-1${timeFrame}`, [timeFrame]);
+  const to = useMemo(() => 'now', []);
   const startDate = useMemo(() => formatDate(from), [from]);
   const endDate = useMemo(() => formatDate(to), [to]);
 
