@@ -272,9 +272,8 @@ const hasIndexedDoc = async ({
   agentId: string;
   esClient: ElasticsearchClient;
 }): Promise<string[]> => {
-  let responseActionIds: string[] = [];
-  try {
-    const response = await esClient.search<LogsEndpointActionResponse>(
+  const response = await esClient
+    .search<LogsEndpointActionResponse>(
       {
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
         body: {
@@ -286,14 +285,12 @@ const hasIndexedDoc = async ({
         },
       },
       { ignore: [404] }
-    );
-    responseActionIds = response.body?.hits?.hits?.map(
-      (hit) => (hit._source as LogsEndpointActionResponse).EndpointActions.action_id
-    );
-  } catch (error) {
-    catchAndWrapError(error);
-  }
-  return responseActionIds;
+    )
+    .then(
+      (result) => result.body?.hits?.hits?.map((a) => a._source?.EndpointActions.action_id) || []
+    )
+    .catch(catchAndWrapError);
+  return response.filter((action): action is string => action !== undefined);
 };
 
 /**
