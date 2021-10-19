@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiButton,
@@ -25,6 +26,11 @@ import {
 } from '@elastic/eui';
 
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import {
+  uiMetricService,
+  UIM_ML_SNAPSHOT_UPGRADE_CLICK,
+  UIM_ML_SNAPSHOT_DELETE_CLICK,
+} from '../../../../lib/ui_metric';
 import { useAppContext } from '../../../../app_context';
 import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
 import { MlSnapshotContext } from './context';
@@ -167,11 +173,13 @@ export const FixSnapshotsFlyout = ({
   const isResolved = snapshotState.status === 'complete';
 
   const onUpgradeSnapshot = () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_ML_SNAPSHOT_UPGRADE_CLICK);
     upgradeSnapshot();
     closeFlyout();
   };
 
   const onDeleteSnapshot = () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_ML_SNAPSHOT_DELETE_CLICK);
     deleteSnapshot();
     closeFlyout();
   };

@@ -132,7 +132,7 @@ describe('Policy trusted apps layout', () => {
 
     await waitForAction('assignedTrustedAppsListStateChanged');
 
-    expect(component.getByTestId('policyDetailsTrustedAppsCount')).not.toBeNull();
+    expect(component.getAllByTestId('policyTrustedAppsGrid-card')).toHaveLength(10);
   });
 
   it('should hide assign button on empty state with unassigned policies when downgraded to a gold or below license', async () => {
