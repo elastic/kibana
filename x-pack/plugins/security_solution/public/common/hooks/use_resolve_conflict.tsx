@@ -37,52 +37,53 @@ export const useResolveConflict = () => {
   const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
     if (
-      spaces &&
-      resolveTimelineConfig?.outcome === 'conflict' &&
-      resolveTimelineConfig?.alias_target_id != null
+      !spaces ||
+      resolveTimelineConfig?.outcome !== 'conflict' ||
+      resolveTimelineConfig?.alias_target_id == null
     ) {
-      const searchQuery = new URLSearchParams(search);
-      const timelineRison = searchQuery.get(CONSTANTS.timeline) ?? undefined;
-      // Try to get state on URL, but default to what's in Redux in case of decodeRisonFailure
-      const currentTimelineState = {
-        id: savedObjectId ?? '',
-        isOpen: !!show,
-        activeTab,
-        graphEventId,
-      };
-      let timelineSearch: TimelineUrl = currentTimelineState;
-      try {
-        timelineSearch = decodeRisonUrlState(timelineRison) ?? currentTimelineState;
-      } catch (error) {
-        // do nothing as it's already defaulted on line 77
-      }
-      // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
-      // callout with a warning for the user, and provide a way for them to navigate to the other object.
-      const currentObjectId = timelineSearch?.id;
-      const newSavedObjectId = resolveTimelineConfig?.alias_target_id ?? ''; // This is always defined if outcome === 'conflict'
-
-      const newTimelineSearch: TimelineUrl = {
-        ...timelineSearch,
-        id: newSavedObjectId,
-      };
-      const newTimelineRison = encodeRisonUrlState(newTimelineSearch);
-      searchQuery.set(CONSTANTS.timeline, newTimelineRison);
-
-      const newPath = `${pathname}?${searchQuery.toString()}${window.location.hash}`;
-
-      return (
-        <>
-          {spaces.ui.components.getLegacyUrlConflict({
-            objectNoun: CONSTANTS.timeline,
-            currentObjectId,
-            otherObjectId: newSavedObjectId,
-            otherObjectPath: newPath,
-          })}
-          <EuiSpacer />
-        </>
-      );
+      return null;
     }
-    return null;
+
+    const searchQuery = new URLSearchParams(search);
+    const timelineRison = searchQuery.get(CONSTANTS.timeline) ?? undefined;
+    // Try to get state on URL, but default to what's in Redux in case of decodeRisonFailure
+    const currentTimelineState = {
+      id: savedObjectId ?? '',
+      isOpen: !!show,
+      activeTab,
+      graphEventId,
+    };
+    let timelineSearch: TimelineUrl = currentTimelineState;
+    try {
+      timelineSearch = decodeRisonUrlState(timelineRison) ?? currentTimelineState;
+    } catch (error) {
+      // do nothing as it's already defaulted on line 77
+    }
+    // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
+    // callout with a warning for the user, and provide a way for them to navigate to the other object.
+    const currentObjectId = timelineSearch?.id;
+    const newSavedObjectId = resolveTimelineConfig?.alias_target_id ?? ''; // This is always defined if outcome === 'conflict'
+
+    const newTimelineSearch: TimelineUrl = {
+      ...timelineSearch,
+      id: newSavedObjectId,
+    };
+    const newTimelineRison = encodeRisonUrlState(newTimelineSearch);
+    searchQuery.set(CONSTANTS.timeline, newTimelineRison);
+
+    const newPath = `${pathname}?${searchQuery.toString()}${window.location.hash}`;
+
+    return (
+      <>
+        {spaces.ui.components.getLegacyUrlConflict({
+          objectNoun: CONSTANTS.timeline,
+          currentObjectId,
+          otherObjectId: newSavedObjectId,
+          otherObjectPath: newPath,
+        })}
+        <EuiSpacer />
+      </>
+    );
   }, [
     activeTab,
     graphEventId,
