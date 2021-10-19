@@ -36,9 +36,7 @@ export const usePreviewRoute = ({
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
-  const [{ isLoading, response }, setRule] = usePreviewRule(
-    getInvocationCountFromTimeFrame(timeFrame)
-  );
+  const [{ isLoading, response }, setRule] = usePreviewRule();
   const [warnings, setWarnings] = useState<string[]>(response.warnings ?? []);
 
   useEffect(() => {
@@ -72,7 +70,15 @@ export const usePreviewRoute = ({
   useEffect(() => {
     if (isRequestTriggered) {
       setRule(
-        formatPreviewRule({ index, query, threatIndex, threatQuery, threatMapping, ruleType })
+        formatPreviewRule({
+          index,
+          query,
+          ruleType,
+          threatIndex,
+          threatMapping,
+          threatQuery,
+          timeFrame,
+        })
       );
       setIsRequestTriggered(false);
     }
@@ -98,16 +104,4 @@ export const usePreviewRoute = ({
     previewId: response.previewId ?? '',
     warnings,
   };
-};
-
-const getInvocationCountFromTimeFrame = (timeFrame: Unit): number => {
-  switch (timeFrame) {
-    case 'w':
-      return 168;
-    case 'd':
-      return 24;
-    case 'h':
-    default:
-      return 1;
-  }
 };

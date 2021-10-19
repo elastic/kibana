@@ -427,14 +427,6 @@ export const fullResponseSchema = t.intersection([
 ]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
 
-export const previewRulesSchema = t.intersection([
-  sharedCreateSchema,
-  createTypeSpecific,
-  t.type({ invocationCount: t.number }),
-]);
-
-export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
-
 export interface PreviewResponse {
   previewId: string | undefined;
   errors: string[] | undefined;

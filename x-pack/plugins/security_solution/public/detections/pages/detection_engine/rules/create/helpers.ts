@@ -6,6 +6,7 @@
  */
 
 import { has, isEmpty } from 'lodash/fp';
+import { Unit } from '@elastic/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
 
@@ -400,6 +401,7 @@ export const formatPreviewRule = ({
   threatQuery,
   ruleType,
   threatMapping,
+  timeFrame,
 }: {
   index: string[];
   threatIndex: string[];
@@ -407,6 +409,7 @@ export const formatPreviewRule = ({
   threatQuery: FieldValueQueryBar;
   ruleType: Type;
   threatMapping: ThreatMapping;
+  timeFrame: Unit;
 }): CreateRulesSchema => {
   const defineStepData = {
     ...stepDefineDefaultValue,
@@ -423,7 +426,7 @@ export const formatPreviewRule = ({
     description: 'Preview Rule',
   };
   const scheduleStepData = {
-    interval: '60m',
+    interval: `1${timeFrame}`,
     from: '1m',
   };
   return formatRule<CreateRulesSchema>(

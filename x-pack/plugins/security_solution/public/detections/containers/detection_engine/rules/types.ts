@@ -57,11 +57,6 @@ export interface CreateRulesProps {
   signal: AbortSignal;
 }
 
-export interface PreviewRulesProps {
-  rule: CreateRulesSchema & { invocationCount: number };
-  signal: AbortSignal;
-}
-
 export interface UpdateRulesProps {
   rule: UpdateRulesSchema;
   signal: AbortSignal;

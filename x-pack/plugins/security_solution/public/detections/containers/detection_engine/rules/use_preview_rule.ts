@@ -30,7 +30,7 @@ const emptyPreviewRule: PreviewResponse = {
   warnings: [],
 };
 
-export const usePreviewRule = (invocationCount: number): ReturnPreviewRule => {
+export const usePreviewRule = (): ReturnPreviewRule => {
   const [rule, setRule] = useState<CreateRulesSchema | null>(null);
   const [response, setResponse] = useState<PreviewResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
@@ -52,7 +52,7 @@ export const usePreviewRule = (invocationCount: number): ReturnPreviewRule => {
         try {
           setIsLoading(true);
           const previewRuleResponse = await previewRule({
-            rule: { ...transformOutput(rule), invocationCount },
+            rule: transformOutput(rule),
             signal: abortCtrl.signal,
           });
           if (isSubscribed) {
@@ -74,7 +74,7 @@ export const usePreviewRule = (invocationCount: number): ReturnPreviewRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError, invocationCount]);
+  }, [rule, addError]);
 
   return [{ isLoading, response }, setRule];
 };
