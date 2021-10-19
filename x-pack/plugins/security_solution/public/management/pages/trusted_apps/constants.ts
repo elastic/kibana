@@ -8,6 +8,7 @@
 export const SEARCHABLE_FIELDS: Readonly<string[]> = [
   `name`,
   `description`,
+  'item_id',
   `entries.value`,
   `entries.entries.value`,
 ];
