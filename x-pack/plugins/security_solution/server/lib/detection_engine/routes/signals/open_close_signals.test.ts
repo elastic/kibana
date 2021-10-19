@@ -20,13 +20,16 @@ import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     server = serverMock.create();
+    logger = loggingSystemMock.createLogger();
     ({ context } = requestContextMock.createTools());
 
     context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResolvedValue(
@@ -40,7 +43,7 @@ describe('set signal status', () => {
         getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
       },
     } as unknown as SetupPlugins['security'];
-    setSignalsStatusRoute(server.router, securityMock, telemetrySenderMock);
+    setSignalsStatusRoute(server.router, logger, securityMock, telemetrySenderMock);
   });
 
   describe('status on signal', () => {
