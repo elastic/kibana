@@ -94,6 +94,16 @@ function TableOptions({
       />
 
       <SwitchOption
+        label={i18n.translate('visTypeTable.params.autoFitRow', {
+          defaultMessage: 'Auto fit rows to content',
+        })}
+        paramName="autoFitRowToContent"
+        value={stateParams.autoFitRowToContent}
+        setValue={setValue}
+        data-test-subj="autoFitRowToContent"
+      />
+
+      <SwitchOption
         label={i18n.translate('visTypeTable.params.showPartialRowsLabel', {
           defaultMessage: 'Show partial rows',
         })}
