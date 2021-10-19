@@ -217,13 +217,16 @@ describe('Machine Learning privileges deprecations', () => {
               Object {
                 "correctiveActions": Object {
                   "manualSteps": Array [
-                    "The following roles will grant access to Machine Learning features starting in 8.0. Update this role to grant access to specific features if you do not want to grant access to Machine Learning: roleA, roleB, roleC",
+                    "Change the affected roles to use feature privileges that grant access to only the desired features instead.",
+                    "If you don't make any changes, affected roles will grant access to the Machine Learning feature in 8.0.",
+                    "The affected roles are: roleA, roleB, roleC",
                   ],
                 },
                 "deprecationType": "feature",
+                "documentationUrl": "https://www.elastic.co/guide/en/kibana/some-branch/kibana-privileges.html",
                 "level": "warning",
-                "message": "Roles that grant \\"all\\" or \\"read\\" privileges to all features will include Machine Learning.",
-                "title": "Access to Machine Learning features will be granted in 8.0",
+                "message": "Roles that use base privileges will include the Machine Learning feature in 8.0.",
+                "title": "The Machine Learning feature is changing",
               },
             ]
           `);
