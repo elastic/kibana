@@ -153,8 +153,8 @@ export const EmptyIndexListPrompt = ({
           </EuiFlexGrid>
           <EuiSpacer size="xxl" />
           <div className="inpEmptyState__footer">
-            <EuiFlexGroup>
-              <EuiFlexItem grow={1} className="inpEmptyState__footerFlexItem">
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false} className="inpEmptyState__footerFlexItem">
                 <EuiDescriptionList
                   listItems={[
                     {
@@ -176,7 +176,7 @@ export const EmptyIndexListPrompt = ({
                   ]}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={2} className="inpEmptyState__footerFlexItem">
+              <EuiFlexItem grow={false} className="inpEmptyState__footerFlexItem">
                 <EuiDescriptionList
                   listItems={[
                     {
