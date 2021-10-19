@@ -194,6 +194,7 @@ export const importRulesRoute = (
                       throttle,
                       version,
                       exceptions_list: exceptionsList,
+                      actions,
                     } = parsedRule;
 
                     try {
@@ -265,7 +266,7 @@ export const importRulesRoute = (
                           note,
                           version,
                           exceptionsList,
-                          actions: [], // Actions are not imported nor exported at this time
+                          actions,
                         });
                         resolve({
                           rule_id: ruleId,
@@ -328,7 +329,7 @@ export const importRulesRoute = (
                           exceptionsList,
                           anomalyThreshold,
                           machineLearningJobId,
-                          actions: undefined,
+                          actions,
                         });
                         resolve({
                           rule_id: ruleId,
