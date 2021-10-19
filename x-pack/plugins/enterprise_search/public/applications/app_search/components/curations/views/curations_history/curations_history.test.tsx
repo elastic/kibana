@@ -9,11 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import {
-  CurationChangesPanel,
-  IgnoredSuggestionsPanel,
-  RejectedCurationsPanel,
-} from './components';
+import { CurationChangesPanel, IgnoredQueriesPanel, RejectedCurationsPanel } from './components';
 import { CurationsHistory } from './curations_history';
 
 describe('CurationsHistory', () => {
@@ -22,6 +18,6 @@ describe('CurationsHistory', () => {
 
     expect(wrapper.find(CurationChangesPanel)).toHaveLength(1);
     expect(wrapper.find(RejectedCurationsPanel)).toHaveLength(1);
-    expect(wrapper.find(IgnoredSuggestionsPanel)).toHaveLength(1);
+    expect(wrapper.find(IgnoredQueriesPanel)).toHaveLength(1);
   });
 });

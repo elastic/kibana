@@ -43,7 +43,6 @@ import { RulesService } from './services/rules';
 
 export const config: PluginConfigDescriptor = {
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     inventory: schema.object({
       compositeSize: schema.number({ defaultValue: 2000 }),
     }),
@@ -68,7 +67,6 @@ export const config: PluginConfigDescriptor = {
       })
     ),
   }),
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };
 
 export type InfraConfig = TypeOf<typeof config.schema>;

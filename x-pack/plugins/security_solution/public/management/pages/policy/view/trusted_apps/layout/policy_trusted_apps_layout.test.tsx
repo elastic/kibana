@@ -19,8 +19,12 @@ import { createLoadedResourceState, isLoadedResourceState } from '../../../../..
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 
 jest.mock('../../../../trusted_apps/service');
+jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
+const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
 
 let mockedContext: AppContextTestRender;
 let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
@@ -46,6 +50,14 @@ describe('Policy trusted apps layout', () => {
           });
         }
 
+        // GET Agent status for agent policy
+        if (path === '/api/fleet/agent-status') {
+          return Promise.resolve({
+            results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },
+            success: true,
+          });
+        }
+
         // Get package data
         // Used in tests that route back to the list
         if (policyListApiHandlers[path]) {
@@ -63,6 +75,10 @@ describe('Policy trusted apps layout', () => {
 
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     render = () => mockedContext.render(<PolicyTrustedAppsLayout />);
+  });
+
+  afterAll(() => {
+    mockUseEndpointPrivileges.mockReset();
   });
 
   afterEach(() => reactTestingLibrary.cleanup());
@@ -104,6 +120,42 @@ describe('Policy trusted apps layout', () => {
 
     await waitForAction('assignedTrustedAppsListStateChanged');
 
-    expect(component.getByTestId('policyDetailsTrustedAppsCount')).not.toBeNull();
+    expect(component.getAllByTestId('policyTrustedAppsGrid-card')).toHaveLength(10);
+  });
+
+  it('should hide assign button on empty state with unassigned policies when downgraded to a gold or below license', async () => {
+    mockUseEndpointPrivileges.mockReturnValue(
+      getEndpointPrivilegesInitialStateMock({
+        isPlatinumPlus: false,
+      })
+    );
+    const component = render();
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234'));
+
+    await waitForAction('assignedTrustedAppsListStateChanged');
+
+    mockedContext.store.dispatch({
+      type: 'policyArtifactsDeosAnyTrustedAppExists',
+      payload: createLoadedResourceState(true),
+    });
+    expect(component.queryByTestId('assign-ta-button')).toBeNull();
+  });
+
+  it('should hide the `Assign trusted applications` button when there is data and the license is downgraded to gold or below', async () => {
+    mockUseEndpointPrivileges.mockReturnValue(
+      getEndpointPrivilegesInitialStateMock({
+        isPlatinumPlus: false,
+      })
+    );
+    TrustedAppsHttpServiceMock.mockImplementation(() => {
+      return {
+        getTrustedAppsList: () => getMockListResponse(),
+      };
+    });
+    const component = render();
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234'));
+
+    await waitForAction('assignedTrustedAppsListStateChanged');
+    expect(component.queryByTestId('assignTrustedAppButton')).toBeNull();
   });
 });

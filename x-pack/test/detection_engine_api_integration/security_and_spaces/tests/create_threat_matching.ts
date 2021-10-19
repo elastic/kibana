@@ -411,6 +411,52 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).equal(0);
       });
 
+      describe('timeout behavior', () => {
+        it('will return an error if a rule execution exceeds the rule interval', async () => {
+          const rule: CreateRulesSchema = {
+            description: 'Detecting root and admin users',
+            name: 'Query with a short interval',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'threat_match',
+            risk_score: 55,
+            language: 'kuery',
+            rule_id: 'rule-1',
+            from: '1900-01-01T00:00:00.000Z',
+            query: '*:*',
+            threat_query: '*:*', // broad query to take more time
+            threat_index: ['auditbeat-*'], // We use auditbeat as both the matching index and the threat list for simplicity
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    field: 'host.name',
+                    value: 'host.name',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+            threat_filters: [],
+            concurrent_searches: 1,
+            interval: '1s', // short interval
+            items_per_search: 1, // iterate only 1 threat item per loop to ensure we're slow
+          };
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id, 'failed');
+
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+            .set('kbn-xsrf', 'true')
+            .send({ ids: [id] })
+            .expect(200);
+          expect(body[id].current_status.last_failure_message).to.contain(
+            'execution has exceeded its allotted interval'
+          );
+        });
+      });
+
       describe('indicator enrichment', () => {
         before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/filebeat/threat_intel');
