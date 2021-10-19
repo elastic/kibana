@@ -108,6 +108,7 @@ const finalTestMap = testMap.concat(testMap2);
 
 console.log('TEST PATHS: ');
 console.log(finalTestMap);
+throw new Error('FAIL CI');
 
 // modifies all future calls to require() to automatically
 // compile the required source with babel
