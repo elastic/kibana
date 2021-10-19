@@ -29,6 +29,7 @@ import * as i18n from './translations';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -40,6 +41,11 @@ const ResetButton = styled(EuiButtonEmpty)`
 interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
 }
+
+const getPatternListWithoutSignals = (
+  patternList: string[],
+  signalIndexName: string | null
+): string[] => patternList.filter((p) => p !== signalIndexName);
 
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
@@ -58,15 +64,29 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const { patternList, selectablePatterns } = useMemo(() => {
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
     return theDataView != null
-      ? {
-          patternList: theDataView.title
-            .split(',')
-            // remove duplicates patterns from selector
-            .filter((pattern, i, self) => self.indexOf(pattern) === i),
-          selectablePatterns: theDataView.patternList,
-        }
+      ? scopeId === SourcererScopeName.default
+        ? {
+            patternList: getPatternListWithoutSignals(
+              theDataView.title
+                .split(',')
+                // remove duplicates patterns from selector
+                .filter((pattern, i, self) => self.indexOf(pattern) === i),
+              signalIndexName
+            ),
+            selectablePatterns: getPatternListWithoutSignals(
+              theDataView.patternList,
+              signalIndexName
+            ),
+          }
+        : {
+            patternList: theDataView.title
+              .split(',')
+              // remove duplicates patterns from selector
+              .filter((pattern, i, self) => self.indexOf(pattern) === i),
+            selectablePatterns: theDataView.patternList,
+          }
       : { patternList: [], selectablePatterns: [] };
-  }, [kibanaDataViews, dataViewId]);
+  }, [kibanaDataViews, scopeId, signalIndexName, dataViewId]);
 
   const selectableOptions = useMemo(
     () =>

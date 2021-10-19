@@ -8,7 +8,6 @@
 import { State } from '../../store';
 import { sourcererSelectors } from '../../store/selectors';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { isSignalIndex } from '../../store/sourcerer/helpers';
 
 export interface IndicesSelector {
   all: string[];
@@ -22,9 +21,7 @@ export const getIndicesSelector = () => {
   return (state: State, scopeId: SourcererScopeName): IndicesSelector => {
     const signalIndexName = getSignalIndexNameSelector(state);
     const { selectedPatterns } = getScopeSelector(state, scopeId);
-    const raw: string[] = selectedPatterns.filter(
-      (index) => !isSignalIndex(index, signalIndexName)
-    );
+    const raw: string[] = selectedPatterns.filter((index) => index !== signalIndexName);
 
     return {
       all: signalIndexName != null ? [...raw, signalIndexName] : [...raw],

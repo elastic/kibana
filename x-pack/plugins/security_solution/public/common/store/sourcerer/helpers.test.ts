@@ -11,7 +11,6 @@ import { SourcererScopeName } from './model';
 import {
   defaultDataViewByEventType,
   getScopePatternListSelection,
-  isSignalIndex,
   validateSelectedPatterns,
 } from './helpers';
 
@@ -24,13 +23,11 @@ const dataView = {
   patternList: ['packetbeat-*', 'auditbeat-*', `${signalIndexName}`],
 };
 const patternListNoSignals = mockGlobalState.sourcerer.defaultDataView.patternList
-  .filter((p) => !isSignalIndex(p, signalIndexName))
+  .filter((p) => p !== signalIndexName)
   .sort();
 const patternListSignals = [
   signalIndexName,
-  ...mockGlobalState.sourcerer.defaultDataView.patternList.filter(
-    (p) => !isSignalIndex(p, signalIndexName)
-  ),
+  ...mockGlobalState.sourcerer.defaultDataView.patternList.filter((p) => p !== signalIndexName),
 ].sort();
 
 describe('sourcerer store helpers', () => {
@@ -125,7 +122,7 @@ describe('sourcerer store helpers', () => {
           selectedPatterns: [
             signalIndexName,
             ...mockGlobalState.sourcerer.defaultDataView.patternList.filter(
-              (p) => !isSignalIndex(p, signalIndexName)
+              (p) => p !== signalIndexName
             ),
           ].sort(),
         },

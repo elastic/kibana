@@ -58,20 +58,20 @@ export class IndexPatternsFetcher {
   }): Promise<FieldDescriptor[]> {
     const { pattern, metaFields, fieldCapsOptions, type, rollupIndex } = options;
     const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
+    const allowNoIndices = fieldCapsOptions
+      ? fieldCapsOptions.allow_no_indices
+      : this.allowNoIndices;
     let patternListActive: string[] = patternList;
     // if only one pattern, don't bother with validation. We let getFieldCapabilities fail if the single pattern is bad regardless
-    if (patternList.length > 1) {
+    if (patternList.length > 1 && !allowNoIndices) {
       patternListActive = await this.validatePatternListActive(patternList);
     }
     const fieldCapsResponse = await getFieldCapabilities(
       this.elasticsearchClient,
-      // if none of the patterns are active, pass the original list to get an error
-      patternListActive.length > 0 ? patternListActive : patternList,
+      patternListActive,
       metaFields,
       {
-        allow_no_indices: fieldCapsOptions
-          ? fieldCapsOptions.allow_no_indices
-          : this.allowNoIndices,
+        allow_no_indices: allowNoIndices,
       }
     );
     if (type === 'rollup' && rollupIndex) {

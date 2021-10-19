@@ -31,10 +31,7 @@ import { sourcererSelectors } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { TimelineEventsType } from '../../../../../common';
 import * as i18n from './translations';
-import {
-  getScopePatternListSelection,
-  isSignalIndex,
-} from '../../../../common/store/sourcerer/helpers';
+import { getScopePatternListSelection } from '../../../../common/store/sourcerer/helpers';
 import { SIEM_DATA_VIEW_LABEL } from '../../../../common/components/sourcerer/translations';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
@@ -192,7 +189,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         setSelectedOptions(
           (signalIndexName == null
             ? selectablePatterns
-            : selectablePatterns.filter((index) => !isSignalIndex(index, signalIndexName))
+            : selectablePatterns.filter((index) => index !== signalIndexName)
           ).map((indexSelected) => ({
             label: indexSelected,
             value: indexSelected,
@@ -222,7 +219,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         dataViewId === defaultDataView.id &&
         localSelectedPatterns ===
           selectablePatterns
-            .filter((index) => !isSignalIndex(index, signalIndexName))
+            .filter((index) => index !== signalIndexName)
             .sort()
             .join()
       ) {

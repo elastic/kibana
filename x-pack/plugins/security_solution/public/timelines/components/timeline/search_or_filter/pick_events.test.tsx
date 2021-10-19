@@ -18,7 +18,6 @@ import {
 import { TimelineEventsType } from '../../../../../common';
 import { createStore } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { isSignalIndex } from '../../../../common/store/sourcerer/helpers';
 
 describe('Pick Events/Timeline Sourcerer', () => {
   const defaultProps = {
@@ -27,7 +26,7 @@ describe('Pick Events/Timeline Sourcerer', () => {
   };
   const initialPatterns = [
     ...mockSourcererState.defaultDataView.patternList.filter(
-      (p) => !isSignalIndex(p, mockSourcererState.signalIndexName)
+      (p) => p !== mockSourcererState.signalIndexName
     ),
     mockSourcererState.signalIndexName,
   ];

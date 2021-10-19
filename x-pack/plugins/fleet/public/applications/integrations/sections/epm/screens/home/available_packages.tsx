@@ -79,7 +79,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
             const allCategories = [...topCategories, ...categories];
             return {
               ...restOfPackage,
-              id: `${restOfPackage}-${name}`,
+              id: `${restOfPackage.id}-${name}`,
               integration: name,
               title,
               description,
@@ -181,7 +181,7 @@ export const AvailablePackages: React.FC = memo(() => {
   let controls = [
     <EuiFlexItem grow={false}>
       <EuiHorizontalRule margin="m" />
-      <IntegrationPreference initialType={preference} onChange={setPreference} />,
+      <IntegrationPreference initialType={preference} onChange={setPreference} />
     </EuiFlexItem>,
   ];
 

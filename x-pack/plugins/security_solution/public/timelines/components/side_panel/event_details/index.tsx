@@ -82,7 +82,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   tabType,
   timelineId,
 }) => {
-  const [loading, detailsData] = useTimelineEventsDetails({
+  const [loading, detailsData, rawEventData] = useTimelineEventsDetails({
     docValueFields,
     entityType,
     indexName: expandedEvent.indexName ?? '',
@@ -199,6 +199,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             isAlert={isAlert}
             isDraggable={isDraggable}
             loading={loading}
+            rawEventData={rawEventData}
             timelineId={timelineId}
             timelineTabType="flyout"
             hostRisk={hostRisk}
@@ -232,6 +233,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         isAlert={isAlert}
         isDraggable={isDraggable}
         loading={loading}
+        rawEventData={rawEventData}
         timelineId={timelineId}
         timelineTabType={tabType}
         hostRisk={hostRisk}
