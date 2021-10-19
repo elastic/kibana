@@ -151,39 +151,31 @@ const hasAckInResponse = (response: EndpointActionResponse): boolean => {
   return typeof response.action_data.ack !== 'undefined';
 };
 
-const isLogsEndpointFilter = async ({
+const isLogsEndpointFilter = ({
+  action,
+  agentId,
+  indexedActionIds,
+}: {
+  action: EndpointAction;
+  agentId: string;
+  indexedActionIds: string[];
+}): boolean => {
+  return action.agents.includes(agentId) && !indexedActionIds.includes(action.action_id);
+};
+
+const legacyFilterCallback = ({
   action,
   agentId,
   agentResponses,
-  esClient,
 }: {
   action: EndpointAction;
   agentId: string;
   agentResponses: EndpointActionResponse[];
-  esClient: ElasticsearchClient;
-}): Promise<boolean> => {
-  // get response actionIds for responses with ACKs
-  const ackResponseActionIdList: string[] = agentResponses
-    .filter(hasAckInResponse)
-    .map((response) => response.action_id);
-
-  // actions Ids that are indexed in new response index
-  const indexedActionIds = await hasIndexedDoc({
-    agentId,
-    actionIds: ackResponseActionIdList,
-    esClient,
-  });
-
-  // if action_id not in the ACK list then use the legacy filter to find pending actions
-  // else see if the action doesn't have a response in the new response index
-  if (ackResponseActionIdList.includes(action.action_id)) {
-    return action.agents.includes(agentId) && !indexedActionIds.includes(action.action_id);
-  } else {
-    return (
-      action.agents.includes(agentId) &&
-      !agentResponses.map((e) => e.action_id).includes(action.action_id)
-    );
-  }
+}): boolean => {
+  return (
+    action.agents.includes(agentId) &&
+    !agentResponses.map((e) => e.action_id).includes(action.action_id)
+  );
 };
 
 export const getPendingActionCounts = async (
@@ -226,18 +218,35 @@ export const getPendingActionCounts = async (
     agentIDs
   );
 
+  //
+
   const pending: EndpointPendingActions[] = [];
   for (const agentId of agentIDs) {
     const agentResponses = responses[agentId];
-    const pendingActions: EndpointAction[] = (
-      await Promise.all(
-        recentActions.filter(async (action): Promise<EndpointAction | undefined> => {
-          return (await isLogsEndpointFilter({ action, agentId, agentResponses, esClient }))
-            ? action
-            : undefined;
-        })
-      )
-    ).filter((action): action is EndpointAction => action !== undefined);
+
+    // get response actionIds for responses with ACKs
+    const ackResponseActionIdList: string[] = agentResponses
+      .filter(hasAckInResponse)
+      .map((response) => response.action_id);
+
+    // actions Ids that are indexed in new response index
+    const indexedActionIds = await hasIndexedDoc({
+      agentId,
+      actionIds: ackResponseActionIdList,
+      esClient,
+    });
+
+    const pendingActions: EndpointAction[] = recentActions.filter((action) => {
+      return ackResponseActionIdList.includes(action.action_id) // if has ack
+        ? isLogsEndpointFilter({ action, agentId, indexedActionIds }) // then find responses in new index
+        : legacyFilterCallback({
+            // else use the legacy way
+            action,
+            agentId,
+            agentResponses,
+          });
+    });
+
     pending.push({
       agent_id: agentId,
       pending_actions: pendingActions
