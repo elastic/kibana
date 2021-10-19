@@ -42,7 +42,7 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       <>
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelledTitle"
-          defaultMessage="Reindexing cancelled"
+          defaultMessage="Reindexing cancelled."
         />
       </>
     );
@@ -91,7 +91,7 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       <EuiFlexItem grow={false}>
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
-          defaultMessage="Reindexing documents"
+          defaultMessage="Reindexing documents."
         />
       </EuiFlexItem>
       {showCancelLink && (
