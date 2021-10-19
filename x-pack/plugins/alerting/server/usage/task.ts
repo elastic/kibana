@@ -89,6 +89,7 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
                 count_active_by_type: totalInUse.countByType,
                 count_active_total: totalInUse.countTotal,
                 count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
+                count_rules_namespaces: totalInUse.countNamespaces,
               },
               runAt: getNextMidnight(),
             };
