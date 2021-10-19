@@ -59,6 +59,7 @@ export async function traceData(context: InheritedFtrProviderContext) {
     },
     clean: () => {
       return es.deleteByQuery({
+        conflicts: 'proceed',
         index: 'apm-*',
         body: {
           query: {
