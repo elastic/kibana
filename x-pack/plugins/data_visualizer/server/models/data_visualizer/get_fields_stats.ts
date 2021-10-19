@@ -86,10 +86,10 @@ export const getDocumentCountStats = async (
   });
 
   return {
-    documentCounts: {
-      interval: intervalMs,
-      buckets,
-    },
+    interval: intervalMs,
+    buckets,
+    timeRangeEarliest: earliestMs ?? 0,
+    timeRangeLatest: latestMs ?? 0,
   };
 };
 

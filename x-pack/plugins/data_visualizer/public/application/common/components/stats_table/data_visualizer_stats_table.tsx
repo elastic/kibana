@@ -65,7 +65,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   extendedColumns,
   showPreviewByDefault,
   onChange,
-  progress,
 }: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, setExpandAll] = useState<boolean>(false);
