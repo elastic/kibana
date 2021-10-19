@@ -115,11 +115,11 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         end={endDate}
         entityType="events"
         id={TimelineId.hostsPageEvents}
+        pageFilters={pageFilters}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
         scopeId={SourcererScopeName.default}
         start={startDate}
-        pageFilters={pageFilters}
         unit={unit}
       />
     </>

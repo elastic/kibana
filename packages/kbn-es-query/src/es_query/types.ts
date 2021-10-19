@@ -65,7 +65,7 @@ export type IndexPatternFieldBase = DataViewFieldBase;
 export interface DataViewBase {
   fields: DataViewFieldBase[];
   id?: string;
-  title?: string;
+  title: string;
 }
 
 /**

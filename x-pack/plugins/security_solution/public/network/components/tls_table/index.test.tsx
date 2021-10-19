@@ -77,7 +77,7 @@ describe('Tls Table Component', () => {
           />
         </TestProviders>
       );
-      expect(store.getState().network.details.queries!.tls.sort).toEqual({
+      expect(store.getState().network.details.queries?.tls.sort).toEqual({
         direction: 'desc',
         field: '_id',
       });
@@ -86,7 +86,7 @@ describe('Tls Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.details.queries!.tls.sort).toEqual({
+      expect(store.getState().network.details.queries?.tls.sort).toEqual({
         direction: 'asc',
         field: '_id',
       });

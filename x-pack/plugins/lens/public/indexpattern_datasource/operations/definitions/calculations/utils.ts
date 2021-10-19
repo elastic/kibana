@@ -24,7 +24,7 @@ export const buildLabelFunction =
   };
 
 export function checkForDataLayerType(layerType: LayerType, name: string) {
-  if (layerType === layerTypes.THRESHOLD) {
+  if (layerType === layerTypes.REFERENCELINE) {
     return [
       i18n.translate('xpack.lens.indexPattern.calculations.layerDataType', {
         defaultMessage: '{name} is disabled for this type of layer.',
