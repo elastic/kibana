@@ -19,7 +19,7 @@ export const PLUGIN = {
   }),
 };
 
-export const MAJOR_VERSION = '8.0.0';
+export const MAJOR_VERSION = '7.16.0';
 
 export const API_BASE_PATH = '/api/index_lifecycle_management';
 
