@@ -11,487 +11,252 @@ import type { Role } from '../../../common/model';
 import { RolesAPIClient } from './roles_api_client';
 
 describe('RolesAPIClient', () => {
-  async function saveRole(role: Role, spacesEnabled: boolean) {
+  async function saveRole(role: Role) {
     const httpMock = httpServiceMock.createStartContract();
     const rolesAPIClient = new RolesAPIClient(httpMock);
 
-    await rolesAPIClient.saveRole({ role, spacesEnabled });
+    await rolesAPIClient.saveRole({ role });
     expect(httpMock.put).toHaveBeenCalledTimes(1);
 
     return JSON.parse((httpMock.put.mock.calls[0] as any)[1]?.body as any);
   }
 
-  describe('spaces disabled', () => {
-    it('removes placeholder index privileges', async () => {
-      const role: Role = {
-        name: 'my role',
-        elasticsearch: {
-          cluster: [],
-          indices: [{ names: [], privileges: [] }],
-          run_as: [],
-        },
-        kibana: [],
-      };
+  it('removes placeholder index privileges', async () => {
+    const role: Role = {
+      name: 'my role',
+      elasticsearch: {
+        cluster: [],
+        indices: [{ names: [], privileges: [] }],
+        run_as: [],
+      },
+      kibana: [],
+    };
 
-      const result = await saveRole(role, false);
+    const result = await saveRole(role);
 
-      expect(result).toEqual({
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [],
-      });
-    });
-
-    it('removes placeholder query entries', async () => {
-      const role: Role = {
-        name: 'my role',
-        elasticsearch: {
-          cluster: [],
-          indices: [{ names: ['.kibana*'], privileges: ['all'], query: '' }],
-          run_as: [],
-        },
-        kibana: [],
-      };
-
-      const result = await saveRole(role, false);
-
-      expect(result).toEqual({
-        elasticsearch: {
-          cluster: [],
-          indices: [{ names: ['.kibana*'], privileges: ['all'] }],
-          run_as: [],
-        },
-        kibana: [],
-      });
-    });
-
-    it('removes transient fields not required for save', async () => {
-      const role: Role = {
-        name: 'my role',
-        transient_metadata: {
-          foo: 'bar',
-        },
-        _transform_error: ['kibana'],
-        metadata: {
-          someOtherMetadata: true,
-        },
-        _unrecognized_applications: ['foo'],
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [],
-      };
-
-      const result = await saveRole(role, false);
-
-      expect(result).toEqual({
-        metadata: {
-          someOtherMetadata: true,
-        },
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [],
-      });
-    });
-
-    it('does not remove actual query entries', async () => {
-      const role: Role = {
-        name: 'my role',
-        elasticsearch: {
-          cluster: [],
-          indices: [{ names: ['.kibana*'], privileges: ['all'], query: 'something' }],
-          run_as: [],
-        },
-        kibana: [],
-      };
-
-      const result = await saveRole(role, false);
-
-      expect(result).toEqual({
-        elasticsearch: {
-          cluster: [],
-          indices: [{ names: ['.kibana*'], privileges: ['all'], query: 'something' }],
-          run_as: [],
-        },
-        kibana: [],
-      });
-    });
-
-    it('should remove feature privileges if a corresponding base privilege is defined', async () => {
-      const role: Role = {
-        name: 'my role',
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: ['all'],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
-          },
-        ],
-      };
-
-      const result = await saveRole(role, false);
-
-      expect(result).toEqual({
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: ['all'],
-            feature: {},
-          },
-        ],
-      });
-    });
-
-    it('should not remove feature privileges if a corresponding base privilege is not defined', async () => {
-      const role: Role = {
-        name: 'my role',
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: [],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
-          },
-        ],
-      };
-
-      const result = await saveRole(role, false);
-
-      expect(result).toEqual({
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: [],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
-          },
-        ],
-      });
-    });
-
-    it('should remove space privileges', async () => {
-      const role: Role = {
-        name: 'my role',
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: [],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
-          },
-          {
-            spaces: ['marketing'],
-            base: [],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
-          },
-        ],
-      };
-
-      const result = await saveRole(role, false);
-
-      expect(result).toEqual({
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: [],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
-          },
-        ],
-      });
+    expect(result).toEqual({
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [],
     });
   });
 
-  describe('spaces enabled', () => {
-    it('removes placeholder index privileges', async () => {
-      const role: Role = {
-        name: 'my role',
-        elasticsearch: {
-          cluster: [],
-          indices: [{ names: [], privileges: [] }],
-          run_as: [],
-        },
-        kibana: [],
-      };
+  it('removes placeholder query entries', async () => {
+    const role: Role = {
+      name: 'my role',
+      elasticsearch: {
+        cluster: [],
+        indices: [{ names: ['.kibana*'], privileges: ['all'], query: '' }],
+        run_as: [],
+      },
+      kibana: [],
+    };
 
-      const result = await saveRole(role, true);
+    const result = await saveRole(role);
 
-      expect(result).toEqual({
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [],
-      });
+    expect(result).toEqual({
+      elasticsearch: {
+        cluster: [],
+        indices: [{ names: ['.kibana*'], privileges: ['all'] }],
+        run_as: [],
+      },
+      kibana: [],
     });
+  });
 
-    it('removes placeholder query entries', async () => {
-      const role: Role = {
-        name: 'my role',
-        elasticsearch: {
-          cluster: [],
-          indices: [{ names: ['.kibana*'], privileges: ['all'], query: '' }],
-          run_as: [],
-        },
-        kibana: [],
-      };
+  it('removes transient fields not required for save', async () => {
+    const role: Role = {
+      name: 'my role',
+      transient_metadata: {
+        foo: 'bar',
+      },
+      _transform_error: ['kibana'],
+      metadata: {
+        someOtherMetadata: true,
+      },
+      _unrecognized_applications: ['foo'],
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [],
+    };
 
-      const result = await saveRole(role, true);
+    const result = await saveRole(role);
 
-      expect(result).toEqual({
-        elasticsearch: {
-          cluster: [],
-          indices: [{ names: ['.kibana*'], privileges: ['all'] }],
-          run_as: [],
-        },
-        kibana: [],
-      });
+    expect(result).toEqual({
+      metadata: {
+        someOtherMetadata: true,
+      },
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [],
     });
+  });
 
-    it('removes transient fields not required for save', async () => {
-      const role: Role = {
-        name: 'my role',
-        transient_metadata: {
-          foo: 'bar',
-        },
-        _transform_error: ['kibana'],
-        metadata: {
-          someOtherMetadata: true,
-        },
-        _unrecognized_applications: ['foo'],
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [],
-      };
+  it('does not remove actual query entries', async () => {
+    const role: Role = {
+      name: 'my role',
+      elasticsearch: {
+        cluster: [],
+        indices: [{ names: ['.kibana*'], privileges: ['all'], query: 'something' }],
+        run_as: [],
+      },
+      kibana: [],
+    };
 
-      const result = await saveRole(role, true);
+    const result = await saveRole(role);
 
-      expect(result).toEqual({
-        metadata: {
-          someOtherMetadata: true,
-        },
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [],
-      });
+    expect(result).toEqual({
+      elasticsearch: {
+        cluster: [],
+        indices: [{ names: ['.kibana*'], privileges: ['all'], query: 'something' }],
+        run_as: [],
+      },
+      kibana: [],
     });
+  });
 
-    it('does not remove actual query entries', async () => {
-      const role: Role = {
-        name: 'my role',
-        elasticsearch: {
-          cluster: [],
-          indices: [{ names: ['.kibana*'], privileges: ['all'], query: 'something' }],
-          run_as: [],
+  it('should remove feature privileges if a corresponding base privilege is defined', async () => {
+    const role: Role = {
+      name: 'my role',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [
+        {
+          spaces: ['foo'],
+          base: ['all'],
+          feature: {
+            feature1: ['read'],
+            feature2: ['write'],
+          },
         },
-        kibana: [],
-      };
+      ],
+    };
 
-      const result = await saveRole(role, true);
+    const result = await saveRole(role);
 
-      expect(result).toEqual({
-        elasticsearch: {
-          cluster: [],
-          indices: [{ names: ['.kibana*'], privileges: ['all'], query: 'something' }],
-          run_as: [],
+    expect(result).toEqual({
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [
+        {
+          spaces: ['foo'],
+          base: ['all'],
+          feature: {},
         },
-        kibana: [],
-      });
+      ],
     });
+  });
 
-    it('should remove feature privileges if a corresponding base privilege is defined', async () => {
-      const role: Role = {
-        name: 'my role',
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [
-          {
-            spaces: ['foo'],
-            base: ['all'],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
+  it('should not remove feature privileges if a corresponding base privilege is not defined', async () => {
+    const role: Role = {
+      name: 'my role',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [
+        {
+          spaces: ['foo'],
+          base: [],
+          feature: {
+            feature1: ['read'],
+            feature2: ['write'],
           },
-        ],
-      };
-
-      const result = await saveRole(role, true);
-
-      expect(result).toEqual({
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
         },
-        kibana: [
-          {
-            spaces: ['foo'],
-            base: ['all'],
-            feature: {},
+      ],
+    };
+
+    const result = await saveRole(role);
+
+    expect(result).toEqual({
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [
+        {
+          spaces: ['foo'],
+          base: [],
+          feature: {
+            feature1: ['read'],
+            feature2: ['write'],
           },
-        ],
-      });
+        },
+      ],
     });
+  });
 
-    it('should not remove feature privileges if a corresponding base privilege is not defined', async () => {
-      const role: Role = {
-        name: 'my role',
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
+  it('should not remove space privileges', async () => {
+    const role: Role = {
+      name: 'my role',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [
+        {
+          spaces: ['*'],
+          base: [],
+          feature: {
+            feature1: ['read'],
+            feature2: ['write'],
+          },
         },
-        kibana: [
-          {
-            spaces: ['foo'],
-            base: [],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
+        {
+          spaces: ['marketing'],
+          base: [],
+          feature: {
+            feature1: ['read'],
+            feature2: ['write'],
           },
-        ],
-      };
-
-      const result = await saveRole(role, true);
-
-      expect(result).toEqual({
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
         },
-        kibana: [
-          {
-            spaces: ['foo'],
-            base: [],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
-          },
-        ],
-      });
-    });
+      ],
+    };
 
-    it('should not remove space privileges', async () => {
-      const role: Role = {
-        name: 'my role',
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
+    const result = await saveRole(role);
+
+    expect(result).toEqual({
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [
+        {
+          spaces: ['*'],
+          base: [],
+          feature: {
+            feature1: ['read'],
+            feature2: ['write'],
+          },
         },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: [],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
+        {
+          spaces: ['marketing'],
+          base: [],
+          feature: {
+            feature1: ['read'],
+            feature2: ['write'],
           },
-          {
-            spaces: ['marketing'],
-            base: [],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
-          },
-        ],
-      };
-
-      const result = await saveRole(role, true);
-
-      expect(result).toEqual({
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
         },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: [],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
-          },
-          {
-            spaces: ['marketing'],
-            base: [],
-            feature: {
-              feature1: ['read'],
-              feature2: ['write'],
-            },
-          },
-        ],
-      });
+      ],
     });
   });
 });

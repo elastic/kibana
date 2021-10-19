@@ -20,7 +20,8 @@ const params = {
     start: 'now-15m',
     end: 'now',
   },
-  bucketSize: '10s',
+  intervalString: '10s',
+  bucketSize: 10,
 };
 
 describe('registerDataHandler', () => {

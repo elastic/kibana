@@ -87,6 +87,7 @@ jest.mock('../../../../../util/index_utils', () => {
       async (id: string): Promise<IndexPatternAndSavedSearch> => {
         return {
           indexPattern: {
+            // @ts-expect-error fields should not be empty
             fields: [],
             title:
               id === 'the-remote-saved-search-id'

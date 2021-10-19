@@ -20,7 +20,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { CASES_URL } from '../../urls/navigation';
 
-describe('Cases connectors', () => {
+// Skipping flakey test: https://github.com/elastic/kibana/issues/115438
+describe.skip('Cases connectors', () => {
   const configureResult = {
     connector: {
       id: 'e271c3b8-f702-4fbc-98e0-db942b573bbd',
@@ -89,11 +90,11 @@ describe('Cases connectors', () => {
     addServiceNowConnector(snConnector);
 
     cy.wait('@createConnector').then(({ response }) => {
-      cy.wrap(response!.statusCode).should('eql', 200);
+      cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should('have.text', "Created 'New connector'");
       cy.get(TOASTER).should('not.exist');
 
-      selectLastConnectorCreated(response!.body.id);
+      selectLastConnectorCreated(response?.body.id);
 
       cy.wait('@saveConnector', { timeout: 10000 }).its('response.statusCode').should('eql', 200);
       cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');
