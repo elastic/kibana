@@ -11,7 +11,8 @@ import { APP_ID } from '../../../../../plugins/maps/common/constants';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'maps', 'security']);
+  const PageObjects = getPageObjects(['common', 'maps', 'security', 'header']);
+  const listingTable = getService('listingTable');
   const appsMenu = getService('appsMenu');
 
   describe('spaces feature controls', () => {
@@ -61,7 +62,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.maps.deleteSavedMaps('my test map');
+
+        // Can not use maps.deleteSavedMaps because maps.deleteSavedMaps will
+        // navigate to default space if on list page check fails
+        await listingTable.searchForItemWithName('my test map');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await listingTable.checkListingSelectAllCheckbox();
+        await listingTable.clickDeleteSelected();
+        await PageObjects.common.clickConfirmOnModal();
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
     });
 
