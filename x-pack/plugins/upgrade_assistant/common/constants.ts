@@ -8,7 +8,7 @@
  * On master, the version should represent the next major version (e.g., master --> 8.0.0)
  * The release branch should match the release version (e.g., 7.x --> 7.0.0)
  */
-export const MAJOR_VERSION = '7.0.0';
+export const MAJOR_VERSION = '7.16.0';
 
 /*
  * Map of 7.0 --> 8.0 index setting deprecation log messages and associated settings
