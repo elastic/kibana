@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should configure Kibana successfully', async () => {
-      this.timeout(100_000);
+      this.timeout(60_000);
 
       await browser.get(`${deployment.getHostPort()}?code=${verificationCode}`);
 
@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
       await find.clickByButtonText('Configure Elastic');
 
       // Wait for home page to load
-      await find.byButtonText('Add data', undefined, 100_000);
+      await find.byButtonText('Add data', undefined, 60_000);
     });
   });
 }

@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should configure Kibana successfully', async () => {
-      this.timeout(100_000);
+      this.timeout(60_000);
 
       await browser.get(`${deployment.getHostPort()}?code=${verificationCode}`);
 
@@ -47,10 +47,16 @@ export default function ({ getService }: FtrProviderContext) {
       await passwordField.clearValueWithKeyboard();
       await passwordField.type(kibanaServerTestUser.password);
 
+      const caCertField = await find.byCssSelector('input[type="checkbox"]');
+      if (!(await caCertField.isSelected())) {
+        const id = await caCertField.getAttribute('id');
+        await find.clickByCssSelector(`label[for="${id}"]`);
+      }
+
       await find.clickByButtonText('Configure Elastic');
 
       // Wait for login page to load
-      await find.byButtonText('Log in', undefined, 100_000);
+      await find.byButtonText('Log in', undefined, 60_000);
     });
   });
 }
