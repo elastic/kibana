@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useWaterfallContext } from '..';
 import { useTheme } from '../../../../../../../observability/public';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { WaterfallMarkerIcon } from './waterfall_marker_icon';
 
 export const FCP_LABEL = i18n.translate('xpack.uptime.synthetics.waterfall.fcpLabel', {
   defaultMessage: 'First contentful paint',
@@ -39,6 +39,12 @@ export const DOCUMENT_CONTENT_LOADED_LABEL = i18n.translate(
   }
 );
 
+export const SYNTHETICS_CLS = 'browser.experience.cls';
+export const SYNTHETICS_LCP = 'browser.experience.lcp.us';
+export const SYNTHETICS_FCP = 'browser.experience.fcp.us';
+export const SYNTHETICS_DOCUMENT_ONLOAD = 'browser.experience.load.us';
+export const SYNTHETICS_DCL = 'browser.experience.dcl.us';
+
 export function WaterfallChartMarkers() {
   const { markerItems } = useWaterfallContext();
 
@@ -48,12 +54,32 @@ export function WaterfallChartMarkers() {
     return null;
   }
 
-  const markersInfo: Record<string, { label: string; color: string }> = {
-    domContentLoaded: { label: DOCUMENT_CONTENT_LOADED_LABEL, color: theme.eui.euiColorVis0 },
-    firstContentfulPaint: { label: FCP_LABEL, color: theme.eui.euiColorVis1 },
-    largestContentfulPaint: { label: LCP_LABEL, color: theme.eui.euiColorVis2 },
-    layoutShift: { label: LAYOUT_SHIFT_LABEL, color: theme.eui.euiColorVis3 },
-    loadEvent: { label: LOAD_EVENT_LABEL, color: theme.eui.euiColorVis9 },
+  const markersInfo: Record<string, { label: string; color: string; field: string }> = {
+    domContentLoaded: {
+      label: DOCUMENT_CONTENT_LOADED_LABEL,
+      color: theme.eui.euiColorVis0,
+      field: SYNTHETICS_DCL,
+    },
+    firstContentfulPaint: {
+      label: FCP_LABEL,
+      color: theme.eui.euiColorVis1,
+      field: SYNTHETICS_FCP,
+    },
+    largestContentfulPaint: {
+      label: LCP_LABEL,
+      color: theme.eui.euiColorVis2,
+      field: SYNTHETICS_LCP,
+    },
+    layoutShift: {
+      label: LAYOUT_SHIFT_LABEL,
+      color: theme.eui.euiColorVis3,
+      field: SYNTHETICS_CLS,
+    },
+    loadEvent: {
+      label: LOAD_EVENT_LABEL,
+      color: theme.eui.euiColorVis9,
+      field: SYNTHETICS_DOCUMENT_ONLOAD,
+    },
   };
 
   return (
@@ -73,7 +99,9 @@ export function WaterfallChartMarkers() {
               }),
             },
           ]}
-          marker={<EuiIcon type="dot" size="l" />}
+          marker={
+            <WaterfallMarkerIcon field={markersInfo[id]?.field} label={markersInfo[id]?.label} />
+          }
           style={{
             line: {
               strokeWidth: 2,

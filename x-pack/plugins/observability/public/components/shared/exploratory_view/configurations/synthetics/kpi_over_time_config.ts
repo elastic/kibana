@@ -111,44 +111,48 @@ export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesCon
         field: SYNTHETICS_LCP,
         id: SYNTHETICS_LCP,
         columnType: OPERATION_COLUMN,
-        columnFilters: [STEP_METRIC_FILTER],
+        columnFilters: getStepMetricColumnFilter(SYNTHETICS_LCP),
       },
       {
         label: FCP_LABEL,
         field: SYNTHETICS_FCP,
         id: SYNTHETICS_FCP,
         columnType: OPERATION_COLUMN,
-        columnFilters: [STEP_METRIC_FILTER],
+        columnFilters: getStepMetricColumnFilter(SYNTHETICS_FCP),
       },
       {
         label: DCL_LABEL,
         field: SYNTHETICS_DCL,
         id: SYNTHETICS_DCL,
         columnType: OPERATION_COLUMN,
-        columnFilters: [STEP_METRIC_FILTER],
+        columnFilters: getStepMetricColumnFilter(SYNTHETICS_DCL),
       },
       {
         label: DOCUMENT_ONLOAD_LABEL,
         field: SYNTHETICS_DOCUMENT_ONLOAD,
         id: SYNTHETICS_DOCUMENT_ONLOAD,
         columnType: OPERATION_COLUMN,
-        columnFilters: [STEP_METRIC_FILTER],
+        columnFilters: getStepMetricColumnFilter(SYNTHETICS_DOCUMENT_ONLOAD),
       },
       {
         label: CLS_LABEL,
         field: SYNTHETICS_CLS,
         id: SYNTHETICS_CLS,
         columnType: OPERATION_COLUMN,
-        columnFilters: [STEP_METRIC_FILTER],
+        columnFilters: getStepMetricColumnFilter(SYNTHETICS_CLS),
       },
     ],
     labels: { ...FieldLabels, [SUMMARY_UP]: UP_LABEL, [SUMMARY_DOWN]: DOWN_LABEL },
   };
 }
 
-const STEP_METRIC_FILTER: ColumnFilter = {
-  language: 'kuery',
-  query: `synthetics.type: step/metrics`,
+const getStepMetricColumnFilter = (field: string): ColumnFilter[] => {
+  return [
+    {
+      language: 'kuery',
+      query: `synthetics.type: step/metrics and ${field}: *`,
+    },
+  ];
 };
 
 const STEP_END_FILTER: ColumnFilter = {
