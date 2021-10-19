@@ -24,7 +24,7 @@ const i18nTexts = {
   completedWithWarnings: i18n.translate(
     'xpack.reporting.statusIndicator.completedWithWarningsLabel',
     {
-      defaultMessage: 'Done, issues detected',
+      defaultMessage: 'Done, warnings detected',
     }
   ),
   pending: i18n.translate('xpack.reporting.statusIndicator.pendingLabel', {
@@ -56,43 +56,46 @@ const i18nTexts = {
 export const ReportStatusIndicator: FC<Props> = ({ job }) => {
   const hasIssues = useMemo<boolean>(() => jobHasIssues(job), [job]);
 
-  const renderStatus = (statusText: string, icon: JSX.Element) => (
-    <EuiToolTip content={i18nTexts.lastStatusUpdate({ date: job.getPrettyStatusTimestamp() })}>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} aria-label={statusText}>
-        <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-        <EuiFlexItem grow={false}>{statusText}</EuiFlexItem>
-        {hasIssues ? <EuiFlexItem grow={false}>{statusText}</EuiFlexItem> : undefined}
-      </EuiFlexGroup>
-    </EuiToolTip>
-  );
+  let icon: JSX.Element;
+  let statusText: string;
 
   switch (job.status) {
     case JOB_STATUSES.COMPLETED:
       if (hasIssues) {
-        return renderStatus(
-          i18nTexts.completedWithWarnings,
-          <EuiIcon type="alert" color="warning" />
-        );
+        icon = <EuiIcon type="alert" color="warning" />;
+        statusText = i18nTexts.completedWithWarnings;
+        break;
       }
-      return renderStatus(
-        i18nTexts.completed,
-        <EuiIcon type="checkInCircleFilled" color="success" />
-      );
+      icon = <EuiIcon type="checkInCircleFilled" color="success" />;
+      statusText = i18nTexts.completed;
+      break;
     case JOB_STATUSES.WARNINGS:
-      return renderStatus(
-        i18nTexts.completedWithWarnings,
-        <EuiIcon type="alert" color="warning" />
-      );
+      icon = <EuiIcon type="alert" color="warning" />;
+      statusText = i18nTexts.completedWithWarnings;
+      break;
     case JOB_STATUSES.PENDING:
-      return renderStatus(i18nTexts.pending, <EuiLoadingSpinner />);
+      icon = <EuiLoadingSpinner />;
+      statusText = i18nTexts.pending;
+      break;
     case JOB_STATUSES.PROCESSING:
-      return renderStatus(
-        i18nTexts.processing({ attempt: job.attempts, of: job.max_attempts }),
-        <EuiLoadingSpinner />
-      );
+      icon = <EuiLoadingSpinner />;
+      statusText = i18nTexts.processing({ attempt: job.attempts, of: job.max_attempts });
+      break;
     case JOB_STATUSES.FAILED:
-      return renderStatus(i18nTexts.failed, <EuiIcon type="crossInACircleFilled" color="danger" />);
+      icon = <EuiIcon type="crossInACircleFilled" color="danger" />;
+      statusText = i18nTexts.failed;
+      break;
     default:
-      return renderStatus(i18nTexts.unknown, <EuiIcon type="cross" color="subdued" />);
+      icon = <EuiIcon type="cross" color="subdued" />;
+      statusText = i18nTexts.unknown;
   }
+
+  return (
+    <EuiToolTip content={i18nTexts.lastStatusUpdate({ date: job.getPrettyStatusTimestamp() })}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} aria-label={statusText}>
+        <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{statusText}</EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  );
 };
