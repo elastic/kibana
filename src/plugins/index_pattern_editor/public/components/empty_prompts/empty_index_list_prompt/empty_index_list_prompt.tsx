@@ -45,12 +45,20 @@ export const EmptyIndexListPrompt = ({
 }) => {
   const createAnywayLink = (
     <EuiText color="subdued" textAlign="center" size="xs">
-      <EuiLink onClick={() => createAnyway()} data-test-subj="createAnyway">
-        <FormattedMessage
-          id="indexPatternEditor.createIndexPattern.emptyState.createAnywayLink"
-          defaultMessage="Create an index pattern against hidden or system indices."
-        />
-      </EuiLink>
+      <FormattedMessage
+        id="indexPatternEditor.createIndexPattern.emptyState.createAnywayTxt"
+        defaultMessage="You can also {link}"
+        values={{
+          link: (
+            <EuiLink onClick={() => createAnyway()} data-test-subj="createAnyway">
+              <FormattedMessage
+                id="indexPatternEditor.createIndexPattern.emptyState.createAnywayLink"
+                defaultMessage="create an index pattern against hidden or system indices."
+              />
+            </EuiLink>
+          ),
+        }}
+      />
     </EuiText>
   );
 
