@@ -49,7 +49,7 @@ export const createIndexRoute = (
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
       const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
 
