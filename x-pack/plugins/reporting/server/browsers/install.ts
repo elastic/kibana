@@ -28,20 +28,20 @@ export function installBrowser(
   const binaryPath$ = new Rx.Subject<string>();
 
   const paths = new ChromiumArchivePaths();
-  const p = paths.find(platform, architecture);
+  const pkg = paths.find(platform, architecture);
 
-  if (!p) {
+  if (!pkg) {
     throw new Error(`Unsupported platform: ${platform}-${architecture}`);
   }
 
   const backgroundInstall = async () => {
-    const binaryPath = paths.getBinaryPath(p);
+    const binaryPath = paths.getBinaryPath(pkg);
     const binaryChecksum = await md5(binaryPath).catch(() => '');
 
-    if (binaryChecksum !== p.binaryChecksum) {
+    if (binaryChecksum !== pkg.binaryChecksum) {
       logger.warning(
-        `Found browser binary checksum for ${p.platform}/${p.architecture} ` +
-          `is ${binaryChecksum} but ${p.binaryChecksum} was expected. Re-installing...`
+        `Found browser binary checksum for ${pkg.platform}/${pkg.architecture} ` +
+          `is ${binaryChecksum} but ${pkg.binaryChecksum} was expected. Re-installing...`
       );
       try {
         await del(chromiumPath);
@@ -51,7 +51,7 @@ export function installBrowser(
 
       try {
         await ensureBrowserDownloaded(logger);
-        const archive = path.join(paths.archivesPath, p.architecture, p.archiveFilename);
+        const archive = path.join(paths.archivesPath, pkg.architecture, pkg.archiveFilename);
         logger.info(`Extracting [${archive}] to [${chromiumPath}]`);
         await extract(archive, chromiumPath);
       } catch (err) {
