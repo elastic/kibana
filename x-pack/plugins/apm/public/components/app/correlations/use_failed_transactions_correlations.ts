@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { chunk } from 'lodash';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import { chunk, debounce } from 'lodash';
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
@@ -45,26 +45,31 @@ export function useFailedTransactionsCorrelations() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const [rawResponse, setRawResponse] = useReducer(
+  const [rawResponse, setRawResponseRaw] = useReducer(
     getReducer<Response>(),
     getInitialRawResponse()
   );
+  const setRawResponse = useMemo(() => debounce(setRawResponseRaw, 50), []);
 
-  const [fetchState, setFetchState] = useReducer(
+  const [fetchState, setFetchStateRaw] = useReducer(
     getReducer<CorrelationsProgress>(),
     getInitialProgress()
   );
+  const setFetchState = useMemo(() => debounce(setFetchStateRaw, 50), []);
 
   const isCancelledRef = useRef(false);
 
   const startFetch = useCallback(async () => {
     isCancelledRef.current = false;
 
+    setRawResponse(getInitialRawResponse());
     setFetchState({
       ...getInitialProgress(),
       isRunning: true,
       error: undefined,
     });
+    setRawResponse.flush();
+    setFetchState.flush();
 
     const query = {
       serviceName,
@@ -157,9 +162,9 @@ export function useFailedTransactionsCorrelations() {
             ...pValues.failedTransactionsCorrelations
           );
           rawResponseUpdate.failedTransactionsCorrelations =
-            getFailedTransactionsCorrelationsSortedByScore(
-              failedTransactionsCorrelations
-            );
+            getFailedTransactionsCorrelationsSortedByScore([
+              ...failedTransactionsCorrelations,
+            ]);
           setRawResponse(rawResponseUpdate);
         }
 
@@ -190,6 +195,8 @@ export function useFailedTransactionsCorrelations() {
       setFetchState({
         loaded: 100,
       });
+      setRawResponse.flush();
+      setFetchState.flush();
     } catch (e) {
       // const err = e as Error | IHttpFetchError;
       // const message = error.body?.message ?? error.response?.statusText;
@@ -209,6 +216,8 @@ export function useFailedTransactionsCorrelations() {
     kuery,
     start,
     end,
+    setFetchState,
+    setRawResponse,
   ]);
 
   const cancelFetch = useCallback(() => {
@@ -216,7 +225,7 @@ export function useFailedTransactionsCorrelations() {
     setFetchState({
       isRunning: false,
     });
-  }, []);
+  }, [setFetchState]);
 
   // auto-update
   useEffect(() => {

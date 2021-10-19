@@ -13,10 +13,7 @@ import type {
   FieldValuePair,
   CorrelationsParams,
 } from '../../../../common/correlations/types';
-import {
-  isLatencyCorrelation,
-  LatencyCorrelation,
-} from '../../../../common/correlations/latency_correlations/types';
+import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 
 import {
   computeExpectationsAndRanges,
@@ -75,8 +72,9 @@ export const fetchSignificantCorrelations = async (
     )
   );
 
-  const latencyCorrelations: LatencyCorrelation[] =
-    fulfilled.filter(isLatencyCorrelation);
+  const latencyCorrelations: LatencyCorrelation[] = fulfilled.filter(
+    (d): d is LatencyCorrelation => d !== undefined
+  );
 
   const ccsWarning =
     rejected.length > 0 && paramsWithIndex?.index.includes(':');

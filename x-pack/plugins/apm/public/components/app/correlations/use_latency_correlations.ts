@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { chunk } from 'lodash';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import { chunk, debounce } from 'lodash';
 
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
 import type { FieldValuePair } from '../../../../common/correlations/types';
@@ -45,26 +45,31 @@ export function useLatencyCorrelations() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const [rawResponse, setRawResponse] = useReducer(
+  const [rawResponse, setRawResponseRaw] = useReducer(
     getReducer<Response>(),
     getInitialRawResponse()
   );
+  const setRawResponse = useMemo(() => debounce(setRawResponseRaw, 50), []);
 
-  const [fetchState, setFetchState] = useReducer(
+  const [fetchState, setFetchStateRaw] = useReducer(
     getReducer<CorrelationsProgress>(),
     getInitialProgress()
   );
+  const setFetchState = useMemo(() => debounce(setFetchStateRaw, 50), []);
 
   const isCancelledRef = useRef(false);
 
   const startFetch = useCallback(async () => {
     isCancelledRef.current = false;
 
+    setRawResponse(getInitialRawResponse());
     setFetchState({
       ...getInitialProgress(),
       isRunning: true,
       error: undefined,
     });
+    setRawResponse.flush();
+    setFetchState.flush();
 
     const query = {
       serviceName,
@@ -139,11 +144,11 @@ export function useLatencyCorrelations() {
           return;
         }
 
-        chunkLoadCounter += chunkSize;
         setFetchState({
           loaded:
             10 + Math.round((chunkLoadCounter / fieldValuePairs.length) * 10),
         });
+        chunkLoadCounter += chunkSize;
       }
 
       if (isCancelledRef.current) {
@@ -180,7 +185,7 @@ export function useLatencyCorrelations() {
             ...significantCorrelations.latencyCorrelations
           );
           rawResponseUpdate.latencyCorrelations =
-            getLatencyCorrelationsSortedByCorrelation(latencyCorrelations);
+            getLatencyCorrelationsSortedByCorrelation([...latencyCorrelations]);
           setRawResponse(rawResponseUpdate);
         }
 
@@ -188,11 +193,11 @@ export function useLatencyCorrelations() {
           return;
         }
 
-        chunkLoadCounter += chunkSize;
         setFetchState({
           loaded:
             20 + Math.round((chunkLoadCounter / fieldValuePairs.length) * 80),
         });
+        chunkLoadCounter += chunkSize;
       }
 
       const fieldStats = await callApmApi({
@@ -212,6 +217,8 @@ export function useLatencyCorrelations() {
       setFetchState({
         loaded: 100,
       });
+      setRawResponse.flush();
+      setFetchState.flush();
     } catch (e) {
       // const err = e as Error | IHttpFetchError;
       // const message = error.body?.message ?? error.response?.statusText;
@@ -231,6 +238,8 @@ export function useLatencyCorrelations() {
     kuery,
     start,
     end,
+    setRawResponse,
+    setFetchState,
   ]);
 
   const cancelFetch = useCallback(() => {
@@ -238,7 +247,7 @@ export function useLatencyCorrelations() {
     setFetchState({
       isRunning: false,
     });
-  }, []);
+  }, [setFetchState]);
 
   // auto-update
   useEffect(() => {
