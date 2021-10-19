@@ -57,6 +57,10 @@ export function deleteTestSuiteFactory(
     // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
     const buckets = response.aggregations?.count.buckets;
 
+    // The test fixture contains three legacy URL aliases:
+    // (1) one for "space_1", (2) one for "space_2", and (3) one for "other_space", which is a non-existent space.
+    // Each test deletes "space_2", so the agg buckets should reflect that aliases (1) and (3) still exist afterwards.
+
     // Space 2 deleted, all others should exist
     const expectedBuckets = [
       {
@@ -84,7 +88,7 @@ export function deleteTestSuiteFactory(
             { key: 'visualization', doc_count: 3 },
             { key: 'dashboard', doc_count: 2 },
             { key: 'index-pattern', doc_count: 1 },
-            { key: 'legacy-url-alias', doc_count: 1 },
+            { key: 'legacy-url-alias', doc_count: 1 }, // alias (1)
           ],
         },
       },
@@ -94,7 +98,7 @@ export function deleteTestSuiteFactory(
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
-          buckets: [{ key: 'legacy-url-alias', doc_count: 1 }], // this alias is in a non-existent space (for other test suites)
+          buckets: [{ key: 'legacy-url-alias', doc_count: 1 }], // alias (3)
         },
       },
     ];

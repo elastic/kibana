@@ -789,9 +789,8 @@ export class SavedObjectsRepository {
 
     // Construct kueryNode to filter legacy URL aliases (these space-agnostic objects do not use root-level "namespace/s" fields)
     const { buildNode } = esKuery.nodeTypes.function;
-    const targetNamespaceField = `${LEGACY_URL_ALIAS_TYPE}.targetNamespace`;
-    const match1 = buildNode('is', targetNamespaceField, namespace);
-    const match2 = buildNode('not', buildNode('exists', targetNamespaceField));
+    const match1 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.targetNamespace`, namespace);
+    const match2 = buildNode('not', buildNode('is', 'type', LEGACY_URL_ALIAS_TYPE));
     const kueryNode = buildNode('or', [match1, match2]);
 
     const { body, statusCode, headers } = await this.client.updateByQuery(
