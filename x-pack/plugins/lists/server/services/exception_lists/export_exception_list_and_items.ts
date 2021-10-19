@@ -25,8 +25,14 @@ interface ExportExceptionListAndItemsOptions {
 
 export interface ExportExceptionListAndItemsReturn {
   exportData: string;
-  exceptionListCount: number;
-  exceptionListItemsCount: number;
+  exportDetails: {
+    exported_exception_list_count: number;
+    exported_exception_list_item_count: number;
+    missing_exception_list_item_count: number;
+    missing_exception_list_items: string[];
+    missing_exception_lists: string[];
+    missing_exception_lists_count: number;
+  };
 }
 
 export const exportExceptionListAndItems = async ({
@@ -59,13 +65,19 @@ export const exportExceptionListAndItems = async ({
       sortOrder: 'desc',
     });
     const exceptionItems = listItems?.data ?? [];
-    console.log({ listItems });
     const { exportData } = getExport([exceptionList, ...exceptionItems]);
 
+    // TODO: Add logic for missing lists and items on errors
     return {
-      exceptionListCount: 1,
-      exceptionListItemsCount: exceptionItems.length,
       exportData: `${exportData}`,
+      exportDetails: {
+        exported_exception_list_count: 1,
+        exported_exception_list_item_count: exceptionItems.length,
+        missing_exception_list_item_count: 0,
+        missing_exception_list_items: [],
+        missing_exception_lists: [],
+        missing_exception_lists_count: 0,
+      },
     };
   }
 };

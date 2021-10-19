@@ -20,32 +20,23 @@ export const EXCEPTIONS_EXPORT_CHUNK_SIZE = 50;
 export const getRuleExceptionsForExport = async (
   exceptions: ListArray,
   exceptionsListClient: ExceptionListClient | undefined
-): Promise<{
-  listCount: number;
-  itemsCount: number;
-  exportString: string | null;
-}> => {
+): Promise<ExportExceptionListAndItemsReturn> => {
   if (exceptionsListClient != null) {
     const exceptionsWithoutUnexportableLists = exceptions.filter(
       ({ list_id: listId }) => !NON_EXPORTABLE_LIST_IDS.includes(listId)
     );
     return getExportableExceptions(exceptionsWithoutUnexportableLists, exceptionsListClient);
   } else {
-    return { exportString: null, listCount: 0, itemsCount: 0 };
+    return { exportData: '', exportDetails: getDefaultExportDetails() };
   }
 };
 
 export const getExportableExceptions = async (
   exceptions: ListArray,
   exceptionsListClient: ExceptionListClient
-): Promise<{
-  listCount: number;
-  itemsCount: number;
-  exportString: string;
-}> => {
-  let listCount = 0;
-  let itemsCount = 0;
+): Promise<ExportExceptionListAndItemsReturn> => {
   let exportString = '';
+  const exportDetails = getDefaultExportDetails();
 
   const exceptionChunks = chunk(EXCEPTIONS_EXPORT_CHUNK_SIZE, exceptions);
   for await (const exceptionChunk of exceptionChunks) {
@@ -54,19 +45,29 @@ export const getExportableExceptions = async (
     const responses = await Promise.all(promises);
 
     for (const res of responses) {
-      console.log({ res: JSON.stringify(res) });
-      const { exceptionListCount, exceptionListItemsCount, exportData } = res;
+      if (res != null) {
+        const {
+          exportDetails: {
+            exported_exception_list_count: exportedExceptionListCount,
+            exported_exception_list_item_count: exportedExceptionListItemCount,
+          },
+          exportData,
+        } = res;
 
-      listCount = listCount + exceptionListCount;
-      itemsCount = itemsCount + exceptionListItemsCount;
-      exportString = `${exportString}${exportData}`;
+        exportDetails.exported_exception_list_count =
+          exportDetails.exported_exception_list_count + exportedExceptionListCount;
+
+        exportDetails.exported_exception_list_item_count =
+          exportDetails.exported_exception_list_item_count + exportedExceptionListItemCount;
+
+        exportString = `${exportString}${exportData}`;
+      }
     }
   }
 
   return {
-    listCount,
-    itemsCount,
-    exportString,
+    exportDetails,
+    exportData: exportString,
   };
 };
 
@@ -90,3 +91,12 @@ export const createPromises = (
     }
   );
 };
+
+export const getDefaultExportDetails = () => ({
+  exported_exception_list_count: 0,
+  exported_exception_list_item_count: 0,
+  missing_exception_list_item_count: 0,
+  missing_exception_list_items: [],
+  missing_exception_lists: [],
+  missing_exception_lists_count: 0,
+});

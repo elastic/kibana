@@ -70,7 +70,7 @@ export const exportRulesRoute = (
           }
         }
 
-        const exportedRules =
+        const exportedRulesAndExceptions =
           request.body?.objects != null
             ? await getExportByObjectIds(
                 rulesClient,
@@ -81,8 +81,8 @@ export const exportRulesRoute = (
             : await getExportAll(rulesClient, exceptionsClient, isRuleRegistryEnabled);
 
         const responseBody = request.query.exclude_export_details
-          ? exportedRules.rulesNdjson
-          : `${exportedRules.rulesNdjson}${exportedRules.exceptionLists}${exportedRules.exportDetails}`;
+          ? exportedRulesAndExceptions.rulesNdjson
+          : `${exportedRulesAndExceptions.rulesNdjson}${exportedRulesAndExceptions.exceptionLists}${exportedRulesAndExceptions.exportDetails}`;
 
         return response.ok({
           headers: {

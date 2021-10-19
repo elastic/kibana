@@ -83,7 +83,13 @@ describe.each([
       exceptions_list: getListArrayMock(),
     });
     expect(detailsJson).toEqual({
-      exported_count: 1,
+      exported_exception_list_count: 0,
+      exported_exception_list_item_count: 0,
+      exported_rules_count: 1,
+      missing_exception_list_item_count: 0,
+      missing_exception_list_items: [],
+      missing_exception_lists: [],
+      missing_exception_lists_count: 0,
       missing_rules: [],
       missing_rules_count: 0,
     });
@@ -103,7 +109,8 @@ describe.each([
     const exports = await getExportAll(rulesClient, exceptionsClient, isRuleRegistryEnabled);
     expect(exports).toEqual({
       rulesNdjson: '',
-      exportDetails: '{"exported_count":0,"missing_rules":[],"missing_rules_count":0}\n',
+      exportDetails:
+        '{"exported_rules_count":0,"missing_rules":[],"missing_rules_count":0,"exported_exception_list_count":0,"exported_exception_list_item_count":0,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}\n',
       exceptionLists: '',
     });
   });

@@ -30,7 +30,17 @@ export class ExceptionListClientMock extends ExceptionListClient {
   public findExceptionList = jest.fn().mockResolvedValue(getFoundExceptionListSchemaMock());
   public createTrustedAppsList = jest.fn().mockResolvedValue(getTrustedAppsListSchemaMock());
   public createEndpointList = jest.fn().mockResolvedValue(getExceptionListSchemaMock());
-  public exportExceptionListAndItems = jest.fn().mockResolvedValue('{exportList}{exportItems}');
+  public exportExceptionListAndItems = jest.fn().mockResolvedValue({
+    exportData: 'exportString',
+    exportDetails: {
+      exported_exception_list_count: 0,
+      exported_exception_list_item_count: 0,
+      missing_exception_list_item_count: 0,
+      missing_exception_list_items: [],
+      missing_exception_lists: [],
+      missing_exception_lists_count: 0,
+    },
+  });
 }
 
 export const getExceptionListClientMock = (

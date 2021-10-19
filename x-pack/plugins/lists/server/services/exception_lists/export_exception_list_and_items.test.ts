@@ -14,6 +14,9 @@ import { exportExceptionListAndItems } from './export_exception_list_and_items';
 import { findExceptionListItem } from './find_exception_list_item';
 import { getExceptionList } from './get_exception_list';
 
+jest.mock('./get_exception_list');
+jest.mock('./find_exception_list_item');
+
 describe('export_exception_list_and_items', () => {
   describe('exportExceptionListAndItems', () => {
     test('it should return null if no matching exception list found', async () => {
@@ -41,11 +44,19 @@ describe('export_exception_list_and_items', () => {
         namespaceType: 'single',
         savedObjectsClient: {} as SavedObjectsClientContract,
       });
-      expect(result).toEqual(
+      expect(result?.exportData).toEqual(
         `${JSON.stringify(getExceptionListSchemaMock())}\n${JSON.stringify(
           getExceptionListItemSchemaMock()
-        )}\n{"exported_exception_list_id":"1","exported_exception_list_items_count":1}\n`
+        )}\n`
       );
+      expect(result?.exportDetails).toEqual({
+        exported_exception_list_count: 1,
+        exported_exception_list_item_count: 1,
+        missing_exception_list_item_count: 0,
+        missing_exception_list_items: [],
+        missing_exception_lists: [],
+        missing_exception_lists_count: 0,
+      });
     });
   });
 });

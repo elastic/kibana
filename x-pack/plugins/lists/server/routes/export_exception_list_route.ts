@@ -43,13 +43,9 @@ export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
             statusCode: 400,
           });
         }
-        const exportDetails = getExportDetails(
-          exportContent.exceptionListCount,
-          exportContent.exceptionListItemsCount
-        );
 
         return response.ok({
-          body: `${exportContent.exportData}${exportDetails}`,
+          body: `${exportContent.exportData}${exportContent.exportDetails}`,
           headers: {
             'Content-Disposition': `attachment; filename="${listId}"`,
             'Content-Type': 'application/ndjson',
@@ -65,23 +61,3 @@ export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
     }
   );
 };
-
-// TODO: Add logic for missing lists and items on errors
-export const getExportDetails = (
-  listCount: number,
-  itemsCount: number
-): {
-  exported_exception_list_count: number;
-  exported_exception_list_item_count: number;
-  missing_exception_lists: string[];
-  missing_exception_lists_count: number;
-  missing_exception_list_items: string[];
-  missing_exception_list_item_count: number;
-} => ({
-  exported_exception_list_count: listCount,
-  exported_exception_list_item_count: itemsCount,
-  missing_exception_list_item_count: 0,
-  missing_exception_list_items: [],
-  missing_exception_lists: [],
-  missing_exception_lists_count: 0,
-});

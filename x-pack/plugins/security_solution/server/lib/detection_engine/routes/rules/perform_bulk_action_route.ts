@@ -139,7 +139,7 @@ export const performBulkActionRoute = (
               isRuleRegistryEnabled
             );
 
-            const responseBody = `${exported.rulesNdjson}${exported.exportDetails}${exported.exceptionLists}`;
+            const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.exportDetails}`;
 
             return response.ok({
               headers: {

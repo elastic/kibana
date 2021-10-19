@@ -10,7 +10,7 @@ import { RulesSchema } from '../../../../common/detection_engine/schemas/respons
 export const getExportDetailsNdjson = (
   rules: Array<Partial<RulesSchema>>,
   missingRules: Array<{ rule_id: string }> = [],
-  extraMeta: Record<string, number | string>
+  extraMeta: Record<string, number | string | string[]> = {}
 ): string => {
   const stringified = JSON.stringify({
     exported_rules_count: rules.length,

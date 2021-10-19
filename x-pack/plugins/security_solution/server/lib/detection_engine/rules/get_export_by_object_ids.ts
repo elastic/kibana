@@ -47,10 +47,8 @@ export const getExportByObjectIds = async (
   const rulesAndErrors = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
   const exceptions = rulesAndErrors.rules.flatMap((rule) => rule.exceptions_list ?? []);
 
-  const { exceptionLists, exceptionDetails } = await getRuleExceptionsForExport(
-    exceptions,
-    exceptionsClient
-  );
+  const { exportData: exceptionLists, exportDetails: exceptionDetails } =
+    await getRuleExceptionsForExport(exceptions, exceptionsClient);
   const rulesNdjson = transformDataToNdjson(rulesAndErrors.rules);
   const exportDetails = getExportDetailsNdjson(
     rulesAndErrors.rules,
