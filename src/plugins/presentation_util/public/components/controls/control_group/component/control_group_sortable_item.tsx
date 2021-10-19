@@ -32,19 +32,11 @@ export type SortableControlProps = ControlFrameProps & {
  */
 export const SortableControl = (frameProps: SortableControlProps) => {
   const { embeddableId } = frameProps;
-  const {
-    over,
-    listeners,
-    isSorting,
-    transform,
-    transition,
-    attributes,
-    isDragging,
-    setNodeRef,
-  } = useSortable({
-    id: embeddableId,
-    animateLayoutChanges: () => true,
-  });
+  const { over, listeners, isSorting, transform, transition, attributes, isDragging, setNodeRef } =
+    useSortable({
+      id: embeddableId,
+      animateLayoutChanges: () => true,
+    });
 
   frameProps.dragInfo = { ...frameProps.dragInfo, isOver: over?.id === embeddableId, isDragging };
 
@@ -82,13 +74,13 @@ const SortableControlInner = forwardRef<
   return (
     <EuiFlexItem
       grow={width === 'auto'}
-      className={classNames('controlFrame__wrapper', {
-        'controlFrame__wrapper-isDragging': isDragging,
-        'controlFrame__wrapper--small': width === 'small',
-        'controlFrame__wrapper--medium': width === 'medium',
-        'controlFrame__wrapper--large': width === 'large',
-        'controlFrame__wrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
-        'controlFrame__wrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
+      className={classNames('controlFrameWrapper', {
+        'controlFrameWrapper-isDragging': isDragging,
+        'controlFrameWrapper--small': width === 'small',
+        'controlFrameWrapper--medium': width === 'medium',
+        'controlFrameWrapper--large': width === 'large',
+        'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
+        'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
       })}
       style={style}
     >
@@ -114,11 +106,11 @@ export const ControlClone = ({ draggingId }: { draggingId: string }) => {
   const title = panels[draggingId].explicitInput.title;
   return (
     <EuiFlexItem
-      className={classNames('controlFrame__cloneWrapper', {
-        'controlFrame__cloneWrapper--small': width === 'small',
-        'controlFrame__cloneWrapper--medium': width === 'medium',
-        'controlFrame__cloneWrapper--large': width === 'large',
-        'controlFrame__cloneWrapper--twoLine': controlStyle === 'twoLine',
+      className={classNames('controlFrameCloneWrapper', {
+        'controlFrameCloneWrapper--small': width === 'small',
+        'controlFrameCloneWrapper--medium': width === 'medium',
+        'controlFrameCloneWrapper--large': width === 'large',
+        'controlFrameCloneWrapper--twoLine': controlStyle === 'twoLine',
       })}
     >
       {controlStyle === 'twoLine' ? <EuiFormLabel>{title}</EuiFormLabel> : undefined}

@@ -9,7 +9,6 @@
 import '../control_group.scss';
 
 import {
-  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -79,10 +78,10 @@ export const ControlGroup = () => {
   );
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const draggingIndex = useMemo(() => (draggingId ? idsInOrder.indexOf(draggingId) : -1), [
-    idsInOrder,
-    draggingId,
-  ]);
+  const draggingIndex = useMemo(
+    () => (draggingId ? idsInOrder.indexOf(draggingId) : -1),
+    [idsInOrder, draggingId]
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -156,15 +155,20 @@ export const ControlGroup = () => {
                     iconType="gear"
                     color="subdued"
                     data-test-subj="inputControlsSortingButton"
-                    onClick={() =>
-                      openFlyout(forwardAllContext(<EditControlGroup />, reduxContainerContext))
-                    }
+                    onClick={() => {
+                      const flyoutInstance = openFlyout(
+                        forwardAllContext(
+                          <EditControlGroup closeFlyout={() => flyoutInstance.close()} />,
+                          reduxContainerContext
+                        )
+                      );
+                    }}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
-                  <CreateControlButton />
+                  <CreateControlButton isIconButton={true} />
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -175,14 +179,12 @@ export const ControlGroup = () => {
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={1}>
               <EuiText className="emptyStateText eui-textCenter" size="s">
-                <p>Controls let you filter and interact with your dashboard data</p>
+                <p>{ControlGroupStrings.emptyState.getCallToAction()}</p>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div className="addControlButton">
-                <EuiButton size="s" color="primary">
-                  Add control
-                </EuiButton>
+                <CreateControlButton isIconButton={false} />
               </div>
             </EuiFlexItem>
           </EuiFlexGroup>

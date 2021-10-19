@@ -37,6 +37,7 @@ import { CONTROL_WIDTH_OPTIONS } from '../control_group_constants';
 
 interface ManageControlProps {
   title?: string;
+  isCreate: boolean;
   onSave: () => void;
   width: ControlWidth;
   onCancel: () => void;
@@ -51,6 +52,7 @@ export const ControlEditor = ({
   removeControl,
   updateTitle,
   updateWidth,
+  isCreate,
   onCancel,
   onSave,
   title,
@@ -68,7 +70,11 @@ export const ControlEditor = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{ControlGroupStrings.manageControl.getFlyoutTitle()}</h2>
+          <h2>
+            {isCreate
+              ? ControlGroupStrings.manageControl.getFlyoutCreateTitle()
+              : ControlGroupStrings.manageControl.getFlyoutEditTitle()}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -121,7 +127,7 @@ export const ControlEditor = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              aria-label={`delete-${title}`}
+              aria-label={`cancel-${title}`}
               iconType="cross"
               onClick={() => {
                 onCancel();
@@ -132,7 +138,7 @@ export const ControlEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              aria-label={`delete-${title}`}
+              aria-label={`save-${title}`}
               iconType="check"
               color="primary"
               disabled={!editorValid || !controlEditorValid}

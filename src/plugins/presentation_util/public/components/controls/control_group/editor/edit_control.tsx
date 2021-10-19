@@ -88,6 +88,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     const flyoutInstance = openFlyout(
       forwardAllContext(
         <ControlEditor
+          isCreate={false}
           width={panel.width}
           title={embeddable.getTitle()}
           removeControl={() => {

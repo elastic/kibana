@@ -30,7 +30,7 @@ export const OptionsListStrings = {
       }),
     getAllowMultiselectTitle: () =>
       i18n.translate('presentationUtil.inputControls.optionsList.editor.allowMultiselectTitle', {
-        defaultMessage: 'Allow multiselect',
+        defaultMessage: 'Allow multiple selections in dropdown',
       }),
   },
   popover: {
@@ -52,7 +52,7 @@ export const OptionsListStrings = {
       }),
     getSelectedOptionsButtonTitle: () =>
       i18n.translate('presentationUtil.inputControls.optionsList.popover.selectedOptionsTitle', {
-        defaultMessage: 'Show selected options only',
+        defaultMessage: 'Show only selected options',
       }),
     getClearAllSelectionsButtonTitle: () =>
       i18n.translate('presentationUtil.inputControls.optionsList.popover.clearAllSelectionsTitle', {
