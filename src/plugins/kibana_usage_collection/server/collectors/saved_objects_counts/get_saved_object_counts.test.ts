@@ -27,7 +27,7 @@ describe('getSavedObjectsCounts', () => {
     expect(esClient.search).toHaveBeenCalledWith({
       index: '.kibana',
       ignoreUnavailable: true,
-      filterPath: 'aggregations.types.buckets',
+      filter_path: 'aggregations.types.buckets',
       body: {
         size: 0,
         query: { match_all: {} },
@@ -42,7 +42,7 @@ describe('getSavedObjectsCounts', () => {
     expect(esClient.search).toHaveBeenCalledWith({
       index: '.kibana',
       ignoreUnavailable: true,
-      filterPath: 'aggregations.types.buckets',
+      filter_path: 'aggregations.types.buckets',
       body: {
         size: 0,
         query: { match_all: {} },
@@ -57,7 +57,7 @@ describe('getSavedObjectsCounts', () => {
     expect(esClient.search).toHaveBeenCalledWith({
       index: '.kibana',
       ignoreUnavailable: true,
-      filterPath: 'aggregations.types.buckets',
+      filter_path: 'aggregations.types.buckets',
       body: {
         size: 0,
         query: { terms: { type: ['type_one', 'type_two'] } },
