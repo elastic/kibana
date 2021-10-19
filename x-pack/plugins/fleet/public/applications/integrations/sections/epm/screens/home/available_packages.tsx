@@ -89,7 +89,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
             const allCategories = [...topCategories, ...categories];
             return {
               ...restOfPackage,
-              id: `${restOfPackage}-${name}`,
+              id: `${restOfPackage.id}-${name}`,
               integration: name,
               title,
               description,
