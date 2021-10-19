@@ -25,7 +25,6 @@
     "home",
     "alerting",
     "kibanaReact",
-    "licenseManagement",
     "kibanaLegacy"
   ]
 }
