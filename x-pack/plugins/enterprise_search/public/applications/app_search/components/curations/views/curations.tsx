@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../shared/licensing';
@@ -63,7 +64,13 @@ export const Curations: React.FC = () => {
 
   const pageTabs = hasPlatinumLicense
     ? [OVERVIEW_TAB, HISTORY_TAB, SETTINGS_TAB]
-    : [OVERVIEW_TAB, SETTINGS_TAB];
+    : [
+        OVERVIEW_TAB,
+        {
+          ...SETTINGS_TAB,
+          prepend: <EuiIcon type="cheer" />,
+        },
+      ];
 
   useEffect(() => {
     loadCurations();
