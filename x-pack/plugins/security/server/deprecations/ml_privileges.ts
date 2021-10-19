@@ -22,9 +22,6 @@ import type {
 import { isRoleReserved } from '../../common/model';
 import { getPrivilegeDeprecationsService } from './privilege_deprecations';
 
-export const KIBANA_USER_ROLE_NAME = 'kibana_user';
-export const KIBANA_ADMIN_ROLE_NAME = 'kibana_admin';
-
 interface Deps {
   deprecationsService: DeprecationsServiceSetup;
   license: SecurityLicense;
@@ -35,14 +32,14 @@ interface Deps {
 
 function getDeprecationTitle() {
   return i18n.translate('xpack.security.deprecations.mlPrivileges.deprecationTitle', {
-    defaultMessage: 'Access to Machine Learning features will be granted in 8.0',
+    defaultMessage: 'The Machine Learning feature is changing',
   });
 }
 
 function getDeprecationMessage() {
   return i18n.translate('xpack.security.deprecations.mlPrivileges.deprecationMessage', {
     defaultMessage:
-      'Roles that grant "all" or "read" privileges to all features will include Machine Learning.',
+      'Roles that use base privileges will include the Machine Learning feature in 8.0.',
   });
 }
 
@@ -68,14 +65,15 @@ export const registerMLPrivilegesDeprecation = ({
         logger
       );
 
-      return [...(await getRolesDeprecations(context, privilegeDeprecationService))];
+      return [...(await getRolesDeprecations(context, privilegeDeprecationService, packageInfo))];
     },
   });
 };
 
 async function getRolesDeprecations(
   context: GetDeprecationsContext,
-  privilegeDeprecationService: PrivilegeDeprecationsService
+  privilegeDeprecationService: PrivilegeDeprecationsService,
+  packageInfo: PackageInfo
 ): Promise<DeprecationsDetails[]> {
   const response: PrivilegeDeprecationsRolesResponse =
     await privilegeDeprecationService.getKibanaRoles({ context });
@@ -102,11 +100,19 @@ async function getRolesDeprecations(
       message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${packageInfo.branch}/kibana-privileges.html`,
       correctiveActions: {
         manualSteps: [
-          i18n.translate('xpack.security.deprecations.mlPrivileges.deprecationCorrectiveAction', {
+          i18n.translate('xpack.security.deprecations.mlPrivileges.manualSteps1', {
             defaultMessage:
-              'The following roles will grant access to Machine Learning features starting in 8.0. Update this role to grant access to specific features if you do not want to grant access to Machine Learning: {roles}',
+              'Change the affected roles to use feature privileges that grant access to only the desired features instead.',
+          }),
+          i18n.translate('xpack.security.deprecations.mlPrivileges.manualSteps2', {
+            defaultMessage:
+              "If you don't make any changes, affected roles will grant access to the Machine Learning feature in 8.0.",
+          }),
+          i18n.translate('xpack.security.deprecations.mlPrivileges.manualSteps3', {
+            defaultMessage: 'The affected roles are: {roles}',
             values: {
               roles: rolesWithBasePrivileges.join(', '),
             },
