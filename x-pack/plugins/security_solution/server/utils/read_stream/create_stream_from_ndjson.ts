@@ -28,6 +28,12 @@ export const parseNdjsonStrings = (): Transform => {
   });
 };
 
+export const filterExportedCounts = (): Transform => {
+  return createFilterStream<ImportRulesSchemaDecoded | RulesObjectsExportResultDetails>(
+    (obj) => obj != null && !has('exported_count', obj)
+  );
+};
+
 export const filterExportedCountsAndExceptions = (): Transform => {
   return createFilterStream<ImportRulesSchemaDecoded | RulesObjectsExportResultDetails>(
     (obj) => obj != null && !has('exported_rules_count', obj) && !has('list_id', obj)
