@@ -14,6 +14,7 @@ import { Home } from './home';
 import { FeatureCatalogueCategory } from '../../services';
 import { telemetryPluginMock } from '../../../../telemetry/public/mocks';
 
+let mockHasIntegrationsPermission = true;
 jest.mock('../kibana_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
@@ -21,6 +22,13 @@ jest.mock('../kibana_services', () => ({
     homeConfig: { disableWelcomeScreen: false },
     chrome: {
       setBreadcrumbs: () => {},
+    },
+    application: {
+      capabilities: {
+        navLinks: {
+          integrations: mockHasIntegrationsPermission,
+        },
+      },
     },
   }),
 }));
@@ -35,6 +43,7 @@ describe('home', () => {
   let defaultProps: HomeProps;
 
   beforeEach(() => {
+    mockHasIntegrationsPermission = true;
     defaultProps = {
       directories: [],
       solutions: [],
@@ -210,6 +219,14 @@ describe('home', () => {
 
     test('should show the normal home page if welcome screen is disabled locally', async () => {
       defaultProps.localStorage.getItem = jest.fn(() => 'false');
+
+      const component = await renderHome();
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test("should show the normal home page if user doesn't have access to integrations", async () => {
+      mockHasIntegrationsPermission = false;
 
       const component = await renderHome();
 

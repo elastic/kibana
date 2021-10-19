@@ -362,7 +362,7 @@ export function CollapsibleNav({
               iconType="plusInCircleFilled"
             >
               {i18n.translate('core.ui.primaryNav.addData', {
-                defaultMessage: 'Add data',
+                defaultMessage: 'Add integrations',
               })}
             </EuiButton>
           </EuiCollapsibleNavGroup>

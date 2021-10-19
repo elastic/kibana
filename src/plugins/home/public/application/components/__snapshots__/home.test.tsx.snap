@@ -21,10 +21,28 @@ exports[`home change home route should render a link to change the default route
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -57,10 +75,28 @@ exports[`home directories should not render directory entry when showOnHomePage 
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -93,10 +129,28 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     features={
       Array [
         Object {
@@ -176,10 +230,28 @@ exports[`home directories should render solutions in the "solution section" 1`] 
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -212,10 +284,28 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -248,10 +338,28 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -480,10 +588,28 @@ exports[`home should render home component 1`] = `
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -516,10 +642,82 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
+    features={Array []}
+  />
+  <mockConstructor
+    addBasePath={[Function]}
+    onChangeDefaultRoute={[Function]}
+    onSetDefaultRoute={[Function]}
+    path="/app/home"
+  />
+</mockConstructor>
+`;
+
+exports[`home welcome should show the normal home page if user doesn't have access to integrations 1`] = `
+<mockConstructor
+  data-test-subj="homeApp"
+  pageHeader={
+    Object {
+      "bottomBorder": false,
+      "pageTitle": <FormattedMessage
+        defaultMessage="Welcome home"
+        id="home.header.title"
+        values={Object {}}
+      />,
+    }
+  }
+  template="empty"
+>
+  <SolutionsSection
+    addBasePath={[Function]}
+    solutions={Array []}
+  />
+  <AddData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": false,
+          },
+        },
+      }
+    }
+    isDarkMode={false}
+  />
+  <ManageData
+    addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": false,
+          },
+        },
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -552,10 +750,28 @@ exports[`home welcome should show the normal home page if welcome screen is disa
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -784,10 +1000,28 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      }
+    }
     features={Array []}
   />
   <mockConstructor

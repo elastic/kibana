@@ -73,9 +73,9 @@ exports[`NoDataPage render 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       className="kbnNoDataPageContents__item"
-      key="empty-page-beats-action"
+      key="empty-page-agent-action"
     >
-      <ElasticBeatsCard
+      <ElasticAgentCard
         solution="Elastic"
       />
     </EuiFlexItem>
