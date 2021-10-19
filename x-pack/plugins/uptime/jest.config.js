@@ -13,3 +13,5 @@ module.exports = {
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: ['<rootDir>/x-pack/plugins/uptime/{common,public,server}/**/*.{ts,tsx}'],
 };
+
+// TODO remove me after testing
