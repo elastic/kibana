@@ -65,6 +65,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   extendedColumns,
   showPreviewByDefault,
   onChange,
+  progress,
 }: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, setExpandAll] = useState<boolean>(false);
@@ -317,6 +318,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     const itemIds = expandedRowItemIds;
     return getItemIdToExpandedRowMap(itemIds, items);
   }, [items, expandedRowItemIds, getItemIdToExpandedRowMap]);
+
+  console.log('items', items); // Some actions open up fly-out or popup
 
   return (
     <EuiResizeObserver onResize={resizeHandler}>

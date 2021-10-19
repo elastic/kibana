@@ -82,6 +82,7 @@ export const EmbeddableWrapper = ({
   );
   const { configs, searchQueryLanguage, searchString, extendedColumns, progress } =
     useDataVisualizerGridData(input, dataVisualizerListState);
+
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
       return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
@@ -135,6 +136,7 @@ export const EmbeddableWrapper = ({
         extendedColumns={extendedColumns}
         showPreviewByDefault={input?.showPreviewByDefault}
         onChange={onOutputChange}
+        progress={progress}
       />
     </div>
   );

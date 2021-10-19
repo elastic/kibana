@@ -442,7 +442,7 @@ export const useDataVisualizerGridData = (
       // @todo
       // @ts-ignore
       combinedConfigs = combinedConfigs.map((c) => {
-        const loadedFullStats = fieldStats.get(c.fieldName);
+        const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
         return loadedFullStats
           ? {
               ...c,
@@ -462,6 +462,7 @@ export const useDataVisualizerGridData = (
     strategyResponse.fieldStats,
   ]);
 
+  useEffect(() => console.log('configs updated', configs), [configs]);
   // Some actions open up fly-out or popup
   // This variable is used to keep track of them and clean up when unmounting
   const actionFlyoutRef = useRef<() => void | undefined>();
