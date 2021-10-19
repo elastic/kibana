@@ -25,16 +25,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 
-    it('redirects correctly', async () => {
+    it('redirects correctly to index pattern management', async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
 
-      const url = await browser.getCurrentUrl();
+      const url = await (await browser.getCurrentUrl()).split('#')[0];
+      const modifiedUrl = url.replace('indexPatterns', 'dataViews');
+      await browser.navigateTo(modifiedUrl);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const newUrl = (await browser.getCurrentUrl()).split('#')[0];
+      expect(newUrl).to.equal(url);
+    });
+
+    it('redirects correctly to specific index pattern', async () => {
+      await PageObjects.settings.clickIndexPatternLogstash();
+
+      const url = await (await browser.getCurrentUrl()).split('#')[0];
       const modifiedUrl = url.replace('patterns', 'dataView').replace('indexPatterns', 'dataViews');
       await browser.navigateTo(modifiedUrl);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const newUrl = await browser.getCurrentUrl();
+      const newUrl = (await browser.getCurrentUrl()).split('#')[0];
       expect(newUrl).to.equal(url);
     });
   });
