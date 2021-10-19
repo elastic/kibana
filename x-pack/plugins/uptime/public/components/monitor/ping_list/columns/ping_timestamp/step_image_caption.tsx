@@ -7,9 +7,12 @@
 
 import React, { MouseEvent, useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+
 import { nextAriaLabel, prevAriaLabel } from './translations';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+
 import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
+import { useTheme } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 export interface StepImageCaptionProps {
   captionContent: string;
@@ -41,6 +44,8 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   label,
   onVisible,
 }) => {
+  const theme = useTheme();
+
   useEffect(() => {
     onVisible(true);
     return () => {
@@ -74,7 +79,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText>{captionContent}</EuiText>
+              <EuiText color={theme.eui.euiTextColor}>{captionContent}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -93,7 +98,9 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-        <span className="eui-textNoWrap">{label}</span>
+        <EuiText className="eui-textNoWrap" color={theme.eui.euiTextColor}>
+          {label}
+        </EuiText>
       </div>
     </ImageCaption>
   );
