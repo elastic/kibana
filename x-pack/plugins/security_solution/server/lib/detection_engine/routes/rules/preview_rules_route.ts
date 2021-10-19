@@ -150,7 +150,7 @@ export const previewRulesRoute = async (
           ...previewRuleOptions,
           lists: context.lists,
           config,
-          indexNameOverride: `${previewIndex}-${spaceId}`,
+          indexNameOverride: previewIndex,
           ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
           // unused as we override the ruleExecutionLogClient
           eventLogService: {} as unknown as IEventLogService,
