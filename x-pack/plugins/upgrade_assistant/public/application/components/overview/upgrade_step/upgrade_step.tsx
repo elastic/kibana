@@ -21,17 +21,17 @@ import { useAppContext } from '../../../app_context';
 
 const i18nTexts = {
   upgradeStepTitle: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
-    defaultMessage: 'Upgrade to Elastic Stack 8',
+    defaultMessage: 'Upgrade to Elastic 8',
   }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
     defaultMessage:
-      'Once you’ve resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic Stack 8. Be sure to back up your data again before upgrading.',
+      'Once you’ve resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic 8. Be sure to back up your data again before upgrading.',
   }),
   upgradeStepDescriptionForCloud: i18n.translate(
     'xpack.upgradeAssistant.overview.upgradeStepDescriptionForCloud',
     {
       defaultMessage:
-        "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic Stack 8. Be sure to back up your data again before upgrading. Upgrade your deployment on Elastic Cloud.",
+        "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic 8. Be sure to back up your data again before upgrading. Upgrade your deployment on Elastic Cloud.",
     }
   ),
   upgradeStepLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepLink', {
