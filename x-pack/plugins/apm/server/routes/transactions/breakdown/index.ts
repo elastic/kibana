@@ -51,11 +51,6 @@ export async function getTransactionBreakdown({
         field: SPAN_SELF_TIME_SUM,
       },
     },
-    total_transaction_breakdown_count: {
-      sum: {
-        field: TRANSACTION_BREAKDOWN_COUNT,
-      },
-    },
     types: {
       terms: {
         field: SPAN_TYPE,
