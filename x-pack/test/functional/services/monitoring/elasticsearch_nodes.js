@@ -53,7 +53,9 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
 
     async clickRowByResolver(nodeResolver) {
       await testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver);
-      await testSubjects.find('elasticsearchNodeDetailPage');
+      await retry.tryForTime(10000, async () => {
+        await testSubjects.existOrFail('elasticsearchNodeDetailPage');
+      });
     }
 
     async waitForTableToFinishLoading() {
