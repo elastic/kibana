@@ -80,9 +80,10 @@ import {
 } from './services/agents';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation, ensureInstalledPackage } from './services/epm/packages';
-import { makeRouterEnforcingSuperuser } from './routes/security';
+import { RouterWrappers } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
 import { FleetArtifactsClient } from './services/artifacts';
+import type { FleetRouter } from './types/request_context';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -206,6 +207,24 @@ export class FleetPlugin
         category: DEFAULT_APP_CATEGORIES.management,
         app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
         catalogue: ['fleet'],
+        reserved: {
+          description:
+            'Privilege to setup Fleet packages and configured policies. Intended for use by the elastic/fleet-server service account only.',
+          privileges: [
+            {
+              id: 'fleet-setup',
+              privilege: {
+                excludeFromBasePrivileges: true,
+                api: ['fleet-setup'],
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: [],
+              },
+            },
+          ],
+        },
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
@@ -245,7 +264,7 @@ export class FleetPlugin
       })
     );
 
-    const router = core.http.createRouter<FleetRequestHandlerContext>();
+    const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
@@ -254,24 +273,34 @@ export class FleetPlugin
     registerAppRoutes(router);
     // Allow read-only users access to endpoints necessary for Integrations UI
     // Only some endpoints require superuser so we pass a raw IRouter here
-    registerEPMRoutes(router);
 
     // For all the routes we enforce the user to have role superuser
-    const routerSuperuserOnly = makeRouterEnforcingSuperuser(router);
+    const superuserRouter = RouterWrappers.require.superuser(router);
+    const fleetSetupRouter = RouterWrappers.require.fleetSetupPrivilege(router);
+
+    // Some EPM routes use regular rbac to support integrations app
+    registerEPMRoutes({ rbac: router, superuser: superuserRouter });
+
     // Register rest of routes only if security is enabled
     if (deps.security) {
-      registerSetupRoutes(routerSuperuserOnly, config);
-      registerAgentPolicyRoutes(routerSuperuserOnly);
-      registerPackagePolicyRoutes(routerSuperuserOnly);
-      registerOutputRoutes(routerSuperuserOnly);
-      registerSettingsRoutes(routerSuperuserOnly);
-      registerDataStreamRoutes(routerSuperuserOnly);
-      registerPreconfigurationRoutes(routerSuperuserOnly);
+      registerSetupRoutes(fleetSetupRouter, config);
+      registerAgentPolicyRoutes({
+        fleetSetup: fleetSetupRouter,
+        superuser: superuserRouter,
+      });
+      registerPackagePolicyRoutes(superuserRouter);
+      registerOutputRoutes(superuserRouter);
+      registerSettingsRoutes(superuserRouter);
+      registerDataStreamRoutes(superuserRouter);
+      registerPreconfigurationRoutes(superuserRouter);
 
       // Conditional config routes
       if (config.agents.enabled) {
-        registerAgentAPIRoutes(routerSuperuserOnly, config);
-        registerEnrollmentApiKeyRoutes(routerSuperuserOnly);
+        registerAgentAPIRoutes(superuserRouter, config);
+        registerEnrollmentApiKeyRoutes({
+          fleetSetup: fleetSetupRouter,
+          superuser: superuserRouter,
+        });
       }
     }
   }
