@@ -24,18 +24,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
 
-  // FLAKY https://github.com/elastic/kibana/issues/100296
-  describe.skip('When on the Endpoint Policy Details Page', function () {
+  describe.only('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
+
     before(async () => {
       const endpointPackage = await policyTestResources.getEndpointPackage();
       await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       indexedData = await endpointTestResources.loadEndpointData();
       await browser.refresh();
     });
+
     after(async () => {
       await endpointTestResources.unloadEndpointData(indexedData);
     });
+
     describe('with an invalid policy id', () => {
       it('should display an error', async () => {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');
@@ -99,11 +101,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await testSubjects.isChecked('malwareUserNotificationCheckbox')).to.be(true);
         await testSubjects.existOrFail('malwareUserNotificationCustomMessage');
       });
+
       it('should not show the custom message text area when the Notify User checkbox is unchecked', async () => {
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox('malwareUserNotificationCheckbox');
         expect(await testSubjects.isChecked('malwareUserNotificationCheckbox')).to.be(false);
         await testSubjects.missingOrFail('malwareUserNotificationCustomMessage');
       });
+
       it('should preserve a custom notification message upon saving', async () => {
         const customMessage = await testSubjects.find('malwareUserNotificationCustomMessage');
         await customMessage.clearValue();
@@ -139,6 +143,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           `Integration ${policyInfo.packagePolicy.name} has been updated.`
         );
       });
+
       it('should persist update on the screen', async () => {
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_process');
         await pageObjects.policy.confirmAndSave();
@@ -151,6 +156,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           false
         );
       });
+
       it('should have updated policy data in overall Agent Policy', async () => {
         // This test ensures that updates made to the Endpoint Policy are carried all the way through
         // to the generated Agent Policy that is dispatch down to the Elastic Agent.
@@ -862,6 +868,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('when on Ingest Policy Edit Package Policy page', async () => {
       let policyInfo: PolicyTestResourceInfo;
+
       beforeEach(async () => {
         // Create a policy and navigate to Ingest app
         policyInfo = await policyTestResources.createPolicy();
@@ -871,6 +878,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
+
       afterEach(async () => {
         if (policyInfo) {
           await policyInfo.cleanup();
