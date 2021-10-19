@@ -114,6 +114,7 @@ export const createCustomRuleActivated = (
       enabled: true,
       tags: ['rule1'],
       max_signals: maxSignals,
+      building_block_type: rule.buildingBlockType,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
