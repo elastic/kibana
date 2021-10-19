@@ -29,15 +29,14 @@ export const ExternalUrlErrorModal = ({ url, handleClose }: ExternalUrlErrorModa
       <EuiModalHeaderTitle>
         <FormattedMessage
           id="visTypeTimeseries.externalUrlErrorModal.headerTitle"
-          defaultMessage="External URL access denied"
+          defaultMessage="Access to this external URL is not yet enabled"
         />
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>
       <FormattedMessage
         id="visTypeTimeseries.externalUrlErrorModal.bodyMessage"
-        defaultMessage='External URL {url} was denied by ExternalUrl service.
-          You can configure external URL policies using "{externalUrlPolicy}" setting in {kibanaConfigFileName}.'
+        defaultMessage="Configure {externalUrlPolicy} in your {kibanaConfigFileName} to allow access to {url}."
         values={{
           url: (
             <EuiTextColor color="warning" component="span">
