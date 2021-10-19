@@ -34,7 +34,12 @@ export function registerSystemIndicesMigrationRoutes({
           const status = await getESSystemIndicesMigrationStatus(client.asCurrentUser);
 
           return response.ok({
-            body: status,
+            body: {
+              ...status,
+              features: status.features.filter(
+                (feature) => feature.upgrade_status !== 'NO_UPGRADE_NEEDED'
+              ),
+            },
           });
         } catch (error) {
           return handleEsError({ error, response });

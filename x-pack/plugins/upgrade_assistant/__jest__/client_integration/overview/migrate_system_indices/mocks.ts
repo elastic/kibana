@@ -43,16 +43,5 @@ export const systemIndicesMigrationStatus: SystemIndicesMigrationStatus = {
         },
       ],
     },
-    {
-      feature_name: 'logstash',
-      minimum_index_version: '7.1.4',
-      upgrade_status: 'NO_UPGRADE_NEEDED',
-      indices: [
-        {
-          index: '.logstash-config',
-          version: '7.1.4',
-        },
-      ],
-    },
   ],
 };
