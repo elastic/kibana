@@ -18,9 +18,11 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useAppContext } from '../../app_context';
+import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
 import { getBackupStep } from './backup_step';
 import { getFixIssuesStep } from './fix_issues_step';
 import { getFixLogsStep } from './fix_logs_step';
@@ -34,21 +36,14 @@ export const Overview: FunctionComponent = () => {
     kibanaVersionInfo: { nextMajor },
     services: {
       breadcrumbs,
-      api,
       core: { docLinks },
     },
     plugins: { cloud },
   } = useAppContext();
 
   useEffect(() => {
-    async function sendTelemetryData() {
-      await api.sendPageTelemetryData({
-        overview: true,
-      });
-    }
-
-    sendTelemetryData();
-  }, [api]);
+    uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_OVERVIEW_PAGE_LOAD);
+  }, []);
 
   useEffect(() => {
     breadcrumbs.setBreadcrumbs('overview');

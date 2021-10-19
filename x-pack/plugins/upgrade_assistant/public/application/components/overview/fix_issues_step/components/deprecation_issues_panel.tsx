@@ -73,9 +73,10 @@ export const DeprecationIssuesPanel = (props: Props) => {
       className="upgDeprecationIssuesPanel"
       layout="horizontal"
       title={deprecationSource}
+      titleSize="xs"
       {...(!hasNoIssues && reactRouterNavigate(history, linkUrl))}
     >
-      <EuiSpacer />
+      <EuiSpacer size="s" />
 
       {hasError ? (
         <LoadingIssuesError>{errorMessage}</LoadingIssuesError>

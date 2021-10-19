@@ -313,11 +313,11 @@ describe.skip('<CustomFields />', () => {
     // resolve errors
     fireEvent.click(monitorType);
 
-    waitFor(() => {
-      expect(getByText('http')).toBeInTheDocument();
-      expect(getByText('tcp')).toBeInTheDocument();
-      expect(getByText('icmp')).toBeInTheDocument();
-      expect(queryByText('browser')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(getByText('HTTP')).toBeInTheDocument();
+      expect(getByText('TCP')).toBeInTheDocument();
+      expect(getByText('ICMP')).toBeInTheDocument();
+      expect(queryByText('Browser')).not.toBeInTheDocument();
     });
   });
 });

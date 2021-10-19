@@ -20,7 +20,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { CASES_URL } from '../../urls/navigation';
 
-describe('Cases connectors', () => {
+// Skipping flakey test: https://github.com/elastic/kibana/issues/115438
+describe.skip('Cases connectors', () => {
   const configureResult = {
     connector: {
       id: 'e271c3b8-f702-4fbc-98e0-db942b573bbd',

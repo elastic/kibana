@@ -301,4 +301,67 @@ export const registerEnterpriseSearchIntegrations = (
       ...integration,
     });
   });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'app_search_web_crawler',
+    title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.webCrawlerName', {
+      defaultMessage: 'Web Crawler',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.integrations.webCrawlerDescription',
+      {
+        defaultMessage: "Add search to your website with App Search's web crawler.",
+      }
+    ),
+    categories: ['website_search'],
+    uiInternalPath: '/app/enterprise_search/app_search/engines/new?method=crawler',
+    icons: [
+      {
+        type: 'eui',
+        src: 'globe',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'app_search_json',
+    title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.jsonName', {
+      defaultMessage: 'JSON',
+    }),
+    description: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.jsonDescription', {
+      defaultMessage: 'Search over your JSON data with App Search.',
+    }),
+    categories: ['upload_file'],
+    uiInternalPath: '/app/enterprise_search/app_search/engines/new?method=json',
+    icons: [
+      {
+        type: 'eui',
+        src: 'exportAction',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'app_search_api',
+    title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.apiName', {
+      defaultMessage: 'API',
+    }),
+    description: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.apiDescription', {
+      defaultMessage: "Add search to your application with App Search's robust APIs.",
+    }),
+    categories: ['custom'],
+    uiInternalPath: '/app/enterprise_search/app_search/engines/new?method=api',
+    icons: [
+      {
+        type: 'eui',
+        src: 'editorCodeBlock',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
 };
