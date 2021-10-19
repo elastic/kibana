@@ -79,15 +79,14 @@ export const AddResultFlyout: React.FC = () => {
 
           {searchResults.length > 0 ? (
             <EuiFlexGroup direction="column" gutterSize="s">
-              {searchResults.map((result) => {
+              {searchResults.map((result, index) => {
                 const id = result.id.raw;
                 const isPromoted = promotedIds.includes(id);
                 const isHidden = hiddenIds.includes(id);
 
                 return (
-                  <EuiFlexItem>
+                  <EuiFlexItem key={index}>
                     <CurationResult
-                      key={id}
                       result={result}
                       actions={[
                         isHidden

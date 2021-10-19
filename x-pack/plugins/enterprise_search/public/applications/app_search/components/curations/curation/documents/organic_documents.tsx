@@ -48,11 +48,10 @@ export const OrganicDocuments: React.FC = () => {
       {hasDocuments ? (
         <EuiFlexGroup direction="column" gutterSize="s">
           {documents.map((document: Result, index) => (
-            <EuiFlexItem>
+            <EuiFlexItem key={index}>
               <CurationResult
                 result={document}
                 index={index}
-                key={document.id.raw}
                 actions={
                   isAutomated
                     ? []

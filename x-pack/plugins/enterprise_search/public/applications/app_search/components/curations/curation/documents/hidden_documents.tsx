@@ -54,9 +54,8 @@ export const HiddenDocuments: React.FC = () => {
       {hasDocuments ? (
         <EuiFlexGroup direction="column" gutterSize="s">
           {documents.map((document, index) => (
-            <EuiFlexItem>
+            <EuiFlexItem key={index}>
               <CurationResult
-                key={document.id}
                 result={convertToResultFormat(document)}
                 index={index}
                 actions={[

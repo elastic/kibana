@@ -98,10 +98,9 @@ export const PromotedDocuments: React.FC = () => {
           >
             <EuiFlexGroup direction="column" gutterSize="s">
               {documents.map((document, index) => (
-                <EuiFlexItem>
+                <EuiFlexItem key={index}>
                   <EuiDraggable
                     index={index}
-                    key={document.id}
                     draggableId={document.id}
                     customDragHandle
                     spacing="none"
@@ -109,7 +108,6 @@ export const PromotedDocuments: React.FC = () => {
                   >
                     {(provided) => (
                       <CurationResult
-                        key={document.id}
                         index={index}
                         result={convertToResultFormat(document)}
                         actions={
