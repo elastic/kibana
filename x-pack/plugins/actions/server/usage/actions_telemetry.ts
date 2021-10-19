@@ -322,6 +322,8 @@ export async function getExecutionsTotalCount(
   countByType: Record<string, number>;
   countFailures: number;
   countFailuresByType: Record<string, number>;
+  avgExecutionTime: number;
+  avgExecutionTimeByType: Record<string, number>;
 }> {
   const scriptedMetric = {
     scripted_metric: {
@@ -423,20 +425,80 @@ export async function getExecutionsTotalCount(
             },
           },
         },
+        avgDuration: { avg: { field: 'event.duration' } },
       },
     },
   });
 
   // @ts-expect-error aggegation type is not specified
   const aggsExecutions = actionResults.aggregations.totalExecutions?.byConnectorTypeId.value;
+  const aggsAvgExecutionTime = Math.round(
+    // @ts-expect-error aggegation type is not specified
+    actionResults.aggregations.avgDuration.value / (1000 * 1000)
+  ); // nano seconds
   const aggsFailureExecutions =
     // @ts-expect-error aggegation type is not specified
     actionResults.aggregations.failuresExecutions?.refs?.byConnectorTypeId.value;
+
+  const avgExecutionTimeByType: Record<string, number> = {};
+  for (const [key] of Object.entries(aggsExecutions.connectorTypes)) {
+    const { body: connectorTypeResults } = await esClient.search({
+      index: eventLogIndex,
+      body: {
+        query: {
+          bool: {
+            filter: {
+              bool: {
+                must: [
+                  {
+                    term: { 'event.action': 'execute' },
+                  },
+                  {
+                    nested: {
+                      path: 'kibana.saved_objects',
+                      query: {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                'kibana.saved_objects.type': {
+                                  value: 'action',
+                                },
+                              },
+                            },
+                            {
+                              term: {
+                                'kibana.saved_objects.type_id': {
+                                  value: key,
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+        aggs: {
+          avgDuration: { avg: { field: 'event.duration' } },
+        },
+      },
+    });
+    avgExecutionTimeByType[key] =
+      // @ts-expect-error aggegation type is not specified
+      Math.round(connectorTypeResults.aggregations?.avgDuration.value / (1000 * 1000));
+  }
 
   return {
     countTotal: aggsExecutions.total,
     countByType: aggsExecutions.connectorTypes,
     countFailures: aggsFailureExecutions.total,
     countFailuresByType: aggsFailureExecutions.connectorTypes,
+    avgExecutionTime: aggsAvgExecutionTime,
+    avgExecutionTimeByType,
   };
 }

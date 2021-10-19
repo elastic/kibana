@@ -16,4 +16,6 @@ export interface ActionsUsage {
   count_actions_executions_by_type: Record<string, number>;
   count_actions_executions_failured: number;
   count_actions_executions_failured_by_type: Record<string, number>;
+  avg_execution_time: number;
+  avg_execution_time_by_type: Record<string, number>;
 }

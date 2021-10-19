@@ -109,6 +109,8 @@ export function telemetryTaskRunner(
                 count_rules_executions_failured_by_reason: totalExecutions.countFailuresByReason,
                 count_rules_executions_failured_by_reason_by_type:
                   totalExecutions.countFailuresByReasonByType,
+                avg_execution_time: totalExecutions.avgExecutionTime,
+                avg_execution_time_by_type: totalExecutions.avgExecutionTimeByType,
               },
               runAt: getNextMidnight(),
             };

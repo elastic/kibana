@@ -16,6 +16,8 @@ export interface AlertsUsage {
   count_rules_executions_failured: number;
   count_rules_executions_failured_by_reason: Record<string, number>;
   count_rules_executions_failured_by_reason_by_type: Record<string, Record<string, number>>;
+  avg_execution_time: number;
+  avg_execution_time_by_type: Record<string, number>;
   throttle_time: {
     min: string;
     avg: string;

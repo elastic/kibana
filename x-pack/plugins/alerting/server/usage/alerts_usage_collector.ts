@@ -115,6 +115,8 @@ export function createAlertsUsageCollector(
           count_rules_executions_failured: 0,
           count_rules_executions_failured_by_reason: {},
           count_rules_executions_failured_by_reason_by_type: {},
+          avg_execution_time: 0,
+          avg_execution_time_by_type: {},
         };
       }
     },
@@ -144,6 +146,8 @@ export function createAlertsUsageCollector(
       count_rules_executions_failured: { type: 'long' },
       count_rules_executions_failured_by_reason: byReasonSchema,
       count_rules_executions_failured_by_reason_by_type: byReasonSchemaByType,
+      avg_execution_time: { type: 'long' },
+      avg_execution_time_by_type: byTypeSchema,
     },
   });
 }

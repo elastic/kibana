@@ -36,10 +36,12 @@ const alertTypeMetric = {
 
 const ruleTypeExecutionsMetric = {
   scripted_metric: {
-    init_script: 'state.ruleTypes = [:];',
+    init_script: 'state.ruleTypes = [:]; state.ruleTypesDuration = [:];',
     map_script: `
-      String ruleType = doc['rule.category'].value; 
+      String ruleType = doc['rule.category'].value;
+      long duration = doc['event.duration'].value / (1000 * 1000); 
       state.ruleTypes.put(ruleType, state.ruleTypes.containsKey(ruleType) ? state.ruleTypes.get(ruleType) + 1 : 1);
+      state.ruleTypesDuration.put(ruleType, state.ruleTypesDuration.containsKey(ruleType) ? state.ruleTypesDuration.get(ruleType) + duration : duration);
     `,
     // Combine script is executed per cluster, but we already have a key-value pair per cluster.
     // Despite docs that say this is optional, this script can't be blank.
@@ -430,13 +432,21 @@ export async function getTotalExecutionsCount(
       aggs: {
         byRuleTypeId: ruleTypeExecutionsMetric,
         failuresByReason: ruleTypeFailureExecutionsMetric,
+        avgDuration: { avg: { field: 'event.duration' } },
       },
     },
   });
 
   const executionsAggregations = searchResult.aggregations as {
-    byRuleTypeId: { value: { ruleTypes: Record<string, string> } };
+    byRuleTypeId: {
+      value: { ruleTypes: Record<string, string>; ruleTypesDuration: Record<string, number> };
+    };
   };
+
+  const aggsAvgExecutionTime = Math.round(
+    // @ts-expect-error aggegation type is not specified
+    searchResult.aggregations.avgDuration.value / (1000 * 1000)
+  ); // nano seconds
 
   const executionFailuresAggregations = searchResult.aggregations as {
     failuresByReason: { value: { reasons: Record<string, Record<string, string>> } };
@@ -496,6 +506,19 @@ export async function getTotalExecutionsCount(
         ...obj,
         [replaceFirstAndLastDotSymbols(key)]:
           executionFailuresAggregations.failuresByReason.value.reasons[key],
+      }),
+      {}
+    ),
+    avgExecutionTime: aggsAvgExecutionTime,
+    avgExecutionTimeByType: Object.keys(executionsAggregations.byRuleTypeId.value.ruleTypes).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, key: string) => ({
+        ...obj,
+        [replaceFirstAndLastDotSymbols(key)]: Math.round(
+          executionsAggregations.byRuleTypeId.value.ruleTypesDuration[key] /
+            parseInt(executionsAggregations.byRuleTypeId.value.ruleTypes[key], 10)
+        ),
       }),
       {}
     ),

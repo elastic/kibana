@@ -58,6 +58,8 @@ export function createActionsUsageCollector(
       count_actions_executions_by_type: byTypeSchema,
       count_actions_executions_failured: { type: 'long' },
       count_actions_executions_failured_by_type: byTypeSchema,
+      avg_execution_time: { type: 'long' },
+      avg_execution_time_by_type: byTypeSchema,
     },
     fetch: async () => {
       try {
@@ -81,6 +83,8 @@ export function createActionsUsageCollector(
           count_actions_executions_by_type: {},
           count_actions_executions_failured: 0,
           count_actions_executions_failured_by_type: {},
+          avg_execution_time: 0,
+          avg_execution_time_by_type: {},
         };
       }
     },
