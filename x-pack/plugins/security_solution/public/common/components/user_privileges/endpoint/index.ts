@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export * from './fleet_agent_status_to_endpoint_host_status';
-export * from './wrap_errors';
-export * from './audit_log_helpers';
-export * from './yes_no_data_stream';
+export * from './use_endpoint_privileges';
+export { getEndpointPrivilegesInitialState } from './utils';
