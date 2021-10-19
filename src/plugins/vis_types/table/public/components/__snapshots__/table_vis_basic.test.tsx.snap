@@ -17,6 +17,7 @@ exports[`TableVisBasic should init data grid 1`] = `
         "header": "underline",
       }
     }
+    key="0"
     minSizeForControls={1}
     onColumnResize={[Function]}
     renderCellValue={[Function]}
@@ -55,6 +56,7 @@ exports[`TableVisBasic should init data grid with title provided - for split mod
         "header": "underline",
       }
     }
+    key="0"
     minSizeForControls={1}
     onColumnResize={[Function]}
     renderCellValue={[Function]}
@@ -86,6 +88,7 @@ exports[`TableVisBasic should render the toolbar 1`] = `
         "header": "underline",
       }
     }
+    key="0"
     minSizeForControls={1}
     onColumnResize={[Function]}
     renderCellValue={[Function]}
