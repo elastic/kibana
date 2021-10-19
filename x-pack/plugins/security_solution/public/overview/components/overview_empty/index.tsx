@@ -11,7 +11,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { SOLUTION_NAME } from '../../../../public/common/translations';
 
 import {
-  KibanaPageTemplate,
+  NoDataPage,
   NoDataPageActionsProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
 
@@ -32,13 +32,11 @@ const OverviewEmptyComponent: React.FC = () => {
   };
 
   return (
-    <KibanaPageTemplate
+    <NoDataPage
       data-test-subj="empty-page"
-      noDataConfig={{
-        solution: SOLUTION_NAME,
-        actions: agentAction,
-        docsLink: docLinks.links.siem.gettingStarted,
-      }}
+      solution={SOLUTION_NAME}
+      actions={agentAction}
+      docsLink={docLinks.links.siem.gettingStarted}
     />
   );
 };

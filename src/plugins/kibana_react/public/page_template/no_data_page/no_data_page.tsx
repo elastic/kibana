@@ -17,9 +17,11 @@ import {
   EuiText,
   EuiTextColor,
   EuiLink,
+  CommonProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import classNames from 'classnames';
 import { KibanaPageTemplateProps } from '../page_template';
 
 import { ElasticAgentCard, NoDataCard } from './no_data_card';
@@ -63,7 +65,7 @@ export type NoDataPageActions = Partial<EuiCardProps> & {
 
 export type NoDataPageActionsProps = Record<string, NoDataPageActions>;
 
-export interface NoDataPageProps {
+export interface NoDataPageProps extends CommonProps {
   /**
    * Single name for the current solution, used to auto-generate the title, logo, description, and button label
    */
@@ -94,6 +96,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   actions,
   docsLink,
   pageTitle,
+  ...rest
 }) => {
   // Convert obj data into an iterable array
   const entries = Object.entries(actions);
@@ -131,7 +134,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   }, [actions, sortedData, actionsKeys]);
 
   return (
-    <div className="kbnNoDataPageContents">
+    <div {...rest} className={classNames('kbnNoDataPageContents', rest.className)}>
       <EuiText textAlign="center">
         <KibanaPageTemplateSolutionNavAvatar
           name={solution}
