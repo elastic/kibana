@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-export DISABLE_BOOTSTRAP_VALIDATION=true
-export BUILD_TS_REFS_DISABLE=true
+# Write Bazel cache for Linux
+.buildkite/scripts/common/persist_bazel_cache.sh
 
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/build_kibana.sh

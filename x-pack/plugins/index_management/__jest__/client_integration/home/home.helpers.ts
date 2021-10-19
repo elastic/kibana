@@ -24,24 +24,31 @@ const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), te
 export interface HomeTestBed extends TestBed<TestSubjects> {
   actions: {
     selectHomeTab: (tab: 'indicesTab' | 'templatesTab') => void;
+    toggleHiddenIndices: () => void;
   };
 }
 
 export const setup = async (): Promise<HomeTestBed> => {
   const testBed = await initTestBed();
+  const { find } = testBed;
 
   /**
    * User Actions
    */
 
   const selectHomeTab = (tab: 'indicesTab' | 'templatesTab') => {
-    testBed.find(tab).simulate('click');
+    find(tab).simulate('click');
+  };
+
+  const toggleHiddenIndices = async function () {
+    find('indexTableIncludeHiddenIndicesToggle').simulate('click');
   };
 
   return {
     ...testBed,
     actions: {
       selectHomeTab,
+      toggleHiddenIndices,
     },
   };
 };

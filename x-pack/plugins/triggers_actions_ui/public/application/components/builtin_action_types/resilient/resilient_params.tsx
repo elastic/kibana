@@ -42,20 +42,18 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
-      (({
+      ({
         incident: {},
         comments: [],
-      } as unknown) as ResilientActionParams['subActionParams']),
+      } as unknown as ResilientActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
-  const {
-    isLoading: isLoadingIncidentTypes,
-    incidentTypes: allIncidentTypes,
-  } = useGetIncidentTypes({
-    http,
-    toastNotifications: toasts,
-    actionConnector,
-  });
+  const { isLoading: isLoadingIncidentTypes, incidentTypes: allIncidentTypes } =
+    useGetIncidentTypes({
+      http,
+      toastNotifications: toasts,
+      actionConnector,
+    });
 
   const { isLoading: isLoadingSeverity, severity } = useGetSeverity({
     http,
@@ -79,22 +77,21 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         : [],
     [allIncidentTypes]
   );
-  const selectedIncidentTypesComboBoxOptions: Array<
-    EuiComboBoxOptionOption<string>
-  > = useMemo(() => {
-    const allIncidentTypesAsObject = allIncidentTypes.reduce(
-      (acc, type) => ({ ...acc, [type.id.toString()]: type.name }),
-      {} as Record<string, string>
-    );
-    return incident.incidentTypes
-      ? incident.incidentTypes
-          .map((type) => ({
-            label: allIncidentTypesAsObject[type.toString()],
-            value: type.toString(),
-          }))
-          .filter((type) => type.label != null)
-      : [];
-  }, [allIncidentTypes, incident.incidentTypes]);
+  const selectedIncidentTypesComboBoxOptions: Array<EuiComboBoxOptionOption<string>> =
+    useMemo(() => {
+      const allIncidentTypesAsObject = allIncidentTypes.reduce(
+        (acc, type) => ({ ...acc, [type.id.toString()]: type.name }),
+        {} as Record<string, string>
+      );
+      return incident.incidentTypes
+        ? incident.incidentTypes
+            .map((type) => ({
+              label: allIncidentTypesAsObject[type.toString()],
+              value: type.toString(),
+            }))
+            .filter((type) => type.label != null)
+        : [];
+    }, [allIncidentTypes, incident.incidentTypes]);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {

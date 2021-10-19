@@ -40,7 +40,7 @@ describe('migration v2 with corrupt saved object documents', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
-  it('collects corrupt saved object documents accross batches', async () => {
+  it('collects corrupt saved object documents across batches', async () => {
     const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {

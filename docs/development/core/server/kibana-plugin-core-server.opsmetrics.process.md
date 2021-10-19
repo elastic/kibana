@@ -6,9 +6,10 @@
 
 > Warning: This API is now obsolete.
 > 
+> use the processes field instead.
 > 
 
-Process related metrics. Deprecated in favor of processes field.
+Process related metrics.
 
 <b>Signature:</b>
 

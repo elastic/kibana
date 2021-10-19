@@ -32,7 +32,7 @@ export type GetTrustedAppsListRequest = TypeOf<typeof GetTrustedAppsRequestSchem
 /** API request params for retrieving summary of Trusted Apps */
 export type GetTrustedAppsSummaryRequest = TypeOf<typeof GetTrustedAppsSummaryRequestSchema.query>;
 
-export interface GetTrustedListAppsResponse {
+export interface GetTrustedAppsListResponse {
   per_page: number;
   page: number;
   total: number;

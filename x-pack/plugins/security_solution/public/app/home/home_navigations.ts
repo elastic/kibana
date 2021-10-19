@@ -26,6 +26,7 @@ import {
   APP_EVENT_FILTERS_PATH,
   APP_UEBA_PATH,
   SecurityPageName,
+  APP_HOST_ISOLATION_EXCEPTIONS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -117,6 +118,13 @@ export const navTabs: SecurityNav = {
     id: SecurityPageName.eventFilters,
     name: i18n.EVENT_FILTERS,
     href: APP_EVENT_FILTERS_PATH,
+    disabled: false,
+    urlKey: 'administration',
+  },
+  [SecurityPageName.hostIsolationExceptions]: {
+    id: SecurityPageName.hostIsolationExceptions,
+    name: i18n.HOST_ISOLATION_EXCEPTIONS,
+    href: APP_HOST_ISOLATION_EXCEPTIONS_PATH,
     disabled: false,
     urlKey: 'administration',
   },

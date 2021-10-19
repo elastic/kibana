@@ -10,7 +10,7 @@ import { ElasticsearchClient } from 'src/core/server';
 import { estypes } from '@elastic/elasticsearch';
 import { MonitoringConfig } from '../../../config';
 // @ts-ignore
-import { prefixIndexPattern } from '../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../common/ccs_utils';
 import { StackProductUsage } from '../types';
 
 interface ESResponse {

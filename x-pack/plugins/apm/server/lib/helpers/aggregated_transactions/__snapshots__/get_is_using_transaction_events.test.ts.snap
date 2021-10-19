@@ -17,15 +17,6 @@ Object {
             },
           },
           Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
             "bool": Object {
               "minimum_should_match": 1,
               "should": Array [
@@ -61,15 +52,6 @@ Object {
               "field": "transaction.duration.histogram",
             },
           },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
         ],
       },
     },
@@ -97,15 +79,6 @@ Array [
                   "field": "transaction.duration.histogram",
                 },
               },
-              Object {
-                "range": Object {
-                  "@timestamp": Object {
-                    "format": "epoch_millis",
-                    "gte": 1528113600000,
-                    "lte": 1528977600000,
-                  },
-                },
-              },
             ],
           },
         },
@@ -124,17 +97,7 @@ Array [
       "body": Object {
         "query": Object {
           "bool": Object {
-            "filter": Array [
-              Object {
-                "range": Object {
-                  "@timestamp": Object {
-                    "format": "epoch_millis",
-                    "gte": 1528113600000,
-                    "lte": 1528977600000,
-                  },
-                },
-              },
-            ],
+            "filter": Array [],
           },
         },
       },

@@ -168,7 +168,8 @@ export interface AllocateAction {
 }
 
 export interface ShrinkAction {
-  number_of_shards: number;
+  number_of_shards?: number;
+  max_primary_shard_size?: string;
 }
 
 export interface ForcemergeAction {

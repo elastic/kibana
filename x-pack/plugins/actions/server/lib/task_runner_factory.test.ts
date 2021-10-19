@@ -119,9 +119,11 @@ test('executes the task by calling the executor with proper parameters, using gi
 
   expect(runnerResult).toBeUndefined();
   expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
-  expect(
-    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser
-  ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
+  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { namespace: 'namespace-test' }
+  );
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
@@ -175,9 +177,11 @@ test('executes the task by calling the executor with proper parameters, using st
 
   expect(runnerResult).toBeUndefined();
   expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
-  expect(
-    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser
-  ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
+  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { namespace: 'namespace-test' }
+  );
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '9',

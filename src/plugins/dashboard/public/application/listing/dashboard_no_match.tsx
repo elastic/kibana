@@ -23,9 +23,8 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
 
   useEffect(() => {
     services.restorePreviousUrl();
-
     const { navigated } = services.urlForwarding.navigateToLegacyKibanaUrl(
-      history.location.pathname
+      history.location.pathname + history.location.search
     );
 
     if (!navigated) {

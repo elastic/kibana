@@ -149,7 +149,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
       }
       noItemsMessage={showNoItemsMessage}
       items={renderedItems}
-      columns={(columns as unknown) as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
+      columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
       sorting={sort}
       onChange={onTableChange}
       {...(paginationProps ? { pagination: paginationProps } : {})}

@@ -62,5 +62,6 @@ export function rabbitmqMetricsSpecProvider(context: TutorialContext): TutorialS
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['message_queue'],
   };
 }

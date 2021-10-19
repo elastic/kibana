@@ -342,7 +342,7 @@ describe('Exception helpers', () => {
   describe('#getCodeSignatureValue', () => {
     test('it should return empty string if code_signature nested value are undefined', () => {
       // Using the unsafe casting because with our types this shouldn't be possible but there have been issues with old data having undefined values in these fields
-      const payload = ([{ trusted: undefined, subject_name: undefined }] as unknown) as Flattened<
+      const payload = [{ trusted: undefined, subject_name: undefined }] as unknown as Flattened<
         CodeSignature[]
       >;
       const result = getCodeSignatureValue(payload);

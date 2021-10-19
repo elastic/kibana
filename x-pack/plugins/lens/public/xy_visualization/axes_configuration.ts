@@ -7,8 +7,11 @@
 
 import { FormatFactory } from '../../common';
 import { AxisExtentConfig, XYLayerConfig } from '../../common/expressions';
-import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
-import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common';
+import { Datatable } from '../../../../../src/plugins/expressions/public';
+import type {
+  IFieldFormat,
+  SerializedFieldFormat,
+} from '../../../../../src/plugins/field_formats/common';
 
 interface FormattedMetric {
   layer: string;
@@ -30,16 +33,17 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function getAxesConfiguration(
-  layers: XYLayerConfig[],
-  shouldRotate: boolean,
-  tables?: Record<string, Datatable>,
-  formatFactory?: FormatFactory
-): GroupsConfiguration {
-  const series: { auto: FormattedMetric[]; left: FormattedMetric[]; right: FormattedMetric[] } = {
+export function groupAxesByType(layers: XYLayerConfig[], tables?: Record<string, Datatable>) {
+  const series: {
+    auto: FormattedMetric[];
+    left: FormattedMetric[];
+    right: FormattedMetric[];
+    bottom: FormattedMetric[];
+  } = {
     auto: [],
     left: [],
     right: [],
+    bottom: [],
   };
 
   layers?.forEach((layer) => {
@@ -89,6 +93,16 @@ export function getAxesConfiguration(
       series.right.push(currentSeries);
     }
   });
+  return series;
+}
+
+export function getAxesConfiguration(
+  layers: XYLayerConfig[],
+  shouldRotate: boolean,
+  tables?: Record<string, Datatable>,
+  formatFactory?: FormatFactory
+): GroupsConfiguration {
+  const series = groupAxesByType(layers, tables);
 
   const axisGroups: GroupsConfiguration = [];
 

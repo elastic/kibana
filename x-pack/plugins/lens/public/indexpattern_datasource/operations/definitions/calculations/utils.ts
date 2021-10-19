@@ -16,17 +16,15 @@ import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
 import { operationDefinitionMap } from '..';
 
-export const buildLabelFunction = (ofName: (name?: string) => string) => (
-  name?: string,
-  timeScale?: TimeScaleUnit,
-  timeShift?: string
-) => {
-  const rawLabel = ofName(name);
-  return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale, undefined, timeShift);
-};
+export const buildLabelFunction =
+  (ofName: (name?: string) => string) =>
+  (name?: string, timeScale?: TimeScaleUnit, timeShift?: string) => {
+    const rawLabel = ofName(name);
+    return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale, undefined, timeShift);
+  };
 
 export function checkForDataLayerType(layerType: LayerType, name: string) {
-  if (layerType === layerTypes.THRESHOLD) {
+  if (layerType === layerTypes.REFERENCELINE) {
     return [
       i18n.translate('xpack.lens.indexPattern.calculations.layerDataType', {
         defaultMessage: '{name} is disabled for this type of layer.',
@@ -146,7 +144,7 @@ export function dateBasedOperationToExpression(
   functionName: string,
   additionalArgs: Record<string, unknown[]> = {}
 ): ExpressionFunctionAST[] {
-  const currentColumn = (layer.columns[columnId] as unknown) as ReferenceBasedIndexPatternColumn;
+  const currentColumn = layer.columns[columnId] as unknown as ReferenceBasedIndexPatternColumn;
   const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
   const dateColumnIndex = buckets.findIndex(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
@@ -177,7 +175,7 @@ export function optionallHistogramBasedOperationToExpression(
   functionName: string,
   additionalArgs: Record<string, unknown[]> = {}
 ): ExpressionFunctionAST[] {
-  const currentColumn = (layer.columns[columnId] as unknown) as ReferenceBasedIndexPatternColumn;
+  const currentColumn = layer.columns[columnId] as unknown as ReferenceBasedIndexPatternColumn;
   const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
   const nonHistogramColumns = buckets.filter(
     (colId) =>

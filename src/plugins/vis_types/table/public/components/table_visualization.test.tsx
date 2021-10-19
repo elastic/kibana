@@ -20,11 +20,11 @@ import { useUiState } from '../utils';
 
 describe('TableVisualizationComponent', () => {
   const coreStartMock = coreMock.createStart();
-  const handlers = ({
+  const handlers = {
     done: jest.fn(),
     uiState: 'uiState',
     event: 'event',
-  } as unknown) as IInterpreterRenderHandlers;
+  } as unknown as IInterpreterRenderHandlers;
   const visData: TableVisData = {
     table: {
       columns: [],
@@ -33,7 +33,7 @@ describe('TableVisualizationComponent', () => {
     },
     tables: [],
   };
-  const visConfig = ({} as unknown) as TableVisConfig;
+  const visConfig = {} as unknown as TableVisConfig;
 
   it('should render the basic table', () => {
     const comp = shallow(

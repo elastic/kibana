@@ -7,4 +7,5 @@
  */
 
 export * from '../common/stubs';
-export { createStubIndexPattern } from './index_patterns/index_patterns/index_pattern.stub';
+// eslint-disable-next-line
+export { createStubDataView } from '../../data_views/public/data_views/data_view.stub';

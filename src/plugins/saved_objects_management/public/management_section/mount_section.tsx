@@ -14,17 +14,16 @@ import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../management/public';
+import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
-import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { getAllowedTypes } from './../lib';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
   mountParams: ManagementAppMountParams;
 }
 
-let allowedObjectTypes: string[] | undefined;
+let allowedObjectTypes: SavedObjectManagementTypeInfo[] | undefined;
 
 const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
   defaultMessage: 'Saved Objects',
@@ -32,24 +31,17 @@ const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle',
 
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
 const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));
-export const mountManagementSection = async ({
-  core,
-  mountParams,
-  serviceRegistry,
-}: MountParams) => {
-  const [
-    coreStart,
-    { data, savedObjectsTaggingOss, spaces: spacesApi },
-    pluginStart,
-  ] = await core.getStartServices();
+export const mountManagementSection = async ({ core, mountParams }: MountParams) => {
+  const [coreStart, { data, savedObjectsTaggingOss, spaces: spacesApi }, pluginStart] =
+    await core.getStartServices();
+  const { capabilities } = coreStart.application;
   const { element, history, setBreadcrumbs } = mountParams;
-  if (allowedObjectTypes === undefined) {
+
+  if (!allowedObjectTypes) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
 
   coreStart.chrome.docTitle.change(title);
-
-  const capabilities = coreStart.application.capabilities;
 
   const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
     const allowed = capabilities?.management?.kibana?.objects ?? false;
@@ -65,12 +57,11 @@ export const mountManagementSection = async ({
     <I18nProvider>
       <Router history={history}>
         <Switch>
-          <Route path={'/:service/:id'} exact={true}>
+          <Route path={'/:type/:id'} exact={true}>
             <RedirectToHomeIfUnauthorized>
               <Suspense fallback={<EuiLoadingSpinner />}>
                 <SavedObjectsEditionPage
                   coreStart={coreStart}
-                  serviceRegistry={serviceRegistry}
                   setBreadcrumbs={setBreadcrumbs}
                   history={history}
                 />
@@ -85,7 +76,6 @@ export const mountManagementSection = async ({
                   taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
                   spacesApi={spacesApi}
                   dataStart={data}
-                  serviceRegistry={serviceRegistry}
                   actionRegistry={pluginStart.actions}
                   columnRegistry={pluginStart.columns}
                   allowedTypes={allowedObjectTypes}

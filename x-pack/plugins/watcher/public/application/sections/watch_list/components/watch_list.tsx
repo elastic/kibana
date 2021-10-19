@@ -67,9 +67,11 @@ export const WatchList = () => {
     setBreadcrumbs([listBreadcrumb]);
   }, [setBreadcrumbs]);
 
-  const { isLoading: isWatchesLoading, data: watches, error } = useLoadWatches(
-    REFRESH_INTERVALS.WATCH_LIST
-  );
+  const {
+    isLoading: isWatchesLoading,
+    data: watches,
+    error,
+  } = useLoadWatches(REFRESH_INTERVALS.WATCH_LIST);
 
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
@@ -198,7 +200,7 @@ export const WatchList = () => {
             defaultMessage="Error loading watches"
           />
         }
-        error={(error as unknown) as Error}
+        error={error as unknown as Error}
       />
     );
   }

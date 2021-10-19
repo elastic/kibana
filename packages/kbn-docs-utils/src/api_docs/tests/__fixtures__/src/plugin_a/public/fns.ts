@@ -60,11 +60,15 @@ export const arrowFn = (
  * @returns I have no idea.
  *
  */
-export const crazyFunction = (
-  obj: { hi: string },
-  { fn1, fn2 }: { fn1: (foo: { param: string }) => number; fn2: () => void },
-  { str }: { str: string }
-) => () => () => fn1({ param: str });
+export const crazyFunction =
+  (
+    obj: { hi: string },
+    { fn1, fn2 }: { fn1: (foo: { param: string }) => number; fn2: () => void },
+    { str }: { str: string }
+  ) =>
+  () =>
+  () =>
+    fn1({ param: str });
 
 export const fnWithNonExportedRef = (a: ImNotExportedFromIndex) => a;
 

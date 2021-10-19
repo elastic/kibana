@@ -45,13 +45,14 @@ export function setupSavedObjects({
   getSpacesService,
 }: SetupSavedObjectsParams) {
   savedObjects.setClientFactoryProvider(
-    (repositoryFactory) => ({ request, includedHiddenTypes }) => {
-      return new SavedObjectsClient(
-        authz.mode.useRbacForRequest(request)
-          ? repositoryFactory.createInternalRepository(includedHiddenTypes)
-          : repositoryFactory.createScopedRepository(request, includedHiddenTypes)
-      );
-    }
+    (repositoryFactory) =>
+      ({ request, includedHiddenTypes }) => {
+        return new SavedObjectsClient(
+          authz.mode.useRbacForRequest(request)
+            ? repositoryFactory.createInternalRepository(includedHiddenTypes)
+            : repositoryFactory.createScopedRepository(request, includedHiddenTypes)
+        );
+      }
   );
 
   savedObjects.addClientWrapper(Number.MAX_SAFE_INTEGER - 1, 'security', ({ client, request }) => {
@@ -61,9 +62,8 @@ export function setupSavedObjects({
           legacyAuditLogger,
           auditLogger: audit.asScoped(request),
           baseClient: client,
-          checkSavedObjectsPrivilegesAsCurrentUser: authz.checkSavedObjectsPrivilegesWithRequest(
-            request
-          ),
+          checkSavedObjectsPrivilegesAsCurrentUser:
+            authz.checkSavedObjectsPrivilegesWithRequest(request),
           errors: SavedObjectsClient.errors,
           getSpacesService,
         })

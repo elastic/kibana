@@ -51,115 +51,113 @@ export const createGridColumns = (
     });
   };
 
-  return columns.map(
-    (col, colIndex): EuiDataGridColumn => {
-      const formattedColumn = formattedColumns[col.id];
-      const cellActions = formattedColumn.filterable
-        ? [
-            ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-              const rowValue = rows[rowIndex][columnId];
-              const contentsIsDefined = rowValue !== null && rowValue !== undefined;
-              const cellContent = formattedColumn.formatter.convert(rowValue);
+  return columns.map((col, colIndex): EuiDataGridColumn => {
+    const formattedColumn = formattedColumns[col.id];
+    const cellActions = formattedColumn.filterable
+      ? [
+          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+            const rowValue = rows[rowIndex][columnId];
+            const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+            const cellContent = formattedColumn.formatter.convert(rowValue);
 
-              const filterForText = i18n.translate(
-                'visTypeTable.tableCellFilter.filterForValueText',
-                {
-                  defaultMessage: 'Filter for value',
-                }
-              );
-              const filterForAriaLabel = i18n.translate(
-                'visTypeTable.tableCellFilter.filterForValueAriaLabel',
-                {
-                  defaultMessage: 'Filter for value: {cellContent}',
-                  values: {
-                    cellContent,
-                  },
-                }
-              );
+            const filterForText = i18n.translate(
+              'visTypeTable.tableCellFilter.filterForValueText',
+              {
+                defaultMessage: 'Filter for value',
+              }
+            );
+            const filterForAriaLabel = i18n.translate(
+              'visTypeTable.tableCellFilter.filterForValueAriaLabel',
+              {
+                defaultMessage: 'Filter for value: {cellContent}',
+                values: {
+                  cellContent,
+                },
+              }
+            );
 
-              return (
-                contentsIsDefined && (
-                  <Component
-                    aria-label={filterForAriaLabel}
-                    data-test-subj="tbvChartCell__filterForCellValue"
-                    onClick={() => {
-                      onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
-                      closePopover();
-                    }}
-                    iconType="plusInCircle"
-                  >
-                    {filterForText}
-                  </Component>
-                )
-              );
-            },
-            ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-              const rowValue = rows[rowIndex][columnId];
-              const contentsIsDefined = rowValue !== null && rowValue !== undefined;
-              const cellContent = formattedColumn.formatter.convert(rowValue);
-
-              const filterOutText = i18n.translate(
-                'visTypeTable.tableCellFilter.filterOutValueText',
-                {
-                  defaultMessage: 'Filter out value',
-                }
-              );
-              const filterOutAriaLabel = i18n.translate(
-                'visTypeTable.tableCellFilter.filterOutValueAriaLabel',
-                {
-                  defaultMessage: 'Filter out value: {cellContent}',
-                  values: {
-                    cellContent,
-                  },
-                }
-              );
-
-              return (
-                contentsIsDefined && (
-                  <Component
-                    aria-label={filterOutAriaLabel}
-                    onClick={() => {
-                      onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
-                      closePopover();
-                    }}
-                    iconType="minusInCircle"
-                  >
-                    {filterOutText}
-                  </Component>
-                )
-              );
-            },
-          ]
-        : undefined;
-
-      const initialWidth = columnsWidth.find((c) => c.colIndex === colIndex);
-      const column: EuiDataGridColumn = {
-        id: col.id,
-        display: col.name,
-        displayAsText: col.name,
-        actions: {
-          showHide: false,
-          showMoveLeft: false,
-          showMoveRight: false,
-          showSortAsc: {
-            label: i18n.translate('visTypeTable.sort.ascLabel', {
-              defaultMessage: 'Sort asc',
-            }),
+            return (
+              contentsIsDefined && (
+                <Component
+                  aria-label={filterForAriaLabel}
+                  data-test-subj="tbvChartCell__filterForCellValue"
+                  onClick={() => {
+                    onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
+                    closePopover();
+                  }}
+                  iconType="plusInCircle"
+                >
+                  {filterForText}
+                </Component>
+              )
+            );
           },
-          showSortDesc: {
-            label: i18n.translate('visTypeTable.sort.descLabel', {
-              defaultMessage: 'Sort desc',
-            }),
+          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+            const rowValue = rows[rowIndex][columnId];
+            const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+            const cellContent = formattedColumn.formatter.convert(rowValue);
+
+            const filterOutText = i18n.translate(
+              'visTypeTable.tableCellFilter.filterOutValueText',
+              {
+                defaultMessage: 'Filter out value',
+              }
+            );
+            const filterOutAriaLabel = i18n.translate(
+              'visTypeTable.tableCellFilter.filterOutValueAriaLabel',
+              {
+                defaultMessage: 'Filter out value: {cellContent}',
+                values: {
+                  cellContent,
+                },
+              }
+            );
+
+            return (
+              contentsIsDefined && (
+                <Component
+                  aria-label={filterOutAriaLabel}
+                  onClick={() => {
+                    onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
+                    closePopover();
+                  }}
+                  iconType="minusInCircle"
+                >
+                  {filterOutText}
+                </Component>
+              )
+            );
           },
+        ]
+      : undefined;
+
+    const initialWidth = columnsWidth.find((c) => c.colIndex === colIndex);
+    const column: EuiDataGridColumn = {
+      id: col.id,
+      display: col.name,
+      displayAsText: col.name,
+      actions: {
+        showHide: false,
+        showMoveLeft: false,
+        showMoveRight: false,
+        showSortAsc: {
+          label: i18n.translate('visTypeTable.sort.ascLabel', {
+            defaultMessage: 'Sort asc',
+          }),
         },
-        cellActions,
-      };
+        showSortDesc: {
+          label: i18n.translate('visTypeTable.sort.descLabel', {
+            defaultMessage: 'Sort desc',
+          }),
+        },
+      },
+      cellActions,
+    };
 
-      if (initialWidth) {
-        column.initialWidth = initialWidth.width;
-      }
-
-      return column;
+    if (initialWidth) {
+      column.initialWidth = initialWidth.width;
     }
-  );
+
+    return column;
+  });
 };

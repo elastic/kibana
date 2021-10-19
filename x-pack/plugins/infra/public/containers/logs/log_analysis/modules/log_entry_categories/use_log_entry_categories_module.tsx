@@ -86,7 +86,5 @@ export const useLogEntryCategoriesModule = ({
   };
 };
 
-export const [
-  LogEntryCategoriesModuleProvider,
-  useLogEntryCategoriesModuleContext,
-] = createContainer(useLogEntryCategoriesModule);
+export const [LogEntryCategoriesModuleProvider, useLogEntryCategoriesModuleContext] =
+  createContainer(useLogEntryCategoriesModule);

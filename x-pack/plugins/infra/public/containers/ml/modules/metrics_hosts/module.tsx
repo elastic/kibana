@@ -76,6 +76,5 @@ export const useMetricHostsModule = ({
   };
 };
 
-export const [MetricHostsModuleProvider, useMetricHostsModuleContext] = createContainer(
-  useMetricHostsModule
-);
+export const [MetricHostsModuleProvider, useMetricHostsModuleContext] =
+  createContainer(useMetricHostsModule);

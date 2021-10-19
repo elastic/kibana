@@ -28,6 +28,8 @@ describe('service node queries', () => {
         serviceName: 'foo',
         kuery: '',
         environment: ENVIRONMENT_ALL.value,
+        start: 0,
+        end: 50000,
       })
     );
 
@@ -41,6 +43,8 @@ describe('service node queries', () => {
         serviceName: 'foo',
         serviceNodeName: 'bar',
         kuery: '',
+        start: 0,
+        end: 50000,
       })
     );
 
@@ -54,6 +58,8 @@ describe('service node queries', () => {
         serviceName: 'foo',
         serviceNodeName: SERVICE_NODE_NAME_MISSING,
         kuery: '',
+        start: 0,
+        end: 50000,
       })
     );
 

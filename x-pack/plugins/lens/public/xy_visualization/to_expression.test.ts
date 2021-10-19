@@ -13,6 +13,7 @@ import { Operation } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { defaultReferenceLineColor } from './color_assignment';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
@@ -81,24 +82,26 @@ describe('#toExpression', () => {
 
   it('should default the fitting function to None', () => {
     expect(
-      (xyVisualization.toExpression(
-        {
-          legend: { position: Position.Bottom, isVisible: true },
-          valueLabels: 'hide',
-          preferredSeriesType: 'bar',
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              splitAccessor: 'd',
-              xAccessor: 'a',
-              accessors: ['b', 'c'],
-            },
-          ],
-        },
-        frame.datasourceLayers
-      ) as Ast).chain[0].arguments.fittingFunction[0]
+      (
+        xyVisualization.toExpression(
+          {
+            legend: { position: Position.Bottom, isVisible: true },
+            valueLabels: 'hide',
+            preferredSeriesType: 'bar',
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'a',
+                accessors: ['b', 'c'],
+              },
+            ],
+          },
+          frame.datasourceLayers
+        ) as Ast
+      ).chain[0].arguments.fittingFunction[0]
     ).toEqual('None');
   });
 
@@ -316,5 +319,43 @@ describe('#toExpression', () => {
       frame.datasourceLayers
     ) as Ast;
     expect(expression.chain[0].arguments.valueLabels[0] as Ast).toEqual('inside');
+  });
+
+  it('should compute the correct series color fallback based on the layer type', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'inside',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+            yConfig: [{ forAccessor: 'a' }],
+          },
+          {
+            layerId: 'referenceLine',
+            layerType: layerTypes.REFERENCELINE,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+            yConfig: [{ forAccessor: 'a' }],
+          },
+        ],
+      },
+      { ...frame.datasourceLayers, referenceLine: mockDatasource.publicAPIMock }
+    ) as Ast;
+
+    function getYConfigColorForLayer(ast: Ast, index: number) {
+      return ((ast.chain[0].arguments.layers[index] as Ast).chain[0].arguments.yConfig[0] as Ast)
+        .chain[0].arguments.color;
+    }
+    expect(getYConfigColorForLayer(expression, 0)).toEqual([]);
+    expect(getYConfigColorForLayer(expression, 1)).toEqual([defaultReferenceLineColor]);
   });
 });

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
-import { IndexPattern } from '../../index_patterns';
+import { of, throwError } from 'rxjs';
+import { IndexPattern } from '../..';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
 import { AggConfigs, AggTypesRegistryStart } from '../../';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
@@ -25,21 +25,21 @@ const getComputedFields = () => ({
 const mockSource = { excludes: ['foo-*'] };
 const mockSource2 = { excludes: ['bar-*'] };
 
-const indexPattern = ({
+const indexPattern = {
   title: 'foo',
   fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }, { name: '_id' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
-const indexPattern2 = ({
+const indexPattern2 = {
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource2,
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 const fields3 = [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }];
-const indexPattern3 = ({
+const indexPattern3 = {
   title: 'foo',
   fields: {
     getByName: (name: string) => {
@@ -51,7 +51,7 @@ const indexPattern3 = ({
   },
   getComputedFields,
   getSourceFiltering: () => mockSource,
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 const runtimeFieldDef = {
   type: 'keyword',
@@ -139,7 +139,7 @@ describe('SearchSource', () => {
     describe('computed fields handling', () => {
       test('still provides computed fields when no fields are specified', async () => {
         const runtimeFields = { runtime_field: runtimeFieldDef };
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: ['hello'],
@@ -147,7 +147,7 @@ describe('SearchSource', () => {
             docvalueFields: ['@timestamp'],
             runtimeFields,
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
 
         const request = searchSource.getSearchRequestBody();
         expect(request.stored_fields).toEqual(['hello']);
@@ -157,14 +157,14 @@ describe('SearchSource', () => {
       });
 
       test('never includes docvalue_fields', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: {},
             docvalueFields: ['@timestamp'],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', ['@timestamp']);
         searchSource.setField('fieldsFromSource', ['foo']);
 
@@ -173,14 +173,14 @@ describe('SearchSource', () => {
       });
 
       test('overrides computed docvalue fields with ones that are provided', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: {},
             docvalueFields: ['hello'],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
         searchSource.setField('docvalue_fields', ['world']);
 
@@ -190,14 +190,14 @@ describe('SearchSource', () => {
       });
 
       test('allows explicitly provided docvalue fields to override fields API when fetching fieldsFromSource', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: {},
             docvalueFields: [{ field: 'a', format: 'date_time' }],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
         searchSource.setField('docvalue_fields', [{ field: 'b', format: 'date_time' }]);
         searchSource.setField('fields', ['c']);
@@ -215,7 +215,7 @@ describe('SearchSource', () => {
         indexPatternFields.getByType = (type) => {
           return [];
         };
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           fields: indexPatternFields,
           getComputedFields: () => ({
@@ -223,7 +223,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: [{ field: 'hello', format: 'date_time' }],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', [{ field: 'hello', format: 'strict_date_time' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -232,14 +232,14 @@ describe('SearchSource', () => {
       });
 
       test('injects a date format for computed docvalue fields if none is provided', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: {},
             docvalueFields: [{ field: 'hello', format: 'date_time' }],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', ['hello']);
 
         const request = searchSource.getSearchRequestBody();
@@ -248,7 +248,7 @@ describe('SearchSource', () => {
       });
 
       test('injects a date format for computed docvalue fields while merging other properties', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           fields: {
             getByType: () => {
@@ -260,7 +260,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: [{ field: 'hello', format: 'date_time', a: 'test', b: 'test' }],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', [{ field: 'hello', a: 'a', c: 'c' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -271,14 +271,14 @@ describe('SearchSource', () => {
       });
 
       test('merges provided script fields with computed fields', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: { hello: {} },
             docvalueFields: [],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
         searchSource.setField('script_fields', { world: {} });
 
@@ -291,14 +291,14 @@ describe('SearchSource', () => {
       });
 
       test(`requests any fields that aren't script_fields from stored_fields`, async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: { hello: {} },
             docvalueFields: [],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', ['hello', 'a', { field: 'c' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -307,14 +307,14 @@ describe('SearchSource', () => {
       });
 
       test('ignores objects without a `field` property when setting stored_fields', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: { hello: {} },
             docvalueFields: [],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', ['hello', 'a', { foo: 'c' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -323,14 +323,14 @@ describe('SearchSource', () => {
       });
 
       test(`requests any fields that aren't script_fields from stored_fields with fieldsFromSource`, async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: { hello: {} },
             docvalueFields: [],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fieldsFromSource', ['hello', 'a']);
 
         const request = searchSource.getSearchRequestBody();
@@ -426,14 +426,14 @@ describe('SearchSource', () => {
 
     describe('source filters handling', () => {
       test('excludes docvalue fields based on source filtering', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: {},
             docvalueFields: ['@timestamp', 'exclude-me'],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         // @ts-expect-error Typings for excludes filters need to be fixed.
         searchSource.setField('source', { excludes: ['exclude-*'] });
 
@@ -442,28 +442,28 @@ describe('SearchSource', () => {
       });
 
       test('defaults to source filters from index pattern', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: {},
             docvalueFields: ['@timestamp', 'foo-bar', 'foo-baz'],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
 
         const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual(['@timestamp']);
       });
 
       test('filters script fields to only include specified fields', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: [],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', ['hello']);
 
         const request = searchSource.getSearchRequestBody();
@@ -471,14 +471,14 @@ describe('SearchSource', () => {
       });
 
       test('request all fields except the ones specified with source filters', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: [],
             docvalueFields: [],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', [
           'hello',
           'foo-bar',
@@ -492,14 +492,14 @@ describe('SearchSource', () => {
       });
 
       test('request all fields from index pattern except the ones specified with source filters', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: [],
             docvalueFields: [],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
@@ -507,14 +507,14 @@ describe('SearchSource', () => {
       });
 
       test('request all fields from index pattern except the ones specified with source filters with unmapped_fields option', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: [],
             docvalueFields: [],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -522,14 +522,14 @@ describe('SearchSource', () => {
       });
 
       test('excludes metafields from the request', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: [],
             docvalueFields: [],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -544,14 +544,14 @@ describe('SearchSource', () => {
       });
 
       test('returns all scripted fields when one fields entry is *', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: [],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', ['timestamp', '*']);
 
         const request = searchSource.getSearchRequestBody();
@@ -561,14 +561,14 @@ describe('SearchSource', () => {
 
     describe('handling for when specific fields are provided', () => {
       test('fieldsFromSource will request any fields outside of script_fields from _source & stored fields', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp'],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fieldsFromSource', [
           'hello',
           'world',
@@ -585,14 +585,14 @@ describe('SearchSource', () => {
       });
 
       test('filters request when a specific list of fields is provided', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: ['*'],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp', 'date'],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
 
         const request = searchSource.getSearchRequestBody();
@@ -603,7 +603,7 @@ describe('SearchSource', () => {
 
       test('filters request when a specific list of fields is provided with fieldsFromSource', async () => {
         const runtimeFields = { runtime_field: runtimeFieldDef, runtime_field_b: runtimeFieldDef };
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: ['*'],
@@ -611,7 +611,7 @@ describe('SearchSource', () => {
             docvalueFields: ['@timestamp', 'date'],
             runtimeFields,
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fieldsFromSource', [
           'hello',
           '@timestamp',
@@ -631,14 +631,14 @@ describe('SearchSource', () => {
       });
 
       test('filters request when a specific list of fields is provided with fieldsFromSource or fields', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: ['*'],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp', 'date', 'time'],
           }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
         searchSource.setField('fieldsFromSource', ['foo-b', 'date', 'baz']);
 
@@ -654,7 +654,7 @@ describe('SearchSource', () => {
 
     describe('handling date fields', () => {
       test('adds date format to any date field', async () => {
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
@@ -665,7 +665,7 @@ describe('SearchSource', () => {
             getByType: () => [{ name: '@timestamp', esTypes: ['date_nanos'] }],
           },
           getSourceFiltering: () => ({ excludes: [] }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
@@ -684,7 +684,7 @@ describe('SearchSource', () => {
             { name: 'custom_date', esTypes: ['date'] },
           ];
         };
-        searchSource.setField('index', ({
+        searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
             storedFields: [],
@@ -693,7 +693,7 @@ describe('SearchSource', () => {
           }),
           fields: indexPatternFields,
           getSourceFiltering: () => ({ excludes: ['custom_date'] }),
-        } as unknown) as IndexPattern);
+        } as unknown as IndexPattern);
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
@@ -824,7 +824,7 @@ describe('SearchSource', () => {
     test('should serialize filters', () => {
       const filter = [
         {
-          query: { q: 'query' },
+          query: { query_string: { query: 'query' } },
           meta: {
             alias: 'alias',
             disabled: false,
@@ -842,7 +842,7 @@ describe('SearchSource', () => {
       searchSource.setField('index', indexPattern123);
       const filter = [
         {
-          query: { q: 'query' },
+          query: { query_string: { query: 'query' } },
           meta: {
             alias: 'alias',
             disabled: false,
@@ -866,7 +866,7 @@ describe('SearchSource', () => {
       searchSource.setField('docvalue_fields', ['prop1']);
       searchSource.setField('source', ['geometry']);
       searchSource.setField('fieldsFromSource', ['geometry', 'prop1']);
-      searchSource.setField('index', ({
+      searchSource.setField('index', {
         ...indexPattern,
         getSourceFiltering: () => ({ excludes: [] }),
         getComputedFields: () => ({
@@ -874,7 +874,7 @@ describe('SearchSource', () => {
           scriptFields: {},
           docvalueFields: [],
         }),
-      } as unknown) as IndexPattern);
+      } as unknown as IndexPattern);
       const request = searchSource.getSearchRequestBody();
       expect(request.stored_fields).toEqual(['geometry', 'prop1']);
       expect(request.docvalue_fields).toEqual(['prop1']);
@@ -885,7 +885,7 @@ describe('SearchSource', () => {
   describe('getSerializedFields', () => {
     const filter: Filter[] = [
       {
-        query: { q: 'query' },
+        query: { query_string: { query: 'query' } },
         meta: {
           alias: 'alias',
           disabled: false,
@@ -915,7 +915,9 @@ describe('SearchSource', () => {
                 "negate": false,
               },
               "query": Object {
-                "q": "query",
+                "query_string": Object {
+                  "query": "query",
+                },
               },
             },
           ],
@@ -1042,12 +1044,12 @@ describe('SearchSource', () => {
     describe('inspector', () => {
       let requestResponder: RequestResponder;
       beforeEach(() => {
-        requestResponder = ({
+        requestResponder = {
           stats: jest.fn(),
           ok: jest.fn(),
           error: jest.fn(),
           json: jest.fn(),
-        } as unknown) as RequestResponder;
+        } as unknown as RequestResponder;
       });
 
       test('calls inspector if provided', async () => {
@@ -1113,7 +1115,7 @@ describe('SearchSource', () => {
           },
         };
 
-        searchSourceDependencies.search = jest.fn().mockReturnValue(of(Promise.reject('aaaaa')));
+        searchSourceDependencies.search = jest.fn().mockReturnValue(throwError('aaaaa'));
 
         searchSource = new SearchSource({}, searchSourceDependencies);
         searchSource.setField('index', indexPattern);

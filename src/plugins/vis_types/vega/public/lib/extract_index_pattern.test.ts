@@ -12,7 +12,7 @@ import { setData } from '../services';
 
 import type { VegaSpec } from '../data_model/types';
 
-const getMockedSpec = (mockedObj: any) => (mockedObj as unknown) as VegaSpec;
+const getMockedSpec = (mockedObj: any) => mockedObj as unknown as VegaSpec;
 
 describe('extractIndexPatternsFromSpec', () => {
   const dataStart = dataPluginMock.createStartContract();

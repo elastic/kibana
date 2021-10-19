@@ -9,11 +9,11 @@ import type { EncryptedSavedObjectsAuditLogger } from './audit_logger';
 
 export const encryptedSavedObjectsAuditLoggerMock = {
   create() {
-    return ({
+    return {
       encryptAttributesSuccess: jest.fn(),
       encryptAttributeFailure: jest.fn(),
       decryptAttributesSuccess: jest.fn(),
       decryptAttributeFailure: jest.fn(),
-    } as unknown) as jest.Mocked<EncryptedSavedObjectsAuditLogger>;
+    } as unknown as jest.Mocked<EncryptedSavedObjectsAuditLogger>;
   },
 };

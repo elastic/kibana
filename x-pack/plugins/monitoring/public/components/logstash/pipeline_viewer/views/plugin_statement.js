@@ -24,11 +24,8 @@ function getInputStatementMetrics({ latestEventsPerSecond }) {
 }
 
 function getProcessorStatementMetrics(processorVertex) {
-  const {
-    latestMillisPerEvent,
-    latestEventsPerSecond,
-    percentOfTotalProcessorTime,
-  } = processorVertex;
+  const { latestMillisPerEvent, latestEventsPerSecond, percentOfTotalProcessorTime } =
+    processorVertex;
 
   return [
     <Metric

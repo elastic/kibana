@@ -25,6 +25,7 @@ describe('SourceConfigFields', () => {
   it('renders with all items, hiding API Keys', () => {
     const wrapper = shallow(
       <SourceConfigFields
+        isOauth1={false}
         clientId="123"
         clientSecret="456"
         publicKey="abc"
@@ -39,7 +40,13 @@ describe('SourceConfigFields', () => {
 
   it('shows API keys', () => {
     const wrapper = shallow(
-      <SourceConfigFields clientSecret="456" publicKey="abc" consumerKey="def" baseUrl="ghi" />
+      <SourceConfigFields
+        isOauth1
+        clientSecret="456"
+        publicKey="abc"
+        consumerKey="def"
+        baseUrl="ghi"
+      />
     );
 
     expect(wrapper.find(ApiKey)).toHaveLength(2);

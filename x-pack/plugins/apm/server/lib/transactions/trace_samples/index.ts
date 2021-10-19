@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { getTraceSamples } from './get_trace_samples';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
@@ -20,6 +20,8 @@ export async function getTransactionTraceSamples({
   sampleRangeFrom,
   sampleRangeTo,
   setup,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
@@ -30,7 +32,9 @@ export async function getTransactionTraceSamples({
   traceId: string;
   sampleRangeFrom?: number;
   sampleRangeTo?: number;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_transaction_trace_samples', async () => {
     return await getTraceSamples({
@@ -44,6 +48,8 @@ export async function getTransactionTraceSamples({
       sampleRangeFrom,
       sampleRangeTo,
       setup,
+      start,
+      end,
     });
   });
 }

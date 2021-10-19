@@ -125,10 +125,10 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     [handleClose, markdownContext]
   );
 
-  const originatingPath = useMemo(() => `${location.pathname}${location.search}`, [
-    location.pathname,
-    location.search,
-  ]);
+  const originatingPath = useMemo(
+    () => `${location.pathname}${location.search}`,
+    [location.pathname, location.search]
+  );
 
   const handleCreateInLensClick = useCallback(() => {
     storage.set(DRAFT_COMMENT_STORAGE_ID, {

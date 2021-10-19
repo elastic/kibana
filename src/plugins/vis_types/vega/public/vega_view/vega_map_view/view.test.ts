@@ -78,7 +78,7 @@ describe('vega_map_view/view', () => {
     setNotifications(coreStart.notifications);
     setUISettings(coreStart.uiSettings);
 
-    const getTmsService = jest.fn().mockReturnValue(({
+    const getTmsService = jest.fn().mockReturnValue({
       getVectorStyleSheet: () => ({
         version: 8,
         sources: {},
@@ -88,7 +88,7 @@ describe('vega_map_view/view', () => {
       getMaxZoom: async () => 20,
       getMinZoom: async () => 0,
       getAttributions: () => [{ url: 'tms_attributions' }],
-    } as unknown) as TMSService);
+    } as unknown as TMSService);
     const config = {
       tilemap: {
         url: 'test',
@@ -101,16 +101,16 @@ describe('vega_map_view/view', () => {
     } as MapsEmsConfig;
 
     function setMapService(defaultTmsLayer: string) {
-      setMapServiceSettings(({
+      setMapServiceSettings({
         getTmsService,
         defaultTmsLayer: () => defaultTmsLayer,
         config,
-      } as unknown) as MapServiceSettings);
+      } as unknown as MapServiceSettings);
     }
 
     async function createVegaMapView() {
       await vegaParser.parseAsync();
-      return new VegaMapView(({
+      return new VegaMapView({
         vegaParser,
         filterManager: dataPluginStart.query.filterManager,
         timefilter: dataPluginStart.query.timefilter.timefilter,
@@ -121,8 +121,10 @@ describe('vega_map_view/view', () => {
           restore: jest.fn(),
           clear: jest.fn(),
         },
-      } as unknown) as VegaViewParams);
+      } as unknown as VegaViewParams);
     }
+
+    let mockedConsoleLog: jest.SpyInstance;
 
     beforeEach(() => {
       vegaParser = new VegaParser(
@@ -137,10 +139,13 @@ describe('vega_map_view/view', () => {
         {},
         mockGetServiceSettings
       );
+      mockedConsoleLog = jest.spyOn(console, 'log'); // mocked console.log to avoid messages in the console when running tests
+      mockedConsoleLog.mockImplementation(() => {}); //  comment this line when console logging for debugging
     });
 
     afterEach(() => {
       jest.clearAllMocks();
+      mockedConsoleLog.mockRestore();
     });
 
     test('should be added TmsRasterLayer and do not use tmsService if mapStyle is "user_configured"', async () => {

@@ -9,7 +9,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,12 +21,12 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { IHttpFetchError } from 'kibana/public';
 
 import type { PingResult } from '../common';
+import { SubmitErrorCallout } from './submit_error_callout';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
-import { useHttp } from './use_http';
+import { useKibana } from './use_kibana';
 
 export interface ClusterAddressFormValues {
   host: string;
@@ -46,7 +45,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
   onCancel,
   onSuccess,
 }) => {
-  const http = useHttp();
+  const { http } = useKibana();
 
   const [form, eventHandlers] = useForm({
     defaultValues,
@@ -65,7 +64,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
           }
         } catch (error) {
           errors.host = i18n.translate('interactiveSetup.clusterAddressForm.hostInvalidError', {
-            defaultMessage: 'Enter a valid address including protocol.',
+            defaultMessage: "Enter a valid address, including 'http' or 'https'.",
           });
         }
       }
@@ -88,14 +87,12 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
     <EuiForm component="form" noValidate {...eventHandlers}>
       {form.submitError && (
         <>
-          <EuiCallOut
-            color="danger"
-            title={i18n.translate('interactiveSetup.clusterAddressForm.submitErrorTitle', {
+          <SubmitErrorCallout
+            error={form.submitError}
+            defaultTitle={i18n.translate('interactiveSetup.clusterAddressForm.submitErrorTitle', {
               defaultMessage: "Couldn't check address",
             })}
-          >
-            {(form.submitError as IHttpFetchError).body?.message}
-          </EuiCallOut>
+          />
           <EuiSpacer />
         </>
       )}
@@ -112,6 +109,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
           name="host"
           value={form.values.host}
           isInvalid={form.touched.host && !!form.errors.host}
+          placeholder="https://localhost:9200"
           fullWidth
         />
       </EuiFormRow>

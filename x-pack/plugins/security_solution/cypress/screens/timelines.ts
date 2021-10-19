@@ -9,7 +9,10 @@ export const BULK_ACTIONS = '[data-test-subj="utility-bar-action-button"]';
 
 export const EXPORT_TIMELINE_ACTION = '[data-test-subj="export-timeline-action"]';
 
-export const TIMELINE = (id: string) => {
+export const TIMELINE = (id: string | undefined) => {
+  if (id == null) {
+    throw new TypeError('id should never be null or undefined');
+  }
   return `[data-test-subj="title-${id}"]`;
 };
 
@@ -26,7 +29,5 @@ export const TIMELINES_NOTES_COUNT = '[data-test-subj="notes-count"]';
 export const TIMELINES_PINNED_EVENT_COUNT = '[data-test-subj="pinned-event-count"]';
 
 export const TIMELINES_TABLE = '[data-test-subj="timelines-table"]';
-
-export const TIMELINES_USERNAME = '[data-test-subj="username"]';
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton-linkIcon"]';

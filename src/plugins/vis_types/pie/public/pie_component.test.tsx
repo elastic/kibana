@@ -123,7 +123,7 @@ describe('PieComponent', function () {
   });
 
   it('renders the no results component if all the values are zero', () => {
-    const newVisData = ({
+    const newVisData = {
       type: 'datatable',
       columns: [
         {
@@ -145,14 +145,14 @@ describe('PieComponent', function () {
           'col-1-1': 0,
         },
       ],
-    } as unknown) as Datatable;
+    } as unknown as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
     const component = mount(<PieComponent {...newProps} />);
     expect(findTestSubject(component, 'pieVisualizationError').text()).toEqual('No results found');
   });
 
   it('renders the no results component if there are negative values', () => {
-    const newVisData = ({
+    const newVisData = {
       type: 'datatable',
       columns: [
         {
@@ -174,7 +174,7 @@ describe('PieComponent', function () {
           'col-1-1': -10,
         },
       ],
-    } as unknown) as Datatable;
+    } as unknown as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
     const component = mount(<PieComponent {...newProps} />);
     expect(findTestSubject(component, 'pieVisualizationError').text()).toEqual(

@@ -38,8 +38,8 @@ export const TimelinesPageComponent: React.FC = () => {
   }, [setImportDataModalToggle]);
   const { indicesExist } = useSourcererScope();
 
-  const capabilitiesCanUserCRUD: boolean = !!useKibana().services.application.capabilities.siem
-    .crud;
+  const capabilitiesCanUserCRUD: boolean =
+    !!useKibana().services.application.capabilities.siem.crud;
 
   return (
     <>
@@ -93,7 +93,6 @@ export const TimelinesPageComponent: React.FC = () => {
         </>
       ) : (
         <SecuritySolutionPageWrapper>
-          <HeaderPage hideSourcerer={true} border title={i18n.PAGE_TITLE} />
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}

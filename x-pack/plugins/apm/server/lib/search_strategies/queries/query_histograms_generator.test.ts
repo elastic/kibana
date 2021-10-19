@@ -17,8 +17,8 @@ import { fetchTransactionDurationHistograms } from './query_histograms_generator
 
 const params = {
   index: 'apm-*',
-  start: '2020',
-  end: '2021',
+  start: 1577836800000,
+  end: 1609459200000,
   includeFrozen: false,
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
@@ -38,17 +38,21 @@ const fieldValuePairs = [
 describe('query_histograms_generator', () => {
   describe('fetchTransactionDurationHistograms', () => {
     it(`doesn't break on failing ES queries and adds messages to the log`, async () => {
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
-        body: estypes.SearchResponse;
-      } => {
-        return {
-          body: ({} as unknown) as estypes.SearchResponse,
-        };
-      });
+      const esClientSearchMock = jest.fn(
+        (
+          req: estypes.SearchRequest
+        ): {
+          body: estypes.SearchResponse;
+        } => {
+          return {
+            body: {} as unknown as estypes.SearchResponse,
+          };
+        }
+      );
 
-      const esClientMock = ({
+      const esClientMock = {
         search: esClientSearchMock,
-      } as unknown) as ElasticsearchClient;
+      } as unknown as ElasticsearchClient;
 
       const state = latencyCorrelationsSearchServiceStateProvider();
       const { addLogMessage, getLogMessages } = searchServiceLogProvider();
@@ -85,24 +89,28 @@ describe('query_histograms_generator', () => {
     });
 
     it('returns items with correlation and ks-test value', async () => {
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
-        body: estypes.SearchResponse;
-      } => {
-        return {
-          body: ({
-            aggregations: {
-              latency_ranges: { buckets: [] },
-              transaction_duration_correlation: { value: 0.6 },
-              ks_test: { less: 0.001 },
-              logspace_ranges: { buckets: [] },
-            },
-          } as unknown) as estypes.SearchResponse,
-        };
-      });
+      const esClientSearchMock = jest.fn(
+        (
+          req: estypes.SearchRequest
+        ): {
+          body: estypes.SearchResponse;
+        } => {
+          return {
+            body: {
+              aggregations: {
+                latency_ranges: { buckets: [] },
+                transaction_duration_correlation: { value: 0.6 },
+                ks_test: { less: 0.001 },
+                logspace_ranges: { buckets: [] },
+              },
+            } as unknown as estypes.SearchResponse,
+          };
+        }
+      );
 
-      const esClientMock = ({
+      const esClientMock = {
         search: esClientSearchMock,
-      } as unknown) as ElasticsearchClient;
+      } as unknown as ElasticsearchClient;
 
       const state = latencyCorrelationsSearchServiceStateProvider();
       const { addLogMessage, getLogMessages } = searchServiceLogProvider();

@@ -97,10 +97,8 @@ const CreateRulePageComponent: React.FC = () => {
       canUserCRUD,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const { navigateToApp } = useKibana().services.application;
   const loading = userInfoLoading || listsConfigLoading;
   const [, dispatchToaster] = useStateToaster();
@@ -403,6 +401,7 @@ const CreateRulePageComponent: React.FC = () => {
               >
                 <EuiHorizontalRule margin="m" />
                 <StepScheduleRule
+                  ruleType={ruleType}
                   addPadding={true}
                   defaultValues={stepsData.current[RuleStep.scheduleRule].data}
                   descriptionColumns="singleSplit"

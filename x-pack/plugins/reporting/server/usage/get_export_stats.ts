@@ -33,6 +33,7 @@ function getAvailableTotalForFeature(
     available: isAvailable(featureAvailability, typeKey),
     total: jobType.total,
     deprecated,
+    output_size: jobType.sizes,
     app: { ...defaultTotalsForFeature.app, ...jobType.app },
     layout: { ...defaultTotalsForFeature.layout, ...jobType.layout },
   };
@@ -56,6 +57,7 @@ export const getExportStats = (
     _all: rangeAll,
     status: rangeStatus,
     statuses: rangeStatusByApp,
+    output_size: outputSize,
     ...rangeStats
   } = rangeStatsInput;
 
@@ -84,6 +86,7 @@ export const getExportStats = (
     _all: rangeAll || 0,
     status: { completed: 0, failed: 0, ...rangeStatus },
     statuses: rangeStatusByApp,
+    output_size: outputSize,
   } as RangeStats;
 
   return resultStats;

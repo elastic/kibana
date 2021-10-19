@@ -53,7 +53,7 @@ export function createInstallableFrom<T>(
   return savedObject
     ? {
         ...from,
-        status: installationStatuses.Installed,
+        status: savedObject.attributes.install_status,
         savedObject,
       }
     : {

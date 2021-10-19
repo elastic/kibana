@@ -15,21 +15,24 @@ import { AlertExecutorOptionsWithExtraServices } from '../types';
 
 import { LifecycleAlertServices, LifecycleRuleExecutor } from './create_lifecycle_executor';
 
-export const createLifecycleRuleExecutorMock = <
-  Params extends AlertTypeParams = never,
-  State extends AlertTypeState = never,
-  InstanceState extends AlertInstanceState = never,
-  InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
->(
-  executor: LifecycleRuleExecutor<Params, State, InstanceState, InstanceContext, ActionGroupIds>
-) => async (
-  options: AlertExecutorOptionsWithExtraServices<
-    Params,
-    State,
-    InstanceState,
-    InstanceContext,
-    ActionGroupIds,
-    LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds>
-  >
-) => await executor(options);
+export const createLifecycleRuleExecutorMock =
+  <
+    Params extends AlertTypeParams = never,
+    State extends AlertTypeState = never,
+    InstanceState extends AlertInstanceState = never,
+    InstanceContext extends AlertInstanceContext = never,
+    ActionGroupIds extends string = never
+  >(
+    executor: LifecycleRuleExecutor<Params, State, InstanceState, InstanceContext, ActionGroupIds>
+  ) =>
+  async (
+    options: AlertExecutorOptionsWithExtraServices<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds>
+    >
+  ) =>
+    await executor(options);

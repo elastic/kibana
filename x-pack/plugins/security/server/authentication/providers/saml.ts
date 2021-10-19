@@ -576,7 +576,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-      const { id: requestId, redirect, realm } = (
+      const {
+        id: requestId,
+        redirect,
+        realm,
+      } = (
         await this.options.client.asInternalUser.transport.request({
           method: 'POST',
           path: '/_security/saml/prepare',

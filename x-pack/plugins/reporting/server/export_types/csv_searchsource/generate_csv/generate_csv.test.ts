@@ -75,20 +75,21 @@ const mockSearchSourceGetFieldDefault = jest.fn().mockImplementation((key: strin
           getByName: jest.fn().mockImplementation(() => []),
           getByType: jest.fn().mockImplementation(() => []),
         },
+        metaFields: ['_id', '_index', '_type', '_score'],
         getFormatterForField: jest.fn(),
       };
   }
 });
 
-const mockFieldFormatsRegistry = ({
+const mockFieldFormatsRegistry = {
   deserialize: jest
     .fn()
     .mockImplementation(() => ({ id: 'string', convert: jest.fn().mockImplementation(identity) })),
-} as unknown) as FieldFormatsRegistry;
+} as unknown as FieldFormatsRegistry;
 
 beforeEach(async () => {
   content = '';
-  stream = ({ write: jest.fn((chunk) => (content += chunk)) } as unknown) as typeof stream;
+  stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
   mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
   mockDataClient = dataPluginMock.createStartContract().search.asScoped({} as any);
   mockDataClient.search = mockDataClientSearchDefault;

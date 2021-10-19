@@ -17,8 +17,8 @@ import {
 
 const params = {
   index: 'apm-*',
-  start: '2020',
-  end: '2021',
+  start: 1577836800000,
+  end: 1609459200000,
   includeFrozen: false,
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
@@ -78,23 +78,27 @@ describe('query_histogram', () => {
         },
       ];
 
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
-        body: estypes.SearchResponse;
-      } => {
-        return {
-          body: ({
-            aggregations: {
-              transaction_duration_histogram: {
-                buckets: histogramBucket,
+      const esClientSearchMock = jest.fn(
+        (
+          req: estypes.SearchRequest
+        ): {
+          body: estypes.SearchResponse;
+        } => {
+          return {
+            body: {
+              aggregations: {
+                transaction_duration_histogram: {
+                  buckets: histogramBucket,
+                },
               },
-            },
-          } as unknown) as estypes.SearchResponse,
-        };
-      });
+            } as unknown as estypes.SearchResponse,
+          };
+        }
+      );
 
-      const esClientMock = ({
+      const esClientMock = {
         search: esClientSearchMock,
-      } as unknown) as ElasticsearchClient;
+      } as unknown as ElasticsearchClient;
 
       const resp = await fetchTransactionDurationHistogram(
         esClientMock,

@@ -16,7 +16,8 @@ export interface VisDefaultEditorSetupDependencies {
 }
 
 export class VisDefaultEditorPlugin
-  implements Plugin<void, void, VisDefaultEditorSetupDependencies, {}> {
+  implements Plugin<void, void, VisDefaultEditorSetupDependencies, {}>
+{
   public setup(core: CoreSetup, { visualize }: VisDefaultEditorSetupDependencies) {
     if (visualize) {
       visualize.visEditorsRegistry.registerDefault(DefaultEditorController);

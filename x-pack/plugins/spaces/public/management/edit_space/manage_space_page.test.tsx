@@ -64,7 +64,7 @@ describe('ManageSpacePage', () => {
 
     const wrapper = mountWithIntl(
       <ManageSpacePage
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}
@@ -124,7 +124,7 @@ describe('ManageSpacePage', () => {
     const wrapper = mountWithIntl(
       <ManageSpacePage
         spaceId={'existing-space'}
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         onLoadSpace={onLoadSpace}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
@@ -191,7 +191,7 @@ describe('ManageSpacePage', () => {
     const wrapper = mountWithIntl(
       <ManageSpacePage
         spaceId={'existing-space'}
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         onLoadSpace={onLoadSpace}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
@@ -240,7 +240,7 @@ describe('ManageSpacePage', () => {
 
     const wrapper = mountWithIntl(
       <ManageSpacePage
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
         history={history}
@@ -276,7 +276,7 @@ describe('ManageSpacePage', () => {
     const wrapper = mountWithIntl(
       <ManageSpacePage
         spaceId={'my-space'}
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}
@@ -336,7 +336,7 @@ describe('ManageSpacePage', () => {
     const wrapper = mountWithIntl(
       <ManageSpacePage
         spaceId={'my-space'}
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}

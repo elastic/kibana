@@ -79,6 +79,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   legendPosition,
   mapping,
   onError,
+  paddingSize = 'm',
   panelHeight = DEFAULT_PANEL_HEIGHT,
   setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
@@ -124,9 +125,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     [chartHeight, startDate, legendPosition, endDate, handleBrushEnd, yTickFormatter, showLegend]
   );
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
-    defaultStackByOption
-  );
+  const [selectedStackByOption, setSelectedStackByOption] =
+    useState<MatrixHistogramOption>(defaultStackByOption);
   const setSelectedChartOptionCallback = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStackByOption(
@@ -150,9 +150,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     skip,
   };
 
-  const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogramCombined(
-    matrixHistogramRequest
-  );
+  const [loading, { data, inspect, totalCount, refetch }] =
+    useMatrixHistogramCombined(matrixHistogramRequest);
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -169,10 +168,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
     return subtitle;
   }, [isInitialLoading, subtitle, totalCount]);
-  const hideHistogram = useMemo(() => (totalCount <= 0 && hideHistogramIfEmpty ? true : false), [
-    totalCount,
-    hideHistogramIfEmpty,
-  ]);
+  const hideHistogram = useMemo(
+    () => (totalCount <= 0 && hideHistogramIfEmpty ? true : false),
+    [totalCount, hideHistogramIfEmpty]
+  );
   const barChartData = useMemo(() => getCustomChartData(data, mapping), [data, mapping]);
 
   useEffect(() => {
@@ -202,7 +201,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   return (
     <>
       <InspectButtonContainer show={!isInitialLoading}>
-        <HistogramPanel data-test-subj={`${id}Panel`} height={panelHeight}>
+        <HistogramPanel
+          data-test-subj={`${id}Panel`}
+          height={panelHeight}
+          paddingSize={paddingSize}
+        >
           {loading && !isInitialLoading && (
             <EuiProgress
               data-test-subj="initialLoadingPanelMatrixOverTime"

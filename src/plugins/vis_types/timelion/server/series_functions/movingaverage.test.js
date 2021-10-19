@@ -18,13 +18,11 @@ import invoke from './helpers/invoke_series_fn.js';
 
 function getFivePointSeries() {
   return getSeriesList([
-    getSeries('Five', [].concat(buckets).push(moment('1984-01-01T00:00:00.000Z')), [
-      10,
-      20,
-      30,
-      40,
-      50,
-    ]),
+    getSeries(
+      'Five',
+      [].concat(buckets).push(moment('1984-01-01T00:00:00.000Z')),
+      [10, 20, 30, 40, 50]
+    ),
   ]);
 }
 

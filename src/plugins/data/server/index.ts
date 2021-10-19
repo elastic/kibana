@@ -30,7 +30,7 @@ export const exporters = {
  * Field Formats:
  */
 
-export { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../common';
+export { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
 
 /*
  * Index patterns:
@@ -42,7 +42,7 @@ export {
   FieldDescriptor,
   getCapabilitiesForRollupIndices,
   IndexPatternsServiceStart,
-} from './index_patterns';
+} from './data_views';
 
 export {
   IndexPatternField,
@@ -54,6 +54,7 @@ export {
   IndexPattern,
   IndexPatternsService,
   IndexPatternsService as IndexPatternsCommonService,
+  DataView,
 } from '../common';
 
 /**

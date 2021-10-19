@@ -23,6 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from '../legacy_shims';
+import { useAlertsModal } from '../application/hooks/use_alerts_modal';
 
 interface Props {
   alerts: {};
@@ -30,8 +31,7 @@ interface Props {
 
 export const EnableAlertsModal: React.FC<Props> = ({ alerts }: Props) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const $injector = Legacy.shims.getAngularInjector();
-  const alertsEnableModalProvider: any = $injector.get('enableAlertsModal');
+  const alertsEnableModalProvider = useAlertsModal();
 
   const closeModal = () => {
     setIsModalVisible(false);

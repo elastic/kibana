@@ -8,13 +8,23 @@
 
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLink } from '@elastic/eui';
+import { DocLinksStart } from '../../../../../../core/public';
 
 interface NotFoundErrors {
   type: string;
+  docLinks: DocLinksStart['links'];
 }
+const savedObjectsApisLinkText = i18n.translate(
+  'savedObjectsManagement.view.howToFixErrorDescriptionLinkText',
+  {
+    defaultMessage: 'Saved objects APIs',
+  }
+);
 
-export const NotFoundErrors = ({ type }: NotFoundErrors) => {
+export const NotFoundErrors = ({ type, docLinks }: NotFoundErrors) => {
   const getMessage = () => {
     switch (type) {
       case 'search':
@@ -58,7 +68,18 @@ export const NotFoundErrors = ({ type }: NotFoundErrors) => {
       <div>
         <FormattedMessage
           id="savedObjectsManagement.view.howToFixErrorDescription"
-          defaultMessage="If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above."
+          defaultMessage="If you know what this error means, you can use the {savedObjectsApis} to fix it &mdash; otherwise click the delete button above."
+          values={{
+            savedObjectsApis: (
+              <EuiLink
+                aria-label={savedObjectsApisLinkText}
+                href={`${docLinks.management.savedObjectsApiList}`}
+                target="_blank"
+              >
+                {savedObjectsApisLinkText}
+              </EuiLink>
+            ),
+          }}
         />
       </div>
     </EuiCallOut>

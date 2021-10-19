@@ -50,7 +50,7 @@ export function ActionsExpressionsExample2({ expressions, actions }: Props) {
   };
 
   const handleEvents = (event: any) => {
-    updateVariables({ color: event.value.href === 'http://www.google.com' ? 'red' : 'blue' });
+    updateVariables({ color: event.data.href === 'http://www.google.com' ? 'red' : 'blue' });
   };
 
   return (

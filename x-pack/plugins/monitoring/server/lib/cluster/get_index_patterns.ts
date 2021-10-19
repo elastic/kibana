@@ -6,7 +6,7 @@
  */
 
 import { LegacyServer } from '../../types';
-import { prefixIndexPattern } from '../ccs_utils';
+import { prefixIndexPattern } from '../../../common/ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,

@@ -20,11 +20,11 @@ describe('ensureBrowserDownloaded', () => {
   let logger: jest.Mocked<LevelLogger>;
 
   beforeEach(() => {
-    logger = ({
+    logger = {
       debug: jest.fn(),
       error: jest.fn(),
       warning: jest.fn(),
-    } as unknown) as typeof logger;
+    } as unknown as typeof logger;
 
     (md5 as jest.MockedFunction<typeof md5>).mockImplementation(
       async (path) =>

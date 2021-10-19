@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+import { IndexPatternsContract } from '../..';
 import { SearchSourceService, SearchSourceDependencies } from './';
 
 describe('SearchSource service', () => {
@@ -24,7 +24,7 @@ describe('SearchSource service', () => {
   describe('start()', () => {
     test('exposes proper contract', () => {
       const start = new SearchSourceService().start(
-        (jest.fn() as unknown) as jest.Mocked<IndexPatternsContract>,
+        jest.fn() as unknown as jest.Mocked<IndexPatternsContract>,
         dependencies
       );
 

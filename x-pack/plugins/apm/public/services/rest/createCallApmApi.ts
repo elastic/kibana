@@ -28,7 +28,7 @@ import type {
   APIEndpoint,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server';
-import { InspectResponse } from '../../../typings/common';
+import { InspectResponse } from '../../../../observability/typings/common';
 
 export type APMClientOptions = Omit<
   FetchOptions,
@@ -54,9 +54,8 @@ export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   _inspect?: InspectResponse;
 };
 
-export type APIClientRequestParamsOf<
-  TEndpoint extends APIEndpoint
-> = ClientRequestParamsOf<APMServerRouteRepository, TEndpoint>;
+export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> =
+  ClientRequestParamsOf<APMServerRouteRepository, TEndpoint>;
 
 export type AbstractAPMRepository = ServerRouteRepository<
   APMRouteHandlerResources,
@@ -81,7 +80,7 @@ export let callApmApi: APMClient = () => {
 export function createCallApmApi(core: CoreStart | CoreSetup) {
   callApmApi = ((options) => {
     const { endpoint, ...opts } = options;
-    const { params } = (options as unknown) as {
+    const { params } = options as unknown as {
       params?: Partial<Record<string, any>>;
     };
 

@@ -72,7 +72,7 @@ export class VegaMapView extends VegaBaseView {
     const { zoom, maxZoom, minZoom } = validateZoomSettings(
       this._parser.mapConfig,
       defaults,
-      this.onWarn
+      this.onWarn.bind(this)
     );
     const { signals } = this._vegaStateRestorer.restore() || {};
 

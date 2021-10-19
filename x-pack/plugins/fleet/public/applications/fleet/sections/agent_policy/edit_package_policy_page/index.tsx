@@ -97,9 +97,8 @@ export const EditPackagePolicyForm = memo<{
     inputs: [],
     version: '',
   });
-  const [originalPackagePolicy, setOriginalPackagePolicy] = useState<
-    GetOnePackagePolicyResponse['item']
-  >();
+  const [originalPackagePolicy, setOriginalPackagePolicy] =
+    useState<GetOnePackagePolicyResponse['item']>();
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
 
   const policyId = agentPolicy?.id ?? '';
@@ -110,10 +109,8 @@ export const EditPackagePolicyForm = memo<{
       setIsLoadingData(true);
       setLoadingError(undefined);
       try {
-        const {
-          data: packagePolicyData,
-          error: packagePolicyError,
-        } = await sendGetOnePackagePolicy(packagePolicyId);
+        const { data: packagePolicyData, error: packagePolicyError } =
+          await sendGetOnePackagePolicy(packagePolicyId);
 
         if (packagePolicyError) {
           throw packagePolicyError;
@@ -203,10 +200,19 @@ export const EditPackagePolicyForm = memo<{
 
             if (packageData?.response) {
               setPackageInfo(packageData.response);
-              setValidationResults(
-                validatePackagePolicy(newPackagePolicy, packageData.response, safeLoad)
+
+              const newValidationResults = validatePackagePolicy(
+                newPackagePolicy,
+                packageData.response,
+                safeLoad
               );
-              setFormState('VALID');
+              setValidationResults(newValidationResults);
+
+              if (validationHasErrors(newValidationResults)) {
+                setFormState('INVALID');
+              } else {
+                setFormState('VALID');
+              }
             }
           }
         }
@@ -587,10 +593,17 @@ export const EditPackagePolicyForm = memo<{
                         fill
                         data-test-subj="saveIntegration"
                       >
-                        <FormattedMessage
-                          id="xpack.fleet.editPackagePolicy.saveButton"
-                          defaultMessage="Save integration"
-                        />
+                        {isUpgrade ? (
+                          <FormattedMessage
+                            id="xpack.fleet.editPackagePolicy.upgradeButton"
+                            defaultMessage="Upgrade integration"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.editPackagePolicy.saveButton"
+                            defaultMessage="Save integration"
+                          />
+                        )}
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -683,7 +696,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
                 <h2 id="FleetPackagePolicyPreviousVersionFlyoutTitle">
                   <FormattedMessage
                     id="xpack.fleet.upgradePackagePolicy.previousVersionFlyout.title"
-                    defaultMessage="'{name}' package policy"
+                    defaultMessage="'{name}' integration policy"
                     values={{ name: currentPackagePolicy?.name }}
                   />
                 </h2>
@@ -729,7 +742,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
         >
           <FormattedMessage
             id="xpack.fleet.upgradePackagePolicy.statusCallout.errorContent"
-            defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform upgrade. You may reference your {previousConfigurationLink} for comparison."
+            defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform the upgrade. You may reference your {previousConfigurationLink} for comparison."
             values={{
               currentVersion: currentPackagePolicy?.package?.version,
               upgradeVersion: proposedUpgradePackagePolicy?.package?.version,

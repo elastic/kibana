@@ -8,7 +8,7 @@
 
 import { Assign } from '@kbn/utility-types';
 import { DatatableColumn } from 'src/plugins/expressions';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { IndexPattern } from '../..';
 import {
   aggAvg,
   aggBucketAvg,
@@ -141,9 +141,8 @@ export interface AggExpressionType {
 }
 
 /** @internal */
-export type AggExpressionFunctionArgs<
-  Name extends keyof AggParamsMapping
-> = AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
+export type AggExpressionFunctionArgs<Name extends keyof AggParamsMapping> =
+  AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
 
 /**
  * A global list of the param interfaces for each agg type.

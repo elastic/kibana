@@ -14,7 +14,7 @@ import { IFlashMessage } from './types';
 
 /**
  * The API errors we are handling can come from one of two ways:
- *  - When our http calls recieve a response containing an error code, such as a 404 or 500
+ *  - When our http calls receive a response containing an error code, such as a 404 or 500
  *  - Our own JS while handling a successful response
  *
  * In the first case, if it is a purposeful error (like a 404) we will receive an
@@ -53,9 +53,9 @@ export const flashAPIErrors = (
   response: HttpResponse<ErrorResponse>,
   { isQueued }: Options = {}
 ) => {
-  const errorFlashMessages: IFlashMessage[] = getErrorsFromHttpResponse(
-    response
-  ).map((message) => ({ type: 'error', message }));
+  const errorFlashMessages: IFlashMessage[] = getErrorsFromHttpResponse(response).map(
+    (message) => ({ type: 'error', message })
+  );
 
   if (isQueued) {
     FlashMessagesLogic.actions.setQueuedMessages(errorFlashMessages);

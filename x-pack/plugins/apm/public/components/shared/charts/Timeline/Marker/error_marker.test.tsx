@@ -26,7 +26,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
 }
 
 describe('ErrorMarker', () => {
-  const mark = ({
+  const mark = {
     id: 'agent',
     offset: 10000,
     type: 'errorMark',
@@ -44,7 +44,7 @@ describe('ErrorMarker', () => {
       service: { name: 'bar' },
     },
     serviceColor: '#fff',
-  } as unknown) as ErrorMark;
+  } as unknown as ErrorMark;
 
   function openPopover(errorMark: ErrorMark) {
     const component = renderWithTheme(<ErrorMarker mark={errorMark} />, {
@@ -114,7 +114,7 @@ describe('ErrorMarker', () => {
 
   describe('when the error message is not longer than 240 characters', () => {
     it('truncates the error message text', () => {
-      const newMark = ({
+      const newMark = {
         ...mark,
         error: {
           ...mark.error,
@@ -125,7 +125,7 @@ describe('ErrorMarker', () => {
             },
           },
         },
-      } as unknown) as ErrorMark;
+      } as unknown as ErrorMark;
       const component = openPopover(newMark);
       const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
       expect(errorLink.innerHTML).toHaveLength(5);

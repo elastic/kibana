@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { MouseEvent, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
@@ -86,12 +86,12 @@ describe('IndexPattern Field Item', () => {
     core.http.post.mockClear();
     defaultProps = {
       indexPattern,
-      fieldFormats: ({
+      fieldFormats: {
         ...fieldFormatsServiceMock.createStartContract(),
         getDefaultInstance: jest.fn(() => ({
           convert: jest.fn((s: unknown) => JSON.stringify(s)),
         })),
-      } as unknown) as FieldFormatsStart,
+      } as unknown as FieldFormatsStart,
       core,
       highlight: '',
       dateRange: {
@@ -139,7 +139,7 @@ describe('IndexPattern Field Item', () => {
       mountWithIntl(popoverContent as ReactElement)
         .find('[data-test-subj="lnsFieldListPanelEdit"]')
         .first()
-        .prop('onClick')!({} as MouseEvent);
+        .simulate('click');
     });
     expect(editFieldSpy).toHaveBeenCalledWith('bytes');
   });
@@ -215,7 +215,7 @@ describe('IndexPattern Field Item', () => {
         query: { query: 'geo.src : "US"', language: 'kuery' },
         filters: [
           {
-            match: { phrase: { 'geo.dest': 'US' } },
+            query: { match: { phrase: { 'geo.dest': 'US' } } },
           },
         ],
       });

@@ -20,8 +20,8 @@ import {
 
 const params = {
   index: 'apm-*',
-  start: '2020',
-  end: '2021',
+  start: 1577836800000,
+  end: 1609459200000,
   includeFrozen: false,
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
@@ -44,23 +44,27 @@ describe('query_field_value_pairs', () => {
         'myFieldCandidate3',
       ];
 
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
-        body: estypes.SearchResponse;
-      } => {
-        return {
-          body: ({
-            aggregations: {
-              attribute_terms: {
-                buckets: [{ key: 'myValue1' }, { key: 'myValue2' }],
+      const esClientSearchMock = jest.fn(
+        (
+          req: estypes.SearchRequest
+        ): {
+          body: estypes.SearchResponse;
+        } => {
+          return {
+            body: {
+              aggregations: {
+                attribute_terms: {
+                  buckets: [{ key: 'myValue1' }, { key: 'myValue2' }],
+                },
               },
-            },
-          } as unknown) as estypes.SearchResponse,
-        };
-      });
+            } as unknown as estypes.SearchResponse,
+          };
+        }
+      );
 
-      const esClientMock = ({
+      const esClientMock = {
         search: esClientSearchMock,
-      } as unknown) as ElasticsearchClient;
+      } as unknown as ElasticsearchClient;
 
       const { addLogMessage, getLogMessages } = searchServiceLogProvider();
       const state = latencyCorrelationsSearchServiceStateProvider();

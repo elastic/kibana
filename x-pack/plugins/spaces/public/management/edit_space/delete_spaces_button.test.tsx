@@ -29,7 +29,7 @@ describe('DeleteSpacesButton', () => {
     const wrapper = shallowWithIntl(
       <DeleteSpacesButton
         space={space}
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         onDelete={jest.fn()}
         notifications={notifications}
       />

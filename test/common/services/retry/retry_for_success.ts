@@ -13,8 +13,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const returnTrue = () => true;
 
-const defaultOnFailure = (methodName: string) => (lastError: Error) => {
-  throw new Error(`${methodName} timeout: ${lastError.stack || lastError.message}`);
+const defaultOnFailure = (methodName: string) => (lastError: Error | undefined) => {
+  throw new Error(
+    `${methodName} timeout${lastError ? `: ${lastError.stack || lastError.message}` : ''}`
+  );
 };
 
 /**
@@ -53,7 +55,7 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
   let lastError;
 
   while (true) {
-    if (lastError && Date.now() - start > timeout) {
+    if (Date.now() - start > timeout) {
       await onFailure(lastError);
       throw new Error('expected onFailure() option to throw an error');
     } else if (lastError && onFailureBlock) {

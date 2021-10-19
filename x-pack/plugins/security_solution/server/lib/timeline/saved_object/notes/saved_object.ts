@@ -181,12 +181,10 @@ const createNote = async ({
     ? pickSavedNote(noteId, shallowCopyOfNote, userInfo)
     : shallowCopyOfNote;
 
-  const {
-    transformedFields: migratedAttributes,
-    references,
-  } = noteFieldsMigrator.extractFieldsToReferences<NoteWithoutExternalRefs>({
-    data: noteWithCreator,
-  });
+  const { transformedFields: migratedAttributes, references } =
+    noteFieldsMigrator.extractFieldsToReferences<NoteWithoutExternalRefs>({
+      data: noteWithCreator,
+    });
 
   const createdNote = await savedObjectsClient.create<NoteWithoutExternalRefs>(
     noteSavedObjectType,
@@ -229,13 +227,11 @@ const updateNote = async ({
 
   const noteWithCreator = overrideOwner ? pickSavedNote(noteId, note, userInfo) : note;
 
-  const {
-    transformedFields: migratedPatchAttributes,
-    references,
-  } = noteFieldsMigrator.extractFieldsToReferences<NoteWithoutExternalRefs>({
-    data: noteWithCreator,
-    existingReferences: existingNote.references,
-  });
+  const { transformedFields: migratedPatchAttributes, references } =
+    noteFieldsMigrator.extractFieldsToReferences<NoteWithoutExternalRefs>({
+      data: noteWithCreator,
+      existingReferences: existingNote.references,
+    });
 
   const updatedNote = await savedObjectsClient.update(
     noteSavedObjectType,

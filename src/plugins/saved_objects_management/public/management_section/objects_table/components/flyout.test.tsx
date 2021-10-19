@@ -11,21 +11,20 @@ import { importFileMock, resolveImportErrorsMock } from './flyout.test.mocks';
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test/jest';
 import { coreMock, httpServiceMock } from '../../../../../../core/public/mocks';
-import { serviceRegistryMock } from '../../../services/service_registry.mock';
 import { Flyout, FlyoutProps, FlyoutState } from './flyout';
 import { ShallowWrapper } from 'enzyme';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 
-const mockFile = ({
+const mockFile = {
   name: 'foo.ndjson',
   path: '/home/foo.ndjson',
-} as unknown) as File;
+} as unknown as File;
 
 describe('Flyout', () => {
   let defaultProps: FlyoutProps;
 
   const shallowRender = (props: FlyoutProps) => {
-    return (shallowWithI18nProvider(<Flyout {...props} />) as unknown) as ShallowWrapper<
+    return shallowWithI18nProvider(<Flyout {...props} />) as unknown as ShallowWrapper<
       FlyoutProps,
       FlyoutState,
       Flyout
@@ -48,10 +47,9 @@ describe('Flyout', () => {
         ]),
       } as any,
       http,
-      allowedTypes: ['search', 'index-pattern', 'visualization'],
-      serviceRegistry: serviceRegistryMock.create(),
       search,
       basePath,
+      allowedTypes: [],
     };
   });
 

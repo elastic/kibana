@@ -95,10 +95,14 @@ function buildSuggestion({
 export function getDatasourceSuggestionsForField(
   state: IndexPatternPrivateState,
   indexPatternId: string,
-  field: IndexPatternField
+  field: IndexPatternField,
+  filterLayers?: (layerId: string) => boolean
 ): IndexPatternSuggestion[] {
   const layers = Object.keys(state.layers);
-  const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
+  let layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
+  if (filterLayers) {
+    layerIds = layerIds.filter(filterLayers);
+  }
 
   if (layerIds.length === 0) {
     // The field we're suggesting on does not match any existing layer.
@@ -346,9 +350,11 @@ function createNewLayerWithMetricAggregation(
 }
 
 export function getDatasourceSuggestionsFromCurrentState(
-  state: IndexPatternPrivateState
+  state: IndexPatternPrivateState,
+  filterLayers: (layerId: string) => boolean = () => true
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-  const layers = Object.entries(state.layers || {});
+  const layers = Object.entries(state.layers || {}).filter(([layerId]) => filterLayers(layerId));
+
   if (layers.length > 1) {
     // Return suggestions that reduce the data to each layer individually
     return layers
@@ -390,7 +396,7 @@ export function getDatasourceSuggestionsFromCurrentState(
   }
 
   return flatten(
-    Object.entries(state.layers || {})
+    layers
       .filter(([_id, layer]) => layer.columnOrder.length && layer.indexPatternId)
       .map(([layerId, layer]) => {
         const indexPattern = state.indexPatterns[layer.indexPatternId];

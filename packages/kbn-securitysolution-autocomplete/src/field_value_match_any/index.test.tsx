@@ -189,9 +189,11 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).props() as unknown) as {
-      onCreateOption: (a: string) => void;
-    }).onCreateOption('127.0.0.1');
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onCreateOption: (a: string) => void;
+      }
+    ).onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith(['127.0.0.1']);
   });
@@ -221,9 +223,11 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'value 1' }]);
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'value 1' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(['value 1']);
   });
@@ -250,9 +254,11 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
       />
     );
     act(() => {
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onSearchChange: (a: string) => void;
-      }).onSearchChange('value 1');
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onSearchChange: (a: string) => void;
+        }
+      ).onSearchChange('value 1');
     });
     expect(useFieldValueAutocomplete).toHaveBeenCalledWith({
       autocompleteService: autocompleteStartMock,

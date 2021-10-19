@@ -25,9 +25,9 @@ const mockIndexPattern = {
   getComputedFields: () => [],
 } as never;
 const getMock = jest.fn(() => Promise.resolve(mockIndexPattern));
-const mockIndexPatternService = ({
+const mockIndexPatternService = {
   get: getMock,
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 (getServices as jest.Mock).mockImplementation(() => ({
   uiSettings: {
@@ -43,13 +43,13 @@ const mockIndexPatternService = ({
 }));
 describe('Source Viewer component', () => {
   test('renders loading state', () => {
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [0, null, null, () => {}]);
+    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [0, null, () => {}]);
 
     const comp = mountWithIntl(
       <SourceViewer
         id={'1'}
         index={'index1'}
-        indexPatternId={'xyz'}
+        indexPattern={mockIndexPattern}
         width={123}
         hasLineNumbers={true}
       />
@@ -60,13 +60,13 @@ describe('Source Viewer component', () => {
   });
 
   test('renders error state', () => {
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [3, null, null, () => {}]);
+    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [3, null, () => {}]);
 
     const comp = mountWithIntl(
       <SourceViewer
         id={'1'}
         index={'index1'}
-        indexPatternId={'xyz'}
+        indexPattern={mockIndexPattern}
         width={123}
         hasLineNumbers={true}
       />
@@ -97,9 +97,7 @@ describe('Source Viewer component', () => {
         _underscore: 123,
       },
     } as never;
-    jest
-      .spyOn(hooks, 'useEsDocSearch')
-      .mockImplementation(() => [2, mockHit, mockIndexPattern, () => {}]);
+    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [2, mockHit, () => {}]);
     jest.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => {
       return false;
     });
@@ -107,7 +105,7 @@ describe('Source Viewer component', () => {
       <SourceViewer
         id={'1'}
         index={'index1'}
-        indexPatternId={'xyz'}
+        indexPattern={mockIndexPattern}
         width={123}
         hasLineNumbers={true}
       />

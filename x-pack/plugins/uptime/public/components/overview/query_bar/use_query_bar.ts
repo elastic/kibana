@@ -9,9 +9,13 @@ import React, { useCallback, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useDispatch } from 'react-redux';
 import { Query } from 'src/plugins/data/common';
-import { useGetUrlParams, useUpdateKueryString, useUrlParams } from '../../../hooks';
+import {
+  useGetUrlParams,
+  useIndexPattern,
+  useUpdateKueryString,
+  useUrlParams,
+} from '../../../hooks';
 import { setEsKueryString } from '../../../state/actions';
-import { useIndexPattern } from './use_index_pattern';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { UptimePluginServices } from '../../../apps/plugin';
 
@@ -35,6 +39,8 @@ interface UseQueryBarUtils {
   submitImmediately: () => void;
 }
 
+export const DEBOUNCE_INTERVAL = 250;
+
 /**
  * Provides state management and automatic dispatching of a Query object.
  *
@@ -44,7 +50,7 @@ export const useQueryBar = (): UseQueryBarUtils => {
   const dispatch = useDispatch();
 
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
-  const { search, query: queryParam, filters: paramFilters } = params;
+  const { search, query: queryParam, filters: paramFilters, excludedFilters } = params;
 
   const {
     services: { storage },
@@ -64,14 +70,15 @@ export const useQueryBar = (): UseQueryBarUtils => {
         }
   );
 
-  const { index_pattern: indexPattern } = useIndexPattern();
+  const indexPattern = useIndexPattern();
 
-  const updateUrlParams = useUrlParams()[1];
+  const [, updateUrlParams] = useUrlParams();
 
   const [esFilters, error] = useUpdateKueryString(
     indexPattern,
     query.language === SyntaxType.kuery ? (query.query as string) : undefined,
-    paramFilters
+    paramFilters,
+    excludedFilters
   );
 
   const setEsKueryFilters = useCallback(
@@ -79,10 +86,10 @@ export const useQueryBar = (): UseQueryBarUtils => {
     [dispatch]
   );
 
-  const setEs = useCallback(() => setEsKueryFilters(esFilters ?? ''), [
-    esFilters,
-    setEsKueryFilters,
-  ]);
+  const setEs = useCallback(
+    () => setEsKueryFilters(esFilters ?? ''),
+    [esFilters, setEsKueryFilters]
+  );
   const [, cancelEsKueryUpdate] = useDebounce(setEs, DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL, [
     esFilters,
     setEsKueryFilters,
@@ -92,7 +99,7 @@ export const useQueryBar = (): UseQueryBarUtils => {
     if (query.language === SyntaxType.text && queryParam !== query.query) {
       updateUrlParams({ query: query.query as string });
     }
-    if (query.language === SyntaxType.kuery) {
+    if (query.language === SyntaxType.kuery && queryParam !== '') {
       updateUrlParams({ query: '' });
     }
   }, [query.language, query.query, queryParam, updateUrlParams]);
@@ -112,17 +119,18 @@ export const useQueryBar = (): UseQueryBarUtils => {
 
   useDebounce(
     () => {
-      if (query.language === SyntaxType.kuery && !error && esFilters) {
+      if (query.language === SyntaxType.kuery && !error && esFilters && search !== query.query) {
         updateUrlParams({ search: query.query as string });
       }
-      if (query.language === SyntaxType.text) {
+      if (query.language === SyntaxType.text && search !== '') {
         updateUrlParams({ search: '' });
       }
-      if (query.language === SyntaxType.kuery && query.query === '') {
+      // this calls when it probably doesn't need to
+      if (query.language === SyntaxType.kuery && query.query === '' && search !== '') {
         updateUrlParams({ search: '' });
       }
     },
-    250,
+    DEBOUNCE_INTERVAL,
     [esFilters, error]
   );
 

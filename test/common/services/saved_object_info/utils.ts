@@ -33,16 +33,17 @@ export const areValid = (flags: any) => {
   return true;
 };
 
-export const print = (log: ToolingLog) => (msg: string | null = null) => ({
-  xs,
-  count,
-}: ResolvedPayload) => log.write(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);
+export const print =
+  (log: ToolingLog) =>
+  (msg: string | null = null) =>
+  ({ xs, count }: ResolvedPayload) =>
+    log.write(`\n### Saved Object Types ${msg || 'Count: ' + count}\n${xs}`);
 
 export const expectedFlags = () => ({
   string: ['esUrl'],
   boolean: ['soTypes', 'json'],
   help: `
---esUrl             Required, tells the app which url to point to
+--esUrl             Required, tells the svc which url to point to
 --soTypes           Not Required, tells the svc to show the types within the .kibana index
 --json              Not Required, tells the svc to show the types, with only json output.  Useful for piping into jq
         `,

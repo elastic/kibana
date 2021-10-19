@@ -17,8 +17,8 @@ import {
 
 const params = {
   index: 'apm-*',
-  start: '2020',
-  end: '2021',
+  start: 1577836800000,
+  end: 1609459200000,
   includeFrozen: false,
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
@@ -74,27 +74,31 @@ describe('query_histogram_range_steps', () => {
 
   describe('fetchTransactionDurationHistogramRangeSteps', () => {
     it('fetches the range steps for the log histogram', async () => {
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
-        body: estypes.SearchResponse;
-      } => {
-        return {
-          body: ({
-            hits: { total: { value: 10 } },
-            aggregations: {
-              transaction_duration_max: {
-                value: 10000,
+      const esClientSearchMock = jest.fn(
+        (
+          req: estypes.SearchRequest
+        ): {
+          body: estypes.SearchResponse;
+        } => {
+          return {
+            body: {
+              hits: { total: { value: 10 } },
+              aggregations: {
+                transaction_duration_max: {
+                  value: 10000,
+                },
+                transaction_duration_min: {
+                  value: 10,
+                },
               },
-              transaction_duration_min: {
-                value: 10,
-              },
-            },
-          } as unknown) as estypes.SearchResponse,
-        };
-      });
+            } as unknown as estypes.SearchResponse,
+          };
+        }
+      );
 
-      const esClientMock = ({
+      const esClientMock = {
         search: esClientSearchMock,
-      } as unknown) as ElasticsearchClient;
+      } as unknown as ElasticsearchClient;
 
       const resp = await fetchTransactionDurationHistogramRangeSteps(
         esClientMock,
@@ -102,8 +106,8 @@ describe('query_histogram_range_steps', () => {
       );
 
       expect(resp.length).toEqual(100);
-      expect(resp[0]).toEqual(9.260965422132594);
-      expect(resp[99]).toEqual(18521.930844265193);
+      expect(resp[0]).toEqual(9);
+      expect(resp[99]).toEqual(18522);
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });

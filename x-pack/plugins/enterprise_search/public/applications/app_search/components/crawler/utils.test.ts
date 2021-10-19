@@ -26,6 +26,7 @@ import {
   crawlRequestServerToClient,
   getDeleteDomainConfirmationMessage,
   getDeleteDomainSuccessMessage,
+  getCrawlRulePathPatternTooltip,
 } from './utils';
 
 const DEFAULT_CRAWL_RULE: CrawlRule = {
@@ -290,5 +291,30 @@ describe('getDeleteDomainConfirmationMessage', () => {
 describe('getDeleteDomainSuccessMessage', () => {
   it('includes the url', () => {
     expect(getDeleteDomainSuccessMessage('https://elastic.co/')).toContain('https://elastic.co');
+  });
+});
+
+describe('getCrawlRulePathPatternTooltip', () => {
+  it('includes regular expression', () => {
+    const crawlRule: CrawlRule = {
+      id: '-',
+      policy: CrawlerPolicies.allow,
+      rule: CrawlerRules.regex,
+      pattern: '.*',
+    };
+
+    expect(getCrawlRulePathPatternTooltip(crawlRule)).toContain('regular expression');
+  });
+
+  it('includes meta', () => {
+    const crawlRule: CrawlRule = {
+      id: '-',
+      policy: CrawlerPolicies.allow,
+      rule: CrawlerRules.beginsWith,
+      pattern: '/elastic',
+    };
+
+    expect(getCrawlRulePathPatternTooltip(crawlRule)).not.toContain('regular expression');
+    expect(getCrawlRulePathPatternTooltip(crawlRule)).toContain('meta');
   });
 });

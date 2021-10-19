@@ -17,9 +17,9 @@ interface MetaEnginesTableValues {
 }
 
 interface MetaEnginesTableActions {
-  addSourceEngines(
-    sourceEngines: MetaEnginesTableValues['sourceEngines']
-  ): { sourceEngines: MetaEnginesTableValues['sourceEngines'] };
+  addSourceEngines(sourceEngines: MetaEnginesTableValues['sourceEngines']): {
+    sourceEngines: MetaEnginesTableValues['sourceEngines'];
+  };
   displayRow(itemId: string): { itemId: string };
   fetchOrDisplayRow(itemId: string): { itemId: string };
   fetchSourceEngines(engineName: string): { engineName: string };

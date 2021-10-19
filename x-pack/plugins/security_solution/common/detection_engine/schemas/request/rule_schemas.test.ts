@@ -1174,12 +1174,8 @@ describe('create rules schema', () => {
 
     test('threat_index, threat_query, and threat_mapping are required when type is "threat_match" and validation fails without them', () => {
       /* eslint-disable @typescript-eslint/naming-convention */
-      const {
-        threat_index,
-        threat_query,
-        threat_mapping,
-        ...payload
-      } = getCreateThreatMatchRulesSchemaMock();
+      const { threat_index, threat_query, threat_mapping, ...payload } =
+        getCreateThreatMatchRulesSchemaMock();
       const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);

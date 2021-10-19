@@ -19,13 +19,13 @@ import {
   PinnedEventSavedObjectRuntimeType,
   SavedPinnedEvent,
   PinnedEvent as PinnedEventResponse,
+  PinnedEventWithoutExternalRefs,
 } from '../../../../../common/types/timeline/pinned_event';
-import { PageInfoNote, SortNote } from '../../../../../common/types/timeline/note';
 import { FrameworkRequest } from '../../../framework';
 
-import { pickSavedTimeline } from '../../saved_object/timelines';
-import { convertSavedObjectToSavedTimeline } from '../timelines';
+import { createTimeline } from '../../saved_object/timelines';
 import { pinnedEventSavedObjectType } from '../../saved_object_mappings/pinned_events';
+import { pinnedEventFieldsMigrator } from './field_migrator';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 
 export interface PinnedEvent {
@@ -44,13 +44,6 @@ export interface PinnedEvent {
   getAllPinnedEventsByTimelineId: (
     request: FrameworkRequest,
     timelineId: string
-  ) => Promise<PinnedEventSavedObject[]>;
-
-  getAllPinnedEvents: (
-    request: FrameworkRequest,
-    pageInfo: PageInfoNote | null,
-    search: string | null,
-    sort: SortNote | null
   ) => Promise<PinnedEventSavedObject[]>;
 
   persistPinnedEventOnTimeline: (
@@ -117,26 +110,7 @@ export const getAllPinnedEventsByTimelineId = async (
 ): Promise<PinnedEventSavedObject[]> => {
   const options: SavedObjectsFindOptions = {
     type: pinnedEventSavedObjectType,
-    search: timelineId,
-    searchFields: ['timelineId'],
-  };
-  return getAllSavedPinnedEvents(request, options);
-};
-
-export const getAllPinnedEvents = async (
-  request: FrameworkRequest,
-  pageInfo: PageInfoNote | null,
-  search: string | null,
-  sort: SortNote | null
-): Promise<PinnedEventSavedObject[]> => {
-  const options: SavedObjectsFindOptions = {
-    type: pinnedEventSavedObjectType,
-    perPage: pageInfo != null ? pageInfo.pageSize : undefined,
-    page: pageInfo != null ? pageInfo.pageIndex : undefined,
-    search: search != null ? search : undefined,
-    searchFields: ['timelineId', 'eventId'],
-    sortField: sort != null ? sort.sortField : undefined,
-    sortOrder: sort != null ? sort.sortOrder : undefined,
+    hasReference: { type: timelineSavedObjectType, id: timelineId },
   };
   return getAllSavedPinnedEvents(request, options);
 };
@@ -147,51 +121,35 @@ export const persistPinnedEventOnTimeline = async (
   eventId: string,
   timelineId: string | null
 ): Promise<PinnedEventResponse | null> => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
-
   try {
-    if (pinnedEventId == null) {
-      const timelineVersionSavedObject =
-        timelineId == null
-          ? await (async () => {
-              const timelineResult = convertSavedObjectToSavedTimeline(
-                await savedObjectsClient.create(
-                  timelineSavedObjectType,
-                  pickSavedTimeline(null, {}, request.user || null)
-                )
-              );
-              timelineId = timelineResult.savedObjectId; // eslint-disable-line no-param-reassign
-              return timelineResult.version;
-            })()
-          : null;
-
-      if (timelineId != null) {
-        const allPinnedEventId = await getAllPinnedEventsByTimelineId(request, timelineId);
-        const isPinnedAlreadyExisting = allPinnedEventId.filter(
-          (pinnedEvent) => pinnedEvent.eventId === eventId
-        );
-
-        if (isPinnedAlreadyExisting.length === 0) {
-          const savedPinnedEvent: SavedPinnedEvent = {
-            eventId,
-            timelineId,
-          };
-          // create Pinned Event on Timeline
-          return convertSavedObjectToSavedPinnedEvent(
-            await savedObjectsClient.create(
-              pinnedEventSavedObjectType,
-              pickSavedPinnedEvent(pinnedEventId, savedPinnedEvent, request.user || null)
-            ),
-            timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
-          );
-        }
-        return isPinnedAlreadyExisting[0];
-      }
-      throw new Error('You can NOT pinned event without a timelineID');
+    if (pinnedEventId != null) {
+      // Delete Pinned Event on Timeline
+      await deletePinnedEventOnTimeline(request, [pinnedEventId]);
+      return null;
     }
-    // Delete Pinned Event on Timeline
-    await deletePinnedEventOnTimeline(request, [pinnedEventId]);
-    return null;
+
+    const { timelineId: validatedTimelineId, timelineVersion } = await getValidTimelineIdAndVersion(
+      request,
+      timelineId
+    );
+
+    const pinnedEvents = await getPinnedEventsInTimelineWithEventId(
+      request,
+      validatedTimelineId,
+      eventId
+    );
+
+    // we already had this event pinned so let's just return the one we already had
+    if (pinnedEvents.length > 0) {
+      return pinnedEvents[0];
+    }
+
+    return await createPinnedEvent({
+      request,
+      eventId,
+      timelineId: validatedTimelineId,
+      timelineVersion,
+    });
   } catch (err) {
     if (getOr(null, 'output.statusCode', err) === 404) {
       /*
@@ -215,11 +173,91 @@ export const persistPinnedEventOnTimeline = async (
   }
 };
 
+const getValidTimelineIdAndVersion = async (
+  request: FrameworkRequest,
+  timelineId: string | null
+): Promise<{ timelineId: string; timelineVersion?: string }> => {
+  if (timelineId != null) {
+    return {
+      timelineId,
+    };
+  }
+
+  const savedObjectsClient = request.context.core.savedObjects.client;
+
+  // create timeline because it didn't exist
+  const { timeline: timelineResult } = await createTimeline({
+    timelineId: null,
+    timeline: {},
+    savedObjectsClient,
+    userInfo: request.user,
+  });
+
+  return {
+    timelineId: timelineResult.savedObjectId,
+    timelineVersion: timelineResult.version,
+  };
+};
+
+const getPinnedEventsInTimelineWithEventId = async (
+  request: FrameworkRequest,
+  timelineId: string,
+  eventId: string
+): Promise<PinnedEventSavedObject[]> => {
+  const allPinnedEventId = await getAllPinnedEventsByTimelineId(request, timelineId);
+  const pinnedEvents = allPinnedEventId.filter((pinnedEvent) => pinnedEvent.eventId === eventId);
+
+  return pinnedEvents;
+};
+
+const createPinnedEvent = async ({
+  request,
+  eventId,
+  timelineId,
+  timelineVersion,
+}: {
+  request: FrameworkRequest;
+  eventId: string;
+  timelineId: string;
+  timelineVersion?: string;
+}) => {
+  const savedObjectsClient = request.context.core.savedObjects.client;
+
+  const savedPinnedEvent: SavedPinnedEvent = {
+    eventId,
+    timelineId,
+  };
+
+  const pinnedEventWithCreator = pickSavedPinnedEvent(null, savedPinnedEvent, request.user);
+
+  const { transformedFields: migratedAttributes, references } =
+    pinnedEventFieldsMigrator.extractFieldsToReferences<PinnedEventWithoutExternalRefs>({
+      data: pinnedEventWithCreator,
+    });
+
+  const createdPinnedEvent = await savedObjectsClient.create<PinnedEventWithoutExternalRefs>(
+    pinnedEventSavedObjectType,
+    migratedAttributes,
+    { references }
+  );
+
+  const repopulatedSavedObject =
+    pinnedEventFieldsMigrator.populateFieldsFromReferences(createdPinnedEvent);
+
+  // create Pinned Event on Timeline
+  return convertSavedObjectToSavedPinnedEvent(repopulatedSavedObject, timelineVersion);
+};
+
 const getSavedPinnedEvent = async (request: FrameworkRequest, pinnedEventId: string) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
-  const savedObject = await savedObjectsClient.get(pinnedEventSavedObjectType, pinnedEventId);
+  const savedObject = await savedObjectsClient.get<PinnedEventWithoutExternalRefs>(
+    pinnedEventSavedObjectType,
+    pinnedEventId
+  );
 
-  return convertSavedObjectToSavedPinnedEvent(savedObject);
+  const populatedPinnedEvent = pinnedEventFieldsMigrator.populateFieldsFromReferences(savedObject);
+
+  return convertSavedObjectToSavedPinnedEvent(populatedPinnedEvent);
 };
 
 const getAllSavedPinnedEvents = async (
@@ -227,11 +265,14 @@ const getAllSavedPinnedEvents = async (
   options: SavedObjectsFindOptions
 ) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
-  const savedObjects = await savedObjectsClient.find(options);
+  const savedObjects = await savedObjectsClient.find<PinnedEventWithoutExternalRefs>(options);
 
-  return savedObjects.saved_objects.map((savedObject) =>
-    convertSavedObjectToSavedPinnedEvent(savedObject)
-  );
+  return savedObjects.saved_objects.map((savedObject) => {
+    const populatedPinnedEvent =
+      pinnedEventFieldsMigrator.populateFieldsFromReferences(savedObject);
+
+    return convertSavedObjectToSavedPinnedEvent(populatedPinnedEvent);
+  });
 };
 
 export const savePinnedEvents = (
@@ -284,11 +325,10 @@ export const pickSavedPinnedEvent = (
   if (pinnedEventId == null) {
     savedPinnedEvent.created = dateNow;
     savedPinnedEvent.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
-    savedPinnedEvent.updated = dateNow;
-    savedPinnedEvent.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
-  } else if (pinnedEventId != null) {
-    savedPinnedEvent.updated = dateNow;
-    savedPinnedEvent.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
+
+  savedPinnedEvent.updated = dateNow;
+  savedPinnedEvent.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+
   return savedPinnedEvent;
 };

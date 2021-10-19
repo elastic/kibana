@@ -38,7 +38,7 @@ export const queryResponseToHostListResult = (
 
   return {
     resultLength:
-      ((response.hits?.total as unknown) as { value: number; relation: string }).value || 0,
+      (response.hits?.total as unknown as { value: number; relation: string }).value || 0,
     resultList: list,
   };
 };

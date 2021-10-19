@@ -71,9 +71,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.openControlsByName(fieldName);
       log.debug('controls are open');
       await (
-        await (await testSubjects.find('formatRow')).findAllByCssSelector(
-          '[data-test-subj="toggle"]'
-        )
+        await (
+          await testSubjects.find('formatRow')
+        ).findAllByCssSelector('[data-test-subj="toggle"]')
       )[0].click();
       await PageObjects.settings.setFieldFormat('url');
       const response = await es.update({

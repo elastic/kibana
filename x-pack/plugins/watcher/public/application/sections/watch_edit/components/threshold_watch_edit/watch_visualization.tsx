@@ -183,7 +183,7 @@ export const WatchVisualization = () => {
               defaultMessage="Cannot load watch visualization"
             />
           }
-          error={(error as unknown) as Error}
+          error={error as unknown as Error}
         />
         <EuiSpacer size="l" />
       </Fragment>
@@ -227,7 +227,12 @@ export const WatchVisualization = () => {
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
-            <Axis domain={{ max: maxY }} id="left" title={aggLabel} position={Position.Left} />
+            <Axis
+              domain={{ max: maxY, min: NaN }}
+              id="left"
+              title={aggLabel}
+              position={Position.Left}
+            />
             {watchVisualizationDataKeys.map((key: string) => {
               return (
                 <LineSeries

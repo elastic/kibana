@@ -205,12 +205,12 @@ describe('data table dimension editor', () => {
     state.columns[0].colorMode = 'cell';
     const instance = mountWithIntl(<TableDimensionEditor {...props} />);
 
-    act(() =>
-      (instance
+    act(() => {
+      instance
         .find('[data-test-subj="lnsDatatable_dynamicColoring_trigger"]')
         .first()
-        .prop('onClick') as () => void)?.()
-    );
+        .simulate('click');
+    });
 
     expect(instance.find(PalettePanelContainer).exists()).toBe(true);
   });

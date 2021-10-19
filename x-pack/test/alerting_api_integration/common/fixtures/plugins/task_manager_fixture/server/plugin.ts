@@ -45,7 +45,8 @@ const taskByIdQuery = (id: string) => ({
 });
 
 export class SampleTaskManagerFixturePlugin
-  implements Plugin<void, void, {}, SampleTaskManagerFixtureStartDeps> {
+  implements Plugin<void, void, {}, SampleTaskManagerFixtureStartDeps>
+{
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
   taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
     .pipe(first())

@@ -176,8 +176,7 @@ const wsState: any = {
         'Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24',
       color: '#CE0060',
       field: 'agent.keyword',
-      term:
-        'Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24',
+      term: 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24',
       parent: null,
       size: 15,
     },
@@ -407,8 +406,7 @@ const wsState: any = {
   ],
   urlTemplates: [
     {
-      url:
-        '/app/discover#/?_a=(columns%3A!(_source)%2Cindex%3A%2790943e30-9a47-11e8-b64d-95841ca0b247%27%2Cinterval%3Aauto%2Cquery%3A(language%3Akuery%2Cquery%3A{{gquery}})%2Csort%3A!(_score%2Cdesc))',
+      url: '/app/discover#/?_a=(columns%3A!(_source)%2Cindex%3A%2790943e30-9a47-11e8-b64d-95841ca0b247%27%2Cinterval%3Aauto%2Cquery%3A(language%3Akuery%2Cquery%3A{{gquery}})%2Csort%3A!(_score%2Cdesc))',
       description: 'Raw documents',
       isDefault: true,
       encoderID: 'kql-loose',

@@ -59,7 +59,7 @@ export function ServiceOverviewDependenciesTable({
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
+        endpoint: 'GET /internal/apm/services/{serviceName}/dependencies',
         params: {
           path: { serviceName },
           query: { start, end, environment, numBuckets: 20, offset },

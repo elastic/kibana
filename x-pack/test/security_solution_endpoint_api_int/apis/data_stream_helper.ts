@@ -13,11 +13,12 @@ import {
   policyIndexPattern,
   metadataCurrentIndexPattern,
   telemetryIndexPattern,
+  METADATA_UNITED_INDEX,
 } from '../../../plugins/security_solution/common/endpoint/constants';
 
-export async function deleteDataStream(getService: (serviceName: 'es') => Client, index: string) {
+export function deleteDataStream(getService: (serviceName: 'es') => Client, index: string) {
   const client = getService('es');
-  await client.transport.request(
+  return client.transport.request(
     {
       method: 'DELETE',
       path: `_data_stream/${index}`,
@@ -41,11 +42,18 @@ export async function deleteAllDocsFromIndex(
         },
       },
       index: `${index}`,
+      wait_for_completion: true,
+      refresh: true,
     },
     {
       ignore: [404],
     }
   );
+}
+
+export async function deleteIndex(getService: (serviceName: 'es') => Client, index: string) {
+  const client = getService('es');
+  await client.indices.delete({ index, ignore_unavailable: true });
 }
 
 export async function deleteMetadataStream(getService: (serviceName: 'es') => Client) {
@@ -62,6 +70,12 @@ export async function deleteAllDocsFromMetadataCurrentIndex(
   await deleteAllDocsFromIndex(getService, metadataCurrentIndexPattern);
 }
 
+export async function deleteAllDocsFromMetadataUnitedIndex(
+  getService: (serviceName: 'es') => Client
+) {
+  await deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
+}
+
 export async function deleteEventsStream(getService: (serviceName: 'es') => Client) {
   await deleteDataStream(getService, eventsIndexPattern);
 }
@@ -76,4 +90,15 @@ export async function deletePolicyStream(getService: (serviceName: 'es') => Clie
 
 export async function deleteTelemetryStream(getService: (serviceName: 'es') => Client) {
   await deleteDataStream(getService, telemetryIndexPattern);
+}
+
+export function stopTransform(getService: (serviceName: 'es') => Client, transformId: string) {
+  const client = getService('es');
+  const stopRequest = {
+    transform_id: transformId,
+    force: true,
+    wait_for_completion: true,
+    allow_no_match: true,
+  };
+  return client.transform.stopTransform(stopRequest);
 }

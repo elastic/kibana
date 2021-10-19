@@ -23,6 +23,7 @@ import {
   KBN_IS_TILE_COMPLETE,
   KBN_METADATA_FEATURE,
   KBN_VECTOR_SHAPE_TYPE_COUNTS,
+  LAYER_TYPE,
 } from '../constants';
 
 export type Attribution = {
@@ -56,7 +57,6 @@ export type LayerDescriptor = {
   alpha?: number;
   attribution?: Attribution;
   id: string;
-  joins?: JoinDescriptor[];
   label?: string | null;
   areLabelsOnTop?: boolean;
   minZoom?: number;
@@ -70,9 +70,12 @@ export type LayerDescriptor = {
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.VECTOR | LAYER_TYPE.TILED_VECTOR | LAYER_TYPE.BLENDED_VECTOR;
+  joins?: JoinDescriptor[];
   style: VectorStyleDescriptor;
 };
 
 export type HeatmapLayerDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.HEATMAP;
   style: HeatmapStyleDescriptor;
 };

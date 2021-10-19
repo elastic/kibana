@@ -300,9 +300,9 @@ function TimelionVisComponent({
             legendValueNumbers.eq(i).empty();
           } else {
             let label = y.toFixed(precision);
-            const formatter = ((series.yaxis as unknown) as LegacyAxis).tickFormatter;
+            const formatter = (series.yaxis as unknown as LegacyAxis).tickFormatter;
             if (formatter) {
-              label = formatter(Number(label), (series.yaxis as unknown) as LegacyAxis);
+              label = formatter(Number(label), series.yaxis as unknown as LegacyAxis);
             }
             legendValueNumbers.eq(i).text(`(${label})`);
           }
@@ -401,9 +401,10 @@ function TimelionVisComponent({
     }
   }, [chartElem, plotHoverHandler]);
 
-  const title: string = useMemo(() => last(compact(map(seriesList.list, '_title'))) || '', [
-    seriesList.list,
-  ]);
+  const title: string = useMemo(
+    () => last(compact(map(seriesList.list, '_title'))) || '',
+    [seriesList.list]
+  );
 
   return (
     <div ref={elementRef} className="timChart">

@@ -21,9 +21,12 @@ import { getToastNotificationService } from '../../../../../../../services/toast
 type DetectorFieldValues = Record<number, string[]>;
 
 export const PopulationDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    chartLoader,
+    resultsLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(

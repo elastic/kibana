@@ -542,14 +542,8 @@ function SearchInspector({
 
 function useAppState({ data }: { data: DataPublicPluginStart }) {
   const stateContainer = useMemo(() => {
-    const {
-      filters,
-      time,
-      searchSessionId,
-      numericFieldName,
-      indexPatternId,
-      query,
-    } = getInitialStateFromUrl();
+    const { filters, time, searchSessionId, numericFieldName, indexPatternId, query } =
+      getInitialStateFromUrl();
 
     if (filters) {
       data.query.filterManager.setFilters(filters);

@@ -147,26 +147,21 @@ export const thresholdExecutor = async ({
     buildRuleMessage,
   });
 
-  const {
-    success,
-    bulkCreateDuration,
-    createdItemsCount,
-    createdItems,
-    errors,
-  } = await bulkCreateThresholdSignals({
-    someResult: thresholdResults,
-    ruleSO: rule,
-    filter: esFilter,
-    services,
-    logger,
-    inputIndexPattern: inputIndex,
-    signalsIndex: ruleParams.outputIndex,
-    startedAt,
-    from: tuple.from.toDate(),
-    signalHistory,
-    bulkCreate,
-    wrapHits,
-  });
+  const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
+    await bulkCreateThresholdSignals({
+      someResult: thresholdResults,
+      ruleSO: rule,
+      filter: esFilter,
+      services,
+      logger,
+      inputIndexPattern: inputIndex,
+      signalsIndex: ruleParams.outputIndex,
+      startedAt,
+      from: tuple.from.toDate(),
+      signalHistory,
+      bulkCreate,
+      wrapHits,
+    });
 
   result = mergeReturns([
     result,

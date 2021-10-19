@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useState, useEffect, useCallback } from 'react';
-import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
+import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../../../../hooks';
@@ -57,6 +57,29 @@ export const LogLevelFilter: React.FunctionComponent<{
     fetchValues();
   }, [data.autocomplete]);
 
+  const noLogsFound = (
+    <div className="euiFilterSelect__note">
+      <div className="euiFilterSelect__noteContent">
+        <EuiIcon type="minusInCircle" />
+        <EuiSpacer size="xs" />
+        <p>
+          {i18n.translate('xpack.fleet.agentLogs.logLevelEmpty', {
+            defaultMessage: 'No Logs Found',
+          })}
+        </p>
+      </div>
+    </div>
+  );
+  const filterSelect = levelValues.map((level) => (
+    <EuiFilterSelectItem
+      checked={selectedLevels.includes(level) ? 'on' : undefined}
+      key={level}
+      onClick={() => onToggleLevel(level)}
+    >
+      {level}
+    </EuiFilterSelectItem>
+  ));
+
   return (
     <EuiPopover
       button={
@@ -78,15 +101,7 @@ export const LogLevelFilter: React.FunctionComponent<{
       closePopover={closePopover}
       panelPaddingSize="none"
     >
-      {levelValues.map((level) => (
-        <EuiFilterSelectItem
-          checked={selectedLevels.includes(level) ? 'on' : undefined}
-          key={level}
-          onClick={() => onToggleLevel(level)}
-        >
-          {level}
-        </EuiFilterSelectItem>
-      ))}
+      {levelValues.length === 0 ? noLogsFound : filterSelect}
     </EuiPopover>
   );
 });

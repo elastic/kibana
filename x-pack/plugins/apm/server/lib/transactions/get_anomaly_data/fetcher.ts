@@ -82,7 +82,7 @@ export function anomalySeriesFetcher({
       },
     };
 
-    return (ml.mlSystem.mlAnomalySearch(params, []) as unknown) as Promise<
+    return ml.mlSystem.mlAnomalySearch(params, []) as unknown as Promise<
       ESSearchResponse<unknown, typeof params>
     >;
   });

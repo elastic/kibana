@@ -38,9 +38,8 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
 
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuid.v4()}`, []);
-    const [selectedStackByOption, setSelectedStackByOption] = useState<AlertsStackByField>(
-      DEFAULT_STACK_BY_FIELD
-    );
+    const [selectedStackByOption, setSelectedStackByOption] =
+      useState<AlertsStackByField>(DEFAULT_STACK_BY_FIELD);
 
     // TODO: Once we are past experimental phase this code should be removed
     // const fetchMethod = useIsExperimentalFeatureEnabled('ruleRegistryEnabled')
@@ -95,7 +94,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
         <KpiPanel hasBorder data-test-subj="alertsCountPanel">
           <HeaderSection
             id={uniqueQueryId}
-            title={i18n.COUNT_TABLE_TITLE}
+            title={<span className="eui-textBreakNormal">{i18n.COUNT_TABLE_TITLE}</span>}
             titleSize="s"
             hideSubtitle
           >

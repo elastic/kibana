@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { identity, isNil } from 'lodash';
+import { identity } from 'lodash';
 
 import { AxisSpec, TickFormatter, YDomainRange, ScaleType as ECScaleType } from '@elastic/charts';
 
@@ -126,14 +126,16 @@ function getScale<S extends XScaleType | YScaleType>(
   format: Aspect['format'],
   isCategoryAxis: boolean
 ): ScaleConfig<S> {
-  const type = (isCategoryAxis
-    ? getScaleType(
-        scale,
-        format?.id === 'number' || (format?.params?.id === 'number' && format?.id !== 'range'),
-        'date' in params,
-        'interval' in params
-      )
-    : getScaleType(scale, true)) as S;
+  const type = (
+    isCategoryAxis
+      ? getScaleType(
+          scale,
+          format?.id === 'number' || (format?.params?.id === 'number' && format?.id !== 'range'),
+          'date' in params,
+          'interval' in params
+        )
+      : getScaleType(scale, true)
+  ) as S;
 
   return {
     ...scale,
@@ -169,17 +171,5 @@ function getAxisDomain<S extends XScaleType | YScaleType>(
   const fit = defaultYExtents;
   const padding = boundsMargin || undefined;
 
-  if (!isNil(min) && !isNil(max)) {
-    return { fit, padding, min, max };
-  }
-
-  if (!isNil(min)) {
-    return { fit, padding, min };
-  }
-
-  if (!isNil(max)) {
-    return { fit, padding, max };
-  }
-
-  return { fit, padding };
+  return { fit, padding, min: min ?? NaN, max: max ?? NaN };
 }

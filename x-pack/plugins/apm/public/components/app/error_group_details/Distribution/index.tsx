@@ -31,9 +31,11 @@ import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_ann
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { LazyAlertsFlyout } from '../../../../../../observability/public';
 
-const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED = ALERT_RULE_TYPE_ID_NON_TYPED;
+const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
+  ALERT_RULE_TYPE_ID_NON_TYPED;
 
-type ErrorDistributionAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/errors/distribution'>;
+type ErrorDistributionAPIResponse =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
 
 interface FormattedBucket {
   x0: number;

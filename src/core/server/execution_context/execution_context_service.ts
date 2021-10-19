@@ -69,7 +69,8 @@ export interface ExecutionContextSetup {
 export type ExecutionContextStart = ExecutionContextSetup;
 
 export class ExecutionContextService
-  implements CoreService<InternalExecutionContextSetup, InternalExecutionContextStart> {
+  implements CoreService<InternalExecutionContextSetup, InternalExecutionContextStart>
+{
   private readonly log: Logger;
   private readonly contextStore: AsyncLocalStorage<IExecutionContextContainer>;
   private readonly requestIdStore: AsyncLocalStorage<{ requestId: string }>;

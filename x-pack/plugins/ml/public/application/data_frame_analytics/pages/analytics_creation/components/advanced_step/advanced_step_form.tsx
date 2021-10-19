@@ -181,9 +181,10 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const selectedNumTopClassesIsInvalid = isInvalidNumTopClasses(selectedNumTopClasses);
 
-  const mmlErrors = useMemo(() => getModelMemoryLimitErrors(modelMemoryLimitValidationResult), [
-    modelMemoryLimitValidationResult,
-  ]);
+  const mmlErrors = useMemo(
+    () => getModelMemoryLimitErrors(modelMemoryLimitValidationResult),
+    [modelMemoryLimitValidationResult]
+  );
 
   const isRegOrClassJob =
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;

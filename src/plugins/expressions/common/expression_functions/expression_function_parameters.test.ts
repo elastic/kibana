@@ -21,7 +21,7 @@ describe('ExpressionFunctionParameter', () => {
     const param = new ExpressionFunctionParameter('foo', {
       help: 'bar',
       types: ['baz', 'quux'],
-    });
+    } as ConstructorParameters<typeof ExpressionFunctionParameter>[1]);
 
     expect(param.accepts('baz')).toBe(true);
     expect(param.accepts('quux')).toBe(true);

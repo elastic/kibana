@@ -13,10 +13,12 @@ import { createMemoryHistory } from 'history';
 import { MemoryRouter, RouteComponentProps } from 'react-router-dom';
 import { CoreStart, DocLinksStart, HttpStart } from 'kibana/public';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 
 const { location } = createMemoryHistory();
 
 const KibanaReactContext = createKibanaReactContext({
+  notifications: { toasts: { add: () => {} } },
   usageCollection: { reportUiCounter: () => {} },
   observability: {
     navigation: {
@@ -31,15 +33,15 @@ const KibanaReactContext = createKibanaReactContext({
       get: () => `/basepath`,
     },
   } as HttpStart,
-  docLinks: ({
+  docLinks: {
     DOC_LINK_VERSION: '0',
     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
     links: {
       apm: {},
       observability: { guide: '' },
     },
-  } as unknown) as DocLinksStart,
-} as Partial<CoreStart>);
+  } as unknown as DocLinksStart,
+} as unknown as Partial<CoreStart>);
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -52,10 +54,13 @@ function Wrapper({ children }: { children?: ReactNode }) {
 }
 
 describe('Settings', () => {
+  beforeEach(() => {
+    createCallApmApi({} as CoreStart);
+  });
   it('renders', async () => {
-    const routerProps = ({
+    const routerProps = {
       location,
-    } as unknown) as RouteComponentProps<{}>;
+    } as unknown as RouteComponentProps<{}>;
     expect(() =>
       render(
         <SettingsTemplate selectedTab="agent-configurations" {...routerProps}>

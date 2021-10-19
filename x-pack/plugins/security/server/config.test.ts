@@ -27,6 +27,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Object {
@@ -62,9 +63,10 @@ describe('config schema', () => {
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
 
@@ -79,6 +81,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Object {
@@ -114,9 +117,10 @@ describe('config schema', () => {
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
 
@@ -131,6 +135,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Object {
@@ -165,9 +170,10 @@ describe('config schema', () => {
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "P30D",
         },
+        "showInsecureClusterWarning": true,
       }
     `);
   });
@@ -308,6 +314,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "oidc": Object {
@@ -339,6 +346,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "oidc": Object {
@@ -370,6 +378,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Array [
@@ -388,6 +397,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Array [
@@ -409,6 +419,7 @@ describe('config schema', () => {
             "enabled": true,
             "schemes": Array [
               "apikey",
+              "bearer",
             ],
           },
           "providers": Array [
@@ -1482,6 +1493,7 @@ describe('createConfig()', () => {
           "enabled": true,
           "schemes": Array [
             "apikey",
+            "bearer",
           ],
         },
         "providers": Object {
@@ -1729,7 +1741,7 @@ describe('createConfig()', () => {
           },
         },
       })
-    ).toThrow('[audit.appender.2.type]: expected value to equal [legacy-appender]');
+    ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
   });
 
   it('rejects an ignore_filter when no appender is configured', () => {
@@ -1756,7 +1768,7 @@ describe('createConfig()', () => {
       expect(createMockConfig().session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "P30D",
         }
       `);
@@ -1806,7 +1818,7 @@ describe('createConfig()', () => {
         })
       ).toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "PT0.456S",
         }
       `);
@@ -1840,7 +1852,7 @@ describe('createConfig()', () => {
           createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts(provider)
         ).toMatchInlineSnapshot(`
           Object {
-            "idleTimeout": "PT1H",
+            "idleTimeout": "PT8H",
             "lifespan": "PT0.456S",
           }
         `);
@@ -1921,14 +1933,14 @@ describe('createConfig()', () => {
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "PT0.654S",
         }
       `);
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "PT11M5.544S",
         }
       `);
@@ -1945,7 +1957,7 @@ describe('createConfig()', () => {
       expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT1H",
+          "idleTimeout": "PT8H",
           "lifespan": "PT0.654S",
         }
       `);

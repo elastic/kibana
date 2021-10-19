@@ -17,10 +17,11 @@ import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const long: { type: 'long' } = { type: 'long' };
 
-const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts> = {
-  expected_metric_document_count: long,
-  transaction_count: long,
-};
+const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts> =
+  {
+    expected_metric_document_count: long,
+    transaction_count: long,
+  };
 
 const timeframeMap1dSchema: MakeSchemaFrom<TimeframeMap1d> = {
   '1d': long,

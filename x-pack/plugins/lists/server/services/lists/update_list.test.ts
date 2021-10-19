@@ -30,7 +30,7 @@ describe('update_list', () => {
 
   test('it returns a list as expected with the id changed out for the elastic id when there is a list to update', async () => {
     const list = getListResponseMock();
-    ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
+    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getUpdateListOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.update.mockReturnValue(
@@ -48,7 +48,7 @@ describe('update_list', () => {
       deserializer: '{{value}}',
       serializer: '(?<value>)',
     };
-    ((getList as unknown) as jest.Mock).mockResolvedValueOnce(list);
+    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getUpdateListOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.update.mockReturnValue(
@@ -66,7 +66,7 @@ describe('update_list', () => {
   });
 
   test('it returns null when there is not a list to update', async () => {
-    ((getList as unknown) as jest.Mock).mockResolvedValueOnce(null);
+    (getList as unknown as jest.Mock).mockResolvedValueOnce(null);
     const options = getUpdateListOptionsMock();
     const updatedList = await updateList(options);
     expect(updatedList).toEqual(null);

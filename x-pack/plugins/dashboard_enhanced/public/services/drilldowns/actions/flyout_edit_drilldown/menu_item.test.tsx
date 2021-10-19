@@ -17,11 +17,11 @@ test('<MenuItem/>', () => {
   const { getByText, queryByText } = render(
     <MenuItem
       context={{
-        embeddable: ({
+        embeddable: {
           enhancements: {
-            dynamicActions: ({ state } as unknown) as DynamicActionManager,
+            dynamicActions: { state } as unknown as DynamicActionManager,
           },
-        } as unknown) as EnhancedEmbeddable,
+        } as unknown as EnhancedEmbeddable,
         trigger: {} as any,
       }}
     />

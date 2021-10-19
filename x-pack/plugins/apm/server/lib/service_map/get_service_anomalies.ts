@@ -21,7 +21,7 @@ import {
 import { rangeQuery } from '../../../../observability/server';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   mlJobIds: [],
@@ -35,12 +35,16 @@ export type ServiceAnomaliesResponse = PromiseReturnType<
 export async function getServiceAnomalies({
   setup,
   environment,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   environment: string;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_service_anomalies', async () => {
-    const { ml, start, end } = setup;
+    const { ml } = setup;
 
     if (!ml) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
@@ -107,10 +111,8 @@ export async function getServiceAnomalies({
       getMLJobIds(ml.anomalyDetectors, environment),
     ]);
 
-    const typedAnomalyResponse: ESSearchResponse<
-      unknown,
-      typeof params
-    > = anomalyResponse as any;
+    const typedAnomalyResponse: ESSearchResponse<unknown, typeof params> =
+      anomalyResponse as any;
     const relevantBuckets = uniqBy(
       sortBy(
         // make sure we only return data for jobs that are available in this space

@@ -183,8 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      // FLAKY: https://github.com/elastic/kibana/issues/93188
-      describe.skip(`${testData.suiteTitle}`, function () {
+      describe(`${testData.suiteTitle}`, function () {
         before(async () => {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
@@ -205,9 +204,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('should display the feature importance decision path in the data grid', async () => {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsResults.openFeatureImportanceDecisionPathPopover();
-          await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathElementsExists();
-          await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathChartElementsExists();
+          await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
+          await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
         });
       });
     }

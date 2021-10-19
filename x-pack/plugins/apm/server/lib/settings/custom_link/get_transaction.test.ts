@@ -23,7 +23,7 @@ describe('custom link get transaction', () => {
   it('fetches without filter', async () => {
     mock = await inspectSearchParams((setup) =>
       getTransaction({
-        setup: (setup as unknown) as Setup,
+        setup: setup as unknown as Setup,
       })
     );
 
@@ -32,7 +32,7 @@ describe('custom link get transaction', () => {
   it('fetches with all filter', async () => {
     mock = await inspectSearchParams((setup) =>
       getTransaction({
-        setup: (setup as unknown) as Setup,
+        setup: setup as unknown as Setup,
         filters: {
           [SERVICE_NAME]: 'foo',
           [SERVICE_ENVIRONMENT]: 'bar',

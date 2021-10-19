@@ -17,9 +17,8 @@ export const migratePackagePolicyToV7150: SavedObjectMigrationFn<PackagePolicy, 
     return packagePolicyDoc;
   }
 
-  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = cloneDeep(
-    packagePolicyDoc
-  );
+  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> =
+    cloneDeep(packagePolicyDoc);
 
   const input = updatedPackagePolicyDoc.attributes.inputs[0];
   const memory = {

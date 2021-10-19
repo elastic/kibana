@@ -20,8 +20,8 @@ import {
 
 const params = {
   index: 'apm-*',
-  start: '2020',
-  end: '2021',
+  start: 1577836800000,
+  end: 1609459200000,
   includeFrozen: false,
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
@@ -106,30 +106,34 @@ describe('query_field_candidates', () => {
           },
         },
       }));
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
-        body: estypes.SearchResponse;
-      } => {
-        return {
-          body: ({
-            hits: {
-              hits: [
-                {
-                  fields: {
-                    myIpFieldName: '1.1.1.1',
-                    myKeywordFieldName: 'myKeywordFieldValue',
-                    myNumericFieldName: 1234,
+      const esClientSearchMock = jest.fn(
+        (
+          req: estypes.SearchRequest
+        ): {
+          body: estypes.SearchResponse;
+        } => {
+          return {
+            body: {
+              hits: {
+                hits: [
+                  {
+                    fields: {
+                      myIpFieldName: '1.1.1.1',
+                      myKeywordFieldName: 'myKeywordFieldValue',
+                      myNumericFieldName: 1234,
+                    },
                   },
-                },
-              ],
-            },
-          } as unknown) as estypes.SearchResponse,
-        };
-      });
+                ],
+              },
+            } as unknown as estypes.SearchResponse,
+          };
+        }
+      );
 
-      const esClientMock = ({
+      const esClientMock = {
         fieldCaps: esClientFieldCapsMock,
         search: esClientSearchMock,
-      } as unknown) as ElasticsearchClient;
+      } as unknown as ElasticsearchClient;
 
       const resp = await fetchTransactionDurationFieldCandidates(
         esClientMock,

@@ -22,26 +22,24 @@ const getUiSettings = (coreStart: CoreStart, context: ExecutionContext) => {
 };
 
 /** @internal **/
-export const getFormatFactory = (core: CoreSetup<PluginStartContract>) => async (
-  context: ExecutionContext
-) => {
-  const [coreStart, { fieldFormats: fieldFormatsStart }] = await core.getStartServices();
+export const getFormatFactory =
+  (core: CoreSetup<PluginStartContract>) => async (context: ExecutionContext) => {
+    const [coreStart, { fieldFormats: fieldFormatsStart }] = await core.getStartServices();
 
-  const fieldFormats = await fieldFormatsStart.fieldFormatServiceFactory(
-    getUiSettings(coreStart, context)
-  );
+    const fieldFormats = await fieldFormatsStart.fieldFormatServiceFactory(
+      getUiSettings(coreStart, context)
+    );
 
-  return fieldFormats.deserialize;
-};
+    return fieldFormats.deserialize;
+  };
 
 /** @internal **/
-export const getTimeZoneFactory = (core: CoreSetup<PluginStartContract>) => async (
-  context: ExecutionContext
-) => {
-  const [coreStart] = await core.getStartServices();
-  const uiSettings = await getUiSettings(coreStart, context);
-  const timezone = await uiSettings.get('dateFormat:tz');
+export const getTimeZoneFactory =
+  (core: CoreSetup<PluginStartContract>) => async (context: ExecutionContext) => {
+    const [coreStart] = await core.getStartServices();
+    const uiSettings = await getUiSettings(coreStart, context);
+    const timezone = await uiSettings.get('dateFormat:tz');
 
-  /** if `Browser`, hardcode it to 'UTC' so the export has data that makes sense **/
-  return timezone === 'Browser' ? 'UTC' : timezone;
-};
+    /** if `Browser`, hardcode it to 'UTC' so the export has data that makes sense **/
+    return timezone === 'Browser' ? 'UTC' : timezone;
+  };

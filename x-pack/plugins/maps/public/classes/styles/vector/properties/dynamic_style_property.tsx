@@ -77,7 +77,8 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
 
 export class DynamicStyleProperty<T>
   extends AbstractStyleProperty<T>
-  implements IDynamicStyleProperty<T> {
+  implements IDynamicStyleProperty<T>
+{
   static type = STYLE_TYPE.DYNAMIC;
 
   protected readonly _field: IField | null;

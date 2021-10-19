@@ -328,7 +328,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('"exists" operator', () => {
-      it('will return 1 results if matching against keyword for the empty array', async () => {
+      // FLAKY https://github.com/elastic/kibana/issues/115308
+      it.skip('will return 1 results if matching against keyword for the empty array', async () => {
         const rule = getRuleForSignalTesting(['keyword_as_array']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
@@ -496,7 +497,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql([[], ['word eight', 'word nine', 'word ten']]);
       });
 
-      it('will return only the empty array for results if we have a list that includes all keyword', async () => {
+      // FLAKY https://github.com/elastic/kibana/issues/115304
+      it.skip('will return only the empty array for results if we have a list that includes all keyword', async () => {
         await importFile(
           supertest,
           'keyword',

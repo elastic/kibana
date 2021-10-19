@@ -108,5 +108,5 @@ export function getCentroid(feature: Feature): Feature | null {
 
 function getLineCentroid(feature: Feature): Geometry {
   const length = turfLength(feature);
-  return turfAlong((feature as unknown) as LineString, length / 2).geometry!;
+  return turfAlong(feature as unknown as LineString, length / 2).geometry!;
 }

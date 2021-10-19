@@ -36,14 +36,15 @@ export const useTimelineStatus = ({
   installPrepackagedTimelines: () => void;
 } => {
   const [selectedTab, setSelectedTab] = useState<TemplateTimelineTypeLiteralWithNull>(null);
-  const isTemplateFilterEnabled = useMemo(() => timelineType === TimelineType.template, [
-    timelineType,
-  ]);
+  const isTemplateFilterEnabled = useMemo(
+    () => timelineType === TimelineType.template,
+    [timelineType]
+  );
 
-  const templateTimelineType = useMemo(() => (!isTemplateFilterEnabled ? null : selectedTab), [
-    selectedTab,
-    isTemplateFilterEnabled,
-  ]);
+  const templateTimelineType = useMemo(
+    () => (!isTemplateFilterEnabled ? null : selectedTab),
+    [selectedTab, isTemplateFilterEnabled]
+  );
 
   const timelineStatus = useMemo(
     () =>
@@ -96,6 +97,7 @@ export const useTimelineStatus = ({
             onClick={onFilterClicked.bind(null, tab.id)}
             withNext={tab.withNext}
             isDisabled={tab.disabled}
+            data-test-subj={tab.name}
           >
             {tab.name}
           </EuiFilterButton>

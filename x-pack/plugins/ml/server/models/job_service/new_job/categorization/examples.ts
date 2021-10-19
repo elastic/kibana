@@ -136,7 +136,12 @@ export function categorizationExamplesProvider({
     });
 
     const lengths = examples.map((e) => e.length);
-    const sumLengths = lengths.map(((s) => (a: number) => (s += a))(0));
+    const sumLengths = lengths.map(
+      (
+        (s) => (a: number) =>
+          (s += a)
+      )(0)
+    );
 
     const tokensPerExample: Token[][] = examples.map((e) => []);
 

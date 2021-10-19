@@ -42,21 +42,20 @@ export const useTimelineEventsDetails = ({
   indexName,
   eventId,
   skip,
-}: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData']] => {
+}: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData'], object | undefined] => {
   const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    timelineDetailsRequest,
-    setTimelineDetailsRequest,
-  ] = useState<TimelineEventsDetailsRequestOptions | null>(null);
+  const [timelineDetailsRequest, setTimelineDetailsRequest] =
+    useState<TimelineEventsDetailsRequestOptions | null>(null);
   const { addError, addWarning } = useAppToasts();
 
-  const [timelineDetailsResponse, setTimelineDetailsResponse] = useState<EventsArgs['detailsData']>(
-    null
-  );
+  const [timelineDetailsResponse, setTimelineDetailsResponse] =
+    useState<EventsArgs['detailsData']>(null);
+
+  const [rawEventData, setRawEventData] = useState<object | undefined>(undefined);
 
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
@@ -81,6 +80,7 @@ export const useTimelineEventsDetails = ({
               if (isCompleteResponse(response)) {
                 setLoading(false);
                 setTimelineDetailsResponse(response.data || []);
+                setRawEventData(response.rawResponse.hits.hits[0]);
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
@@ -128,5 +128,5 @@ export const useTimelineEventsDetails = ({
     };
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
-  return [loading, timelineDetailsResponse];
+  return [loading, timelineDetailsResponse, rawEventData];
 };

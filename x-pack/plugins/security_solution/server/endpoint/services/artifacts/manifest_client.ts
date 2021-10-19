@@ -32,10 +32,7 @@ export class ManifestClient {
   ) {
     this.savedObjectsClient = savedObjectsClient;
 
-    const [validated, errors] = validate(
-      (schemaVersion as unknown) as object,
-      manifestSchemaVersion
-    );
+    const [validated, errors] = validate(schemaVersion as unknown as object, manifestSchemaVersion);
 
     if (errors != null || validated === null) {
       throw new Error(`Invalid manifest version: ${schemaVersion}`);

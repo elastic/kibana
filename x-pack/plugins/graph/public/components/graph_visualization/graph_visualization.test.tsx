@@ -101,7 +101,7 @@ describe('graph_visualization', () => {
       width: 2.2,
     },
   ];
-  const workspace = ({
+  const workspace = {
     nodes,
     edges,
     selectNone: () => {},
@@ -110,7 +110,7 @@ describe('graph_visualization', () => {
       return !node.isSelected;
     }),
     getAllIntersections: jest.fn(),
-  } as unknown) as jest.Mocked<Workspace>;
+  } as unknown as jest.Mocked<Workspace>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -120,7 +120,7 @@ describe('graph_visualization', () => {
     expect(
       shallow(
         <GraphVisualization
-          workspace={({} as unknown) as Workspace}
+          workspace={{} as unknown as Workspace}
           selectSelected={() => {}}
           onSetControl={() => {}}
           onSetMergeCandidates={() => {}}

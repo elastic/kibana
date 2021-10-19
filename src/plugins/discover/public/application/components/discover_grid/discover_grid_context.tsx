@@ -21,6 +21,6 @@ export interface GridContext {
   setSelectedDocs: (selected: string[]) => void;
 }
 
-const defaultContext = ({} as unknown) as GridContext;
+const defaultContext = {} as unknown as GridContext;
 
 export const DiscoverGridContext = React.createContext<GridContext>(defaultContext);

@@ -19,7 +19,7 @@ import { EuiFieldText } from '@elastic/eui';
 import { EuiPageHeader } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { AppMountParameters } from '../../../src/core/public';
-import { formatSearchParams, SharePluginSetup } from '../../../src/plugins/share/public';
+import { SharePluginSetup } from '../../../src/plugins/share/public';
 import {
   HelloLocatorV1Params,
   HelloLocatorV2Params,
@@ -164,14 +164,7 @@ const ActionsExplorer = ({ share }: Props) => {
                   <EuiLink
                     color={link.version !== '0.0.2' ? 'danger' : 'primary'}
                     data-test-subj="linkToHelloPage"
-                    href={
-                      '/app/r?' +
-                      formatSearchParams({
-                        id: 'HELLO_LOCATOR',
-                        version: link.version,
-                        params: link.params,
-                      }).toString()
-                    }
+                    href={share.url.locators.get('HELLO_LOCATOR')?.getRedirectUrl(link.params)}
                     target="_blank"
                   >
                     through redirect app

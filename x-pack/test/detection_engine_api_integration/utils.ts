@@ -369,15 +369,29 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false): Partial
   version: 1,
 });
 
+export const resolveSimpleRuleOutput = (
+  ruleId = 'rule-1',
+  enabled = false
+): Partial<RulesSchema> => ({ outcome: 'exactMatch', ...getSimpleRuleOutput(ruleId, enabled) });
+
 /**
  * This is the typical output of a simple rule that Kibana will output with all the defaults except
  * for all the server generated properties such as created_by. Useful for testing end to end tests.
  */
 export const getSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
   const rule = getSimpleRuleOutput(ruleId);
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { rule_id, ...ruleWithoutRuleId } = rule;
+  const { rule_id: rId, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
+};
+
+/**
+ * This is the typical output of a simple rule that Kibana will output with all the defaults except
+ * for all the server generated properties such as created_by. Useful for testing end to end tests.
+ */
+export const resolveSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
+  const rule = getSimpleRuleOutput(ruleId);
+  const { rule_id: rId, ...ruleWithoutRuleId } = rule;
+  return { outcome: 'exactMatch', ...ruleWithoutRuleId };
 };
 
 export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => {
@@ -399,12 +413,17 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
  * @param supertest The supertest agent.
  */
 export const deleteAllAlerts = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  space?: string
 ): Promise<void> => {
   await countDownTest(
     async () => {
       const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find?per_page=9999`)
+        .get(
+          space
+            ? `/s/${space}${DETECTION_ENGINE_RULES_URL}/_find?per_page=9999`
+            : `${DETECTION_ENGINE_RULES_URL}/_find?per_page=9999`
+        )
         .set('kbn-xsrf', 'true')
         .send();
 
@@ -413,7 +432,11 @@ export const deleteAllAlerts = async (
       }));
 
       await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+        .post(
+          space
+            ? `/s/${space}${DETECTION_ENGINE_RULES_URL}/_bulk_delete`
+            : `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`
+        )
         .send(ids)
         .set('kbn-xsrf', 'true');
 
@@ -1081,13 +1104,12 @@ export const getSignalsByRuleIds = async (
     [x: string]: unknown;
   }>
 > => {
-  const {
-    body: signalsOpen,
-  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsRuleId(ruleIds))
-    .expect(200);
+  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+    await supertest
+      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+      .set('kbn-xsrf', 'true')
+      .send(getQuerySignalsRuleId(ruleIds))
+      .expect(200);
   return signalsOpen;
 };
 
@@ -1107,13 +1129,12 @@ export const getSignalsByIds = async (
     [x: string]: unknown;
   }>
 > => {
-  const {
-    body: signalsOpen,
-  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId(ids, size))
-    .expect(200);
+  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+    await supertest
+      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+      .set('kbn-xsrf', 'true')
+      .send(getQuerySignalsId(ids, size))
+      .expect(200);
   return signalsOpen;
 };
 
@@ -1131,13 +1152,12 @@ export const getSignalsById = async (
     [x: string]: unknown;
   }>
 > => {
-  const {
-    body: signalsOpen,
-  }: { body: estypes.SearchResponse<{ signal: Signal }> } = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId([id]))
-    .expect(200);
+  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+    await supertest
+      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+      .set('kbn-xsrf', 'true')
+      .send(getQuerySignalsId([id]))
+      .expect(200);
   return signalsOpen;
 };
 

@@ -27,6 +27,7 @@ export {
   PackagePolicySOAttributes,
   FullAgentPolicyInput,
   FullAgentPolicy,
+  FullAgentPolicyOutput,
   AgentPolicy,
   AgentPolicySOAttributes,
   NewAgentPolicy,
@@ -95,3 +96,4 @@ export interface BulkActionResult {
 export * from './models';
 export * from './rest_spec';
 export * from './extensions';
+export { FleetRequestHandler, FleetRequestHandlerContext } from './request_context';

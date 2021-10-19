@@ -126,10 +126,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
   const [rollupIndex, setRollupIndex] = useState<string | undefined>();
-  const [
-    rollupIndicesCapabilities,
-    setRollupIndicesCapabilities,
-  ] = useState<RollupIndicesCapsResponse>({});
+  const [rollupIndicesCapabilities, setRollupIndicesCapabilities] =
+    useState<RollupIndicesCapsResponse>({});
   const [matchedIndices, setMatchedIndices] = useState<MatchedIndicesSet>({
     allIndices: [],
     exactMatchedIndices: [],

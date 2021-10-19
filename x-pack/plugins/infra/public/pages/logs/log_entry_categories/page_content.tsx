@@ -25,6 +25,7 @@ import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
 import { LogsPageTemplate } from '../page_template';
 import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 
 const logCategoriesTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle', {
   defaultMessage: 'Categories',
@@ -40,9 +41,10 @@ export const LogEntryCategoriesPageContent = () => {
   const { fetchJobStatus, setupStatus, jobStatus } = useLogEntryCategoriesModuleContext();
 
   const { showModuleSetup } = useLogAnalysisSetupFlyoutStateContext();
-  const showCategoriesModuleSetup = useCallback(() => showModuleSetup('logs_ui_categories'), [
-    showModuleSetup,
-  ]);
+  const showCategoriesModuleSetup = useCallback(
+    () => showModuleSetup('logs_ui_categories'),
+    [showModuleSetup]
+  );
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
@@ -113,8 +115,10 @@ const CategoriesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
   children,
   ...rest
 }) => {
+  const { sourceStatus } = useLogSourceContext();
   return (
     <LogsPageTemplate
+      hasData={sourceStatus?.logIndexStatus !== 'missing'}
       data-test-subj="logsLogEntryCategoriesPage"
       pageHeader={
         rest.isEmptyState

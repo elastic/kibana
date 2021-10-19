@@ -111,7 +111,7 @@ describe('buildFieldList', () => {
   };
 
   it('supports scripted fields', () => {
-    const fields = buildFieldList((indexPattern as unknown) as IndexPattern, []);
+    const fields = buildFieldList(indexPattern as unknown as IndexPattern, []);
     expect(fields.find((f) => f.isScript)).toMatchObject({
       isScript: true,
       name: 'foo',
@@ -121,7 +121,7 @@ describe('buildFieldList', () => {
   });
 
   it('supports runtime fields', () => {
-    const fields = buildFieldList((indexPattern as unknown) as IndexPattern, []);
+    const fields = buildFieldList(indexPattern as unknown as IndexPattern, []);
     expect(fields.find((f) => f.runtimeField)).toMatchObject({
       name: 'runtime_foo',
       runtimeField: { type: 'long', script: { source: '2+2' } },
@@ -129,7 +129,7 @@ describe('buildFieldList', () => {
   });
 
   it('supports meta fields', () => {
-    const fields = buildFieldList((indexPattern as unknown) as IndexPattern, ['_mymeta']);
+    const fields = buildFieldList(indexPattern as unknown as IndexPattern, ['_mymeta']);
     expect(fields.find((f) => f.isMeta)).toMatchObject({
       isScript: false,
       isMeta: true,

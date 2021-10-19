@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from 'src/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsPlugin } from './plugin';
@@ -15,6 +15,8 @@ export { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } fr
 export { EncryptedSavedObjectsClient } from './saved_objects';
 export type { IsMigrationNeededPredicate } from './create_migration';
 
-export const config = { schema: ConfigSchema };
+export const config: PluginConfigDescriptor = {
+  schema: ConfigSchema,
+};
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new EncryptedSavedObjectsPlugin(initializerContext);

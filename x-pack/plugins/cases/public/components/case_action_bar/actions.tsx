@@ -27,12 +27,8 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
   currentExternalIncident,
 }) => {
   // Delete case
-  const {
-    handleToggleModal,
-    handleOnDeleteConfirm,
-    isDeleted,
-    isDisplayConfirmDeleteModal,
-  } = useDeleteCases();
+  const { handleToggleModal, handleOnDeleteConfirm, isDeleted, isDisplayConfirmDeleteModal } =
+    useDeleteCases();
 
   const propertyActions = useMemo(
     () => [

@@ -12,7 +12,7 @@ import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 import TutorialConfigAgent from './';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 
-export type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
+export type APIResponseType = APIReturnType<'GET /internal/apm/fleet/agents'>;
 
 interface Args {
   apmAgent: string;
@@ -51,7 +51,7 @@ function Wrapper({
   hasCloudPolicyWithApmIntegration,
   isFleetEnabled,
 }: Args) {
-  const http = ({
+  const http = {
     get: () => ({
       fleetAgents: [
         ...(hasFleetPoliciesWithApmIntegration ? fleetAgents : []),
@@ -65,7 +65,7 @@ function Wrapper({
         secretToken: 'foo',
       },
     }),
-  } as unknown) as HttpStart;
+  } as unknown as HttpStart;
   return (
     <TutorialConfigAgent
       http={http}

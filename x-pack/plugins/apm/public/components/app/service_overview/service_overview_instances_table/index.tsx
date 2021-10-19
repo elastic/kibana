@@ -28,9 +28,12 @@ import { InstanceDetails } from './intance_details';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 
-type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
-type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
-type ServiceInstanceDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
+type ServiceInstanceMainStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+type MainStatsServiceInstanceItem =
+  ServiceInstanceMainStatistics['currentPeriod'][0];
+type ServiceInstanceDetailedStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 export interface TableOptions {
   pageIndex: number;
@@ -75,10 +78,8 @@ export function ServiceOverviewInstancesTable({
     urlParams: { latencyAggregationType, comparisonEnabled },
   } = useUrlParams();
 
-  const [
-    itemIdToOpenActionMenuRowMap,
-    setItemIdToOpenActionMenuRowMap,
-  ] = useState<Record<string, boolean>>({});
+  const [itemIdToOpenActionMenuRowMap, setItemIdToOpenActionMenuRowMap] =
+    useState<Record<string, boolean>>({});
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReactNode>

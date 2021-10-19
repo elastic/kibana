@@ -87,7 +87,7 @@ export class LicenseExpirationRule extends BaseRule {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const licenses = await fetchLicenses(esClient, clusters, esIndexPattern);
+    const licenses = await fetchLicenses(esClient, clusters, esIndexPattern, params.filterQuery);
 
     return licenses.map((license) => {
       const { clusterUuid, type, expiryDateMS, status, ccs } = license;

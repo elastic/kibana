@@ -32,7 +32,7 @@ function getExistingFilter(
     if (!filter) return;
 
     if (fieldName === '_exists_' && isExistsFilter(filter)) {
-      return filter.exists!.field === value;
+      return filter.query.exists!.field === value;
     }
 
     if (isPhraseFilter(filter)) {
@@ -72,11 +72,13 @@ export function generateFilters(
   index: string
 ): Filter[] {
   values = Array.isArray(values) ? _.uniq(values) : [values];
-  const fieldObj = (_.isObject(field)
-    ? field
-    : {
-        name: field,
-      }) as IFieldType;
+  const fieldObj = (
+    _.isObject(field)
+      ? field
+      : {
+          name: field,
+        }
+  ) as IFieldType;
   const fieldName = fieldObj.name;
   const newFilters: Filter[] = [];
   const appFilters = filterManager.getAppFilters();

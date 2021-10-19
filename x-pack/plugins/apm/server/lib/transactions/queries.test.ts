@@ -29,6 +29,8 @@ describe('transaction queries', () => {
         setup,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
+        start: 0,
+        end: 50000,
       })
     );
 
@@ -44,6 +46,8 @@ describe('transaction queries', () => {
         setup,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
+        start: 0,
+        end: 50000,
       })
     );
 
@@ -61,6 +65,8 @@ describe('transaction queries', () => {
         setup,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
+        start: 0,
+        end: 50000,
       })
     );
 
@@ -69,7 +75,13 @@ describe('transaction queries', () => {
 
   it('fetches a transaction', async () => {
     mock = await inspectSearchParams((setup) =>
-      getTransaction({ transactionId: 'foo', traceId: 'bar', setup })
+      getTransaction({
+        transactionId: 'foo',
+        traceId: 'bar',
+        setup,
+        start: 0,
+        end: 50000,
+      })
     );
 
     expect(mock.params).toMatchSnapshot();

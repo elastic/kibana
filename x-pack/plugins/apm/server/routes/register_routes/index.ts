@@ -21,7 +21,7 @@ import { mergeRt, jsonRt } from '@kbn/io-ts-utils';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRouteHandlerResources, TelemetryUsageCounter } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
-import { InspectResponse } from '../../../typings/common';
+import { InspectResponse } from '../../../../observability/typings/common';
 
 const inspectRt = t.exact(
   t.partial({
@@ -67,10 +67,12 @@ export function registerRoutes({
 
     const { method, pathname } = parseEndpoint(endpoint);
 
-    (router[method] as RouteRegistrar<
-      typeof method,
-      ApmPluginRequestHandlerContext
-    >)(
+    (
+      router[method] as RouteRegistrar<
+        typeof method,
+        ApmPluginRequestHandlerContext
+      >
+    )(
       {
         path: pathname,
         options,

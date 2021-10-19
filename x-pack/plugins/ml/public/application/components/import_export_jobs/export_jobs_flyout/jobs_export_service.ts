@@ -35,9 +35,8 @@ export class JobsExportService {
   }
 
   public async exportDataframeAnalyticsJobs(jobIds: string[]) {
-    const {
-      data_frame_analytics: configs,
-    } = await this._mlApiServices.dataFrameAnalytics.getDataFrameAnalytics(jobIds.join(','), true);
+    const { data_frame_analytics: configs } =
+      await this._mlApiServices.dataFrameAnalytics.getDataFrameAnalytics(jobIds.join(','), true);
     this._export(configs, 'data-frame-analytics');
   }
 

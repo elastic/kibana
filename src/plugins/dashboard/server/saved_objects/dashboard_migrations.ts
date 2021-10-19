@@ -134,7 +134,7 @@ function createExtractPanelReferencesMigration(
 
     const injectedAttributes = injectReferences(
       {
-        attributes: (doc.attributes as unknown) as SavedObjectAttributes,
+        attributes: doc.attributes as unknown as SavedObjectAttributes,
         references,
       },
       { embeddablePersistableStateService: deps.embeddable }
@@ -159,56 +159,59 @@ type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
 };
 
 // Runs the embeddable migrations on each panel
-const migrateByValuePanels = (
-  migrate: MigrateFunction,
-  version: string
-): SavedObjectMigrationFn => (doc: any) => {
-  const { attributes } = doc;
-  // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
-  // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
-  // object has panelsJSON in all previous versions of kibana.
-  if (typeof attributes?.panelsJSON !== 'string') {
-    return doc;
-  }
-  const panels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
-  // Same here, prevent failing saved object import if ever panels aren't an array.
-  if (!Array.isArray(panels)) {
-    return doc;
-  }
-  const newPanels: SavedDashboardPanel[] = [];
-  panels.forEach((panel) => {
-    // Convert each panel into a state that can be passed to EmbeddablesSetup.migrate
-    const originalPanelState = convertSavedDashboardPanelToPanelState<ValueOrReferenceInput>(panel);
-
-    // saved vis is used to store by value input for Visualize. This should eventually be renamed to `attributes` to align with Lens and Maps
-    if (originalPanelState.explicitInput.attributes || originalPanelState.explicitInput.savedVis) {
-      // If this panel is by value, migrate the state using embeddable migrations
-      const migratedInput = migrate({
-        ...originalPanelState.explicitInput,
-        type: originalPanelState.type,
-      });
-      // Convert the embeddable state back into the panel shape
-      newPanels.push(
-        convertPanelStateToSavedDashboardPanel(
-          {
-            ...originalPanelState,
-            explicitInput: { ...migratedInput, id: migratedInput.id as string },
-          },
-          version
-        )
-      );
-    } else {
-      newPanels.push(panel);
+const migrateByValuePanels =
+  (migrate: MigrateFunction, version: string): SavedObjectMigrationFn =>
+  (doc: any) => {
+    const { attributes } = doc;
+    // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
+    // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
+    // object has panelsJSON in all previous versions of kibana.
+    if (typeof attributes?.panelsJSON !== 'string') {
+      return doc;
     }
-  });
-  return {
-    ...doc,
-    attributes: {
-      ...attributes,
-      panelsJSON: JSON.stringify(newPanels),
-    },
+    const panels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
+    // Same here, prevent failing saved object import if ever panels aren't an array.
+    if (!Array.isArray(panels)) {
+      return doc;
+    }
+    const newPanels: SavedDashboardPanel[] = [];
+    panels.forEach((panel) => {
+      // Convert each panel into a state that can be passed to EmbeddablesSetup.migrate
+      const originalPanelState =
+        convertSavedDashboardPanelToPanelState<ValueOrReferenceInput>(panel);
+
+      // saved vis is used to store by value input for Visualize. This should eventually be renamed to `attributes` to align with Lens and Maps
+      if (
+        originalPanelState.explicitInput.attributes ||
+        originalPanelState.explicitInput.savedVis
+      ) {
+        // If this panel is by value, migrate the state using embeddable migrations
+        const migratedInput = migrate({
+          ...originalPanelState.explicitInput,
+          type: originalPanelState.type,
+        });
+        // Convert the embeddable state back into the panel shape
+        newPanels.push(
+          convertPanelStateToSavedDashboardPanel(
+            {
+              ...originalPanelState,
+              explicitInput: { ...migratedInput, id: migratedInput.id as string },
+            },
+            version
+          )
+        );
+      } else {
+        newPanels.push(panel);
+      }
+    });
+    return {
+      ...doc,
+      attributes: {
+        ...attributes,
+        panelsJSON: JSON.stringify(newPanels),
+      },
+    };
   };
-};
 
 export interface DashboardSavedObjectTypeMigrationsDeps {
   embeddable: EmbeddableSetup;

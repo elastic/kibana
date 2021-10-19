@@ -114,13 +114,13 @@ describe('get_local_stats', () => {
       },
     },
   ];
-  const clusterStats = ({
+  const clusterStats = {
     _nodes: { failed: 123 },
     cluster_name: 'real-cool',
     indices: { totally: 456 },
     nodes: { yup: 'abc' },
     random: 123,
-  } as unknown) as estypes.ClusterStatsResponse;
+  } as unknown as estypes.ClusterStatsResponse;
 
   const kibana = {
     kibana: {

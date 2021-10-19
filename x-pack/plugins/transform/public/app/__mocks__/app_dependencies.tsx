@@ -19,6 +19,7 @@ import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import type { AppDependencies } from '../app_dependencies';
 import { MlSharedContext } from './shared_context';
 import type { GetMlSharedImportsReturnType } from '../../shared_imports';
+import type { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';
 
 const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
@@ -36,13 +37,14 @@ const appDependencies: AppDependencies = {
   notifications: coreSetup.notifications,
   uiSettings: coreStart.uiSettings,
   savedObjects: coreStart.savedObjects,
-  storage: ({ get: jest.fn() } as unknown) as Storage,
+  storage: { get: jest.fn() } as unknown as Storage,
   overlays: coreStart.overlays,
   http: coreSetup.http,
   history: {} as ScopedHistory,
   savedObjectsPlugin: savedObjectsPluginMock.createStartContract(),
-  share: ({ urlGenerators: { getUrlGenerator: jest.fn() } } as unknown) as SharePluginStart,
+  share: { urlGenerators: { getUrlGenerator: jest.fn() } } as unknown as SharePluginStart,
   ml: {} as GetMlSharedImportsReturnType,
+  triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
 };
 
 export const useAppDependencies = () => {

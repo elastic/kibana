@@ -118,43 +118,40 @@ export function createTaskRunAggregator(
   runningAverageWindowSize: number
 ): AggregatedStatProvider<TaskRunStat> {
   const taskRunEventToStat = createTaskRunEventToStat(runningAverageWindowSize);
-  const taskRunEvents$: Observable<
-    Pick<TaskRunStat, 'drift' | 'drift_by_type' | 'execution'>
-  > = taskPollingLifecycle.events.pipe(
-    filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent) && hasTiming(taskEvent)),
-    map((taskEvent: TaskLifecycleEvent) => {
-      const { task, result, persistence }: RanTask | ErroredTask = unwrap(
-        (taskEvent as TaskRun).event
-      );
-      return taskRunEventToStat(task, persistence, taskEvent.timing!, result);
-    })
-  );
+  const taskRunEvents$: Observable<Pick<TaskRunStat, 'drift' | 'drift_by_type' | 'execution'>> =
+    taskPollingLifecycle.events.pipe(
+      filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent) && hasTiming(taskEvent)),
+      map((taskEvent: TaskLifecycleEvent) => {
+        const { task, result, persistence }: RanTask | ErroredTask = unwrap(
+          (taskEvent as TaskRun).event
+        );
+        return taskRunEventToStat(task, persistence, taskEvent.timing!, result);
+      })
+    );
 
   const loadQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  const taskManagerLoadStatEvents$: Observable<
-    Pick<TaskRunStat, 'load'>
-  > = taskPollingLifecycle.events.pipe(
-    filter(
-      (taskEvent: TaskLifecycleEvent) =>
-        isTaskManagerStatEvent(taskEvent) &&
-        taskEvent.id === 'load' &&
-        isOk<number, never>(taskEvent.event)
-    ),
-    map((taskEvent: TaskLifecycleEvent) => {
-      return {
-        load: loadQueue(((taskEvent.event as unknown) as Ok<number>).value),
-      };
-    })
-  );
+  const taskManagerLoadStatEvents$: Observable<Pick<TaskRunStat, 'load'>> =
+    taskPollingLifecycle.events.pipe(
+      filter(
+        (taskEvent: TaskLifecycleEvent) =>
+          isTaskManagerStatEvent(taskEvent) &&
+          taskEvent.id === 'load' &&
+          isOk<number, never>(taskEvent.event)
+      ),
+      map((taskEvent: TaskLifecycleEvent) => {
+        return {
+          load: loadQueue((taskEvent.event as unknown as Ok<number>).value),
+        };
+      })
+    );
 
   const resultFrequencyQueue = createRunningAveragedStat<FillPoolResult>(runningAverageWindowSize);
   const pollingDurationQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimDurationQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimConflictsQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimMismatchesQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  const polledTasksByPersistenceQueue = createRunningAveragedStat<TaskPersistence>(
-    runningAverageWindowSize
-  );
+  const polledTasksByPersistenceQueue =
+    createRunningAveragedStat<TaskPersistence>(runningAverageWindowSize);
   const taskPollingEvents$: Observable<Pick<TaskRunStat, 'polling'>> = combineLatest([
     // get latest polling stats
     taskPollingLifecycle.events.pipe(
@@ -164,10 +161,9 @@ export function createTaskRunAggregator(
           isOk<ClaimAndFillPoolResult, unknown>(taskEvent.event)
       ),
       map((taskEvent: TaskLifecycleEvent) => {
-        const {
-          result,
-          stats: { tasksClaimed, tasksUpdated, tasksConflicted } = {},
-        } = ((taskEvent.event as unknown) as Ok<ClaimAndFillPoolResult>).value;
+        const { result, stats: { tasksClaimed, tasksUpdated, tasksConflicted } = {} } = (
+          taskEvent.event as unknown as Ok<ClaimAndFillPoolResult>
+        ).value;
         const duration = (taskEvent?.timing?.stop ?? 0) - (taskEvent?.timing?.start ?? 0);
         return {
           polling: {
@@ -295,12 +291,10 @@ function createTaskRunEventToStat(runningAverageWindowSize: number) {
   const taskPersistenceQueue = createRunningAveragedStat<TaskPersistence>(runningAverageWindowSize);
   const driftByTaskQueue = createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
   const taskRunDurationQueue = createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
-  const taskRunDurationByPersistenceQueue = createMapOfRunningAveragedStats<number>(
-    runningAverageWindowSize
-  );
-  const resultFrequencyQueue = createMapOfRunningAveragedStats<TaskRunResult>(
-    runningAverageWindowSize
-  );
+  const taskRunDurationByPersistenceQueue =
+    createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
+  const resultFrequencyQueue =
+    createMapOfRunningAveragedStats<TaskRunResult>(runningAverageWindowSize);
   return (
     task: ConcreteTaskInstance,
     persistence: TaskPersistence,

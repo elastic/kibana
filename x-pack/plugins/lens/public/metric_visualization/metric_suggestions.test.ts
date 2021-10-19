@@ -50,40 +50,40 @@ describe('metric_suggestions', () => {
     };
 
     expect(
-      ([
-        {
-          columns: [dateCol('a')],
-          isMultiRow: true,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-        {
-          columns: [strCol('foo'), strCol('bar')],
-          isMultiRow: true,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-        {
-          layerId: 'l1',
-          isMultiRow: true,
-          columns: [numCol('bar')],
-          changeType: 'unchanged',
-        },
-        {
-          columns: [unknownCol(), numCol('bar')],
-          isMultiRow: true,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-        {
-          columns: [numCol('bar'), numCol('baz')],
-          isMultiRow: false,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-      ] as TableSuggestion[]).map((table) =>
-        expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([])
-      )
+      (
+        [
+          {
+            columns: [dateCol('a')],
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+          {
+            columns: [strCol('foo'), strCol('bar')],
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+          {
+            layerId: 'l1',
+            isMultiRow: true,
+            columns: [numCol('bar')],
+            changeType: 'unchanged',
+          },
+          {
+            columns: [unknownCol(), numCol('bar')],
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+          {
+            columns: [numCol('bar'), numCol('baz')],
+            isMultiRow: false,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+        ] as TableSuggestion[]
+      ).map((table) => expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([]))
     );
   });
 

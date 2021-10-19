@@ -36,9 +36,8 @@ import { DisplaySettingsLogic } from './display_settings_logic';
 const emptyField = { fieldName: '', label: '' };
 
 export const FieldEditorModal: React.FC = () => {
-  const { toggleFieldEditorModal, addDetailField, updateDetailField } = useActions(
-    DisplaySettingsLogic
-  );
+  const { toggleFieldEditorModal, addDetailField, updateDetailField } =
+    useActions(DisplaySettingsLogic);
 
   const {
     searchResultConfig: { detailFields },

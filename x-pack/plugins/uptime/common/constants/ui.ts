@@ -17,6 +17,8 @@ export const STEP_DETAIL_ROUTE = '/journey/:checkGroupId/step/:stepIndex';
 
 export const SYNTHETIC_CHECK_STEPS_ROUTE = '/journey/:checkGroupId/steps';
 
+export const MAPPING_ERROR_ROUTE = '/mapping-error';
+
 export enum STATUS {
   UP = 'up',
   DOWN = 'down',
@@ -67,3 +69,10 @@ export enum CERT_STATUS {
 }
 
 export const KQL_SYNTAX_LOCAL_STORAGE = 'xpack.uptime.kql.syntax';
+
+export const FILTER_FIELDS = {
+  TAGS: 'tags',
+  PORT: 'url.port',
+  LOCATION: 'observer.geo.name',
+  TYPE: 'monitor.type',
+};

@@ -32,6 +32,8 @@ import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { UptimeIndexPatternContextProvider } from '../contexts/uptime_index_pattern_context';
+import { InspectorContextProvider } from '../../../observability/public';
 
 export interface UptimeAppColors {
   danger: string;
@@ -109,6 +111,7 @@ const Application = (props: UptimeAppProps) => {
               ...plugins,
               storage,
               data: startPlugins.data,
+              inspector: startPlugins.inspector,
               triggersActionsUi: startPlugins.triggersActionsUi,
               observability: startPlugins.observability,
             }}
@@ -119,16 +122,20 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
-                          <RedirectAppLinks
-                            className={APP_WRAPPER_CLASS}
-                            application={core.application}
-                          >
-                            <UptimeAlertsFlyoutWrapper />
-                            <PageRouter />
-                            <ActionMenu appMountParameters={appMountParameters} />
-                          </RedirectAppLinks>
-                        </div>
+                        <UptimeIndexPatternContextProvider data={startPlugins.data}>
+                          <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
+                            <RedirectAppLinks
+                              className={APP_WRAPPER_CLASS}
+                              application={core.application}
+                            >
+                              <InspectorContextProvider>
+                                <UptimeAlertsFlyoutWrapper />
+                                <PageRouter />
+                                <ActionMenu appMountParameters={appMountParameters} />
+                              </InspectorContextProvider>
+                            </RedirectAppLinks>
+                          </div>
+                        </UptimeIndexPatternContextProvider>
                       </UptimeStartupPluginsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>

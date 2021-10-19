@@ -53,7 +53,7 @@ describe('Capture URL view routes', () => {
     const request = httpServerMock.createKibanaRequest();
     const responseFactory = httpResourcesMock.createResponseFactory();
 
-    await routeHandler(({} as unknown) as SecurityRequestHandlerContext, request, responseFactory);
+    await routeHandler({} as unknown as SecurityRequestHandlerContext, request, responseFactory);
 
     expect(responseFactory.renderAnonymousCoreApp).toHaveBeenCalledWith();
   });

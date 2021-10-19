@@ -421,7 +421,7 @@ describe('rules_schema', () => {
       const payload: Omit<RulesSchema, 'type'> & { type: string } = getRulesSchemaMock();
       payload.type = 'invalid_data';
 
-      const dependents = getDependents((payload as unknown) as TypeAndTimelineOnly);
+      const dependents = getDependents(payload as unknown as TypeAndTimelineOnly);
       const decoded = dependents.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);

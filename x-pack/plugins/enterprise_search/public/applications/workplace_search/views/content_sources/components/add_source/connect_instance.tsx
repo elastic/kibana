@@ -82,9 +82,8 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue,
   } = useActions(AddSourceLogic);
 
-  const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } = useValues(
-    AddSourceLogic
-  );
+  const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } =
+    useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 

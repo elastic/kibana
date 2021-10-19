@@ -71,6 +71,7 @@ export interface IndexParams {
   index: string;
   body: Annotation;
   refresh: boolean | 'wait_for' | undefined;
+  require_alias?: boolean;
   id?: string;
 }
 
@@ -99,6 +100,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
       body: annotation,
       refresh: 'wait_for',
+      require_alias: true,
     };
 
     if (typeof annotation._id !== 'undefined') {
@@ -393,11 +395,13 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
 
     const { body } = await asInternalUser.search<Annotation>(params);
 
-    const annotations = (body.aggregations!.by_job as estypes.AggregationsTermsAggregate<{
-      key: string;
-      doc_count: number;
-      latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
-    }>).buckets.map((bucket) => {
+    const annotations = (
+      body.aggregations!.by_job as estypes.AggregationsTermsAggregate<{
+        key: string;
+        doc_count: number;
+        latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
+      }>
+    ).buckets.map((bucket) => {
       return bucket.latest_delayed.hits.hits[0]._source!;
     });
 
@@ -405,14 +409,37 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   }
 
   async function deleteAnnotation(id: string) {
-    const params: DeleteParams = {
-      index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+    // Find the index the annotation is stored in.
+    const searchParams: estypes.SearchRequest = {
+      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+      size: 1,
+      body: {
+        query: {
+          ids: {
+            values: [id],
+          },
+        },
+      },
+    };
+
+    const { body } = await asInternalUser.search(searchParams);
+    const totalCount =
+      typeof body.hits.total === 'number' ? body.hits.total : body.hits.total.value;
+
+    if (totalCount === 0) {
+      throw Boom.notFound(`Cannot find annotation with ID ${id}`);
+    }
+
+    const index = body.hits.hits[0]._index;
+
+    const deleteParams: DeleteParams = {
+      index,
       id,
       refresh: 'wait_for',
     };
 
-    const { body } = await asInternalUser.delete(params);
-    return body;
+    const { body: deleteResponse } = await asInternalUser.delete(deleteParams);
+    return deleteResponse;
   }
 
   return {

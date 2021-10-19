@@ -28,9 +28,9 @@ import { ReportingStore } from '../lib';
 import { setFieldFormats } from '../services';
 import { createMockLevelLogger } from './create_mock_levellogger';
 
-(initializeBrowserDriverFactory as jest.Mock<
-  Promise<HeadlessChromiumDriverFactory>
->).mockImplementation(() => Promise.resolve({} as HeadlessChromiumDriverFactory));
+(
+  initializeBrowserDriverFactory as jest.Mock<Promise<HeadlessChromiumDriverFactory>>
+).mockImplementation(() => Promise.resolve({} as HeadlessChromiumDriverFactory));
 
 (chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
@@ -141,11 +141,11 @@ export const createMockReportingCore = async (
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
   startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
-  const mockReportingCore = ({
+  const mockReportingCore = {
     getConfig: () => createMockConfig(config),
     getEsClient: () => startDepsMock?.esClient,
     getDataService: () => startDepsMock?.data,
-  } as unknown) as ReportingCore;
+  } as unknown as ReportingCore;
 
   if (!setupDepsMock) {
     setupDepsMock = createMockPluginSetup({});

@@ -21,6 +21,7 @@ export class SettingsPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly savedObjects = this.ctx.getPageObject('savedObjects');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   async clickNavigation() {
     await this.find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
@@ -557,6 +558,20 @@ export class SettingsPageObject extends FtrService {
     }
   }
 
+  async addFieldFilter(name: string) {
+    await this.testSubjects.click('tab-sourceFilters');
+    await this.find.setValue('.euiFieldText', name);
+    await this.find.clickByButtonText('Add');
+    const table = await this.find.byClassName('euiTable');
+    await this.retry.waitFor('field filter to be added', async () => {
+      const tableCells = await table.findAllByCssSelector('td');
+      const fieldNames = await mapAsync(tableCells, async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      });
+      return fieldNames.includes(name);
+    });
+  }
+
   public async confirmSave() {
     await this.testSubjects.setValue('saveModalConfirmText', 'change');
     await this.testSubjects.click('confirmModalConfirmButton');
@@ -725,14 +740,7 @@ export class SettingsPageObject extends FtrService {
 
   async setScriptedFieldScript(script: string) {
     this.log.debug('set scripted field script = ' + script);
-    const aceEditorCssSelector = '[data-test-subj="editorFieldScript"] .ace_editor';
-    const editor = await this.find.byCssSelector(aceEditorCssSelector);
-    await editor.click();
-    const existingText = await editor.getVisibleText();
-    for (let i = 0; i < existingText.length; i++) {
-      await this.browser.pressKeys(this.browser.keys.BACK_SPACE);
-    }
-    await this.browser.pressKeys(...script.split(''));
+    await this.monacoEditor.setCodeEditorValue(script);
   }
 
   async openScriptedFieldHelp(activeTab: string) {

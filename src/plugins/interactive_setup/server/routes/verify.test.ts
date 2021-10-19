@@ -22,7 +22,7 @@ describe('Configure routes', () => {
     mockRouteParams = routeDefinitionParamsMock.create();
     router = mockRouteParams.router;
 
-    mockContext = ({} as unknown) as RequestHandlerContext;
+    mockContext = {} as unknown as RequestHandlerContext;
 
     defineVerifyRoute(mockRouteParams);
   });

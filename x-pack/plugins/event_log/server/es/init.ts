@@ -96,8 +96,9 @@ class EsInitializationSteps {
     }
     asyncForEach(Object.keys(indices), async (indexName: string) => {
       try {
-        const hidden: string | boolean | undefined = (indices[indexName]
-          ?.settings as IndicesIndexStatePrefixedSettings)?.index?.hidden;
+        const hidden: string | boolean | undefined = (
+          indices[indexName]?.settings as IndicesIndexStatePrefixedSettings
+        )?.index?.hidden;
 
         // Check to see if this index template is hidden
         if (hidden !== true && hidden !== 'true') {

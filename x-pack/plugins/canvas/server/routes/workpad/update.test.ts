@@ -15,14 +15,14 @@ import { okResponse } from '../ok_response';
 import { getMockedRouterDeps } from '../test_helpers';
 import { workpadRouteContextMock, MockWorkpadRouteContext } from '../../mocks';
 
-const mockRouteContext = ({
+const mockRouteContext = {
   core: {
     savedObjects: {
       client: savedObjectsClientMock.create(),
     },
   },
   canvas: workpadRouteContextMock.create(),
-} as unknown) as MockWorkpadRouteContext;
+} as unknown as MockWorkpadRouteContext;
 
 const workpad = workpads[0];
 const now = new Date();

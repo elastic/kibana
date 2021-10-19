@@ -8,20 +8,14 @@
 
 import { Executor } from './executor';
 import { parseExpression } from '../ast';
+import { Execution } from '../execution/execution';
 
-// eslint-disable-next-line
-const { __getArgs } = require('../execution/execution');
+jest.mock('../execution/execution', () => ({
+  Execution: jest.fn(),
+}));
 
-jest.mock('../execution/execution', () => {
-  const mockedModule = {
-    args: undefined,
-    __getArgs: () => mockedModule.args,
-    Execution: function ExecutionMock(...args: any) {
-      mockedModule.args = args;
-    },
-  };
-
-  return mockedModule;
+beforeEach(() => {
+  jest.clearAllMocks();
 });
 
 describe('Executor mocked execution tests', () => {
@@ -31,7 +25,9 @@ describe('Executor mocked execution tests', () => {
         const executor = new Executor();
         executor.createExecution('foo bar="baz"');
 
-        expect(__getArgs()[0].expression).toBe('foo bar="baz"');
+        expect(Execution).toHaveBeenCalledWith(
+          expect.objectContaining({ expression: 'foo bar="baz"' })
+        );
       });
     });
 
@@ -41,7 +37,9 @@ describe('Executor mocked execution tests', () => {
         const ast = parseExpression('foo bar="baz"');
         executor.createExecution(ast);
 
-        expect(__getArgs()[0].expression).toBe(undefined);
+        expect(Execution).toHaveBeenCalledWith(
+          expect.not.objectContaining({ expression: expect.anything() })
+        );
       });
     });
   });

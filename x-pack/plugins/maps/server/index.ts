@@ -17,7 +17,6 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   // exposeToBrowser specifies kibana.yml settings to expose to the browser
   // the value `true` in this context signals configuration is exposed to browser
   exposeToBrowser: {
-    enabled: true,
     showMapsInspectorAdapter: true,
     preserveDrawingBuffer: true,
   },
@@ -32,6 +31,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
         return completeConfig;
       }
       addDeprecation({
+        configPath: 'map.proxyElasticMapsServiceInMaps',
         documentationUrl:
           'https://www.elastic.co/guide/en/kibana/current/maps-connect-to-ems.html#elastic-maps-server',
         message: i18n.translate('xpack.maps.deprecation.proxyEMS.message', {

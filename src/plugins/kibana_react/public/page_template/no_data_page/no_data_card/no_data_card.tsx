@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiButton, EuiCard, EuiCardProps } from '@elastic/eui';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
@@ -17,6 +18,7 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
   recommended,
   title,
   button,
+  layout,
   ...cardRest
 }) => {
   const footer =
@@ -25,10 +27,16 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
   return (
     <EuiCard
       paddingSize="l"
-      title={title}
+      // TODO: we should require both title and description to be passed in by consumers since defaults are not adequate.
+      // see comment: https://github.com/elastic/kibana/pull/111261/files#r708399140
+      title={title!}
+      description={i18n.translate('kibana-react.noDataPage.noDataCard.description', {
+        defaultMessage: `Proceed without collecting data`,
+      })}
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
       footer={footer}
-      {...(cardRest as any)}
+      layout={layout as 'vertical' | undefined}
+      {...cardRest}
     />
   );
 };

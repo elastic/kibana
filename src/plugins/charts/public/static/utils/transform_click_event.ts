@@ -9,7 +9,7 @@
 import {
   XYChartSeriesIdentifier,
   GeometryValue,
-  XYBrushArea,
+  XYBrushEvent,
   Accessor,
   AccessorFn,
   Datum,
@@ -112,27 +112,29 @@ function getSplitChartValue({
  * @param yAccessor
  * @param splitAccessors
  */
-const columnReducer = (
-  xAccessor: Accessor | AccessorFn | null,
-  yAccessor: Accessor | AccessorFn | null,
-  splitAccessors: AllSeriesAccessors,
-  splitChartAccessor?: Accessor | AccessorFn
-) => (
-  acc: Array<[index: number, id: string]>,
-  { id }: Datatable['columns'][number],
-  index: number
-): Array<[index: number, id: string]> => {
-  if (
-    (xAccessor !== null && validateAccessorId(id, xAccessor)) ||
-    (yAccessor !== null && validateAccessorId(id, yAccessor)) ||
-    (splitChartAccessor !== undefined && validateAccessorId(id, splitChartAccessor)) ||
-    splitAccessors.some(([accessor]) => validateAccessorId(id, accessor))
-  ) {
-    acc.push([index, id]);
-  }
+const columnReducer =
+  (
+    xAccessor: Accessor | AccessorFn | null,
+    yAccessor: Accessor | AccessorFn | null,
+    splitAccessors: AllSeriesAccessors,
+    splitChartAccessor?: Accessor | AccessorFn
+  ) =>
+  (
+    acc: Array<[index: number, id: string]>,
+    { id }: Datatable['columns'][number],
+    index: number
+  ): Array<[index: number, id: string]> => {
+    if (
+      (xAccessor !== null && validateAccessorId(id, xAccessor)) ||
+      (yAccessor !== null && validateAccessorId(id, yAccessor)) ||
+      (splitChartAccessor !== undefined && validateAccessorId(id, splitChartAccessor)) ||
+      splitAccessors.some(([accessor]) => validateAccessorId(id, accessor))
+    ) {
+      acc.push([index, id]);
+    }
 
-  return acc;
-};
+    return acc;
+  };
 
 /**
  * Finds matching row index for given accessors and geometry values
@@ -142,23 +144,25 @@ const columnReducer = (
  * @param yAccessor
  * @param splitAccessors
  */
-const rowFindPredicate = (
-  geometry: GeometryValue | null,
-  xAccessor: Accessor | AccessorFn | null,
-  yAccessor: Accessor | AccessorFn | null,
-  splitAccessors: AllSeriesAccessors,
-  splitChartAccessor?: Accessor | AccessorFn,
-  splitChartValue?: string | number
-) => (row: Datatable['rows'][number]): boolean =>
-  (geometry === null ||
-    (xAccessor !== null &&
-      getAccessorValue(row, xAccessor) === getAccessorValue(geometry.datum, xAccessor) &&
-      yAccessor !== null &&
-      getAccessorValue(row, yAccessor) === getAccessorValue(geometry.datum, yAccessor) &&
-      (splitChartAccessor === undefined ||
-        (splitChartValue !== undefined &&
-          getAccessorValue(row, splitChartAccessor) === splitChartValue)))) &&
-  [...splitAccessors].every(([accessor, value]) => getAccessorValue(row, accessor) === value);
+const rowFindPredicate =
+  (
+    geometry: GeometryValue | null,
+    xAccessor: Accessor | AccessorFn | null,
+    yAccessor: Accessor | AccessorFn | null,
+    splitAccessors: AllSeriesAccessors,
+    splitChartAccessor?: Accessor | AccessorFn,
+    splitChartValue?: string | number
+  ) =>
+  (row: Datatable['rows'][number]): boolean =>
+    (geometry === null ||
+      (xAccessor !== null &&
+        getAccessorValue(row, xAccessor) === getAccessorValue(geometry.datum, xAccessor) &&
+        yAccessor !== null &&
+        getAccessorValue(row, yAccessor) === getAccessorValue(geometry.datum, yAccessor) &&
+        (splitChartAccessor === undefined ||
+          (splitChartValue !== undefined &&
+            getAccessorValue(row, splitChartAccessor) === splitChartValue)))) &&
+    [...splitAccessors].every(([accessor, value]) => getAccessorValue(row, accessor) === value);
 
 /**
  * Helper function to transform `@elastic/charts` click event into filter action event
@@ -168,103 +172,106 @@ const rowFindPredicate = (
  * @param splitSeriesAccessorFnMap needed when using `splitSeriesAccessors` as `AccessorFn`
  * @param negate
  */
-export const getFilterFromChartClickEventFn = (
-  table: Datatable,
-  xAccessor: Accessor | AccessorFn,
-  splitSeriesAccessorFnMap?: Map<string | number, AccessorFn>,
-  splitChartAccessor?: Accessor | AccessorFn,
-  negate: boolean = false
-) => (points: Array<[GeometryValue, XYChartSeriesIdentifier]>): ClickTriggerEvent => {
-  const data: ValueClickContext['data']['data'] = [];
+export const getFilterFromChartClickEventFn =
+  (
+    table: Datatable,
+    xAccessor: Accessor | AccessorFn,
+    splitSeriesAccessorFnMap?: Map<string | number, AccessorFn>,
+    splitChartAccessor?: Accessor | AccessorFn,
+    negate: boolean = false
+  ) =>
+  (points: Array<[GeometryValue, XYChartSeriesIdentifier]>): ClickTriggerEvent => {
+    const data: ValueClickContext['data']['data'] = [];
 
-  points.forEach((point) => {
-    const [geometry, { yAccessor, splitAccessors }] = point;
-    const splitChartValue = getSplitChartValue(point[1]);
+    points.forEach((point) => {
+      const [geometry, { yAccessor, splitAccessors }] = point;
+      const splitChartValue = getSplitChartValue(point[1]);
+      const allSplitAccessors = getAllSplitAccessors(splitAccessors, splitSeriesAccessorFnMap);
+      const columns = table.columns.reduce<Array<[index: number, id: string]>>(
+        columnReducer(xAccessor, yAccessor, allSplitAccessors, splitChartAccessor),
+        []
+      );
+      const row = table.rows.findIndex(
+        rowFindPredicate(
+          geometry,
+          xAccessor,
+          yAccessor,
+          allSplitAccessors,
+          splitChartAccessor,
+          splitChartValue
+        )
+      );
+      const newData = columns.map(([column, id]) => ({
+        table,
+        column,
+        row,
+        value: table.rows?.[row]?.[id] ?? null,
+      }));
+
+      data.push(...newData);
+    });
+
+    return {
+      name: 'filterBucket',
+      data: {
+        negate,
+        data,
+      },
+    };
+  };
+
+/**
+ * Helper function to get filter action event from series
+ */
+export const getFilterFromSeriesFn =
+  (table: Datatable) =>
+  (
+    { splitAccessors, ...rest }: XYChartSeriesIdentifier,
+    splitSeriesAccessorFnMap?: Map<string | number, AccessorFn>,
+    splitChartAccessor?: Accessor | AccessorFn,
+    negate = false
+  ): ClickTriggerEvent => {
+    const splitChartValue = getSplitChartValue(rest);
     const allSplitAccessors = getAllSplitAccessors(splitAccessors, splitSeriesAccessorFnMap);
     const columns = table.columns.reduce<Array<[index: number, id: string]>>(
-      columnReducer(xAccessor, yAccessor, allSplitAccessors, splitChartAccessor),
+      columnReducer(null, null, allSplitAccessors, splitChartAccessor),
       []
     );
     const row = table.rows.findIndex(
-      rowFindPredicate(
-        geometry,
-        xAccessor,
-        yAccessor,
-        allSplitAccessors,
-        splitChartAccessor,
-        splitChartValue
-      )
+      rowFindPredicate(null, null, null, allSplitAccessors, splitChartAccessor, splitChartValue)
     );
-    const newData = columns.map(([column, id]) => ({
+    const data: ValueClickContext['data']['data'] = columns.map(([column, id]) => ({
       table,
       column,
       row,
       value: table.rows?.[row]?.[id] ?? null,
     }));
 
-    data.push(...newData);
-  });
-
-  return {
-    name: 'filterBucket',
-    data: {
-      negate,
-      data,
-    },
+    return {
+      name: 'filterBucket',
+      data: {
+        negate,
+        data,
+      },
+    };
   };
-};
-
-/**
- * Helper function to get filter action event from series
- */
-export const getFilterFromSeriesFn = (table: Datatable) => (
-  { splitAccessors, ...rest }: XYChartSeriesIdentifier,
-  splitSeriesAccessorFnMap?: Map<string | number, AccessorFn>,
-  splitChartAccessor?: Accessor | AccessorFn,
-  negate = false
-): ClickTriggerEvent => {
-  const splitChartValue = getSplitChartValue(rest);
-  const allSplitAccessors = getAllSplitAccessors(splitAccessors, splitSeriesAccessorFnMap);
-  const columns = table.columns.reduce<Array<[index: number, id: string]>>(
-    columnReducer(null, null, allSplitAccessors, splitChartAccessor),
-    []
-  );
-  const row = table.rows.findIndex(
-    rowFindPredicate(null, null, null, allSplitAccessors, splitChartAccessor, splitChartValue)
-  );
-  const data: ValueClickContext['data']['data'] = columns.map(([column, id]) => ({
-    table,
-    column,
-    row,
-    value: table.rows?.[row]?.[id] ?? null,
-  }));
-
-  return {
-    name: 'filterBucket',
-    data: {
-      negate,
-      data,
-    },
-  };
-};
 
 /**
  * Helper function to transform `@elastic/charts` brush event into brush action event
  */
-export const getBrushFromChartBrushEventFn = (
-  table: Datatable,
-  xAccessor: Accessor | AccessorFn
-) => ({ x: selectedRange }: XYBrushArea): BrushTriggerEvent => {
-  const [start, end] = selectedRange ?? [0, 0];
-  const range: [number, number] = [start, end];
-  const column = table.columns.findIndex(({ id }) => validateAccessorId(id, xAccessor));
+export const getBrushFromChartBrushEventFn =
+  (table: Datatable, xAccessor: Accessor | AccessorFn) =>
+  ({ x: selectedRange }: XYBrushEvent): BrushTriggerEvent => {
+    const [start, end] = selectedRange ?? [0, 0];
+    const range: [number, number] = [start, end];
+    const column = table.columns.findIndex(({ id }) => validateAccessorId(id, xAccessor));
 
-  return {
-    data: {
-      table,
-      column,
-      range,
-    },
-    name: 'brush',
+    return {
+      data: {
+        table,
+        column,
+        range,
+      },
+      name: 'brush',
+    };
   };
-};

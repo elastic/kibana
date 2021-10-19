@@ -90,7 +90,7 @@ describe('.execute() & getHref', () => {
     });
     const getLocationSpy = jest.spyOn(definition, 'getLocation');
     const drilldown = new EmbeddableToDashboardDrilldown({
-      start: ((() => ({
+      start: (() => ({
         core: {
           application: {
             navigateToApp,
@@ -111,7 +111,7 @@ describe('.execute() & getHref', () => {
           },
         },
         self: {},
-      })) as unknown) as StartServicesGetter<
+      })) as unknown as StartServicesGetter<
         Pick<StartDependencies, 'data' | 'uiActionsEnhanced' | 'dashboard'>
       >,
     });
@@ -123,7 +123,7 @@ describe('.execute() & getHref', () => {
       ...config,
     };
 
-    const context = ({
+    const context = {
       filters: filtersFromEvent,
       embeddable: {
         getInput: () => ({
@@ -134,7 +134,7 @@ describe('.execute() & getHref', () => {
         }),
       },
       timeFieldName,
-    } as unknown) as ApplyGlobalFilterActionContext & EnhancedEmbeddableContext;
+    } as unknown as ApplyGlobalFilterActionContext & EnhancedEmbeddableContext;
 
     await drilldown.execute(completeConfig, context);
 
@@ -349,11 +349,13 @@ function getMockTimeRangeFilter(): RangeFilter {
       negate: false,
       alias: null,
     },
-    range: {
-      order_date: {
-        gte: '2020-03-23T13:10:29.665Z',
-        lt: '2020-03-23T13:10:36.736Z',
-        format: 'strict_date_optional_time',
+    query: {
+      range: {
+        order_date: {
+          gte: '2020-03-23T13:10:29.665Z',
+          lt: '2020-03-23T13:10:36.736Z',
+          format: 'strict_date_optional_time',
+        },
       },
     },
   };

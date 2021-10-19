@@ -93,11 +93,8 @@ const showDisabledWatcherClusterAlertsError = () => {
 };
 
 export const showAlertsToast = (response: EnableAlertResponse) => {
-  const {
-    isSufficientlySecure,
-    hasPermanentEncryptionKey,
-    disabledWatcherClusterAlerts,
-  } = response;
+  const { isSufficientlySecure, hasPermanentEncryptionKey, disabledWatcherClusterAlerts } =
+    response;
 
   if (isSufficientlySecure === false || hasPermanentEncryptionKey === false) {
     showTlsAndEncryptionError();

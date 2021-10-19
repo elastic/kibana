@@ -15,7 +15,8 @@ You do not need to configure any additional settings to use the
 [cols="2*<"]
 |===
 | `xpack.security.enabled`
-  | By default, {kib} automatically detects whether to enable the
+  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
+  By default, {kib} automatically detects whether to enable the
   {security-features} based on the license and whether {es} {security-features}
   are enabled. +
   +
@@ -217,7 +218,7 @@ There is a very limited set of cases when you'd want to change these settings. F
 | Determines if HTTP authentication schemes used by the enabled authentication providers should be automatically supported during HTTP authentication. By default, this setting is set to `true`.
 
 | `xpack.security.authc.http.schemes[]`
-| List of HTTP authentication schemes that {kib} HTTP authentication should support. By default, this setting is set to `['apikey']` to support HTTP authentication with <<api-keys, `ApiKey`>> scheme.
+| List of HTTP authentication schemes that {kib} HTTP authentication should support. By default, this setting is set to `['apikey', 'bearer']` to support HTTP authentication with the <<api-keys, `ApiKey`>> and <<http-authentication, `Bearer`>> schemes.
 
 |===
 
@@ -271,7 +272,7 @@ You can configure the following settings in the `kibana.yml` file.
 
 |[[xpack-session-idleTimeout]] `xpack.security.session.idleTimeout` {ess-icon}
   | Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both
-highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 1 hour.
+highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 8 hours.
 
 2+a|
 [TIP]

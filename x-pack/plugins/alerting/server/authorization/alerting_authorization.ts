@@ -435,12 +435,8 @@ export class AlertingAuthorization {
           : // only has some of the required privileges
             privileges.kibana.reduce((authorizedRuleTypes, { authorized, privilege }) => {
               if (authorized && privilegeToRuleType.has(privilege)) {
-                const [
-                  ruleType,
-                  feature,
-                  hasPrivileges,
-                  isAuthorizedAtProducerLevel,
-                ] = privilegeToRuleType.get(privilege)!;
+                const [ruleType, feature, hasPrivileges, isAuthorizedAtProducerLevel] =
+                  privilegeToRuleType.get(privilege)!;
                 ruleType.authorizedConsumers[feature] = mergeHasPrivileges(
                   hasPrivileges,
                   ruleType.authorizedConsumers[feature]
@@ -490,8 +486,8 @@ function mergeHasPrivileges(left: HasPrivileges, right?: HasPrivileges): HasPriv
 }
 
 function hasPrivilegeByOperation(operation: ReadOperations | WriteOperations): HasPrivileges {
-  const read = Object.values(ReadOperations).includes((operation as unknown) as ReadOperations);
-  const all = Object.values(WriteOperations).includes((operation as unknown) as WriteOperations);
+  const read = Object.values(ReadOperations).includes(operation as unknown as ReadOperations);
+  const all = Object.values(WriteOperations).includes(operation as unknown as WriteOperations);
   return {
     read: read || all,
     all,

@@ -147,7 +147,7 @@ describe('PieVisualization component', () => {
       );
 
       (component.find(Partition).prop('layers')![1].shape!.fillColor as NodeColorAccessor)(
-        ({
+        {
           dataName: 'third',
           depth: 2,
           parent: {
@@ -173,7 +173,7 @@ describe('PieVisualization component', () => {
           },
           value: 41,
           sortIndex: 2,
-        } as unknown) as ShapeTreeNode,
+        } as unknown as ShapeTreeNode,
         0,
         [] as HierarchyOfArrays
       );

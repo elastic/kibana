@@ -28,10 +28,10 @@ jest.mock('./migrate_app_state', () => ({
 const { createStateContainer, syncState } = jest.requireMock('../../../../kibana_utils/public');
 
 describe('createVisualizeAppState', () => {
-  const kbnUrlStateStorage = ({
+  const kbnUrlStateStorage = {
     set: jest.fn(),
     get: jest.fn(() => ({ linked: false })),
-  } as unknown) as IKbnUrlStateStorage;
+  } as unknown as IKbnUrlStateStorage;
 
   const { stateContainer, stopStateSync } = createVisualizeAppState({
     stateDefaults: visualizeAppStateStub,

@@ -1198,6 +1198,91 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
       });
+
+      it('should apply layers filter if passed and model the suggestion based on that', () => {
+        (generateId as jest.Mock).mockReturnValue('newid');
+        const initialState = stateWithNonEmptyTables();
+
+        const modifiedState: IndexPatternPrivateState = {
+          ...initialState,
+          layers: {
+            referenceLineLayer: {
+              indexPatternId: '1',
+              columnOrder: ['referenceLine'],
+              columns: {
+                referenceLine: {
+                  dataType: 'number',
+                  isBucketed: false,
+                  label: 'Static Value: 0',
+                  operationType: 'static_value',
+                  params: { value: '0' },
+                  references: [],
+                  scale: 'ratio',
+                },
+              },
+            },
+            currentLayer: {
+              indexPatternId: '1',
+              columnOrder: ['metric', 'ref'],
+              columns: {
+                metric: {
+                  label: '',
+                  customLabel: true,
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'average',
+                  sourceField: 'bytes',
+                },
+                ref: {
+                  label: '',
+                  customLabel: true,
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'cumulative_sum',
+                  references: ['metric'],
+                },
+              },
+            },
+          },
+        };
+
+        const suggestions = getSuggestionSubset(
+          getDatasourceSuggestionsForField(
+            modifiedState,
+            '1',
+            documentField,
+            (layerId) => layerId !== 'referenceLineLayer'
+          )
+        );
+        // should ignore the referenceLine layer
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            table: expect.objectContaining({
+              changeType: 'extended',
+              columns: [
+                {
+                  columnId: 'ref',
+                  operation: {
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: '',
+                    scale: undefined,
+                  },
+                },
+                {
+                  columnId: 'newid',
+                  operation: {
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: 'Count of records',
+                    scale: 'ratio',
+                  },
+                },
+              ],
+            }),
+          })
+        );
+      });
     });
 
     describe('finding the layer that is using the current index pattern', () => {
@@ -1579,6 +1664,103 @@ describe('IndexPattern Data Source suggestions', () => {
       };
 
       expect(getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state))).toContainEqual(
+        expect.objectContaining({
+          table: {
+            isMultiRow: true,
+            changeType: 'extended',
+            label: 'Over time',
+            columns: [
+              {
+                columnId: 'cola',
+                operation: {
+                  label: 'My Terms',
+                  dataType: 'string',
+                  isBucketed: true,
+                  scale: 'ordinal',
+                },
+              },
+              {
+                columnId: 'id1',
+                operation: {
+                  label: 'timestampLabel',
+                  dataType: 'date',
+                  isBucketed: true,
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'colb',
+                operation: {
+                  label: 'My Op',
+                  dataType: 'number',
+                  isBucketed: false,
+                  scale: 'ratio',
+                },
+              },
+            ],
+            layerId: 'first',
+          },
+        })
+      );
+    });
+
+    it('adds date histogram over default time field for tables without time dimension and a referenceLine', async () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        ...initialState,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['cola', 'colb'],
+            columns: {
+              cola: {
+                label: 'My Terms',
+                customLabel: true,
+                dataType: 'string',
+                isBucketed: true,
+                operationType: 'terms',
+                sourceField: 'source',
+                scale: 'ordinal',
+                params: {
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                  size: 5,
+                },
+              },
+              colb: {
+                label: 'My Op',
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'average',
+                sourceField: 'bytes',
+                scale: 'ratio',
+              },
+            },
+          },
+          referenceLine: {
+            indexPatternId: '2',
+            columnOrder: ['referenceLineA'],
+            columns: {
+              referenceLineA: {
+                label: 'My Op',
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'average',
+                sourceField: 'bytes',
+                scale: 'ratio',
+              },
+            },
+          },
+        },
+      };
+
+      expect(
+        getSuggestionSubset(
+          getDatasourceSuggestionsFromCurrentState(state, (layerId) => layerId !== 'referenceLine')
+        )
+      ).toContainEqual(
         expect.objectContaining({
           table: {
             isMultiRow: true,

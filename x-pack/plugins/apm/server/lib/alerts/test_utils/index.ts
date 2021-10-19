@@ -17,17 +17,17 @@ export const createRuleTypeMocks = () => {
   let alertExecutor: (...args: any[]) => Promise<any>;
 
   const mockedConfig$ = of({
-    /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.errorIndices': 'apm-*',
-    'apm_oss.transactionIndices': 'apm-*',
-    /* eslint-enable @typescript-eslint/naming-convention */
+    indices: {
+      error: 'apm-*',
+      transaction: 'apm-*',
+    },
   } as APMConfig);
 
-  const loggerMock = ({
+  const loggerMock = {
     debug: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown) as Logger;
+  } as unknown as Logger;
 
   const alerting = {
     registerType: ({ executor }) => {

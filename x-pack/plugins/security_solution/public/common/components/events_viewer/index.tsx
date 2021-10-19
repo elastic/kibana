@@ -32,11 +32,11 @@ import { defaultControlColumn } from '../../../timelines/components/timeline/bod
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
   {
     ...defaultControlColumn,
-    // eslint-disable-next-line react/display-name
     headerCellRender: () => <>{i18n.ACTIONS}</>,
   },
 ];
@@ -177,41 +177,41 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         <InspectButtonContainer>
           {tGridEnabled ? (
             timelinesUi.getTGrid<'embedded'>({
-              id,
-              type: 'embedded',
+              additionalFilters,
               browserFields,
               bulkActions,
               columns,
-              dataProviders: dataProviders!,
+              dataProviders,
               defaultCellActions,
               deletedEventIds,
               docValueFields,
               end,
               entityType,
               filters: globalFilters,
+              filterStatus: currentFilter,
               globalFullScreen,
+              graphEventId,
               graphOverlay,
               hasAlertsCrud,
+              id,
               indexNames: selectedPatterns,
               indexPattern,
               isLive,
               isLoadingIndexPattern,
               itemsPerPage,
-              itemsPerPageOptions: itemsPerPageOptions!,
+              itemsPerPageOptions,
               kqlMode,
-              query,
+              leadingControlColumns,
               onRuleChange,
+              query,
               renderCellValue,
               rowRenderers,
               setQuery,
-              start,
               sort,
-              additionalFilters,
-              graphEventId,
-              filterStatus: currentFilter,
-              leadingControlColumns,
-              trailingControlColumns,
+              start,
               tGridEventRenderedViewEnabled,
+              trailingControlColumns,
+              type: 'embedded',
               unit,
             })
           ) : (
@@ -220,7 +220,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               columns={columns}
               docValueFields={docValueFields}
               id={id}
-              dataProviders={dataProviders!}
+              dataProviders={dataProviders}
               deletedEventIds={deletedEventIds}
               end={end}
               isLoadingIndexPattern={isLoadingIndexPattern}
@@ -228,8 +228,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               indexNames={selectedPatterns}
               indexPattern={indexPattern}
               isLive={isLive}
-              itemsPerPage={itemsPerPage!}
-              itemsPerPageOptions={itemsPerPageOptions!}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
               kqlMode={kqlMode}
               query={query}
               onRuleChange={onRuleChange}

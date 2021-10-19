@@ -47,13 +47,8 @@ export const registerCreateRoute = (router: IRouter, { coreUsageData }: RouteDep
     catchAndReturnBoomErrors(async (context, req, res) => {
       const { type, id } = req.params;
       const { overwrite } = req.query;
-      const {
-        attributes,
-        migrationVersion,
-        coreMigrationVersion,
-        references,
-        initialNamespaces,
-      } = req.body;
+      const { attributes, migrationVersion, coreMigrationVersion, references, initialNamespaces } =
+        req.body;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});

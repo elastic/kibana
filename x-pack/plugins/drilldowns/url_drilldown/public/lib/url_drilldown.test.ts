@@ -49,14 +49,14 @@ const mockDataPoints = [
   },
 ];
 
-const mockEmbeddable = ({
+const mockEmbeddable = {
   getInput: () => ({
     filters: [],
     timeRange: { from: 'now-15m', to: 'now' },
     query: { query: 'test', language: 'kuery' },
   }),
   getOutput: () => ({}),
-} as unknown) as IEmbeddable;
+} as unknown as IEmbeddable;
 
 const mockNavigateToUrl = jest.fn(() => Promise.resolve());
 
