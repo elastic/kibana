@@ -71,7 +71,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     const esQuery = {
       allowNoIndices: true,
       index: resolvedLogSourceConfiguration.indices,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         size: size + 1, // Extra one to test if it has more before or after
         track_total_hits: false,
@@ -141,7 +141,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     const query = {
       allowNoIndices: true,
       index: resolvedLogSourceConfiguration.indices,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         aggregations: {
           count_by_date: {

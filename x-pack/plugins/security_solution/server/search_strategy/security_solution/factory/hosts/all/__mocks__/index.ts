@@ -622,7 +622,7 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           track_total_hits: false,
           body: {
             docvalue_fields: mockOptions.docValueFields,
@@ -821,7 +821,7 @@ export const expectedDsl = {
     docvalue_fields: mockOptions.docValueFields,
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',

@@ -189,7 +189,7 @@ export const getDetectionRuleMetrics = async (
   const ruleSearchOptions: RuleSearchParams = {
     body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
     filter_path: [],
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index: kibanaIndex,
     size: MAX_RESULTS_WINDOW,
   };

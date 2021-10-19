@@ -29,7 +29,7 @@ export const buildHostsKpiUniqueIpsQueryEntities = ({
   const dslQuery = {
     index: defaultIndex,
     allowNoIndices: true,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       aggregations: {

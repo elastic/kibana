@@ -46,7 +46,7 @@ export const buildTimelineKpiQuery = ({
   const dslQuery = {
     allowNoIndices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       aggs: {
         userCount: {

@@ -33,7 +33,7 @@ export const getMetricMetadata = async (
   const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
   const metricQuery = {
     allowNoIndices: true,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index: sourceConfiguration.metricAlias,
     body: {
       query: {

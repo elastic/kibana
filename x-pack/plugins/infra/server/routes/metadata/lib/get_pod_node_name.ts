@@ -23,7 +23,7 @@ export const getPodNodeName = async (
   const timestampField = sourceConfiguration.fields.timestamp;
   const params = {
     allowNoIndices: true,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     terminateAfter: 1,
     index: sourceConfiguration.metricAlias,
     body: {

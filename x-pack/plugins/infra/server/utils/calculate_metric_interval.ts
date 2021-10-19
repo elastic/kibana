@@ -37,7 +37,7 @@ export const calculateMetricInterval = async (
   const query = {
     allowNoIndices: true,
     index: options.indexPattern,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: {
         bool: {

@@ -41,7 +41,7 @@ export const expectedDsl = {
     'winlogbeat-*',
   ],
   allowNoIndices: true,
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -96,7 +96,7 @@ export const expectedThresholdDsl = {
     'winlogbeat-*',
   ],
   allowNoIndices: true,
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -153,7 +153,7 @@ export const expectedThresholdMissingFieldDsl = {
     'winlogbeat-*',
   ],
   allowNoIndices: true,
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -244,7 +244,7 @@ export const expectedThresholdWithCardinalityDsl = {
     },
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -270,7 +270,7 @@ export const expectedThresholdWithGroupFieldsAndCardinalityDsl = {
     'winlogbeat-*',
   ],
   allowNoIndices: true,
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -365,7 +365,7 @@ export const expectedThresholdGroupWithCardinalityDsl = {
     },
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -391,7 +391,7 @@ export const expectedIpIncludingMissingDataDsl = {
     'winlogbeat-*',
   ],
   allowNoIndices: true,
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -454,7 +454,7 @@ export const expectedIpNotIncludingMissingDataDsl = {
     'winlogbeat-*',
   ],
   allowNoIndices: true,
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {

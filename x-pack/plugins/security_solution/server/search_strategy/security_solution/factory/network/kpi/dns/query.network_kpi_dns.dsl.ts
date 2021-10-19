@@ -57,7 +57,7 @@ export const buildDnsQuery = ({
   const dslQuery = {
     index: defaultIndex,
     allowNoIndices: true,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: true,
     body: {
       query: {

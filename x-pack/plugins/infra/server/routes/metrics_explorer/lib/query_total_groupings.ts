@@ -42,7 +42,7 @@ export const queryTotalGroupings = async (
 
   const params = {
     allowNoIndices: true,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index: options.indexPattern,
     body: {
       size: 0,

@@ -30,7 +30,7 @@ export const buildOverviewHostQuery = ({
   const dslQuery = {
     allowNoIndices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       aggregations: {

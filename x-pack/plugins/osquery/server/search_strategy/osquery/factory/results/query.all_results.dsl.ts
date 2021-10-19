@@ -38,7 +38,7 @@ export const buildResultsQuery = ({
   const dslQuery = {
     allowNoIndices: true,
     index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       aggs: {
         count_by_agent_id: {

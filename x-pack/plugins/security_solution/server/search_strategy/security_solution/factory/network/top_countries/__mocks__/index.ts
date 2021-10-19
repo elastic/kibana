@@ -69,7 +69,7 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           body: {
             aggregations: {
               top_countries_count: { cardinality: { field: 'destination.geo.country_iso_code' } },
@@ -129,7 +129,7 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   body: {
     aggregations: {
       top_countries_count: { cardinality: { field: 'destination.geo.country_iso_code' } },
