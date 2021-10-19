@@ -14,7 +14,7 @@ export const checkValidNode = async (
   id: string
 ): Promise<boolean> => {
   const params = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     ignore_unavailable: true,
     index: indexPattern,
     terminateAfter: 1,

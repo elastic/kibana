@@ -35,7 +35,7 @@ export const buildHostDetailsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,

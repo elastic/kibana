@@ -26,7 +26,7 @@ export const getCloudMetricsMetadata = async (
   timeRange: { from: number; to: number }
 ): Promise<InfraCloudMetricsAdapterResponse> => {
   const metricQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     ignore_unavailable: true,
     index: sourceConfiguration.metricAlias,
     body: {

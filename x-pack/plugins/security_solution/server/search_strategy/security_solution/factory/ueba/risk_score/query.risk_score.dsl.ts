@@ -31,7 +31,7 @@ export const buildRiskScoreQuery = ({
   ];
 
   return {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: true,

@@ -17,7 +17,7 @@ export const buildFirstOrLastSeenHostQuery = ({
   const filter = [{ term: { 'host.name': hostName } }];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,

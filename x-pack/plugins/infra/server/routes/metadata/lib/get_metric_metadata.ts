@@ -32,7 +32,7 @@ export const getMetricMetadata = async (
 ): Promise<InfraMetricsAdapterResponse> => {
   const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
   const metricQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     ignore_unavailable: true,
     index: sourceConfiguration.metricAlias,
     body: {

@@ -26,7 +26,7 @@ export const mockOptions = {
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',

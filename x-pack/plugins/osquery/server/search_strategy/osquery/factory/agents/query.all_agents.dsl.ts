@@ -21,7 +21,7 @@ export const buildAgentsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: '.fleet-agents',
     ignore_unavailable: true,
     body: {

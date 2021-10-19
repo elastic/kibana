@@ -35,7 +35,7 @@ export const calculateMetricInterval = async (
     from = options.timerange.to - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
   }
   const query = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: options.indexPattern,
     ignore_unavailable: true,
     body: {

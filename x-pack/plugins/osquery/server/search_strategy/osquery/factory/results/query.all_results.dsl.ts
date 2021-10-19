@@ -36,7 +36,7 @@ export const buildResultsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
     ignore_unavailable: true,
     body: {
