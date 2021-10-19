@@ -22,7 +22,10 @@ import {
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { DETECTION_ENGINE_RULES_STATUS_URL } from '../../../../plugins/security_solution/common/constants';
+import {
+  DETECTION_ENGINE_RULES_STATUS_URL,
+  DETECTION_ENGINE_RULES_URL,
+} from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
