@@ -452,7 +452,7 @@ export function Detail() {
         name: (
           <FormattedMessage
             id="xpack.fleet.epm.packageDetailsNav.packagePoliciesLinkText"
-            defaultMessage="Policies"
+            defaultMessage="Integration Policies"
           />
         ),
         isSelected: panel === 'policies',

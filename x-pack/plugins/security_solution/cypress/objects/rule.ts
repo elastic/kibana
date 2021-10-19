@@ -58,6 +58,7 @@ export interface CustomRule {
   lookBack: Interval;
   timeline: CompleteTimeline;
   maxSignals: number;
+  buildingBlockType?: string;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -186,6 +187,25 @@ export const getNewRule = (): CustomRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
+});
+
+export const getBuildingBlockRule = (): CustomRule => ({
+  customQuery: 'host.name: *',
+  index: getIndexPatterns(),
+  name: 'Building Block Rule Test',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+  buildingBlockType: 'default',
 });
 
 export const getUnmappedRule = (): CustomRule => ({
