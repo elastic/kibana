@@ -17,6 +17,7 @@ import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } fro
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
@@ -996,8 +997,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         ['==', ['get', MVT_HITS_TOTAL_RELATION], 'gte'],
         ['>=', ['get', MVT_HITS_TOTAL_VALUE], DEFAULT_MAX_RESULT_WINDOW],
       ]);
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', '#FF0000');
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-width', 2);
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', euiThemeVars.euiColorWarning);
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-width', 3);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-dasharray', [2, 1]);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-opacity', this.getAlpha());
     }
