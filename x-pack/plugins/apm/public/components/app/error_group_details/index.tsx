@@ -123,7 +123,7 @@ export function ErrorGroupDetails() {
     }),
   });
 
-  const { data: errorGroupData, status } = useFetcher(
+  const { data: errorGroupData } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
@@ -146,7 +146,7 @@ export function ErrorGroupDetails() {
     [environment, kuery, serviceName, start, end, groupId]
   );
 
-  const { errorDistributionData } = useErrorGroupDistributionFetcher({
+  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId,
     environment,

@@ -34,14 +34,14 @@ export function ErrorGroupOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { errorDistributionData } = useErrorGroupDistributionFetcher({
+  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
     environment,
     kuery,
   });
 
-  const { data: errorGroupListData, status } = useFetcher(
+  const { data: errorGroupListData } = useFetcher(
     (callApmApi) => {
       const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
 
