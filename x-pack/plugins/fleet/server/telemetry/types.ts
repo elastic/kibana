@@ -42,7 +42,6 @@ export interface ESLicense {
 
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
-  '@timestamp'?: string;
   cluster_name?: string;
   cluster_uuid?: string;
   license?: ESLicense;
