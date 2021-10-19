@@ -14,4 +14,10 @@ export type EditPackagePolicyFrom =
   | 'upgrade-from-integrations-policy-list'
   | 'upgrade-from-extension';
 
-export type PackagePolicyFormState = 'VALID' | 'INVALID' | 'CONFIRM' | 'LOADING' | 'SUBMITTED';
+export type PackagePolicyFormState =
+  | 'VALID'
+  | 'INVALID'
+  | 'CONFIRM'
+  | 'LOADING'
+  | 'SUBMITTED'
+  | 'SUBMITTED_NO_AGENTS';
