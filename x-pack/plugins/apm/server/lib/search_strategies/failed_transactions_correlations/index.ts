@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export {
-  failedTransactionsCorrelationsSearchServiceProvider,
-  FailedTransactionsCorrelationsSearchServiceProvider,
-  FailedTransactionsCorrelationsSearchStrategy,
-} from './failed_transactions_correlations_search_service';
+export { failedTransactionsCorrelationsSearchServiceProvider } from './failed_transactions_correlations_search_service';
