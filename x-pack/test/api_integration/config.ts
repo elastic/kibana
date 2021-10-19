@@ -42,7 +42,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
         'node.attr.name=apiIntegrationTestNode',
-        'path.repo=/tmp/repo,/tmp/repo_1,/tmp/repo_2',
+        'path.repo=/tmp/repo,/tmp/repo_1,/tmp/repo_2,/tmp/cloud-snapshots/',
       ],
     },
   };
