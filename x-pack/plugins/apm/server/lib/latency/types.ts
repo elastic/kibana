@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { Setup } from '../helpers/setup_request';
-import { CorrelationsOptions } from '../search_strategies/queries/get_filters';
+import type {
+  FieldValuePair,
+  SearchStrategyClientParams,
+} from '../../../common/search_strategies/types';
 
-export interface OverallLatencyDistributionOptions extends CorrelationsOptions {
+import { Setup } from '../helpers/setup_request';
+
+export interface OverallLatencyDistributionOptions
+  extends SearchStrategyClientParams {
   percentileThreshold: number;
+  termFilters?: FieldValuePair[];
   setup: Setup;
 }
 
