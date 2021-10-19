@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { KibanaRequest } from 'src/core/server';
 import { sha256 } from 'js-sha256';
 
 interface AlertContext {
@@ -39,6 +40,30 @@ export class InsightsService {
 
   constructor(clusterId: string) {
     this.clusterId = clusterId;
+  }
+
+  public getSessionIDfromKibanaRequest(request: KibanaRequest): string {
+    const rawCookieHeader = request.headers.cookie;
+    if (!rawCookieHeader) {
+      return '';
+    }
+    const cookieHeaders = Array.isArray(rawCookieHeader) ? rawCookieHeader : [rawCookieHeader];
+    let tokenPackage: string | undefined;
+
+    cookieHeaders
+      .flatMap((rawHeader) => rawHeader.split('; '))
+      .forEach((rawCookie) => {
+        const [cookieName, cookieValue] = rawCookie.split('=');
+        if (cookieName === 'sid') tokenPackage = cookieValue;
+      });
+
+    if (tokenPackage) {
+      const concatValue = tokenPackage + this.clusterId;
+      const sha = sha256.create().update(concatValue).hex();
+      return sha;
+    } else {
+      return '';
+    }
   }
 
   private getUserHash(username: string): string {
