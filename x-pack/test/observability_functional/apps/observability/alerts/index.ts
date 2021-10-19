@@ -14,9 +14,9 @@ async function asyncForEach<T>(array: T[], callback: (item: T, index: number) =>
   }
 }
 
-const ACTIVE_ALERTS_CELL_COUNT = 48;
-const RECOVERED_ALERTS_CELL_COUNT = 24;
-const TOTAL_ALERTS_CELL_COUNT = 72;
+const ACTIVE_ALERTS_CELL_COUNT = 78;
+const RECOVERED_ALERTS_CELL_COUNT = 120;
+const TOTAL_ALERTS_CELL_COUNT = 198;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -122,7 +122,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               const titleText = await (
                 await observability.alerts.common.getAlertsFlyoutTitle()
               ).getVisibleText();
-              expect(titleText).to.contain('Log threshold');
+              expect(titleText).to.contain('APM Failed Transaction Rate (one)');
             });
           });
 
@@ -142,11 +142,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             ];
             const expectedDescriptions = [
               'Active',
-              'Sep 2, 2021 @ 12:54:09.674',
-              '15 minutes',
-              '100.25',
-              '1957',
-              'Log threshold',
+              // NOTE: This *should* be 15:00, e.g. UTC, I'm investigating why the feature controls tests change the timezone to Browser (this is a known issue
+              // when using custom spaces, but those tests don't AFAICS). This *will* break at some point if not fixed.
+              'Oct 19, 2021 @ 16:00:41.555',
+              '20 minutes',
+              '5',
+              '30.73',
+              'Failed transaction rate threshold',
             ];
 
             await asyncForEach(flyoutTitles, async (title, index) => {
