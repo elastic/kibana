@@ -48,31 +48,30 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
       const ids = body.ids;
       try {
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
-        const [statusesById, failingRules] = await Promise.all([
-          ruleStatusClient.findBulk({
+        const [currentStatusesByRuleId, failingRules] = await Promise.all([
+          ruleStatusClient.getCurrentStatusBulk({
             ruleIds: ids,
-            logsCount: 6,
             spaceId: context.securitySolution.getSpaceId(),
           }),
           getFailingRules(ids, rulesClient),
         ]);
 
         const statuses = ids.reduce((acc, id) => {
-          const lastFiveErrorsForId = statusesById[id];
+          const currentStatus = currentStatusesByRuleId[id];
+          const failingRule = failingRules[id];
 
-          if (lastFiveErrorsForId == null || lastFiveErrorsForId.length === 0) {
+          if (currentStatus == null) {
             return acc;
           }
 
-          const failingRule = failingRules[id];
+          const finalCurrentStatus =
+            failingRule != null
+              ? mergeAlertWithSidecarStatus(failingRule, currentStatus)
+              : currentStatus;
 
-          if (failingRule != null) {
-            const currentStatus = mergeAlertWithSidecarStatus(failingRule, lastFiveErrorsForId[0]);
-            const updatedLastFiveErrorsSO = [currentStatus, ...lastFiveErrorsForId.slice(1)];
-            return mergeStatuses(id, updatedLastFiveErrorsSO, acc);
-          }
-          return mergeStatuses(id, [...lastFiveErrorsForId], acc);
+          return mergeStatuses(id, [finalCurrentStatus], acc);
         }, {});
+
         return response.ok({ body: statuses });
       } catch (err) {
         const error = transformError(err);
