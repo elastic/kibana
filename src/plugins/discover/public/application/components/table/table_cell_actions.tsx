@@ -21,6 +21,7 @@ interface TableActionsProps {
   fieldMapping?: IndexPatternField;
   onFilter: DocViewFilterFn;
   onToggleColumn: (field: string) => void;
+  ignoredValue: boolean;
 }
 
 export const TableActions = ({
@@ -30,15 +31,16 @@ export const TableActions = ({
   flattenedField,
   onToggleColumn,
   onFilter,
+  ignoredValue,
 }: TableActionsProps) => {
   return (
     <div className="kbnDocViewer__buttons">
       <DocViewTableRowBtnFilterAdd
-        disabled={!fieldMapping || !fieldMapping.filterable}
+        disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue}
         onClick={() => onFilter(fieldMapping, flattenedField, '+')}
       />
       <DocViewTableRowBtnFilterRemove
-        disabled={!fieldMapping || !fieldMapping.filterable}
+        disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue}
         onClick={() => onFilter(fieldMapping, flattenedField, '-')}
       />
       <DocViewTableRowBtnToggleColumn
