@@ -45,7 +45,7 @@ export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
         }
 
         return response.ok({
-          body: `${exportContent.exportData}${exportContent.exportDetails}`,
+          body: `${exportContent.exportData}${JSON.stringify(exportContent.exportDetails)}\n`,
           headers: {
             'Content-Disposition': `attachment; filename="${listId}"`,
             'Content-Type': 'application/ndjson',
