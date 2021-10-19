@@ -54,7 +54,7 @@ describe('ExpressionChart', () => {
         metricAlias: 'metricbeat-*',
         inventoryDefaultView: 'host',
         metricsExplorerDefaultView: 'host',
-        // @ts-expect-error not full interface
+        // @ts-ignore
         fields: {
           timestamp: '@timestamp',
           container: 'container.id',

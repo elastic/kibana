@@ -88,13 +88,13 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           ? sources.updateSourceConfiguration(
               requestContext.core.savedObjects.client,
               sourceId,
-              // @ts-expect-error incompat interface
+              // @ts-ignore
               patchedSourceConfigurationProperties
             )
           : sources.createSourceConfiguration(
               requestContext.core.savedObjects.client,
               sourceId,
-              // @ts-expect-error incompat interface
+              // @ts-ignore
               patchedSourceConfigurationProperties
             ));
 
