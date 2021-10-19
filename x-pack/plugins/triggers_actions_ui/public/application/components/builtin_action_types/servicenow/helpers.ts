@@ -14,6 +14,8 @@ import {
 import { IErrorObject } from '../../../../../public/types';
 import { AppInfo, Choice, RESTApiError, ServiceNowActionConnector } from './types';
 
+export const DEFAULT_CORRELATION_ID = '{{rule.id}}:{{alert.id}}';
+
 export const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
   choices.map((choice) => ({ value: choice.value, text: choice.label }));
 
