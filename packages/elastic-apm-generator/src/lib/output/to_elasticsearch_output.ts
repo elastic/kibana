@@ -25,7 +25,8 @@ export function toElasticsearchOutput(events: Fields[], versionOverride?: string
     const document = {};
     // eslint-disable-next-line guard-for-in
     for (const key in values) {
-      set(document, key, values[key as keyof typeof values]);
+      const val = values[key as keyof typeof values];
+      set(document, key, val);
     }
     return {
       _index: `apm-${versionOverride || values['observer.version']}-${values['processor.event']}`,
