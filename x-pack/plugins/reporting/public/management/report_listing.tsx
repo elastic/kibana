@@ -422,7 +422,7 @@ class ReportListingUi extends Component<Props, State> {
                 defaultMessage: 'Open the Kibana App where this report was generated.',
               }
             ),
-            enabled: (job) =>
+            available: (job) =>
               [PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2].some(
                 (linkableJobType) => linkableJobType === job.jobtype
               ),
