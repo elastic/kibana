@@ -26,9 +26,9 @@ import { truncateMessage } from './utils/normalization';
 
 interface ConstructorParams {
   underlyingClient: UnderlyingLogClient;
-  eventLogService: IEventLogService;
-  eventLogClient: IEventLogClient;
   savedObjectsClient: SavedObjectsClientContract;
+  eventLogService: IEventLogService;
+  eventLogClient?: IEventLogClient;
 }
 
 export class RuleExecutionLogClient implements IRuleExecutionLogClient {

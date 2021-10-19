@@ -58,11 +58,11 @@ interface IExecLogEventLogClient {
 }
 
 export class EventLogClient implements IExecLogEventLogClient {
-  private readonly eventLogClient: IEventLogClient;
+  private readonly eventLogClient: IEventLogClient | undefined;
   private readonly eventLogger: IEventLogger;
   private sequence = 0;
 
-  constructor(eventLogService: IEventLogService, eventLogClient: IEventLogClient) {
+  constructor(eventLogService: IEventLogService, eventLogClient: IEventLogClient | undefined) {
     this.eventLogClient = eventLogClient;
     this.eventLogger = eventLogService.getLogger({
       event: { provider: RULE_EXECUTION_LOG_PROVIDER },
@@ -72,6 +72,10 @@ export class EventLogClient implements IExecLogEventLogClient {
   public async getLastStatusChanges(
     args: GetLastStatusChangesArgs
   ): Promise<IRuleStatusSOAttributes[]> {
+    if (!this.eventLogClient) {
+      throw new Error('Querying Event Log from a rule executor is not supported at this moment');
+    }
+
     const soType = ALERT_SAVED_OBJECT_TYPE;
     const soIds = [args.ruleId];
     const count = args.count;

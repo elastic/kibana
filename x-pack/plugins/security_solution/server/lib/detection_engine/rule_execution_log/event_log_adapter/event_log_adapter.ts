@@ -37,7 +37,7 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
 
   constructor(
     eventLogService: IEventLogService,
-    eventLogClient: IEventLogClient,
+    eventLogClient: IEventLogClient | undefined,
     savedObjectsClient: SavedObjectsClientContract
   ) {
     this.eventLogClient = new EventLogClient(eventLogService, eventLogClient);
