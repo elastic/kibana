@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import type { ChartTimeRange } from './last_updated';
 
 export function ChartCreationInfo(props: Partial<ChartTimeRange>) {
-  const dateFormat = 'MM/DD/YYYY hh:mm A';
+  const dateFormat = 'lll';
   const from = moment(props.from).format(dateFormat);
   const to = moment(props.to).format(dateFormat);
   const created = moment(props.lastUpdated).format(dateFormat);
