@@ -235,7 +235,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
 
-    // Register rule types via rule-registry
+    // rule options are used both to create and preview rules.
     const ruleOptions: CreateRuleOptions = {
       experimentalFeatures,
       logger: this.logger,
@@ -270,14 +270,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         secondaryAlias: config.signalsIndex,
       });
 
-      // Register rule types via rule-registry
-      const createRuleOptions: CreateRuleOptions = {
-        experimentalFeatures,
-        logger: this.logger,
-        ml: plugins.ml,
-        version: this.context.env.packageInfo.version,
-      };
-
       const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
         lists: plugins.lists,
         logger: this.logger,
@@ -287,19 +279,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
 
       this.setupPlugins.alerting.registerType(
-        securityRuleTypeWrapper(createEqlAlertType(createRuleOptions))
+        securityRuleTypeWrapper(createEqlAlertType(ruleOptions))
       );
       this.setupPlugins.alerting.registerType(
-        securityRuleTypeWrapper(createIndicatorMatchAlertType(createRuleOptions))
+        securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
       );
       this.setupPlugins.alerting.registerType(
-        securityRuleTypeWrapper(createMlAlertType(createRuleOptions))
+        securityRuleTypeWrapper(createMlAlertType(ruleOptions))
       );
       this.setupPlugins.alerting.registerType(
-        securityRuleTypeWrapper(createQueryAlertType(createRuleOptions))
+        securityRuleTypeWrapper(createQueryAlertType(ruleOptions))
       );
       this.setupPlugins.alerting.registerType(
-        securityRuleTypeWrapper(createThresholdAlertType(createRuleOptions))
+        securityRuleTypeWrapper(createThresholdAlertType(ruleOptions))
       );
     }
 
