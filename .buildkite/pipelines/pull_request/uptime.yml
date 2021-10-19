@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/uptime.sh
-    label: 'Uptime Playwright Tests'
+    label: 'Uptime @elastic/synthetics Tests'
     agents:
       queue: ci-group-6
     depends_on: build
