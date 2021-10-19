@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
         async () => {
           const { body: response } = await es.indices.get({
             index: `${rollupSourceIndexPrefix}*`,
-            allow_no_indices: false,
+            allow_no_indices: true,
           });
           return Object.keys(response).length === 3;
         }
