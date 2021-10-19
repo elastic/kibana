@@ -123,29 +123,10 @@ describe('#run$', () => {
     // ensure that FORCE_COLOR is in the env for consistency in snapshot
     process.env.FORCE_COLOR = process.env.FORCE_COLOR || 'true';
 
-    expect(execa.node.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "some/script",
-          Array [
-            "foo",
-            "bar",
-          ],
-          Object {
-            "env": Object {
-              "<inheritted process.env>": true,
-              "ELASTIC_APM_SERVICE_NAME": "kibana",
-              "isDevCliChild": "true",
-            },
-            "nodeOptions": Array [
-              "--preserve-symlinks-main",
-              "--preserve-symlinks",
-            ],
-            "stdio": "pipe",
-          },
-        ],
-      ]
-    `);
+    const [script, args, options] = execa.node.mock.calls[0];
+    expect(script).toBe('some/script');
+    expect(args).toEqual(['foo', 'bar']);
+    expect(options.stdio).toEqual('pipe');
   });
 
   it('writes stdout and stderr lines to logger', () => {
