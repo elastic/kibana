@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { DocLinksStart } from 'kibana/public';
 import './health_check.scss';
 import { useHealthContext } from '../context/health_context';
