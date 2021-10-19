@@ -7,10 +7,8 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
-import { PreviewRuleOptions } from '../../rule_types/types';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { signalRulesAlertType } from '../../signals/signal_rule_alert_type';
 import { createWarningsAndErrors } from '../../signals/preview/preview_rule_execution_log_client';
@@ -37,6 +35,7 @@ import { AlertInstance } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { IEventLogService } from '../../../../../../event_log/server';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
+import { CreateRuleOptions } from '../../rule_types/types';
 
 enum InvocationCount {
   HOUR = 1,
@@ -48,8 +47,8 @@ export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   ml: SetupPlugins['ml'],
-  previewRuleOptions: PreviewRuleOptions,
-  security: SetupPlugins['security']
+  security: SetupPlugins['security'],
+  ruleOptions: CreateRuleOptions
 ) => {
   router.post(
     {
@@ -171,18 +170,11 @@ export const previewRulesRoute = async (
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
             invocationCount--;
-            // eslint-disable-next-line no-console
-            console.log(
-              'preview invocation count remaining ',
-              invocationCount,
-              ' for previewId ',
-              previewId
-            );
           }
         };
 
         const signalRuleAlertType = signalRulesAlertType({
-          ...previewRuleOptions,
+          ...ruleOptions,
           lists: context.lists,
           config,
           indexNameOverride: previewIndex,

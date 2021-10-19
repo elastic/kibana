@@ -58,7 +58,7 @@ import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
-import { PreviewRuleOptions } from '../lib/detection_engine/rule_types/types';
+import { CreateRuleOptions } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
 import { createPreviewIndexRoute } from '../lib/detection_engine/routes/index/create_preview_index_route';
@@ -72,7 +72,7 @@ export const initRoutes = (
   ruleDataService: RuleDataPluginService,
   logger: Logger,
   isRuleRegistryEnabled: boolean,
-  previewRuleOptions: PreviewRuleOptions
+  ruleOptions: CreateRuleOptions
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
@@ -82,7 +82,7 @@ export const initRoutes = (
   patchRulesRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesRoute(router, isRuleRegistryEnabled);
   findRulesRoute(router, logger, isRuleRegistryEnabled);
-  previewRulesRoute(router, config, ml, previewRuleOptions, security);
+  previewRulesRoute(router, config, ml, security, ruleOptions);
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
   legacyCreateLegacyNotificationRoute(router, logger);
