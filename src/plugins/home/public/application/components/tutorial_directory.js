@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Synopsis } from './synopsis';
@@ -33,34 +33,6 @@ class TutorialDirectoryUi extends React.Component {
     const extraTabs = getServices().addDataService.getAddDataTabs();
 
     this.tabs = [
-      {
-        id: ALL_TAB_ID,
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.allTitle',
-          defaultMessage: 'All',
-        }),
-      },
-      {
-        id: 'logging',
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.loggingTitle',
-          defaultMessage: 'Logs',
-        }),
-      },
-      {
-        id: 'metrics',
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.metricsTitle',
-          defaultMessage: 'Metrics',
-        }),
-      },
-      {
-        id: 'security',
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.securitySolutionTitle',
-          defaultMessage: 'Security',
-        }),
-      },
       {
         id: SAMPLE_DATA_TAB_ID,
         name: this.props.intl.formatMessage({
@@ -88,7 +60,6 @@ class TutorialDirectoryUi extends React.Component {
     this.state = {
       selectedTabId: openTab,
       tutorialCards: [],
-      notices: getServices().tutorialService.getDirectoryNotices(),
     };
   }
 
@@ -216,19 +187,6 @@ class TutorialDirectoryUi extends React.Component {
     );
   };
 
-  renderNotices = () => {
-    const notices = getServices().tutorialService.getDirectoryNotices();
-    return notices.length ? (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        {notices.map((DirectoryNotice, index) => (
-          <EuiFlexItem key={index}>
-            <DirectoryNotice />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    ) : null;
-  };
-
   renderHeaderLinks = () => {
     const headerLinks = getServices().tutorialService.getDirectoryHeaderLinks();
     return headerLinks.length ? (
@@ -245,7 +203,6 @@ class TutorialDirectoryUi extends React.Component {
   render() {
     const headerLinks = this.renderHeaderLinks();
     const tabs = this.getTabs();
-    const notices = this.renderNotices();
 
     return (
       <KibanaPageTemplate
@@ -253,18 +210,15 @@ class TutorialDirectoryUi extends React.Component {
         template="empty"
         pageHeader={{
           pageTitle: (
-            <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
+            <FormattedMessage
+              id="home.tutorial.addDataToKibanaTitle"
+              defaultMessage="Alternative ways to add data"
+            />
           ),
           tabs,
           rightSideItems: headerLinks ? [headerLinks] : [],
         }}
       >
-        {notices && (
-          <>
-            {notices}
-            <EuiSpacer size="s" />
-          </>
-        )}
         {this.renderTabContent()}
       </KibanaPageTemplate>
     );

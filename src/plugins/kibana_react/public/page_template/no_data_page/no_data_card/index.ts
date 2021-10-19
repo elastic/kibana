@@ -7,5 +7,4 @@
  */
 
 export * from './elastic_agent_card';
-export * from './elastic_beats_card';
 export * from './no_data_card';

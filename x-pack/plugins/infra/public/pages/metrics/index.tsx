@@ -93,9 +93,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
                         <MetricsAlertDropdown />
                         <EuiHeaderLink
-                          href={kibana.services?.application?.getUrlForApp(
-                            '/home#/tutorial_directory/metrics'
-                          )}
+                          href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
                           color="primary"
                           iconType="indexOpen"
                         >

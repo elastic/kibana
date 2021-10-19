@@ -18,8 +18,8 @@ interface InvalidNodeErrorProps {
 
 export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = ({ nodeName }) => {
   const tutorialLinkProps = useLinkProps({
-    app: 'home',
-    hash: '/tutorial_directory/metrics',
+    app: 'integrations',
+    hash: '/browse',
   });
 
   return (

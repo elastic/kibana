@@ -7,18 +7,10 @@
 
 import React from 'react';
 import type {
-  TutorialDirectoryNoticeComponent,
   TutorialDirectoryHeaderLinkComponent,
   TutorialModuleNoticeComponent,
 } from 'src/plugins/home/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
-
-const TutorialDirectoryNoticeLazy = React.lazy(() => import('./tutorial_directory_notice'));
-export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = () => (
-  <React.Suspense fallback={<EuiLoadingSpinner />}>
-    <TutorialDirectoryNoticeLazy />
-  </React.Suspense>
-);
 
 const TutorialDirectoryHeaderLinkLazy = React.lazy(
   () => import('./tutorial_directory_header_link')
