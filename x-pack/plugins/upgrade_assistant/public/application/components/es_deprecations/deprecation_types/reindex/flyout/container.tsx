@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
 
@@ -15,6 +16,11 @@ import type { ReindexStateContext } from '../context';
 import { ChecklistFlyoutStep } from './checklist_step';
 import { WarningsFlyoutStep } from './warnings_step';
 import { DeprecationBadge } from '../../../../shared';
+import {
+  UIM_REINDEX_START_CLICK,
+  UIM_REINDEX_STOP_CLICK,
+  uiMetricService,
+} from '../../../../../lib/ui_metric';
 
 export interface ReindexFlyoutProps extends ReindexStateContext {
   deprecation: EnrichedDeprecationInfo;
@@ -33,6 +39,16 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
 
   const [showWarningsStep, setShowWarningsStep] = useState(false);
 
+  const onStartReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_START_CLICK);
+    startReindex();
+  }, [startReindex]);
+
+  const onStopReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_STOP_CLICK);
+    cancelReindex();
+  }, [cancelReindex]);
+
   const startReindexWithWarnings = () => {
     if (
       reindexWarnings &&
@@ -42,7 +58,7 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
     ) {
       setShowWarningsStep(true);
     } else {
-      startReindex();
+      onStartReindex();
     }
   };
   const flyoutContents = showWarningsStep ? (
@@ -51,7 +67,7 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
       hideWarningsStep={() => setShowWarningsStep(false)}
       continueReindex={() => {
         setShowWarningsStep(false);
-        startReindex();
+        onStartReindex();
       }}
     />
   ) : (
@@ -59,7 +75,7 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
       closeFlyout={closeFlyout}
       startReindex={startReindexWithWarnings}
       reindexState={reindexState}
-      cancelReindex={cancelReindex}
+      cancelReindex={onStopReindex}
     />
   );
 

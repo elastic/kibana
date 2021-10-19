@@ -145,7 +145,7 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
             <EuiButton fill color="primary" onClick={continueReindex} disabled={blockAdvance}>
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.continueButtonLabel"
-                defaultMessage="Continue with reindex"
+                defaultMessage="Continue reindexing"
               />
             </EuiButton>
           </EuiFlexItem>

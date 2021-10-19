@@ -32,7 +32,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
           onClick={[MockFunction]}
         >
           <FormattedMessage
-            defaultMessage="Continue with reindex"
+            defaultMessage="Continue reindexing"
             id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.continueButtonLabel"
             values={Object {}}
           />

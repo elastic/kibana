@@ -6,14 +6,23 @@ exports[`ChecklistFlyout renders 1`] = `
     <EuiText>
       <p>
         <FormattedMessage
-          defaultMessage="Index is unable to ingest, update, or delete documents while reindexing. If you can’t stop document updates or need to reindex into a new cluster, consider using a different upgrade strategy."
+          defaultMessage="The index will be read-only during reindexing. You won't be able to add, update, or delete documents until reindexing is complete. If you need to reindex to a new cluster, use the reindex API. {docsLink}"
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
-          values={Object {}}
+          values={
+            Object {
+              "docsLink": <EuiLink
+                href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/docs-reindex.html#reindex-from-remote"
+                target="_blank"
+              >
+                Learn more
+              </EuiLink>,
+            }
+          }
         />
       </p>
       <p>
         <FormattedMessage
-          defaultMessage="You can close this page while reindexing is in progress, it will continue in the background. If Kibana shuts down or restarts, return to this page to resume reindexing."
+          defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress or resume reindexing after a Kibana restart."
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
           values={Object {}}
         />
@@ -21,7 +30,7 @@ exports[`ChecklistFlyout renders 1`] = `
     </EuiText>
     <EuiSpacer />
     <ReindexProgress
-      cancelReindex={[Function]}
+      cancelReindex={[MockFunction]}
       reindexState={
         Object {
           "errorMessage": null,
@@ -63,10 +72,10 @@ exports[`ChecklistFlyout renders 1`] = `
           disabled={false}
           fill={true}
           isLoading={false}
-          onClick={[Function]}
+          onClick={[MockFunction]}
         >
           <FormattedMessage
-            defaultMessage="Run reindex"
+            defaultMessage="Start reindexing"
             id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
             values={Object {}}
           />
