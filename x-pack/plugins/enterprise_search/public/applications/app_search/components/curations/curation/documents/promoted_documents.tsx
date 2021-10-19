@@ -31,6 +31,8 @@ import { PROMOTED_DOCUMENTS_TITLE } from '../constants';
 import { CurationLogic } from '../curation_logic';
 import { AddResultButton, CurationResult, convertToResultFormat } from '../results';
 
+import './promoted_documents.scss';
+
 export const PromotedDocuments: React.FC = () => {
   const { curation, isAutomated, promotedIds, promotedDocumentsLoading } = useValues(CurationLogic);
   const documents = curation.promoted;
@@ -89,7 +91,11 @@ export const PromotedDocuments: React.FC = () => {
     >
       {hasDocuments ? (
         <EuiDragDropContext onDragEnd={reorderPromotedIds}>
-          <EuiDroppable droppableId="PromotedDocuments" spacing="m">
+          <EuiDroppable
+            droppableId="PromotedDocuments"
+            spacing="m"
+            className="promotedDocuments--results"
+          >
             {documents.map((document, index) => (
               <EuiDraggable
                 index={index}
