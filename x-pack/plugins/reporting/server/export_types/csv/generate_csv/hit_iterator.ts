@@ -64,10 +64,8 @@ export function createHitIterator(logger: LevelLogger) {
       logger.debug('executing scroll request');
       return parseResponse(
         await elasticsearchClient.scroll({
-          body: {
-            scroll_id: scrollId,
-            scroll: scrollSettings.duration,
-          },
+          scroll_id: scrollId,
+          scroll: scrollSettings.duration,
         })
       );
     }

@@ -23,10 +23,8 @@ export function fetchAllFromScroll(
 
     return dataClient.asCurrentUser
       .scroll({
-        body: {
-          scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
-          scroll_id: scrollId!,
-        },
+        scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
+        scroll_id: scrollId!,
       })
       .then(({ body: innerResponse }) => {
         return fetchAllFromScroll(innerResponse, dataClient, hits);

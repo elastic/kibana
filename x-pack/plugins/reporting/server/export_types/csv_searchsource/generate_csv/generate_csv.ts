@@ -109,10 +109,8 @@ export class CsvGenerator {
     this.logger.debug(`executing scroll request`);
     const results = (
       await this.clients.es.asCurrentUser.scroll({
-        body: {
-          scroll: scrollSettings.duration,
-          scroll_id: scrollId,
-        },
+        scroll: scrollSettings.duration,
+        scroll_id: scrollId,
       })
     ).body;
     return results;
