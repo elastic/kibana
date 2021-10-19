@@ -21,7 +21,8 @@ import {
 } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
   parseNdjsonStrings,
-  filterExportedCountsAndExceptions,
+  filterExportedRulesCounts,
+  filterExceptions,
   createLimitStream,
 } from '../../../utils/read_stream/create_stream_from_ndjson';
 
@@ -59,7 +60,8 @@ export const createRulesStreamFromNdJson = (ruleLimit: number) => {
   return [
     createSplitStream('\n'),
     parseNdjsonStrings(),
-    filterExportedCountsAndExceptions(),
+    filterExportedRulesCounts(),
+    filterExceptions(),
     validateRules(),
     createLimitStream(ruleLimit),
     createConcatStream([]),
