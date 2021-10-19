@@ -8,28 +8,28 @@
 import React, { FC } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { createCapabilityFailureMessage } from '../../../../lib/authorization';
 
 interface CreateAlertRuleActionProps {
   disabled: boolean;
 }
 
-export const crateAlertRuleActionNameText = (
-  <FormattedMessage
-    id="xpack.transform.transformList.createAlertRuleNameText"
-    defaultMessage="Create alert rule"
-  />
+export const crateAlertRuleActionNameText = i18n.translate(
+  'xpack.transform.transformList.createAlertRuleNameText',
+  {
+    defaultMessage: 'Create alert rule',
+  }
 );
 
 export const CreateAlertRuleActionName: FC<CreateAlertRuleActionProps> = ({ disabled }) => {
   if (disabled) {
     return (
       <EuiToolTip position="top" content={createCapabilityFailureMessage('canStartStopTransform')}>
-        {crateAlertRuleActionNameText}
+        <>{crateAlertRuleActionNameText}</>
       </EuiToolTip>
     );
   }
 
-  return crateAlertRuleActionNameText;
+  return <>{crateAlertRuleActionNameText}</>;
 };
