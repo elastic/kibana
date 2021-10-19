@@ -65,7 +65,7 @@ export const getFixIssuesStep = ({
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.fixIssuesStepDescription"
-              defaultMessage="Update your Elasticsearch and Kibana deployments to be compatible with Elastic 8. Critical issues must be resolved before you upgrade. Warning issues can be ignored at your discretion."
+              defaultMessage="Update your Elasticsearch and Kibana deployments to be compatible with Elastic 8.x. Critical issues must be resolved before you upgrade. Warning issues can be ignored at your discretion."
             />
           </p>
         </EuiText>
