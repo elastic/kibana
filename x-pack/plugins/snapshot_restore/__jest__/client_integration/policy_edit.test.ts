@@ -153,7 +153,7 @@ describe('<PolicyEdit />', () => {
           schedule,
           repository,
           config: {
-            ignore_unavailable: true,
+            ignoreUnavailable: true,
           },
           retention: {
             ...retention,
