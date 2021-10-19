@@ -9,9 +9,10 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
 import { getServices } from '../kibana_services';
 import { KibanaPageTemplate } from '../../../../kibana_react/public';
@@ -150,18 +151,46 @@ class TutorialDirectoryUi extends React.Component {
 
   renderTabContent = () => {
     const tab = this.tabs.find(({ id }) => id === this.state.selectedTabId);
+    if (tab?.content) {
+      getServices().chrome.setBreadcrumbs([
+        {
+          text: integrationsTitle,
+          href: this.props.addBasePath(`/app/integrations/browse`),
+        },
+        {
+          text: tab.name,
+        },
+      ]);
+      return tab.content;
+    }
 
-    getServices().chrome.setBreadcrumbs([
-      {
-        text: integrationsTitle,
-        href: this.props.addBasePath(`/app/integrations/browse`),
-      },
-      {
-        text: tab.name,
-      },
-    ]);
-
-    return tab.content;
+    return (
+      <EuiFlexGrid columns={4}>
+        {this.state.tutorialCards
+          .filter((tutorial) => {
+            return (
+              this.state.selectedTabId === SAMPLE_DATA_TAB_ID ||
+              this.state.selectedTabId === tutorial.category
+            );
+          })
+          .map((tutorial) => {
+            return (
+              <EuiFlexItem data-test-subj={`homeTab-${tutorial.name}`} key={tutorial.name}>
+                <Synopsis
+                  id={tutorial.id}
+                  iconType={tutorial.icon}
+                  description={tutorial.description}
+                  title={tutorial.name}
+                  wrapInPanel
+                  url={tutorial.url}
+                  onClick={tutorial.onClick}
+                  isBeta={tutorial.isBeta}
+                />
+              </EuiFlexItem>
+            );
+          })}
+      </EuiFlexGrid>
+    );
   };
 
   renderHeaderLinks = () => {
