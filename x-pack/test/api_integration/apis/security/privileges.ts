@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
               'packs_read',
             ],
           },
-          reserved: ['ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+          reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
         };
 
         await supertest
