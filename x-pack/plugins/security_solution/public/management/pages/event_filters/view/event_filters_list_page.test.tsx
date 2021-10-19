@@ -14,7 +14,7 @@ import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 
 // Needed to mock the data services used by the ExceptionItem component
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 describe('When on the Event Filters List Page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

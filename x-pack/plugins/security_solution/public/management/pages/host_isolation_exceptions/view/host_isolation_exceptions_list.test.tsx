@@ -16,8 +16,7 @@ import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
 import { useLicense } from '../../../../common/hooks/use_license';
 
-jest.mock('../../../../common/components/user_privileges/use_endpoint_privileges');
-
+jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 jest.mock('../service');
 jest.mock('../../../../common/hooks/use_license');
 
