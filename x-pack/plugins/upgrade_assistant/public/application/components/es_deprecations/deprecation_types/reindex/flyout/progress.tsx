@@ -47,6 +47,13 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       </>
     );
   }
+
+  // step is in progress after the new index is created and while it's not completed yet
+  const stepInProgress =
+    status === ReindexStatus.inProgress &&
+    (lastCompletedStep === ReindexStep.newIndexCreated ||
+      lastCompletedStep === ReindexStep.reindexStarted);
+  // but the reindex can only be cancelled after it has started
   const showCancelLink =
     status === ReindexStatus.inProgress && lastCompletedStep === ReindexStep.reindexStarted;
 
@@ -89,10 +96,17 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
   return (
     <EuiFlexGroup component="span">
       <EuiFlexItem grow={false}>
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
-          defaultMessage="Reindexing documents."
-        />
+        {stepInProgress ? (
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
+            defaultMessage="Reindexing documents."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
+            defaultMessage="Reindex documents."
+          />
+        )}
       </EuiFlexItem>
       {showCancelLink && (
         <EuiFlexItem>
@@ -119,7 +133,7 @@ const getStepTitle = (step: ReindexStep, inProgress?: boolean): ReactNode => {
       />
     ) : (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.readonlyStepTitle"
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
         defaultMessage="Set original index to read-only."
       />
     );
@@ -127,7 +141,7 @@ const getStepTitle = (step: ReindexStep, inProgress?: boolean): ReactNode => {
   if (step === ReindexStep.newIndexCreated) {
     return inProgress ? (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inPrgress.createIndexStepTitle"
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.createIndexStepTitle"
         defaultMessage="Creating new index."
       />
     ) : (
