@@ -289,7 +289,7 @@ const getValuesFromAggregations = (
       buckets = [
         {
           ...aggregations,
-          doc_count: 0,
+          doc_count: 0, // this is never used
           to_as_string: moment(timeFrame.end).toISOString(),
           from_as_string: moment(timeFrame.start).toISOString(),
           key_as_string: moment(timeFrame.start).toISOString(),
