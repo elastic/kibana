@@ -10,7 +10,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
 import {
   transformError,
-  getIndexExists,
+  getBootstrapIndexExists,
   getPolicyExists,
   setPolicy,
   createBootstrapIndex,
@@ -96,7 +96,10 @@ export const createDetectionIndex = async (
 
   const index = siemClient.getSignalsIndex();
 
-  const indexExists = await getIndexExists(esClient, index);
+  const indexExists = await getBootstrapIndexExists(
+    context.core.elasticsearch.client.asInternalUser,
+    index
+  );
   // If using the rule registry implementation, we don't want to create new .siem-signals indices -
   // only create/update resources if there are existing indices
   if (ruleRegistryEnabled && !indexExists) {
