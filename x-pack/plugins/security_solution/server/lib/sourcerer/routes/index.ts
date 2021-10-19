@@ -54,6 +54,7 @@ export const createSourcererDataViewRoute = (
 
         if (siemDataView == null) {
           const defaultDataView = await dataViewService.createAndSave({
+            allowNoIndex: true,
             id: DEFAULT_DATA_VIEW_ID,
             title: patternListAsTitle,
             timeFieldName: DEFAULT_TIME_FIELD,

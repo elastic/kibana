@@ -58,15 +58,9 @@ export class IndexPatternsFetcher {
   }): Promise<FieldDescriptor[]> {
     const { pattern, metaFields, fieldCapsOptions, type, rollupIndex } = options;
     const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
-    let patternListActive: string[] = patternList;
-    // if only one pattern, don't bother with validation. We let getFieldCapabilities fail if the single pattern is bad regardless
-    if (patternList.length > 1) {
-      patternListActive = await this.validatePatternListActive(patternList);
-    }
     const fieldCapsResponse = await getFieldCapabilities(
       this.elasticsearchClient,
-      // if none of the patterns are active, pass the original list to get an error
-      patternListActive.length > 0 ? patternListActive : patternList,
+      patternList,
       metaFields,
       {
         allow_no_indices: fieldCapsOptions
@@ -121,32 +115,5 @@ export class IndexPatternsFetcher {
       throw createNoMatchingIndicesError(pattern);
     }
     return await getFieldCapabilities(this.elasticsearchClient, indices, metaFields);
-  }
-
-  /**
-   *  Returns an index pattern list of only those index pattern strings in the given list that return indices
-   *
-   *  @param patternList string[]
-   *  @return {Promise<string[]>}
-   */
-  async validatePatternListActive(patternList: string[]) {
-    const result = await Promise.all(
-      patternList
-        .map(async (index) => {
-          const searchResponse = await this.elasticsearchClient.fieldCaps({
-            index,
-            fields: '_id',
-            ignore_unavailable: true,
-            allow_no_indices: false,
-          });
-          return searchResponse.body.indices.length > 0;
-        })
-        .map((p) => p.catch(() => false))
-    );
-    return result.reduce(
-      (acc: string[], isValid, patternListIndex) =>
-        isValid ? [...acc, patternList[patternListIndex]] : acc,
-      []
-    );
   }
 }
