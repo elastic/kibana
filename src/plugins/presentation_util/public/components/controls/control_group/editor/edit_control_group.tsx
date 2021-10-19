@@ -106,7 +106,7 @@ export const EditControlGroup = ({ closeFlyout }: { closeFlyout: () => void }) =
         </EuiFormRow>
         <EuiSpacer size="s" />
         <EuiCheckbox
-          id="widthsCheckbox"
+          id="editControls_setAllSizesCheckbox"
           label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
           checked={state.setAllWidths}
           onChange={(e) => setState((s) => ({ ...s, setAllWidths: e.target.checked }))}
