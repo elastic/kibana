@@ -8,10 +8,7 @@
 import React from 'react';
 import { screen } from '@testing-library/dom';
 import { render } from '../rtl_helpers';
-import * as kibanaSettings from '../../../../hooks/use_kibana_ui_settings';
 import { ChartCreationInfo } from './chart_creation_info';
-
-jest.spyOn(kibanaSettings, 'useKibanaUISettings').mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS');
 
 const info = {
   to: 1634071132571,
@@ -24,19 +21,15 @@ describe('ChartCreationInfo', () => {
     render(<ChartCreationInfo {...info} />);
 
     expect(screen.getByText('Chart created')).toBeInTheDocument();
-    expect(screen.getByText('Oct 12, 2021 @ 16:39:00.788')).toBeInTheDocument();
+    expect(screen.getByText('10/12/2021 04:39 PM')).toBeInTheDocument();
     expect(screen.getByText('Displaying from')).toBeInTheDocument();
-    expect(
-      screen.getByText('Oct 5, 2021 @ 00:00:00.000 → Oct 12, 2021 @ 16:38:52.571')
-    ).toBeInTheDocument();
+    expect(screen.getByText('10/05/2021 12:00 AM → 10/12/2021 04:38 PM')).toBeInTheDocument();
   });
 
   it('does not display info when props are falsey', async () => {
     render(<ChartCreationInfo />);
 
-    expect(screen.queryByText('Oct 12, 2021 @ 16:39:00.788')).not.toBeInTheDocument();
-    expect(
-      screen.queryByText('Oct 5, 2021 @ 00:00:00.000 → Oct 12, 2021 @ 16:38:52.571')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Chart created')).not.toBeInTheDocument();
+    expect(screen.queryByText('Displaying from')).not.toBeInTheDocument();
   });
 });

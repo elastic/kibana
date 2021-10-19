@@ -9,11 +9,10 @@ import React from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
-import { UI_SETTINGS, useKibanaUISettings } from '../../../../hooks/use_kibana_ui_settings';
 import type { ChartTimeRange } from './last_updated';
 
 export function ChartCreationInfo(props: Partial<ChartTimeRange>) {
-  const dateFormat = useKibanaUISettings(UI_SETTINGS.DATE_FORMAT) as string;
+  const dateFormat = 'MM/DD/YYYY hh:mm A';
   const from = moment(props.from).format(dateFormat);
   const to = moment(props.to).format(dateFormat);
   const created = moment(props.lastUpdated).format(dateFormat);
