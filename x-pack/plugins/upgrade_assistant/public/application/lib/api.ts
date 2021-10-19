@@ -125,14 +125,6 @@ export class ApiService {
     });
   }
 
-  public async sendPageTelemetryData(telemetryData: { [tabName: string]: boolean }) {
-    return await this.sendRequest({
-      path: `${API_BASE_PATH}/stats/ui_open`,
-      method: 'put',
-      body: JSON.stringify(telemetryData),
-    });
-  }
-
   public useLoadDeprecationLogging() {
     return this.useRequest<{
       isDeprecationLogIndexingEnabled: boolean;
@@ -213,14 +205,6 @@ export class ApiService {
     }>({
       path: `${API_BASE_PATH}/ml_upgrade_mode`,
       method: 'get',
-    });
-  }
-
-  public async sendReindexTelemetryData(telemetryData: { [key: string]: boolean }) {
-    return await this.sendRequest({
-      path: `${API_BASE_PATH}/stats/ui_reindex`,
-      method: 'put',
-      body: JSON.stringify(telemetryData),
     });
   }
 

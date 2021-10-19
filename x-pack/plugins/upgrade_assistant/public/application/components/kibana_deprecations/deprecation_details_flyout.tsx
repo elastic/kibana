@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiButtonEmpty,
@@ -23,6 +24,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
 import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../shared';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
 
@@ -127,6 +129,11 @@ export const DeprecationDetailsFlyout = ({
   const isCurrent = deprecationResolutionState?.id === deprecation.id;
   const isResolved = isCurrent && deprecationResolutionState?.resolveDeprecationStatus === 'ok';
 
+  const onResolveDeprecation = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_KIBANA_QUICK_RESOLVE_CLICK);
+    resolveDeprecation(deprecation);
+  }, [deprecation, resolveDeprecation]);
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -227,7 +234,7 @@ export const DeprecationDetailsFlyout = ({
               <EuiButton
                 fill
                 data-test-subj="resolveButton"
-                onClick={() => resolveDeprecation(deprecation)}
+                onClick={onResolveDeprecation}
                 isLoading={Boolean(
                   deprecationResolutionState?.resolveDeprecationStatus === 'in_progress'
                 )}
