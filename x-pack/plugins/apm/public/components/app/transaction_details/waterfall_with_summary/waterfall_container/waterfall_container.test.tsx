@@ -27,4 +27,16 @@ describe('WaterfallContainer', () => {
   it('renders', () => {
     expect(() => render(<Example />)).not.toThrowError();
   });
+
+  it('expands and contracts the accordion', () => {
+    const { getAllByRole } = render(<Example />);
+    const buttons = getAllByRole('button');
+    const parentItem = buttons[2];
+    const childItem = buttons[3];
+
+    parentItem.click();
+
+    expect(parentItem).toHaveAttribute('aria-expanded', 'false');
+    expect(childItem).toHaveAttribute('aria-expanded', 'true');
+  });
 });
