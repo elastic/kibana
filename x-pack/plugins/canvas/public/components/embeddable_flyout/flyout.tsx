@@ -85,9 +85,10 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
       };
 
       // If by-value is enabled, we'll handle both by-reference and by-value embeddables
-      // with the new generic `embeddable` function
+      // with the new generic `embeddable` function.
+      // Otherwise we fallback to the embeddable type specific expressions.
       if (isByValueEnabled) {
-        const config = encode({ id });
+        const config = encode({ savedObjectId: id });
         partialElement.expression = `embeddable config="${config}" 
   type="${type}" 
 | render`;
