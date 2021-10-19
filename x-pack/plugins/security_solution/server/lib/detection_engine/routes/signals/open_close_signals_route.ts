@@ -7,6 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { Logger } from 'src/core/server';
 import { setSignalStatusValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/set_signal_status_type_dependents';
 import {
   SetSignalsStatusSchemaDecoded,
@@ -23,6 +24,7 @@ import { InsightsService } from '../../../telemetry/insights';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
+  logger: Logger,
   security: SetupPlugins['security'],
   sender: TelemetryEventsSender
 ) => {
@@ -40,6 +42,8 @@ export const setSignalsStatusRoute = (
     },
     async (context, request, response) => {
       const { conflicts, signal_ids: signalIds, query, status } = request.body;
+      // Sometimes the ids are in the query not passed in the request?
+      const toSendAlertIds = signalIds || query?.bool?.filter?.terms?._id;
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const siemClient = context.securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
@@ -51,14 +55,15 @@ export const setSignalsStatusRoute = (
       const insightsService = new InsightsService(clusterId);
       const sessionId = insightsService.getSessionIDfromKibanaRequest(request);
       const isTelemetryOptedIn = await sender.isTelemetryOptedIn();
-      if (isTelemetryOptedIn && username && signalIds) {
+      if (isTelemetryOptedIn && username && toSendAlertIds) {
         const insightsPayloads = insightsService.createAlertStatusPayloads(
-          signalIds,
+          toSendAlertIds,
           sessionId,
           username,
           DETECTION_ENGINE_SIGNALS_STATUS_URL,
           status
         );
+        logger.debug(`Sending Insights Payloads ${JSON.stringify(insightsPayloads)}`);
         await sender.sendOnDemand(INSIGHTS_CHANNEL, insightsPayloads);
       }
 

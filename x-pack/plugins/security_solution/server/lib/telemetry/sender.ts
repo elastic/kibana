@@ -263,6 +263,7 @@ export class TelemetryEventsSender {
     const ndjson = transformDataToNdjson(events);
 
     try {
+      this.logger.debug(`Sending ${events.length} telemetry events to ${channel}`);
       const resp = await axios.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
@@ -283,8 +284,9 @@ export class TelemetryEventsSender {
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
+      this.logger.warn(`Error sending events (1): ${err}`);
       this.logger.warn(
-        `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
+        `Error sending events (2): ${err.response.status} ${JSON.stringify(err.response.data)}`
       );
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
