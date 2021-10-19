@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -42,11 +42,18 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       <>
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelledTitle"
-          defaultMessage="Reindexing cancelled"
+          defaultMessage="Reindexing cancelled."
         />
       </>
     );
   }
+
+  // step is in progress after the new index is created and while it's not completed yet
+  const stepInProgress =
+    status === ReindexStatus.inProgress &&
+    (lastCompletedStep === ReindexStep.newIndexCreated ||
+      lastCompletedStep === ReindexStep.reindexStarted);
+  // but the reindex can only be cancelled after it has started
   const showCancelLink =
     status === ReindexStatus.inProgress && lastCompletedStep === ReindexStep.reindexStarted;
 
@@ -89,10 +96,17 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
   return (
     <EuiFlexGroup component="span">
       <EuiFlexItem grow={false}>
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
-          defaultMessage="Reindexing documents"
-        />
+        {stepInProgress ? (
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
+            defaultMessage="Reindexing documents."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
+            defaultMessage="Reindex documents."
+          />
+        )}
       </EuiFlexItem>
       {showCancelLink && (
         <EuiFlexItem>
@@ -110,6 +124,47 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
 };
 
 const orderedSteps = Object.values(ReindexStep).sort() as number[];
+const getStepTitle = (step: ReindexStep, inProgress?: boolean): ReactNode => {
+  if (step === ReindexStep.readonly) {
+    return inProgress ? (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.readonlyStepTitle"
+        defaultMessage="Setting original index to read-only."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
+        defaultMessage="Set original index to read-only."
+      />
+    );
+  }
+  if (step === ReindexStep.newIndexCreated) {
+    return inProgress ? (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.createIndexStepTitle"
+        defaultMessage="Creating new index."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
+        defaultMessage="Create new index."
+      />
+    );
+  }
+  if (step === ReindexStep.aliasCreated) {
+    return inProgress ? (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.aliasSwapStepTitle"
+        defaultMessage="Swapping original index with alias."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
+        defaultMessage="Swap original index with alias."
+      />
+    );
+  }
+};
 
 /**
  * Displays a list of steps in the reindex operation, the current status, a progress bar,
@@ -125,33 +180,39 @@ export const ReindexProgress: React.FunctionComponent<{
     status,
     reindexTaskPercComplete,
   } = props.reindexState;
-  const stepDetails = (thisStep: ReindexStep): Pick<StepProgressStep, 'status' | 'children'> => {
+  const getProgressStep = (thisStep: ReindexStep): StepProgressStep => {
     const previousStep = orderedSteps[orderedSteps.indexOf(thisStep) - 1];
 
     if (status === ReindexStatus.failed && lastCompletedStep === previousStep) {
       return {
+        title: getStepTitle(thisStep),
         status: 'failed',
         children: <ErrorCallout {...{ errorMessage }} />,
       };
     } else if (status === ReindexStatus.paused && lastCompletedStep === previousStep) {
       return {
+        title: getStepTitle(thisStep),
         status: 'paused',
         children: <PausedCallout />,
       };
     } else if (status === ReindexStatus.cancelled && lastCompletedStep === previousStep) {
       return {
+        title: getStepTitle(thisStep),
         status: 'cancelled',
       };
     } else if (status === undefined || lastCompletedStep < previousStep) {
       return {
+        title: getStepTitle(thisStep),
         status: 'incomplete',
       };
     } else if (lastCompletedStep === previousStep) {
       return {
+        title: getStepTitle(thisStep, true),
         status: 'inProgress',
       };
     } else {
       return {
+        title: getStepTitle(thisStep),
         status: 'complete',
       };
     }
@@ -194,34 +255,10 @@ export const ReindexProgress: React.FunctionComponent<{
   }
 
   const steps = [
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
-          defaultMessage="Setting old index to read-only"
-        />
-      ),
-      ...stepDetails(ReindexStep.readonly),
-    },
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
-          defaultMessage="Creating new index"
-        />
-      ),
-      ...stepDetails(ReindexStep.newIndexCreated),
-    },
+    getProgressStep(ReindexStep.readonly),
+    getProgressStep(ReindexStep.newIndexCreated),
     reindexingDocsStep,
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
-          defaultMessage="Swapping original index with alias"
-        />
-      ),
-      ...stepDetails(ReindexStep.aliasCreated),
-    },
+    getProgressStep(ReindexStep.aliasCreated),
   ];
 
   return (

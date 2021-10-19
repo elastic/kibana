@@ -37,10 +37,9 @@ jest.mock('../../../../../app_context', () => {
 
 describe('WarningsFlyoutStep', () => {
   const defaultProps = {
-    advanceNextStep: jest.fn(),
     warnings: [] as ReindexWarning[],
-    closeFlyout: jest.fn(),
-    renderGlobalCallouts: jest.fn(),
+    hideWarningsStep: jest.fn(),
+    continueReindex: jest.fn(),
   };
 
   it('renders', () => {
@@ -74,7 +73,7 @@ describe('WarningsFlyoutStep', () => {
       const button = wrapper.find('EuiButton');
 
       button.simulate('click');
-      expect(defaultPropsWithWarnings.advanceNextStep).not.toHaveBeenCalled();
+      expect(defaultPropsWithWarnings.continueReindex).not.toHaveBeenCalled();
 
       // first warning (customTypeName)
       wrapper.find(`input#${idForWarning(0)}`).simulate('change');
@@ -82,7 +81,7 @@ describe('WarningsFlyoutStep', () => {
       wrapper.find(`input#${idForWarning(1)}`).simulate('change');
       button.simulate('click');
 
-      expect(defaultPropsWithWarnings.advanceNextStep).toHaveBeenCalled();
+      expect(defaultPropsWithWarnings.continueReindex).toHaveBeenCalled();
     });
   }
 });

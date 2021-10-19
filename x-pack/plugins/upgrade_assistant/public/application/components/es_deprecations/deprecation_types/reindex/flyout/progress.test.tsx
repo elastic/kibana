@@ -52,15 +52,15 @@ describe('ReindexProgress', () => {
               Object {
                 "status": "inProgress",
                 "title": <FormattedMessage
-                  defaultMessage="Setting old index to read-only"
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
+                  defaultMessage="Setting original index to read-only."
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.readonlyStepTitle"
                   values={Object {}}
                 />,
               },
               Object {
                 "status": "incomplete",
                 "title": <FormattedMessage
-                  defaultMessage="Creating new index"
+                  defaultMessage="Create new index."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
                   values={Object {}}
                 />,
@@ -82,7 +82,7 @@ describe('ReindexProgress', () => {
               Object {
                 "status": "incomplete",
                 "title": <FormattedMessage
-                  defaultMessage="Swapping original index with alias"
+                  defaultMessage="Swap original index with alias."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
                   values={Object {}}
                 />,
