@@ -19,6 +19,7 @@ export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
 
 export function ChangeIndexPattern({
   indexPatternRefs,
+  isMissingCurrent,
   indexPatternId,
   onChangeIndexPattern,
   trigger,
@@ -26,13 +27,12 @@ export function ChangeIndexPattern({
 }: {
   trigger: ChangeIndexPatternTriggerProps;
   indexPatternRefs: IndexPatternRef[];
+  isMissingCurrent: boolean;
   onChangeIndexPattern: (newId: string) => void;
   indexPatternId?: string;
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-
-  const isMissingCurrent = !indexPatternRefs.some(({ id }) => id === indexPatternId);
 
   // be careful to only add color with a value, otherwise it will fallbacks to "primary"
   const colorProp = isMissingCurrent

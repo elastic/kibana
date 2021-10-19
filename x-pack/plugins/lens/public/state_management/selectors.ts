@@ -147,9 +147,9 @@ export const selectDatasourceLayers = createSelector(
 export const selectFramePublicAPI = createSelector(
   [selectDatasourceStates, selectActiveData, selectDatasourceMap],
   (datasourceStates, activeData, datasourceMap) => {
-    console.log('selectFramePublicAPI')
-    return ({
-    datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),
-    activeData,
-  })}
+    return {
+      datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),
+      activeData,
+    };
+  }
 );
