@@ -426,13 +426,16 @@ export const formatPreviewRule = ({
     description: 'Preview Rule',
   };
   const scheduleStepData = {
-    interval: `1${timeFrame}`,
-    from: '1m',
+    from: `${timeFrame === 'w' ? '7d' : `1${timeFrame}`}`,
+    interval: `now-30s`,
   };
-  return formatRule<CreateRulesSchema>(
-    defineStepData,
-    aboutStepData,
-    scheduleStepData,
-    stepActionsDefaultValue
-  );
+  return {
+    ...formatRule<CreateRulesSchema>(
+      defineStepData,
+      aboutStepData,
+      scheduleStepData,
+      stepActionsDefaultValue
+    ),
+    ...scheduleStepData,
+  };
 };
