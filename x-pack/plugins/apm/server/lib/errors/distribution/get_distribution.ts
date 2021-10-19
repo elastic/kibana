@@ -55,7 +55,7 @@ export async function getErrorDistribution({
           start: comparisonStart,
           end: comparisonEnd,
         })
-      : { noHits: true, buckets: [], bucketSize: null };
+      : { buckets: [], bucketSize: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,
@@ -63,7 +63,6 @@ export async function getErrorDistribution({
   ]);
 
   return {
-    noHits: [currentPeriod.noHits, previousPeriod.noHits],
     currentPeriod: currentPeriod.buckets,
     previousPeriod: previousPeriod.buckets,
     bucketSize,

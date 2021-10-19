@@ -123,7 +123,7 @@ export function ErrorGroupDetails() {
     }),
   });
 
-  const { data: errorGroupData } = useFetcher(
+  const { data: errorGroupData, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
@@ -209,6 +209,7 @@ export function ErrorGroupDetails() {
           </Titles>
         )}
         <ErrorDistribution
+          fetchStatus={status}
           distribution={errorDistributionData}
           title={i18n.translate(
             'xpack.apm.errorGroupDetails.occurrencesChartLabel',

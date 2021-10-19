@@ -12,6 +12,7 @@ import {
   ApmPluginContextValue,
 } from '../../../../context/apm_plugin/apm_plugin_context';
 import { ErrorDistribution } from './';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 export default {
   title: 'app/ErrorGroupDetails/Distribution',
@@ -39,7 +40,6 @@ export default {
 
 export function Example() {
   const distribution = {
-    noHits: [false, false],
     bucketSize: 62350,
     currentPeriod: [
       { key: 1624279912350, count: 6 },
@@ -79,17 +79,23 @@ export function Example() {
     ],
   };
 
-  return <ErrorDistribution distribution={distribution} title="Foo title" />;
+  return (
+    <ErrorDistribution
+      fetchStatus={FETCH_STATUS.SUCCESS}
+      distribution={distribution}
+      title="Foo title"
+    />
+  );
 }
 
 export function EmptyState() {
   return (
     <ErrorDistribution
+      fetchStatus={FETCH_STATUS.SUCCESS}
       distribution={{
         bucketSize: 10,
         currentPeriod: [],
         previousPeriod: [],
-        noHits: [true, true],
       }}
       title="Foo title"
     />

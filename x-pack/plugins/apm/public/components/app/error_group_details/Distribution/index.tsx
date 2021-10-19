@@ -24,8 +24,10 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
 import { useTheme } from '../../../../hooks/use_theme';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { AlertType } from '../../../../../common/alert_types';
 import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_annotations';
+import { ChartContainer } from '../../../shared/charts/chart_container';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { LazyAlertsFlyout } from '../../../../../../observability/public';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -50,11 +52,12 @@ export function getCoordinatedBuckets(
   });
 }
 interface Props {
+  fetchStatus: FETCH_STATUS;
   distribution: ErrorDistributionAPIResponse;
   title: React.ReactNode;
 }
 
-export function ErrorDistribution({ distribution, title }: Props) {
+export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const theme = useTheme();
   const currentPeriod = getCoordinatedBuckets(distribution.currentPeriod);
   const previousPeriod = getCoordinatedBuckets(distribution.previousPeriod);
@@ -105,7 +108,12 @@ export function ErrorDistribution({ distribution, title }: Props) {
       <EuiTitle size="xs">
         <span>{title}</span>
       </EuiTitle>
-      <div style={{ height: 256 }}>
+      <ChartContainer
+        hasData={!!distribution}
+        height={256}
+        status={fetchStatus}
+        id="errorDistribution"
+      >
         <Chart>
           <Settings
             xDomain={{ min, max }}
@@ -164,7 +172,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
             />
           </Suspense>
         </Chart>
-      </div>
+      </ChartContainer>
     </>
   );
 }

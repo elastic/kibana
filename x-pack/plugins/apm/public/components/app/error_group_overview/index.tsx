@@ -41,7 +41,7 @@ export function ErrorGroupOverview() {
     kuery,
   });
 
-  const { data: errorGroupListData } = useFetcher(
+  const { data: errorGroupListData, status } = useFetcher(
     (callApmApi) => {
       const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
 
@@ -78,6 +78,7 @@ export function ErrorGroupOverview() {
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
               <ErrorDistribution
+                fetchStatus={status}
                 distribution={errorDistributionData}
                 title={i18n.translate(
                   'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
