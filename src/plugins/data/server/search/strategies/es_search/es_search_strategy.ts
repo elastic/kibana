@@ -38,10 +38,13 @@ export const esSearchStrategyProvider = (
     const search = async () => {
       try {
         const config = await config$.pipe(first()).toPromise();
+        // @ts-expect-error params fall back to any, but should be valid SearchRequest params
+        const { terminateAfter, ...requestParams } = request.params ?? {};
         const params = {
           ...(await getDefaultSearchParams(uiSettingsClient)),
           ...getShardTimeout(config),
-          ...request.params,
+          ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
+          ...requestParams,
         };
         const { body } = await esClient.asCurrentUser.search(params, {
           signal: abortSignal,
