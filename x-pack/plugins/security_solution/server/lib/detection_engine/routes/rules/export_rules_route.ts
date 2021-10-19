@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { Logger } from 'src/core/server';
 import {
   exportRulesQuerySchema,
   ExportRulesQuerySchemaDecoded,
@@ -24,6 +25,7 @@ import { buildSiemResponse } from '../utils';
 export const exportRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
+  logger: Logger,
   isRuleRegistryEnabled: boolean
 ) => {
   router.post(
@@ -45,6 +47,7 @@ export const exportRulesRoute = (
       const siemResponse = buildSiemResponse(response);
       const rulesClient = context.alerting?.getRulesClient();
       const exceptionsClient = context.lists?.getExceptionListClient();
+      const savedObjectsClient = context.core.savedObjects.client;
 
       if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
@@ -75,10 +78,18 @@ export const exportRulesRoute = (
             ? await getExportByObjectIds(
                 rulesClient,
                 exceptionsClient,
+                savedObjectsClient,
                 request.body.objects,
+                logger,
                 isRuleRegistryEnabled
               )
-            : await getExportAll(rulesClient, exceptionsClient, isRuleRegistryEnabled);
+            : await getExportAll(
+                rulesClient,
+                exceptionsClient,
+                savedObjectsClient,
+                logger,
+                isRuleRegistryEnabled
+              );
 
         const responseBody = request.query.exclude_export_details
           ? exportedRulesAndExceptions.rulesNdjson

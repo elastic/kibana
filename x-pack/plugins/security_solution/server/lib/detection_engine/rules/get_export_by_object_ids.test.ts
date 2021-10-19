@@ -10,6 +10,7 @@ import {
   getAlertMock,
   getFindResultWithSingleHit,
   FindHit,
+  getEmptySavedObjectsResponse,
 } from '../routes/__mocks__/request_responses';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
@@ -18,16 +19,24 @@ import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
 
 const exceptionsClient = getExceptionListClientMock();
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { requestContextMock } from '../routes/__mocks__/request_context';
 
 describe.each([
   ['Legacy', false],
   ['RAC', true],
 ])('get_export_by_object_ids - %s', (_, isRuleRegistryEnabled) => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  const { clients } = requestContextMock.createTools();
+
   beforeEach(() => {
     jest.resetAllMocks();
     jest.restoreAllMocks();
     jest.clearAllMocks();
+
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
   });
+
   describe('getExportByObjectIds', () => {
     test('it exports object ids into an expected string with new line characters', async () => {
       const rulesClient = rulesClientMock.create();
@@ -37,7 +46,9 @@ describe.each([
       const exports = await getExportByObjectIds(
         rulesClient,
         exceptionsClient,
+        clients.savedObjectsClient,
         objects,
+        logger,
         isRuleRegistryEnabled
       );
       const exportsObj = {
@@ -119,7 +130,9 @@ describe.each([
       const exports = await getExportByObjectIds(
         rulesClient,
         exceptionsClient,
+        clients.savedObjectsClient,
         objects,
+        logger,
         isRuleRegistryEnabled
       );
       expect(exports).toEqual({
@@ -137,7 +150,13 @@ describe.each([
       rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
+      const exports = await getRulesFromObjects(
+        rulesClient,
+        clients.savedObjectsClient,
+        objects,
+        logger,
+        isRuleRegistryEnabled
+      );
       const expected: RulesErrors = {
         exportedCount: 1,
         missingRules: [],
@@ -212,7 +231,13 @@ describe.each([
       rulesClient.find.mockResolvedValue(findResult);
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
+      const exports = await getRulesFromObjects(
+        rulesClient,
+        clients.savedObjectsClient,
+        objects,
+        logger,
+        isRuleRegistryEnabled
+      );
       const expected: RulesErrors = {
         exportedCount: 0,
         missingRules: [{ rule_id: 'rule-1' }],
@@ -235,7 +260,13 @@ describe.each([
       rulesClient.find.mockResolvedValue(findResult);
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
+      const exports = await getRulesFromObjects(
+        rulesClient,
+        clients.savedObjectsClient,
+        objects,
+        logger,
+        isRuleRegistryEnabled
+      );
       const expected: RulesErrors = {
         exportedCount: 0,
         missingRules: [{ rule_id: 'rule-1' }],
