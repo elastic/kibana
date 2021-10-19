@@ -30,7 +30,7 @@ describe('createMetricsK8sAnomaliesQuery', () => {
       allow_no_indices: true,
       ignore_unavailable: true,
       track_scores: false,
-      trackTotalHits: false,
+      track_total_hits: false,
       body: {
         query: {
           bool: {
