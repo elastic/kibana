@@ -15,7 +15,6 @@ import {
   SPAN_SELF_TIME_SUM,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-  TRANSACTION_BREAKDOWN_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { rangeQuery, kqlQuery } from '../../../../../observability/server';
