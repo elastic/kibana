@@ -68,6 +68,8 @@ export const useTransactionDistributionChartData = () => {
   );
 
   const {
+    // TODO The default object has `log: []` to retain compatibility with the shared search strategies code.
+    // Remove once the other tabs are migrated away from search strategies.
     data: overallLatencyData = { log: [] },
     status: overallLatencyStatus,
     error: overallLatencyError,
@@ -112,6 +114,8 @@ export const useTransactionDistributionChartData = () => {
     Array.isArray(overallLatencyHistogram) &&
     overallLatencyHistogram.length > 0;
 
+  // TODO The default object has `log: []` to retain compatibility with the shared search strategies code.
+  // Remove once the other tabs are migrated away from search strategies.
   const { data: errorHistogramData = { log: [] }, error: errorHistogramError } =
     useFetcher(
       (callApmApi) => {
