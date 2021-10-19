@@ -26,6 +26,7 @@ import { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
   FieldRequestConfig,
   JOB_FIELD_TYPES,
+  JobFieldType,
   NON_AGGREGATABLE_FIELD_TYPES,
   OMIT_FIELDS,
 } from '../../../../common';
@@ -304,9 +305,10 @@ export const useDataVisualizerGridData = (
       const fieldData = aggregatableFields.find((f) => {
         return f.fieldName === field.spec.name;
       });
+      if (!fieldData) return;
 
       const metricConfig: FieldVisConfig = {
-        ...(fieldData ? fieldData : {}),
+        ...fieldData,
         fieldFormat: currentIndexPattern.getFormatterForField(field),
         type: JOB_FIELD_TYPES.NUMBER,
         loading: true,
@@ -337,8 +339,8 @@ export const useDataVisualizerGridData = (
     });
     // Obtain the list of all non-metric fields which appear in documents
     // (aggregatable or not aggregatable).
-    const populatedNonMetricFields: [] = []; // Kibana index pattern non metric fields.
-    let nonMetricFieldData: AggregatableField[] = []; // Basic non metric field data loaded from requesting overall stats.
+    const populatedNonMetricFields: DataViewField[] = []; // Kibana index pattern non metric fields.
+    let nonMetricFieldData: Array<AggregatableField | NonAggregatableField> = []; // Basic non metric field data loaded from requesting overall stats.
     const aggregatableExistsFields: AggregatableField[] =
       overallStats.aggregatableExistsFields || [];
     const nonAggregatableExistsFields: NonAggregatableField[] =
@@ -384,12 +386,11 @@ export const useDataVisualizerGridData = (
     nonMetricFieldsToShow.forEach((field) => {
       const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.spec.name);
 
-      const nonMetricConfig = {
+      const nonMetricConfig: Partial<FieldVisConfig> = {
         ...(fieldData ? fieldData : {}),
         fieldFormat: currentIndexPattern.getFormatterForField(field),
         aggregatable: field.aggregatable,
-        scripted: field.scripted,
-        loading: fieldData?.existsInDocs,
+        loading: fieldData?.existsInDocs ?? true,
         deletable: field.runtimeField !== undefined,
       };
 
@@ -401,7 +402,7 @@ export const useDataVisualizerGridData = (
       } else {
         // Add a flag to indicate that this is one of the 'other' Kibana
         // field types that do not yet have a specific card type.
-        nonMetricConfig.type = field.type;
+        nonMetricConfig.type = field.type as JobFieldType;
         nonMetricConfig.isUnsupportedType = true;
       }
 
@@ -409,7 +410,7 @@ export const useDataVisualizerGridData = (
         nonMetricConfig.displayName = field.displayName;
       }
 
-      configs.push(nonMetricConfig);
+      configs.push(nonMetricConfig as FieldVisConfig);
     });
 
     setNonMetricConfigs(configs);
@@ -436,8 +437,6 @@ export const useDataVisualizerGridData = (
     }
 
     if (fieldStats) {
-      // @todo
-      // @ts-ignore
       combinedConfigs = combinedConfigs.map((c) => {
         const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
         return loadedFullStats
