@@ -25,24 +25,8 @@ export interface ESClusterInfo {
   };
 }
 
-// From https://www.elastic.co/guide/en/elasticsearch/reference/current/get-license.html
-export interface ESLicense {
-  status: string;
-  uid: string;
-  type: string;
-  issue_date?: string;
-  issue_date_in_millis?: number;
-  expiry_date?: string;
-  expirty_date_in_millis?: number;
-  max_nodes?: number;
-  issued_to?: string;
-  issuer?: string;
-  start_date_in_millis?: number;
-}
-
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
   cluster_name?: string;
   cluster_uuid?: string;
-  license?: ESLicense;
 }

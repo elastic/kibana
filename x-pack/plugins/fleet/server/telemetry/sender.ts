@@ -108,10 +108,9 @@ export class TelemetryEventsSender {
         return;
       }
 
-      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
+      const [telemetryUrl, clusterInfo] = await Promise.all([
         this.fetchTelemetryUrl(FLEET_CHANNEL_NAME),
         this.receiver?.fetchClusterInfo(),
-        this.receiver?.fetchLicenseInfo(),
       ]);
 
       this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
@@ -121,7 +120,6 @@ export class TelemetryEventsSender {
 
       const toSend: TelemetryEvent[] = cloneDeep(this.queue).map((event) => ({
         ...event,
-        ...(licenseInfo ? { license: this.receiver?.copyLicenseFields(licenseInfo) } : {}),
         cluster_uuid: clusterInfo?.cluster_uuid,
         cluster_name: clusterInfo?.cluster_name,
       }));
@@ -133,8 +131,7 @@ export class TelemetryEventsSender {
         toSend,
         telemetryUrl,
         clusterInfo?.cluster_uuid,
-        clusterInfo?.version?.number,
-        licenseInfo?.uid
+        clusterInfo?.version?.number
       );
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
@@ -168,8 +165,7 @@ export class TelemetryEventsSender {
     events: unknown[],
     telemetryUrl: string,
     clusterUuid: string | undefined,
-    clusterVersionNumber: string | undefined,
-    licenseId: string | undefined
+    clusterVersionNumber: string | undefined
   ) {
     const ndjson = this.transformDataToNdjson(events);
 
@@ -179,7 +175,6 @@ export class TelemetryEventsSender {
           'Content-Type': 'application/x-ndjson',
           'X-Elastic-Cluster-ID': clusterUuid,
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.16.0',
-          ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);

@@ -195,7 +195,7 @@ export class FleetPlugin
     this.logger = this.initializerContext.logger.get();
     this.configInitialValue = this.initializerContext.config.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
-    this.telemetryReceiver = new TelemetryReceiver(this.logger);
+    this.telemetryReceiver = new TelemetryReceiver();
   }
 
   public setup(core: CoreSetup, deps: FleetSetupDeps) {
