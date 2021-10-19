@@ -80,8 +80,8 @@ describe('AllRulesTable Columns', () => {
   });
 
   describe('getColumns', () => {
-    test('should not set truncated text option for name column', () => {
-      const [nameColumn] = getColumns({
+    test('should not have truncated text options for column items', () => {
+      const columns = getColumns({
         dispatch,
         dispatchToaster,
         history,
@@ -95,18 +95,20 @@ describe('AllRulesTable Columns', () => {
         hasReadActionsPrivileges: false,
       });
 
-      expect(nameColumn).toHaveProperty('field', 'name');
-      expect(nameColumn).not.toHaveProperty('truncateText');
+      columns.forEach((column) => {
+        expect(column).not.toHaveProperty('truncateText');
+      });
     });
   });
 
   describe('getMonitoringColumns', () => {
     test('should not set truncated text option for name column', () => {
       const docsLinksStartMock = { links: { siem: { troubleshootGaps: 'mock' } } } as DocLinksStart;
-      const [nameColumn] = getMonitoringColumns(navigateToApp, formatUrl, docsLinksStartMock);
+      const columns = getMonitoringColumns(navigateToApp, formatUrl, docsLinksStartMock);
 
-      expect(nameColumn).toHaveProperty('field', 'name');
-      expect(nameColumn).not.toHaveProperty('truncateText');
+      columns.forEach((column) => {
+        expect(column).not.toHaveProperty('truncateText');
+      });
     });
   });
 });
