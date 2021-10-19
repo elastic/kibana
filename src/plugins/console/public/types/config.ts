@@ -6,15 +6,8 @@
  * Side Public License, v 1.
  */
 
-import './index.scss';
-import { PluginInitializerContext } from 'src/core/public';
-
-import { ConsoleUIPlugin } from './plugin';
-
-export type { ConsoleUILocatorParams, ConsolePluginSetup } from './types';
-
-export { ConsoleUIPlugin as Plugin };
-
-export function plugin(ctx: PluginInitializerContext) {
-  return new ConsoleUIPlugin(ctx);
+export interface ClientConfigType {
+  ui: {
+    enabled: boolean;
+  };
 }

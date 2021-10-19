@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+import { PluginInitializerContext } from 'src/core/server';
 
 import { LicenseManagementServerPlugin } from './plugin';
-import { configSchema, LicenseManagementConfig } from './config';
+
+export { config } from './config';
 
 export const plugin = (ctx: PluginInitializerContext) => new LicenseManagementServerPlugin();
-
-export const config: PluginConfigDescriptor<LicenseManagementConfig> = {
-  schema: configSchema,
-  exposeToBrowser: {
-    ui: true,
-  },
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
-};

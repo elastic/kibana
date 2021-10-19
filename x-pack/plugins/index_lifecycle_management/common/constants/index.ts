@@ -19,6 +19,8 @@ export const PLUGIN = {
   }),
 };
 
+export const MAJOR_VERSION = '8.0.0';
+
 export const API_BASE_PATH = '/api/index_lifecycle_management';
 
 export { MIN_SEARCHABLE_SNAPSHOT_LICENSE, MIN_PLUGIN_LICENSE };

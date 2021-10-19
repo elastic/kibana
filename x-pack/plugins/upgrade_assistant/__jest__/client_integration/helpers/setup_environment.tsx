@@ -9,7 +9,7 @@ import React from 'react';
 import axios from 'axios';
 // @ts-ignore
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-
+import SemVer from 'semver/classes/semver';
 import {
   deprecationsServiceMock,
   docLinksServiceMock,
@@ -19,7 +19,7 @@ import {
 import { HttpSetup } from 'src/core/public';
 
 import { KibanaContextProvider } from '../../../public/shared_imports';
-import { mockKibanaSemverVersion } from '../../../common/constants';
+import { MAJOR_VERSION } from '../../../common/constants';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
@@ -31,6 +31,8 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
+export const kibanaVersion = new SemVer(MAJOR_VERSION);
+
 export const WithAppDependencies =
   (Comp: any, overrides: Record<string, unknown> = {}) =>
   (props: Record<string, unknown>) => {
@@ -41,9 +43,9 @@ export const WithAppDependencies =
       http: mockHttpClient as unknown as HttpSetup,
       docLinks: docLinksServiceMock.createStartContract(),
       kibanaVersionInfo: {
-        currentMajor: mockKibanaSemverVersion.major,
-        prevMajor: mockKibanaSemverVersion.major - 1,
-        nextMajor: mockKibanaSemverVersion.major + 1,
+        currentMajor: kibanaVersion.major,
+        prevMajor: kibanaVersion.major - 1,
+        nextMajor: kibanaVersion.major + 1,
       },
       notifications: notificationServiceMock.createStartContract(),
       isReadOnlyMode: false,

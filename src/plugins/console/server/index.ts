@@ -11,6 +11,7 @@ import { PluginInitializerContext } from 'kibana/server';
 import { ConsoleServerPlugin } from './plugin';
 
 export { ConsoleSetup, ConsoleStart } from './types';
+
 export { config } from './config';
 
 export const plugin = (ctx: PluginInitializerContext) => new ConsoleServerPlugin(ctx);

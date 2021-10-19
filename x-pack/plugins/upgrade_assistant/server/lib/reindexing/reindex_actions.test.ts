@@ -19,7 +19,7 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { mockKibanaVersion } from '../../../common/constants';
+import { MAJOR_VERSION } from '../../../common/constants';
 import { versionService } from '../version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
 import { getMockVersionInfo } from '../__fixtures__/version';
@@ -54,7 +54,7 @@ describe('ReindexActions', () => {
 
   describe('createReindexOp', () => {
     beforeEach(() => {
-      versionService.setup(mockKibanaVersion);
+      versionService.setup(MAJOR_VERSION);
       client.create.mockResolvedValue();
     });
 
