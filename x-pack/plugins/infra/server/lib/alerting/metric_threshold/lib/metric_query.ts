@@ -38,7 +38,13 @@ export const getElasticsearchMetricQuery = (
 
   const aggregations =
     aggType === Aggregators.COUNT
-      ? {}
+      ? {
+          aggregatedValue: {
+            filter: {
+              match_all: {},
+            },
+          },
+        }
       : aggType === Aggregators.RATE
       ? networkTraffic('aggregatedValue', metric)
       : aggType === Aggregators.P95 || aggType === Aggregators.P99

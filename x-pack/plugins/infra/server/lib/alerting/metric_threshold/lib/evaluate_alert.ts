@@ -23,14 +23,20 @@ import { MetricExpressionParams, Comparator, Aggregators } from '../types';
 import { getElasticsearchMetricQuery } from './metric_query';
 import { createTimerange } from './create_timerange';
 
+interface AggregatedValue {
+  value: number;
+  values?: Array<{ key: number; value: number }>;
+  doc_count?: number;
+}
+
 interface AggregationWithoutIntervals {
-  aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
+  aggregatedValue: AggregatedValue;
 }
 
 interface AggregationWithIntervals {
   aggregatedIntervals: {
     buckets: Array<{
-      aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
+      aggregatedValue: AggregatedValue;
       doc_count: number;
       to_as_string: string;
       from_as_string: string;
@@ -213,8 +219,7 @@ const getMetric: (
             bucket,
             aggType,
             dropPartialBucketsOptions,
-            calculatedTimerange,
-            bucket.doc_count
+            calculatedTimerange
           ),
         }),
         {}
@@ -231,12 +236,7 @@ const getMetric: (
         result.aggregations! as unknown as Aggregation,
         aggType,
         dropPartialBucketsOptions,
-        calculatedTimerange,
-        result.hits
-          ? isNumber(result.hits.total)
-            ? result.hits.total
-            : result.hits.total.value
-          : 0
+        calculatedTimerange
       ),
     };
   } catch (e: any) {
@@ -279,27 +279,17 @@ const getValuesFromAggregations = (
   aggregations: Aggregation | undefined,
   aggType: MetricExpressionParams['aggType'],
   dropPartialBucketsOptions: DropPartialBucketOptions | null,
-  timeFrame: { start: number; end: number },
-  docCount?: number
+  timeFrame: { start: number; end: number }
 ) => {
   try {
     let buckets;
-    if (aggType === Aggregators.COUNT) {
-      buckets = [
-        {
-          doc_count: docCount,
-          to_as_string: moment(timeFrame.end).toISOString(),
-          from_as_string: moment(timeFrame.start).toISOString(),
-          key_as_string: moment(timeFrame.start).toISOString(),
-        },
-      ];
-    } else if (isAggregationWithIntervals(aggregations)) {
+    if (isAggregationWithIntervals(aggregations)) {
       buckets = aggregations.aggregatedIntervals.buckets;
     } else {
       buckets = [
         {
           ...aggregations,
-          doc_count: docCount,
+          doc_count: 0,
           to_as_string: moment(timeFrame.end).toISOString(),
           from_as_string: moment(timeFrame.start).toISOString(),
           key_as_string: moment(timeFrame.start).toISOString(),
@@ -314,7 +304,7 @@ const getValuesFromAggregations = (
     if (aggType === Aggregators.COUNT) {
       mappedBuckets = buckets.map((bucket) => ({
         key: bucket.from_as_string,
-        value: bucket.doc_count || null,
+        value: bucket.aggregatedValue?.doc_count ?? null,
       }));
     } else if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
       mappedBuckets = buckets.map((bucket) => {

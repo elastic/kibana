@@ -81,10 +81,52 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Metric Threshold Alerts Executor', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
-
+    describe('with 10K plus docs', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
+      it('should alert on document count', async () => {
+        const params = {
+          ...baseParams,
+          criteria: [
+            {
+              timeSize: 5,
+              timeUnit: 'm',
+              threshold: [10000],
+              comparator: Comparator.LT_OR_EQ,
+              aggType: Aggregators.COUNT,
+            } as CountMetricExpressionParams,
+          ],
+        };
+        const config = {
+          ...configuration,
+          metricAlias: 'filebeat-*',
+        };
+        const timeFrame = { end: DATES.ten_thousand_plus.max };
+        const results = await evaluateAlert(esClient, params, config, [], timeFrame);
+        expect(results).to.eql([
+          {
+            '*': {
+              timeSize: 5,
+              timeUnit: 'm',
+              threshold: [10000],
+              comparator: '<=',
+              aggType: 'count',
+              metric: 'Document count',
+              currentValue: 20918,
+              timestamp: '2021-10-18T23:38:59.990Z',
+              shouldFire: [false],
+              shouldWarn: [false],
+              isNoData: [false],
+              isError: false,
+            },
+          },
+        ]);
+      });
+    });
     describe('with gauge data', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+
       describe('without groupBy', () => {
         it('should alert on document count', async () => {
           const params = {
@@ -285,6 +327,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with rate data', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
       describe('without groupBy', () => {
         it('should alert on rate', async () => {
           const params = {
