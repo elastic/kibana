@@ -6788,7 +6788,6 @@
     "xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel": "サンプルドキュメントを表示",
     "xpack.apm.transactionBreakdown.chartTitle": "スパンタイプ別時間",
     "xpack.apm.transactionDetails.clearSelectionAriaLabel": "選択した項目をクリア",
-    "xpack.apm.transactionDetails.distribution.errorTitle": "分布の取得中にエラーが発生しました",
     "xpack.apm.transactionDetails.distribution.panelTitle": "レイテンシ分布",
     "xpack.apm.transactionDetails.emptySelectionText": "クリックおよびドラッグして範囲を選択",
     "xpack.apm.transactionDetails.noTraceParentButtonTooltip": "トレースの親が見つかりませんでした",
