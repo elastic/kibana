@@ -7,9 +7,9 @@
  */
 
 import { RequestHandlerContext, SavedObject } from 'kibana/server';
+import { isFilters } from '@kbn/es-query';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/persistable_state';
-import { isFilters } from '../../../../../../../../../private/var/tmp/_bazel_lukas/0e089c5e2da9a36b2c2982c0e50789cb/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-es-query';
 
 function injectReferences({
   id,
