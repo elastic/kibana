@@ -15,6 +15,7 @@ import {
   getParamFromQueryString,
 } from './helpers';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
+import { CONSTANTS } from './constants';
 
 const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
   getParamFromQueryString(getQueryStringFromLocation(search), urlKey);
@@ -30,6 +31,13 @@ interface QueryTimelineIdOnUrlChange {
   }>;
 }
 
+/**
+ * After the initial load of the security solution, timeline is not updated when the timeline url search value is changed
+ * This is because those state changes happen in place and doesn't lead to a requerying of data for the new id.
+ * To circumvent this for the sake of the redirects needed for the saved object Id changes happening in 8.0
+ * We are actively pulling the id changes that take place for timeline in the url and calling the query below
+ * to request the new data.
+ */
 export const queryTimelineByIdOnUrlChange = ({
   oldSearch,
   search,
@@ -38,11 +46,11 @@ export const queryTimelineByIdOnUrlChange = ({
   updateTimelineIsLoading,
 }: QueryTimelineIdOnUrlChange) => {
   const oldUrlStateString = getQueryStringKeyValue({
-    urlKey: 'timeline',
+    urlKey: CONSTANTS.timeline,
     search: oldSearch ?? '',
   });
 
-  const newUrlStateString = getQueryStringKeyValue({ urlKey: 'timeline', search });
+  const newUrlStateString = getQueryStringKeyValue({ urlKey: CONSTANTS.timeline, search });
 
   if (oldUrlStateString != null && newUrlStateString != null) {
     let newTimeline = null;
