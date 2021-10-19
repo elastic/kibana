@@ -67,15 +67,12 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     absolute,
   });
 
-  const { codeEntries } = entries.reduce(
-    (paths, entry) => {
-      const resolvedPath = path.resolve(inputPath, entry);
-      paths.codeEntries.push(resolvedPath);
+  const codeEntries = entries.reduce((paths, entry) => {
+    const resolvedPath = path.resolve(inputPath, entry);
+    paths.push(resolvedPath);
 
-      return paths;
-    },
-    { codeEntries: [] }
-  );
+    return paths;
+  }, []);
 
   return [[codeEntries, extractCodeMessages]];
 }
