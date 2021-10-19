@@ -33,7 +33,7 @@ export const buildTimelineDetailsQuery = (
         };
 
   return {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: indexName,
     ignore_unavailable: true,
     body: {

@@ -124,7 +124,7 @@ export const formattedSearchStrategyFirstResponse = {
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
             'traces-apm*',
@@ -190,7 +190,7 @@ export const formattedSearchStrategyLastResponse = {
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
             'traces-apm*',
@@ -225,7 +225,7 @@ export const formattedSearchStrategyLastResponse = {
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',

@@ -63,7 +63,7 @@ export const buildTimelineEventsAllQuery = ({
     });
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
     body: {

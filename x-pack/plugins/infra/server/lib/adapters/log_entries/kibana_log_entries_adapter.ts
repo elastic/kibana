@@ -69,7 +69,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     };
 
     const esQuery = {
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: resolvedLogSourceConfiguration.indices,
       ignore_unavailable: true,
       body: {
@@ -139,7 +139,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     );
 
     const query = {
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: resolvedLogSourceConfiguration.indices,
       ignore_unavailable: true,
       body: {

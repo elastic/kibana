@@ -30,7 +30,7 @@ export const buildUserRulesQuery = ({
   ];
 
   return {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex, // can stop getting this from sourcerer and assume default detections index if we want
     ignore_unavailable: true,
     track_total_hits: true,

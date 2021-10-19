@@ -810,7 +810,7 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
             'traces-apm*',
@@ -878,7 +878,7 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',

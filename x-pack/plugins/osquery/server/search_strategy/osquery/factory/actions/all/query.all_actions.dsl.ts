@@ -20,7 +20,7 @@ export const buildActionsQuery = ({
   // const filter = [...createQueryFilterClauses(filterQuery)];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: '.fleet-actions',
     ignore_unavailable: true,
     body: {
