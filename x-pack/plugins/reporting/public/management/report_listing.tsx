@@ -43,6 +43,7 @@ import {
   ViewInAppLink,
   ReportInfoFlyout,
   ReportDownloadButton,
+  ReportMoreMenu,
 } from './components';
 import { guessAppIconTypeFromObjectType, jobHasIssues } from './utils';
 
@@ -343,9 +344,14 @@ class ReportListingUi extends Component<Props, State> {
         render: (_status: string, job) => {
           const hasIssues = jobHasIssues(job);
           return (
-            <div data-test-subj="reportJobStatus">
+            <EuiFlexGroup
+              gutterSize="none"
+              responsive={false}
+              alignItems="center"
+              data-test-subj="reportJobStatus"
+            >
               <ReportStatusIndicator hasIssues={hasIssues} job={job} />
-            </div>
+            </EuiFlexGroup>
           );
         },
         mobileOptions: {
@@ -393,7 +399,7 @@ class ReportListingUi extends Component<Props, State> {
             ),
           },
           {
-            render: () => <div />,
+            render: (job) => <ReportMoreMenu job={job} />,
             name: i18n.translate(
               'xpack.reporting.listing.table.viewReportingInfoActionButtonLabel',
               {

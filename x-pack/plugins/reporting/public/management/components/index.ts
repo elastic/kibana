@@ -14,3 +14,4 @@ export { ReportInfoButton } from './report_info_button';
 export { ReportStatusIndicator } from './report_status_indicator';
 export { ViewInAppLink } from './view_in_app_link';
 export { ReportInfoFlyout } from './report_info_flyout';
+export { ReportMoreMenu } from './report_more_menu';

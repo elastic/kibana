@@ -7,22 +7,30 @@
 
 import React, { useState } from 'react';
 import type { FunctionComponent } from 'react';
-import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiHorizontalRule } from '@elastic/eui';
 import { Job } from '../../lib/job';
 
 interface Props {
   job: Job;
 }
 
-export const ReportMoreMenu: FunctionComponent<Props> = ({}) => {
+export const ReportMoreMenu: FunctionComponent<Props> = ({ job }) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
-
   return (
     <EuiPopover
       isOpen={showPopover}
-      button={<EuiButtonIcon onClick={() => setShowPopover((isShowing) => !isShowing)} />}
+      button={
+        <EuiButtonIcon
+          iconType="horizontalBlocks"
+          onClick={() => setShowPopover((isShowing) => !isShowing)}
+        />
+      }
     >
-      temp
+      Download
+      <EuiHorizontalRule />
+      Show info
+      <EuiHorizontalRule />
+      Go to Kibana app
     </EuiPopover>
   );
 };
