@@ -22,7 +22,7 @@ describe('Overview Page', () => {
   });
 
   describe('Documentation links', () => {
-    test('Has a whatsNew link and it references nextMajor version', () => {
+    test('Has a whatsNew link and it references target version', () => {
       const { exists, find } = testBed;
 
       expect(exists('whatsNewLink')).toBe(true);

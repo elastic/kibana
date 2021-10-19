@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { extractCodeMessages } from './code';
+export interface ClientConfigType {
+  ui: {
+    enabled: boolean;
+  };
+}
