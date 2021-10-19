@@ -21,7 +21,7 @@ describe('Overview - Migrate system indices - Step completion', () => {
 
   test(`It's complete when no upgrade is needed`, async () => {
     httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-      upgrade_status: 'NO_UPGRADE_NEEDED',
+      migration_status: 'NO_MIGRATION_NEEDED',
     });
 
     await act(async () => {
@@ -37,7 +37,7 @@ describe('Overview - Migrate system indices - Step completion', () => {
 
   test(`It's incomplete when migration is needed`, async () => {
     httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-      upgrade_status: 'UPGRADE_NEEDED',
+      migration_status: 'MIGRATION_NEEDED',
     });
 
     await act(async () => {
@@ -57,7 +57,7 @@ describe('Overview - Migrate system indices - Step completion', () => {
 
       // First request should make the step be incomplete
       httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-        upgrade_status: 'IN_PROGRESS',
+        migration_status: 'IN_PROGRESS',
       });
 
       testBed = await setupOverviewPage();
@@ -73,7 +73,7 @@ describe('Overview - Migrate system indices - Step completion', () => {
       expect(exists('migrateSystemIndicesStep-incomplete')).toBe(true);
 
       httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-        upgrade_status: 'NO_UPGRADE_NEEDED',
+        migration_status: 'NO_MIGRATION_NEEDED',
       });
 
       // Resolve the polling timeout.
