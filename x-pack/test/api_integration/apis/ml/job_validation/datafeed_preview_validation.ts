@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
-      ml.api.createIndex('farequote_empty', farequoteMappings);
+      await ml.api.createIndex('farequote_empty', farequoteMappings);
     });
 
     after(async () => {
@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it(`should fail to validate a job with documents`, async () => {
+    it(`should fail to validate a job with documents and non-existent field`, async () => {
       const job = getBaseJobConfig();
       job.analysis_config.detectors[0].field_name = 'no_such_field';
 
@@ -148,6 +148,28 @@ export default ({ getService }: FtrProviderContext) => {
         false,
         `documentsFound should be false, but got ${body.documentsFound}`
       );
+    });
+
+    it(`should fail for viewer user`, async () => {
+      const job = getBaseJobConfig();
+
+      await supertest
+        .post('/api/ml/validate/datafeed_preview')
+        .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+        .set(COMMON_REQUEST_HEADERS)
+        .send({ job })
+        .expect(403);
+    });
+
+    it(`should fail for unauthorized user`, async () => {
+      const job = getBaseJobConfig();
+
+      await supertest
+        .post('/api/ml/validate/datafeed_preview')
+        .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+        .set(COMMON_REQUEST_HEADERS)
+        .send({ job })
+        .expect(403);
     });
   });
 };
