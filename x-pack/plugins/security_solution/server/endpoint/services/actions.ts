@@ -151,7 +151,7 @@ const hasAckInResponse = (response: EndpointActionResponse): boolean => {
   return typeof response.action_data.ack !== 'undefined';
 };
 
-const logsEndpointFilterCallback = ({
+const isLogsEndpointFilter = async ({
   action,
   agentId,
   agentResponses,
@@ -161,43 +161,29 @@ const logsEndpointFilterCallback = ({
   agentId: string;
   agentResponses: EndpointActionResponse[];
   esClient: ElasticsearchClient;
-}): boolean => {
+}): Promise<boolean> => {
   // get response actionIds for responses with ACKs
   const ackResponseActionIdList: string[] = agentResponses
-    .map((response) => (hasAckInResponse(response) ? response.action_id : ''))
-    .filter((e) => {
-      return e.length;
-    });
+    .filter(hasAckInResponse)
+    .map((response) => response.action_id);
 
-  // list of actionIds and if they are indexed in new responses index
-  const hasIndexedDocList = ackResponseActionIdList
-    .map((actionId) => (hasIndexedDoc({ agentId, actionId, esClient }) ? actionId : ''))
-    .filter((e) => {
-      return e.length;
-    });
+  // actions Ids that are indexed in new response index
+  const indexedActionIds = await hasIndexedDoc({
+    agentId,
+    actionIds: ackResponseActionIdList,
+    esClient,
+  });
 
   // if action_id not in the ACK list then use the legacy filter to find pending actions
   // else see if the action doesn't have a response in the new response index
-  if (!ackResponseActionIdList.includes(action.action_id)) {
-    return legacyFilterCallback({ action, agentId, agentResponses });
+  if (ackResponseActionIdList.includes(action.action_id)) {
+    return action.agents.includes(agentId) && !indexedActionIds.includes(action.action_id);
   } else {
-    return action.agents.includes(agentId) && !hasIndexedDocList.includes(action.action_id);
+    return (
+      action.agents.includes(agentId) &&
+      !agentResponses.map((e) => e.action_id).includes(action.action_id)
+    );
   }
-};
-
-const legacyFilterCallback = ({
-  action,
-  agentId,
-  agentResponses,
-}: {
-  action: EndpointAction;
-  agentId: string;
-  agentResponses: EndpointActionResponse[];
-}): boolean => {
-  return (
-    action.agents.includes(agentId) &&
-    !agentResponses.map((e) => e.action_id).includes(action.action_id)
-  );
 };
 
 export const getPendingActionCounts = async (
@@ -243,9 +229,15 @@ export const getPendingActionCounts = async (
   const pending: EndpointPendingActions[] = [];
   for (const agentId of agentIDs) {
     const agentResponses = responses[agentId];
-    const pendingActions = recentActions.filter((action) => {
-      return logsEndpointFilterCallback({ action, agentId, agentResponses, esClient });
-    });
+    const pendingActions: EndpointAction[] = (
+      await Promise.all(
+        recentActions.filter(async (action): Promise<EndpointAction | undefined> => {
+          return (await isLogsEndpointFilter({ action, agentId, agentResponses, esClient }))
+            ? action
+            : undefined;
+        })
+      )
+    ).filter((action): action is EndpointAction => action !== undefined);
     pending.push({
       agent_id: agentId,
       pending_actions: pendingActions
@@ -272,32 +264,36 @@ export const getPendingActionCounts = async (
  * @param agentIds
  */
 const hasIndexedDoc = async ({
-  actionId,
+  actionIds,
   agentId,
   esClient,
 }: {
-  actionId: string;
+  actionIds: string[];
   agentId: string;
   esClient: ElasticsearchClient;
-}): Promise<boolean> => {
-  const hasActionResponse = await esClient
-    .search<EndpointActionResponse>(
+}): Promise<string[]> => {
+  let responseActionIds: string[] = [];
+  try {
+    const response = await esClient.search<LogsEndpointActionResponse>(
       {
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
         body: {
           query: {
             bool: {
-              filter: [{ term: { action_id: actionId } }, { term: { agent_id: agentId } }],
+              filter: [{ terms: { action_id: actionIds } }, { term: { agent_id: agentId } }],
             },
           },
         },
       },
       { ignore: [404] }
-    )
-    .then((result) => !!result.body?.hits?.hits?.length)
-    .catch(catchAndWrapError);
-
-  return hasActionResponse;
+    );
+    responseActionIds = response.body?.hits?.hits?.map(
+      (hit) => (hit._source as LogsEndpointActionResponse).EndpointActions.action_id
+    );
+  } catch (error) {
+    catchAndWrapError(error);
+  }
+  return responseActionIds;
 };
 
 /**
