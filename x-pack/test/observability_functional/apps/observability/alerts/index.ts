@@ -92,7 +92,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             // We shouldn't expect any data for the last 15 minutes
             await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
             await observability.alerts.common.getNoDataStateOrFail();
-            await pageObjects.common.waitUntilUrlIncludes('rangeFrom=now-15m&rangeTo=now');
           });
         });
       });

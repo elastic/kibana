@@ -37,7 +37,8 @@ export function ObservabilityAlertsCommonProvider({
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
       'observability',
       '/alerts',
-      `?${querystring.stringify(DATE_WITH_DATA)}`
+      `?_a=(rangeFrom:'${DATE_WITH_DATA.rangeFrom}',rangeTo:'${DATE_WITH_DATA.rangeTo}')`,
+      { ensureCurrentUrl: false }
     );
   };
 

@@ -87,7 +87,9 @@ export const routes = {
     handler: () => {
       return <AlertsPage />;
     },
-    params: {},
+    params: {
+      // Technically gets a '_a' param by using Kibana URL state sync helpers
+    },
   },
   '/exploratory-view/': {
     handler: () => {

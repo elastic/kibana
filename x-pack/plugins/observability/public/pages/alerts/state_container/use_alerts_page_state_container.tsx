@@ -27,7 +27,7 @@ import {
 export function useAlertsPageStateContainer() {
   const stateContainer = useContainer();
 
-  useUrlStateSync(stateContainer);
+  useUrlStateSyncEffect(stateContainer);
 
   const { setRangeFrom, setRangeTo, setKuery, setWorkflowStatus } = stateContainer.transitions;
   const { rangeFrom, rangeTo, kuery, workflowStatus } = useContainerSelector(
@@ -47,12 +47,16 @@ export function useAlertsPageStateContainer() {
   };
 }
 
-function useUrlStateSync(stateContainer: AlertsPageStateContainer) {
+function useUrlStateSyncEffect(stateContainer: AlertsPageStateContainer) {
   const history = useHistory();
   const timefilterService = useTimefilterService();
 
   useEffect(() => {
-    const urlStateStorage = createKbnUrlStateStorage({ history, useHash: false });
+    const urlStateStorage = createKbnUrlStateStorage({
+      history,
+      useHash: false,
+      useHashQuery: false,
+    });
     const { start, stop } = setupUrlStateSync(stateContainer, urlStateStorage);
 
     start();
