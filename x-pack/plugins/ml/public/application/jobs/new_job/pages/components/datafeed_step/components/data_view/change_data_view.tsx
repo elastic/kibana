@@ -42,6 +42,11 @@ import {
 
 const fixedPageSize: number = 8;
 
+enum STEP {
+  PICK_DATA_VIEW,
+  VALIDATE,
+}
+
 interface Props {
   onClose: () => void;
 }
@@ -61,7 +66,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   const jobCreator = jc as AdvancedJobCreator;
 
   const [validating, setValidating] = useState(false);
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(STEP.PICK_DATA_VIEW);
 
   const [currentDataViewTitle, setCurrentDataViewTitle] = useState<string>('');
   const [newDataViewTitle, setNewDataViewTitle] = useState<string>('');
@@ -75,7 +80,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
 
   useEffect(
     function stepChange() {
-      if (step === 1) {
+      if (step === STEP.PICK_DATA_VIEW) {
         setValidationResponse(null);
       }
     },
@@ -84,7 +89,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
 
   function onDataViewSelected(dataViewId: string) {
     if (validating === false) {
-      setStep(2);
+      setStep(STEP.VALIDATE);
       validate(dataViewId);
     }
   }
@@ -131,42 +136,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
         </EuiModalHeader>
 
         <EuiModalBody>
-          {step === 0 && (
-            <>
-              <EuiCallOut color="warning">
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.description"
-                  defaultMessage="Changing the current index pattern may cause problems with the corresponding job configuration as the newly selected index pattern may not contain the same fields."
-                />
-              </EuiCallOut>
-
-              <EuiSpacer size="s" />
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={onClose} isDisabled={validating} flush="left">
-                    <FormattedMessage
-                      id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.cancelButton"
-                      defaultMessage="Cancel"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    isDisabled={validating}
-                    onClick={setStep.bind(null, 1)}
-                    fill
-                    data-test-subj="mlJobMgmtImportImportButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.nextButton"
-                      defaultMessage="Next"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          )}
-          {step === 1 && (
+          {step === STEP.PICK_DATA_VIEW && (
             <>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.datafeedStep.dataView.step1.title"
@@ -203,7 +173,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
               />
             </>
           )}
-          {step === 2 && (
+          {step === STEP.VALIDATE && (
             <>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.datafeedStep.dataView.step2.title"
@@ -233,7 +203,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    onClick={setStep.bind(null, 1)}
+                    onClick={setStep.bind(null, STEP.PICK_DATA_VIEW)}
                     isDisabled={validating}
                     flush="left"
                   >
@@ -281,7 +251,7 @@ const ValidationMessage: FC<{
       >
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.dataView.validation.noDetectors.message"
-          defaultMessage="NNo detectors have been configured; this index pattern can be applied to the job."
+          defaultMessage="No detectors have been configured; this index pattern can be applied to the job."
         />
       </EuiCallOut>
     );
