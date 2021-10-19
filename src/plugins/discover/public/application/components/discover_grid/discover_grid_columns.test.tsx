@@ -120,18 +120,12 @@ describe('Discover grid columns ', function () {
           "display": <React.Fragment>
             timestamp
              
-            <EuiToolTip
-              content="This column represents primary time field of the data view"
-              delay="regular"
-              display="inlineBlock"
-              position="top"
-            >
-              <EuiIcon
-                color="primary"
-                size="s"
-                type="clock"
-              />
-            </EuiToolTip>
+            <EuiIconTip
+              aria-label="Primary time field."
+              color="primary"
+              content="This field represents the time that events occurred."
+              type="clock"
+            />
           </React.Fragment>,
           "id": "timestamp",
           "initialWidth": 190,

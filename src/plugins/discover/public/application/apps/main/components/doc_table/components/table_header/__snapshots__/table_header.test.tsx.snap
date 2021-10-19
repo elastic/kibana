@@ -20,8 +20,10 @@ exports[`TableHeader with time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <span
+          aria-label="Primary time field."
           color="primary"
           data-euiicon-type="clock"
+          tabindex="0"
         />
       </span>
       <span
