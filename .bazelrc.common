@@ -121,7 +121,6 @@ test --incompatible_strict_action_env
 coverage --instrument_test_targets
 
 # Metadata settings
-build --build_metadata=ROLE=CI
 build --workspace_status_command="node ./src/dev/bazel_workspace_status.js"
 
 # Load any settings specific to the current user.

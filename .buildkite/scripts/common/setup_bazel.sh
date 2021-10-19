@@ -11,6 +11,7 @@ cat <<EOF > $KIBANA_DIR/.bazelrc
 
   import %workspace%/.bazelrc.common
 
+  build --build_metadata=ROLE=CI
 EOF
 
 if [[ "${BAZEL_CACHE_MODE:-none}" == read* ]]; then
