@@ -336,7 +336,6 @@ class ReportListingUi extends Component<Props, State> {
           defaultMessage: 'Status',
         }),
         render: (_status: string, job) => {
-          const hasIssues = jobHasIssues(job);
           return (
             <EuiFlexGroup
               gutterSize="none"
@@ -344,7 +343,7 @@ class ReportListingUi extends Component<Props, State> {
               alignItems="center"
               data-test-subj="reportJobStatus"
             >
-              <ReportStatusIndicator hasIssues={hasIssues} job={job} />
+              <ReportStatusIndicator job={job} />
             </EuiFlexGroup>
           );
         },

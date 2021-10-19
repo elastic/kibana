@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 
 import type { Job } from '../../lib/job';
 import { JOB_STATUSES } from '../../../common/constants';
+import { jobHasIssues } from '../utils';
 
 interface Props {
   job: Job;
-  hasIssues: boolean;
 }
 
 const i18nTexts = {
@@ -53,12 +53,15 @@ const i18nTexts = {
     }),
 };
 
-export const ReportStatusIndicator: FC<Props> = ({ job, hasIssues }) => {
+export const ReportStatusIndicator: FC<Props> = ({ job }) => {
+  const hasIssues = useMemo<boolean>(() => jobHasIssues(job), [job]);
+
   const renderStatus = (statusText: string, icon: JSX.Element) => (
     <EuiToolTip content={i18nTexts.lastStatusUpdate({ date: job.getPrettyStatusTimestamp() })}>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} aria-label={statusText}>
         <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
         <EuiFlexItem grow={false}>{statusText}</EuiFlexItem>
+        {hasIssues ? <EuiFlexItem grow={false}>{statusText}</EuiFlexItem> : undefined}
       </EuiFlexGroup>
     </EuiToolTip>
   );
