@@ -36,7 +36,10 @@ describe('Overview - Migrate system indices - Flyout', () => {
 
     const { tableCellsValues } = table.getMetaData('flyoutDetails');
 
-    expect(tableCellsValues.length).toBe(systemIndicesMigrationStatus.features.length);
+    const featuresToBeMigrated = systemIndicesMigrationStatus.features.filter(
+      (feature) => feature.upgrade_status !== 'NO_UPGRADE_NEEDED'
+    );
+    expect(tableCellsValues.length).toBe(featuresToBeMigrated.length);
     expect(tableCellsValues).toMatchSnapshot();
   });
 });

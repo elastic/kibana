@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { startCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
@@ -158,6 +158,10 @@ const columns = [
 ];
 
 export const SystemIndicesFlyout = ({ closeFlyout, data, nextMajor }: SystemIndicesFlyoutProps) => {
+  const featuresToBeMigrated = useMemo(() => {
+    return data.features.filter((feature) => feature.upgrade_status !== 'NO_UPGRADE_NEEDED');
+  }, [data.features]);
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -173,7 +177,7 @@ export const SystemIndicesFlyout = ({ closeFlyout, data, nextMajor }: SystemIndi
         <EuiInMemoryTable<SystemIndicesMigrationFeature>
           data-test-subj="featuresTable"
           itemId="feature_name"
-          items={data.features}
+          items={featuresToBeMigrated}
           columns={columns}
           pagination={true}
           sorting={true}
