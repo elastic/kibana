@@ -90,7 +90,6 @@ export async function getTransactionBreakdown({
       bool: {
         should: [
           { exists: { field: SPAN_SELF_TIME_SUM } },
-          { exists: { field: TRANSACTION_BREAKDOWN_COUNT } },
         ],
         minimum_should_match: 1,
       },
