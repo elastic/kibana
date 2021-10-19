@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import type { RawResponseBase } from '../../../../plugins/apm/common/correlations/types';
 import type { FailedTransactionsCorrelationsRawResponse } from '../../../../plugins/apm/common/correlations/failed_transactions_correlations/types';
 import { EVENT_OUTCOME } from '../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../plugins/apm/common/event_outcome';
@@ -87,13 +86,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         `Expected status to be '200', got '${failedTransactionsCorrelationsResponse.status}'`
       );
 
-      const finalRawResponse: FailedTransactionsCorrelationsRawResponse & RawResponseBase = {
+      const finalRawResponse: FailedTransactionsCorrelationsRawResponse = {
         ccsWarning: failedTransactionsCorrelationsResponse.body?.ccsWarning,
         percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
         overallHistogram: overallDistributionResponse.body?.overallHistogram,
         failedTransactionsCorrelations:
           failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations,
-        log: [],
       };
 
       expect(finalRawResponse?.failedTransactionsCorrelations?.length).to.eql(
@@ -173,14 +171,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         `Expected status to be '200', got '${failedTransactionsCorrelationsResponse.status}'`
       );
 
-      const finalRawResponse: FailedTransactionsCorrelationsRawResponse & RawResponseBase = {
+      const finalRawResponse: FailedTransactionsCorrelationsRawResponse = {
         ccsWarning: failedTransactionsCorrelationsResponse.body?.ccsWarning,
         percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
         overallHistogram: overallDistributionResponse.body?.overallHistogram,
         errorHistogram: errorDistributionResponse.body?.overallHistogram,
         failedTransactionsCorrelations:
           failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations,
-        log: [],
       };
 
       expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);

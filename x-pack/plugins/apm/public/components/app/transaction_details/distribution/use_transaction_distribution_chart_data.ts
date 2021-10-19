@@ -10,7 +10,6 @@ import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
-import { RawSearchStrategyClientParams } from '../../../../../common/correlations/types';
 import { EVENT_OUTCOME } from '../../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../../common/event_outcome';
 
@@ -24,11 +23,6 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { TransactionDistributionChartData } from '../../../shared/charts/transaction_distribution_chart';
 
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
-
-function hasRequiredParams(params: RawSearchStrategyClientParams) {
-  const { serviceName, environment, start, end } = params;
-  return serviceName && environment && start && end;
-}
 
 export const useTransactionDistributionChartData = () => {
   const { serviceName, transactionType } = useApmServiceContext();
@@ -68,14 +62,17 @@ export const useTransactionDistributionChartData = () => {
   );
 
   const {
-    // TODO The default object has `log: []` to retain compatibility with the shared search strategies code.
-    // Remove once the other tabs are migrated away from search strategies.
-    data: overallLatencyData = { log: [] },
+    data: overallLatencyData = {},
     status: overallLatencyStatus,
     error: overallLatencyError,
   } = useFetcher(
     (callApmApi) => {
-      if (hasRequiredParams(params)) {
+      if (
+        params.serviceName &&
+        params.environment &&
+        params.start &&
+        params.end
+      ) {
         return callApmApi({
           endpoint: 'POST /internal/apm/latency/overall_distribution',
           params: {
@@ -114,12 +111,15 @@ export const useTransactionDistributionChartData = () => {
     Array.isArray(overallLatencyHistogram) &&
     overallLatencyHistogram.length > 0;
 
-  // TODO The default object has `log: []` to retain compatibility with the shared search strategies code.
-  // Remove once the other tabs are migrated away from search strategies.
-  const { data: errorHistogramData = { log: [] }, error: errorHistogramError } =
+  const { data: errorHistogramData = {}, error: errorHistogramError } =
     useFetcher(
       (callApmApi) => {
-        if (hasRequiredParams(params)) {
+        if (
+          params.serviceName &&
+          params.environment &&
+          params.start &&
+          params.end
+        ) {
           return callApmApi({
             endpoint: 'POST /internal/apm/latency/overall_distribution',
             params: {

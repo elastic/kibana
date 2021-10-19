@@ -15,7 +15,7 @@ import {
   PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { SearchStrategyClientParams } from '../../../../common/correlations/types';
+import { CorrelationsClientParams } from '../../../../common/correlations/types';
 
 export function getCorrelationsFilters({
   environment,
@@ -25,7 +25,7 @@ export function getCorrelationsFilters({
   transactionName,
   start,
   end,
-}: SearchStrategyClientParams) {
+}: CorrelationsClientParams) {
   const correlationsFilters: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     ...rangeQuery(start, end),

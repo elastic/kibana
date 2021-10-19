@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import type { RawResponseBase } from '../../../../plugins/apm/common/correlations/types';
 import type { LatencyCorrelationsRawResponse } from '../../../../plugins/apm/common/correlations/latency_correlations/types';
 
 // These tests go through the full sequence of queries required
@@ -87,12 +86,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `Expected status to be '200', got '${significantCorrelationsResponse.status}'`
         );
 
-        const finalRawResponse: LatencyCorrelationsRawResponse & RawResponseBase = {
+        const finalRawResponse: LatencyCorrelationsRawResponse = {
           ccsWarning: significantCorrelationsResponse.body?.ccsWarning,
           percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
           overallHistogram: overallDistributionResponse.body?.overallHistogram,
           latencyCorrelations: significantCorrelationsResponse.body?.latencyCorrelations,
-          log: [],
         };
 
         expect(finalRawResponse?.percentileThresholdValue).to.be(undefined);
@@ -183,12 +181,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `Expected 1244 total doc count, got ${significantCorrelationsResponse.body?.totalDocCount}.`
         );
 
-        const finalRawResponse: LatencyCorrelationsRawResponse & RawResponseBase = {
+        const finalRawResponse: LatencyCorrelationsRawResponse = {
           ccsWarning: significantCorrelationsResponse.body?.ccsWarning,
           percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
           overallHistogram: overallDistributionResponse.body?.overallHistogram,
           latencyCorrelations: significantCorrelationsResponse.body?.latencyCorrelations,
-          log: [],
         };
 
         // Fetched 95th percentile value of 1309695.875 based on 1244 documents.

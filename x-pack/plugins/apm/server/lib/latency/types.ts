@@ -7,13 +7,13 @@
 
 import type {
   FieldValuePair,
-  SearchStrategyClientParams,
+  CorrelationsClientParams,
 } from '../../../common/correlations/types';
 
 import { Setup } from '../helpers/setup_request';
 
 export interface OverallLatencyDistributionOptions
-  extends SearchStrategyClientParams {
+  extends CorrelationsClientParams {
   percentileThreshold: number;
   termFilters?: FieldValuePair[];
   setup: Setup;
