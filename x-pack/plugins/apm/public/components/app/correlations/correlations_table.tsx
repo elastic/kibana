@@ -22,6 +22,7 @@ interface CorrelationsTableProps<T extends FieldValuePair> {
   significantTerms?: T[];
   status: FETCH_STATUS;
   percentageColumnName?: string;
+  setPinnedSignificantTerm?: (term: T | null) => void;
   setSelectedSignificantTerm: (term: T | null) => void;
   selectedTerm?: FieldValuePair;
   onFilter?: () => void;
@@ -33,6 +34,7 @@ interface CorrelationsTableProps<T extends FieldValuePair> {
 export function CorrelationsTable<T extends FieldValuePair>({
   significantTerms,
   status,
+  setPinnedSignificantTerm,
   setSelectedSignificantTerm,
   columns,
   selectedTerm,
@@ -91,6 +93,11 @@ export function CorrelationsTable<T extends FieldValuePair>({
       columns={columns}
       rowProps={(term) => {
         return {
+          onClick: () => {
+            if (setPinnedSignificantTerm) {
+              setPinnedSignificantTerm(term);
+            }
+          },
           onMouseEnter: () => {
             setSelectedSignificantTerm(term);
             trackSelectSignificantCorrelationTerm();

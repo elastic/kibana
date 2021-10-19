@@ -6,20 +6,15 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
-  const retry = getService('retry');
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
   describe('add data tutorials', function describeIndexTests() {
-    it('directory should display registered tutorials', async () => {
+    it('directory should redirect to integrations app', async () => {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory', { useActualUrl: true });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await retry.try(async () => {
-        const tutorialExists = await PageObjects.home.doesSynopsisExist('netflowlogs');
-        expect(tutorialExists).to.be(true);
-      });
+      await PageObjects.common.waitUntilUrlIncludes('/app/integrations');
     });
   });
 }
