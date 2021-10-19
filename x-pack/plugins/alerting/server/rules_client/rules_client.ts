@@ -399,6 +399,13 @@ export class RulesClient {
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
+    /*if (usageCounter) {
+      usageCounter.incrementCounter({
+        counterName: `rule_max_number_actions_associated`,
+        counterType: 'legacyApiUsage',
+        incrementBy: 1,
+      });
+    } */
     return this.getAlertFromRaw<Params>(
       createdAlert.id,
       createdAlert.attributes.alertTypeId,

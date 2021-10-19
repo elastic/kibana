@@ -178,19 +178,19 @@ export async function getTotalCountAggregations(
   const connectorsMetric = {
     scripted_metric: {
       init_script:
-        'state.currentAlertActions = 0; state.min = 0; state.max = 0; state.totalActionsCount = 0;',
+        'state.currentAlertActions = 0; state.min_actions = 1000; state.max_actions = 0; state.totalActionsCount = 0;',
       map_script: `
         String refName = doc['alert.actions.actionRef'].value;
         if (refName == 'action_0') {
-          if (state.currentAlertActions !== 0 && state.currentAlertActions < state.min) {
-            state.min = state.currentAlertActions;
-          }
-          if (state.currentAlertActions !== 0 && state.currentAlertActions > state.max) {
-            state.max = state.currentAlertActions;
-          }
           state.currentAlertActions = 1;
         } else {
           state.currentAlertActions++;
+        }
+        if (state.currentAlertActions > 0 && state.currentAlertActions < state.min_actions) {
+          state.min_actions = state.currentAlertActions;
+        }
+        if (state.currentAlertActions > 0 && state.currentAlertActions > state.max_actions) {
+          state.max_actions = state.currentAlertActions;
         }
         state.totalActionsCount++;
       `,
@@ -200,23 +200,14 @@ export async function getTotalCountAggregations(
       // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
       // This also needs to account for having no data
       reduce_script: `
-        double min = 0;
-        double max = 0;
-        long totalActionsCount = 0;
-        long currentAlertActions = 0;
+        Map result = [:];
         for (Map m : states.toArray()) {
           if (m !== null) {
-            min = min > 0 ? Math.min(min, m.min) : m.min;
-            max = Math.max(max, m.max);
-            currentAlertActions += m.currentAlertActions;
-            totalActionsCount += m.totalActionsCount;
+            for (String k : m.keySet()) {
+              result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
+            }
           }
         }
-        Map result = new HashMap();
-        result.min = min;
-        result.max = max;
-        result.currentAlertActions = currentAlertActions;
-        result.totalActionsCount = totalActionsCount;
         return result;
       `,
     },
@@ -252,7 +243,12 @@ export async function getTotalCountAggregations(
     intervalTime: { value: { min: number; max: number; totalCount: number; totalSum: number } };
     connectorsAgg: {
       connectors: {
-        value: { min: number; max: number; totalActionsCount: number; totalAlertsCount: number };
+        value: {
+          min_actions: number;
+          max_actions: number;
+          totalActionsCount: number;
+          currentAlertActions: number;
+        };
       };
     };
   };
@@ -293,12 +289,12 @@ export async function getTotalCountAggregations(
       max: `${aggregations.intervalTime.value.max}s`,
     },
     connectors_per_alert: {
-      min: aggregations.connectorsAgg.connectors.value.min,
+      min: aggregations.connectorsAgg.connectors.value.min_actions,
       avg:
         totalAlertsCount > 0
           ? aggregations.connectorsAgg.connectors.value.totalActionsCount / totalAlertsCount
           : 0,
-      max: aggregations.connectorsAgg.connectors.value.max,
+      max: aggregations.connectorsAgg.connectors.value.max_actions,
     },
   };
 }
