@@ -142,11 +142,10 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     registerRoutes(dependencies, this.getWorker.bind(this));
 
     if (usageCollection) {
-      getStartServices().then(([{ savedObjects: savedObjectsService, elasticsearch }]) => {
+      getStartServices().then(([{ elasticsearch }]) => {
         registerUpgradeAssistantUsageCollector({
           elasticsearch,
           usageCollection,
-          savedObjects: savedObjectsService,
         });
       });
     }

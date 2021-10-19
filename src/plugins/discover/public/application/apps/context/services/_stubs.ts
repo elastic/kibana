@@ -9,7 +9,6 @@
 import sinon from 'sinon';
 import moment from 'moment';
 
-import { IndexPatternsContract } from '../../../../../../data/public';
 import { EsHitRecordList } from '../../../types';
 
 type SortHit = {
@@ -17,18 +16,6 @@ type SortHit = {
 } & {
   sort: [number, number];
 };
-
-export function createIndexPatternsStub() {
-  return {
-    get: sinon.spy((indexPatternId) =>
-      Promise.resolve({
-        id: indexPatternId,
-        isTimeNanosBased: () => false,
-        popularizeField: () => {},
-      })
-    ),
-  } as unknown as IndexPatternsContract;
-}
 
 /**
  * A stubbed search source with a `fetch` method that returns all of `_stubHits`.
