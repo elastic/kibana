@@ -16,7 +16,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useUiTracker } from '../../../../../../observability/public';
 
@@ -161,36 +163,30 @@ export function TransactionDistribution({
       </EuiFlexGroup>
 
       <EuiText color="subdued" size="xs">
-        {i18n.translate(
-          'xpack.apm.transactionDetails.tabs.transactionDistributionChartDescription',
-          {
-            defaultMessage:
-              'Log-log plot for latency (x) by transactions (y) with overlapping bands for',
-          }
-        )}{' '}
-        <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
-          {i18n.translate(
-            'xpack.apm.transactionDetails.tabs.transactionDistributionChartAllTransactions',
-            {
-              defaultMessage: 'all transactions',
-            }
-          )}
-        </span>{' '}
-        {i18n.translate(
-          'xpack.apm.transactionDetails.tabs.transactionDistributionChartAnd',
-          {
-            defaultMessage: 'and',
-          }
-        )}{' '}
-        <span style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}>
-          {i18n.translate(
-            'xpack.apm.transactionDetails.tabs.transactionDistributionChartAllFailedTransactions',
-            {
-              defaultMessage: 'all failed transactions',
-            }
-          )}
-        </span>
-        .
+        <FormattedMessage
+          id="xpack.apm.transactionDetails.tabs.transactionDistributionChartDescription"
+          defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {allTransactions} and {allFailedTransactions}."
+          values={{
+            allTransactions: (
+              <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
+                <FormattedMessage
+                  id="xpack.apm.transactionDetails.tabs.transactionDistributionChartAllTransactions"
+                  defaultMessage="all transactions"
+                />
+              </span>
+            ),
+            allFailedTransactions: (
+              <span
+                style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}
+              >
+                <FormattedMessage
+                  id="xpack.apm.transactionDetails.tabs.transactionDistributionChartAllFailedTransactions"
+                  defaultMessage="all failed transactions"
+                />
+              </span>
+            ),
+          }}
+        />
       </EuiText>
 
       <EuiSpacer size="s" />

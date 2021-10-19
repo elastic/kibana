@@ -27,6 +27,8 @@ import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_tabl
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   enableInspectEsQueries,
   useUiTracker,
@@ -521,41 +523,36 @@ export function FailedTransactionsCorrelations({
 
       {selectedTerm && (
         <EuiText color="subdued" size="xs">
-          {i18n.translate(
-            'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartDescription',
-            {
-              defaultMessage:
-                'Log-log plot for latency (x) by transactions (y) with overlapping bands for',
-            }
-          )}
-          <br />
-          <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
-            {i18n.translate(
-              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllTransactions',
-              {
-                defaultMessage: 'all transactions',
-              }
-            )}
-          </span>
-          ,{' '}
-          <span style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}>
-            {i18n.translate(
-              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllFailedTransactions',
-              {
-                defaultMessage: 'all failed transactions',
-              }
-            )}
-          </span>{' '}
-          {i18n.translate(
-            'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAnd',
-            {
-              defaultMessage: 'and',
-            }
-          )}{' '}
-          <span style={{ color: transactionColors.FOCUS_TRANSACTION }}>
-            {selectedTerm?.fieldName}:{selectedTerm?.fieldValue}
-          </span>
-          .
+          <FormattedMessage
+            id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartDescription"
+            defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {br}{allTransactions}, {allFailedTransactions} and {focusTransaction}."
+            values={{
+              br: <br />,
+              allTransactions: (
+                <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
+                  <FormattedMessage
+                    id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllTransactions"
+                    defaultMessage="all transactions"
+                  />
+                </span>
+              ),
+              allFailedTransactions: (
+                <span
+                  style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}
+                >
+                  <FormattedMessage
+                    id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllTransactions"
+                    defaultMessage="all failed transactions"
+                  />
+                </span>
+              ),
+              focusTransaction: (
+                <span style={{ color: transactionColors.FOCUS_TRANSACTION }}>
+                  {selectedTerm?.fieldName}:{selectedTerm?.fieldValue}
+                </span>
+              ),
+            }}
+          />
         </EuiText>
       )}
 

@@ -23,6 +23,7 @@ import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   enableInspectEsQueries,
@@ -332,32 +333,26 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
       {selectedHistogram && (
         <EuiText color="subdued" size="xs">
-          {i18n.translate(
-            'xpack.apm.transactionDetails.tabs.latencyCorrelationsChartDescription',
-            {
-              defaultMessage:
-                'Log-log plot for latency (x) by transactions (y) with overlapping bands for',
-            }
-          )}
-          <br />
-          <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
-            {i18n.translate(
-              'xpack.apm.transactionDetails.tabs.latencyCorrelationsChartAllTransactions',
-              {
-                defaultMessage: 'all transactions',
-              }
-            )}
-          </span>{' '}
-          {i18n.translate(
-            'xpack.apm.transactionDetails.tabs.latencyCorrelationsChartAnd',
-            {
-              defaultMessage: 'and',
-            }
-          )}{' '}
-          <span style={{ color: transactionColors.FOCUS_TRANSACTION }}>
-            {selectedHistogram?.fieldName}:{selectedHistogram?.fieldValue}
-          </span>
-          .
+          <FormattedMessage
+            id="xpack.apm.transactionDetails.tabs.latencyCorrelationsChartDescription"
+            defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {br}{allTransactions} and {focusTransaction}."
+            values={{
+              br: <br />,
+              allTransactions: (
+                <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
+                  <FormattedMessage
+                    id="xpack.apm.transactionDetails.tabs.latencyCorrelationsChartAllTransactions"
+                    defaultMessage="all transactions"
+                  />
+                </span>
+              ),
+              focusTransaction: (
+                <span style={{ color: transactionColors.FOCUS_TRANSACTION }}>
+                  {selectedHistogram?.fieldName}:{selectedHistogram?.fieldValue}
+                </span>
+              ),
+            }}
+          />
         </EuiText>
       )}
 
