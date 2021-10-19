@@ -43,6 +43,7 @@ export const AllCasesPage = React.memo(() => {
 
   return userPermissions == null || userPermissions?.read ? (
     <ObservabilityPageTemplate
+      data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       noDataConfig={noDataConfig}
       pageHeader={{
         pageTitle: <>{i18n.PAGE_TITLE}</>,

@@ -32,6 +32,10 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
       await testSubjects.missingOrFail('case-callout-e41900b01c9ef0fa81dd6ff326083fb3');
     },
 
+    async expectNoDataPage() {
+      await testSubjects.existOrFail('noDataPage');
+    },
+
     async expectCreateCase() {
       await testSubjects.existOrFail('case-creation-form-steps');
     },
