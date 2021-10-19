@@ -24,7 +24,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Observability alerts', function () {
     this.tags('includeFirefox');
 
-    const pageObjects = getPageObjects(['common']);
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
     const observability = getService('observability');

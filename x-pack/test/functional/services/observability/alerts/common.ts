@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import querystring from 'querystring';
 import { chunk } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
