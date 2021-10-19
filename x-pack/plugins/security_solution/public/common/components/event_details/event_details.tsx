@@ -61,6 +61,7 @@ interface Props {
   id: string;
   isAlert: boolean;
   isDraggable?: boolean;
+  rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
   hostRisk: HostRisk | null;
@@ -106,6 +107,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   id,
   isAlert,
   isDraggable,
+  rawEventData,
   timelineId,
   timelineTabType,
   hostRisk,
@@ -278,12 +280,12 @@ const EventDetailsComponent: React.FC<Props> = ({
         <>
           <EuiSpacer size="m" />
           <TabContentWrapper data-test-subj="jsonViewWrapper">
-            <JsonView data={data} />
+            <JsonView rawEventData={rawEventData} />
           </TabContentWrapper>
         </>
       ),
     }),
-    [data]
+    [rawEventData]
   );
 
   const tabs = useMemo(() => {
