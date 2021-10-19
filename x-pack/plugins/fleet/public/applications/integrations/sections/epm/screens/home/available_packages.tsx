@@ -15,7 +15,6 @@ import {
   EuiFlexGrid,
   EuiSpacer,
   EuiCard,
-  EuiFlexGroup,
   EuiIcon,
 } from '@elastic/eui';
 
