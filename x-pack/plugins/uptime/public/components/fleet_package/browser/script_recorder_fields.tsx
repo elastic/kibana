@@ -103,7 +103,9 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <span id="syntheticsBrowerScriptBlockHeader">{fileName || MOCK_FILE_NAME}</span>
+              <span id="syntheticsBrowerScriptBlockHeader">
+                {fileName || PLACEHOLDER_FILE_NAME}
+              </span>
             </EuiTitle>
           </EuiFlyoutHeader>
           <div style={{ height: '100%' }}>
@@ -117,7 +119,7 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
   );
 }
 
-const MOCK_FILE_NAME = i18n.translate(
+const PLACEHOLDER_FILE_NAME = i18n.translate(
   'xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.mockFileName',
   {
     defaultMessage: 'test_script.js',
