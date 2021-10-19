@@ -130,7 +130,7 @@ describe('setup_mode', () => {
 
       setModulesAndMocks();
       await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
-      await toggleSetupMode(true);
+      toggleSetupMode(true);
       await waitForSetupModeData();
 
       const state = getSetupModeState();
