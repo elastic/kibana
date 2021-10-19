@@ -275,22 +275,20 @@ export async function getTotalCountAggregations(
       {}
     ),
     throttle_time: {
-      min: `${aggregations.throttleTime.value.min}s`,
-      avg: `${
+      min: aggregations.throttleTime.value.min,
+      avg:
         aggregations.throttleTime.value.totalCount > 0
           ? aggregations.throttleTime.value.totalSum / aggregations.throttleTime.value.totalCount
-          : 0
-      }s`,
-      max: `${aggregations.throttleTime.value.max}s`,
+          : 0,
+      max: aggregations.throttleTime.value.max,
     },
     schedule_time: {
-      min: `${aggregations.intervalTime.value.min}s`,
-      avg: `${
+      min: aggregations.intervalTime.value.min,
+      avg:
         aggregations.intervalTime.value.totalCount > 0
           ? aggregations.intervalTime.value.totalSum / aggregations.intervalTime.value.totalCount
-          : 0
-      }s`,
-      max: `${aggregations.intervalTime.value.max}s`,
+          : 0,
+      max: aggregations.intervalTime.value.max,
     },
     connectors_per_alert: {
       min: aggregations.connectorsAgg.connectors.value.min,

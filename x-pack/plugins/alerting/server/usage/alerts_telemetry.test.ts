@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
-import { getTotalCountInUse } from './alerts_telemetry';
+import { getTotalCountAggregations, getTotalCountInUse } from './alerts_telemetry';
 
 describe('alerts telemetry', () => {
   test('getTotalCountInUse should replace first "." symbol to "__" in alert types names', async () => {
@@ -29,6 +29,40 @@ describe('alerts telemetry', () => {
     );
 
     const telemetry = await getTotalCountInUse(mockEsClient, 'test');
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "countByType": Object {
+    "__index-threshold": 2,
+    "document.test__": 1,
+    "logs.alert.document.count": 1,
+  },
+  "countTotal": 4,
+}
+`);
+  });
+
+  test('getTotalCountAggregations should return aggregations for throttle, interval and associated actions', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          byAlertTypeId: {
+            value: {
+              types: { '.index-threshold': 2, 'logs.alert.document.count': 1, 'document.test.': 1 },
+            },
+          },
+        },
+        hits: {
+          hits: [],
+        },
+      })
+    );
+
+    const telemetry = await getTotalCountAggregations(mockEsClient, 'test');
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
