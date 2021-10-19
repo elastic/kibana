@@ -9,12 +9,14 @@ import { RulesSchema } from '../../../../common/detection_engine/schemas/respons
 
 export const getExportDetailsNdjson = (
   rules: Array<Partial<RulesSchema>>,
-  missingRules: Array<{ rule_id: string }> = []
+  missingRules: Array<{ rule_id: string }> = [],
+  extraMeta: Record<string, number | string>
 ): string => {
   const stringified = JSON.stringify({
-    exported_count: rules.length,
+    exported_rules_count: rules.length,
     missing_rules: missingRules,
     missing_rules_count: missingRules.length,
+    ...extraMeta,
   });
   return `${stringified}\n`;
 };

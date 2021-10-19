@@ -25,14 +25,19 @@ export const getExportAll = async (
 }> => {
   const ruleAlertTypes = await getNonPackagedRules({ rulesClient, isRuleRegistryEnabled });
   const rules = transformAlertsToRules(ruleAlertTypes);
-  // Grab all relevant exception lists associated
-  // NOTE: soon enough we won't be stripping the actions, so this should
-  // update to just return the exceptionLists
-  const { rules: rulesWithoutActions, exceptionLists } = await getRuleExceptionsForExport(
-    rules,
+  const exceptions = rules.flatMap((rule) => rule.exceptions_list ?? []);
+  const { listCount, itemsCount, exportString } = await getRuleExceptionsForExport(
+    exceptions,
     exceptionsClient
   );
-  const rulesNdjson = transformDataToNdjson(rulesWithoutActions);
-  const exportDetails = getExportDetailsNdjson(rules);
-  return { rulesNdjson, exportDetails, exceptionLists };
+  const rulesNdjson = transformDataToNdjson(rules);
+  const exportDetails = getExportDetailsNdjson(rules, [], {
+    exported_exception_list_count: listCount,
+    exported_exception_list_item_count: itemsCount,
+    missing_exception_list_item_count: 0,
+    missing_exception_list_items: [],
+    missing_exception_lists: [],
+    missing_exception_lists_count: 0,
+  });
+  return { rulesNdjson, exportDetails, exceptionLists: exportString };
 };

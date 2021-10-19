@@ -82,7 +82,7 @@ export const exportRulesRoute = (
 
         const responseBody = request.query.exclude_export_details
           ? exportedRules.rulesNdjson
-          : `${exportedRules.rulesNdjson}${exportedRules.exportDetails}${exportedRules.exceptionLists}`;
+          : `${exportedRules.rulesNdjson}${exportedRules.exceptionLists}${exportedRules.exportDetails}`;
 
         return response.ok({
           headers: {

@@ -45,15 +45,18 @@ export const getExportByObjectIds = async (
 }> => {
   // Retrieve rules, these aren't the rule SOs, just the params
   const rulesAndErrors = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
-  // Grab all relevant exception lists associated
-  // NOTE: soon enough we won't be stripping the actions, so this should
-  // update to just return the exceptionLists
-  const { rules, exceptionLists } = await getRuleExceptionsForExport(
-    rulesAndErrors.rules,
+  const exceptions = rulesAndErrors.rules.flatMap((rule) => rule.exceptions_list ?? []);
+
+  const { exceptionLists, exceptionDetails } = await getRuleExceptionsForExport(
+    exceptions,
     exceptionsClient
   );
-  const rulesNdjson = transformDataToNdjson(rules);
-  const exportDetails = getExportDetailsNdjson(rules, rulesAndErrors.missingRules);
+  const rulesNdjson = transformDataToNdjson(rulesAndErrors.rules);
+  const exportDetails = getExportDetailsNdjson(
+    rulesAndErrors.rules,
+    rulesAndErrors.missingRules,
+    exceptionDetails
+  );
   return { rulesNdjson, exportDetails, exceptionLists };
 };
 

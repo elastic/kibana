@@ -5,33 +5,41 @@
  * 2.0.
  */
 
+import { SavedObjectsClientContract } from 'kibana/server';
+
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 
 import { exportExceptionListAndItems } from './export_exception_list_and_items';
+import { findExceptionListItem } from './find_exception_list_item';
+import { getExceptionList } from './get_exception_list';
 
 describe('export_exception_list_and_items', () => {
   describe('exportExceptionListAndItems', () => {
     test('it should return null if no matching exception list found', async () => {
+      (getExceptionList as jest.Mock).mockResolvedValue(null);
+      (findExceptionListItem as jest.Mock).mockResolvedValue({ data: [] });
+
       const result = await exportExceptionListAndItems({
-        findExceptionListItem: jest.fn(),
-        getExceptionList: jest.fn().mockResolvedValue(null),
         id: '123',
         listId: 'non-existent',
         namespaceType: 'single',
+        savedObjectsClient: {} as SavedObjectsClientContract,
       });
       expect(result).toBeNull();
     });
 
     test('it should return stringified list and items', async () => {
+      (getExceptionList as jest.Mock).mockResolvedValue(getExceptionListSchemaMock());
+      (findExceptionListItem as jest.Mock).mockResolvedValue({
+        data: [getExceptionListItemSchemaMock()],
+      });
+
       const result = await exportExceptionListAndItems({
-        findExceptionListItem: jest
-          .fn()
-          .mockResolvedValue({ data: [getExceptionListItemSchemaMock()] }),
-        getExceptionList: jest.fn().mockResolvedValue(getExceptionListSchemaMock()),
         id: '123',
         listId: 'non-existent',
         namespaceType: 'single',
+        savedObjectsClient: {} as SavedObjectsClientContract,
       });
       expect(result).toEqual(
         `${JSON.stringify(getExceptionListSchemaMock())}\n${JSON.stringify(

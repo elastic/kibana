@@ -39,7 +39,10 @@ import {
   UpdateExceptionListOptions,
 } from './exception_list_client_types';
 import { getExceptionList } from './get_exception_list';
-import { exportExceptionListAndItems } from './export_exception_list_and_items';
+import {
+  ExportExceptionListAndItemsReturn,
+  exportExceptionListAndItems,
+} from './export_exception_list_and_items';
 import { getExceptionListSummary } from './get_exception_list_summary';
 import { createExceptionList } from './create_exception_list';
 import { getExceptionListItem } from './get_exception_list_item';
@@ -499,13 +502,14 @@ export class ExceptionListClient {
     listId,
     id,
     namespaceType,
-  }: ExportExceptionListAndItemsOptions): Promise<string | null> => {
+  }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
+    const { savedObjectsClient } = this;
+
     return exportExceptionListAndItems({
-      findExceptionListItem: this.findExceptionListItem,
-      getExceptionList: this.getExceptionList,
       id,
       listId,
       namespaceType,
+      savedObjectsClient,
     });
   };
 }
