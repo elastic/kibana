@@ -91,7 +91,7 @@ export const EmptyIndexListPrompt = ({
               <EuiCard
                 className="inpEmptyState__card"
                 onClick={() => {
-                  navigateToApp('home', { path: '#/tutorial_directory' });
+                  navigateToApp('home', { path: '/app/integrations/browse' });
                   closeFlyout();
                 }}
                 icon={<EuiIcon size="xl" type="database" color="subdued" />}
