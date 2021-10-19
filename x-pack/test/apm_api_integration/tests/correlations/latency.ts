@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { IKibanaSearchRequest } from '../../../../../src/plugins/data/common';
 
 import type { LatencyCorrelationsParams } from '../../../../plugins/apm/common/search_strategies/latency_correlations/types';
-import type { SearchStrategyClientParams } from '../../../../plugins/apm/common/search_strategies/types';
+import type { RawSearchStrategyClientParams } from '../../../../plugins/apm/common/search_strategies/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../plugins/apm/common/search_strategies/constants';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -22,16 +22,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const getRequestBody = () => {
-    const request: IKibanaSearchRequest<LatencyCorrelationsParams & SearchStrategyClientParams> = {
-      params: {
-        environment: 'ENVIRONMENT_ALL',
-        start: '2020',
-        end: '2021',
-        kuery: '',
-        percentileThreshold: 95,
-        analyzeCorrelations: true,
-      },
-    };
+    const request: IKibanaSearchRequest<LatencyCorrelationsParams & RawSearchStrategyClientParams> =
+      {
+        params: {
+          environment: 'ENVIRONMENT_ALL',
+          start: '2020',
+          end: '2021',
+          kuery: '',
+          percentileThreshold: 95,
+          analyzeCorrelations: true,
+        },
+      };
 
     return {
       batch: [
