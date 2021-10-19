@@ -48,6 +48,7 @@ import {
 } from './support/query_strategies';
 import { NotFoundError } from '../../errors';
 import { EndpointHostUnEnrolledError } from '../../services/metadata';
+import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
@@ -522,10 +523,11 @@ async function queryUnitedIndex(
       const agentPolicy = agentPoliciesMap[agent.policy_id!];
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const endpointPolicy = endpointPoliciesMap[agent.policy_id!];
+      const fleetAgentStatus = getAgentStatus(agent as Agent);
+
       return {
         metadata,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        host_status: fleetAgentStatusToEndpointHostStatus(agent.last_checkin_status!),
+        host_status: fleetAgentStatusToEndpointHostStatus(fleetAgentStatus),
         policy_info: {
           agent: {
             applied: {
