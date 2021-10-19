@@ -10,7 +10,7 @@
 /* eslint-disable dot-notation */
 
 import { mockTelemetryService } from '../mocks';
-import { TELEMETRY_ENDPOINT } from '../../common/constants';
+
 describe('TelemetryService', () => {
   describe('fetchTelemetry', () => {
     it('calls expected URL with 20 minutes - now', async () => {
@@ -142,7 +142,9 @@ describe('TelemetryService', () => {
         config: { sendUsageTo: 'staging' },
       });
 
-      expect(telemetryService.getTelemetryUrl()).toBe(TELEMETRY_ENDPOINT.MAIN_CHANNEL.STAGING);
+      expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
+        `"https://telemetry-staging.elastic.co/v3/send/kibana-snapshot"`
+      );
     });
 
     it('should return prod endpoint when sendUsageTo is set to prod', async () => {
@@ -150,7 +152,9 @@ describe('TelemetryService', () => {
         config: { sendUsageTo: 'prod' },
       });
 
-      expect(telemetryService.getTelemetryUrl()).toBe(TELEMETRY_ENDPOINT.MAIN_CHANNEL.PROD);
+      expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
+        `"https://telemetry.elastic.co/v3/send/kibana-snapshot"`
+      );
     });
   });
 
@@ -160,8 +164,8 @@ describe('TelemetryService', () => {
         config: { sendUsageTo: 'staging' },
       });
 
-      expect(telemetryService.getOptInStatusUrl()).toBe(
-        TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.STAGING
+      expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
+        `"https://telemetry-staging.elastic.co/v3/send/kibana-opt_in_status"`
       );
     });
 
@@ -170,8 +174,8 @@ describe('TelemetryService', () => {
         config: { sendUsageTo: 'prod' },
       });
 
-      expect(telemetryService.getOptInStatusUrl()).toBe(
-        TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.PROD
+      expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
+        `"https://telemetry.elastic.co/v3/send/kibana-opt_in_status"`
       );
     });
   });

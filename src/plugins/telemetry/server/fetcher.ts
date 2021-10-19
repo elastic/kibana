@@ -141,7 +141,7 @@ export class FetcherTask {
     const allowChangingOptInStatus = config.allowChangingOptInStatus;
     const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
     const telemetryUrl = getTelemetryChannelEndpoint({
-      channelName: 'main',
+      channelName: 'snapshot',
       env: config.sendUsageTo,
     });
     const { failureCount, failureVersion } = getTelemetryFailureDetails({

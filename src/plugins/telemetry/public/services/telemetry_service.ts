@@ -101,7 +101,7 @@ export class TelemetryService {
   /** Retrieve the URL to report telemetry **/
   public getTelemetryUrl = () => {
     const { sendUsageTo } = this.config;
-    return getTelemetryChannelEndpoint({ channelName: 'main', env: sendUsageTo });
+    return getTelemetryChannelEndpoint({ channelName: 'snapshot', env: sendUsageTo });
   };
 
   /**
