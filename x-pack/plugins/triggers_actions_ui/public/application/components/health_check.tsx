@@ -108,7 +108,7 @@ const EncryptionError = ({ docLinks, className }: PromptErrorProps) => (
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.healthCheck.encryptionErrorTitle"
-          defaultMessage="Encrypted saved objects are not available"
+          defaultMessage="Additional setup required"
         />
       </h2>
     }
@@ -118,22 +118,14 @@ const EncryptionError = ({ docLinks, className }: PromptErrorProps) => (
           {i18n.translate(
             'xpack.triggersActionsUI.components.healthCheck.encryptionErrorBeforeKey',
             {
-              defaultMessage: 'To create a rule, set a value for ',
-            }
-          )}
-          <EuiCode>{'xpack.encryptedSavedObjects.encryptionKey'}</EuiCode>
-          {i18n.translate(
-            'xpack.triggersActionsUI.components.healthCheck.encryptionErrorAfterKey',
-            {
-              defaultMessage:
-                ' in your kibana.yml file and ensure the Encrypted Saved Objects plugin is enabled. ',
+              defaultMessage: 'You must configure an encryption key to use Alerting. ',
             }
           )}
           <EuiLink href={docLinks.links.alerting.generalSettings} external target="_blank">
             {i18n.translate(
               'xpack.triggersActionsUI.components.healthCheck.encryptionErrorAction',
               {
-                defaultMessage: 'Learn how.',
+                defaultMessage: 'Learn more.',
               }
             )}
           </EuiLink>
@@ -153,7 +145,7 @@ const ApiKeysDisabledError = ({ docLinks, className }: PromptErrorProps) => (
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.healthCheck.apiKeysDisabledErrorTitle"
-          defaultMessage="You must enable API keys"
+          defaultMessage="Additional setup required"
         />
       </h2>
     }
@@ -161,7 +153,7 @@ const ApiKeysDisabledError = ({ docLinks, className }: PromptErrorProps) => (
       <div className={`${className}__body`}>
         <p role="banner">
           {i18n.translate('xpack.triggersActionsUI.components.healthCheck.apiKeysDisabledError', {
-            defaultMessage: 'Alerting relies on API keys. ',
+            defaultMessage: 'You must enable API keys to use Alerting. ',
           })}
           <EuiLink
             href={docLinks.links.security.elasticsearchEnableApiKeys}
@@ -171,7 +163,7 @@ const ApiKeysDisabledError = ({ docLinks, className }: PromptErrorProps) => (
             {i18n.translate(
               'xpack.triggersActionsUI.components.healthCheck.apiKeysDisabledErrorAction',
               {
-                defaultMessage: 'Learn how to enable API keys.',
+                defaultMessage: 'Learn more.',
               }
             )}
           </EuiLink>
@@ -232,14 +224,15 @@ const ApiKeysAndEncryptionError = ({ docLinks, className }: PromptErrorProps) =>
           {i18n.translate(
             'xpack.triggersActionsUI.components.healthCheck.apiKeysAndEncryptionError',
             {
-              defaultMessage: 'You must enable API keys and configure an encryption key. ',
+              defaultMessage:
+                'You must enable API keys and configure an encryption key to use Alerting. ',
             }
           )}
           <EuiLink href={docLinks.links.alerting.setupPrerequisites} external target="_blank">
             {i18n.translate(
               'xpack.triggersActionsUI.components.healthCheck.apiKeysAndEncryptionErrorAction',
               {
-                defaultMessage: 'Learn how.',
+                defaultMessage: 'Learn more.',
               }
             )}
           </EuiLink>

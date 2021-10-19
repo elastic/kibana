@@ -104,13 +104,13 @@ describe('health check', () => {
     });
 
     const [description] = queryAllByText(/API keys/i);
-    const [action] = queryAllByText(/how to enable API keys/i);
+    const [action] = queryAllByText(/Learn more/i);
 
-    expect(description.textContent).toMatchInlineSnapshot(`"You must enable API keys"`);
-
-    expect(action.textContent).toMatchInlineSnapshot(
-      `"Learn how to enable API keys.(opens in a new tab or window)"`
+    expect(description.textContent).toMatchInlineSnapshot(
+      `"You must enable API keys to use Alerting. Learn more.(opens in a new tab or window)"`
     );
+
+    expect(action.textContent).toMatchInlineSnapshot(`"Learn more.(opens in a new tab or window)"`);
 
     expect(action.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"`
@@ -141,11 +141,13 @@ describe('health check', () => {
 
     const description = queryByRole(/banner/i);
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"To create a rule, set a value for xpack.encryptedSavedObjects.encryptionKey in your kibana.yml file and ensure the Encrypted Saved Objects plugin is enabled. Learn how.(opens in a new tab or window)"`
+      `"You must configure an encryption key to use Alerting. Learn more.(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
-    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how.(opens in a new tab or window)"`);
+    expect(action!.textContent).toMatchInlineSnapshot(
+      `"Learn more.(opens in a new tab or window)"`
+    );
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alert-action-settings-kb.html#general-alert-action-settings"`
     );
@@ -177,11 +179,13 @@ describe('health check', () => {
     const description = queryByText(/You must enable/i);
 
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"You must enable API keys and configure an encryption key. Learn how.(opens in a new tab or window)"`
+      `"You must enable API keys and configure an encryption key to use Alerting. Learn more.(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
-    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how.(opens in a new tab or window)"`);
+    expect(action!.textContent).toMatchInlineSnapshot(
+      `"Learn more.(opens in a new tab or window)"`
+    );
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alerting-setup.html#alerting-prerequisites"`
     );
