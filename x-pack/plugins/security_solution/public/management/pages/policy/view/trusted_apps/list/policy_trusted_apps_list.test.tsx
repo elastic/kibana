@@ -24,9 +24,10 @@ import { APP_ID } from '../../../../../../../common/constants';
 import {
   EndpointPrivileges,
   useEndpointPrivileges,
-} from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
+} from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 
-jest.mock('../../../../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
 
 describe('when rendering the PolicyTrustedAppsList', () => {
@@ -43,10 +44,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   const loadedUserEndpointPrivilegesState = (
     endpointOverrides: Partial<EndpointPrivileges> = {}
   ): EndpointPrivileges => ({
-    loading: false,
-    canAccessFleet: true,
-    canAccessEndpointManagement: true,
-    isPlatinumPlus: true,
+    ...getEndpointPrivilegesInitialStateMock(),
     ...endpointOverrides,
   });
 
@@ -207,7 +205,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     expect(appTestContext.coreStart.application.navigateToApp).toHaveBeenCalledWith(
       APP_ID,
       expect.objectContaining({
-        path: '/administration/trusted_apps?show=edit&id=89f72d8a-05b5-4350-8cad-0dc3661d6e67',
+        path: '/administration/trusted_apps?filter=89f72d8a-05b5-4350-8cad-0dc3661d6e67',
       })
     );
   });
