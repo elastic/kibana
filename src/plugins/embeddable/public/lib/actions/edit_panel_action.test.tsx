@@ -33,6 +33,18 @@ class EditableEmbeddable extends Embeddable {
   public reload() {}
 }
 
+let originalLocation: Window['location'];
+const testPath = '#/path/to/current/app';
+
+beforeAll(async () => {
+  originalLocation = window.location;
+  window.location.hash = testPath;
+});
+
+afterAll(async () => {
+  window.location = originalLocation;
+});
+
 test('is compatible when edit url is available, in edit mode and editable', async () => {
   const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
   expect(
@@ -67,7 +79,7 @@ test('redirects to app using state transfer with by value mode', async () => {
         coolInput1: 1,
         coolInput2: 2,
       },
-      originatingPath: '',
+      originatingPath: testPath,
     },
   });
 });
@@ -87,7 +99,7 @@ test('redirects to app using state transfer without by value mode', async () => 
       originatingApp: 'superCoolCurrentApp',
       embeddableId: '123',
       valueInput: undefined,
-      originatingPath: '',
+      originatingPath: testPath,
     },
   });
 });

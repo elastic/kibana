@@ -112,6 +112,7 @@ export class EditPanelAction implements Action<ActionContext> {
           valueInput: byValueMode ? this.getExplicitInput({ embeddable }) : undefined,
           embeddableId: embeddable.id,
           searchSessionId: embeddable.getInput().searchSessionId,
+          originatingPath: window.location.hash,
         };
         return { app, path, state };
       }
