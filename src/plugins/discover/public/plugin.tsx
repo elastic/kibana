@@ -272,7 +272,7 @@ export class DiscoverPlugin
           <SourceViewer
             index={hit._index}
             id={hit._id}
-            indexPatternId={indexPattern?.id || ''}
+            indexPattern={indexPattern}
             hasLineNumbers
           />
         </React.Suspense>
