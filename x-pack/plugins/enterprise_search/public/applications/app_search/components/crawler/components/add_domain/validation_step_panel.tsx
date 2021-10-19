@@ -35,10 +35,7 @@ export const ValidationStepPanel: React.FC<ValidationStepPanelProps> = ({
   const showErrorMessage = step.state === 'invalid' || step.state === 'warning';
 
   return (
-    <EuiPanel
-      hasShadow={false}
-      color={domainValidationStateToPanelColor(step.state)}
-    >
+    <EuiPanel hasShadow={false} color={domainValidationStateToPanelColor(step.state)}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <ValidationStateIcon state={step.state} />
