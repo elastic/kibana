@@ -14,7 +14,7 @@ export const PLUGIN = {
   minimumLicenseType: basicLicense,
 };
 
-export const MAJOR_VERSION = '8.0.0';
+export const MAJOR_VERSION = '7.16.0';
 
 export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
 
