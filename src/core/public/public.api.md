@@ -706,6 +706,7 @@ export interface DocLinksStart {
             elasticAgent: string;
             datastreams: string;
             datastreamsNamingScheme: string;
+            installElasticAgent: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
@@ -732,10 +733,9 @@ export interface DocLinksStart {
 // Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
 //
 // @internal (undocumented)
-export interface DomainDeprecationDetails extends DeprecationsDetails {
-    // (undocumented)
+export type DomainDeprecationDetails = DeprecationsDetails & {
     domainId: string;
-}
+};
 
 export { EnvironmentMode }
 

@@ -327,6 +327,7 @@ export class DocLinksService {
           preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
           preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}index-action-type.html#preconfigured-connector-alert-history`,
           serviceNowAction: `${KIBANA_DOCS}servicenow-action-type.html#configuring-servicenow`,
+          serviceNowSIRAction: `${KIBANA_DOCS}servicenow-sir-action-type.html`,
           setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
           slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
           teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
@@ -476,9 +477,10 @@ export class DocLinksService {
           settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
-          elasticAgent: `${FLEET_DOCS}elastic-agent-installation-configuration.html`,
+          elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
           datastreams: `${FLEET_DOCS}data-streams.html`,
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
+          installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
@@ -739,6 +741,7 @@ export interface DocLinksStart {
       elasticAgent: string;
       datastreams: string;
       datastreamsNamingScheme: string;
+      installElasticAgent: string;
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
       learnMoreBlog: string;

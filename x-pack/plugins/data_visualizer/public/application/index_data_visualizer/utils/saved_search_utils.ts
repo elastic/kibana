@@ -16,17 +16,31 @@ import {
   Filter,
 } from '@kbn/es-query';
 import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IndexPattern, SearchSource } from '../../../../../../../src/plugins/data/common';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
 import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
+const DEFAULT_QUERY = {
+  bool: {
+    must: [
+      {
+        match_all: {},
+      },
+    ],
+  },
+};
+
+export function getDefaultQuery() {
+  return cloneDeep(DEFAULT_QUERY);
+}
+
 /**
  * Parse the stringified searchSourceJSON
  * from a saved search or saved search object
  */
-export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | SavedSearch) {
+export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObject | SavedSearch) {
   const search = isSavedSearchSavedObject(savedSearch)
     ? savedSearch?.attributes?.kibanaSavedObjectMeta
     : // @ts-expect-error kibanaSavedObjectMeta does exist
@@ -117,9 +131,30 @@ export function getEsQueryFromSavedSearch({
 }) {
   if (!indexPattern || !savedSearch) return;
 
-  const savedSearchData = getQueryFromSavedSearch(savedSearch);
   const userQuery = query;
   const userFilters = filters;
+
+  // If saved search has a search source with nested parent
+  // e.g. a search coming from Dashboard saved search embeddable
+  // which already combines both the saved search's original query/filters and the Dashboard's
+  // then no need to process any further
+  if (
+    savedSearch &&
+    'searchSource' in savedSearch &&
+    savedSearch?.searchSource instanceof SearchSource &&
+    savedSearch.searchSource.getParent() !== undefined &&
+    userQuery
+  ) {
+    return {
+      searchQuery: savedSearch.searchSource.getSearchRequestBody()?.query ?? getDefaultQuery(),
+      searchString: userQuery.query,
+      queryLanguage: userQuery.language as SearchQueryLanguage,
+    };
+  }
+
+  // If saved search is an json object with the original query and filter
+  // retrieve the parsed query and filter
+  const savedSearchData = getQueryFromSavedSearchObject(savedSearch);
 
   // If no saved search available, use user's query and filters
   if (!savedSearchData && userQuery) {
@@ -139,7 +174,8 @@ export function getEsQueryFromSavedSearch({
     };
   }
 
-  // If saved search available, merge saved search with latest user query or filters differ from extracted saved search data
+  // If saved search available, merge saved search with latest user query or filters
+  // which might differ from extracted saved search data
   if (savedSearchData) {
     const currentQuery = userQuery ?? savedSearchData?.query;
     const currentFilters = userFilters ?? savedSearchData?.filter;
@@ -159,18 +195,4 @@ export function getEsQueryFromSavedSearch({
       queryLanguage: currentQuery.language as SearchQueryLanguage,
     };
   }
-}
-
-const DEFAULT_QUERY = {
-  bool: {
-    must: [
-      {
-        match_all: {},
-      },
-    ],
-  },
-};
-
-export function getDefaultQuery() {
-  return cloneDeep(DEFAULT_QUERY);
 }
