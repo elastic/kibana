@@ -189,9 +189,9 @@ export const combineQueries = ({
 
 export const buildCombinedQuery = (combineQueriesParams: CombineQueries) => {
   const combinedQuery = combineQueries(combineQueriesParams);
-  return combinedQuery
+  return combinedQuery?.filterQuery
     ? {
-        filterQuery: combinedQuery!.filterQuery,
+        filterQuery: combinedQuery.filterQuery,
       }
     : null;
 };
@@ -227,11 +227,14 @@ export const getCombinedFilterQuery = ({
   to,
   filters,
   ...combineQueriesParams
-}: CombineQueries & { from: string; to: string }): string =>
-  combineQueries({
+}: CombineQueries & { from: string; to: string }): string | undefined => {
+  const combinedQueries = combineQueries({
     ...combineQueriesParams,
     filters: [...filters, buildTimeRangeFilter(from, to)],
-  })!.filterQuery;
+  });
+
+  return combinedQueries ? combinedQueries.filterQuery : undefined;
+};
 
 /**
  * The CSS class name of a "stateful event", which appears in both
