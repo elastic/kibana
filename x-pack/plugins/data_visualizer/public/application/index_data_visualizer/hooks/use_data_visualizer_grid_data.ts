@@ -37,6 +37,7 @@ import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
 import { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
 import { Dictionary } from '../../common/util/url_state';
+import { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 
 const defaults = getDefaultPageState();
 
@@ -103,6 +104,7 @@ export const useDataVisualizerGridData = (
     currentIndexPattern.id,
     dataVisualizerListState.searchString,
     dataVisualizerListState.searchQueryLanguage,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify({
       searchQuery: dataVisualizerListState.searchQuery,
       currentQuery,
@@ -145,23 +147,28 @@ export const useDataVisualizerGridData = (
       // (such as the document count chart). Aim for 75 bars.
       const buckets = _timeBuckets;
 
-      const tf = timefilter as any;
+      const tf = timefilter;
 
       if (!buckets || !tf || !currentIndexPattern) return;
 
       const activeBounds = tf.getActiveBounds();
+
       let earliest: number | undefined;
       let latest: number | undefined;
       if (activeBounds !== undefined && currentIndexPattern.timeFieldName !== undefined) {
-        earliest = tf.getActiveBounds().min.valueOf();
-        latest = tf.getActiveBounds().max.valueOf();
+        earliest = activeBounds.min?.valueOf();
+        latest = activeBounds.max?.valueOf();
       }
 
       const bounds = tf.getActiveBounds();
       const BAR_TARGET = 75;
       buckets.setInterval('auto');
-      buckets.setBounds(bounds);
-      buckets.setBarTarget(BAR_TARGET);
+
+      if (bounds) {
+        buckets.setBounds(bounds);
+        buckets.setBarTarget(BAR_TARGET);
+      }
+
       const aggInterval = buckets.getInterval();
 
       const aggregatableFields: string[] = [];
@@ -204,19 +211,6 @@ export const useDataVisualizerGridData = (
       lastRefresh,
     ]
   );
-
-  useEffect(() => console.log('_timeBuckets', _timeBuckets), [_timeBuckets]);
-  useEffect(() => console.log('timefilter', timefilter), [timefilter]);
-  useEffect(
-    () => console.log('currentIndexPattern', currentIndexPattern.id),
-    [currentIndexPattern.id]
-  );
-  useEffect(
-    () => console.log('searchQuery', JSON.stringify(searchQuery)),
-    [JSON.stringify(searchQuery)]
-  );
-  useEffect(() => console.log('samplerShardSize', samplerShardSize), [samplerShardSize]);
-  useEffect(() => console.log('searchSessionId', searchSessionId), [searchSessionId]);
 
   const configsWithoutStats = useMemo(() => {
     const existMetricFields: FieldRequestConfig[] = metricConfigs.map((config) => {
@@ -277,7 +271,8 @@ export const useDataVisualizerGridData = (
 
   const createMetricCards = useCallback(() => {
     const configs: FieldVisConfig[] = [];
-    const aggregatableExistsFields: any[] = overallStats.aggregatableExistsFields || [];
+    const aggregatableExistsFields: AggregatableField[] =
+      overallStats.aggregatableExistsFields || [];
 
     const allMetricFields = indexPatternFields.filter((f) => {
       return (
@@ -297,7 +292,7 @@ export const useDataVisualizerGridData = (
       return;
     }
 
-    let aggregatableFields: any[] = overallStats.aggregatableExistsFields;
+    let aggregatableFields: AggregatableField[] = overallStats.aggregatableExistsFields;
     if (allMetricFields.length !== metricExistsFields.length && metricsLoaded === true) {
       aggregatableFields = aggregatableFields.concat(overallStats.aggregatableNotExistsFields);
     }
@@ -342,10 +337,12 @@ export const useDataVisualizerGridData = (
     });
     // Obtain the list of all non-metric fields which appear in documents
     // (aggregatable or not aggregatable).
-    const populatedNonMetricFields: any[] = []; // Kibana index pattern non metric fields.
-    let nonMetricFieldData: any[] = []; // Basic non metric field data loaded from requesting overall stats.
-    const aggregatableExistsFields: any[] = overallStats.aggregatableExistsFields || [];
-    const nonAggregatableExistsFields: any[] = overallStats.nonAggregatableExistsFields || [];
+    const populatedNonMetricFields: [] = []; // Kibana index pattern non metric fields.
+    let nonMetricFieldData: AggregatableField[] = []; // Basic non metric field data loaded from requesting overall stats.
+    const aggregatableExistsFields: AggregatableField[] =
+      overallStats.aggregatableExistsFields || [];
+    const nonAggregatableExistsFields: NonAggregatableField[] =
+      overallStats.nonAggregatableExistsFields || [];
 
     allNonMetricFields.forEach((f) => {
       const checkAggregatableField = aggregatableExistsFields.find(
@@ -462,7 +459,6 @@ export const useDataVisualizerGridData = (
     strategyResponse.fieldStats,
   ]);
 
-  useEffect(() => console.log('configs updated', configs), [configs]);
   // Some actions open up fly-out or popup
   // This variable is used to keep track of them and clean up when unmounting
   const actionFlyoutRef = useRef<() => void | undefined>();

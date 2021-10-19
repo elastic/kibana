@@ -136,7 +136,6 @@ export const EmbeddableWrapper = ({
         extendedColumns={extendedColumns}
         showPreviewByDefault={input?.showPreviewByDefault}
         onChange={onOutputChange}
-        progress={progress}
       />
     </div>
   );

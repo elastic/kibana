@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-nocheck
 import React, { FC, Fragment, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { merge } from 'rxjs';
 import {
@@ -885,12 +886,12 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 >
                   {currentIndexPattern.timeFieldName !== undefined && (
                     <EuiFlexItem grow={false}>
-                      <FullTimeRangeSelector
-                        indexPattern={currentIndexPattern}
-                        query={undefined}
-                        disabled={false}
-                        timefilter={timefilter}
-                      />
+                      {/* <FullTimeRangeSelector*/}
+                      {/*  indexPattern={currentIndexPattern}*/}
+                      {/*  query={undefined}*/}
+                      {/*  disabled={false}*/}
+                      {/*  timefilter={timefilter}*/}
+                      {/* />*/}
                     </EuiFlexItem>
                   )}
                   <EuiFlexItem grow={false}>

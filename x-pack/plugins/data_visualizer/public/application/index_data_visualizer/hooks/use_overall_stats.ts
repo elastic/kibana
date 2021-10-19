@@ -221,7 +221,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         });
       },
       complete: () => {
-        console.log('useOverallStats called', intervalMs);
         setFetchState({
           loaded: 100,
           isRunning: false,

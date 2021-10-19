@@ -319,8 +319,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     return getItemIdToExpandedRowMap(itemIds, items);
   }, [items, expandedRowItemIds, getItemIdToExpandedRowMap]);
 
-  console.log('items', items); // Some actions open up fly-out or popup
-
   return (
     <EuiResizeObserver onResize={resizeHandler}>
       {(resizeRef) => (

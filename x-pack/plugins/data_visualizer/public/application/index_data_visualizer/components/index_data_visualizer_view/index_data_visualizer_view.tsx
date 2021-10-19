@@ -140,20 +140,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   }, [dataVisualizerProps?.currentSavedSearch]);
 
   useEffect(() => {
-    return () => {
-      // When navigating away from the index pattern
-      // Reset all previously set filters
-      // to make sure new page doesn't have unrelated filters
-      data.query.filterManager.removeAll();
-    };
-  }, [currentIndexPattern.id, data.query.filterManager]);
-
-  // const timefilter = useTimefilter({
-  //   timeRangeSelector: currentIndexPattern?.timeFieldName !== undefined,
-  //   autoRefreshSelector: true,
-  // });
-
-  useEffect(() => {
     if (!currentIndexPattern.isTimeBased()) {
       toasts.addWarning({
         title: i18n.translate(
@@ -260,6 +246,18 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     timefilter,
     setLastRefresh,
   } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
+
+  useEffect(() => {
+    // Force refresh on index pattern change
+    setLastRefresh(Date.now());
+
+    return () => {
+      // When navigating away from the index pattern
+      // Reset all previously set filters
+      // to make sure new page doesn't have unrelated filters
+      data.query.filterManager.removeAll();
+    };
+  }, [currentIndexPattern.id, data.query.filterManager, setLastRefresh]);
 
   useEffect(() => {
     if (globalState?.time !== undefined) {

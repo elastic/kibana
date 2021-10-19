@@ -7,39 +7,7 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
-import { FieldVisConfig } from '../../../../../plugins/data_visualizer/public/application/common/components/stats_table/types';
-
-interface MetricFieldVisConfig extends FieldVisConfig {
-  statsMaxDecimalPlaces: number;
-  docCountFormatted: string;
-  topValuesCount: number;
-  viewableInLens: boolean;
-  hasActionMenu: boolean;
-}
-
-interface NonMetricFieldVisConfig extends FieldVisConfig {
-  docCountFormatted: string;
-  exampleCount: number;
-  viewableInLens: boolean;
-  hasActionMenu: boolean;
-}
-
-interface TestData {
-  suiteTitle: string;
-  sourceIndexOrSavedSearch: string;
-  rowsPerPage?: 10 | 25 | 50;
-  newFields?: Array<{ fieldName: string; type: string; script: string }>;
-  fieldsToRename?: Array<{ originalName: string; newName: string }>;
-  expected: {
-    totalDocCountFormatted: string;
-    metricFields?: MetricFieldVisConfig[];
-    nonMetricFields?: NonMetricFieldVisConfig[];
-    visibleMetricFieldsCount: number;
-    totalMetricFieldsCount: number;
-    populatedFieldsCount: number;
-    totalFieldsCount: number;
-  };
-}
+import { TestData, MetricFieldVisConfig } from './types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
