@@ -21,9 +21,9 @@ describe('ChartCreationInfo', () => {
     render(<ChartCreationInfo {...info} />);
 
     expect(screen.getByText('Chart created')).toBeInTheDocument();
-    expect(screen.getByText('10/12/2021 04:39 PM')).toBeInTheDocument();
+    expect(screen.getByText('Oct 12, 2021 4:39 PM')).toBeInTheDocument();
     expect(screen.getByText('Displaying from')).toBeInTheDocument();
-    expect(screen.getByText('10/05/2021 12:00 AM → 10/12/2021 04:38 PM')).toBeInTheDocument();
+    expect(screen.getByText('Oct 5, 2021 12:00 AM → Oct 12, 2021 4:38 PM')).toBeInTheDocument();
   });
 
   it('does not display info when props are falsey', async () => {
