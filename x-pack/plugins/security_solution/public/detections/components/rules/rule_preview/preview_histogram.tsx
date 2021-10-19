@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import { Unit } from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
@@ -55,11 +56,15 @@ export const PreviewHistogram = ({
     spaceId,
   });
 
+  const previousPreviewId = usePrevious(previewId);
+
   useEffect(() => {
-    if (isNoisy(totalCount, timeFrame)) {
-      addNoiseWarning();
+    if (previousPreviewId !== previewId && totalCount > 0) {
+      if (isNoisy(totalCount, timeFrame)) {
+        addNoiseWarning();
+      }
     }
-  }, [totalCount, addNoiseWarning, timeFrame]);
+  }, [totalCount, addNoiseWarning, timeFrame, previousPreviewId, previewId]);
 
   useEffect((): void => {
     if (!isLoading && !isInitializing) {
