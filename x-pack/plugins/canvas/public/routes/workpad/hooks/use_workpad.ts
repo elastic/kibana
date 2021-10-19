@@ -63,7 +63,7 @@ export const useWorkpad = (
   }, [workpadId, dispatch, setError, loadPages, workpadResolve]);
 
   useEffect(() => {
-    (async () => {
+    (() => {
       if (!resolveInfo) return;
 
       const { aliasId, outcome } = resolveInfo;
