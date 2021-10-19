@@ -8,20 +8,25 @@
 
 import type { ElasticsearchClient } from '../elasticsearch_client';
 
-export const getIndexExists = async (
+/**
+ * This function is similar to getIndexExists, but is limited to searching indices that match
+ * the index pattern used as concrete backing indices (e.g. .siem-signals-default-000001).
+ * This allows us to separate the indices that are actually .siem-signals indices from
+ * alerts as data indices that only share the .siem-signals alias.
+ *
+ * @param esClient Elasticsearch client to use to make the request
+ * @param index Index alias name to check for existence
+ */
+export const getBootstrapIndexExists = async (
   esClient: ElasticsearchClient,
   index: string
 ): Promise<boolean> => {
   try {
-    const { body: response } = await esClient.search({
-      index,
-      size: 0,
-      allow_no_indices: true,
-      body: {
-        terminate_after: 1,
-      },
+    const { body } = await esClient.indices.getAlias({
+      index: `${index}-*`,
+      name: index,
     });
-    return response._shards.total > 0;
+    return Object.keys(body).length > 0;
   } catch (err) {
     if (err.body != null && err.body.status === 404) {
       return false;
