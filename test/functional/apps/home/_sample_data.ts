@@ -156,7 +156,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const from = `${today} @ 00:00:00.000`;
       const to = `${today} @ 23:59:59.999`;
       await PageObjects.common.setTime({ from, to });
-      // await PageObjects.common.navigateToApp('discover');
     }
   });
 }
