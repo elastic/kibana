@@ -698,6 +698,7 @@ export interface DocLinksStart {
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
+            customizeIntegrationDataRetention: string;
             guide: string;
             fleetServer: string;
             fleetServerAddFleetServer: string;
