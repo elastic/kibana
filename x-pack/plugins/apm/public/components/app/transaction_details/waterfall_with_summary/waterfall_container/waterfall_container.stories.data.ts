@@ -4123,7 +4123,7 @@ export const manyChildrenWithSameLength = {
       },
     },
   ],
-} as TraceApiResponse;
+} as TraceAPIResponse;
 
 export const traceWithErrors = {
   traceDocs: [
