@@ -25,7 +25,6 @@ export type FailedTransactionsCorrelationsImpactThreshold =
   typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
 
 export interface FailedTransactionsCorrelationsRawResponse {
-  log: string[];
   failedTransactionsCorrelations?: FailedTransactionsCorrelation[];
   percentileThresholdValue?: number;
   overallHistogram?: HistogramItem[];

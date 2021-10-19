@@ -100,7 +100,6 @@ describe('correlations', () => {
             rawResponse: {
               ccsWarning: false,
               latencyCorrelations: [],
-              log: [],
             },
           }}
         >
@@ -122,7 +121,6 @@ describe('correlations', () => {
             rawResponse: {
               ccsWarning: false,
               latencyCorrelations: [],
-              log: [],
             },
           }}
         >

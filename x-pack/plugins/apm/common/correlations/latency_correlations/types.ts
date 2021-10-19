@@ -22,7 +22,6 @@ export const isLatencyCorrelation = (arg: unknown): arg is LatencyCorrelation =>
   !Object.keys(arg).includes('error');
 
 export interface LatencyCorrelationsRawResponse {
-  log: string[];
   overallHistogram?: HistogramItem[];
   percentileThresholdValue?: number;
   latencyCorrelations?: LatencyCorrelation[];

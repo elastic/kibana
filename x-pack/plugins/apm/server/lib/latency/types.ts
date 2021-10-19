@@ -20,7 +20,6 @@ export interface OverallLatencyDistributionOptions
 }
 
 export interface OverallLatencyDistributionResponse {
-  log: string[];
   percentileThresholdValue?: number;
   overallHistogram?: Array<{
     key: number;

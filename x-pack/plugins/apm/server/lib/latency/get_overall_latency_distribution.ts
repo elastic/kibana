@@ -27,9 +27,7 @@ export async function getOverallLatencyDistribution(
   options: OverallLatencyDistributionOptions
 ) {
   return withApmSpan('get_overall_latency_distribution', async () => {
-    const overallLatencyDistribution: OverallLatencyDistributionResponse = {
-      log: [],
-    };
+    const overallLatencyDistribution: OverallLatencyDistributionResponse = {};
 
     const { setup, termFilters, ...rawParams } = options;
     const { apmEventClient } = setup;

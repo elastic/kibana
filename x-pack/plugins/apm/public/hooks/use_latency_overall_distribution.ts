@@ -27,7 +27,7 @@ export function useLatencyOverallDistribution() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const {
-    data = { log: [] },
+    data = {},
     status,
     error,
   } = useFetcher(
