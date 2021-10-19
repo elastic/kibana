@@ -17,35 +17,41 @@ export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
     readableObjectMode: true,
     async transform(indexOrAlias, enc, callback) {
       try {
-        const resp = await client.indices.get(
-          {
-            index: indexOrAlias,
-            filter_path: [
-              '*.settings',
-              '*.mappings',
-              // remove settings that aren't really settings
-              '-*.settings.index.creation_date',
-              '-*.settings.index.uuid',
-              '-*.settings.index.version',
-              '-*.settings.index.provided_name',
-              '-*.settings.index.frozen',
-              '-*.settings.index.search.throttled',
-              '-*.settings.index.query',
-              '-*.settings.index.routing',
-            ],
-          },
-          {
-            headers: ES_CLIENT_HEADERS,
-          }
-        );
+        const resp = (
+          await client.indices.get(
+            {
+              index: indexOrAlias,
+              filter_path: [
+                '*.settings',
+                '*.mappings',
+                // remove settings that aren't really settings
+                '-*.settings.index.creation_date',
+                '-*.settings.index.uuid',
+                '-*.settings.index.version',
+                '-*.settings.index.provided_name',
+                '-*.settings.index.frozen',
+                '-*.settings.index.search.throttled',
+                '-*.settings.index.query',
+                '-*.settings.index.routing',
+              ],
+            },
+            {
+              headers: ES_CLIENT_HEADERS,
+              meta: true,
+            }
+          )
+        ).body;
 
         for (const [index, { settings, mappings }] of Object.entries(resp)) {
           const {
-            [index]: { aliases },
+            body: {
+              [index]: { aliases },
+            },
           } = await client.indices.getAlias(
             { index },
             {
               headers: ES_CLIENT_HEADERS,
+              meta: true,
             }
           );
 
