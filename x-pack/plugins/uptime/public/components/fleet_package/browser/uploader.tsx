@@ -23,24 +23,18 @@ export function Uploader({ onUpload }: Props) {
   const handleFileRead = (fileName: string) => {
     const content = fileReader?.current?.result as string;
 
-    try {
-      const parsedContent = `${content}`;
-
-      if (content?.trim().slice(0, 4) !== 'step') {
-        throw new Error('inline scripts must begin with the keyword "step"');
-      }
-
-      onUpload({ scriptText: parsedContent, fileName });
-      setError(null);
-    } catch (e) {
+    if (content?.trim().slice(0, 4) !== 'step') {
       setError(PARSING_ERROR);
       filePickerRef.current?.removeFiles();
+      return;
     }
+
+    onUpload({ scriptText: content, fileName });
+    setError(null);
   };
 
-  // @ts-expect-error update types
-  const handleFileChosen = (files) => {
-    if (!files.length) {
+  const handleFileChosen = (files: FileList | null) => {
+    if (!files || !files.length) {
       onUpload({ scriptText: '', fileName: '' });
       return;
     }
