@@ -21,7 +21,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
+import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ErrorDistribution } from '../error_group_details/Distribution';
 import { ErrorGroupList } from './List';
 
@@ -87,10 +87,7 @@ export function ErrorGroupOverview() {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <TransactionErrorRateChart
-              title={i18n.translate('xpack.apm.errorRate.chart.errorRate', {
-                defaultMessage: 'Error rate',
-              })}
+            <FailedTransactionRateChart
               kuery={kuery}
               environment={environment}
             />

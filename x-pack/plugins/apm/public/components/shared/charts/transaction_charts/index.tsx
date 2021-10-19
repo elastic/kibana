@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
@@ -12,7 +12,7 @@ import { ChartPointerEventContextProvider } from '../../../../context/chart_poin
 import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
 import { LatencyChart } from '../latency_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
-import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
+import { FailedTransactionRateChart } from '../failed_transaction_rate_chart';
 
 export function TransactionCharts({
   kuery,
@@ -55,13 +55,7 @@ export function TransactionCharts({
 
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem>
-              <TransactionErrorRateChart
-                title={i18n.translate(
-                  'xpack.apm.errorRate.chart.transactionsErrorRate',
-                  {
-                    defaultMessage: 'Failed transaction rate',
-                  }
-                )}
+              <FailedTransactionRateChart
                 kuery={kuery}
                 environment={environment}
               />

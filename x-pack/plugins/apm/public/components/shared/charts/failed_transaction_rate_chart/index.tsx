@@ -33,7 +33,6 @@ interface Props {
   showAnnotations?: boolean;
   kuery: string;
   environment: string;
-  title: string;
 }
 
 type ErrorRate =
@@ -52,12 +51,11 @@ const INITIAL_STATE: ErrorRate = {
   },
 };
 
-export function TransactionErrorRateChart({
+export function FailedTransactionRateChart({
   height,
   showAnnotations = true,
   environment,
   kuery,
-  title,
 }: Props) {
   const theme = useTheme();
   const {
@@ -121,7 +119,9 @@ export function TransactionErrorRateChart({
       data: data.currentPeriod.transactionErrorRate,
       type: 'linemark',
       color: theme.eui.euiColorVis7,
-      title,
+      title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
+        defaultMessage: 'Failed transaction rate (avg.)',
+      }),
     },
     ...(comparisonEnabled
       ? [
@@ -141,7 +141,11 @@ export function TransactionErrorRateChart({
   return (
     <EuiPanel hasBorder={true}>
       <EuiTitle size="xs">
-        <h2>{title}</h2>
+        <h2>
+          {i18n.translate('xpack.apm.errorRate', {
+            defaultMessage: 'Failed transaction rate',
+          })}
+        </h2>
       </EuiTitle>
       <TimeseriesChart
         id="errorRate"
