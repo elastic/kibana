@@ -32,9 +32,9 @@ import {
 } from '../../../../../../data/public';
 import { migrateLegacyQuery } from '../../../helpers/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
-import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../../../url_generator';
 import { SavedSearch } from '../../../../saved_searches';
 import { handleSourceColumnState } from '../../../helpers/state_helpers';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../locator';
 
 export interface AppState {
   /**
@@ -352,9 +352,9 @@ export function createSearchSessionRestorationDataProvider(deps: {
         })
       );
     },
-    getUrlGeneratorData: async () => {
+    getLocatorData: async () => {
       return {
-        urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
+        id: DISCOVER_APP_LOCATOR,
         initialState: createUrlGeneratorState({
           ...deps,
           getSavedSearchId,
@@ -380,7 +380,7 @@ function createUrlGeneratorState({
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
   shouldRestoreSearchSession: boolean;
-}): DiscoverUrlGeneratorState {
+}): DiscoverAppLocatorParams {
   const appState = appStateContainer.get();
   return {
     filters: data.query.filterManager.getFilters(),

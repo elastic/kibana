@@ -60,4 +60,10 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
       },
     };
   },
+  '7.16.0': (
+    doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest>
+  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
+    // TODO: Convert `urlGeneratorId` to `locatorId` (do we need to convert state as well?)
+    return doc;
+  },
 };
