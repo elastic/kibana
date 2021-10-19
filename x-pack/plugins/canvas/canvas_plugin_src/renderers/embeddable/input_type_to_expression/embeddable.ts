@@ -5,9 +5,34 @@
  * 2.0.
  */
 
+import { toExpression as toExpressionString } from '@kbn/interpreter/common';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { encode } from '../../../../common/lib/embeddable_dataurl';
 import { EmbeddableInput } from '../../../expression_types';
 
-export function toExpression(input: EmbeddableInput, embeddableType: string): string {
-  return `embeddable config="${encode(input)}" type="${embeddableType}"`;
+/*
+  Take the input from an embeddable and the type of embeddable and convert it into an expression
+*/
+export function toExpression(
+  input: EmbeddableInput,
+  embeddableType: string,
+  palettes: PaletteRegistry
+): string {
+  const expressionParts = [] as string[];
+
+  expressionParts.push('embeddable');
+
+  expressionParts.push(`config="${encode(input)}"`);
+
+  expressionParts.push(`type="${embeddableType}"`);
+
+  if (input.palette) {
+    expressionParts.push(
+      `palette={${toExpressionString(
+        palettes.get(input.palette.name).toExpression(input.palette.params)
+      )}}`
+    );
+  }
+
+  return expressionParts.join(' ');
 }

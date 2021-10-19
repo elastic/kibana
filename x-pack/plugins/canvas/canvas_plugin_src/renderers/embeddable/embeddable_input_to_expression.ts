@@ -28,7 +28,7 @@ export function embeddableInputToExpression(
   useGenericEmbeddable?: boolean
 ): string | undefined {
   if (useGenericEmbeddable) {
-    return genericToExpression(input, embeddableType);
+    return genericToExpression(input, embeddableType, palettes);
   }
 
   if (inputToExpressionTypeMap[embeddableType]) {

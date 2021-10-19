@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PaletteOutput } from 'src/plugins/charts/common';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { ExpressionValueFilter, EmbeddableInput } from '../../../types';
 import { EmbeddableExpressionType, EmbeddableExpression } from '../../expression_types';
@@ -17,6 +18,7 @@ import { InitializeArguments } from '.';
 export interface Arguments {
   config: string;
   type: string;
+  palette?: PaletteOutput;
 }
 
 const defaultTimeRange = {
@@ -55,6 +57,11 @@ export function embeddableFunctionFactory({
           required: true,
           help: argHelp.config,
         },
+        palette: {
+          types: ['palette'],
+          help: argHelp.palette,
+          required: false,
+        },
         type: {
           types: ['string'],
           required: true,
@@ -76,6 +83,7 @@ export function embeddableFunctionFactory({
             ...baseEmbeddableInput,
             ...embeddableInput,
             filters: getQueryFilters(filters),
+            palette: args.palette,
           },
           generatedAt: Date.now(),
           embeddableType: args.type,

@@ -18,6 +18,9 @@ export const help: FunctionHelp<FunctionFactory<ReturnType<typeof embeddableFunc
     config: i18n.translate('xpack.canvas.functions.embeddable.args.idHelpText', {
       defaultMessage: `The base64 encoded embeddable input object`,
     }),
+    palette: i18n.translate('xpack.canvas.functions.embeddable.args.paletteHelpText', {
+      defaultMessage: `The color palette to use for the embeddable. Only compatible with the Lens visualization`,
+    }),
     type: i18n.translate('xpack.canvas.functions.embeddable.args.typeHelpText', {
       defaultMessage: `The embeddable type`,
     }),

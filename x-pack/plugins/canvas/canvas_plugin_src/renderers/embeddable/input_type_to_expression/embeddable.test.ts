@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { toExpression } from './embeddable';
-import { EmbeddableInput } from '../../../../types';
-import { decode } from '../../../../common/lib/embeddable_dataurl';
 import { fromExpression } from '@kbn/interpreter/common';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { decode } from '../../../../common/lib/embeddable_dataurl';
+import { EmbeddableInput } from '../../../../types';
+import { toExpression } from './embeddable';
 
 describe('toExpression', () => {
   describe('by-reference embeddable input', () => {
@@ -21,7 +22,11 @@ describe('toExpression', () => {
     it('converts to an embeddable expression', () => {
       const input: EmbeddableInput = baseEmbeddableInput;
 
-      const expression = toExpression(input, 'visualization');
+      const expression = toExpression(
+        input,
+        'visualization',
+        chartPluginMock.createPaletteRegistry()
+      );
       const ast = fromExpression(expression);
 
       expect(ast.type).toBe('expression');
@@ -43,7 +48,11 @@ describe('toExpression', () => {
         },
       };
 
-      const expression = toExpression(input, 'visualization');
+      const expression = toExpression(
+        input,
+        'visualization',
+        chartPluginMock.createPaletteRegistry()
+      );
       const ast = fromExpression(expression);
 
       const config = decode(ast.chain[0].arguments.config[0] as string);
@@ -60,7 +69,11 @@ describe('toExpression', () => {
         title: '',
       };
 
-      const expression = toExpression(input, 'visualization');
+      const expression = toExpression(
+        input,
+        'visualization',
+        chartPluginMock.createPaletteRegistry()
+      );
       const ast = fromExpression(expression);
 
       const config = decode(ast.chain[0].arguments.config[0] as string);
@@ -78,12 +91,12 @@ describe('toExpression', () => {
     it('converts to an embeddable expression', () => {
       const input: EmbeddableInput = baseEmbeddableInput;
 
-      const expression = toExpression(input, 'visualization');
+      const expression = toExpression(input, 'lens', chartPluginMock.createPaletteRegistry());
       const ast = fromExpression(expression);
 
       expect(ast.type).toBe('expression');
       expect(ast.chain[0].function).toBe('embeddable');
-      expect(ast.chain[0].arguments.type[0]).toBe('visualization');
+      expect(ast.chain[0].arguments.type[0]).toBe('lens');
 
       const config = decode(ast.chain[0].arguments.config[0] as string);
       expect(config.filters).toStrictEqual(input.filters);
@@ -100,7 +113,7 @@ describe('toExpression', () => {
         },
       };
 
-      const expression = toExpression(input, 'visualization');
+      const expression = toExpression(input, 'lens', chartPluginMock.createPaletteRegistry());
       const ast = fromExpression(expression);
 
       const config = decode(ast.chain[0].arguments.config[0] as string);
@@ -117,7 +130,7 @@ describe('toExpression', () => {
         title: '',
       };
 
-      const expression = toExpression(input, 'visualization');
+      const expression = toExpression(input, 'lens', chartPluginMock.createPaletteRegistry());
       const ast = fromExpression(expression);
 
       const config = decode(ast.chain[0].arguments.config[0] as string);

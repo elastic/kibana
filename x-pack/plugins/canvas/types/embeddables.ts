@@ -7,10 +7,12 @@
 
 import { TimeRange } from 'src/plugins/data/public';
 import { Filter } from '@kbn/es-query';
+import { PaletteOutput } from 'src/plugins/charts/common';
 import { EmbeddableInput as Input } from '../../../../src/plugins/embeddable/common/';
 
 export type EmbeddableInput = Input & {
   timeRange?: TimeRange;
   filters?: Filter[];
   savedObjectId?: string;
+  palette?: PaletteOutput;
 };
