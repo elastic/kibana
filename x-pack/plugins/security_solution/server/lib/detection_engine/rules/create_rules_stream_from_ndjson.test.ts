@@ -207,7 +207,7 @@ describe('create_rules_stream_from_ndjson', () => {
         read() {
           this.push(getSampleAsNdjson(sample1));
           this.push(getSampleAsNdjson(sample2));
-          this.push('{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n');
+          this.push('{"exported_rules_count":1,"missing_rules":[],"missing_rules_count":0}\n');
           this.push(null);
         },
       });
