@@ -62,7 +62,7 @@ export const removeFilterFunction: ExpressionFunctionRemoveFilter = {
           const isGroupMatching =
             (!group && !ungrouped) || group === meta.group || (ungrouped && !meta.group);
           const isOriginMatching = !from || from === meta.controlledBy;
-          return !isGroupMatching && !isOriginMatching;
+          return !isGroupMatching || !isOriginMatching;
         }) || [],
     };
   },
