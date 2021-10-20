@@ -88,6 +88,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
               size="s"
+              isLoading={!indexPattern}
             >
               {SELECT_REPORT_METRIC_LABEL}
             </EuiButton>
