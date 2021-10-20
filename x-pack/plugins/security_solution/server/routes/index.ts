@@ -6,7 +6,6 @@
  */
 
 import { Logger } from 'src/core/server';
-import { RuleDataPluginService } from '../../../rule_registry/server';
 import { SecuritySolutionPluginRouter } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
@@ -69,7 +68,6 @@ export const initRoutes = (
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
-  ruleDataService: RuleDataPluginService,
   logger: Logger,
   isRuleRegistryEnabled: boolean,
   ruleOptions: CreateRuleOptions
@@ -89,7 +87,7 @@ export const initRoutes = (
 
   // TODO: pass isRuleRegistryEnabled to all relevant routes
 
-  addPrepackedRulesRoute(router, config, security, isRuleRegistryEnabled);
+  addPrepackedRulesRoute(router);
   getPrepackagedRulesStatusRoute(router, config, security, isRuleRegistryEnabled);
   createRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   updateRulesBulkRoute(router, ml, isRuleRegistryEnabled);
@@ -131,7 +129,7 @@ export const initRoutes = (
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
-  createIndexRoute(router, ruleDataService, config);
+  createIndexRoute(router);
   readIndexRoute(router, config);
   deleteIndexRoute(router);
 
