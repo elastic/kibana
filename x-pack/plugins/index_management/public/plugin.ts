@@ -13,7 +13,12 @@ import { setExtensionsService } from './application/store/selectors/extension_se
 
 import { ExtensionsService } from './services';
 
-import { IndexManagementPluginSetup, SetupDependencies, StartDependencies } from './types';
+import {
+  IndexManagementPluginSetup,
+  SetupDependencies,
+  StartDependencies,
+  ClientConfigType,
+} from './types';
 
 // avoid import from index files in plugin.ts, use specific import paths
 import { PLUGIN } from '../common/constants/plugin';
@@ -31,25 +36,30 @@ export class IndexMgmtUIPlugin {
     coreSetup: CoreSetup<StartDependencies>,
     plugins: SetupDependencies
   ): IndexManagementPluginSetup {
-    const { fleet, usageCollection, management } = plugins;
-    const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
+    const {
+      ui: { enabled: isIndexManagementUiEnabled },
+    } = this.ctx.config.get<ClientConfigType>();
 
-    management.sections.section.data.registerApp({
-      id: PLUGIN.id,
-      title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
-      order: 0,
-      mount: async (params) => {
-        const { mountManagementSection } = await import('./application/mount_management_section');
-        return mountManagementSection(
-          coreSetup,
-          usageCollection,
-          params,
-          this.extensionsService,
-          Boolean(fleet),
-          kibanaVersion
-        );
-      },
-    });
+    if (isIndexManagementUiEnabled) {
+      const { fleet, usageCollection, management } = plugins;
+      const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
+      management.sections.section.data.registerApp({
+        id: PLUGIN.id,
+        title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
+        order: 0,
+        mount: async (params) => {
+          const { mountManagementSection } = await import('./application/mount_management_section');
+          return mountManagementSection(
+            coreSetup,
+            usageCollection,
+            params,
+            this.extensionsService,
+            Boolean(fleet),
+            kibanaVersion
+          );
+        },
+      });
+    }
 
     return {
       extensionsService: this.extensionsService.setup(),

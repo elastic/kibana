@@ -41,8 +41,8 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
           track_total_hits: true,
           body: {
             aggregations: {
@@ -127,7 +127,7 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   track_total_hits: false,
   body: {
     aggregations: {
@@ -164,7 +164,7 @@ export const expectedDsl = {
     },
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -209,8 +209,8 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
           track_total_hits: true,
           body: {
             aggs: {
@@ -392,8 +392,8 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
           track_total_hits: true,
           body: {
             aggregations: {
@@ -959,8 +959,8 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
           track_total_hits: true,
           body: {
             aggregations: {
@@ -1927,7 +1927,7 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
             'traces-apm*',
@@ -1938,7 +1938,7 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           body: {
             aggregations: {
               dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
