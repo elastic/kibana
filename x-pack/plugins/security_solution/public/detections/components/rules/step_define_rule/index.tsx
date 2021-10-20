@@ -59,6 +59,7 @@ import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/c
 import { PreviewQuery } from '../query_preview';
 import { RulePreview } from '../rule_preview';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
+import { usePreviewIndex } from '../../../containers/detection_engine/alerts/use_preview_index';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -138,6 +139,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   onSubmit,
   setForm,
 }) => {
+  usePreviewIndex();
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
