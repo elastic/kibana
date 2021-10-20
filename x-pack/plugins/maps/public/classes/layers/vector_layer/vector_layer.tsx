@@ -121,6 +121,9 @@ export const NO_RESULTS_ICON_AND_TOOLTIPCONTENT = {
   }),
 };
 
+/*
+ * Geojson vector layer
+ */
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static type = LAYER_TYPE.VECTOR;
 
@@ -314,7 +317,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
     const sourceDataRequest = this.getSourceDataRequest();
     const { tooltipContent, areResultsTrimmed, isDeprecated } =
-      this.getSource().getSourceTooltipConfigFromGeoJson(sourceDataRequest);
+      this.getSource().getSourceTooltipContent(sourceDataRequest);
     return {
       icon: isDeprecated ? (
         <EuiIcon type="alert" color="danger" />

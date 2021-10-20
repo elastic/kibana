@@ -45,6 +45,9 @@ const ES_MVT_META_LAYER_NAME = 'meta';
 const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
 const ES_MVT_HITS_TOTAL_VALUE = 'hits.total.value';
 
+/*
+ * MVT vector layer
+ */
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 

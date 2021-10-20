@@ -74,7 +74,7 @@ export interface IVectorSource extends ISource {
   hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
-  getSourceTooltipConfigFromGeoJson(sourceDataRequest?: DataRequest): SourceTooltipConfig;
+  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
   getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
   getDefaultFields(): Promise<Record<string, Record<string, string>>>;
@@ -171,7 +171,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipConfigFromGeoJson(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 

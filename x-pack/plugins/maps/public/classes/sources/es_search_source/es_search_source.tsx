@@ -678,7 +678,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipConfigFromGeoJson(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
     if (!meta) {
       // no tooltip content needed when there is no feature collection or meta

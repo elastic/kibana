@@ -208,7 +208,7 @@ export class MVTSingleLayerVectorSource
     return false;
   }
 
-  getSourceTooltipConfigFromGeoJson() {
+  getSourceTooltipContent() {
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 
