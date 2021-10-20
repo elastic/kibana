@@ -177,6 +177,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
 
+    // rule options are used both to create and preview rules.
+    const ruleOptions: CreateRuleOptions = {
+      experimentalFeatures,
+      logger: this.logger,
+      ml: plugins.ml,
+      version: pluginContext.env.packageInfo.version,
+    };
+
     if (isRuleRegistryEnabled) {
       // NOTE: this is not used yet
       // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
@@ -204,14 +212,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         secondaryAlias: config.signalsIndex,
       });
 
-      // Register rule types via rule-registry
-      const createRuleOptions: CreateRuleOptions = {
-        experimentalFeatures,
-        logger,
-        ml: plugins.ml,
-        version: pluginContext.env.packageInfo.version,
-      };
-
       const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
         lists: plugins.lists,
         logger: this.logger,
@@ -220,17 +220,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         eventLogService,
       });
 
-      plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(createRuleOptions)));
+      plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
       plugins.alerting.registerType(
-        securityRuleTypeWrapper(createIndicatorMatchAlertType(createRuleOptions))
+        securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
       );
-      plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(createRuleOptions)));
-      plugins.alerting.registerType(
-        securityRuleTypeWrapper(createQueryAlertType(createRuleOptions))
-      );
-      plugins.alerting.registerType(
-        securityRuleTypeWrapper(createThresholdAlertType(createRuleOptions))
-      );
+      plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
+      plugins.alerting.registerType(securityRuleTypeWrapper(createQueryAlertType(ruleOptions)));
+      plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
     }
 
     // TODO We need to get the endpoint routes inside of initRoutes
@@ -241,7 +237,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.security,
       plugins.ml,
       logger,
-      isRuleRegistryEnabled
+      isRuleRegistryEnabled,
+      ruleOptions
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
