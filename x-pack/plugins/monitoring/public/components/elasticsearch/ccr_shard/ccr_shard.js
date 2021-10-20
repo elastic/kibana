@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AlertsCallout } from '../../../alerts/callout';
 
-export function CcrShardReact(props) {
+export function CcrShard(props) {
   const { services } = useKibana();
   const timezone = services.uiSettings?.get('dateFormat:tz');
   const { metrics, stat, timestamp, oldestStat, formattedLeader, alerts } = props;

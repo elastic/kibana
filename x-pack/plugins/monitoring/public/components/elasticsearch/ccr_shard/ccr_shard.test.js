@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { CcrShardReact } from './ccr_shard_react';
+import { CcrShard } from './ccr_shard';
 
 jest.mock('../../chart', () => ({
   MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
 }));
 
-describe('CcrShardReact', () => {
+describe('CcrShard', () => {
   const props = {
     formattedLeader: 'leader on remote',
     metrics: [],
@@ -50,7 +50,7 @@ describe('CcrShardReact', () => {
   };
 
   test('that it renders normally', () => {
-    const component = shallow(<CcrShardReact {...props} />);
+    const component = shallow(<CcrShard {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -68,7 +68,7 @@ describe('CcrShardReact', () => {
       },
     };
 
-    const component = shallow(<CcrShardReact {...localProps} />);
+    const component = shallow(<CcrShard {...localProps} />);
     expect(component.find('EuiPanel').get(0)).toMatchSnapshot();
   });
 });
