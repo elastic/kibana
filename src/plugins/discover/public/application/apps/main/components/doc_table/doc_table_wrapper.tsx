@@ -17,7 +17,6 @@ import {
   SAMPLE_SIZE_SETTING,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
-  TRUNCATE_MAX_HEIGHT,
 } from '../../../../../../common';
 import { getServices } from '../../../../../kibana_services';
 import { SortOrder } from './components/table_header/helpers';
@@ -129,7 +128,6 @@ export const DocTableWrapper = forwardRef(
       isShortDots,
       sampleSize,
       showMultiFields,
-      maxHeight,
       filterManager,
       addBasePath,
     ] = useMemo(() => {
@@ -140,7 +138,6 @@ export const DocTableWrapper = forwardRef(
         services.uiSettings.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE),
         services.uiSettings.get(SAMPLE_SIZE_SETTING, 500),
         services.uiSettings.get(SHOW_MULTIFIELDS, false),
-        services.uiSettings.get(TRUNCATE_MAX_HEIGHT),
         services.filterManager,
         services.addBasePath,
       ];
@@ -208,13 +205,11 @@ export const DocTableWrapper = forwardRef(
             row={current}
             useNewFieldsApi={useNewFieldsApi}
             hideTimeColumn={hideTimeColumn}
-            isShortDots={isShortDots}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             filterManager={filterManager}
             addBasePath={addBasePath}
             fieldsToShow={fieldsToShow}
-            maxHeight={maxHeight}
           />
         ));
       },
@@ -228,23 +223,8 @@ export const DocTableWrapper = forwardRef(
         onRemoveColumn,
         filterManager,
         addBasePath,
-        isShortDots,
         fieldsToShow,
-        maxHeight,
       ]
-    );
-
-    const noResultsError = (
-      <div className="kbnDocTable__error">
-        <EuiText size="xs" color="subdued">
-          <EuiIcon type="visualizeApp" size="m" color="subdued" />
-          <EuiSpacer size="m" />
-          <FormattedMessage
-            id="discover.docTable.noResultsTitle"
-            defaultMessage="No results found"
-          />
-        </EuiText>
-      </div>
     );
 
     return (
@@ -266,7 +246,18 @@ export const DocTableWrapper = forwardRef(
             renderHeader,
             renderRows,
           })}
-        {!rows.length && noResultsError}
+        {!rows.length && (
+          <div className="kbnDocTable__error">
+            <EuiText size="xs" color="subdued">
+              <EuiIcon type="visualizeApp" size="m" color="subdued" />
+              <EuiSpacer size="m" />
+              <FormattedMessage
+                id="discover.docTable.noResultsTitle"
+                defaultMessage="No results found"
+              />
+            </EuiText>
+          </div>
+        )}
       </div>
     );
   }

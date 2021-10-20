@@ -10,6 +10,7 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
+import { formatFieldValue } from '../../../../../helpers/format_value';
 import { flattenHit } from '../../../../../../../../data/common';
 import { DocViewer } from '../../../../../components/doc_viewer/doc_viewer';
 import { FilterManager, IndexPattern } from '../../../../../../../../data/public';
@@ -18,9 +19,7 @@ import { ElasticSearchHit, DocViewFilterFn } from '../../../../../doc_views/doc_
 import { getContextUrl } from '../../../../../helpers/get_context_url';
 import { getSingleDocUrl } from '../../../../../helpers/get_single_doc_url';
 import { TableRowDetails } from './table_row_details';
-import { formatRow, formatTopLevelObject } from '../lib/formatters/row_formatter';
-import { formatSource } from '../lib/formatters/source_formatter';
-import { getTruncateStyles } from '../../../../../helpers/truncate_styles';
+import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
@@ -35,11 +34,9 @@ export interface TableRowProps {
   onRemoveColumn?: (column: string) => void;
   useNewFieldsApi: boolean;
   hideTimeColumn: boolean;
-  isShortDots: boolean;
   filterManager: FilterManager;
   addBasePath: (path: string) => string;
   fieldsToShow: string[];
-  maxHeight: number;
 }
 
 export const TableRow = ({
@@ -50,12 +47,10 @@ export const TableRow = ({
   useNewFieldsApi,
   fieldsToShow,
   hideTimeColumn,
-  isShortDots,
   onAddColumn,
   onRemoveColumn,
   filterManager,
   addBasePath,
-  maxHeight,
 }: TableRowProps) => {
   const [open, setOpen] = useState(false);
   const docTableRowClassName = classNames('kbnDocTable__row', {
@@ -64,30 +59,38 @@ export const TableRow = ({
   });
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';
 
-  const flattenedRow = useMemo(() => flattenHit(row, indexPattern), [indexPattern, row]);
+  const flattenedRow = useMemo(
+    () => flattenHit(row, indexPattern, { includeIgnoredValues: true }),
+    [indexPattern, row]
+  );
   const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
 
   // toggle display of the rows details, a full list of the fields from each row
   const toggleRow = () => setOpen((prevOpen) => !prevOpen);
 
-  const formatField = (fieldName: string) => {
+  /**
+   * Fill an element with the value of a field
+   */
+  const displayField = (fieldName: string) => {
+    // If we're formatting the _source column, don't use the regular field formatter,
+    // but our Discover mechanism to format a hit in a better human-readable way.
     if (fieldName === '_source') {
-      return formatSource({
-        hit: row,
-        indexPattern,
-        isShortDots,
-        maxHeight,
-      });
+      return formatRow(row, indexPattern, fieldsToShow);
     }
 
-    const formattedField = indexPattern.formatField(row, fieldName);
+    const formattedField = formatFieldValue(
+      flattenedRow[fieldName],
+      row,
+      indexPattern,
+      mapping(fieldName)
+    );
 
-    // field formatters take care of escaping
-    // eslint-disable-next-line react/no-danger
-    const element = <span dangerouslySetInnerHTML={{ __html: formattedField }} />;
-    return <div css={getTruncateStyles(maxHeight)}>{element}</div>;
+    return (
+      // formatFieldValue always returns sanitized HTML
+      // eslint-disable-next-line react/no-danger
+      <div className="truncate-by-height" dangerouslySetInnerHTML={{ __html: formattedField }} />
+    );
   };
-
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
       const field = indexPattern.fields.getByName(column);
@@ -129,7 +132,7 @@ export const TableRow = ({
       <TableCell
         key={indexPattern.timeFieldName}
         timefield={true}
-        formatted={formatField(indexPattern.timeFieldName)}
+        formatted={displayField(indexPattern.timeFieldName)}
         filterable={Boolean(mapping(indexPattern.timeFieldName)?.filterable && filter)}
         column={indexPattern.timeFieldName}
         inlineFilter={inlineFilter}
@@ -138,7 +141,7 @@ export const TableRow = ({
   }
 
   if (columns.length === 0 && useNewFieldsApi) {
-    const formatted = formatRow(row, indexPattern, fieldsToShow, maxHeight);
+    const formatted = formatRow(row, indexPattern, fieldsToShow);
 
     rowCells.push(
       <TableCell
@@ -153,10 +156,9 @@ export const TableRow = ({
     );
   } else {
     columns.forEach(function (column: string) {
-      // when useNewFieldsApi is true, addressing to the fields property is safe
-      if (useNewFieldsApi && !mapping(column) && !row.fields![column]) {
+      if (useNewFieldsApi && !mapping(column) && row.fields && !row.fields[column]) {
         const innerColumns = Object.fromEntries(
-          Object.entries(row.fields!).filter(([key]) => {
+          Object.entries(row.fields).filter(([key]) => {
             return key.indexOf(`${column}.`) === 0;
           })
         );
@@ -166,20 +168,26 @@ export const TableRow = ({
             key={column}
             timefield={false}
             sourcefield={true}
-            formatted={formatTopLevelObject(row, innerColumns, indexPattern, maxHeight)}
+            formatted={formatTopLevelObject(row, innerColumns, indexPattern)}
             filterable={false}
             column={column}
             inlineFilter={inlineFilter}
           />
         );
       } else {
-        const isFilterable = Boolean(mapping(column)?.filterable && filter);
+        // Check whether the field is defined as filterable in the mapping and does
+        // NOT have ignored values in it to determine whether we want to allow filtering.
+        // We should improve this and show a helpful tooltip why the filter buttons are not
+        // there/disabled when there are ignored values.
+        const isFilterable = Boolean(
+          mapping(column)?.filterable && filter && !row._ignored?.includes(column)
+        );
         rowCells.push(
           <TableCell
             key={column}
             timefield={false}
             sourcefield={column === '_source'}
-            formatted={formatField(column)}
+            formatted={displayField(column)}
             filterable={isFilterable}
             column={column}
             inlineFilter={inlineFilter}

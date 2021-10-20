@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { IndexPattern, IndexPatternField } from '../../../../../data/public';
 import { flattenHit } from '../../../../../data/common';
-import { SHOW_MULTIFIELDS, TRUNCATE_MAX_HEIGHT } from '../../../../common';
+import { SHOW_MULTIFIELDS } from '../../../../common';
 import { getServices } from '../../../kibana_services';
 import { isNestedFieldParent } from '../../apps/main/utils/nested_fields';
 import {
@@ -20,12 +20,14 @@ import {
 } from '../../doc_views/doc_views_types';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 import { getFieldsToShow } from '../../helpers/get_fields_to_show';
+import { getIgnoredReason, IgnoredReason } from '../../helpers/get_ignored_reason';
+import { formatFieldValue } from '../../helpers/format_value';
 
 export interface DocViewerTableProps {
   columns?: string[];
   filter?: DocViewFilterFn;
   hit: ElasticSearchHit;
-  indexPattern?: IndexPattern;
+  indexPattern: IndexPattern;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
 }
@@ -45,8 +47,8 @@ export interface FieldRecord {
     fieldMapping?: IndexPatternField;
   };
   value: {
-    maxHeight: number;
     formattedValue: string;
+    ignored?: IgnoredReason;
   };
 }
 
@@ -58,16 +60,12 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const services = getServices();
-  const showMultiFields = services.uiSettings.get(SHOW_MULTIFIELDS);
-  const maxHeight = services.uiSettings.get(TRUNCATE_MAX_HEIGHT);
+  const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
   const mapping = useCallback(
     (name: string) => indexPattern?.fields.getByName(name),
     [indexPattern?.fields]
   );
-
-  const formattedHit = useMemo(() => indexPattern?.formatHit(hit, 'html'), [hit, indexPattern]);
 
   const tableColumns = useMemo(() => {
     return filter ? [ACTIONS_COLUMN, ...MAIN_COLUMNS] : MAIN_COLUMNS;
@@ -99,7 +97,7 @@ export const DocViewerTable = ({
     return null;
   }
 
-  const flattened = flattenHit(hit, indexPattern, { source: true });
+  const flattened = flattenHit(hit, indexPattern, { source: true, includeIgnoredValues: true });
   const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
 
   const items: FieldRecord[] = Object.keys(flattened)
@@ -118,6 +116,8 @@ export const DocViewerTable = ({
       const displayName = fieldMapping?.displayName ?? field;
       const fieldType = isNestedFieldParent(field, indexPattern) ? 'nested' : fieldMapping?.type;
 
+      const ignored = getIgnoredReason(fieldMapping ?? field, hit._ignored);
+
       return {
         action: {
           onToggleColumn,
@@ -133,8 +133,8 @@ export const DocViewerTable = ({
           scripted: Boolean(fieldMapping?.scripted),
         },
         value: {
-          maxHeight,
-          formattedValue: formattedHit[field],
+          formattedValue: formatFieldValue(flattened[field], hit, indexPattern, fieldMapping),
+          ignored,
         },
       };
     });

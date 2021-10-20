@@ -31,7 +31,7 @@ export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
   ),
   render: (
     { flattenedField, isActive, onFilter, onToggleColumn }: FieldRecord['action'],
-    { field: { field, fieldMapping } }: FieldRecord
+    { field: { field, fieldMapping }, value: { ignored } }: FieldRecord
   ) => {
     return (
       <TableActions
@@ -41,6 +41,7 @@ export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
         flattenedField={flattenedField}
         onFilter={onFilter!}
         onToggleColumn={onToggleColumn}
+        ignoredValue={!!ignored}
       />
     );
   },
@@ -83,11 +84,16 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
       </EuiText>
     ),
     render: (
-      { maxHeight, formattedValue }: FieldRecord['value'],
-      { field: { field } }: FieldRecord
+      { formattedValue, ignored }: FieldRecord['value'],
+      { field: { field }, action: { flattenedField } }: FieldRecord
     ) => {
       return (
-        <TableFieldValue maxHeight={maxHeight} field={field} formattedValue={formattedValue} />
+        <TableFieldValue
+          field={field}
+          formattedValue={formattedValue}
+          rawValue={flattenedField}
+          ignoreReason={ignored}
+        />
       );
     },
   },

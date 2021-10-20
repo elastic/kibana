@@ -31,7 +31,7 @@ export {
   HistogramFormat,
 } from './converters';
 
-export { getHighlightRequest, shortenDottedString } from './utils';
+export { getHighlightRequest } from './utils';
 
 export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 export { FORMATS_UI_SETTINGS } from './constants/ui_settings';

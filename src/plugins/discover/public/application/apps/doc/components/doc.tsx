@@ -9,7 +9,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent, EuiPage } from '@elastic/eui';
-import { IndexPatternsContract } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { getServices } from '../../../../kibana_services';
 import { DocViewer } from '../../../components/doc_viewer/doc_viewer';
 import { ElasticRequestState } from '../types';
@@ -25,14 +25,9 @@ export interface DocProps {
    */
   index: string;
   /**
-   * IndexPattern ID used to get IndexPattern entity
-   * that's used for adding additional fields (stored_fields, script_fields, docvalue_fields)
+   * IndexPattern entity
    */
-  indexPatternId: string;
-  /**
-   * IndexPatternService to get a given index pattern by ID
-   */
-  indexPatternService: IndexPatternsContract;
+  indexPattern: IndexPattern;
   /**
    * If set, will always request source, regardless of the global `fieldsFromSource` setting
    */
@@ -40,7 +35,8 @@ export interface DocProps {
 }
 
 export function Doc(props: DocProps) {
-  const [reqState, hit, indexPattern] = useEsDocSearch(props);
+  const { indexPattern } = props;
+  const [reqState, hit] = useEsDocSearch(props);
   const indexExistsLink = getServices().docLinks.links.apis.indexExists;
   return (
     <EuiPage>
@@ -54,7 +50,7 @@ export function Doc(props: DocProps) {
               <FormattedMessage
                 id="discover.doc.failedToLocateIndexPattern"
                 defaultMessage="No index pattern matches ID {indexPatternId}."
-                values={{ indexPatternId: props.indexPatternId }}
+                values={{ indexPatternId: indexPattern.id }}
               />
             }
           />

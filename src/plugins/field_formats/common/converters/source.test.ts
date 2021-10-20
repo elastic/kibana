@@ -27,9 +27,7 @@ describe('Source Format', () => {
       also: 'with "quotes" or \'single quotes\'',
     };
 
-    expect(
-      convertHtml(hit, { field: 'field', indexPattern: { formatHit: (h: string) => h }, hit })
-    ).toMatchInlineSnapshot(
+    expect(convertHtml(hit, { field: 'field', hit })).toMatchInlineSnapshot(
       `"{&quot;foo&quot;:&quot;bar&quot;,&quot;number&quot;:42,&quot;hello&quot;:&quot;&lt;h1&gt;World&lt;/h1&gt;&quot;,&quot;also&quot;:&quot;with \\\\&quot;quotes\\\\&quot; or &#39;single quotes&#39;&quot;}"`
     );
   });
