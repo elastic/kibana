@@ -52,10 +52,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
         setLoading(true);
         const signal = await getSignalIndex({ signal: abortCtrl.signal });
 
-        // TODO: Once we are past experimental phase we can update `getSignalIndex` to return the space-aware DEFAULT_ALERTS_INDEX
-        const signalIndices = ruleRegistryEnabled
-          ? `${DEFAULT_ALERTS_INDEX},${signal.name}`
-          : signal.name;
+        const signalIndices = signal.name;
 
         if (isSubscribed && signal != null) {
           setSignalIndex({

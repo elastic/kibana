@@ -254,7 +254,10 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                       errorMessage: null,
                       id: sourcererScopeName,
                       indexPattern: getIndexFields(stringifyIndices, response.indexFields),
-                      indicesExist: response.indicesExist.length > 0,
+                      indicesExist:
+                        sourcererScopeName === SourcererScopeName.detections
+                          ? true
+                          : response.indicesExist.length > 0,
                       loading: false,
                     },
                   })
