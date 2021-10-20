@@ -18,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const deployment = getService('deployment');
   const es = getService('es');
   const config = getService('config');
+  const retry = getService('retry');
 
   describe('Interactive Setup Functional Tests (Enrolment token)', function () {
     this.tags(['skipCloud', 'ciGroup2']);
@@ -50,6 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
       this.timeout(120_000);
 
       await browser.get(`${deployment.getHostPort()}?code=${verificationCode}`);
+      const url = await browser.getCurrentUrl();
 
       const tokenField = await find.byName('token');
       await tokenField.clearValueWithKeyboard();
@@ -66,8 +68,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       await find.clickByButtonText('Configure Elastic');
 
-      // Wait for login page to load
-      await find.byButtonText('Log in', undefined, 120_000);
+      await retry.waitForWithTimeout('redirect to login page', 120_000, async () => {
+        return (await browser.getCurrentUrl()) !== url;
+      });
     });
   });
 }

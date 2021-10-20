@@ -9,12 +9,13 @@
 import { getUrl } from '@kbn/test';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObject }: FtrProviderContext) {
   const browser = getService('browser');
   const find = getService('find');
   const supertest = getService('supertest');
   const deployment = getService('deployment');
   const config = getService('config');
+  const retry = getService('retry');
 
   describe('Interactive Setup Functional Tests (Manual configuration without Security)', function () {
     this.tags(['skipCloud', 'ciGroup2']);
@@ -29,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
       this.timeout(120_000);
 
       await browser.get(`${deployment.getHostPort()}?code=${verificationCode}`);
+      const url = await browser.getCurrentUrl();
 
       await find.clickByButtonText('Configure manually');
 
@@ -41,8 +43,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       await find.clickByButtonText('Configure Elastic');
 
-      // Wait for home page to load
-      await find.byButtonText('Add data', undefined, 120_000);
+      await retry.waitForWithTimeout('redirect to home page', 120_000, async () => {
+        return (await browser.getCurrentUrl()) !== url;
+      });
     });
   });
 }
