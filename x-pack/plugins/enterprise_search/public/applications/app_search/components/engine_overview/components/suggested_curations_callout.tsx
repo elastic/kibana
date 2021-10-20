@@ -10,6 +10,7 @@ import { useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { LicensingLogic } from '../../../../shared/licensing';
 import { ENGINE_CURATIONS_PATH } from '../../../routes';
 import { SuggestionsCallout } from '../../curations/components/suggestions_callout';
 import { EngineLogic, generateEnginePath } from '../../engine';
@@ -18,10 +19,15 @@ export const SuggestedCurationsCallout: React.FC = () => {
   const {
     engine: { search_relevance_suggestions: searchRelevanceSuggestions },
   } = useValues(EngineLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const pendingCount = searchRelevanceSuggestions?.curation.pending;
 
-  if (typeof searchRelevanceSuggestions === 'undefined' || pendingCount === 0) {
+  if (
+    typeof searchRelevanceSuggestions === 'undefined' ||
+    pendingCount === 0 ||
+    hasPlatinumLicense === false
+  ) {
     return null;
   }
 

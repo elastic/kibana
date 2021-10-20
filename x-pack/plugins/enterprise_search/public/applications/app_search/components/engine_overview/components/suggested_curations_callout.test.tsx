@@ -26,6 +26,8 @@ const MOCK_VALUES = {
       },
     },
   },
+  // LicensingLogic
+  hasPlatinumLicense: true,
 };
 
 describe('SuggestedCurationsCallout', () => {
@@ -50,6 +52,16 @@ describe('SuggestedCurationsCallout', () => {
 
   it('is empty when no pending curations', () => {
     const values = set('engine.search_relevance_suggestions.curation.pending', 0, MOCK_VALUES);
+    setMockValues(values);
+
+    const wrapper = shallow(<SuggestedCurationsCallout />);
+
+    expect(wrapper.isEmptyRender()).toBe(true);
+  });
+
+  it('is empty when the user has no platinum license', () => {
+    // This would happen if the user *had* suggestions and then downgraded from platinum to gold or something
+    const values = set('hasPlatinumLicense', false, MOCK_VALUES);
     setMockValues(values);
 
     const wrapper = shallow(<SuggestedCurationsCallout />);
