@@ -8,4 +8,4 @@ if [[ "$(which docker)" != "" && "$(command uname -m)" != "aarch64" ]]; then
 fi
 
 ./.ci/packer_cache_for_branch.sh master
-./.ci/packer_cache_for_branch.sh 7.x
+./.ci/packer_cache_for_branch.sh 7.16
