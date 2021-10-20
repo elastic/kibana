@@ -21,10 +21,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
    */
   const selectTagsInFilter = async (...tagNames: string[]) => {
     // open the filter dropdown
-    // the first class selector before the id is of course useless. Only here to help cleaning that once we got
-    // testSubjects in EUI filters.
+    // This CSS selector should be cleaned up once we have testSubjects in EUI filters.
     const filterButton = await find.byCssSelector(
-      '.euiFilterGroup #field_value_selection_1 .euiFilterButton'
+      '.euiFilterGroup > *:last-child .euiFilterButton'
     );
     await filterButton.click();
     // select the tags
