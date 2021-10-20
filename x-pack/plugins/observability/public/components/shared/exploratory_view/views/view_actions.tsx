@@ -8,17 +8,29 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
+import { isEqual, pickBy } from 'lodash';
 import { allSeriesKey, convertAllShortSeries, useSeriesStorage } from '../hooks/use_series_storage';
 
 interface Props {
   onApply?: () => void;
 }
 
+export function removeUndefinedProps<T extends object>(obj: T): Partial<T> {
+  return pickBy(obj, (value) => value !== undefined);
+}
+
 export function ViewActions({ onApply }: Props) {
   const { allSeries, storage, applyChanges } = useSeriesStorage();
 
-  const noChanges = isEqual(allSeries, convertAllShortSeries(storage.get(allSeriesKey) ?? []));
+  const urlAllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
+
+  let noChanges = allSeries.length === urlAllSeries.length;
+
+  allSeries.forEach((series, index) => {
+    if (!isEqual(removeUndefinedProps(series), removeUndefinedProps(urlAllSeries[index]))) {
+      noChanges = false;
+    }
+  });
 
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
