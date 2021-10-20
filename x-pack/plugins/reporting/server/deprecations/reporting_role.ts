@@ -19,11 +19,7 @@ import { ReportingCore } from '../';
 import { deprecations } from '../lib/deprecations';
 
 const REPORTING_USER_ROLE_NAME = 'reporting_user';
-const DOCUMENTATION_URL =
-  'https://www.elastic.co/guide/en/kibana/current/secure-reporting.html#grant-user-access';
-
-const upgradableConfig = 'xpack.reporting.roles.enabled: false';
-const incompatibleConfig = 'xpack.reporting.roles.allow';
+const DOCUMENTATION_URL = 'https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html';
 
 interface ExtraDependencies {
   reportingCore: ReportingCore;
@@ -55,32 +51,35 @@ async function getUsersDeprecations(
   reportingCore: ReportingCore,
   deprecatedRoles: string[]
 ): Promise<DeprecationsDetails[]> {
+  const usingDeprecatedConfig = !reportingCore.getContract().usesUiCapabilities();
   const strings = {
     title: i18n.translate('xpack.reporting.deprecations.reportingRoleUsersTitle', {
-      defaultMessage: `The "{reportingUserRoleName}" role is deprecated: check user roles`,
+      defaultMessage: 'The "{reportingUserRoleName}" role is deprecated: check user roles',
       values: { reportingUserRoleName: REPORTING_USER_ROLE_NAME },
     }),
     message: i18n.translate('xpack.reporting.deprecations.reportingRoleUsersMessage', {
-      defaultMessage: `Existing users have their Reporting privilege granted by a deprecated setting.`,
+      defaultMessage:
+        'Existing users have their Reporting privilege granted by a deprecated setting.',
     }),
     manualSteps: (usersRoles: string) => [
-      i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.manualStepOne', {
-        defaultMessage: 'Set "{upgradableConfig}" in kibana.yml',
-        values: { upgradableConfig },
-      }),
-      i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.manualStepTwo', {
-        defaultMessage: 'Remove "{incompatibleConfig}" in kibana.yml',
-        values: { incompatibleConfig },
-      }),
+      ...(usingDeprecatedConfig
+        ? [
+            i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.manualStepOne', {
+              defaultMessage: 'Set "xpack.reporting.roles.enabled: false" in kibana.yml.',
+            }),
+            i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.manualStepTwo', {
+              defaultMessage: 'Remove "xpack.reporting.roles.allow" in kibana.yml, if present.',
+            }),
+          ]
+        : []),
+
       i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.manualStepThree', {
-        defaultMessage:
-          `Create one or more custom roles that provide Kibana application` +
-          ` privileges to reporting features in **Management > Security > Roles**.`,
+        defaultMessage: 'Create a custom role with Kibana privileges to grant access to Reporting.',
       }),
       i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.manualStepFour', {
         defaultMessage:
-          'Assign the custom role(s) as desired. You may remove the "{deprecatedRole}" role from the user(s). The affected users are: {usersRoles}.',
-        values: { deprecatedRole: `reporting_user`, usersRoles },
+          'Remove the "reporting_user" role from all users and add the custom role. The affected users are: {usersRoles}.',
+        values: { usersRoles },
       }),
     ],
   };
@@ -131,36 +130,38 @@ async function getRoleMappingsDeprecations(
   reportingCore: ReportingCore,
   deprecatedRoles: string[]
 ): Promise<DeprecationsDetails[]> {
+  const usingDeprecatedConfig = !reportingCore.getContract().usesUiCapabilities();
   const strings = {
     title: i18n.translate('xpack.reporting.deprecations.reportingRoleMappingsTitle', {
-      defaultMessage: `The "{reportingUserRoleName}" role is deprecated: check role mappings`,
+      defaultMessage: 'The "{reportingUserRoleName}" role is deprecated: check role mappings',
       values: { reportingUserRoleName: REPORTING_USER_ROLE_NAME },
     }),
     message: i18n.translate('xpack.reporting.deprecations.reportingRoleMappingsMessage', {
-      defaultMessage: `Existing roles are mapped to a deprecated role for Reporting privileges`,
+      defaultMessage: 'Existing roles are mapped to a deprecated role for Reporting privileges',
     }),
     manualSteps: (roleMappings: string) => [
-      i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepOne', {
-        defaultMessage: 'Set "{upgradableConfig}" in kibana.yml',
-        values: { upgradableConfig },
-      }),
-      i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepTwo', {
-        defaultMessage: 'Remove "{incompatibleConfig}" in kibana.yml',
-        values: { incompatibleConfig },
-      }),
+      ...(usingDeprecatedConfig
+        ? [
+            i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepOne', {
+              defaultMessage: 'Set "xpack.reporting.roles.enabled: false" in kibana.yml.',
+            }),
+            i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepTwo', {
+              defaultMessage: 'Remove "xpack.reporting.roles.allow" in kibana.yml, if present.',
+            }),
+          ]
+        : []),
+
       i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepThree', {
         defaultMessage:
-          `Create one or more custom roles that provide Kibana application` +
-          ` privileges to reporting features in **Management > Security > Roles**.`,
+          'Create one or more custom roles that provide Kibana application' +
+          ' privileges to reporting features in Management > Security > Roles.',
       }),
       i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepFour', {
-        defaultMessage:
-          'Assign the custom role(s) as desired. You may remove the "{deprecatedRole}" role from the user(s) .',
-        values: { deprecatedRole: `reporting_user` },
+        defaultMessage: 'Create a custom role with Kibana privileges to grant access to Reporting.',
       }),
       i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepFive', {
         defaultMessage:
-          'Remove the role that grants Reporting privilege from all role mappings and add the custom role. The affected role mappings are: {roleMappings}.',
+          'Remove the "reporting_user" role from all role mappings and add the custom role. The affected role mappings are: {roleMappings}.',
         values: { roleMappings },
       }),
     ],

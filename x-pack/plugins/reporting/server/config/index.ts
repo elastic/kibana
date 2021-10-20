@@ -74,6 +74,9 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOne', {
                 defaultMessage: `Set "xpack.reporting.roles.enabled" to "false" in kibana.yml.`,
               }),
+              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOnePartOne', {
+                defaultMessage: `Remove "xpack.reporting.roles.allow" to "false" in kibana.yml, if present.`,
+              }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepTwo', {
                 defaultMessage:
                   `Create one or more roles that grant the Kibana application` +

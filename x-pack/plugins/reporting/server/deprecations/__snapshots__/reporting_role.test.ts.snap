@@ -5,15 +5,15 @@ Array [
   Object {
     "correctiveActions": Object {
       "manualSteps": Array [
-        "Set \\"xpack.reporting.roles.enabled: false\\" in kibana.yml",
-        "Remove \\"xpack.reporting.roles.allow\\" in kibana.yml",
-        "Create one or more custom roles that provide Kibana application privileges to reporting features in **Management > Security > Roles**.",
-        "Assign the custom role(s) as desired. You may remove the \\"reporting_user\\" role from the user(s) .",
-        "Remove the role that grants Reporting privilege from all role mappings and add the custom role. The affected role mappings are: dungeon_master[my_test_reporting_user].",
+        "Set \\"xpack.reporting.roles.enabled: false\\" in kibana.yml.",
+        "Remove \\"xpack.reporting.roles.allow\\" in kibana.yml, if present.",
+        "Create one or more custom roles that provide Kibana application privileges to reporting features in Management > Security > Roles.",
+        "Create a custom role with Kibana privileges to grant access to Reporting.",
+        "Remove the \\"reporting_user\\" role from all role mappings and add the custom role. The affected role mappings are: dungeon_master[my_test_reporting_user].",
       ],
     },
     "deprecationType": "feature",
-    "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/secure-reporting.html#grant-user-access",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html",
     "level": "warning",
     "message": "Existing roles are mapped to a deprecated role for Reporting privileges",
     "title": "The \\"reporting_user\\" role is deprecated: check role mappings",
@@ -26,15 +26,15 @@ Array [
   Object {
     "correctiveActions": Object {
       "manualSteps": Array [
-        "Set \\"xpack.reporting.roles.enabled: false\\" in kibana.yml",
-        "Remove \\"xpack.reporting.roles.allow\\" in kibana.yml",
-        "Create one or more custom roles that provide Kibana application privileges to reporting features in **Management > Security > Roles**.",
-        "Assign the custom role(s) as desired. You may remove the \\"reporting_user\\" role from the user(s) .",
-        "Remove the role that grants Reporting privilege from all role mappings and add the custom role. The affected role mappings are: dungeon_master[reporting_user].",
+        "Set \\"xpack.reporting.roles.enabled: false\\" in kibana.yml.",
+        "Remove \\"xpack.reporting.roles.allow\\" in kibana.yml, if present.",
+        "Create one or more custom roles that provide Kibana application privileges to reporting features in Management > Security > Roles.",
+        "Create a custom role with Kibana privileges to grant access to Reporting.",
+        "Remove the \\"reporting_user\\" role from all role mappings and add the custom role. The affected role mappings are: dungeon_master[reporting_user].",
       ],
     },
     "deprecationType": "feature",
-    "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/secure-reporting.html#grant-user-access",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html",
     "level": "warning",
     "message": "Existing roles are mapped to a deprecated role for Reporting privileges",
     "title": "The \\"reporting_user\\" role is deprecated: check role mappings",
@@ -47,14 +47,14 @@ Array [
   Object {
     "correctiveActions": Object {
       "manualSteps": Array [
-        "Set \\"xpack.reporting.roles.enabled: false\\" in kibana.yml",
-        "Remove \\"xpack.reporting.roles.allow\\" in kibana.yml",
-        "Create one or more custom roles that provide Kibana application privileges to reporting features in **Management > Security > Roles**.",
-        "Assign the custom role(s) as desired. You may remove the \\"reporting_user\\" role from the user(s). The affected users are: reportron[my_test_reporting_user].",
+        "Set \\"xpack.reporting.roles.enabled: false\\" in kibana.yml.",
+        "Remove \\"xpack.reporting.roles.allow\\" in kibana.yml, if present.",
+        "Create a custom role with Kibana privileges to grant access to Reporting.",
+        "Remove the \\"reporting_user\\" role from all users and add the custom role. The affected users are: reportron[my_test_reporting_user].",
       ],
     },
     "deprecationType": "feature",
-    "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/secure-reporting.html#grant-user-access",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html",
     "level": "warning",
     "message": "Existing users have their Reporting privilege granted by a deprecated setting.",
     "title": "The \\"reporting_user\\" role is deprecated: check user roles",
@@ -67,14 +67,14 @@ Array [
   Object {
     "correctiveActions": Object {
       "manualSteps": Array [
-        "Set \\"xpack.reporting.roles.enabled: false\\" in kibana.yml",
-        "Remove \\"xpack.reporting.roles.allow\\" in kibana.yml",
-        "Create one or more custom roles that provide Kibana application privileges to reporting features in **Management > Security > Roles**.",
-        "Assign the custom role(s) as desired. You may remove the \\"reporting_user\\" role from the user(s). The affected users are: reportron[reporting_user].",
+        "Set \\"xpack.reporting.roles.enabled: false\\" in kibana.yml.",
+        "Remove \\"xpack.reporting.roles.allow\\" in kibana.yml, if present.",
+        "Create a custom role with Kibana privileges to grant access to Reporting.",
+        "Remove the \\"reporting_user\\" role from all users and add the custom role. The affected users are: reportron[reporting_user].",
       ],
     },
     "deprecationType": "feature",
-    "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/secure-reporting.html#grant-user-access",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html",
     "level": "warning",
     "message": "Existing users have their Reporting privilege granted by a deprecated setting.",
     "title": "The \\"reporting_user\\" role is deprecated: check user roles",
