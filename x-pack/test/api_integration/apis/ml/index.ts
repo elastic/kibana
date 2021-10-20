@@ -72,7 +72,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./anomaly_detectors'));
     loadTestFile(require.resolve('./calendars'));
     loadTestFile(require.resolve('./data_frame_analytics'));
-    loadTestFile(require.resolve('./data_visualizer'));
     loadTestFile(require.resolve('./fields_service'));
     loadTestFile(require.resolve('./filters'));
     loadTestFile(require.resolve('./indices'));

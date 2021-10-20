@@ -50,7 +50,7 @@ export const DataVisualizerFieldTypesFilter: FC<Props> = ({
               <EuiFlexItem grow={true}> {label}</EuiFlexItem>
               {type && (
                 <EuiFlexItem grow={false}>
-                  <FieldTypeIcon type={type} tooltipEnabled={false} needsAria={true} />
+                  <FieldTypeIcon type={type} tooltipEnabled={false} />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

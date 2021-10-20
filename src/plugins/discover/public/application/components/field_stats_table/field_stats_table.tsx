@@ -86,7 +86,7 @@ export interface DiscoverDataVisualizerGridProps {
    * @param eventName
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  savedSearchRefetch$: DataRefetch$;
+  savedSearchRefetch$?: DataRefetch$;
 }
 
 export const FieldStatisticsTable = (props: DiscoverDataVisualizerGridProps) => {
@@ -123,7 +123,7 @@ export const FieldStatisticsTable = (props: DiscoverDataVisualizerGridProps) => 
       }
     });
 
-    const refetch = savedSearchRefetch$.subscribe(() => {
+    const refetch = savedSearchRefetch$?.subscribe(() => {
       if (embeddable && !isErrorEmbeddable(embeddable)) {
         embeddable.updateInput({ lastReloadRequestTime: Date.now() });
       }

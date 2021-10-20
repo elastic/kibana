@@ -181,7 +181,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           defaultMessage: 'Type',
         }),
         render: (fieldType: JobFieldType) => {
-          return <FieldTypeIcon type={fieldType} tooltipEnabled={true} needsAria={true} />;
+          return <FieldTypeIcon type={fieldType} tooltipEnabled={true} />;
         },
         width: dimensions.type,
         sortable: true,
