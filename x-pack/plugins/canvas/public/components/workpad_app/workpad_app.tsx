@@ -34,10 +34,10 @@ export const WorkpadApp: React.FC = () => {
     [dispatch]
   );
 
-  // const WorkpadAppComponent = withElementsLoadedTelemetry(Component);
+  const WorkpadAppComponent = withElementsLoadedTelemetry(Component);
   return (
-    <Component
-      // workpad={workpad}
+    <WorkpadAppComponent
+      workpad={workpad}
       isWriteable={isWriteableProp}
       deselectElement={deselectElement}
     />
