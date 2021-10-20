@@ -81,3 +81,10 @@ export const CORRELATION_THRESHOLD = 0.3;
 export const KS_TEST_THRESHOLD = 0.1;
 
 export const ERROR_CORRELATION_THRESHOLD = 0.02;
+
+/**
+ * Field stats/top values sampling constants
+ */
+
+export const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
+export const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
