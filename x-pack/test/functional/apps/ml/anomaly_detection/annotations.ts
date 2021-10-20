@@ -263,7 +263,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('with errors', function () {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/115849
+    describe.skip('with errors', function () {
       before(async () => {
         // Points the read/write aliases of annotations to an index with wrong mappings
         // so we can simulate errors when requesting annotations.

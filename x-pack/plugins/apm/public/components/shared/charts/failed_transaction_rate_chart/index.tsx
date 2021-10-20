@@ -51,7 +51,7 @@ const INITIAL_STATE: ErrorRate = {
   },
 };
 
-export function TransactionErrorRateChart({
+export function FailedTransactionRateChart({
   height,
   showAnnotations = true,
   environment,
