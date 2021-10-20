@@ -101,11 +101,11 @@ describe('ensureBrowserDownloaded', () => {
 
       expect(paths).toEqual([
         expect.arrayContaining([
+          'chrome-mac.zip',
           'chrome-win.zip',
           'chromium-70f5d88-linux_x64.zip',
-          'chromium-d163fd7-darwin_x64.zip',
         ]),
-        expect.arrayContaining(['chromium-70f5d88-linux_arm64.zip']),
+        expect.arrayContaining(['chrome-mac.zip', 'chromium-70f5d88-linux_arm64.zip']),
       ]);
     });
 
