@@ -22,7 +22,7 @@ export function calcFieldCounts(
     return {};
   }
   for (const hit of rows) {
-    const fields = Object.keys(flattenHit(hit, indexPattern));
+    const fields = Object.keys(flattenHit(hit, indexPattern, { includeIgnoredValues: true }));
     for (const fieldName of fields) {
       counts[fieldName] = (counts[fieldName] || 0) + 1;
     }

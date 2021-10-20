@@ -480,6 +480,9 @@ export interface DocLinksStart {
     readonly links: {
         readonly settings: string;
         readonly elasticStackGetStarted: string;
+        readonly upgrade: {
+            readonly upgradingElasticStack: string;
+        };
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
@@ -606,6 +609,7 @@ export interface DocLinksStart {
         readonly upgradeAssistant: {
             readonly overview: string;
             readonly batchReindex: string;
+            readonly remoteReindex: string;
         };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
@@ -684,6 +688,7 @@ export interface DocLinksStart {
             clusterPrivileges: string;
             elasticsearchSettings: string;
             elasticsearchEnableSecurity: string;
+            elasticsearchEnableApiKeys: string;
             indicesPrivileges: string;
             kibanaTLS: string;
             kibanaPrivileges: string;
@@ -710,6 +715,7 @@ export interface DocLinksStart {
             elasticAgent: string;
             datastreams: string;
             datastreamsNamingScheme: string;
+            installElasticAgent: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;

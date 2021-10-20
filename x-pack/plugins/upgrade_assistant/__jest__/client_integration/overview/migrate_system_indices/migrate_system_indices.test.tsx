@@ -45,7 +45,7 @@ describe('Overview - Migrate system indices', () => {
       component.update();
 
       httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-        upgrade_status: 'NO_UPGRADE_NEEDED',
+        migration_status: 'NO_MIGRATION_NEEDED',
       });
 
       await actions.clickRetrySystemIndicesButton();
@@ -56,7 +56,7 @@ describe('Overview - Migrate system indices', () => {
 
   test('No migration needed', async () => {
     httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-      upgrade_status: 'NO_UPGRADE_NEEDED',
+      migration_status: 'NO_MIGRATION_NEEDED',
     });
 
     testBed = await setupOverviewPage();
@@ -72,7 +72,7 @@ describe('Overview - Migrate system indices', () => {
 
   test('Migration in progress', async () => {
     httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-      upgrade_status: 'IN_PROGRESS',
+      migration_status: 'IN_PROGRESS',
     });
 
     testBed = await setupOverviewPage();
@@ -91,7 +91,7 @@ describe('Overview - Migrate system indices', () => {
   describe('Migration needed', () => {
     test('Initial state', async () => {
       httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-        upgrade_status: 'UPGRADE_NEEDED',
+        migration_status: 'MIGRATION_NEEDED',
       });
 
       testBed = await setupOverviewPage();
@@ -109,7 +109,7 @@ describe('Overview - Migrate system indices', () => {
 
     test('Handles errors when migrating', async () => {
       httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-        upgrade_status: 'UPGRADE_NEEDED',
+        migration_status: 'MIGRATION_NEEDED',
       });
       httpRequestsMockHelpers.setSystemIndicesMigrationResponse(undefined, {
         statusCode: 400,

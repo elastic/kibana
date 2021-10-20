@@ -12,10 +12,12 @@ import { EuiPageHeader, EuiSpacer, EuiPageContent, EuiLink } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DocLinksStart } from 'kibana/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
+import { uiMetricService, UIM_ES_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
 import { getEsDeprecationError } from '../../lib/get_es_deprecation_error';
 import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
 import { EsDeprecationsTable } from './es_deprecations_table';
@@ -44,7 +46,7 @@ const i18nTexts = {
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
     defaultMessage:
-      'Resolve all critical issues before upgrading. Before making changes, ensure you have a current snapshot of your cluster. Some issues may require reindexing to resolve. ',
+      'Resolve all critical issues before upgrading. Before making changes, ensure you have a current snapshot of your cluster. Indices created before 7.0 must be reindexed or removed. To start multiple reindexing tasks in a single request, use the Kibana batch reindexing API.',
   }),
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
     defaultMessage: 'Loading deprecation issues…',
@@ -82,13 +84,7 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
     },
   } = useAppContext();
 
-  const {
-    data: esDeprecations,
-    isLoading,
-    error,
-    resendRequest,
-    isInitialRequest,
-  } = api.useLoadEsDeprecations();
+  const { data: esDeprecations, isLoading, error, resendRequest } = api.useLoadEsDeprecations();
 
   const deprecationsCountByLevel: {
     warningDeprecations: number;
@@ -103,16 +99,8 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
   }, [breadcrumbs]);
 
   useEffect(() => {
-    if (isLoading === false && isInitialRequest) {
-      async function sendTelemetryData() {
-        await api.sendPageTelemetryData({
-          elasticsearch: true,
-        });
-      }
-
-      sendTelemetryData();
-    }
-  }, [api, isLoading, isInitialRequest]);
+    uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_ES_DEPRECATIONS_PAGE_LOAD);
+  }, []);
 
   if (error) {
     return (

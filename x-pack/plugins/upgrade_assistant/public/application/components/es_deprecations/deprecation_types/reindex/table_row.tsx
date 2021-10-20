@@ -7,9 +7,15 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
+import {
+  uiMetricService,
+  UIM_REINDEX_CLOSE_FLYOUT_CLICK,
+  UIM_REINDEX_OPEN_FLYOUT_CLICK,
+} from '../../../../lib/ui_metric';
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { ReindexResolutionCell } from './resolution_table_cell';
@@ -29,9 +35,6 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const reindexState = useReindexContext();
-  const {
-    services: { api },
-  } = useAppContext();
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
@@ -39,8 +42,8 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   const closeFlyout = useCallback(async () => {
     removeContentFromGlobalFlyout('reindexFlyout');
     setShowFlyout(false);
-    await api.sendReindexTelemetryData({ close: true });
-  }, [api, removeContentFromGlobalFlyout]);
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_CLOSE_FLYOUT_CLICK);
+  }, [removeContentFromGlobalFlyout]);
 
   useEffect(() => {
     if (showFlyout) {
@@ -64,13 +67,9 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
 
   useEffect(() => {
     if (showFlyout) {
-      async function sendTelemetry() {
-        await api.sendReindexTelemetryData({ open: true });
-      }
-
-      sendTelemetry();
+      uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_OPEN_FLYOUT_CLICK);
     }
-  }, [showFlyout, api]);
+  }, [showFlyout]);
 
   return (
     <>
