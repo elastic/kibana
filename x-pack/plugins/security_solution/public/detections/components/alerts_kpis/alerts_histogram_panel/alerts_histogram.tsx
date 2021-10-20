@@ -12,6 +12,7 @@ import {
   Position,
   Settings,
   ChartSizeArray,
+  ScaleType,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -42,7 +43,7 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
     data,
     from,
     legendItems,
-    legendPosition = 'right',
+    legendPosition = Position.Right,
     loading,
     showLegend,
     to,
@@ -81,14 +82,14 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
                 theme={theme}
               />
 
-              <Axis id={xAxisId} position="bottom" tickFormat={tickFormat} />
+              <Axis id={xAxisId} position={Position.Bottom} tickFormat={tickFormat} />
 
-              <Axis id={yAxisId} position="left" />
+              <Axis id={yAxisId} position={Position.Left} />
 
               <HistogramBarSeries
                 id={id}
-                xScaleType="time"
-                yScaleType="linear"
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
                 xAccessor="x"
                 yAccessors={yAccessors}
                 splitSeriesAccessors={splitSeriesAccessors}

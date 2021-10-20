@@ -52,7 +52,7 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
         <BarSeries
           aria-hidden={true}
           id="waterfallItems"
-          xScaleType={ScaleType.Linear}
+          xScaleType={ScaleType.Ordinal}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}

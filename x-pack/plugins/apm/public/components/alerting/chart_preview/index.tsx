@@ -103,7 +103,7 @@ export function ChartPreview({
           data={data}
           id="chart_preview_bar_series"
           xAccessor="x"
-          xScaleType={ScaleType.Linear}
+          xScaleType={ScaleType.Time}
           yAccessors={['y']}
           yScaleType={ScaleType.Linear}
         />

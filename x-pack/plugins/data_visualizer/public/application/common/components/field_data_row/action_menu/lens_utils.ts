@@ -153,7 +153,7 @@ export function getKeywordSettings(item: FieldVisConfig) {
     accessors: ['col2'],
     layerId: 'layer1',
     layerType: 'data',
-    seriesType: 'bar',
+    seriesType: 'bar_horizontal',
     xAccessor: 'col1',
   };
 
