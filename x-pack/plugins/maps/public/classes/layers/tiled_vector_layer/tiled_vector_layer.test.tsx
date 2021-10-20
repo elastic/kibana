@@ -95,8 +95,8 @@ describe('visiblity', () => {
   });
 });
 
-describe('icon', () => {
-  it('should use polygon icon by default (this is the default assumption, before any tile-meta is queried)', async () => {
+describe('getCustomIconAndTooltipContent', () => {
+  it('Layers with non-elasticsearch sources should display icon', async () => {
     const layer: TiledVectorLayer = createLayer({}, {});
 
     const iconAndTooltipContent = layer.getCustomIconAndTooltipContent();
