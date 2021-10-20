@@ -10,9 +10,6 @@ build --remote_timeout=30
 build --remote_header=x-buildbuddy-api-key=3EYk49W2NefOx2n3yMze
 build --remote_accept_cached=true
 
-# BuildBuddy
-## Metadata settings
-build --workspace_status_command="node ./src/dev/bazel_workspace_status.js"
 # Enable this in case you want to share your build info
 # build --build_metadata=VISIBILITY=PUBLIC
 build --build_metadata=TEST_GROUPS=//packages
