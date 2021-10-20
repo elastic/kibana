@@ -58,5 +58,3 @@ export const ManagementRouter = memo(
     </Router>
   )
 );
-
-//
