@@ -45,8 +45,6 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
 
   const SUBJ_NODE_LINK_PREFIX = `${SUBJ_TABLE_BODY} > nodeLink-`;
 
-  const SUBJ_PAGE_LOADING = 'monitoringPageLoading';
-
   return new (class ElasticsearchIndices {
     async isOnListing() {
       const pageId = await retry.try(() => testSubjects.find(SUBJ_LISTING_PAGE));
@@ -57,12 +55,6 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
       await retry.waitForWithTimeout('redirection to node detail', 30000, async () => {
         await testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver, 5000);
         return testSubjects.exists('elasticsearchNodeDetailStatus', { timeout: 5000 });
-      });
-    }
-
-    async waitForPageToFinishLoading() {
-      await retry.try(async () => {
-        await find.waitForDeletedByCssSelector(`[data-test-subj="${SUBJ_PAGE_LOADING}"]`, 5000);
       });
     }
 
