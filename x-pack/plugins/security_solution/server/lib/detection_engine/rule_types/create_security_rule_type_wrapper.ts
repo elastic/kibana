@@ -6,13 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import { flow } from 'fp-ts/lib/function';
-import { Either, chain, fold, tryCatch } from 'fp-ts/lib/Either';
-
-import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
-import { toError } from '@kbn/securitysolution-list-api';
 
 import { createPersistenceRuleTypeWrapper } from '../../../../../rule_registry/server';
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
@@ -136,58 +131,46 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             const inputIndices = params.index ?? [];
 
-            const [privileges, timestampFieldCaps] = await Promise.all([
-              checkPrivilegesFromEsClient(esClient, inputIndices),
-              esClient.fieldCaps({
-                index: index ?? ['*'],
-                fields: hasTimestampOverride
-                  ? [TIMESTAMP, timestampOverride as string]
-                  : [TIMESTAMP],
-                include_unmapped: true,
-              }),
-            ]);
+            const privileges = await checkPrivilegesFromEsClient(esClient, inputIndices);
 
-            fold<Error, Promise<boolean>, void>(
-              async (error: Error) => logger.error(buildRuleMessage(error.message)),
-              async (status: Promise<boolean>) => (wroteWarningStatus = await status)
-            )(
-              flow(
-                () =>
-                  tryCatch(
-                    () =>
-                      hasReadIndexPrivileges({
-                        ...basicLogArguments,
-                        privileges,
-                        logger,
-                        buildRuleMessage,
-                        ruleStatusClient,
-                      }),
-                    toError
-                  ),
-                chain((wroteStatus: unknown) =>
-                  tryCatch(
-                    () =>
-                      hasTimestampFields({
-                        ...basicLogArguments,
-                        wroteStatus: wroteStatus as boolean,
-                        timestampField: hasTimestampOverride
-                          ? (timestampOverride as string)
-                          : '@timestamp',
-                        ruleName: name,
-                        timestampFieldCapsResponse: timestampFieldCaps,
-                        inputIndices,
-                        ruleStatusClient,
-                        logger,
-                        buildRuleMessage,
-                      }),
-                    toError
-                  )
-                )
-              )() as Either<Error, Promise<boolean>>
-            );
+            wroteWarningStatus = await hasReadIndexPrivileges({
+              ...basicLogArguments,
+              privileges,
+              logger,
+              buildRuleMessage,
+              ruleStatusClient,
+            });
+
+            if (!wroteWarningStatus) {
+              const timestampFieldCaps = await services.scopedClusterClient.asCurrentUser.fieldCaps(
+                {
+                  index,
+                  fields: hasTimestampOverride
+                    ? ['@timestamp', timestampOverride as string]
+                    : ['@timestamp'],
+                  include_unmapped: true,
+                }
+              );
+              wroteWarningStatus = await hasTimestampFields({
+                ...basicLogArguments,
+                timestampField: hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
+                timestampFieldCapsResponse: timestampFieldCaps,
+                inputIndices,
+                ruleStatusClient,
+                logger,
+                buildRuleMessage,
+              });
+            }
           }
         } catch (exc) {
-          logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
+          const errorMessage = buildRuleMessage(`Check privileges failed to execute ${exc}`);
+          logger.error(errorMessage);
+          await ruleStatusClient.logStatusChange({
+            ...basicLogArguments,
+            message: errorMessage,
+            newStatus: RuleExecutionStatus['partial failure'],
+          });
+          wroteWarningStatus = true;
         }
         let hasError = false;
         const { tuples, remainingGap } = getRuleRangeTuples({
@@ -375,20 +358,22 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             );
           } else {
             // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
-            await scheduleThrottledNotificationActions({
-              alertInstance: services.alertInstanceFactory(alertId),
-              throttle: ruleSO.attributes.throttle,
-              startedAt,
-              id: ruleSO.id,
-              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
-                ?.kibana_siem_app_url,
-              outputIndex: ruleDataClient.indexName,
-              ruleId,
-              esClient: services.scopedClusterClient.asCurrentUser,
-              notificationRuleParams,
-              signals: result.createdSignals,
-              logger,
-            });
+            if (ruleSO.attributes.throttle != null) {
+              await scheduleThrottledNotificationActions({
+                alertInstance: services.alertInstanceFactory(alertId),
+                throttle: ruleSO.attributes.throttle,
+                startedAt,
+                id: ruleSO.id,
+                kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                  ?.kibana_siem_app_url,
+                outputIndex: ruleDataClient.indexName,
+                ruleId,
+                esClient: services.scopedClusterClient.asCurrentUser,
+                notificationRuleParams,
+                signals: result.createdSignals,
+                logger,
+              });
+            }
             const errorMessage = buildRuleMessage(
               'Bulk Indexing of signals failed:',
               truncateMessageList(result.errors).join()
@@ -407,20 +392,22 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           }
         } catch (error) {
           // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
-          await scheduleThrottledNotificationActions({
-            alertInstance: services.alertInstanceFactory(alertId),
-            throttle: ruleSO.attributes.throttle,
-            startedAt,
-            id: ruleSO.id,
-            kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
-              ?.kibana_siem_app_url,
-            outputIndex: ruleDataClient.indexName,
-            ruleId,
-            esClient: services.scopedClusterClient.asCurrentUser,
-            notificationRuleParams,
-            signals: result.createdSignals,
-            logger,
-          });
+          if (ruleSO.attributes.throttle != null) {
+            await scheduleThrottledNotificationActions({
+              alertInstance: services.alertInstanceFactory(alertId),
+              throttle: ruleSO.attributes.throttle,
+              startedAt,
+              id: ruleSO.id,
+              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                ?.kibana_siem_app_url,
+              outputIndex: ruleDataClient.indexName,
+              ruleId,
+              esClient: services.scopedClusterClient.asCurrentUser,
+              notificationRuleParams,
+              signals: result.createdSignals,
+              logger,
+            });
+          }
 
           const errorMessage = error.message ?? '(no error message given)';
           const message = buildRuleMessage(
