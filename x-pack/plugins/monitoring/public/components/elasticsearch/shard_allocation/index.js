@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ShardAllocationReact } from './shard_allocation_react';
+export { ShardAllocation } from './shard_allocation';

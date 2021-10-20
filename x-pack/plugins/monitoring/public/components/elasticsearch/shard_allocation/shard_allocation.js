@@ -10,9 +10,9 @@ import { EuiTitle, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elast
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import './shard_allocation.scss';
-import { ClusterViewReact } from './components/cluster_view_react';
+import { ClusterView } from './components/cluster_view';
 
-export const ShardAllocationReact = (props) => {
+export const ShardAllocation = (props) => {
   const types = [
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.primaryLabel', {
@@ -77,7 +77,7 @@ export const ShardAllocationReact = (props) => {
         ))}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <ClusterViewReact {...props} />
+      <ClusterView {...props} />
     </div>
   );
 };

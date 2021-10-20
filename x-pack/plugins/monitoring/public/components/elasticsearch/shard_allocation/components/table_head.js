@@ -53,7 +53,7 @@ class IndexLabel extends React.Component {
 }
 
 // eslint-disable-next-line react/no-multi-comp
-export class TableHeadReact extends React.Component {
+export class TableHead extends React.Component {
   constructor(props) {
     super(props);
   }

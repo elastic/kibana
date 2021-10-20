@@ -21,7 +21,7 @@ import { NodeDetailStatus } from '../node_detail_status';
 import { Logs } from '../../logs';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { AlertsCallout } from '../../../alerts/callout';
-import { ShardAllocationReact } from '../shard_allocation';
+import { ShardAllocation } from '../shard_allocation';
 
 export const Node = ({ nodeSummary, metrics, logs, alerts, nodeId, clusterUuid, ...props }) => {
   /*
@@ -83,7 +83,7 @@ export const Node = ({ nodeSummary, metrics, logs, alerts, nodeId, clusterUuid, 
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPanel>
-          <ShardAllocationReact {...props} />
+          <ShardAllocation {...props} />
         </EuiPanel>
       </EuiPageBody>
     </EuiPage>

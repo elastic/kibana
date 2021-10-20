@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { IndexDetailStatus } from '../index_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { ShardAllocationReact } from '../shard_allocation/shard_allocation_react';
+import { ShardAllocation } from '../shard_allocation/shard_allocation';
 import { Logs } from '../../logs';
 import { AlertsCallout } from '../../../alerts/callout';
 
@@ -62,7 +62,7 @@ export const Index = ({
             <Logs logs={logs} indexUuid={indexUuid} clusterUuid={clusterUuid} />
           </EuiPanel>
           <EuiSpacer size="m" />
-          <ShardAllocationReact {...props} />
+          <ShardAllocation {...props} />
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { TableHeadReact } from './table_head_react';
+import { TableHead } from './table_head';
 import { TableBody } from './table_body';
 
-export const ClusterViewReact = (props) => {
+export const ClusterView = (props) => {
   return (
     <table cellPadding="0" cellSpacing="0" className="table">
-      <TableHeadReact
+      <TableHead
         labels={props.labels}
         toggleShowSystemIndices={props.toggleShowSystemIndices}
         showSystemIndices={props.showSystemIndices}
