@@ -18,6 +18,7 @@ import { policyFactory } from '../../../../plugins/security_solution/common/endp
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
+  const retryService = getService('retry');
   const pageObjects = getPageObjects([
     'common',
     'endpoint',
@@ -234,7 +235,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     );
   };
 
-  describe('When on the Endpoint Policy Details Page', function () {
+  describe.only('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
@@ -545,9 +546,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.find('policyWindowsEvent_dns')
         );
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-        const wasSelected = await (await testSubjects.find('policyWindowsEvent_dns')).isSelected();
+        const updatedCheckboxValue = await testSubjects.isSelected('policyWindowsEvent_dns');
 
-        expect(wasSelected).to.be(false);
+        expect(updatedCheckboxValue).to.be(false);
 
         await (await pageObjects.ingestManagerCreatePackagePolicy.findSaveButton(true)).click();
         await pageObjects.ingestManagerCreatePackagePolicy.waitForSaveSuccessNotification(true);
@@ -557,7 +558,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.packagePolicy.id
         );
 
-        expect(await testSubjects.isSelected('policyWindowsEvent_dns')).to.be(wasSelected);
+        await retryService.waitFor('Policy Windows DNS Event to updated', async () => {
+          return (await testSubjects.isSelected('policyWindowsEvent_dns')) === updatedCheckboxValue;
+        });
       });
 
       it('should show trusted apps card and link should go back to policy', async () => {
