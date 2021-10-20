@@ -61,7 +61,9 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
     return this.client.getLastFailures(args);
   }
 
-  public getCurrentStatus(args: GetCurrentStatusArgs): Promise<IRuleStatusSOAttributes> {
+  public getCurrentStatus(
+    args: GetCurrentStatusArgs
+  ): Promise<IRuleStatusSOAttributes | undefined> {
     return this.client.getCurrentStatus(args);
   }
 

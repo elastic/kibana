@@ -63,7 +63,9 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
     });
   }
 
-  public getCurrentStatus(args: GetCurrentStatusArgs): Promise<IRuleStatusSOAttributes> {
+  public getCurrentStatus(
+    args: GetCurrentStatusArgs
+  ): Promise<IRuleStatusSOAttributes | undefined> {
     return this.savedObjectsAdapter.getCurrentStatus(args);
   }
 

@@ -22,7 +22,7 @@ export interface IRuleExecutionLogClient {
   findBulk(args: FindBulkExecutionLogArgs): Promise<FindBulkExecutionLogResponse>;
 
   getLastFailures(args: GetLastFailuresArgs): Promise<IRuleStatusSOAttributes[]>;
-  getCurrentStatus(args: GetCurrentStatusArgs): Promise<IRuleStatusSOAttributes>;
+  getCurrentStatus(args: GetCurrentStatusArgs): Promise<IRuleStatusSOAttributes | undefined>;
   getCurrentStatusBulk(args: GetCurrentStatusBulkArgs): Promise<GetCurrentStatusBulkResult>;
 
   deleteCurrentStatus(ruleId: string): Promise<void>;

@@ -79,9 +79,12 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
     return result.map((so) => so.attributes).slice(1);
   }
 
-  public async getCurrentStatus(args: GetCurrentStatusArgs): Promise<IRuleStatusSOAttributes> {
+  public async getCurrentStatus(
+    args: GetCurrentStatusArgs
+  ): Promise<IRuleStatusSOAttributes | undefined> {
     const result = await this.findRuleStatusSavedObjects(args.ruleId, 1);
-    return result[0].attributes;
+    const currentStatusSavedObject = result[0];
+    return currentStatusSavedObject ? currentStatusSavedObject.attributes : undefined;
   }
 
   public async getCurrentStatusBulk(
