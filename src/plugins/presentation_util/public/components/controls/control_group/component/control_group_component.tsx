@@ -78,10 +78,10 @@ export const ControlGroup = () => {
   );
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const draggingIndex = useMemo(() => (draggingId ? idsInOrder.indexOf(draggingId) : -1), [
-    idsInOrder,
-    draggingId,
-  ]);
+  const draggingIndex = useMemo(
+    () => (draggingId ? idsInOrder.indexOf(draggingId) : -1),
+    [idsInOrder, draggingId]
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor),
