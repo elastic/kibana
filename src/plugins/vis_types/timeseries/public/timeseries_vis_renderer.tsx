@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { lazy } from 'react';
 import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -25,7 +25,9 @@ import type { TimeseriesVisParams } from './types';
 import type { ExpressionRenderDefinition } from '../../../expressions/common';
 import type { TimeseriesRenderValue } from './metrics_fn';
 
-import TimeseriesVisualization from './application/components/timeseries_visualization';
+const TimeseriesVisualization = lazy(
+  () => import('./application/components/timeseries_visualization')
+);
 
 const checkIfDataExists = (visData: TimeseriesVisData | {}, model: TimeseriesVisParams) => {
   if ('type' in visData) {
