@@ -13,7 +13,7 @@ import { ComponentProps } from '../../route_init';
 // @ts-ignore
 import { Listing } from '../../../components/logstash/listing';
 import { LogstashTemplate } from './logstash_template';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import { RULE_LOGSTASH_VERSION_MISMATCH, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
