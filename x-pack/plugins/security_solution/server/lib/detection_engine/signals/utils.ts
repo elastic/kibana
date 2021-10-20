@@ -16,7 +16,6 @@ import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
-import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   TimestampOverrideOrUndefined,
@@ -414,46 +413,23 @@ export const parseInterval = (intervalString: string): moment.Duration | null =>
   }
 };
 
-export const getDriftTolerance = ({
-  from,
-  to,
-  intervalDuration,
-  now = moment(),
-}: {
-  from: string;
-  to: string;
-  intervalDuration: moment.Duration;
-  now?: moment.Moment;
-}): moment.Duration => {
-  const toDate = parseScheduleDates(to) ?? now;
-  const fromDate = parseScheduleDates(from) ?? dateMath.parse('now-6m');
-  const timeSegment = toDate.diff(fromDate);
-  const duration = moment.duration(timeSegment);
-
-  return duration.subtract(intervalDuration);
-};
-
 export const getGapBetweenRuns = ({
   previousStartedAt,
-  intervalDuration,
-  from,
-  to,
-  now = moment(),
+  originalFrom,
+  originalTo,
+  startedAt,
 }: {
   previousStartedAt: Date | undefined | null;
-  intervalDuration: moment.Duration;
-  from: string;
-  to: string;
-  now?: moment.Moment;
+  originalFrom: moment.Moment;
+  originalTo: moment.Moment;
+  startedAt: Date;
 }): moment.Duration => {
   if (previousStartedAt == null) {
     return moment.duration(0);
   }
-  const driftTolerance = getDriftTolerance({ from, to, intervalDuration });
-
-  const diff = moment.duration(now.diff(previousStartedAt));
-  const drift = diff.subtract(intervalDuration);
-  return drift.subtract(driftTolerance);
+  const driftTolerance = moment.duration(originalTo.diff(originalFrom));
+  const currentDuration = moment.duration(moment(startedAt).diff(previousStartedAt));
+  return currentDuration.subtract(driftTolerance);
 };
 
 export const makeFloatString = (num: number): string => Number(num).toFixed(2);
@@ -508,6 +484,7 @@ export const getRuleRangeTuples = ({
   interval,
   maxSignals,
   buildRuleMessage,
+  startedAt,
 }: {
   logger: Logger;
   previousStartedAt: Date | null | undefined;
@@ -516,9 +493,10 @@ export const getRuleRangeTuples = ({
   interval: string;
   maxSignals: number;
   buildRuleMessage: BuildRuleMessage;
+  startedAt: Date;
 }) => {
-  const originalTo = dateMath.parse(to);
-  const originalFrom = dateMath.parse(from);
+  const originalTo = dateMath.parse(to, { forceNow: startedAt });
+  const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   if (originalTo == null || originalFrom == null) {
     throw new Error(buildRuleMessage('dateMath parse failed'));
   }
@@ -534,14 +512,19 @@ export const getRuleRangeTuples = ({
     logger.error(`Failed to compute gap between rule runs: could not parse rule interval`);
     return { tuples, remainingGap: moment.duration(0) };
   }
-  const gap = getGapBetweenRuns({ previousStartedAt, intervalDuration, from, to });
+  const gap = getGapBetweenRuns({
+    previousStartedAt,
+    originalTo,
+    originalFrom,
+    startedAt,
+  });
   const catchup = getNumCatchupIntervals({
     gap,
     intervalDuration,
   });
   const catchupTuples = getCatchupTuples({
-    to: originalTo,
-    from: originalFrom,
+    originalTo,
+    originalFrom,
     ruleParamsMaxSignals: maxSignals,
     catchup,
     intervalDuration,
@@ -564,22 +547,22 @@ export const getRuleRangeTuples = ({
  * @param intervalDuration moment.Duration the interval which the rule runs
  */
 export const getCatchupTuples = ({
-  to,
-  from,
+  originalTo,
+  originalFrom,
   ruleParamsMaxSignals,
   catchup,
   intervalDuration,
 }: {
-  to: moment.Moment;
-  from: moment.Moment;
+  originalTo: moment.Moment;
+  originalFrom: moment.Moment;
   ruleParamsMaxSignals: number;
   catchup: number;
   intervalDuration: moment.Duration;
 }): RuleRangeTuple[] => {
   const catchupTuples: RuleRangeTuple[] = [];
   const intervalInMilliseconds = intervalDuration.asMilliseconds();
-  let currentTo = to;
-  let currentFrom = from;
+  let currentTo = originalTo;
+  let currentFrom = originalFrom;
   // This loop will create tuples with overlapping time ranges, the same way rule runs have overlapping time
   // ranges due to the additional lookback. We could choose to create tuples that don't overlap here by using the
   // "from" value from one tuple as "to" in the next one, however, the overlap matters for rule types like EQL and
@@ -718,6 +701,20 @@ export const createSearchAfterReturnTypeFromResponse = ({
     lastLookBackDate: lastValidDate({ searchResult, timestampOverride }),
   });
 };
+
+export interface PreviewReturnType {
+  totalCount: number;
+  matrixHistogramData: unknown[];
+  errors?: string[] | undefined;
+  warningMessages?: string[] | undefined;
+}
+
+export const createPreviewReturnType = (): PreviewReturnType => ({
+  matrixHistogramData: [],
+  totalCount: 0,
+  errors: [],
+  warningMessages: [],
+});
 
 export const createSearchAfterReturnType = ({
   success,

@@ -21,6 +21,7 @@ import {
   getUserPrivilege,
   createSignalIndex,
   createHostIsolation,
+  createPreviewIndex,
 } from './api';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
@@ -162,6 +163,25 @@ describe('Detections Alerts API', () => {
         signal: abortCtrl.signal,
       });
       expect(alertsResp).toEqual(mockSignalIndex);
+    });
+  });
+
+  describe('createPreviewIndex', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({ acknowledged: true });
+    });
+
+    test('check parameter url', async () => {
+      await createPreviewIndex();
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/preview/index', {
+        method: 'POST',
+      });
+    });
+
+    test('happy path', async () => {
+      const previewResp = await createPreviewIndex();
+      expect(previewResp).toEqual({ acknowledged: true });
     });
   });
 

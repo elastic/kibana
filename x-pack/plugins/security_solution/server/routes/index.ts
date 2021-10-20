@@ -6,7 +6,6 @@
  */
 
 import { Logger } from 'src/core/server';
-
 import { SecuritySolutionPluginRouter } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
@@ -57,8 +56,11 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
+import { CreateRuleOptions } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
+import { createPreviewIndexRoute } from '../lib/detection_engine/routes/index/create_preview_index_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -67,7 +69,8 @@ export const initRoutes = (
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
   logger: Logger,
-  isRuleRegistryEnabled: boolean
+  isRuleRegistryEnabled: boolean,
+  ruleOptions: CreateRuleOptions
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
@@ -77,6 +80,7 @@ export const initRoutes = (
   patchRulesRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesRoute(router, isRuleRegistryEnabled);
   findRulesRoute(router, logger, isRuleRegistryEnabled);
+  previewRulesRoute(router, config, ml, security, ruleOptions);
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
   legacyCreateLegacyNotificationRoute(router, logger);
@@ -128,6 +132,9 @@ export const initRoutes = (
   createIndexRoute(router);
   readIndexRoute(router, config);
   deleteIndexRoute(router);
+
+  // Detection Engine Preview Index  /api/detection_engine/preview/index
+  createPreviewIndexRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
   readTagsRoute(router, isRuleRegistryEnabled);

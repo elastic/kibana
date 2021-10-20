@@ -12,7 +12,6 @@ import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { AlertExecutorOptions, AlertType } from '../../../../../alerting/server';
-import { SavedObject } from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -26,10 +25,9 @@ import { PersistenceServices, IRuleDataClient } from '../../../../../rule_regist
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
-import { RuleParams } from '../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 import { BuildRuleMessage } from '../signals/rule_messages';
 import {
-  AlertAttributes,
   BulkCreate,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
@@ -57,7 +55,7 @@ export interface RunOpts<TParams extends RuleParams> {
   bulkCreate: BulkCreate;
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
-  rule: SavedObject<AlertAttributes<TParams>>;
+  completeRule: CompleteRule<RuleParams>;
   searchAfterSize: number;
   tuple: {
     to: Moment;
