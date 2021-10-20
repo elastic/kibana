@@ -28,7 +28,7 @@ export const StopColorPicker: FC<Props> = (props) => {
 
   const [colorStop, setColorStop] = useState<ColorStop>({ stop: stop ?? 0, color: color ?? '' });
   const onChangeInput = (updatedColorStop: ColorStop) => {
-    setColorStop(updatedColorStop);
+    onChange(updatedColorStop);
   };
   const onBlur = () => onChange(colorStop);
 
@@ -38,7 +38,7 @@ export const StopColorPicker: FC<Props> = (props) => {
         <EuiFlexItem>
           <EuiFieldNumber
             compressed
-            value={colorStop.stop}
+            value={stop}
             min={-Infinity}
             onChange={({ target: { valueAsNumber } }) =>
               onChangeInput({ ...colorStop, stop: valueAsNumber })
@@ -51,7 +51,7 @@ export const StopColorPicker: FC<Props> = (props) => {
           <EuiColorPicker
             key={id}
             secondaryInputDisplay="top"
-            color={colorStop.color}
+            color={color}
             showAlpha
             compressed
             onChange={(newColor) => onChangeInput({ ...colorStop, color: newColor })}
