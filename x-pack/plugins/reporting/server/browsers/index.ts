@@ -28,7 +28,8 @@ export interface BrowserDownload {
 }
 
 export const initializeBrowserDriverFactory = async (core: ReportingCore, logger: LevelLogger) => {
-  const { binaryPath$ } = installBrowser(logger);
+  const chromiumLogger = logger.clone(['chromium']);
+  const { binaryPath$ } = installBrowser(chromiumLogger);
   const binaryPath = await binaryPath$.pipe(first()).toPromise();
-  return chromium.createDriverFactory(core, binaryPath, logger);
+  return chromium.createDriverFactory(core, binaryPath, chromiumLogger);
 };
