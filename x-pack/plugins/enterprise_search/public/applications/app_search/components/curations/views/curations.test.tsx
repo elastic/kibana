@@ -25,6 +25,7 @@ import { CurationsSettings } from './curations_settings';
 
 describe('Curations', () => {
   const values = {
+    // CurationsLogic
     dataLoading: false,
     curations: [
       {
@@ -46,6 +47,8 @@ describe('Curations', () => {
       },
     },
     selectedPageTab: 'overview',
+    // LicensingLogic
+    hasPlatinumLicense: true,
   };
 
   const actions = {
@@ -75,6 +78,20 @@ describe('Curations', () => {
 
     tabs.at(2).simulate('click');
     expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(3, 'settings');
+    // The settings tab should NOT have an icon next to it
+    expect(tabs.at(2).prop('prepend')).toBeUndefined();
+  });
+
+  it('renders less tabs when less than platinum license', () => {
+    setMockValues({ ...values, hasPlatinumLicense: false });
+    const wrapper = shallow(<Curations />);
+
+    expect(getPageTitle(wrapper)).toEqual('Curated results');
+
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+    expect(tabs.length).toBe(2);
+    // The settings tab should have an icon next to it
+    expect(tabs.at(1).prop('prepend')).not.toBeUndefined();
   });
 
   it('renders an overview view', () => {
@@ -109,14 +126,14 @@ describe('Curations', () => {
 
   describe('loading state', () => {
     it('renders a full-page loading state on initial page load', () => {
-      setMockValues({ ...values, dataLoading: true, curations: [] });
+      setMockValues({ ...values, dataLoading: true });
       const wrapper = shallow(<Curations />);
 
       expect(wrapper.prop('isLoading')).toEqual(true);
     });
 
-    it('does not re-render a full-page loading state after initial page load (uses component-level loading state instead)', () => {
-      setMockValues({ ...values, dataLoading: true, curations: [{}] });
+    it('does not re-render a full-page loading state when data is loaded', () => {
+      setMockValues({ ...values, dataLoading: false });
       const wrapper = shallow(<Curations />);
 
       expect(wrapper.prop('isLoading')).toEqual(false);
