@@ -64,6 +64,7 @@ export interface LogsEndpointActionResponse {
 export interface EndpointActionData {
   command: ISOLATION_ACTIONS;
   comment?: string;
+  ack?: boolean;
 }
 
 export interface EndpointAction {
