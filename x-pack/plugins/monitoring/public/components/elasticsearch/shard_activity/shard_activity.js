@@ -68,7 +68,7 @@ const columns = [
   },
 ];
 
-export const ShardActivityReact = (props) => {
+export const ShardActivity = (props) => {
   const {
     data: rawData,
     sorting,

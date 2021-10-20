@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ShardActivityReact } from './shard_activity_react';
+export { ShardActivity } from './shard_activity';
