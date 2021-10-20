@@ -16,10 +16,8 @@ import { IIndexPattern } from 'src/plugins/data/public';
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
 
 const items: ScriptedFieldItem[] = [
-  // @ts-expect-error invalid lang type
-  { name: '1', lang: 'Elastic', script: '', isUserEditable: true },
-  // @ts-expect-error invalid lang type
-  { name: '2', lang: 'Elastic', script: '', isUserEditable: false },
+  { name: '1', lang: 'painless', script: '', isUserEditable: true },
+  { name: '2', lang: 'painless', script: '', isUserEditable: false },
 ];
 
 describe('Table', () => {

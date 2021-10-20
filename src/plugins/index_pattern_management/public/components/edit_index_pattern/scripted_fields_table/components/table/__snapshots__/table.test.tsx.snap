@@ -63,13 +63,13 @@ exports[`Table should render normally 1`] = `
     Array [
       Object {
         "isUserEditable": true,
-        "lang": "Elastic",
+        "lang": "painless",
         "name": "1",
         "script": "",
       },
       Object {
         "isUserEditable": false,
-        "lang": "Elastic",
+        "lang": "painless",
         "name": "2",
         "script": "",
       },

@@ -32,7 +32,7 @@ interface IndexedFieldsTableState {
   fields: IndexedFieldItem[];
 }
 
-const withHooks = (Comp: any) => {
+const withHooks = (Comp: typeof Component) => {
   return (props: any) => {
     const { application } = useKibana<IndexPatternManagmentContext>().services;
     const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
