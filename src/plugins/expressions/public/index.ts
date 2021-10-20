@@ -22,20 +22,23 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 // Static exports.
-export { ExpressionExecutor, IExpressionLoaderParams, ExpressionRenderError } from './types';
-export {
+export type {
+  ExpressionExecutor,
+  IExpressionLoaderParams,
+  ExpressionRenderError,
+  ExpressionRendererEvent,
+} from './types';
+export type { ExpressionLoader } from './loader';
+export type { ExpressionRenderHandler } from './render';
+export type {
   ExpressionRendererComponent,
-  ReactExpressionRenderer,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from './react_expression_renderer';
-export { ExpressionRenderHandler, ExpressionRendererEvent } from './render';
-export {
+export type {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
   ArgumentType,
-  buildExpression,
-  buildExpressionFunction,
   Datatable,
   DatatableColumn,
   DatatableColumnType,
@@ -79,17 +82,12 @@ export {
   FontStyle,
   FontValue,
   FontWeight,
-  format,
-  formatExpression,
   FunctionsRegistry,
   IInterpreterRenderHandlers,
   InterpreterErrorType,
   IRegistry,
-  isExpressionAstBuilder,
   KnownTypeToString,
   Overflow,
-  parse,
-  parseExpression,
   PointSeries,
   PointSeriesColumn,
   PointSeriesColumnName,
@@ -109,6 +107,13 @@ export {
   ExpressionsServiceSetup,
   ExpressionsServiceStart,
   TablesAdapter,
-  ExpressionsInspectorAdapter,
+} from '../common';
+
+export {
+  buildExpression,
+  buildExpressionFunction,
+  formatExpression,
+  isExpressionAstBuilder,
+  parseExpression,
   createDefaultInspectorAdapters,
 } from '../common';
