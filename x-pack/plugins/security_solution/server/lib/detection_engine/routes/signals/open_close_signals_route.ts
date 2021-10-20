@@ -47,17 +47,25 @@ export const setSignalsStatusRoute = (
       const siemClient = context.securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
       const validationErrors = setSignalStatusValidateTypeDependents(request.body);
+
+      if (validationErrors.length) {
+        return siemResponse.error({ statusCode: 400, body: validationErrors });
+      }
+
+      if (!siemClient) {
+        return siemResponse.error({ statusCode: 404 });
+      }
+
       const isTelemetryOptedIn = await sender.isTelemetryOptedIn();
       if (isTelemetryOptedIn) {
         // Sometimes the ids are in the query not passed in the request?
-        const toSendAlertIds = signalIds || get(query, 'bool.filter.terms._id');
-
+        const toSendAlertIds = get(query, 'bool.filter.terms._id') || signalIds;
         // Get Context for Insights Payloads
         const clusterId = await sender.getClusterID();
         const username = await security?.authc.getCurrentUser(request)?.username;
         const insightsService = new InsightsService(clusterId);
         const sessionId = insightsService.getSessionIDfromKibanaRequest(request);
-        if (username && toSendAlertIds) {
+        if (username && toSendAlertIds && sessionId && status) {
           const insightsPayloads = insightsService.createAlertStatusPayloads(
             toSendAlertIds,
             sessionId,
@@ -68,14 +76,6 @@ export const setSignalsStatusRoute = (
           logger.debug(`Sending Insights Payloads ${JSON.stringify(insightsPayloads)}`);
           await sender.sendOnDemand(INSIGHTS_CHANNEL, insightsPayloads);
         }
-      }
-
-      if (validationErrors.length) {
-        return siemResponse.error({ statusCode: 400, body: validationErrors });
-      }
-
-      if (!siemClient) {
-        return siemResponse.error({ statusCode: 404 });
       }
 
       let queryObject;
