@@ -116,3 +116,8 @@ export const getTooltipContent = ({
   }
   return (isOnlyDetectionAlerts ? [signalIndexName] : selectedPatterns).join(', ');
 };
+
+export const getPatternListWithoutSignals = (
+  patternList: string[],
+  signalIndexName: string | null
+): string[] => patternList.filter((p) => p !== signalIndexName);

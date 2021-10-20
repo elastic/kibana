@@ -9,6 +9,8 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { sourcererModel } from '../../store/sourcerer';
+import { getPatternListWithoutSignals } from './helpers';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 interface UsePickIndexPatternsProps {
   alertsOptions: Array<EuiComboBoxOptionOption<string>>;
@@ -46,15 +48,29 @@ export const usePickIndexPatterns = ({
     }
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
     return theDataView != null
-      ? {
-          patternList: theDataView.title
-            .split(',')
-            // remove duplicates patterns from selector
-            .filter((pattern, i, self) => self.indexOf(pattern) === i),
-          selectablePatterns: theDataView.patternList,
-        }
+      ? scopeId === SourcererScopeName.default
+        ? {
+            patternList: getPatternListWithoutSignals(
+              theDataView.title
+                .split(',')
+                // remove duplicates patterns from selector
+                .filter((pattern, i, self) => self.indexOf(pattern) === i),
+              signalIndexName
+            ),
+            selectablePatterns: getPatternListWithoutSignals(
+              theDataView.patternList,
+              signalIndexName
+            ),
+          }
+        : {
+            patternList: theDataView.title
+              .split(',')
+              // remove duplicates patterns from selector
+              .filter((pattern, i, self) => self.indexOf(pattern) === i),
+            selectablePatterns: theDataView.patternList,
+          }
       : { patternList: [], selectablePatterns: [] };
-  }, [isOnlyDetectionAlerts, kibanaDataViews, signalIndexName, dataViewId]);
+  }, [dataViewId, isOnlyDetectionAlerts, kibanaDataViews, scopeId, signalIndexName]);
 
   const selectableOptions = useMemo(
     () =>
