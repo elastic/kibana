@@ -21,7 +21,7 @@ import { createLoadedResourceState, isLoadedResourceState } from '../../../../..
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 
 jest.mock('../../../../trusted_apps/service');
-jest.mock('../../../../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 let mockedContext: AppContextTestRender;
 let waitForAction: MiddlewareActionSpyHelper['waitForAction'];

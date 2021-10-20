@@ -521,7 +521,7 @@ export class GisPageObject extends FtrService {
   }
 
   async selectEMSBoundariesSource() {
-    this.log.debug(`Select EMS boundaries source`);
+    this.log.debug(`Select Elastic Maps Service boundaries source`);
     await this.testSubjects.click('emsBoundaries');
   }
 

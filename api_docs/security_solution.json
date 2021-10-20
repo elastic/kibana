@@ -772,17 +772,17 @@
     "interfaces": [
       {
         "parentPluginId": "securitySolution",
-        "id": "def-server.AppRequestContext",
+        "id": "def-server.SecuritySolutionApiRequestHandlerContext",
         "type": "Interface",
         "tags": [],
-        "label": "AppRequestContext",
+        "label": "SecuritySolutionApiRequestHandlerContext",
         "description": [],
         "path": "x-pack/plugins/security_solution/server/types.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-server.AppRequestContext.getAppClient",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getAppClient",
             "type": "Function",
             "tags": [],
             "label": "getAppClient",
@@ -804,7 +804,7 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-server.AppRequestContext.getSpaceId",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getSpaceId",
             "type": "Function",
             "tags": [],
             "label": "getSpaceId",
@@ -819,7 +819,7 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-server.AppRequestContext.getExecutionLogClient",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getExecutionLogClient",
             "type": "Function",
             "tags": [],
             "label": "getExecutionLogClient",
