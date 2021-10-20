@@ -9,11 +9,11 @@ import { KibanaRequest } from 'src/core/server';
 
 export function cancelEsRequestOnAbort<T extends any>(
   promise: T,
-  request: KibanaRequest
+  request: KibanaRequest,
+  controller: AbortController
 ) {
   const subscription = request.events.aborted$.subscribe(() => {
-    // @ts-expect-error fix abort
-    promise.abort();
+    controller.abort();
   });
 
   // using .catch() here means unsubscribe will be called

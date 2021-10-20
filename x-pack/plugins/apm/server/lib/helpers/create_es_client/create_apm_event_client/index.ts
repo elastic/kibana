@@ -110,9 +110,14 @@ export function createApmEventClient({
 
       return callAsyncWithDebug({
         cb: () => {
-          const searchPromise = withApmSpan(operationName, () =>
-            cancelEsRequestOnAbort(esClient.search(searchParams), request)
-          );
+          const searchPromise = withApmSpan(operationName, () => {
+            const controller = new AbortController();
+            return cancelEsRequestOnAbort(
+              esClient.search(searchParams, { signal: controller.signal }),
+              request,
+              controller
+            );
+          });
 
           return unwrapEsResponse(searchPromise);
         },
@@ -143,15 +148,20 @@ export function createApmEventClient({
       return callAsyncWithDebug({
         cb: () => {
           const { apm, ...rest } = params;
-          const termsEnumPromise = withApmSpan(operationName, () =>
-            cancelEsRequestOnAbort(
-              esClient.termsEnum({
-                index: Array.isArray(index) ? index.join(',') : index,
-                ...rest,
-              }),
-              request
-            )
-          );
+          const termsEnumPromise = withApmSpan(operationName, () => {
+            const controller = new AbortController();
+            return cancelEsRequestOnAbort(
+              esClient.termsEnum(
+                {
+                  index: Array.isArray(index) ? index.join(',') : index,
+                  ...rest,
+                },
+                { signal: controller.signal }
+              ),
+              request,
+              controller
+            );
+          });
 
           return unwrapEsResponse(termsEnumPromise);
         },
