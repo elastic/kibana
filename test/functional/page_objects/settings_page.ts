@@ -558,6 +558,20 @@ export class SettingsPageObject extends FtrService {
     }
   }
 
+  async addFieldFilter(name: string) {
+    await this.testSubjects.click('tab-sourceFilters');
+    await this.find.setValue('.euiFieldText', name);
+    await this.find.clickByButtonText('Add');
+    const table = await this.find.byClassName('euiTable');
+    await this.retry.waitFor('field filter to be added', async () => {
+      const tableCells = await table.findAllByCssSelector('td');
+      const fieldNames = await mapAsync(tableCells, async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      });
+      return fieldNames.includes(name);
+    });
+  }
+
   public async confirmSave() {
     await this.testSubjects.setValue('saveModalConfirmText', 'change');
     await this.testSubjects.click('confirmModalConfirmButton');
