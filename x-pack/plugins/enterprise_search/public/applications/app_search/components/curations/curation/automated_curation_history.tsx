@@ -24,6 +24,7 @@ export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName })
     'event.dataset: search-relevance-suggestions',
     `appsearch.search_relevance_suggestions.engine: ${engineName}`,
     'event.action: curation_suggestion',
+    'appsearch.search_relevance_suggestions.suggestion.new_status: automated',
   ];
 
   return (
