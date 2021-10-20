@@ -51,6 +51,15 @@ export function getFieldTypeName(type: string) {
       return i18n.translate('discover.fieldNameIcons.stringFieldAriaLabel', {
         defaultMessage: 'String field',
       });
+    case 'text':
+      return i18n.translate('discover.fieldNameIcons.textFieldAriaLabel', {
+        defaultMessage: 'Text field',
+      });
+    case 'keyword':
+      return i18n.translate('discover.fieldNameIcons.keywordFieldAriaLabel', {
+        defaultMessage: 'Keyword field',
+      });
+
     case 'nested':
       return i18n.translate('discover.fieldNameIcons.nestedFieldAriaLabel', {
         defaultMessage: 'Nested field',

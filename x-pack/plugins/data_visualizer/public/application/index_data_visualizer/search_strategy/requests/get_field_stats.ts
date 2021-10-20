@@ -39,7 +39,7 @@ export const getFieldStats = (
     case JOB_FIELD_TYPES.NUMBER:
       return fetchNumericFieldStats(dataPlugin, params, field, options);
     case JOB_FIELD_TYPES.KEYWORD:
-      // case JOB_FIELD_TYPES.IP:
+    case JOB_FIELD_TYPES.IP:
       return fetchStringFieldStats(dataPlugin, params, field, options);
     case JOB_FIELD_TYPES.DATE:
       return fetchDateFieldStats(dataPlugin, params, field, options);
@@ -47,8 +47,6 @@ export const getFieldStats = (
       return fetchBooleanFieldStats(dataPlugin, params, field, options);
     case JOB_FIELD_TYPES.TEXT:
       return fetchFieldExamples(dataPlugin, params, field, options);
-    case JOB_FIELD_TYPES.IP:
-      return fetchStringFieldStats(dataPlugin, params, field, options);
     default:
       // Use an exists filter on the the field name to get
       // examples of the field, so cannot batch up.
