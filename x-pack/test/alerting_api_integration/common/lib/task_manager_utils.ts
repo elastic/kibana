@@ -36,7 +36,7 @@ export class TaskManagerUtils {
                 {
                   range: {
                     'task.scheduledAt': {
-                      gte: taskRunAtFilter.toString(),
+                      gte: taskRunAtFilter.getTime().toString(),
                     },
                   },
                 },
@@ -69,7 +69,7 @@ export class TaskManagerUtils {
                 {
                   range: {
                     'task.scheduledAt': {
-                      gte: taskRunAtFilter.toString(),
+                      gte: taskRunAtFilter.getTime().toString(),
                     },
                   },
                 },
@@ -109,7 +109,7 @@ export class TaskManagerUtils {
                 {
                   range: {
                     updated_at: {
-                      gte: createdAtFilter.toString(),
+                      gte: taskRunAtFilter.getTime().toString(),
                     },
                   },
                 },
