@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { pluck } from 'rxjs/operators';
 import {
   EuiCodeBlock,
@@ -22,12 +22,9 @@ import {
   EuiTitle,
   EuiButton,
 } from '@elastic/eui';
-import {
-  ExpressionsStart,
-  ExpressionsInspectorAdapter,
-} from '../../../src/plugins/expressions/public';
+import { ExpressionsStart } from '../../../src/plugins/expressions/public';
 import { ExpressionEditor } from './editor/expression_editor';
-import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
+import { Adapters, Start as InspectorStart } from '../../../src/plugins/inspector/public';
 
 interface Props {
   expressions: ExpressionsStart;
@@ -37,25 +34,24 @@ interface Props {
 export function RunExpressionsExample({ expressions, inspector }: Props) {
   const [expression, updateExpression] = useState('markdownVis "## expressions explorer"');
   const [result, updateResult] = useState<unknown>({});
+  const [inspectorAdapters, updateInspectorAdapters] = useState<Adapters>({});
 
   const expressionChanged = (value: string) => {
     updateExpression(value);
   };
 
-  const inspectorAdapters = useMemo(
-    () => ({
-      expression: new ExpressionsInspectorAdapter(),
-    }),
-    []
-  );
-
   useEffect(() => {
     const execution = expressions.execute(expression, null, {
       debug: true,
-      inspectorAdapters,
     });
-    const subscription = execution.getData().pipe(pluck('result')).subscribe(updateResult);
-
+    const subscription = execution
+      .getData()
+      .pipe(pluck('result'))
+      .subscribe((data) => {
+        updateResult(data);
+        updateInspectorAdapters(execution.inspect());
+      });
+    execution.inspect();
     return () => subscription.unsubscribe();
   }, [expression, expressions, inspectorAdapters]);
 

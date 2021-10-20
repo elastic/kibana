@@ -6,24 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../types';
 import { Datatable } from '../../expression_types';
-
-export interface MovingAverageArgs {
-  by?: string[];
-  inputColumnId: string;
-  outputColumnId: string;
-  outputColumnName?: string;
-  window: number;
-}
-
-export type ExpressionFunctionMovingAverage = ExpressionFunctionDefinition<
-  'moving_average',
-  Datatable,
-  MovingAverageArgs,
-  Promise<Datatable>
->;
+import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
+import { MovingAverageArgs } from './moving_average';
 
 /**
  * Calculates the moving average of a specified column in the data table.
@@ -50,57 +35,40 @@ export type ExpressionFunctionMovingAverage = ExpressionFunctionDefinition<
  * * To determine separate series defined by the `by` columns, the values of these columns will be cast to strings
  *   before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.
  */
-export const movingAverage: ExpressionFunctionMovingAverage = {
-  name: 'moving_average',
-  type: 'datatable',
+export const movingAverageFn = (
+  input: Datatable,
+  { by, inputColumnId, outputColumnId, outputColumnName, window }: MovingAverageArgs
+): Datatable => {
+  const resultColumns = buildResultColumns(input, outputColumnId, inputColumnId, outputColumnName);
 
-  inputTypes: ['datatable'],
+  if (!resultColumns) {
+    return input;
+  }
 
-  help: i18n.translate('expressions.functions.movingAverage.help', {
-    defaultMessage: 'Calculates the moving average of a column in a data table',
-  }),
+  const lastNValuesByBucket: Partial<Record<string, number[]>> = {};
+  return {
+    ...input,
+    columns: resultColumns,
+    rows: input.rows.map((row) => {
+      const newRow = { ...row };
+      const bucketIdentifier = getBucketIdentifier(row, by);
+      const lastNValues = lastNValuesByBucket[bucketIdentifier];
+      const currentValue = newRow[inputColumnId];
+      if (lastNValues != null && currentValue != null) {
+        const sum = lastNValues.reduce((acc, current) => acc + current, 0);
+        newRow[outputColumnId] = sum / lastNValues.length;
+      } else {
+        newRow[outputColumnId] = undefined;
+      }
 
-  args: {
-    by: {
-      help: i18n.translate('expressions.functions.movingAverage.args.byHelpText', {
-        defaultMessage: 'Column to split the moving average calculation by',
-      }),
-      multi: true,
-      types: ['string'],
-      required: false,
-    },
-    inputColumnId: {
-      help: i18n.translate('expressions.functions.movingAverage.args.inputColumnIdHelpText', {
-        defaultMessage: 'Column to calculate the moving average of',
-      }),
-      types: ['string'],
-      required: true,
-    },
-    outputColumnId: {
-      help: i18n.translate('expressions.functions.movingAverage.args.outputColumnIdHelpText', {
-        defaultMessage: 'Column to store the resulting moving average in',
-      }),
-      types: ['string'],
-      required: true,
-    },
-    outputColumnName: {
-      help: i18n.translate('expressions.functions.movingAverage.args.outputColumnNameHelpText', {
-        defaultMessage: 'Name of the column to store the resulting moving average in',
-      }),
-      types: ['string'],
-      required: false,
-    },
-    window: {
-      help: i18n.translate('expressions.functions.movingAverage.args.windowHelpText', {
-        defaultMessage: 'The size of window to "slide" across the histogram.',
-      }),
-      types: ['number'],
-      default: 5,
-    },
-  },
+      if (currentValue != null) {
+        lastNValuesByBucket[bucketIdentifier] = [
+          ...(lastNValues || []),
+          Number(currentValue),
+        ].slice(-window);
+      }
 
-  async fn(input, args) {
-    const { movingAverageFn } = await import('./moving_average_fn');
-    return movingAverageFn(input, args);
-  },
+      return newRow;
+    }),
+  };
 };
