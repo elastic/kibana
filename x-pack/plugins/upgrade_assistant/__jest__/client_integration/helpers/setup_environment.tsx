@@ -43,7 +43,7 @@ export const WithAppDependencies =
     apiService.setup(mockHttpClient as unknown as HttpSetup);
     breadcrumbService.setup(() => '');
 
-    const appContextMock = getAppContextMock() as unknown as AppDependencies;
+    const appContextMock = getAppContextMock(kibanaVersion) as unknown as AppDependencies;
 
     return (
       <AuthorizationContext.Provider
