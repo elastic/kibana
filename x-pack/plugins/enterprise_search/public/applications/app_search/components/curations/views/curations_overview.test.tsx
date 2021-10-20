@@ -15,6 +15,8 @@ import { shallow } from 'enzyme';
 
 import { CurationsTable, EmptyState } from '../components';
 
+import { SuggestionsTable } from '../components/suggestions_table';
+
 import { CurationsOverview } from './curations_overview';
 
 describe('CurationsOverview', () => {
@@ -43,5 +45,19 @@ describe('CurationsOverview', () => {
     const wrapper = shallow(<CurationsOverview />);
 
     expect(wrapper.find(CurationsTable)).toHaveLength(1);
+  });
+
+  it('renders a suggestions table when the user has a platinum license', () => {
+    setMockValues({ curations: [], hasPlatinumLicense: true });
+    const wrapper = shallow(<CurationsOverview />);
+
+    expect(wrapper.find(SuggestionsTable).exists()).toBe(true);
+  });
+
+  it('doesn\t render a suggestions table when the user has no platinum license', () => {
+    setMockValues({ curations: [], hasPlatinumLicense: false });
+    const wrapper = shallow(<CurationsOverview />);
+
+    expect(wrapper.find(SuggestionsTable).exists()).toBe(false);
   });
 });
