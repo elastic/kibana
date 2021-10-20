@@ -18,7 +18,7 @@ const ACTIVE_ALERTS_CELL_COUNT = 48;
 const RECOVERED_ALERTS_CELL_COUNT = 24;
 const TOTAL_ALERTS_CELL_COUNT = 72;
 
-export default ({ getPageObjects, getService }: FtrProviderContext) => {
+export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
   describe('Observability alerts', function () {
