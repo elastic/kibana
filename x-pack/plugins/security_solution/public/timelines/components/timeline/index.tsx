@@ -28,6 +28,7 @@ import { TabsContent } from './tabs_content';
 import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
+import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -120,6 +121,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
   const timelineContext = useMemo(() => ({ timelineId }), [timelineId]);
+  const resolveConflictComponent = useResolveConflict();
 
   return (
     <TimelineContext.Provider value={timelineContext}>
@@ -133,7 +135,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         {timelineType === TimelineType.template && (
           <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
         )}
-
+        {resolveConflictComponent}
         <HideShowContainer
           $isVisible={!timelineFullScreen}
           data-test-subj="timeline-hide-show-container"

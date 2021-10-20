@@ -6,4 +6,4 @@
  */
 
 export type { SecurityLicense } from './licensing';
-export type { AuthenticatedUser } from './model';
+export type { AuthenticatedUser, PrivilegeDeprecationsService } from './model';
