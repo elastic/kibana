@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
+  const retryService = getService('retry');
 
   return {
     /**
@@ -120,6 +122,20 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async findPackagePolicyEndpointCustomConfiguration(onEditPage: boolean = false) {
       return await testSubjects.find(`endpointPackagePolicy_${onEditPage ? 'edit' : 'create'}`);
+    },
+
+    /**
+     * Waits for a Checkbox/Radiobutton to have its `isSelected()` value match the provided expected value
+     * @param selector
+     * @param expectedSelectedValue
+     */
+    async waitForCheckboxSelectionChange(
+      selector: string,
+      expectedSelectedValue: boolean
+    ): Promise<void> {
+      await retryService.try(async () => {
+        expect(await testSubjects.isSelected(selector)).to.be(expectedSelectedValue);
+      });
     },
   };
 }

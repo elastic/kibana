@@ -359,6 +359,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
+        await pageObjects.common.closeToast();
         await pageObjects.endpoint.navigateToEndpointList();
         await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
 
@@ -522,10 +523,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         expect(await winDnsEventingCheckbox.isSelected()).to.be(true);
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-        expect(await winDnsEventingCheckbox.isSelected()).to.be(false);
+        await pageObjects.policy.waitForCheckboxSelectionChange('policyWindowsEvent_dns', false);
       });
 
       it('should preserve updates done from the Fleet form', async () => {
+        // Fleet has its  own form inputs, like description. When those are updated, the changes
+        // are also dispatched to the embedded endpoint Policy form. Update to the Endpoint Policy
+        // form after that should preserve the changes done on the Fleet form
+
         await pageObjects.ingestManagerCreatePackagePolicy.setPackagePolicyDescription(
           'protect everything'
         );
@@ -536,9 +541,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
 
-        expect(
-          await pageObjects.ingestManagerCreatePackagePolicy.getPackagePolicyDescriptionValue()
-        ).to.be('protect everything');
+        await retryService.try(async () => {
+          expect(
+            await pageObjects.ingestManagerCreatePackagePolicy.getPackagePolicyDescriptionValue()
+          ).to.be('protect everything');
+        });
       });
 
       it('should include updated endpoint data when saved', async () => {
@@ -558,9 +565,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.packagePolicy.id
         );
 
-        await retryService.waitFor('Policy Windows DNS Event to updated', async () => {
-          return (await testSubjects.isSelected('policyWindowsEvent_dns')) === updatedCheckboxValue;
-        });
+        await pageObjects.policy.waitForCheckboxSelectionChange(
+          'policyWindowsEvent_dns',
+          updatedCheckboxValue
+        );
       });
 
       it('should show trusted apps card and link should go back to policy', async () => {
