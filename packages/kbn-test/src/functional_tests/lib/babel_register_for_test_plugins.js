@@ -14,14 +14,16 @@ const BASE_REPO_ROOT = Path.resolve(
   Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'package.json')),
   '..'
 );
-const REPO_ROOT = process.env.JENKINS_HOME
-  ? Path.join(
-      Path.dirname(BASE_REPO_ROOT),
-      'parallel',
-      process.env.CI_PARALLEL_PROCESS_NUMBER,
-      Path.basename(BASE_REPO_ROOT)
-    )
-  : BASE_REPO_ROOT;
+// const REPO_ROOT = process.env.JENKINS_HOME
+//   ? Path.join(
+//       Path.dirname(BASE_REPO_ROOT),
+//       'parallel',
+//       process.env.CI_PARALLEL_PROCESS_NUMBER,
+//       Path.basename(BASE_REPO_ROOT)
+//     )
+//   : BASE_REPO_ROOT;
+
+const REPO_ROOT = BASE_REPO_ROOT;
 
 // // process.env.CI_PARALLEL_PROCESS_NUMBER
 // const KIBANA_ROOT = Path.resolve(__dirname, '../../../../../');
