@@ -887,11 +887,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async toggleColumnVisibility(dimension: string) {
-      await PageObjects.common.sleep(500);
-      screenshot.take('toggleColumnVisibility1:before');
+    async toggleColumnVisibility(dimension: string, no = 1) {
       await this.openDimensionEditor(dimension);
-      screenshot.take('toggleColumnVisibility2:opensDimensionEditor');
       const id = 'lns-table-column-hidden';
       await PageObjects.common.sleep(500);
       const isChecked = await testSubjects.isEuiSwitchChecked(id);
