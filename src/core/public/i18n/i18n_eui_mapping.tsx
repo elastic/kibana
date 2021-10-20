@@ -64,7 +64,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       }),
     'euiBasicTable.tablePagination': ({ tableCaption }: EuiValues) =>
       i18n.translate('core.euiBasicTable.tablePagination', {
-        defaultMessage: 'Pagination for preceding table: {tableCaption}',
+        defaultMessage: 'Pagination for table: {tableCaption}',
         values: { tableCaption },
         description: 'Screen reader text to describe the pagination controls',
       }),
@@ -860,6 +860,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiRelativeTab.numberInputLabel': i18n.translate('core.euiRelativeTab.numberInputLabel', {
       defaultMessage: 'Time span amount',
+    }),
+    'euiRelativeTab.dateInputError': i18n.translate('core.euiRelativeTab.dateInputError', {
+      defaultMessage: 'Must be a valid range',
     }),
     'euiResizableButton.horizontalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.horizontalResizerAriaLabel',
