@@ -26,12 +26,7 @@ import { CurationsOverview } from './curations_overview';
 import { CurationsSettings, CurationsSettingsLogic } from './curations_settings';
 
 export const Curations: React.FC = () => {
-  const {
-    dataLoading: curationsDataLoading,
-    curations,
-    meta,
-    selectedPageTab,
-  } = useValues(CurationsLogic);
+  const { dataLoading: curationsDataLoading, meta, selectedPageTab } = useValues(CurationsLogic);
   const { loadCurations, onSelectPageTab } = useActions(CurationsLogic);
 
   const { dataLoading: curationsSettingsDataLoading } = useValues(CurationsSettingsLogic);
@@ -89,7 +84,7 @@ export const Curations: React.FC = () => {
         ],
         tabs: pageTabs,
       }}
-      isLoading={curationsSettingsDataLoading || (curationsDataLoading && !curations.length)}
+      isLoading={curationsSettingsDataLoading || curationsDataLoading}
     >
       {selectedPageTab === 'overview' && <CurationsOverview />}
       {selectedPageTab === 'history' && <CurationsHistory />}

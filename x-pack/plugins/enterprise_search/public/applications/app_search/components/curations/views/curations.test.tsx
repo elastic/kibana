@@ -109,14 +109,14 @@ describe('Curations', () => {
 
   describe('loading state', () => {
     it('renders a full-page loading state on initial page load', () => {
-      setMockValues({ ...values, dataLoading: true, curations: [] });
+      setMockValues({ ...values, dataLoading: true });
       const wrapper = shallow(<Curations />);
 
       expect(wrapper.prop('isLoading')).toEqual(true);
     });
 
-    it('does not re-render a full-page loading state after initial page load (uses component-level loading state instead)', () => {
-      setMockValues({ ...values, dataLoading: true, curations: [{}] });
+    it('does not re-render a full-page loading state when data is loaded', () => {
+      setMockValues({ ...values, dataLoading: false });
       const wrapper = shallow(<Curations />);
 
       expect(wrapper.prop('isLoading')).toEqual(false);
