@@ -23,7 +23,15 @@ const BASE_REPO_ROOT = Path.resolve(
 //     )
 //   : BASE_REPO_ROOT;
 
-const REPO_ROOT = BASE_REPO_ROOT;
+const REPO_ROOT =
+  process.env.JENKINS_HOME && !BASE_REPO_ROOT.includes('parallel')
+    ? Path.join(
+        Path.dirname(BASE_REPO_ROOT),
+        'parallel',
+        process.env.CI_PARALLEL_PROCESS_NUMBER,
+        Path.basename(BASE_REPO_ROOT)
+      )
+    : BASE_REPO_ROOT;
 
 // // process.env.CI_PARALLEL_PROCESS_NUMBER
 // const KIBANA_ROOT = Path.resolve(__dirname, '../../../../../');
