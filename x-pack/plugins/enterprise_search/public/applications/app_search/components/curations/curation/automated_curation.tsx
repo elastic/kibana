@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiButton, EuiBadge, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EngineLogic } from '../../engine';
@@ -38,7 +38,7 @@ export const AutomatedCuration: React.FC = () => {
   const { curationId } = useParams<{ curationId: string }>();
   const logic = CurationLogic({ curationId });
   const { convertToManual } = useActions(logic);
-  const { activeQuery, dataLoading, queries, curation } = useValues(logic);
+  const { activeQuery, queries, curation } = useValues(logic);
   const { engineName } = useValues(EngineLogic);
   const [selectedPageTab, setSelectedPageTab] = useState(PROMOTED);
 
@@ -73,7 +73,7 @@ export const AutomatedCuration: React.FC = () => {
       pageHeader={{
         pageTitle: (
           <>
-            {dataLoading ? <EuiLoadingSpinner size="l" /> : activeQuery}{' '}
+            {activeQuery}{' '}
             <EuiBadge iconType={AutomatedIcon} color="accent">
               {AUTOMATED_LABEL}
             </EuiBadge>
@@ -100,7 +100,6 @@ export const AutomatedCuration: React.FC = () => {
         ],
         tabs: pageTabs,
       }}
-      isLoading={dataLoading}
     >
       {selectedPageTab === PROMOTED && <PromotedDocuments />}
       {selectedPageTab === PROMOTED && <OrganicDocuments />}

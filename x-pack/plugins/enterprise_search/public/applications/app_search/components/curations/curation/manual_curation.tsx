@@ -27,9 +27,7 @@ import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 export const ManualCuration: React.FC = () => {
   const { curationId } = useParams() as { curationId: string };
   const { onSelectPageTab } = useActions(CurationLogic({ curationId }));
-  const { dataLoading, queries, selectedPageTab, curation } = useValues(
-    CurationLogic({ curationId })
-  );
+  const { queries, selectedPageTab, curation } = useValues(CurationLogic({ curationId }));
   const { isFlyoutOpen } = useValues(AddResultLogic);
 
   const pageTabs = [
@@ -64,7 +62,6 @@ export const ManualCuration: React.FC = () => {
         ],
         tabs: pageTabs,
       }}
-      isLoading={dataLoading}
     >
       <ActiveQuerySelect />
       {selectedPageTab === 'promoted' && <SuggestedDocumentsCallout />}
