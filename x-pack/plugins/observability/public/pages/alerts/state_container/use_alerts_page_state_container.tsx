@@ -71,6 +71,7 @@ function setupUrlStateSync(
   stateContainer: AlertsPageStateContainer,
   stateStorage: IKbnUrlStateStorage
 ) {
+  // This handles filling the state when an incomplete URL set is provided
   const setWithDefaults = (changedState: Partial<AlertsPageContainerState> | null) => {
     stateContainer.set({ ...defaultState, ...changedState });
   };
@@ -109,6 +110,8 @@ function syncUrlStateWithInitialContainerState(
 
     stateContainer.set(newState);
   } else {
+    // Reset the state container when no URL state or timefilter range is set to avoid accidentally
+    // re-using state set on a previous visit to the page in the same session
     stateContainer.set(defaultState);
   }
 
