@@ -15,16 +15,18 @@ import { statusCheckAlertFactory } from './lib/alerts/status_check';
 import { tlsAlertFactory } from './lib/alerts/tls';
 import { tlsLegacyAlertFactory } from './lib/alerts/tls_legacy';
 import { durationAnomalyAlertFactory } from './lib/alerts/duration_anomaly';
+import { UptimeConfig } from './config';
 
 export const initUptimeServer = (
   server: UptimeCoreSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePlugins,
   ruleDataClient: IRuleDataClient,
-  logger: Logger
+  logger: Logger,
+  config: UptimeConfig
 ) => {
   restApiRoutes.forEach((route) =>
-    libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route)))
+    libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route), config))
   );
 
   const {

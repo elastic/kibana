@@ -55,12 +55,15 @@ export const umDynamicSettings: SavedObjectsType = {
 };
 
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {
-  getUptimeDynamicSettings: async (client): Promise<DynamicSettings> => {
+  getUptimeDynamicSettings: async (client, config): Promise<DynamicSettings> => {
     try {
       const obj = await client.get<DynamicSettings>(umDynamicSettings.name, settingsObjectId);
       return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULTS;
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+        if (config?.index) {
+          return { ...DYNAMIC_SETTINGS_DEFAULTS, heartbeatIndices: config.index };
+        }
         return DYNAMIC_SETTINGS_DEFAULTS;
       }
       throw getErr;
