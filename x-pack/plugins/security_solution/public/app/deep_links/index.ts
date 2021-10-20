@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 
 import { LicenseType } from '../../../../licensing/common/types';
 import { SecurityPageName } from '../types';
@@ -363,7 +364,7 @@ export function getDeepLinks(
         if (deepLink.id === SecurityPageName.ueba) {
           return enableExperimental.uebaEnabled;
         }
-        if (deepLink.id === SecurityPageName.investigate) {
+        if (!isEmpty(deepLink.deepLinks)) {
           return true;
         }
         return capabilities == null || capabilities[SERVER_APP_ID].show === true;
