@@ -83,7 +83,7 @@ const createMockStore = () => {
 const mockAppUrls: Record<string, string> = {
   uptime: '/app/uptime',
   observability: '/app/observability',
-  '/home#/tutorial/uptimeMonitors': '/home#/tutorial/uptimeMonitors',
+  '/integrations/detail/synthetics/overview': '/integrations/detail/synthetics/overview',
 };
 
 /* default mock core */

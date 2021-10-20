@@ -37,4 +37,15 @@ describe('config', () => {
       commentFieldKey: 'work_notes',
     });
   });
+
+  test('ITOM: the config are correct', async () => {
+    const snConfig = snExternalServiceConfig['.servicenow-itom'];
+    expect(snConfig).toEqual({
+      importSetTable: 'x_elas2_inc_int_elastic_incident',
+      appScope: 'x_elas2_inc_int',
+      table: 'em_event',
+      useImportAPI: true,
+      commentFieldKey: 'work_notes',
+    });
+  });
 });
