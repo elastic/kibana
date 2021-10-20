@@ -71,7 +71,7 @@ const TabComponent = (props: TabProps) => {
   ]);
   const { sourceId, createDerivedIndexPattern } = useSourceContext();
   const { nodeType, accountId, region, customMetrics } = useWaffleOptionsContext();
-  const { currentTime, options, node } = props;
+  const { currentTime, node } = props;
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern('metrics'),
     [createDerivedIndexPattern]

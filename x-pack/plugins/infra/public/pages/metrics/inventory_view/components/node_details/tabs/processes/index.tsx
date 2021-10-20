@@ -17,6 +17,7 @@ import {
   EuiIconTip,
   Query,
 } from '@elastic/eui';
+import { getFieldByType } from '../../../../../../../../common/inventory_models';
 import {
   useProcessList,
   SortBy,
@@ -28,7 +29,7 @@ import { SummaryTable } from './summary_table';
 import { ProcessesTable } from './processes_table';
 import { parseSearchString } from './parse_search_string';
 
-const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
+const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
   const [searchBarState, setSearchBarState] = useState<Query>(Query.MATCH_ALL);
   const [searchFilter, setSearchFilter] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortBy>({
@@ -37,12 +38,9 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
   });
 
   const hostTerm = useMemo(() => {
-    const field =
-      options.fields && Reflect.has(options.fields, nodeType)
-        ? Reflect.get(options.fields, nodeType)
-        : nodeType;
+    const field = getFieldByType(nodeType) ?? nodeType;
     return { [field]: node.name };
-  }, [options, node, nodeType]);
+  }, [node, nodeType]);
 
   const {
     loading,

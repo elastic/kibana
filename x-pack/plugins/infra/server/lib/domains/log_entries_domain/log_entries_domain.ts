@@ -272,7 +272,6 @@ export class InfraLogEntriesDomain {
 
   public async getLogEntryDatasets(
     requestContext: InfraPluginRequestHandlerContext,
-    timestampField: string,
     indexName: string,
     startTime: number,
     endTime: number,
@@ -287,7 +286,6 @@ export class InfraLogEntriesDomain {
         'search',
         createLogEntryDatasetsQuery(
           indexName,
-          timestampField,
           startTime,
           endTime,
           runtimeMappings,

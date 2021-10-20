@@ -8,11 +8,7 @@
 import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-export const hostK8sPodCap: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern,
-  interval
-): TSVBMetricModel => ({
+export const hostK8sPodCap: TSVBMetricModelCreator = (indexPattern, interval): TSVBMetricModel => ({
   id: 'hostK8sPodCap',
   requires: ['kubernetes.node'],
   map_field_to: 'kubernetes.node.name',

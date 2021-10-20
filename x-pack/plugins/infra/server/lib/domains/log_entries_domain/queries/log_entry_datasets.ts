@@ -8,11 +8,11 @@
 import * as rt from 'io-ts';
 import { estypes } from '@elastic/elasticsearch';
 
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 import { commonSearchSuccessResponseFieldsRT } from '../../../../utils/elasticsearch_runtime_types';
 
 export const createLogEntryDatasetsQuery = (
   indexName: string,
-  timestampField: string,
   startTime: number,
   endTime: number,
   runtimeMappings: estypes.MappingRuntimeFields,
@@ -26,7 +26,7 @@ export const createLogEntryDatasetsQuery = (
         filter: [
           {
             range: {
-              [timestampField]: {
+              [TIMESTAMP_FIELD]: {
                 gte: startTime,
                 lte: endTime,
               },

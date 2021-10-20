@@ -102,7 +102,6 @@ export type ProcessListAPIResponse = rt.TypeOf<typeof ProcessListAPIResponseRT>;
 
 export const ProcessListAPIChartRequestRT = rt.type({
   hostTerm: rt.record(rt.string, rt.string),
-  timefield: rt.string,
   indexPattern: rt.string,
   to: rt.number,
   command: rt.string,

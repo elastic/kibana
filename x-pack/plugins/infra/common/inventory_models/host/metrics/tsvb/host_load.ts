@@ -8,11 +8,7 @@
 import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-export const hostLoad: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern,
-  interval
-): TSVBMetricModel => ({
+export const hostLoad: TSVBMetricModelCreator = (indexPattern, interval): TSVBMetricModel => ({
   id: 'hostLoad',
   requires: ['system.cpu'],
   index_pattern: indexPattern,

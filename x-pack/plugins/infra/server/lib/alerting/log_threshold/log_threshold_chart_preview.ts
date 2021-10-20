@@ -13,6 +13,7 @@ import {
   Series,
   Point,
 } from '../../../../common/http_api/log_alerts';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import {
   getGroupedESQuery,
   getUngroupedESQuery,
@@ -37,7 +38,7 @@ export async function getChartPreviewData(
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number
 ) {
-  const { indices, timestampField, runtimeMappings } = resolvedLogSourceConfiguration;
+  const { indices, runtimeMappings } = resolvedLogSourceConfiguration;
   const { groupBy, timeSize, timeUnit } = alertParams;
   const isGrouped = groupBy && groupBy.length > 0 ? true : false;
 
@@ -47,11 +48,11 @@ export async function getChartPreviewData(
     timeSize: timeSize * buckets,
   };
 
-  const { rangeFilter } = buildFiltersFromCriteria(expandedAlertParams, timestampField);
+  const { rangeFilter } = buildFiltersFromCriteria(expandedAlertParams);
 
   const query = isGrouped
-    ? getGroupedESQuery(expandedAlertParams, timestampField, indices, runtimeMappings)
-    : getUngroupedESQuery(expandedAlertParams, timestampField, indices, runtimeMappings);
+    ? getGroupedESQuery(expandedAlertParams, indices, runtimeMappings)
+    : getUngroupedESQuery(expandedAlertParams, indices, runtimeMappings);
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');
@@ -61,7 +62,6 @@ export async function getChartPreviewData(
     query,
     rangeFilter,
     `${timeSize}${timeUnit}`,
-    timestampField,
     isGrouped
   );
 
@@ -79,19 +79,18 @@ const addHistogramAggregationToQuery = (
   query: any,
   rangeFilter: any,
   interval: string,
-  timestampField: string,
   isGrouped: boolean
 ) => {
   const histogramAggregation = {
     histogramBuckets: {
       date_histogram: {
-        field: timestampField,
+        field: TIMESTAMP_FIELD,
         fixed_interval: interval,
         // Utilise extended bounds to make sure we get a full set of buckets even if there are empty buckets
         // at the start and / or end of the range.
         extended_bounds: {
-          min: rangeFilter.range[timestampField].gte,
-          max: rangeFilter.range[timestampField].lte,
+          min: rangeFilter.range[TIMESTAMP_FIELD].gte,
+          max: rangeFilter.range[TIMESTAMP_FIELD].lte,
         },
       },
     },

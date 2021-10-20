@@ -9,7 +9,6 @@ import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
 export const hostFilesystem: TSVBMetricModelCreator = (
-  timeField,
   indexPattern,
   interval
 ): TSVBMetricModel => ({

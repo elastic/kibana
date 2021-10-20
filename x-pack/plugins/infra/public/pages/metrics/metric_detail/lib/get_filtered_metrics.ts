@@ -20,7 +20,7 @@ export const getFilteredMetrics = (
     const metricModelCreator = metrics.tsvb[metric];
     // We just need to get a dummy version of the model so we can filter
     // using the `requires` attribute.
-    const metricModel = metricModelCreator('@timestamp', 'test', '>=1m');
+    const metricModel = metricModelCreator('test', '>=1m');
     return metricMetadata.some((m) => m && metricModel.requires.includes(m));
   });
 };
