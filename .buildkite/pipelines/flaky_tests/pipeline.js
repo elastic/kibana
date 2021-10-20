@@ -17,12 +17,6 @@ const inputs = [
     default: 0,
     required: true,
   },
-  {
-    key: 'ftsr-concurrency',
-    text: 'Max concurrency per step',
-    default: 20,
-    required: true,
-  },
 ];
 
 for (let i = 1; i <= OSS_CI_GROUPS; i++) {

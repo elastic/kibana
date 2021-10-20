@@ -9,8 +9,10 @@ const overrideCount = parseInt(
   execSync(`buildkite-agent meta-data get 'ftsr-override-count'`).toString().trim()
 );
 
-const concurrency =
-  parseInt(execSync(`buildkite-agent meta-data get 'ftsr-concurrency'`).toString().trim()) || 20;
+const concurrency = 25;
+const initialJobs = 3;
+
+let totalJobs = initialJobs;
 
 const testSuites = [];
 for (const key of keys) {
@@ -21,10 +23,22 @@ for (const key of keys) {
   const value =
     overrideCount || execSync(`buildkite-agent meta-data get '${key}'`).toString().trim();
 
+  const count = value === '' ? defaultCount : parseInt(value);
+  totalJobs += count;
+
   testSuites.push({
     key: key.replace('ftsr-suite/', ''),
-    count: value === '' ? defaultCount : parseInt(value),
+    count: count,
   });
+}
+
+if (totalJobs > 500) {
+  console.error(
+    `Buildkite builds can only contain 500 steps in total. Found ${totalJobs} in total. Make sure your test runs are less than ${
+      500 - initialJobs
+    }`
+  );
+  process.exit(1);
 }
 
 const steps = [];
@@ -46,7 +60,7 @@ steps.push({
 for (const testSuite of testSuites) {
   const TEST_SUITE = testSuite.key;
   const RUN_COUNT = testSuite.count;
-  const UUID = TEST_SUITE + process.env.UUID;
+  const UUID = process.env.UUID;
 
   const JOB_PARTS = TEST_SUITE.split('/');
   const IS_XPACK = JOB_PARTS[0] === 'xpack';
@@ -65,6 +79,7 @@ for (const testSuite of testSuites) {
       parallelism: RUN_COUNT,
       concurrency: concurrency,
       concurrency_group: UUID,
+      concurrency_method: 'eager',
     });
   } else {
     steps.push({
@@ -75,6 +90,7 @@ for (const testSuite of testSuites) {
       parallelism: RUN_COUNT,
       concurrency: concurrency,
       concurrency_group: UUID,
+      concurrency_method: 'eager',
     });
   }
 }
