@@ -6,6 +6,8 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { Logger } from 'src/core/server';
+
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
@@ -26,6 +28,7 @@ const BULK_ACTION_RULES_LIMIT = 10000;
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
+  logger: Logger,
   isRuleRegistryEnabled: boolean
 ) => {
   router.post(
@@ -44,6 +47,7 @@ export const performBulkActionRoute = (
 
       try {
         const rulesClient = context.alerting?.getRulesClient();
+        const exceptionsClient = context.lists?.getExceptionListClient();
         const savedObjectsClient = context.core.savedObjects.client;
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
 
@@ -133,11 +137,14 @@ export const performBulkActionRoute = (
           case BulkAction.export:
             const exported = await getExportByObjectIds(
               rulesClient,
+              exceptionsClient,
+              savedObjectsClient,
               rules.data.map(({ params }) => ({ rule_id: params.ruleId })),
+              logger,
               isRuleRegistryEnabled
             );
 
-            const responseBody = `${exported.rulesNdjson}${exported.exportDetails}`;
+            const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.exportDetails}`;
 
             return response.ok({
               headers: {

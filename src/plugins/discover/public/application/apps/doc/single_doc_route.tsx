@@ -7,6 +7,8 @@
  */
 import React, { useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverServices } from '../../../build_services';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { Doc } from './components/doc';
@@ -31,7 +33,7 @@ function useQuery() {
 
 export function SingleDocRoute(props: SingleDocRouteProps) {
   const { services } = props;
-  const { chrome, timefilter, indexPatterns } = services;
+  const { chrome, timefilter } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();
 
@@ -52,7 +54,29 @@ export function SingleDocRoute(props: SingleDocRouteProps) {
     timefilter.disableTimeRangeSelector();
   });
 
-  const indexPattern = useIndexPattern(services.indexPatterns, indexPatternId);
+  const { indexPattern, error } = useIndexPattern(services.indexPatterns, indexPatternId);
+
+  if (error) {
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        iconColor="danger"
+        title={
+          <FormattedMessage
+            id="discover.singleDocRoute.errorTitle"
+            defaultMessage="An error occured"
+          />
+        }
+        body={
+          <FormattedMessage
+            id="discover.singleDocRoute.errorMessage"
+            defaultMessage="No matching index pattern for id {indexPatternId}"
+            values={{ indexPatternId }}
+          />
+        }
+      />
+    );
+  }
 
   if (!indexPattern) {
     return <LoadingIndicator />;
@@ -60,12 +84,7 @@ export function SingleDocRoute(props: SingleDocRouteProps) {
 
   return (
     <div className="app-container">
-      <Doc
-        id={docId}
-        index={index}
-        indexPatternId={indexPatternId}
-        indexPatternService={indexPatterns}
-      />
+      <Doc id={docId} index={index} indexPattern={indexPattern} />
     </div>
   );
 }
