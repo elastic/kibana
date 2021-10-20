@@ -278,7 +278,7 @@ describe('schedule_throttle_notification_actions', () => {
     });
 
     expect(logger.error).toHaveBeenCalledWith(
-      'The notification throttle "from" and/or "to" range values could not be constructed as valid. Tried to construct the values of "from": now-invalid "to": 2021-08-24T19:19:22.094Z. This will cause a reset of the notification throttle. Expect either missing alert notifications or alert notifications happening earlier than expected.'
+      'The notification throttle "from" and/or "to" range values could not be constructed as valid. Tried to construct the values of "from": now-invalid "to": 2021-08-24T19:19:22.094Z. This will cause a reset of the notification throttle. Expect either missing alert notifications or alert notifications happening earlier than expected. Check your rule with ruleId: "rule-123" for data integrity issues'
     );
   });
 
