@@ -7,6 +7,7 @@
 
 import type { IScopedClusterClient } from 'kibana/server';
 import { sumBy } from 'lodash';
+import numeral from '@elastic/numeral';
 import type {
   NodeDeploymentStatsResponse,
   PipelineDefinition,
@@ -63,52 +64,63 @@ export function modelsProvider(
 
       const { body: deploymentStats } = await mlClient.getTrainedModelsDeploymentStats();
 
-      const adMemoryReport = await memoryOverviewService.getAnomalyDetectionMemoryOverview();
+      const {
+        body: { nodes: clusterNodes },
+      } = await client.asCurrentUser.nodes.info();
 
+      const mlNodes = Object.entries(clusterNodes).filter(([id, node]) =>
+        node.roles.includes('ml')
+      );
+
+      const adMemoryReport = await memoryOverviewService.getAnomalyDetectionMemoryOverview();
       const dfaMemoryReport = await memoryOverviewService.getDFAMemoryOverview();
 
-      const nodesR = deploymentStats.deployment_stats.reduce((acc, curr) => {
-        const { nodes, ...modelAttrs } = curr;
-        nodes.forEach((n) => {
-          Object.entries(n.node).forEach(([nodeId, o]) => {
-            if (acc.has(nodeId)) {
-              const d = acc.get(nodeId)!;
-              d.allocated_models.push(modelAttrs);
-            } else {
-              acc.set(nodeId, {
-                ...o,
-                id: nodeId,
-                allocated_models: [modelAttrs],
-                memory_overview: {
-                  machine_memory: {
-                    total: Number(o.attributes['ml.machine_memory']),
-                  },
-                  anomaly_detection: {
-                    total: sumBy(
-                      adMemoryReport.filter((ad) => ad.node_id === nodeId),
-                      'model_size'
-                    ),
-                  },
-                  dfa_training: {
-                    total: sumBy(
-                      dfaMemoryReport.filter((ad) => ad.node_id === nodeId),
-                      'model_size'
-                    ),
-                  },
-                  trained_models: {
-                    total: 3435973836,
-                  },
-                },
-              });
-            }
+      const nodeDeploymentStatsResponses: NodeDeploymentStatsResponse[] = mlNodes.map(
+        ([nodeId, node]) => {
+          const allocatedModels = deploymentStats.deployment_stats.filter((v) =>
+            v.nodes.some((n) => Object.keys(n.node)[0] === nodeId)
+          );
+
+          const modelsMemoryUsage = allocatedModels.map((v) => {
+            return {
+              model_id: v.model_id,
+              // @ts-ignore
+              model_size: numeral(v.model_size.toUpperCase()).value(),
+            };
           });
-        });
-        return acc;
-      }, new Map<string, NodeDeploymentStatsResponse>());
+
+          return {
+            ...node,
+            id: nodeId,
+            allocated_models: allocatedModels,
+            memory_overview: {
+              machine_memory: {
+                total: Number(node.attributes['ml.machine_memory']),
+              },
+              anomaly_detection: {
+                total: sumBy(
+                  adMemoryReport.filter((ad) => ad.node_id === nodeId),
+                  'model_size'
+                ),
+              },
+              dfa_training: {
+                total: sumBy(
+                  dfaMemoryReport.filter((dfa) => dfa.node_id === nodeId),
+                  'model_size'
+                ),
+              },
+              trained_models: {
+                total: sumBy(modelsMemoryUsage, 'model_size'),
+                by_model: modelsMemoryUsage,
+              },
+            },
+          };
+        }
+      );
 
       return {
-        count: nodesR.size,
-        nodes: Array.from(nodesR.values()),
+        count: nodeDeploymentStatsResponses.length,
+        nodes: nodeDeploymentStatsResponses,
       };
     },
   };

@@ -151,14 +151,8 @@ export interface TrainedModelDeploymentStatsResponse {
 export interface NodeDeploymentStatsResponse {
   id: string;
   name: string;
-  ephemeral_id: string;
   transport_address: string;
-  attributes: {
-    'ml.machine_memory': string;
-    'xpack.installed': string;
-    'ml.max_open_jobs': string;
-    'ml.max_jvm_size': string;
-  };
+  attributes: Record<string, string>;
   roles: string[];
   allocated_models: Array<{
     inference_threads: number;
@@ -190,6 +184,10 @@ export interface NodeDeploymentStatsResponse {
     /** Allocated trained models */
     trained_models: {
       total: number;
+      by_model: Array<{
+        model_id: string;
+        model_size: number;
+      }>;
     };
   };
 }
