@@ -84,7 +84,8 @@ export const fetchFieldExamples = (
           fieldName: field.fieldName,
           examples: [] as any[],
         } as FieldExamples;
-        if (body.hits.total.value > 0) {
+
+        if (body.hits.total > 0) {
           const hits = body.hits.hits;
           for (let i = 0; i < hits.length; i++) {
             // Use lodash get() to support field names containing dots.

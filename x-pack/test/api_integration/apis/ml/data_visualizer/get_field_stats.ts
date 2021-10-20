@@ -42,16 +42,16 @@ export default ({ getService }: FtrProviderContext) => {
       responseCode: 200,
       responseBody: [
         {
-          documentCounts: {
-            interval: 86400000,
-            buckets: {
-              '1454803200000': 846,
-              '1454889600000': 846,
-              '1454976000000': 859,
-              '1455062400000': 851,
-              '1455148800000': 858,
-            },
+          interval: 86400000,
+          buckets: {
+            '1454803200000': 846,
+            '1454889600000': 846,
+            '1454976000000': 859,
+            '1455062400000': 851,
+            '1455148800000': 858,
           },
+          timeRangeEarliest: 0,
+          timeRangeLatest: 0,
         },
         {
           // Cannot verify median and percentiles responses as the ES percentiles agg is non-deterministic.

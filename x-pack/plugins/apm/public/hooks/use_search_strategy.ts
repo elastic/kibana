@@ -173,7 +173,6 @@ export function useSearchStrategy<
               error: response as unknown as Error,
               isRunning: false,
             });
-          } else {
           }
         },
         error: (error: Error) => {

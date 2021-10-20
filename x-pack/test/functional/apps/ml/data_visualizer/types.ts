@@ -12,6 +12,7 @@ export interface MetricFieldVisConfig extends FieldVisConfig {
   docCountFormatted: string;
   topValuesCount: number;
   viewableInLens: boolean;
+  hasActionMenu?: boolean;
 }
 
 export interface NonMetricFieldVisConfig extends FieldVisConfig {
@@ -19,6 +20,7 @@ export interface NonMetricFieldVisConfig extends FieldVisConfig {
   exampleCount: number;
   exampleContent?: string[];
   viewableInLens: boolean;
+  hasActionMenu?: boolean;
 }
 
 export interface TestData {
