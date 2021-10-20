@@ -23,12 +23,12 @@ export function couchdbMetricsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'couchdbMetrics',
     name: i18n.translate('home.tutorials.couchdbMetrics.nameTitle', {
-      defaultMessage: 'CouchDB metrics',
+      defaultMessage: 'CouchDB Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.couchdbMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from the CouchdB server.',
+      defaultMessage: 'Collect monitoring metrics from the CouchDB servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.couchdbMetrics.longDescription', {
       defaultMessage:

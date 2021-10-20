@@ -23,12 +23,12 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
   return {
     id: 'activemqMetrics',
     name: i18n.translate('home.tutorials.activemqMetrics.nameTitle', {
-      defaultMessage: 'ActiveMQ metrics',
+      defaultMessage: 'ActiveMQ Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.activemqMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from ActiveMQ instances.',
+      defaultMessage: 'Collect monitoring metrics from the ActiveMQ instances with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.activemqMetrics.longDescription', {
       defaultMessage:

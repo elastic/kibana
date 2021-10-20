@@ -23,13 +23,13 @@ export function elasticsearchMetricsSpecProvider(context: TutorialContext): Tuto
   return {
     id: 'elasticsearchMetrics',
     name: i18n.translate('home.tutorials.elasticsearchMetrics.nameTitle', {
-      defaultMessage: 'Elasticsearch metrics',
+      defaultMessage: 'Elasticsearch Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.elasticsearchMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from Elasticsearch.',
+      defaultMessage: 'Collect metrics from the Elasticsearch clusters with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.elasticsearchMetrics.longDescription', {
       defaultMessage:

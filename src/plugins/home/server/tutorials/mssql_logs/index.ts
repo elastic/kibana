@@ -24,12 +24,12 @@ export function mssqlLogsSpecProvider(context: TutorialContext): TutorialSchema 
   return {
     id: 'mssqlLogs',
     name: i18n.translate('home.tutorials.mssqlLogs.nameTitle', {
-      defaultMessage: 'MSSQL logs',
+      defaultMessage: 'MSSQL Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.mssqlLogs.shortDescription', {
-      defaultMessage: 'Collect MSSQL logs.',
+      defaultMessage: 'Collect and parse logs from the MSSQL servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mssqlLogs.longDescription', {
       defaultMessage:

@@ -23,12 +23,12 @@ export function apacheMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: 'apacheMetrics',
     name: i18n.translate('home.tutorials.apacheMetrics.nameTitle', {
-      defaultMessage: 'Apache metrics',
+      defaultMessage: 'Apache HTTP Server Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.apacheMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Apache 2 HTTP server.',
+      defaultMessage: 'Collect metrics from the Apache HTTP servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.apacheMetrics.longDescription', {
       defaultMessage:

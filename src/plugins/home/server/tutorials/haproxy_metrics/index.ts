@@ -23,13 +23,13 @@ export function haproxyMetricsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'haproxyMetrics',
     name: i18n.translate('home.tutorials.haproxyMetrics.nameTitle', {
-      defaultMessage: 'HAProxy metrics',
+      defaultMessage: 'HAProxy Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.haproxyMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the HAProxy server.',
+      defaultMessage: 'Collect internal metrics from the HAProxy servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.haproxyMetrics.longDescription', {
       defaultMessage:

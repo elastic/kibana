@@ -24,12 +24,12 @@ export function gsuiteLogsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'gsuiteLogs',
     name: i18n.translate('home.tutorials.gsuiteLogs.nameTitle', {
-      defaultMessage: 'GSuite logs',
+      defaultMessage: 'GSuite Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.gsuiteLogs.shortDescription', {
-      defaultMessage: 'Collect GSuite activity reports.',
+      defaultMessage: 'Collect and parse activity reports from GSuite with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.gsuiteLogs.longDescription', {
       defaultMessage:

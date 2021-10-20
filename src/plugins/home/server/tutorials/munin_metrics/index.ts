@@ -23,14 +23,14 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'muninMetrics',
     name: i18n.translate('home.tutorials.muninMetrics.nameTitle', {
-      defaultMessage: 'Munin metrics',
+      defaultMessage: 'Munin Metrics',
     }),
     moduleName,
     euiIconType: '/plugins/home/assets/logos/munin.svg',
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.muninMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Munin server.',
+      defaultMessage: 'Collect internal metrics from the Munin servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.muninMetrics.longDescription', {
       defaultMessage:

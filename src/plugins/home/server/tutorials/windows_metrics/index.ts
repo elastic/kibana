@@ -23,13 +23,13 @@ export function windowsMetricsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'windowsMetrics',
     name: i18n.translate('home.tutorials.windowsMetrics.nameTitle', {
-      defaultMessage: 'Windows metrics',
+      defaultMessage: 'Windows Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.windowsMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from Windows.',
+      defaultMessage: 'Collect internal metrics from Windows with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.windowsMetrics.longDescription', {
       defaultMessage:

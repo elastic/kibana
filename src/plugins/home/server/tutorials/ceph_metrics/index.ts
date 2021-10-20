@@ -23,13 +23,13 @@ export function cephMetricsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'cephMetrics',
     name: i18n.translate('home.tutorials.cephMetrics.nameTitle', {
-      defaultMessage: 'Ceph metrics',
+      defaultMessage: 'Ceph Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.cephMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Ceph server.',
+      defaultMessage: 'Collect internal metrics from the Ceph servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.cephMetrics.longDescription', {
       defaultMessage:

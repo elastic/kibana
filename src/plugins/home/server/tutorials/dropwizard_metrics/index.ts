@@ -23,13 +23,13 @@ export function dropwizardMetricsSpecProvider(context: TutorialContext): Tutoria
   return {
     id: 'dropwizardMetrics',
     name: i18n.translate('home.tutorials.dropwizardMetrics.nameTitle', {
-      defaultMessage: 'Dropwizard metrics',
+      defaultMessage: 'Dropwizard Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.dropwizardMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from Dropwizard Java application.',
+      defaultMessage: 'Collect internal metrics from Dropwizard Java applciations with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.dropwizardMetrics.longDescription', {
       defaultMessage:

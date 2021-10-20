@@ -23,12 +23,12 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'vsphereMetrics',
     name: i18n.translate('home.tutorials.vsphereMetrics.nameTitle', {
-      defaultMessage: 'vSphere metrics',
+      defaultMessage: 'vSphere Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.vsphereMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from vSphere.',
+      defaultMessage: 'Collect internal metrics from vSphere with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.vsphereMetrics.longDescription', {
       defaultMessage:

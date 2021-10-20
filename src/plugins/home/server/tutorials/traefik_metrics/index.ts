@@ -20,12 +20,12 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'traefikMetrics',
     name: i18n.translate('home.tutorials.traefikMetrics.nameTitle', {
-      defaultMessage: 'Traefik metrics',
+      defaultMessage: 'Traefik Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.traefikMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from Traefik.',
+      defaultMessage: 'Collect monitoring metrics from Traefik with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.traefikMetrics.longDescription', {
       defaultMessage:

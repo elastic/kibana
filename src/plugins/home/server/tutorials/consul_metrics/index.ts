@@ -23,12 +23,12 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: 'consulMetrics',
     name: i18n.translate('home.tutorials.consulMetrics.nameTitle', {
-      defaultMessage: 'Consul metrics',
+      defaultMessage: 'Consul Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.consulMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from the Consul server.',
+      defaultMessage: 'Collect monitoring metrics from the Consul servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.consulMetrics.longDescription', {
       defaultMessage:

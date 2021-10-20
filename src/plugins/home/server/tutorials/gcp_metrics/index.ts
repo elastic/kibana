@@ -23,13 +23,12 @@ export function gcpMetricsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'gcpMetrics',
     name: i18n.translate('home.tutorials.gcpMetrics.nameTitle', {
-      defaultMessage: 'Google Cloud metrics',
+      defaultMessage: 'Google Cloud Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.gcpMetrics.shortDescription', {
-      defaultMessage:
-        'Fetch monitoring metrics from Google Cloud Platform using Stackdriver Monitoring API.',
+      defaultMessage: 'Collect monitoring metrics from Google Cloud Platform with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.gcpMetrics.longDescription', {
       defaultMessage:

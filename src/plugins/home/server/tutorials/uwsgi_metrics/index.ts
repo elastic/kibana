@@ -23,12 +23,12 @@ export function uwsgiMetricsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'uwsgiMetrics',
     name: i18n.translate('home.tutorials.uwsgiMetrics.nameTitle', {
-      defaultMessage: 'uWSGI metrics',
+      defaultMessage: 'uWSGI Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.uwsgiMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the uWSGI server.',
+      defaultMessage: 'Collect internal metrics from the uWSGI servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.uwsgiMetrics.longDescription', {
       defaultMessage:

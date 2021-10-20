@@ -23,13 +23,13 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'kafkaMetrics',
     name: i18n.translate('home.tutorials.kafkaMetrics.nameTitle', {
-      defaultMessage: 'Kafka metrics',
+      defaultMessage: 'Kafka Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kafkaMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Kafka server.',
+      defaultMessage: 'Collect internal metrics from the Kafka servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kafkaMetrics.longDescription', {
       defaultMessage:

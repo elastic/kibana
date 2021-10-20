@@ -29,7 +29,7 @@ export function windowsEventLogsSpecProvider(context: TutorialContext): Tutorial
     isBeta: false,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.windowsEventLogs.shortDescription', {
-      defaultMessage: 'Fetch logs from the Windows Event Log.',
+      defaultMessage: 'Collect and parse logs from Windows Event Log with WinLogBeat.',
     }),
     longDescription: i18n.translate('home.tutorials.windowsEventLogs.longDescription', {
       defaultMessage:

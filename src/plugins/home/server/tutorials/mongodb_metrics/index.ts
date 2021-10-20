@@ -23,12 +23,12 @@ export function mongodbMetricsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'mongodbMetrics',
     name: i18n.translate('home.tutorials.mongodbMetrics.nameTitle', {
-      defaultMessage: 'MongoDB metrics',
+      defaultMessage: 'MongoDB Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.mongodbMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from MongoDB.',
+      defaultMessage: 'Collect internal metrics from the MongoDB servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mongodbMetrics.longDescription', {
       defaultMessage:

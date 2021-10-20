@@ -23,13 +23,13 @@ export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: moduleName + 'Metrics',
     name: i18n.translate('home.tutorials.oracleMetrics.nameTitle', {
-      defaultMessage: 'oracle metrics',
+      defaultMessage: 'oracle Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.oracleMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from a Oracle server.',
+      defaultMessage: 'Collect internal metrics from the Oracle servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.oracleMetrics.longDescription', {
       defaultMessage:

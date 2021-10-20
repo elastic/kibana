@@ -23,12 +23,13 @@ export function systemMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: 'systemMetrics',
     name: i18n.translate('home.tutorials.systemMetrics.nameTitle', {
-      defaultMessage: 'System metrics',
+      defaultMessage: 'System Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.systemMetrics.shortDescription', {
-      defaultMessage: 'Collect CPU, memory, network, and disk statistics from the host.',
+      defaultMessage:
+        'Collect CPU, memory, network, and disk metrics from the System hosts with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.systemMetrics.longDescription', {
       defaultMessage:

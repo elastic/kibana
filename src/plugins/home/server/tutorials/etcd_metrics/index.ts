@@ -23,13 +23,13 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'etcdMetrics',
     name: i18n.translate('home.tutorials.etcdMetrics.nameTitle', {
-      defaultMessage: 'Etcd metrics',
+      defaultMessage: 'Etcd Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.etcdMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Etcd server.',
+      defaultMessage: 'Collect internal metrics from the Etcd servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.etcdMetrics.longDescription', {
       defaultMessage:

@@ -23,13 +23,13 @@ export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'awsMetrics',
     name: i18n.translate('home.tutorials.awsMetrics.nameTitle', {
-      defaultMessage: 'AWS metrics',
+      defaultMessage: 'AWS Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.awsMetrics.shortDescription', {
       defaultMessage:
-        'Fetch monitoring metrics for EC2 instances from the AWS APIs and Cloudwatch.',
+        'Collect monitoring metrics for EC2 instances from the AWS APIs and Cloudwatch with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.awsMetrics.longDescription', {
       defaultMessage:

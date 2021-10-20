@@ -24,12 +24,12 @@ export function auditdLogsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'auditdLogs',
     name: i18n.translate('home.tutorials.auditdLogs.nameTitle', {
-      defaultMessage: 'Auditd logs',
+      defaultMessage: 'Auditd Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.auditdLogs.shortDescription', {
-      defaultMessage: 'Collect logs from the Linux auditd daemon.',
+      defaultMessage: 'Collect and parse logs from the Linux audit daemon with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.auditdLogs.longDescription', {
       defaultMessage:

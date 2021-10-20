@@ -23,12 +23,12 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'ibmmqMetrics',
     name: i18n.translate('home.tutorials.ibmmqMetrics.nameTitle', {
-      defaultMessage: 'IBM MQ metrics',
+      defaultMessage: 'IBM MQ Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.ibmmqMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from IBM MQ instances.',
+      defaultMessage: 'Collect monitoring metrics from the IBM MQ instances with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.ibmmqMetrics.longDescription', {
       defaultMessage:

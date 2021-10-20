@@ -23,13 +23,13 @@ export function logstashMetricsSpecProvider(context: TutorialContext): TutorialS
   return {
     id: moduleName + 'Metrics',
     name: i18n.translate('home.tutorials.logstashMetrics.nameTitle', {
-      defaultMessage: 'Logstash metrics',
+      defaultMessage: 'Logstash Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.logstashMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from a Logstash server.',
+      defaultMessage: 'Collect internal metrics from Logstash servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.logstashMetrics.longDescription', {
       defaultMessage:

@@ -23,12 +23,12 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'stanMetrics',
     name: i18n.translate('home.tutorials.stanMetrics.nameTitle', {
-      defaultMessage: 'STAN metrics',
+      defaultMessage: 'STAN Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.stanMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from the STAN server.',
+      defaultMessage: 'Collect monitoring metrics from the STAN servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.stanMetrics.longDescription', {
       defaultMessage:

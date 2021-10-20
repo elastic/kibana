@@ -23,13 +23,13 @@ export function golangMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: moduleName + 'Metrics',
     name: i18n.translate('home.tutorials.golangMetrics.nameTitle', {
-      defaultMessage: 'Golang metrics',
+      defaultMessage: 'Golang Metrics',
     }),
     moduleName,
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.golangMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from a Golang app.',
+      defaultMessage: 'Collect internal metrics from the Golang applications with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.golangMetrics.longDescription', {
       defaultMessage:

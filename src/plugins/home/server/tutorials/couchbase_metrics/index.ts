@@ -23,13 +23,13 @@ export function couchbaseMetricsSpecProvider(context: TutorialContext): Tutorial
   return {
     id: 'couchbaseMetrics',
     name: i18n.translate('home.tutorials.couchbaseMetrics.nameTitle', {
-      defaultMessage: 'Couchbase metrics',
+      defaultMessage: 'Couchbase Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.couchbaseMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from Couchbase.',
+      defaultMessage: 'Collect internal metrics from the Couchbase databases with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.couchbaseMetrics.longDescription', {
       defaultMessage:

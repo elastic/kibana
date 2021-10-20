@@ -23,12 +23,12 @@ export function rabbitmqMetricsSpecProvider(context: TutorialContext): TutorialS
   return {
     id: 'rabbitmqMetrics',
     name: i18n.translate('home.tutorials.rabbitmqMetrics.nameTitle', {
-      defaultMessage: 'RabbitMQ metrics',
+      defaultMessage: 'RabbitMQ Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.rabbitmqMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the RabbitMQ server.',
+      defaultMessage: 'Collect internal metrics from the RabbitMQ servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.rabbitmqMetrics.longDescription', {
       defaultMessage:

@@ -23,12 +23,13 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
   return {
     id: 'redisenterpriseMetrics',
     name: i18n.translate('home.tutorials.redisenterpriseMetrics.nameTitle', {
-      defaultMessage: 'Redis Enterprise metrics',
+      defaultMessage: 'Redis Enterprise Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.redisenterpriseMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from Redis Enterprise Server.',
+      defaultMessage:
+        'Collect monitoring metrics from the Redis Enterprise servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.redisenterpriseMetrics.longDescription', {
       defaultMessage:

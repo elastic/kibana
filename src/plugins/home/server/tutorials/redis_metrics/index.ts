@@ -23,12 +23,12 @@ export function redisMetricsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'redisMetrics',
     name: i18n.translate('home.tutorials.redisMetrics.nameTitle', {
-      defaultMessage: 'Redis metrics',
+      defaultMessage: 'Redis Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.redisMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from Redis.',
+      defaultMessage: 'Collect internal metrics from the Redis servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.redisMetrics.longDescription', {
       defaultMessage:

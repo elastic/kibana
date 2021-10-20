@@ -23,13 +23,13 @@ export function kibanaMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: 'kibanaMetrics',
     name: i18n.translate('home.tutorials.kibanaMetrics.nameTitle', {
-      defaultMessage: 'Kibana metrics',
+      defaultMessage: 'Kibana Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kibanaMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from Kibana.',
+      defaultMessage: 'Collect internal metrics from Kibana with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kibanaMetrics.longDescription', {
       defaultMessage:

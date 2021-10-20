@@ -23,12 +23,12 @@ export function cockroachdbMetricsSpecProvider(context: TutorialContext): Tutori
   return {
     id: 'cockroachdbMetrics',
     name: i18n.translate('home.tutorials.cockroachdbMetrics.nameTitle', {
-      defaultMessage: 'CockroachDB metrics',
+      defaultMessage: 'CockroachDB Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.cockroachdbMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from the CockroachDB server.',
+      defaultMessage: 'Collect monitoring metrics from the CockroachDB servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.cockroachdbMetrics.longDescription', {
       defaultMessage:

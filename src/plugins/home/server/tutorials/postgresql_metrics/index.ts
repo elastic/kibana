@@ -23,13 +23,13 @@ export function postgresqlMetricsSpecProvider(context: TutorialContext): Tutoria
   return {
     id: 'postgresqlMetrics',
     name: i18n.translate('home.tutorials.postgresqlMetrics.nameTitle', {
-      defaultMessage: 'PostgreSQL metrics',
+      defaultMessage: 'PostgreSQL Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     isBeta: false,
     shortDescription: i18n.translate('home.tutorials.postgresqlMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from PostgreSQL.',
+      defaultMessage: 'Collect internal metrics from the PostgreSQL servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.postgresqlMetrics.longDescription', {
       defaultMessage:

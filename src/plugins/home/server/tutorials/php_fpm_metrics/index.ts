@@ -23,13 +23,13 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: 'phpfpmMetrics',
     name: i18n.translate('home.tutorials.phpFpmMetrics.nameTitle', {
-      defaultMessage: 'PHP-FPM metrics',
+      defaultMessage: 'PHP-FPM Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     isBeta: false,
     shortDescription: i18n.translate('home.tutorials.phpFpmMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from PHP-FPM.',
+      defaultMessage: 'Collect internal metrics from PHP-FPM with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.phpFpmMetrics.longDescription', {
       defaultMessage:

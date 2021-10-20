@@ -23,12 +23,12 @@ export function kubernetesMetricsSpecProvider(context: TutorialContext): Tutoria
   return {
     id: 'kubernetesMetrics',
     name: i18n.translate('home.tutorials.kubernetesMetrics.nameTitle', {
-      defaultMessage: 'Kubernetes metrics',
+      defaultMessage: 'Kubernetes Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kubernetesMetrics.shortDescription', {
-      defaultMessage: 'Fetch metrics from your Kubernetes installation.',
+      defaultMessage: 'Collect metrics from the Kubernetes installations with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kubernetesMetrics.longDescription', {
       defaultMessage:
