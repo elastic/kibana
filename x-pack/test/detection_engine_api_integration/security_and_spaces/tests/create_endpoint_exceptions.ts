@@ -33,8 +33,6 @@ interface Host {
   };
 }
 
-// convenience method to get signals by host and sort them for better deterministic testing.
-
 /**
  * Convenience method to get signals by host and sort them for better deterministic testing
  * since Elastic can return the hits back in any order we want to sort them on return for testing.
