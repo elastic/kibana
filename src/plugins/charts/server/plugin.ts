@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin } from 'kibana/server';
-import { COLOR_MAPPING_SETTING, palette, systemPalette } from '../common';
+import { COLOR_MAPPING_SETTING, LEGACY_TIME_AXIS, palette, systemPalette } from '../common';
 import { ExpressionsServerSetup } from '../../expressions/server';
 
 interface SetupDependencies {
@@ -44,6 +44,20 @@ export class ChartsServerPlugin implements Plugin<object, object> {
         },
         category: ['visualization'],
         schema: schema.string(),
+      },
+      [LEGACY_TIME_AXIS]: {
+        name: i18n.translate('charts.advancedSettings.visualization.useLegacyTimeAxis.name', {
+          defaultMessage: 'Legacy chart time axis',
+        }),
+        value: false,
+        description: i18n.translate(
+          'charts.advancedSettings.visualization.useLegacyTimeAxis.description',
+          {
+            defaultMessage: 'Enabled legacy time axis for charts in Lens, discover and TSVB',
+          }
+        ),
+        category: ['visualization'],
+        schema: schema.boolean(),
       },
     });
 

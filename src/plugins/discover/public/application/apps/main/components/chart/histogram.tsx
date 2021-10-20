@@ -35,6 +35,7 @@ import { DataCharts$, DataChartsMessage } from '../../services/use_saved_search'
 import { FetchStatus } from '../../../../types';
 import { DiscoverServices } from '../../../../../build_services';
 import { useDataState } from '../../utils/use_data_state';
+import { LEGACY_TIME_AXIS } from '../../../../../../../charts/common';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
@@ -178,6 +179,9 @@ export function DiscoverHistogram({
   };
 
   const xAxisFormatter = services.data.fieldFormats.deserialize(chartData.yAxisFormat);
+
+  const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
+  console.log(`LEGACY_TIME_AXIS (Discover): ${useLegacyTimeAxis}`); // eslint-disable-line
 
   return (
     <React.Fragment>

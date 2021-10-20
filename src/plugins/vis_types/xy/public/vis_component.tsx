@@ -66,6 +66,7 @@ export interface VisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   syncColors: boolean;
+  useLegacyTimeAxis: boolean;
 }
 
 export type VisComponentType = typeof VisComponent;
@@ -341,6 +342,8 @@ const VisComponent = (props: VisComponentProps) => {
     : visParams.dimensions.splitRow
     ? visData.columns[visParams.dimensions.splitRow[0].accessor]
     : undefined;
+
+  console.log(`LEGACY_TIME_AXIS (vis_type/xy): ${props.useLegacyTimeAxis}`); // eslint-disable-line
 
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">

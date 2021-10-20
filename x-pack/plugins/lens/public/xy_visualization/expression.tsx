@@ -89,6 +89,7 @@ export type XYChartRenderProps = XYChartProps & {
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
   timeZone: string;
+  useLegacyTimeAxis: boolean;
   minInterval: number | undefined;
   interactive?: boolean;
   onClickValue: (data: LensFilterEvent['data']) => void;
@@ -129,6 +130,7 @@ export const getXyChartRenderer = (dependencies: {
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
+  useLegacyTimeAxis: boolean;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
@@ -159,6 +161,7 @@ export const getXyChartRenderer = (dependencies: {
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
+          useLegacyTimeAxis={dependencies.useLegacyTimeAxis}
           minInterval={calculateMinInterval(config)}
           interactive={handlers.isInteractive()}
           onClickValue={onClickValue}
@@ -234,6 +237,7 @@ export function XYChart({
   onSelectRange,
   interactive = true,
   syncColors,
+  useLegacyTimeAxis,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -553,6 +557,8 @@ export function XYChart({
     floating: true,
     floatingColumns: legend?.floatingColumns ?? 1,
   } as LegendPositionConfig;
+
+  console.log(`LEGACY_TIME_AXIS (Lens): ${useLegacyTimeAxis}`); // eslint-disable-line
 
   return (
     <Chart ref={chartRef}>

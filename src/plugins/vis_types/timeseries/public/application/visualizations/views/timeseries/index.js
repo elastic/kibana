@@ -72,6 +72,7 @@ export const TimeSeries = ({
   palettesService,
   interval,
   isLastBucketDropped,
+  useLegacyTimeAxis,
 }) => {
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
@@ -138,6 +139,9 @@ export const TimeSeries = ({
     },
     [palettesService, series, syncColors]
   );
+
+  console.log(`LEGACY_TIME_AXIS (TSVB): ${useLegacyTimeAxis}`); // eslint-disable-line
+
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
@@ -357,4 +361,5 @@ TimeSeries.propTypes = {
   annotations: PropTypes.array,
   interval: PropTypes.number,
   isLastBucketDropped: PropTypes.bool,
+  useLegacyTimeAxis: PropTypes.bool,
 };

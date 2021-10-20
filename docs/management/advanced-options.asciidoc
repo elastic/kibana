@@ -516,6 +516,9 @@ Enables the legacy charts library for timelion charts in Visualize.
 **This setting is deprecated and will not be supported as of 8.0.**
 Maps values to specific colors in charts using the *Compatibility* palette.
 
+[[visualization-uselegacytimeaxis]]`visualization:useLegacyTimeAxis`::
+Enabled legacy time axis for charts in Lens, discover and TSVB
+
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
