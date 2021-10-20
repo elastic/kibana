@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isObjectLike } from 'lodash';
+import { isObjectLike, isEmpty } from 'lodash';
 import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axios';
 import { Logger } from '../../../../../../src/core/server';
 import { getCustomAgents } from './get_custom_agents';
@@ -79,11 +79,9 @@ export const getErrorMessage = (connector: string, msg: string) => {
 };
 
 export const throwIfRequestIsNotValid = ({
-  connectorName,
   res,
   requiredAttributesToBeInTheResponse = [],
 }: {
-  connectorName: string;
   res: AxiosResponse;
   requiredAttributesToBeInTheResponse?: string[];
 }) => {
@@ -94,19 +92,26 @@ export const throwIfRequestIsNotValid = ({
   /**
    * This check ensures that the response is a valid JSON.
    * First we check that the content-type of the response is application/json.
-   * Then we check the response is a JS object (data != null && typeof data === 'object')
+   * Then includes is added because the header can be application/json;charset=UTF-8.
+   * Then we check if the response is a JS object (data != null && typeof data === 'object')
    * in case the content type is application/json but for some reason the response is not.
+   * Empty responses (204 No content) are ignored because the typeof data will be string and
+   * isObjectLike will fail.
    * Axios converts automatically JSON to JS objects.
    */
-  if (contentType !== requiredContentType || !isObjectLike(data)) {
-    throw new Error(getErrorMessage(connectorName, 'Response must be a valid JSON'));
+  if (!contentType.includes(requiredContentType) || (!isEmpty(data) && !isObjectLike(data))) {
+    throw new Error('Response must be a valid JSON');
   }
 
-  if (requiredAttributesToBeInTheResponse.length > 0) {
+  /**
+   * Check for required attributes only if provided and
+   * data is an object and not an array
+   */
+  if (requiredAttributesToBeInTheResponse.length > 0 && !Array.isArray(data)) {
     requiredAttributesToBeInTheResponse.forEach((attr) => {
       // Check only for undefined as null is a valid value
       if (data[attr] === undefined) {
-        throw new Error(getErrorMessage(connectorName, 'Response is missing expected fields'));
+        throw new Error('Response is missing expected fields');
       }
     });
   }

@@ -27,7 +27,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { request, getErrorMessage } from '../lib/axios_utils';
+import { request, getErrorMessage, throwIfRequestIsNotValid } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VERSION = '2';
@@ -181,9 +181,14 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      const { fields, ...rest } = res.data;
+      throwIfRequestIsNotValid({
+        res,
+        requiredAttributesToBeInTheResponse: ['id', 'key'],
+      });
 
-      return { ...rest, ...fields };
+      const { fields, id: incidentId, key } = res.data;
+
+      return { id: incidentId, key, created: fields.created, updated: fields.updated, ...fields };
     } catch (error) {
       throw new Error(
         getErrorMessage(
@@ -230,6 +235,11 @@ export const createExternalService = (
         configurationUtilities,
       });
 
+      throwIfRequestIsNotValid({
+        res,
+        requiredAttributesToBeInTheResponse: ['id'],
+      });
+
       const updatedIncident = await getIncident(res.data.id);
 
       return {
@@ -262,13 +272,17 @@ export const createExternalService = (
     const fields = createFields(projectKey, incidentWithoutNullValues);
 
     try {
-      await request({
+      const res = await request({
         axios: axiosInstance,
         method: 'put',
         url: `${incidentUrl}/${incidentId}`,
         logger,
         data: { fields },
         configurationUtilities,
+      });
+
+      throwIfRequestIsNotValid({
+        res,
       });
 
       const updatedIncident = await getIncident(incidentId as string);
@@ -305,6 +319,11 @@ export const createExternalService = (
         configurationUtilities,
       });
 
+      throwIfRequestIsNotValid({
+        res,
+        requiredAttributesToBeInTheResponse: ['id', 'created'],
+      });
+
       return {
         commentId: comment.commentId,
         externalCommentId: res.data.id,
@@ -330,6 +349,11 @@ export const createExternalService = (
         url: capabilitiesUrl,
         logger,
         configurationUtilities,
+      });
+
+      throwIfRequestIsNotValid({
+        res,
+        requiredAttributesToBeInTheResponse: ['capabilities'],
       });
 
       return { ...res.data };
@@ -358,6 +382,10 @@ export const createExternalService = (
           configurationUtilities,
         });
 
+        throwIfRequestIsNotValid({
+          res,
+        });
+
         const issueTypes = res.data.projects[0]?.issuetypes ?? [];
         return normalizeIssueTypes(issueTypes);
       } else {
@@ -367,6 +395,10 @@ export const createExternalService = (
           url: getIssueTypesUrl,
           logger,
           configurationUtilities,
+        });
+
+        throwIfRequestIsNotValid({
+          res,
         });
 
         const issueTypes = res.data.values;
@@ -397,6 +429,10 @@ export const createExternalService = (
           configurationUtilities,
         });
 
+        throwIfRequestIsNotValid({
+          res,
+        });
+
         const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
         return normalizeFields(fields);
       } else {
@@ -406,6 +442,10 @@ export const createExternalService = (
           url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsUrl, issueTypeId),
           logger,
           configurationUtilities,
+        });
+
+        throwIfRequestIsNotValid({
+          res,
         });
 
         const fields = res.data.values.reduce(
@@ -467,6 +507,10 @@ export const createExternalService = (
         configurationUtilities,
       });
 
+      throwIfRequestIsNotValid({
+        res,
+      });
+
       return normalizeSearchResults(res.data?.issues ?? []);
     } catch (error) {
       throw new Error(
@@ -489,6 +533,10 @@ export const createExternalService = (
         url: getIssueUrl,
         logger,
         configurationUtilities,
+      });
+
+      throwIfRequestIsNotValid({
+        res,
       });
 
       return normalizeIssue(res.data ?? {});
