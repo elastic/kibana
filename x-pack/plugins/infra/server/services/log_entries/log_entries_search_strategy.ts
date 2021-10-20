@@ -109,7 +109,7 @@ export const logEntriesSearchStrategyProvider = ({
             forkJoin([resolvedSourceConfiguration$, messageFormattingRules$]).pipe(
               map(
                 ([
-                  { indices, timestampField, tiebreakerField, columns, runtimeMappings },
+                  { indices, columns, runtimeMappings },
                   messageFormattingRules,
                 ]): IEsSearchRequest => {
                   return {
@@ -120,8 +120,6 @@ export const logEntriesSearchStrategyProvider = ({
                       params.endTimestamp,
                       pickRequestCursor(params),
                       params.size + 1,
-                      timestampField,
-                      tiebreakerField,
                       getRequiredFields(params.columns ?? columns, messageFormattingRules),
                       runtimeMappings,
                       params.query,

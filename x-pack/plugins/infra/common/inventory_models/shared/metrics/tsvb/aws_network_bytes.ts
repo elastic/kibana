@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
 // see discussion in: https://github.com/elastic/kibana/issues/42687
@@ -19,7 +20,7 @@ export const awsNetworkBytes: TSVBMetricModelCreator = (
   map_field_to: 'cloud.instance.id',
   id_type: 'cloud',
   interval: '>=5m',
-  time_field: timeField,
+  time_field: TIMESTAMP_FIELD,
   type: 'timeseries',
   series: [
     {

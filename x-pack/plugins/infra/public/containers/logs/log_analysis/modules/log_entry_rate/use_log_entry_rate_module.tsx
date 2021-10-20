@@ -18,13 +18,11 @@ export const useLogEntryRateModule = ({
   indexPattern,
   sourceId,
   spaceId,
-  timestampField,
   runtimeMappings,
 }: {
   indexPattern: string;
   sourceId: string;
   spaceId: string;
-  timestampField: string;
   runtimeMappings: estypes.MappingRuntimeFields;
 }) => {
   const sourceConfiguration: ModuleSourceConfiguration = useMemo(
@@ -32,10 +30,9 @@ export const useLogEntryRateModule = ({
       indices: indexPattern.split(','),
       sourceId,
       spaceId,
-      timestampField,
       runtimeMappings,
     }),
-    [indexPattern, sourceId, spaceId, timestampField, runtimeMappings]
+    [indexPattern, sourceId, spaceId, runtimeMappings]
   );
 
   const logAnalysisModule = useLogAnalysisModule({

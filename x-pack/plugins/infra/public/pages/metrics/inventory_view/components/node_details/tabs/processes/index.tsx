@@ -36,8 +36,6 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
     isAscending: false,
   });
 
-  const timefield = options.fields!.timestamp;
-
   const hostTerm = useMemo(() => {
     const field =
       options.fields && Reflect.has(options.fields, nodeType)
@@ -51,7 +49,7 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
     error,
     response,
     makeRequest: reload,
-  } = useProcessList(hostTerm, timefield, currentTime, sortBy, parseSearchString(searchFilter));
+  } = useProcessList(hostTerm, currentTime, sortBy, parseSearchString(searchFilter));
 
   const debouncedSearchOnChange = useMemo(
     () => debounce<(queryText: string) => void>((queryText) => setSearchFilter(queryText), 500),
@@ -73,7 +71,7 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
 
   return (
     <TabContent>
-      <ProcessListContextProvider hostTerm={hostTerm} to={currentTime} timefield={timefield}>
+      <ProcessListContextProvider hostTerm={hostTerm} to={currentTime}>
         <SummaryTable
           isLoading={loading}
           processSummary={(!error ? response?.summary : null) ?? { total: 0 }}

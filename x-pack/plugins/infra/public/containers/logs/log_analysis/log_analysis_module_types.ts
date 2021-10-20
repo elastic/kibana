@@ -46,13 +46,11 @@ export interface ModuleDescriptor<JobType extends string> {
   ) => Promise<DeleteJobsResponsePayload>;
   validateSetupIndices: (
     indices: string[],
-    timestampField: string,
     runtimeMappings: estypes.MappingRuntimeFields,
     fetch: HttpHandler
   ) => Promise<ValidationIndicesResponsePayload>;
   validateSetupDatasets: (
     indices: string[],
-    timestampField: string,
     startTime: number,
     endTime: number,
     runtimeMappings: estypes.MappingRuntimeFields,
@@ -64,6 +62,5 @@ export interface ModuleSourceConfiguration {
   indices: string[];
   sourceId: string;
   spaceId: string;
-  timestampField: string;
   runtimeMappings: estypes.MappingRuntimeFields;
 }

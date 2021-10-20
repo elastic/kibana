@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
+import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../../../../common/constants';
 import { jsonArrayRT } from '../../../../common/typed_json';
 import {
   commonHitFieldsRT,
@@ -16,8 +17,6 @@ import {
 export const createGetLogEntryQuery = (
   logEntryIndex: string,
   logEntryId: string,
-  timestampField: string,
-  tiebreakerField: string,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.AsyncSearchSubmitRequest => ({
   index: logEntryIndex,
@@ -34,7 +33,7 @@ export const createGetLogEntryQuery = (
     fields: ['*'],
     // @ts-expect-error @elastic/elasticsearch doesn't declare "runtime_mappings" property
     runtime_mappings: runtimeMappings,
-    sort: [{ [timestampField]: 'desc' }, { [tiebreakerField]: 'desc' }],
+    sort: [{ [TIMESTAMP_FIELD]: 'desc' }, { [TIEBREAKER_FIELD]: 'desc' }],
     _source: false,
   },
 });

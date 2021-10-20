@@ -76,9 +76,7 @@ const TabComponent = (props: TabProps) => {
     () => createDerivedIndexPattern('metrics'),
     [createDerivedIndexPattern]
   );
-  let filter = options.fields
-    ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
-    : '';
+  let filter = `${findInventoryFields(nodeType).id}: "${node.id}"`;
 
   if (filter) {
     filter = convertKueryToElasticSearchQuery(filter, derivedIndexPattern);

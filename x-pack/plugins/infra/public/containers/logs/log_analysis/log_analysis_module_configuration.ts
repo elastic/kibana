@@ -52,7 +52,6 @@ export const isJobConfigurationOutdated =
         new Set(jobConfiguration.indexPattern.split(',')),
         new Set(currentSourceConfiguration.indices)
       ) &&
-      jobConfiguration.timestampField === currentSourceConfiguration.timestampField &&
       equal(datafeedRuntimeMappings, currentSourceConfiguration.runtimeMappings)
     );
   };

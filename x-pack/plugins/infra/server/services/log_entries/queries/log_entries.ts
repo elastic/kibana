@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
+import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../../../../common/constants';
 import {
   LogEntryAfterCursor,
   logEntryAfterCursorRT,
@@ -26,8 +27,6 @@ export const createGetLogEntriesQuery = (
   endTimestamp: number,
   cursor: LogEntryBeforeCursor | LogEntryAfterCursor | null | undefined,
   size: number,
-  timestampField: string,
-  tiebreakerField: string,
   fields: string[],
   runtimeMappings?: estypes.MappingRuntimeFields,
   query?: JsonObject,
@@ -48,7 +47,7 @@ export const createGetLogEntriesQuery = (
           filter: [
             ...(query ? [query] : []),
             ...(highlightQuery ? [highlightQuery] : []),
-            ...createTimeRangeFilterClauses(startTimestamp, endTimestamp, timestampField),
+            ...createTimeRangeFilterClauses(startTimestamp, endTimestamp, TIMESTAMP_FIELD),
           ],
         },
       },
@@ -56,7 +55,7 @@ export const createGetLogEntriesQuery = (
       // @ts-expect-error @elastic/elasticsearch doesn't declare "runtime_mappings" property
       runtime_mappings: runtimeMappings,
       _source: false,
-      ...createSortClause(sortDirection, timestampField, tiebreakerField),
+      ...createSortClause(sortDirection, TIMESTAMP_FIELD, TIEBREAKER_FIELD),
       ...createSearchAfterClause(cursor),
       ...createHighlightClause(highlightQuery, fields),
     },

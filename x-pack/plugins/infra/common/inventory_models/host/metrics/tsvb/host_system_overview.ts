@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
 export const hostSystemOverview: TSVBMetricModelCreator = (
@@ -16,7 +17,7 @@ export const hostSystemOverview: TSVBMetricModelCreator = (
   requires: ['system.cpu', 'system.memory', 'system.load', 'system.network'],
   index_pattern: indexPattern,
   interval,
-  time_field: timeField,
+  time_field: TIMESTAMP_FIELD,
   type: 'top_n',
   series: [
     {

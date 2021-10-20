@@ -36,7 +36,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     rawRequest: KibanaRequest
   ): Promise<NodeDetailsMetricData[]> {
     const indexPattern = `${options.sourceConfiguration.metricAlias}`;
-    const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
+    const fields = findInventoryFields(options.nodeType);
     const nodeField = fields.id;
 
     const search = <Aggregation>(searchOptions: object) =>
@@ -122,11 +122,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       max: options.timerange.to,
     };
 
-    const model = createTSVBModel(
-      options.sourceConfiguration.fields.timestamp,
-      indexPattern,
-      options.timerange.interval
-    );
+    const model = createTSVBModel(indexPattern, options.timerange.interval);
 
     const client = <Hit = {}, Aggregation = undefined>(
       opts: CallWithRequestParams
@@ -137,7 +133,6 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       client,
       {
         indexPattern: `${options.sourceConfiguration.metricAlias}`,
-        timestampField: options.sourceConfiguration.fields.timestamp,
         timerange: options.timerange,
       },
       model.requires

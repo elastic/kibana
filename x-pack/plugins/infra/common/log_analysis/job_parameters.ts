@@ -36,7 +36,6 @@ export type DatasetFilter = rt.TypeOf<typeof datasetFilterRT>;
 
 export const jobSourceConfigurationRT = rt.partial({
   indexPattern: rt.string,
-  timestampField: rt.string,
   bucketSpan: rt.number,
   datasetFilter: datasetFilterRT,
 });

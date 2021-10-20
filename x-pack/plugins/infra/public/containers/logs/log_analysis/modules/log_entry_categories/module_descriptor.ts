@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { HttpHandler } from 'src/core/public';
+import { TIMESTAMP_FIELD } from '../../../../../../common/constants';
 import {
   bucketSpan,
   categoriesMessageField,
@@ -63,7 +64,7 @@ const setUpModule = async (
   start: number | undefined,
   end: number | undefined,
   datasetFilter: DatasetFilter,
-  { spaceId, sourceId, indices, timestampField, runtimeMappings }: ModuleSourceConfiguration,
+  { spaceId, sourceId, indices, runtimeMappings }: ModuleSourceConfiguration,
   fetch: HttpHandler
 ) => {
   const indexNamePattern = indices.join(',');
@@ -74,12 +75,12 @@ const setUpModule = async (
         bucket_span: `${bucketSpan}ms`,
       },
       data_description: {
-        time_field: timestampField,
+        time_field: TIMESTAMP_FIELD,
       },
       custom_settings: {
         logs_source_config: {
           indexPattern: indexNamePattern,
-          timestampField,
+          timestampField: TIMESTAMP_FIELD,
           bucketSpan,
           datasetFilter,
         },
@@ -136,7 +137,6 @@ const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandl
 
 const validateSetupIndices = async (
   indices: string[],
-  timestampField: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   fetch: HttpHandler
 ) => {
@@ -145,7 +145,7 @@ const validateSetupIndices = async (
       indices,
       fields: [
         {
-          name: timestampField,
+          name: TIMESTAMP_FIELD,
           validTypes: ['date'],
         },
         {
@@ -165,16 +165,12 @@ const validateSetupIndices = async (
 
 const validateSetupDatasets = async (
   indices: string[],
-  timestampField: string,
   startTime: number,
   endTime: number,
   runtimeMappings: estypes.MappingRuntimeFields,
   fetch: HttpHandler
 ) => {
-  return await callValidateDatasetsAPI(
-    { indices, timestampField, startTime, endTime, runtimeMappings },
-    fetch
-  );
+  return await callValidateDatasetsAPI({ indices, startTime, endTime, runtimeMappings }, fetch);
 };
 
 export const logEntryCategoriesModule: ModuleDescriptor<LogEntryCategoriesJobType> = {

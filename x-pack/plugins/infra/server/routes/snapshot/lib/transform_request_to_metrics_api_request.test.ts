@@ -47,12 +47,7 @@ const source: InfraSource = {
       indexPatternId: 'kibana_index_pattern',
     },
     fields: {
-      container: 'container.id',
-      host: 'host.name',
       message: ['message', '@message'],
-      pod: 'kubernetes.pod.uid',
-      tiebreaker: '_doc',
-      timestamp: '@timestamp',
     },
     inventoryDefaultView: '0',
     metricsExplorerDefaultView: '0',

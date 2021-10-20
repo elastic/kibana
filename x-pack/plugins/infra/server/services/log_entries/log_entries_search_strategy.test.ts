@@ -289,12 +289,7 @@ const createSourceConfigurationMock = (): InfraSource => ({
       },
     ],
     fields: {
-      pod: 'POD_FIELD',
-      host: 'HOST_FIELD',
-      container: 'CONTAINER_FIELD',
       message: ['MESSAGE_FIELD'],
-      timestamp: 'TIMESTAMP_FIELD',
-      tiebreaker: 'TIEBREAKER_FIELD',
     },
     anomalyThreshold: 20,
   },

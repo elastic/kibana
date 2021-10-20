@@ -21,7 +21,7 @@ export const useLogAnalysisModule = <JobType extends string>({
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { spaceId, sourceId, timestampField, runtimeMappings } = sourceConfiguration;
+  const { spaceId, sourceId, runtimeMappings } = sourceConfiguration;
   const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
 
   const trackMetric = useUiTracker({ app: 'infra_logs' });
@@ -66,7 +66,6 @@ export const useLogAnalysisModule = <JobType extends string>({
             indices: selectedIndices,
             sourceId,
             spaceId,
-            timestampField,
             runtimeMappings,
           },
           services.http.fetch
@@ -114,7 +113,7 @@ export const useLogAnalysisModule = <JobType extends string>({
         }
       },
     },
-    [moduleDescriptor.setUpModule, spaceId, sourceId, timestampField]
+    [moduleDescriptor.setUpModule, spaceId, sourceId]
   );
 
   const [cleanUpModuleRequest, cleanUpModule] = useTrackedPromise(

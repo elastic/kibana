@@ -346,10 +346,9 @@ export async function getLogEntryExamples(
 
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
-  const timestampField = customSettings?.logs_source_config?.timestampField;
-  const { tiebreakerField, runtimeMappings } = resolvedSourceConfiguration;
+  const { runtimeMappings } = resolvedSourceConfiguration;
 
-  if (indices == null || timestampField == null) {
+  if (indices == null) {
     throw new InsufficientLogAnalysisMlJobConfigurationError(
       `Failed to find index configuration for ml job ${jobId}`
     );
@@ -363,8 +362,6 @@ export async function getLogEntryExamples(
     sourceId,
     indices,
     runtimeMappings,
-    timestampField,
-    tiebreakerField,
     startTime,
     endTime,
     dataset,
@@ -388,8 +385,6 @@ export async function fetchLogEntryExamples(
   sourceId: string,
   indices: string,
   runtimeMappings: estypes.MappingRuntimeFields,
-  timestampField: string,
-  tiebreakerField: string,
   startTime: number,
   endTime: number,
   dataset: string,
@@ -435,8 +430,6 @@ export async function fetchLogEntryExamples(
       createLogEntryExamplesQuery(
         indices,
         runtimeMappings,
-        timestampField,
-        tiebreakerField,
         startTime,
         endTime,
         dataset,

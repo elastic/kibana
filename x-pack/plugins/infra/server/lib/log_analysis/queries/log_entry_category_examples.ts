@@ -7,14 +7,13 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
+import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../../../../common/constants';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import { defaultRequestParameters } from './common';
 
 export const createLogEntryCategoryExamplesQuery = (
   indices: string,
   runtimeMappings: estypes.MappingRuntimeFields,
-  timestampField: string,
-  tiebreakerField: string,
   startTime: number,
   endTime: number,
   categoryQuery: string,
@@ -27,7 +26,7 @@ export const createLogEntryCategoryExamplesQuery = (
         filter: [
           {
             range: {
-              [timestampField]: {
+              [TIMESTAMP_FIELD]: {
                 gte: startTime,
                 lte: endTime,
               },
@@ -45,7 +44,7 @@ export const createLogEntryCategoryExamplesQuery = (
       },
     },
     runtime_mappings: runtimeMappings,
-    sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
+    sort: [{ [TIMESTAMP_FIELD]: 'asc' }, { [TIEBREAKER_FIELD]: 'asc' }],
     _source: false,
     fields: ['event.dataset', 'message', 'container.id', 'host.name', 'log.file.path'],
   },

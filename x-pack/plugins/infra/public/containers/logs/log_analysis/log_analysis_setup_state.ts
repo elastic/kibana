@@ -161,7 +161,6 @@ export const useAnalysisSetupState = <JobType extends string>({
       createPromise: async () => {
         return await validateSetupIndices(
           sourceConfiguration.indices,
-          sourceConfiguration.timestampField,
           sourceConfiguration.runtimeMappings,
           services.http.fetch
         );
@@ -173,7 +172,7 @@ export const useAnalysisSetupState = <JobType extends string>({
         setValidatedIndices([]);
       },
     },
-    [sourceConfiguration.indices, sourceConfiguration.timestampField]
+    [sourceConfiguration.indices]
   );
 
   const [validateDatasetsRequest, validateDatasets] = useTrackedPromise(
@@ -186,7 +185,6 @@ export const useAnalysisSetupState = <JobType extends string>({
 
         return await validateSetupDatasets(
           validIndexNames,
-          sourceConfiguration.timestampField,
           startTime ?? 0,
           endTime ?? Date.now(),
           sourceConfiguration.runtimeMappings,
@@ -197,7 +195,7 @@ export const useAnalysisSetupState = <JobType extends string>({
         updateIndicesWithAvailableDatasets(datasets);
       },
     },
-    [validIndexNames, sourceConfiguration.timestampField, startTime, endTime]
+    [validIndexNames, startTime, endTime]
   );
 
   const setUp = useCallback(() => {

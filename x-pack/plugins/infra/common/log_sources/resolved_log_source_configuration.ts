@@ -18,8 +18,6 @@ export interface ResolvedLogSourceConfiguration {
   name: string;
   description: string;
   indices: string;
-  timestampField: string;
-  tiebreakerField: string;
   messageField: string[];
   fields: DataView['fields'];
   runtimeMappings: estypes.MappingRuntimeFields;
@@ -61,8 +59,6 @@ const resolveLegacyReference = async (
 
   return {
     indices: sourceConfiguration.logIndices.indexName,
-    timestampField: sourceConfiguration.fields.timestamp,
-    tiebreakerField: sourceConfiguration.fields.tiebreaker,
     messageField: sourceConfiguration.fields.message,
     fields,
     runtimeMappings: {},
@@ -91,8 +87,6 @@ const resolveKibanaIndexPatternReference = async (
 
   return {
     indices: indexPattern.title,
-    timestampField: indexPattern.timeFieldName ?? '@timestamp',
-    tiebreakerField: '_doc',
     messageField: ['message'],
     fields: indexPattern.fields,
     runtimeMappings: resolveRuntimeMappings(indexPattern),

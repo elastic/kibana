@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
 export const awsDiskioOps: TSVBMetricModelCreator = (timeField, indexPattern): TSVBMetricModel => ({
@@ -14,7 +15,7 @@ export const awsDiskioOps: TSVBMetricModelCreator = (timeField, indexPattern): T
   map_field_to: 'cloud.instance.id',
   id_type: 'cloud',
   interval: '>=5m',
-  time_field: timeField,
+  time_field: TIMESTAMP_FIELD,
   type: 'timeseries',
   series: [
     {
