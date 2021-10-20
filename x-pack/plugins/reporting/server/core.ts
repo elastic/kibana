@@ -86,7 +86,7 @@ export class ReportingCore {
     this.executing = new Set();
   }
 
-  public getKibanaVersion() {
+  public getKibanaPackageInfo() {
     return this.packageInfo;
   }
 

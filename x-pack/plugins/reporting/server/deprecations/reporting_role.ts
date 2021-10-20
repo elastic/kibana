@@ -19,7 +19,8 @@ import { ReportingCore } from '../';
 import { deprecations } from '../lib/deprecations';
 
 const REPORTING_USER_ROLE_NAME = 'reporting_user';
-const DOCUMENTATION_URL = 'https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html';
+const getDocumentationUrl = (branch: string) =>
+  `https://www.elastic.co/guide/en/kibana/${branch}/kibana-privileges.html`;
 
 interface ExtraDependencies {
   reportingCore: ReportingCore;
@@ -120,7 +121,7 @@ async function getUsersDeprecations(
       correctiveActions: { manualSteps: strings.manualSteps(reportingUsers.join(', ')) },
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: DOCUMENTATION_URL,
+      documentationUrl: getDocumentationUrl(reportingCore.getKibanaPackageInfo().branch),
     },
   ];
 }
@@ -208,7 +209,7 @@ async function getRoleMappingsDeprecations(
       },
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: DOCUMENTATION_URL,
+      documentationUrl: getDocumentationUrl(reportingCore.getKibanaPackageInfo().branch),
     },
   ];
 }
