@@ -20,6 +20,7 @@ import { ServiceInventory } from '../../app/service_inventory';
 import { ServiceMapHome } from '../../app/service_map';
 import { TraceOverview } from '../../app/trace_overview';
 import { ApmMainTemplate } from '../templates/apm_main_template';
+import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overview_route_view';
 
 function page<TPath extends string>({
   path,
@@ -107,6 +108,15 @@ export const home = {
         }),
       }),
       children: [
+        {
+          path: '/backends/{backendName}/overview',
+          element: <RedirectToBackendOverviewRouteView />,
+          params: t.type({
+            path: t.type({
+              backendName: t.string,
+            }),
+          }),
+        },
         {
           path: '/backends/overview',
           element: <BackendDetailOverview />,
