@@ -71,6 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await listingTable.clickDeleteSelected();
         await PageObjects.common.clickConfirmOnModal();
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await listingTable.expectItemsCount('map', 0);
       });
     });
 
