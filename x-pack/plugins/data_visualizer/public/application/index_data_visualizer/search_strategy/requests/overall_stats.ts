@@ -206,7 +206,7 @@ export const processNonAggregatableFieldsExistResponse = (
 
   nonAggregatableFields.forEach((fieldName) => {
     const foundField = results.find((r) => r.rawResponse.fieldName === fieldName);
-    const existsInDocs = foundField !== undefined && foundField.rawResponse.hits.hits.length > 0;
+    const existsInDocs = foundField !== undefined && foundField.rawResponse.hits.total > 0;
     const fieldData: NonAggregatableField = {
       fieldName,
       existsInDocs,

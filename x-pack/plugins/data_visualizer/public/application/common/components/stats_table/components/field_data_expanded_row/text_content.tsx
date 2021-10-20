@@ -30,7 +30,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
         {numExamples > 0 && <ExamplesList examples={examples} />}
         {numExamples === 0 && (
           <Fragment>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="xs" />
             <EuiCallOut
               size="s"
               title={i18n.translate(
