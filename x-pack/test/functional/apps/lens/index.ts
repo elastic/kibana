@@ -12,26 +12,42 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+<<<<<<< HEAD
   const PageObjects = getPageObjects(['timePicker']);
+=======
+>>>>>>> master
 
   describe('lens app', () => {
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 800);
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+<<<<<<< HEAD
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({ defaultIndex: 'logstash-*', 'dateFormat:tz': 'UTC' });
+=======
+      await esArchiver.load('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/default'
+      );
+>>>>>>> master
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+<<<<<<< HEAD
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+=======
+      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/default'
+>>>>>>> master
       );
     });
 

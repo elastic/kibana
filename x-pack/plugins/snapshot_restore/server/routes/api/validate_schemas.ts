@@ -26,6 +26,31 @@ const snapshotRetentionSchema = schema.object({
   minCount: schema.maybe(schema.oneOf([schema.number(), schema.literal('')])),
 });
 
+export const snapshotListSchema = schema.object({
+  sortField: schema.oneOf([
+    schema.literal('snapshot'),
+    schema.literal('repository'),
+    schema.literal('indices'),
+    schema.literal('durationInMillis'),
+    schema.literal('startTimeInMillis'),
+    schema.literal('shards.total'),
+    schema.literal('shards.failed'),
+  ]),
+  sortDirection: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
+  pageIndex: schema.number(),
+  pageSize: schema.number(),
+  searchField: schema.maybe(
+    schema.oneOf([
+      schema.literal('snapshot'),
+      schema.literal('repository'),
+      schema.literal('policyName'),
+    ])
+  ),
+  searchValue: schema.maybe(schema.string()),
+  searchMatch: schema.maybe(schema.oneOf([schema.literal('must'), schema.literal('must_not')])),
+  searchOperator: schema.maybe(schema.oneOf([schema.literal('eq'), schema.literal('exact')])),
+});
+
 export const policySchema = schema.object({
   name: schema.string(),
   snapshotName: schema.string(),

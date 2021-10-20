@@ -94,7 +94,6 @@ kibana_vars=(
     map.tilemap.url
     migrations.batchSize
     migrations.maxBatchSizeBytes
-    migrations.enableV2
     migrations.pollInterval
     migrations.retryAttempts
     migrations.scrollDuration
@@ -366,7 +365,6 @@ kibana_vars=(
     xpack.securitySolution.packagerTaskInterval
     xpack.securitySolution.prebuiltRulesFromFileSystem
     xpack.securitySolution.prebuiltRulesFromSavedObjects
-    xpack.spaces.enabled
     xpack.spaces.maxSpaces
     xpack.task_manager.index
     xpack.task_manager.max_attempts
