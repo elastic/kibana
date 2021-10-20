@@ -20,12 +20,12 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['skipCloud', 'ciGroup2']);
 
     let verificationCode: string;
-    before(async () => {
+    before(async function () {
       verificationCode = (await supertest.get('/test_endpoints/verification_code').expect(200)).body
         .verificationCode;
     });
 
-    it('should configure Kibana successfully', async () => {
+    it('should configure Kibana successfully', async function () {
       this.timeout(60_000);
 
       await browser.get(`${deployment.getHostPort()}?code=${verificationCode}`);

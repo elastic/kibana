@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     const elasticsearchConfig = config.get('servers.elasticsearch');
     let verificationCode: string;
     let caFingerprint: string;
-    before(async () => {
+    before(async function () {
       verificationCode = (await supertest.get('/test_endpoints/verification_code').expect(200)).body
         .verificationCode;
 
@@ -37,16 +37,16 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     let enrollmentAPIKey: string;
-    beforeEach(async () => {
+    beforeEach(async function () {
       const apiResponse = await es.security.createApiKey({ body: { name: 'enrollment_api_key' } });
       enrollmentAPIKey = `${apiResponse.body.id}:${apiResponse.body.api_key}`;
     });
 
-    afterEach(async () => {
+    afterEach(async function () {
       await es.security.invalidateApiKey({ body: { name: 'enrollment_api_key' } });
     });
 
-    it('should configure Kibana successfully', async () => {
+    it('should configure Kibana successfully', async function () {
       this.timeout(60_000);
 
       await browser.get(`${deployment.getHostPort()}?code=${verificationCode}`);
