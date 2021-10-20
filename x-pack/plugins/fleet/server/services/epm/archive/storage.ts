@@ -30,7 +30,8 @@ import type { ArchiveEntry } from './index';
 import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
-const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
+// Updated to accomodate larger package size in some ML model packages
+const MAX_ES_ASSET_BYTES = 50 * 1024 * 1024;
 
 export interface PackageAsset {
   package_name: string;
