@@ -162,7 +162,6 @@ export default ({ getService }: FtrProviderContext) => {
             enabled: true,
             created_by: 'elastic',
             updated_by: 'elastic',
-            throttle: null,
             description: 'Test ML rule description',
             risk_score: 50,
             severity: 'critical',
