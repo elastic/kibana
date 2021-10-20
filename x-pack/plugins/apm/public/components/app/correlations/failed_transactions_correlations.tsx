@@ -444,8 +444,8 @@ export function FailedTransactionsCorrelations({
   if (Array.isArray(response.errorHistogram)) {
     transactionDistributionChartData.push({
       id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.allFailedTransactionsLabel',
-        { defaultMessage: 'All failed transactions' }
+        'xpack.apm.transactionDistribution.chart.failedTransactionsLabel',
+        { defaultMessage: 'Failed transactions' }
       ),
       histogram: response.errorHistogram,
     });
@@ -512,7 +512,7 @@ export function FailedTransactionsCorrelations({
         <EuiText color="subdued" size="xs">
           <FormattedMessage
             id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartDescription"
-            defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {br}{allTransactions}, {allFailedTransactions} and {focusTransaction}."
+            defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {br}{allTransactions}, {failedTransactions} and {focusTransaction}."
             values={{
               br: <br />,
               allTransactions: (
@@ -523,13 +523,13 @@ export function FailedTransactionsCorrelations({
                   />
                 </span>
               ),
-              allFailedTransactions: (
+              failedTransactions: (
                 <span
                   style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}
                 >
                   <FormattedMessage
-                    id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllFailedTransactions"
-                    defaultMessage="all failed transactions"
+                    id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartFailedTransactions"
+                    defaultMessage="failed transactions"
                   />
                 </span>
               ),

@@ -138,8 +138,8 @@ export const useTransactionDistributionChartData = () => {
   if (Array.isArray(errorHistogramData.overallHistogram)) {
     transactionDistributionChartData.push({
       id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.allFailedTransactionsLabel',
-        { defaultMessage: 'All failed transactions' }
+        'xpack.apm.transactionDistribution.chart.failedTransactionsLabel',
+        { defaultMessage: 'Failed transactions' }
       ),
       histogram: errorHistogramData.overallHistogram,
     });

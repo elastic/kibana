@@ -165,7 +165,7 @@ export function TransactionDistribution({
       <EuiText color="subdued" size="xs">
         <FormattedMessage
           id="xpack.apm.transactionDetails.tabs.transactionDistributionChartDescription"
-          defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {allTransactions} and {allFailedTransactions}."
+          defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {allTransactions} and {failedTransactions}."
           values={{
             allTransactions: (
               <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
@@ -175,13 +175,13 @@ export function TransactionDistribution({
                 />
               </span>
             ),
-            allFailedTransactions: (
+            failedTransactions: (
               <span
                 style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}
               >
                 <FormattedMessage
-                  id="xpack.apm.transactionDetails.tabs.transactionDistributionChartAllFailedTransactions"
-                  defaultMessage="all failed transactions"
+                  id="xpack.apm.transactionDetails.tabs.transactionDistributionChartFailedTransactions"
+                  defaultMessage="failed transactions"
                 />
               </span>
             ),
