@@ -19,7 +19,7 @@ const i18nTexts = {
   calloutTitle: (warningsCount: number, previousCheck: string) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.verifyChanges.calloutTitle"
-      defaultMessage="{warningsCount, plural, =0 {No} other {{warningsCount}}} deprecation {warningsCount, plural, one {warning} other {warnings}} since {previousCheck}"
+      defaultMessage="{warningsCount, plural, =0 {No} other {{warningsCount}}} deprecation {warningsCount, plural, one {issue} other {issues}} since {previousCheck}"
       values={{
         warningsCount,
         previousCheck: (

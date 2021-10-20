@@ -268,7 +268,7 @@ describe('Overview - Fix deprecation logs step', () => {
       expect(find('hasWarningsCallout').text()).toContain('10');
     });
 
-    test('No deprecation warnings', async () => {
+    test('No deprecation issues', async () => {
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
         count: 0,
       });
@@ -282,7 +282,7 @@ describe('Overview - Fix deprecation logs step', () => {
       component.update();
 
       expect(exists('noWarningsCallout')).toBe(true);
-      expect(find('noWarningsCallout').text()).toContain('No deprecation warnings');
+      expect(find('noWarningsCallout').text()).toContain('No deprecation issues');
     });
 
     test('Handles errors and can retry', async () => {
