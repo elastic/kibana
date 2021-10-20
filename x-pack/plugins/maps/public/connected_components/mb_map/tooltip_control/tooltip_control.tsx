@@ -131,7 +131,7 @@ export class TooltipControl extends Component<Props, {}> {
     featureId,
   }: {
     layerId: string;
-    featureId: string | number;
+    featureId?: string | number;
   }) => {
     const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer || typeof featureId === 'undefined') {
@@ -152,7 +152,7 @@ export class TooltipControl extends Component<Props, {}> {
     tooltipId,
   }: {
     layerId: string;
-    featureId: string | number;
+    featureId?: string | number;
     tooltipId: string;
   }): TooltipFeatureAction[] {
     const actions = [];
@@ -205,9 +205,6 @@ export class TooltipControl extends Component<Props, {}> {
       }
 
       const featureId = getFeatureId(mbFeature, layer.getSource());
-      if (!featureId) {
-        break;
-      }
       const layerId = layer.getId();
       let match = false;
       for (let j = 0; j < uniqueFeatures.length; j++) {
