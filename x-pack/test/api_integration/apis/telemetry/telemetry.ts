@@ -19,6 +19,7 @@ import monitoringRootTelemetrySchema from '../../../../plugins/telemetry_collect
 import ossPluginsTelemetrySchema from '../../../../../src/plugins/telemetry/schema/oss_plugins.json';
 import xpackPluginsTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_plugins.json';
 import { assertTelemetryPayload } from '../../../../../test/api_integration/apis/telemetry/utils';
+import type { UnencryptedTelemetryPayload } from '../../../../../src/plugins/telemetry/common/types';
 
 /**
  * Update the .monitoring-* documents loaded via the archiver to the recent `timestamp`
@@ -92,15 +93,16 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.load(archive);
         await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
 
-        const { body } = await supertest
+        const { body }: { body: UnencryptedTelemetryPayload } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
           .send({ unencrypted: true })
           .expect(200);
 
         expect(body.length).to.be.greaterThan(1);
-        localXPack = body.shift();
-        monitoring = body;
+        const telemetryStats = body.map(({ stats }) => stats);
+        localXPack = telemetryStats.shift() as Record<string, unknown>;
+        monitoring = telemetryStats as Array<Record<string, unknown>>;
       });
       after(() => esArchiver.unload(archive));
 
@@ -142,15 +144,17 @@ export default function ({ getService }: FtrProviderContext) {
       });
       after(() => esArchiver.unload(archive));
       it('should load non-expiring basic cluster', async () => {
-        const { body } = await supertest
+        const { body }: { body: UnencryptedTelemetryPayload } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
           .send({ unencrypted: true })
           .expect(200);
 
         expect(body).length(2);
-        const [localXPack, ...monitoring] = body;
-        expect(localXPack.collectionSource).to.eql('local_xpack');
+        const telemetryStats = body.map(({ stats }) => stats);
+
+        const [localXPack, ...monitoring] = telemetryStats;
+        expect((localXPack as Record<string, unknown>).collectionSource).to.eql('local_xpack');
         expect(monitoring).to.eql(basicClusterFixture.map((item) => ({ ...item, timestamp })));
       });
     });

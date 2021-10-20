@@ -74,6 +74,11 @@ export interface UsageStatsPayload extends BasicStatsPayload {
   collectionSource: string;
 }
 
+export interface OptInStatsPayload {
+  cluster_uuid: string;
+  opt_in_status: boolean;
+}
+
 export interface StatsCollectionContext {
   logger: Logger | Console;
   version: string;
