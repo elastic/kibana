@@ -74,14 +74,10 @@ export class ManagementSectionsService {
       if (capabilities.management.hasOwnProperty(section.id)) {
         const sectionCapabilities = capabilities.management[section.id];
         section.apps.forEach((app) => {
-          if (sectionCapabilities.hasOwnProperty(app.id) && sectionCapabilities[app.id] !== true) {
-            app.disable();
-          }
-          // app is now named dataViews but capabiities are still 'indexPatterns'
+          const capabilitiesId = app.capabilitiesId || app.id;
           if (
-            app.id === 'dataViews' &&
-            sectionCapabilities.hasOwnProperty('indexPatterns') &&
-            sectionCapabilities.indexPatterns !== true
+            sectionCapabilities.hasOwnProperty(capabilitiesId) &&
+            sectionCapabilities[capabilitiesId] !== true
           ) {
             app.disable();
           }

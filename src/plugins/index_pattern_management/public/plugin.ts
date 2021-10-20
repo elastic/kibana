@@ -72,6 +72,8 @@ export class IndexPatternManagementPlugin
       id: IPM_APP_ID,
       title: sectionsHeader,
       order: 0,
+      capabilitiesId: 'indexPatterns',
+      redirectFrom: 'kibana/indexPatterns',
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 

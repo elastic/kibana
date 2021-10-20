@@ -43,7 +43,12 @@ export const ManagementRouter = memo(
               />
             ))
         )}
-        <Redirect path={'/kibana/indexPatterns*'} to={'/kibana/dataViews*'} />
+        {sections.map((section) =>
+          section
+            .getAppsEnabled()
+            .filter((app) => app.redirectFrom)
+            .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
+        )}
         <Route
           path={'/'}
           component={() => (
