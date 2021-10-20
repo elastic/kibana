@@ -15,7 +15,7 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { CcrShardReact } from '../../../components/elasticsearch/ccr_shard';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
