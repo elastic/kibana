@@ -54,7 +54,6 @@ export const useGetIssueTypes = ({
           signal: abortCtrl.current.signal,
           connectorId: connector.id,
         });
-
         if (!didCancel.current) {
           const asOptions = (res.data ?? []).map((type) => ({
             text: type.name ?? '',

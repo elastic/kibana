@@ -8,9 +8,9 @@
 import {
   ActionTypeExecutorResult,
   ActionTypeExecutorResultStatus,
-} from '../../../../../actions/common';
+} from '../../../../actions/common';
 
-interface SnakeCasedResponse<Data> {
+export interface SnakedActionTypeExecutorResponse<Data> {
   connector_id: string;
   status: ActionTypeExecutorResultStatus;
   message?: string;
@@ -23,7 +23,7 @@ export const rewriteResponseToCamelCase = <T>({
   connector_id: actionId,
   service_message: serviceMessage,
   ...data
-}: SnakeCasedResponse<T>): ActionTypeExecutorResult<T> => ({
+}: SnakedActionTypeExecutorResponse<T>): ActionTypeExecutorResult<T> => ({
   ...data,
   actionId,
   serviceMessage,

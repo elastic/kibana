@@ -14,7 +14,6 @@ import { API_INFO_ERROR } from './translations';
 import { AppInfo, RESTApiError } from './types';
 import { rewriteResponseToCamelCase } from '../rewrite_response_body';
 import { ActionTypeExecutorResult } from '../../../../../../actions/common';
-import { BASE_ACTION_API_PATH } from '../../../constants';
 import { Choice } from './types';
 
 export async function getChoices({

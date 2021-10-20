@@ -6,10 +6,11 @@
  */
 
 import { httpServiceMock } from '../../../../../../../../src/core/public/mocks';
+import { rewriteResponseToCamelCase } from '../rewrite_response_body';
 import { getIssueTypes, getFieldsByIssueType, getIssues, getIssue } from './api';
 
 const issueTypesResponse = {
-  status: 'ok',
+  status: 'ok' as const,
   data: {
     projects: [
       {
@@ -26,11 +27,11 @@ const issueTypesResponse = {
       },
     ],
   },
-  actionId: 'test',
+  connector_id: 'test',
 };
 
 const fieldsResponse = {
-  status: 'ok',
+  status: 'ok' as const,
   data: {
     projects: [
       {
@@ -74,21 +75,27 @@ const fieldsResponse = {
         ],
       },
     ],
-    actionId: 'test',
   },
+  connector_id: 'test',
+};
+
+const singleIssue = {
+  id: '10267',
+  key: 'RJ-107',
+  title: 'some title',
 };
 
 const issueResponse = {
-  status: 'ok',
-  data: {
-    id: '10267',
-    key: 'RJ-107',
-    fields: { summary: 'Test title' },
-  },
-  actionId: 'test',
+  status: 'ok' as const,
+  data: singleIssue,
+  connector_id: 'test',
+  service_message: undefined,
 };
 
-const issuesResponse = [issueResponse];
+const issuesResponse = {
+  ...issueResponse,
+  data: [singleIssue],
+};
 
 describe('Jira API', () => {
   const http = httpServiceMock.createStartContract();
@@ -100,8 +107,7 @@ describe('Jira API', () => {
       const abortCtrl = new AbortController();
       http.post.mockResolvedValueOnce(issueTypesResponse);
       const res = await getIssueTypes({ http, signal: abortCtrl.signal, connectorId: 'te/st' });
-
-      expect(res).toEqual(issueTypesResponse);
+      expect(res).toEqual(rewriteResponseToCamelCase(issueTypesResponse));
       expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"issueTypes","subActionParams":{}}}',
         signal: abortCtrl.signal,
@@ -120,7 +126,7 @@ describe('Jira API', () => {
         id: '10006',
       });
 
-      expect(res).toEqual(fieldsResponse);
+      expect(res).toEqual(rewriteResponseToCamelCase(fieldsResponse));
       expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"fieldsByIssueType","subActionParams":{"id":"10006"}}}',
         signal: abortCtrl.signal,
@@ -139,7 +145,7 @@ describe('Jira API', () => {
         title: 'test issue',
       });
 
-      expect(res).toEqual(issuesResponse);
+      expect(res).toEqual(rewriteResponseToCamelCase(issuesResponse));
       expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"issues","subActionParams":{"title":"test issue"}}}',
         signal: abortCtrl.signal,
@@ -150,7 +156,7 @@ describe('Jira API', () => {
   describe('getIssue', () => {
     test('should call get fields API', async () => {
       const abortCtrl = new AbortController();
-      http.post.mockResolvedValueOnce(issuesResponse);
+      http.post.mockResolvedValueOnce(issueResponse);
       const res = await getIssue({
         http,
         signal: abortCtrl.signal,
@@ -158,7 +164,7 @@ describe('Jira API', () => {
         id: 'RJ-107',
       });
 
-      expect(res).toEqual(issuesResponse);
+      expect(res).toEqual(rewriteResponseToCamelCase(issueResponse));
       expect(http.post).toHaveBeenCalledWith('/api/actions/connector/te%2Fst/_execute', {
         body: '{"params":{"subAction":"issue","subActionParams":{"id":"RJ-107"}}}',
         signal: abortCtrl.signal,

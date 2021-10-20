@@ -7,7 +7,6 @@
 
 import { EuiIconProps } from '@elastic/eui';
 import { UserConfiguredActionConnector } from '../../../types';
-import { ActionTypeExecutorResultStatus } from '../../../../../actions/common';
 
 export interface EmailActionParams {
   to: string[];
