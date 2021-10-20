@@ -20,7 +20,7 @@ import * as urlHelpers from '../../shared/Links/url_helpers';
 import { getComparisonTypes } from './get_comparison_types';
 import {
   getTimeRangeComparison,
-  TimeRangeComparisonType,
+  TimeRangeComparisonEnum,
 } from './get_time_range_comparison';
 
 const PrependContainer = euiStyled.div`
@@ -66,13 +66,13 @@ export function getSelectOptions({
   start,
   end,
 }: {
-  comparisonTypes: TimeRangeComparisonType[];
+  comparisonTypes: TimeRangeComparisonEnum[];
   start?: string;
   end?: string;
 }) {
   return comparisonTypes.map((value) => {
     switch (value) {
-      case TimeRangeComparisonType.DayBefore: {
+      case TimeRangeComparisonEnum.DayBefore: {
         return {
           value,
           text: i18n.translate('xpack.apm.timeComparison.select.dayBefore', {
@@ -80,7 +80,7 @@ export function getSelectOptions({
           }),
         };
       }
-      case TimeRangeComparisonType.WeekBefore: {
+      case TimeRangeComparisonEnum.WeekBefore: {
         return {
           value,
           text: i18n.translate('xpack.apm.timeComparison.select.weekBefore', {
@@ -88,9 +88,9 @@ export function getSelectOptions({
           }),
         };
       }
-      case TimeRangeComparisonType.PeriodBefore: {
+      case TimeRangeComparisonEnum.PeriodBefore: {
         const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-          comparisonType: TimeRangeComparisonType.PeriodBefore,
+          comparisonType: TimeRangeComparisonEnum.PeriodBefore,
           start,
           end,
           comparisonEnabled: true,

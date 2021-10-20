@@ -74,7 +74,7 @@ export function BackendDetailDependenciesTable() {
             serviceName={location.serviceName}
             agentName={location.agentName}
             query={{
-              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+              comparisonEnabled: comparisonEnabled ? true : false,
               comparisonType,
               environment,
               kuery,

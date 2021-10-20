@@ -80,7 +80,7 @@ export function ServiceOverviewDependenciesTable({
             type={location.spanType}
             subtype={location.spanSubtype}
             query={{
-              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+              comparisonEnabled: comparisonEnabled ? true : false,
               comparisonType,
               environment,
               kuery,
@@ -100,7 +100,7 @@ export function ServiceOverviewDependenciesTable({
             serviceName={location.serviceName}
             agentName={location.agentName}
             query={{
-              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+              comparisonEnabled: comparisonEnabled ? true : false,
               comparisonType,
               environment,
               kuery,
