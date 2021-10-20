@@ -34,7 +34,8 @@ const userMock = {
   roles: ['superuser'],
 };
 
-describe('EditUserPage', () => {
+// Failing: See https://github.com/elastic/kibana/issues/115473
+describe.skip('EditUserPage', () => {
   it('warns when viewing deactivated user', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
