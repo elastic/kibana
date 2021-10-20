@@ -46,6 +46,7 @@ export const exportRulesRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const rulesClient = context.alerting?.getRulesClient();
+      const exceptionsClient = context.lists?.getExceptionListClient();
       const savedObjectsClient = context.core.savedObjects.client;
 
       if (!rulesClient) {
@@ -72,20 +73,27 @@ export const exportRulesRoute = (
           }
         }
 
-        const exported =
+        const exportedRulesAndExceptions =
           request.body?.objects != null
             ? await getExportByObjectIds(
                 rulesClient,
+                exceptionsClient,
                 savedObjectsClient,
                 request.body.objects,
                 logger,
                 isRuleRegistryEnabled
               )
-            : await getExportAll(rulesClient, savedObjectsClient, logger, isRuleRegistryEnabled);
+            : await getExportAll(
+                rulesClient,
+                exceptionsClient,
+                savedObjectsClient,
+                logger,
+                isRuleRegistryEnabled
+              );
 
         const responseBody = request.query.exclude_export_details
-          ? exported.rulesNdjson
-          : `${exported.rulesNdjson}${exported.exportDetails}`;
+          ? exportedRulesAndExceptions.rulesNdjson
+          : `${exportedRulesAndExceptions.rulesNdjson}${exportedRulesAndExceptions.exceptionLists}${exportedRulesAndExceptions.exportDetails}`;
 
         return response.ok({
           headers: {

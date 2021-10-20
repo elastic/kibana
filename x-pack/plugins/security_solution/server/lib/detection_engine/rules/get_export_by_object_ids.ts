@@ -9,6 +9,7 @@ import { chunk } from 'lodash';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
 import { Logger } from 'src/core/server';
+import { ExceptionListClient } from '../../../../../lists/server';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { RulesClient, AlertServices } from '../../../../../alerting/server';
 
@@ -18,6 +19,7 @@ import { isAlertType } from '../rules/types';
 import { transformAlertToRule } from '../routes/rules/utils';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
+import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../rule_actions/legacy_get_bulk_rule_actions_saved_object';
@@ -40,6 +42,7 @@ export interface RulesErrors {
 
 export const getExportByObjectIds = async (
   rulesClient: RulesClient,
+  exceptionsClient: ExceptionListClient | undefined,
   savedObjectsClient: AlertServices['savedObjectsClient'],
   objects: Array<{ rule_id: string }>,
   logger: Logger,
@@ -47,6 +50,7 @@ export const getExportByObjectIds = async (
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
+  exceptionLists: string | null;
 }> => {
   const rulesAndErrors = await getRulesFromObjects(
     rulesClient,
@@ -56,9 +60,19 @@ export const getExportByObjectIds = async (
     isRuleRegistryEnabled
   );
 
+  // Retrieve exceptions
+  const exceptions = rulesAndErrors.rules.flatMap((rule) => rule.exceptions_list ?? []);
+  const { exportData: exceptionLists, exportDetails: exceptionDetails } =
+    await getRuleExceptionsForExport(exceptions, exceptionsClient);
+
   const rulesNdjson = transformDataToNdjson(rulesAndErrors.rules);
-  const exportDetails = getExportDetailsNdjson(rulesAndErrors.rules, rulesAndErrors.missingRules);
-  return { rulesNdjson, exportDetails };
+  const exportDetails = getExportDetailsNdjson(
+    rulesAndErrors.rules,
+    rulesAndErrors.missingRules,
+    exceptionDetails
+  );
+
+  return { rulesNdjson, exportDetails, exceptionLists };
 };
 
 export const getRulesFromObjects = async (
