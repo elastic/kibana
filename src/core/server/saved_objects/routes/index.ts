@@ -76,5 +76,5 @@ export function registerRoutes({
   const internalRouter = http.createRouter('/internal/saved_objects/');
 
   registerMigrateRoute(internalRouter, migratorPromise);
-  registerDeleteUnknownTypesRoute(internalRouter, { config, kibanaConfig, kibanaVersion });
+  registerDeleteUnknownTypesRoute(internalRouter, { kibanaConfig, kibanaVersion });
 }
