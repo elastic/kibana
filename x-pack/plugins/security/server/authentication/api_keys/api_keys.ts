@@ -113,11 +113,11 @@ export interface InvalidateAPIKeyResult {
    * Details about these errors. This field is not present in the response when error_count is 0.
    */
   error_details?: Array<{
-    type: string;
-    reason: string;
+    type?: string;
+    reason?: string;
     caused_by?: {
-      type: string;
-      reason: string;
+      type?: string;
+      reason?: string;
     };
   }>;
 }
@@ -252,7 +252,6 @@ export class APIKeys {
     let result: InvalidateAPIKeyResult;
     try {
       // User needs `manage_api_key` privilege to use this API
-      // @ts-expect-error error_details is not comptible with error: ErrorCause | string
       result = (
         await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
           body: {
@@ -289,7 +288,6 @@ export class APIKeys {
     let result: InvalidateAPIKeyResult;
     try {
       // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
-      // @ts-expect-error error_details is not comptible with error: ErrorCause | string
       result = (
         await this.clusterClient.asInternalUser.security.invalidateApiKey({
           body: {
