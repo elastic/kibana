@@ -44,6 +44,13 @@ export interface IRuleDataService {
   isWriteEnabled(): boolean;
 
   /**
+   * If writer cache is enabled (the default), the writer will be cached
+   * after being initialized. Disabling this is useful for tests, where we
+   * expect to easily be able to clean up after ourselves between test cases.
+   */
+  isWriterCacheEnabled(): boolean;
+
+  /**
    * Installs common Elasticsearch resources used by all alerts-as-data indices.
    */
   initializeService(): void;
