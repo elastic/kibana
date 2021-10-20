@@ -6,8 +6,7 @@
  */
 
 export { ElasticsearchOverview } from './overview';
-export { ElasticsearchOverviewReact } from './overview';
 export { ElasticsearchNodes } from './nodes';
-export { NodeReact } from './node';
+export { Node } from './node';
 export { ElasticsearchIndices } from './indices';
 export { ElasticsearchMLJobs } from './ml_jobs';

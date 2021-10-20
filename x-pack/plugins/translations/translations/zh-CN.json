@@ -18308,7 +18308,6 @@
     "xpack.monitoring.elasticsearch.shardActivity.totalTimeTooltip": "已启动：{startTime}",
     "xpack.monitoring.elasticsearch.shardActivity.unknownTargetAddressContent": "未知",
     "xpack.monitoring.elasticsearch.shardActivityTitle": "分片活动",
-    "xpack.monitoring.elasticsearch.shardAllocation.clusterViewDisplayName": "ClusterView",
     "xpack.monitoring.elasticsearch.shardAllocation.decorateShards.relocatingFromTextMessage": "正在从 {nodeName} 迁移",
     "xpack.monitoring.elasticsearch.shardAllocation.decorateShards.relocatingToTextMessage": "正在迁移至 {nodeName}",
     "xpack.monitoring.elasticsearch.shardAllocation.initializingLabel": "正在初始化",
