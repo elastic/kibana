@@ -31,7 +31,12 @@ export const Curations: React.FC = () => {
   const { dataLoading: curationsDataLoading, meta, selectedPageTab } = useValues(CurationsLogic);
   const { loadCurations, onSelectPageTab } = useActions(CurationsLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
-  const { dataLoading: curationsSettingsDataLoading } = useValues(CurationsSettingsLogic);
+  const {
+    dataLoading: curationsSettingsDataLoading,
+    curationsSettings: { enabled: curationsSettingsEnabled },
+  } = useValues(CurationsSettingsLogic);
+
+  const suggestionsEnabled = hasPlatinumLicense && curationsSettingsEnabled;
 
   const OVERVIEW_TAB = {
     label: i18n.translate(
@@ -61,7 +66,7 @@ export const Curations: React.FC = () => {
     ),
     isSelected: selectedPageTab === 'settings',
     onClick: () => onSelectPageTab('settings'),
-    append: (
+    append: suggestionsEnabled ? undefined : (
       <EuiBadge color="success">
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.newBadgeLabel', {
           defaultMessage: 'New!',

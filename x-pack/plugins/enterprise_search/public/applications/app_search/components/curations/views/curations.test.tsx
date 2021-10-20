@@ -47,6 +47,10 @@ describe('Curations', () => {
       },
     },
     selectedPageTab: 'overview',
+    // CurationsSettingsLogic
+    curationsSettings: {
+      enabled: true,
+    },
     // LicensingLogic
     hasPlatinumLicense: true,
   };
@@ -90,6 +94,47 @@ describe('Curations', () => {
     expect(tabs.length).toBe(2);
   });
 
+  it('renders a New! badge when less than platinum license', () => {
+    setMockValues({ ...values, hasPlatinumLicense: false });
+    const wrapper = shallow(<Curations />);
+
+    expect(getPageTitle(wrapper)).toEqual('Curated results');
+
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+    expect(tabs.at(1).prop('append')).not.toBeUndefined();
+  });
+
+  it('renders a New! badge when suggestions are disabled', () => {
+    setMockValues({
+      ...values,
+      curationsSettings: {
+        enabled: false,
+      },
+    });
+    const wrapper = shallow(<Curations />);
+
+    expect(getPageTitle(wrapper)).toEqual('Curated results');
+
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+    expect(tabs.at(2).prop('append')).not.toBeUndefined();
+  });
+
+  it('hides the badge when suggestions are enabled and the user has a platinum license', () => {
+    setMockValues({
+      ...values,
+      hasPlatinumLicense: true,
+      curationsSettings: {
+        enabled: true,
+      },
+    });
+    const wrapper = shallow(<Curations />);
+
+    expect(getPageTitle(wrapper)).toEqual('Curated results');
+
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+    expect(tabs.at(2).prop('append')).toBeUndefined();
+  });
+
   it('renders an overview view', () => {
     setMockValues({ ...values, selectedPageTab: 'overview' });
     const wrapper = shallow(<Curations />);
@@ -116,8 +161,6 @@ describe('Curations', () => {
     const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
 
     expect(tabs.at(2).prop('isSelected')).toEqual(true);
-    // New! badge
-    expect(tabs.at(2).prop('append')).not.toBeUndefined();
 
     expect(wrapper.find(CurationsSettings)).toHaveLength(1);
   });
