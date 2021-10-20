@@ -6,9 +6,8 @@
  */
 import { schema } from '@kbn/config-schema';
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
+import { PluginInitializerContext } from '../../../../src/core/server';
 
-import { ConfigSchema } from './config';
 import { MetricsEntitiesPlugin } from './plugin';
 
 export { MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart } from './types';
