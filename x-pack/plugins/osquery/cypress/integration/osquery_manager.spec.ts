@@ -13,9 +13,7 @@ import { addIntegration } from '../tasks/integrations';
 import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../tasks/live_query';
 
 describe('Osquery Manager', () => {
-  before(() => {
-    return addIntegration(Cypress.env('OSQUERY_POLICY'));
-  });
+  before(() => addIntegration(Cypress.env('OSQUERY_POLICY')));
 
   it('Runs live queries', () => {
     navigateTo(NEW_LIVE_QUERY);

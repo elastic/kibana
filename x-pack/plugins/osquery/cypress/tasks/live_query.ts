@@ -17,14 +17,9 @@ export const selectAllAgents = () => {
   return cy.get(ALL_AGENTS_OPTION).contains('All agents').click();
 };
 
-export const inputQuery = () => {
-  return cy.get(LIVE_QUERY_EDITOR).type('select * from processes;');
-};
+export const inputQuery = () => cy.get(LIVE_QUERY_EDITOR).type('select * from processes;');
 
-export const submitQuery = () => {
-  return cy.get(SUBMIT_BUTTON).contains('Submit').click();
-};
+export const submitQuery = () => cy.get(SUBMIT_BUTTON).contains('Submit').click();
 
-export const checkResults = () => {
-  return cy.get('[data-test-subj="dataGridRowCell"]').should('have.lengthOf.above', 0);
-};
+export const checkResults = () =>
+  cy.get('[data-test-subj="dataGridRowCell"]').should('have.lengthOf.above', 0);
