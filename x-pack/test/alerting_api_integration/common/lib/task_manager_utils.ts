@@ -109,7 +109,7 @@ export class TaskManagerUtils {
                 {
                   range: {
                     updated_at: {
-                      gte: taskRunAtFilter.getTime().toString(),
+                      gte: createdAtFilter.getTime().toString(),
                     },
                   },
                 },
