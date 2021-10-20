@@ -21,7 +21,6 @@ export enum USER {
   ML_VIEWER_SPACE1 = 'ft_ml_viewer_space1',
   ML_VIEWER_ALL_SPACES = 'ft_ml_viewer_all_spaces',
   ML_UNAUTHORIZED = 'ft_ml_unauthorized',
-  ML_UNAUTHORIZED_SPACES = 'ft_ml_unauthorized_spaces',
 }
 
 export function MachineLearningSecurityCommonProvider({ getService }: FtrProviderContext) {
@@ -172,7 +171,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       full_name: 'ML Viewer',
       password: 'mlv001',
       roles: [
-        'kibana_admin',
+        'ft_default_space_ml_none',
         'machine_learning_user',
         'ft_ml_source_readonly',
         'ft_ml_dest_readonly',
@@ -201,12 +200,6 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       full_name: 'ML Unauthorized',
       password: 'mlu001',
       roles: ['kibana_admin', 'ft_ml_source_readonly'],
-    },
-    {
-      name: 'ft_ml_unauthorized_spaces',
-      full_name: 'ML Unauthorized',
-      password: 'mlus001',
-      roles: ['ft_default_space_ml_none', 'ft_ml_source_readonly'],
     },
   ];
 
