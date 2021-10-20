@@ -45,11 +45,6 @@ Object {
               "field": "span.self_time.sum.us",
             },
           },
-          "total_transaction_breakdown_count": Object {
-            "sum": Object {
-              "field": "transaction.breakdown.count",
-            },
-          },
           "types": Object {
             "aggs": Object {
               "subtypes": Object {
@@ -92,11 +87,6 @@ Object {
       "sum_all_self_times": Object {
         "sum": Object {
           "field": "span.self_time.sum.us",
-        },
-      },
-      "total_transaction_breakdown_count": Object {
-        "sum": Object {
-          "field": "transaction.breakdown.count",
         },
       },
       "types": Object {
@@ -151,20 +141,8 @@ Object {
             },
           },
           Object {
-            "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
-                Object {
-                  "exists": Object {
-                    "field": "span.self_time.sum.us",
-                  },
-                },
-                Object {
-                  "exists": Object {
-                    "field": "transaction.breakdown.count",
-                  },
-                },
-              ],
+            "exists": Object {
+              "field": "transaction.breakdown.count",
             },
           },
         ],
@@ -189,11 +167,6 @@ Object {
           "sum_all_self_times": Object {
             "sum": Object {
               "field": "span.self_time.sum.us",
-            },
-          },
-          "total_transaction_breakdown_count": Object {
-            "sum": Object {
-              "field": "transaction.breakdown.count",
             },
           },
           "types": Object {
@@ -238,11 +211,6 @@ Object {
       "sum_all_self_times": Object {
         "sum": Object {
           "field": "span.self_time.sum.us",
-        },
-      },
-      "total_transaction_breakdown_count": Object {
-        "sum": Object {
-          "field": "transaction.breakdown.count",
         },
       },
       "types": Object {
