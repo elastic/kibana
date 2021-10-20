@@ -895,12 +895,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const id = 'lns-table-column-hidden';
       await PageObjects.common.sleep(500);
       const isChecked = await testSubjects.isEuiSwitchChecked(id);
-      console.log(`before switch status = ${isChecked}`);
+      log.debug(`switch status before the toggle = ${isChecked}`);
       await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
       await PageObjects.common.sleep(500);
       screenshot.take('toggleColumnVisibility3:Changedswitch');
       const isChecked2 = await testSubjects.isEuiSwitchChecked(id);
-      console.log(`after switch status = ${isChecked2}`);
+      log.debug(`switch status after the toggle = ${isChecked2}`);
       await this.closeDimensionEditor();
       await PageObjects.common.sleep(500);
       screenshot.take('toggleColumnVisibility4:closeDimensionEditor');
