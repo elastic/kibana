@@ -25,10 +25,6 @@ interface Props {
   setIsComplete: OverviewStepProps['setIsComplete'];
 }
 
-interface StepProps extends OverviewStepProps {
-  nextMajor: number;
-}
-
 const FixIssuesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   // We consider ES and Kibana issues to be fixed when there are 0 critical issues.
   const [isEsFixed, setIsEsFixed] = useState(false);
@@ -54,10 +50,9 @@ const FixIssuesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
 };
 
 export const getFixIssuesStep = ({
-  nextMajor,
   isComplete,
   setIsComplete,
-}: StepProps): EuiStepProps => {
+}: OverviewStepProps): EuiStepProps => {
   const status = isComplete ? 'complete' : 'incomplete';
 
   return {
@@ -70,8 +65,7 @@ export const getFixIssuesStep = ({
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.fixIssuesStepDescription"
-              defaultMessage="Update your Elasticsearch and Kibana deployments to be compatible with {nextMajor}.0. Critical issues must be resolved before you upgrade. Warning issues can be ignored at your discretion."
-              values={{ nextMajor }}
+              defaultMessage="Update your Elasticsearch and Kibana deployments to be compatible with Elastic 8.x. Critical issues must be resolved before you upgrade. Warning issues can be ignored at your discretion."
             />
           </p>
         </EuiText>
