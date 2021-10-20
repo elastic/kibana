@@ -21,7 +21,7 @@ import { ShardAllocationReact } from '../shard_allocation/shard_allocation_react
 import { Logs } from '../../logs';
 import { AlertsCallout } from '../../../alerts/callout';
 
-export const IndexReact = ({
+export const Index = ({
   indexSummary,
   metrics,
   clusterUuid,
