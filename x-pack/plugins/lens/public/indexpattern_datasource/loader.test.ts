@@ -186,7 +186,7 @@ const sampleIndexPatterns = {
 
 function mockIndexPatternsService() {
   return {
-    get: jest.fn(async (id: '1' | '2' | 'conflictId') => {
+    get: jest.fn(async (id: '1' | '2') => {
       const result = { ...sampleIndexPatternsFromService[id], metaFields: [] };
       if (!result.fields) {
         result.fields = [];

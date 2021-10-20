@@ -27,7 +27,7 @@ export function ChangeIndexPattern({
 }: {
   trigger: ChangeIndexPatternTriggerProps;
   indexPatternRefs: IndexPatternRef[];
-  isMissingCurrent: boolean;
+  isMissingCurrent?: boolean;
   onChangeIndexPattern: (newId: string) => void;
   indexPatternId?: string;
   selectableProps?: EuiSelectableProps;
