@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { useStartServices } from '../../../../hooks';
+import { TrackApplicationView } from '../../../../../../../../../../src/plugins/usage_collection/public';
 
 import { pagePathGetters } from '../../../../constants';
 import {
@@ -228,42 +229,48 @@ export const AvailablePackages: React.FC = memo(() => {
     <>
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon type="logoSecurity" size="xxl" />}
-            href={addBasePath('/app/integrations/detail/endpoint/')}
-            title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
-              defaultMessage: 'Endpoint Security',
-            })}
-            description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
-              defaultMessage:
-                'Protect your hosts with threat prevention, detection, and deep security data visibility.',
-            })}
-          />
+          <TrackApplicationView viewId="integration-card:epr:endpoint:featured">
+            <EuiCard
+              icon={<EuiIcon type="logoSecurity" size="xxl" />}
+              href={addBasePath('/app/integrations/detail/endpoint/')}
+              title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
+                defaultMessage: 'Endpoint Security',
+              })}
+              description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
+                defaultMessage:
+                  'Protect your hosts with threat prevention, detection, and deep security data visibility.',
+              })}
+            />
+          </TrackApplicationView>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiCard
-            title={i18n.translate('xpack.fleet.featuredObsTitle', {
-              defaultMessage: 'Elastic APM',
-            })}
-            description={i18n.translate('xpack.fleet.featuredObsDesc', {
-              defaultMessage:
-                'Monitor, detect and diagnose complex performance issues from your application.',
-            })}
-            href={addBasePath('/app/integrations/detail/apm')}
-            icon={<EuiIcon type="logoObservability" size="xxl" />}
-          />
+          <TrackApplicationView viewId="integration-card:epr:apm:featured">
+            <EuiCard
+              title={i18n.translate('xpack.fleet.featuredObsTitle', {
+                defaultMessage: 'Elastic APM',
+              })}
+              description={i18n.translate('xpack.fleet.featuredObsDesc', {
+                defaultMessage:
+                  'Monitor, detect and diagnose complex performance issues from your application.',
+              })}
+              href={addBasePath('/app/integrations/detail/apm')}
+              icon={<EuiIcon type="logoObservability" size="xxl" />}
+            />
+          </TrackApplicationView>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon type="logoAppSearch" size="xxl" />}
-            href={addBasePath('/app/enterprise_search/app_search')}
-            title={i18n.translate('xpack.fleet.featuredSearchTitle', {
-              defaultMessage: 'Web site crawler',
-            })}
-            description={i18n.translate('xpack.fleet.featuredSearchDesc', {
-              defaultMessage: 'Add search to your website with the App Search web crawler.',
-            })}
-          />
+          <TrackApplicationView viewId="integration-card:epr:app_search_web_crawler:featured">
+            <EuiCard
+              icon={<EuiIcon type="logoAppSearch" size="xxl" />}
+              href={addBasePath('/app/enterprise_search/app_search')}
+              title={i18n.translate('xpack.fleet.featuredSearchTitle', {
+                defaultMessage: 'Web site crawler',
+              })}
+              description={i18n.translate('xpack.fleet.featuredSearchDesc', {
+                defaultMessage: 'Add search to your website with the App Search web crawler.',
+              })}
+            />
+          </TrackApplicationView>
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="xl" />
