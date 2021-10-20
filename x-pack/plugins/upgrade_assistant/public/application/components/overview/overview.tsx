@@ -33,7 +33,6 @@ type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'fix_lo
 
 export const Overview: FunctionComponent = () => {
   const {
-    kibanaVersionInfo: { nextMajor },
     services: {
       breadcrumbs,
       core: { docLinks },
@@ -93,8 +92,7 @@ export const Overview: FunctionComponent = () => {
             <EuiLink href={docLinks.links.elasticsearch.releaseHighlights} target="_blank">
               <FormattedMessage
                 id="xpack.upgradeAssistant.overview.whatsNewLink"
-                defaultMessage="What's new in version {nextMajor}?"
-                values={{ nextMajor }}
+                defaultMessage="What's new in 8.x?"
               />
             </EuiLink>
           </EuiText>
