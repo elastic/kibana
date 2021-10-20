@@ -34,4 +34,5 @@ export const UI_SETTINGS = {
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
   AUTOCOMPLETE_USE_TIMERANGE: 'autocomplete:useTimeRange',
   AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: 'autocomplete:valueSuggestionMethod',
+  DATE_FORMAT: 'dateFormat',
 } as const;
