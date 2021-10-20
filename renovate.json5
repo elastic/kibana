@@ -37,9 +37,10 @@
       {
         groupName: '@elastic/charts',
         packageNames: ['@elastic/charts'],
-        reviewers: ['markov00', 'nickofthyme'],
+        reviewers: ['team:datavis'],
         matchBaseBranches: ['master'],
         labels: ['release_note:skip', 'v8.0.0', 'v7.16.0', 'auto-backport'],
+        draftPR: true,
         enabled: true,
       },
       {
