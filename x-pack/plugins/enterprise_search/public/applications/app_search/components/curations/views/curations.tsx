@@ -25,12 +25,13 @@ import { getCurationsBreadcrumbs } from '../utils';
 
 import { CurationsHistory } from './curations_history/curations_history';
 import { CurationsOverview } from './curations_overview';
-import { CurationsSettings } from './curations_settings';
+import { CurationsSettings, CurationsSettingsLogic } from './curations_settings';
 
 export const Curations: React.FC = () => {
-  const { dataLoading, curations, meta, selectedPageTab } = useValues(CurationsLogic);
+  const { dataLoading: curationsDataLoading, meta, selectedPageTab } = useValues(CurationsLogic);
   const { loadCurations, onSelectPageTab } = useActions(CurationsLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { dataLoading: curationsSettingsDataLoading } = useValues(CurationsSettingsLogic);
 
   const OVERVIEW_TAB = {
     label: i18n.translate(
@@ -93,7 +94,7 @@ export const Curations: React.FC = () => {
         ],
         tabs: pageTabs,
       }}
-      isLoading={dataLoading && !curations.length}
+      isLoading={curationsSettingsDataLoading || curationsDataLoading}
     >
       {selectedPageTab === 'overview' && <CurationsOverview />}
       {selectedPageTab === 'history' && <CurationsHistory />}
