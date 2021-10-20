@@ -10,7 +10,15 @@ import { URL } from 'url';
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 
+import axios from 'axios';
+
 import { TelemetryEventsSender } from './sender';
+
+jest.mock('axios', () => {
+  return {
+    post: jest.fn(),
+  };
+});
 
 describe('TelemetryEventsSender', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -36,11 +44,11 @@ describe('TelemetryEventsSender', () => {
       };
 
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }], 'my-channel');
-      sender['queuesPerChannel']['my-channel']['sendEvents'] = jest.fn();
+      sender['sendEvents'] = jest.fn();
 
       await sender['sendIfDue']();
 
-      expect(sender['queuesPerChannel']['my-channel']['sendEvents']).toBeCalledTimes(1);
+      expect(sender['sendEvents']).toBeCalledTimes(1);
     });
 
     it("shouldn't send when telemetry is disabled", async () => {
@@ -51,11 +59,11 @@ describe('TelemetryEventsSender', () => {
       sender['telemetryStart'] = telemetryStart;
 
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }], 'my-channel');
-      sender['queuesPerChannel']['my-channel']['sendEvents'] = jest.fn();
+      sender['sendEvents'] = jest.fn();
 
       await sender['sendIfDue']();
 
-      expect(sender['queuesPerChannel']['my-channel']['sendEvents']).toBeCalledTimes(0);
+      expect(sender['sendEvents']).toBeCalledTimes(0);
     });
 
     it('should send events to separate channels', async () => {
@@ -68,19 +76,34 @@ describe('TelemetryEventsSender', () => {
       };
 
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }], 'my-channel');
-      sender['queuesPerChannel']['my-channel']['sendEvents'] = jest.fn();
+      sender['queuesPerChannel']['my-channel']['getEvents'] = jest.fn(() => [
+        { 'event.kind': '1' },
+        { 'event.kind': '2' },
+      ]);
 
       expect(sender['queuesPerChannel']['my-channel']['queue'].length).toBe(2);
 
       sender.queueTelemetryEvents([{ 'event.kind': '3' }], 'my-channel2');
-      sender['queuesPerChannel']['my-channel2']['sendEvents'] = jest.fn();
+      sender['queuesPerChannel']['my-channel2']['getEvents'] = jest.fn(() => [
+        { 'event.kind': '3' },
+      ]);
 
       expect(sender['queuesPerChannel']['my-channel2']['queue'].length).toBe(1);
 
       await sender['sendIfDue']();
 
-      expect(sender['queuesPerChannel']['my-channel']['sendEvents']).toBeCalledTimes(1);
-      expect(sender['queuesPerChannel']['my-channel2']['sendEvents']).toBeCalledTimes(1);
+      expect(sender['queuesPerChannel']['my-channel']['getEvents']).toBeCalledTimes(1);
+      expect(sender['queuesPerChannel']['my-channel2']['getEvents']).toBeCalledTimes(1);
+      expect(axios.post).toHaveBeenCalledWith(
+        'https://telemetry.elastic.co/v3/send/my-channel',
+        expect.anything(),
+        expect.anything()
+      );
+      expect(axios.post).toHaveBeenCalledWith(
+        'https://telemetry.elastic.co/v3/send/my-channel2',
+        expect.anything(),
+        expect.anything()
+      );
     });
   });
 });

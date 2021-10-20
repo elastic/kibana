@@ -10,9 +10,14 @@ import { URL } from 'url';
 import type { Logger } from 'src/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 
-import type { TelemetryEvent } from './types';
+import { cloneDeep } from 'lodash';
+
+import axios from 'axios';
+
 import type { TelemetryReceiver } from './receiver';
 import { TelemetryQueue } from './queue';
+
+import type { ESClusterInfo, TelemetryEvent } from './types';
 
 /**
  * Simplified version of https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/server/lib/telemetry/sender.ts
@@ -58,7 +63,7 @@ export class TelemetryEventsSender {
 
   public queueTelemetryEvents(events: TelemetryEvent[], channel: string) {
     if (!this.queuesPerChannel[channel]) {
-      this.queuesPerChannel[channel] = new TelemetryQueue(this.logger);
+      this.queuesPerChannel[channel] = new TelemetryQueue();
     }
     this.queuesPerChannel[channel].addEvents(events);
   }
@@ -88,13 +93,48 @@ export class TelemetryEventsSender {
     const clusterInfo = await this.receiver?.fetchClusterInfo();
 
     for (const channel of Object.keys(this.queuesPerChannel)) {
-      await this.queuesPerChannel[channel].sendEvents(
+      await this.sendEvents(
         await this.fetchTelemetryUrl(channel),
-        clusterInfo
+        clusterInfo,
+        this.queuesPerChannel[channel]
       );
     }
 
     this.isSending = false;
+  }
+
+  public async sendEvents(
+    telemetryUrl: string,
+    clusterInfo: ESClusterInfo | undefined,
+    queue: TelemetryQueue
+  ) {
+    const events = queue.getEvents();
+    if (events.length === 0) {
+      return;
+    }
+
+    try {
+      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
+
+      const toSend: TelemetryEvent[] = cloneDeep(events).map((event) => ({
+        ...event,
+        cluster_uuid: clusterInfo?.cluster_uuid,
+        cluster_name: clusterInfo?.cluster_name,
+      }));
+      queue.clearEvents();
+
+      this.logger.debug(JSON.stringify(toSend));
+
+      await this.send(
+        toSend,
+        telemetryUrl,
+        clusterInfo?.cluster_uuid,
+        clusterInfo?.version?.number
+      );
+    } catch (err) {
+      this.logger.warn(`Error sending telemetry events data: ${err}`);
+      queue.clearEvents();
+    }
   }
 
   // TODO update once kibana uses v3 too https://github.com/elastic/kibana/pull/113525
@@ -114,4 +154,37 @@ export class TelemetryEventsSender {
     url.pathname = `/v3/send/${channel}`;
     return url.toString();
   }
+
+  private async send(
+    events: unknown[],
+    telemetryUrl: string,
+    clusterUuid: string | undefined,
+    clusterVersionNumber: string | undefined
+  ) {
+    const ndjson = this.transformDataToNdjson(events);
+
+    try {
+      const resp = await axios.post(telemetryUrl, ndjson, {
+        headers: {
+          'Content-Type': 'application/x-ndjson',
+          'X-Elastic-Cluster-ID': clusterUuid,
+          'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.16.0',
+        },
+      });
+      this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
+    } catch (err) {
+      this.logger.warn(
+        `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
+      );
+    }
+  }
+
+  private transformDataToNdjson = (data: unknown[]): string => {
+    if (data.length !== 0) {
+      const dataString = data.map((dataItem) => JSON.stringify(dataItem)).join('\n');
+      return `${dataString}\n`;
+    } else {
+      return '';
+    }
+  };
 }
