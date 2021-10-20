@@ -125,13 +125,6 @@ describe('KibanaMigrator', () => {
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
 
-      options.client.cat.templates.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          // @ts-expect-error
-          { templates: [] } as CatTemplatesResponse,
-          { statusCode: 404 }
-        )
-      );
       options.client.indices.get.mockReturnValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
@@ -144,8 +137,10 @@ describe('KibanaMigrator', () => {
       migrator.prepareMigrations();
       await migrator.runMigrations();
       await migrator.runMigrations();
+      await migrator.runMigrations();
 
-      expect(options.client.cat.templates).toHaveBeenCalledTimes(1);
+      // indices.get is called twice during a single migration
+      expect(options.client.indices.get).toHaveBeenCalledTimes(2);
     });
 
     it('emits results on getMigratorResult$()', async () => {
