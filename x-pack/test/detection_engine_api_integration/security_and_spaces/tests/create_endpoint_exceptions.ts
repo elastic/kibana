@@ -71,7 +71,8 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  describe('Rule exception operators for endpoints', () => {
+  // Flaky
+  describe.skip('Rule exception operators for endpoints', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/rule_exceptions/endpoint_without_host_type'
