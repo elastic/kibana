@@ -81,7 +81,7 @@ export function registerSearchRelevanceSuggestionsRoutes({
     })
   );
 
-  router.post(
+  router.get(
     {
       path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/{query}',
       validate: {
@@ -89,20 +89,13 @@ export function registerSearchRelevanceSuggestionsRoutes({
           engineName: schema.string(),
           query: schema.string(),
         }),
-        body: schema.object({
-          page: schema.object({
-            current: schema.number(),
-            size: schema.number(),
-          }),
-          filters: schema.object({
-            status: schema.arrayOf(schema.string()),
-            type: schema.string(),
-          }),
+        query: schema.object({
+          type: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/:query',
+      path: '/as/engines/:engineName/search_relevance_suggestions/:query',
     })
   );
 }
