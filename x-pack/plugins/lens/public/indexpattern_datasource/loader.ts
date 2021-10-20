@@ -262,7 +262,7 @@ export async function loadInitialState({
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: {},
-    patterns: initialContext ? [initialContext.indexPatternId] : usedPatterns,
+    patterns: usedPatterns,
     notUsedPatterns,
   });
 
