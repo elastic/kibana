@@ -17,9 +17,13 @@ import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { PageContent } from '../../../../components/page';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
-import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../hooks/use_waffle_options';
+import {
+  DEFAULT_LEGEND,
+  useWaffleOptionsContext,
+  WaffleLegendOptions,
+} from '../hooks/use_waffle_options';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import { InfraFormatterType } from '../../../../lib/lib';
+import { InfraFormatterType, InfraWaffleMapBounds } from '../../../../lib/lib';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
@@ -28,6 +32,7 @@ import { createLegend } from '../lib/create_legend';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { BottomDrawer } from './bottom_drawer';
 import { Legend } from './waffle/legend';
+import { LegendControls } from './waffle/legend_controls';
 
 interface Props {
   shouldLoadDefault: boolean;
@@ -36,6 +41,12 @@ interface Props {
   interval: string;
   nodes: SnapshotNode[];
   loading: boolean;
+}
+
+interface LegendControlOptions {
+  auto: boolean;
+  bounds: InfraWaffleMapBounds;
+  legend: WaffleLegendOptions;
 }
 
 export const Layout = React.memo(
@@ -52,6 +63,9 @@ export const Layout = React.memo(
       autoBounds,
       boundsOverride,
       legend,
+      changeBoundsOverride,
+      changeAutoBounds,
+      changeLegend,
     } = useWaffleOptionsContext();
     const { currentTime, jumpToTime, isAutoReloading } = useWaffleTimeContext();
     const { applyFilterQuery } = useWaffleFiltersContext();
@@ -118,6 +132,15 @@ export const Layout = React.memo(
       setShowLoading(!hasNodes);
     }, [nodes]);
 
+    const handleLegendControlChange = useCallback(
+      (opts: LegendControlOptions) => {
+        changeBoundsOverride(opts.bounds);
+        changeAutoBounds(opts.auto);
+        changeLegend(opts.legend);
+      },
+      [changeBoundsOverride, changeAutoBounds, changeLegend]
+    );
+
     return (
       <>
         <PageContent>
@@ -137,6 +160,18 @@ export const Layout = React.memo(
                           gutterSize="m"
                         >
                           <Toolbar nodeType={nodeType} currentTime={currentTime} />
+                          {view === 'map' && (
+                            <EuiFlexItem grow={false}>
+                              <LegendControls
+                                options={legend != null ? legend : DEFAULT_LEGEND}
+                                dataBounds={dataBounds}
+                                bounds={bounds}
+                                autoBounds={autoBounds}
+                                boundsOverride={boundsOverride}
+                                onChange={handleLegendControlChange}
+                              />
+                            </EuiFlexItem>
+                          )}
                           <EuiFlexItem grow={false}>
                             <ViewSwitcher view={view} onChange={changeView} />
                           </EuiFlexItem>
@@ -167,14 +202,7 @@ export const Layout = React.memo(
                                 interval={interval}
                                 formatter={formatter}
                                 width={width}
-                              >
-                                <Legend
-                                  formatter={formatter}
-                                  bounds={bounds}
-                                  dataBounds={dataBounds}
-                                  legend={options.legend}
-                                />
-                              </BottomDrawer>
+                              />
                             )}
                           </>
                         )}
@@ -182,6 +210,14 @@ export const Layout = React.memo(
                     </>
                   )}
                 </AutoSizer>
+                {view === 'map' && (
+                  <Legend
+                    formatter={formatter}
+                    bounds={bounds}
+                    dataBounds={dataBounds}
+                    legend={options.legend}
+                  />
+                )}
               </MainContainer>
             )}
           </AutoSizer>
