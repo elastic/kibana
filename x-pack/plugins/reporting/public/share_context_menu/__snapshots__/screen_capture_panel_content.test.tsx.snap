@@ -259,6 +259,8 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     <EuiAccordion
       arrowDisplay="left"
       buttonContent="Advanced options"
+      buttonElement="button"
+      element="div"
       id="advanced-options"
       initialIsOpen={false}
       isLoading={false}
@@ -271,6 +273,43 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
         <div
           className="euiAccordion__triggerWrapper"
         >
+          <EuiButtonIcon
+            aria-controls="advanced-options"
+            aria-expanded={false}
+            aria-labelledby="generated-id"
+            className="euiAccordion__iconButton"
+            color="text"
+            iconType="arrowRight"
+            onClick={[Function]}
+            tabIndex={-1}
+          >
+            <button
+              aria-controls="advanced-options"
+              aria-expanded={false}
+              aria-labelledby="generated-id"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton"
+              disabled={false}
+              onClick={[Function]}
+              tabIndex={-1}
+              type="button"
+            >
+              <EuiIcon
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                color="inherit"
+                size="m"
+                type="arrowRight"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="arrowRight"
+                  size="m"
+                />
+              </EuiIcon>
+            </button>
+          </EuiButtonIcon>
           <button
             aria-controls="advanced-options"
             aria-expanded={false}
@@ -280,22 +319,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
             type="button"
           >
             <span
-              className="euiAccordion__iconWrapper"
-            >
-              <EuiIcon
-                className="euiAccordion__icon"
-                size="m"
-                type="arrowRight"
-              >
-                <span
-                  className="euiAccordion__icon"
-                  data-euiicon-type="arrowRight"
-                  size="m"
-                />
-              </EuiIcon>
-            </span>
-            <span
-              className="euiIEFlexWrapFix"
+              className="euiAccordion__buttonContent"
             >
               Advanced options
             </span>
@@ -697,6 +721,8 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     <EuiAccordion
       arrowDisplay="left"
       buttonContent="Advanced options"
+      buttonElement="button"
+      element="div"
       id="advanced-options"
       initialIsOpen={false}
       isLoading={false}
@@ -709,6 +735,43 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
         <div
           className="euiAccordion__triggerWrapper"
         >
+          <EuiButtonIcon
+            aria-controls="advanced-options"
+            aria-expanded={false}
+            aria-labelledby="generated-id"
+            className="euiAccordion__iconButton"
+            color="text"
+            iconType="arrowRight"
+            onClick={[Function]}
+            tabIndex={-1}
+          >
+            <button
+              aria-controls="advanced-options"
+              aria-expanded={false}
+              aria-labelledby="generated-id"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton"
+              disabled={false}
+              onClick={[Function]}
+              tabIndex={-1}
+              type="button"
+            >
+              <EuiIcon
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                color="inherit"
+                size="m"
+                type="arrowRight"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="arrowRight"
+                  size="m"
+                />
+              </EuiIcon>
+            </button>
+          </EuiButtonIcon>
           <button
             aria-controls="advanced-options"
             aria-expanded={false}
@@ -718,22 +781,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
             type="button"
           >
             <span
-              className="euiAccordion__iconWrapper"
-            >
-              <EuiIcon
-                className="euiAccordion__icon"
-                size="m"
-                type="arrowRight"
-              >
-                <span
-                  className="euiAccordion__icon"
-                  data-euiicon-type="arrowRight"
-                  size="m"
-                />
-              </EuiIcon>
-            </span>
-            <span
-              className="euiIEFlexWrapFix"
+              className="euiAccordion__buttonContent"
             >
               Advanced options
             </span>
@@ -1007,6 +1055,8 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     <EuiAccordion
       arrowDisplay="left"
       buttonContent="Advanced options"
+      buttonElement="button"
+      element="div"
       id="advanced-options"
       initialIsOpen={false}
       isLoading={false}
@@ -1019,6 +1069,43 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
         <div
           className="euiAccordion__triggerWrapper"
         >
+          <EuiButtonIcon
+            aria-controls="advanced-options"
+            aria-expanded={false}
+            aria-labelledby="generated-id"
+            className="euiAccordion__iconButton"
+            color="text"
+            iconType="arrowRight"
+            onClick={[Function]}
+            tabIndex={-1}
+          >
+            <button
+              aria-controls="advanced-options"
+              aria-expanded={false}
+              aria-labelledby="generated-id"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton"
+              disabled={false}
+              onClick={[Function]}
+              tabIndex={-1}
+              type="button"
+            >
+              <EuiIcon
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                color="inherit"
+                size="m"
+                type="arrowRight"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="arrowRight"
+                  size="m"
+                />
+              </EuiIcon>
+            </button>
+          </EuiButtonIcon>
           <button
             aria-controls="advanced-options"
             aria-expanded={false}
@@ -1028,22 +1115,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
             type="button"
           >
             <span
-              className="euiAccordion__iconWrapper"
-            >
-              <EuiIcon
-                className="euiAccordion__icon"
-                size="m"
-                type="arrowRight"
-              >
-                <span
-                  className="euiAccordion__icon"
-                  data-euiicon-type="arrowRight"
-                  size="m"
-                />
-              </EuiIcon>
-            </span>
-            <span
-              className="euiIEFlexWrapFix"
+              className="euiAccordion__buttonContent"
             >
               Advanced options
             </span>
