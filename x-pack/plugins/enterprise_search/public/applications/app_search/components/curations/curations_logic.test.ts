@@ -92,7 +92,7 @@ describe('CurationsLogic', () => {
     });
 
     describe('onSelectPageTab', () => {
-      it('should set the selected page tab', () => {
+      it('should set the selected page tab and clear flash messages', () => {
         mount();
 
         CurationsLogic.actions.onSelectPageTab('settings');
@@ -101,6 +101,7 @@ describe('CurationsLogic', () => {
           ...DEFAULT_VALUES,
           selectedPageTab: 'settings',
         });
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
   });

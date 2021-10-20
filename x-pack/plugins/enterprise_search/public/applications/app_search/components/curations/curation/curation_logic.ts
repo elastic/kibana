@@ -21,7 +21,7 @@ import { DELETE_SUCCESS_MESSAGE } from '../constants';
 import { Curation } from '../types';
 import { addDocument, removeDocument } from '../utils';
 
-type CurationPageTabs = 'promoted' | 'hidden';
+type CurationPageTabs = 'promoted' | 'history' | 'hidden';
 
 interface CurationValues {
   dataLoading: boolean;
@@ -270,6 +270,9 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       if (activeQueryDeleted) actions.setActiveQuery(queries[0]);
 
       actions.updateCuration();
+    },
+    onSelectPageTab: () => {
+      clearFlashMessages();
     },
     setActiveQuery: () => actions.updateCuration(),
     setPromotedIds: () => actions.updateCuration(),

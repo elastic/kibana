@@ -49,6 +49,7 @@ describe('AutomatedCuration', () => {
 
   const actions = {
     convertToManual: jest.fn(),
+    onSelectPageTab: jest.fn(),
   };
 
   beforeEach(() => {
@@ -62,48 +63,41 @@ describe('AutomatedCuration', () => {
     const wrapper = shallow(<AutomatedCuration />);
 
     expect(wrapper.is(AppSearchPageTemplate));
-    expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
-    expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
-    expect(wrapper.find(History)).toHaveLength(0);
   });
 
-  it('includes tabs', () => {
+  it('includes set of tabs in the page header', () => {
     const wrapper = shallow(<AutomatedCuration />);
-    let tabs = getPageHeaderTabs(wrapper).find(EuiTab);
 
-    expect(tabs).toHaveLength(3);
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
 
-    expect(tabs.at(0).prop('isSelected')).toBe(true);
+    tabs.at(0).simulate('click');
+    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(1, 'promoted');
 
-    expect(tabs.at(1).prop('onClick')).toBeUndefined();
-    expect(tabs.at(1).prop('isSelected')).toBe(false);
     expect(tabs.at(1).prop('disabled')).toBe(true);
 
-    expect(tabs.at(2).prop('isSelected')).toBe(false);
-
-    // Clicking on the History tab shows the history view
     tabs.at(2).simulate('click');
+    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(2, 'history');
+  });
 
-    tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+  it('renders promoted and organic documents when the promoted tab is selected', () => {
+    setMockValues({ ...values, selectedPageTab: 'promoted' });
+    const wrapper = shallow(<AutomatedCuration />);
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
 
-    expect(tabs.at(0).prop('isSelected')).toBe(false);
-    expect(tabs.at(2).prop('isSelected')).toBe(true);
-
-    expect(wrapper.find(PromotedDocuments)).toHaveLength(0);
-    expect(wrapper.find(OrganicDocuments)).toHaveLength(0);
-    expect(wrapper.find(History)).toHaveLength(1);
-
-    // Clicking back to the Promoted tab shows promoted documents
-    tabs.at(0).simulate('click');
-
-    tabs = getPageHeaderTabs(wrapper).find(EuiTab);
-
-    expect(tabs.at(0).prop('isSelected')).toBe(true);
-    expect(tabs.at(2).prop('isSelected')).toBe(false);
+    expect(tabs.at(0).prop('isSelected')).toEqual(true);
 
     expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
     expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
-    expect(wrapper.find(History)).toHaveLength(0);
+  });
+
+  it('renders curation history when the history tab is selected', () => {
+    setMockValues({ ...values, selectedPageTab: 'history' });
+    const wrapper = shallow(<AutomatedCuration />);
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs.at(2).prop('isSelected')).toEqual(true);
+
+    expect(wrapper.find(History)).toHaveLength(1);
   });
 
   it('initializes CurationLogic with a curationId prop from URL param', () => {

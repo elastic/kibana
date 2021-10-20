@@ -126,5 +126,8 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
         flashAPIErrors(e);
       }
     },
+    onSelectPageTab: () => {
+      clearFlashMessages();
+    },
   }),
 });
