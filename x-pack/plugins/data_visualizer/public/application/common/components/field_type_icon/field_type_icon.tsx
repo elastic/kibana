@@ -48,7 +48,7 @@ export const typeToEuiIconMap: Record<string, { iconType: string; color?: string
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },
-  keyword: { iconType: 'tokenTag' },
+  keyword: { iconType: 'tokenKeyword' },
   nested: { iconType: 'tokenNested' },
 };
 
