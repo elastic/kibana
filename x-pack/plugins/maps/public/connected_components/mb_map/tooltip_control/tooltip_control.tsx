@@ -127,7 +127,13 @@ export class TooltipControl extends Component<Props, {}> {
     }) as IVectorLayer;
   }
 
-  _loadPreIndexedShape = async ({ layerId, featureId }: { layerId: string; featureId: string | number }) => {
+  _loadPreIndexedShape = async ({
+    layerId,
+    featureId,
+  }: {
+    layerId: string;
+    featureId: string | number;
+  }) => {
     const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer || typeof featureId === 'undefined') {
       return null;

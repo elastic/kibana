@@ -41,8 +41,12 @@ const mockLayer = {
   },
   getSource: () => {
     return {
-      isMvt: () => { return false; },
-      isESSource: () => { return false; },
+      isMvt: () => {
+        return false;
+      },
+      isESSource: () => {
+        return false;
+      },
     };
   },
   getFeatureById: () => {

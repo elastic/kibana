@@ -80,7 +80,9 @@ export function cleanTooltipStateForLayer(layer: ILayer, layerFeatures: Feature[
 
           // Keep feature if it is still in layer
           return layerFeatures.some((layerFeature) => {
-            return getFeatureId(layerFeature, (layer as IVectorLayer).getSource()) === tooltipFeature.id;
+            return (
+              getFeatureId(layerFeature, (layer as IVectorLayer).getSource()) === tooltipFeature.id
+            );
           });
         });
 

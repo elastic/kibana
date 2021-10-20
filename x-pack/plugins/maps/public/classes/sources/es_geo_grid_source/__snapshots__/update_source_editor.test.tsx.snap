@@ -20,6 +20,7 @@ exports[`source editor geo_grid_source default vector layer config should allow 
     <MetricsEditor
       allowMultipleMetrics={true}
       fields={Array []}
+      key="1c4df149-224d-415a-a859-d3c4cdee1d19"
       metrics={Array []}
       onChange={[Function]}
     />
@@ -44,6 +45,7 @@ exports[`source editor geo_grid_source default vector layer config should allow 
     />
     <ResolutionEditor
       includeSuperFine={true}
+      metrics={Array []}
       onChange={[Function]}
       resolution="COARSE"
     />
@@ -79,6 +81,7 @@ exports[`source editor geo_grid_source should put limitations based on heatmap-r
     <MetricsEditor
       allowMultipleMetrics={false}
       fields={Array []}
+      key="7da47982-cf76-4bdd-9e79-e5fda412bc5e"
       metrics={Array []}
       metricsFilter={[Function]}
       onChange={[Function]}
@@ -104,6 +107,7 @@ exports[`source editor geo_grid_source should put limitations based on heatmap-r
     />
     <ResolutionEditor
       includeSuperFine={false}
+      metrics={Array []}
       onChange={[Function]}
       resolution="COARSE"
     />
