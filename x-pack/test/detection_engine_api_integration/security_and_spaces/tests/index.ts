@@ -18,6 +18,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./add_actions'));
       loadTestFile(require.resolve('./update_actions'));
       loadTestFile(require.resolve('./add_prepackaged_rules'));
+      loadTestFile(require.resolve('./check_privileges'));
       loadTestFile(require.resolve('./create_rules'));
       loadTestFile(require.resolve('./create_rules_bulk'));
       loadTestFile(require.resolve('./create_index'));
