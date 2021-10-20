@@ -61,7 +61,6 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
     dataLoading: [
       true,
       {
-        loadCurations: () => true,
         onCurationsLoad: () => false,
       },
     ],

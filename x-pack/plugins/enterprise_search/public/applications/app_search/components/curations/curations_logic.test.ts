@@ -107,17 +107,6 @@ describe('CurationsLogic', () => {
 
   describe('listeners', () => {
     describe('loadCurations', () => {
-      it('should set dataLoading state', () => {
-        mount({ dataLoading: false });
-
-        CurationsLogic.actions.loadCurations();
-
-        expect(CurationsLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          dataLoading: true,
-        });
-      });
-
       it('should make an API call and set curations & meta state', async () => {
         http.get.mockReturnValueOnce(Promise.resolve(MOCK_CURATIONS_RESPONSE));
         mount();
