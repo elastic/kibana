@@ -23,6 +23,7 @@ import {
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
+  INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
 } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -43,7 +44,6 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { GetCurrentStatusBulkResult } from '../../rule_execution_log/types';
-import { ruleTypeMappings } from '../../signals/utils';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleNotificationAlertType } from '../../notifications/legacy_types';
 
@@ -230,6 +230,13 @@ export const ruleStatusRequest = () =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
+    body: { ids: ['04128c15-0d1b-4716-a4c5-46997ac7f3bd'] },
+  });
+
+export const internalRuleStatusRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
     body: { ids: ['04128c15-0d1b-4716-a4c5-46997ac7f3bd'] },
   });
 

@@ -198,7 +198,7 @@ export const patchRulesBulkRoute = (
                 ruleId: rule.id,
                 spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, [ruleStatus], isRuleRegistryEnabled);
+              return transformValidateBulkError(rule.id, rule, ruleStatus, isRuleRegistryEnabled);
             } else {
               return getIdBulkError({ id, ruleId });
             }

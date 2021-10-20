@@ -92,7 +92,7 @@ export const deleteRulesBulkRoute = (
           return transformValidateBulkError(
             idOrRuleIdOrUnknown,
             rule,
-            [ruleStatus],
+            ruleStatus,
             isRuleRegistryEnabled
           );
         } catch (err) {

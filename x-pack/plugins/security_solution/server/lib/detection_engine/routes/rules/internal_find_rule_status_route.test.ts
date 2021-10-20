@@ -7,13 +7,13 @@
 
 import { INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL } from '../../../../../common/constants';
 import {
-  ruleStatusRequest,
+  internalRuleStatusRequest,
   getAlertMock,
   getRuleExecutionStatusSucceeded,
   getRuleExecutionStatusFailed,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
-import { findRulesStatusesRoute } from './find_rules_status_route';
+import { internalFindRuleStatusRoute } from './internal_find_rule_status_route';
 import { RuleStatusResponse } from '../../rules/types';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
@@ -39,18 +39,18 @@ describe.each([
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
 
-    findRulesStatusesRoute(server.router);
+    internalFindRuleStatusRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when finding a single rule status with a valid rulesClient', async () => {
-      const response = await server.inject(ruleStatusRequest(), context);
+      const response = await server.inject(internalRuleStatusRequest(), context);
       expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting.getRulesClient = jest.fn();
-      const response = await server.inject(ruleStatusRequest(), context);
+      const response = await server.inject(internalRuleStatusRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
@@ -59,7 +59,7 @@ describe.each([
       clients.ruleExecutionLogClient.getCurrentStatus.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(ruleStatusRequest(), context);
+      const response = await server.inject(internalRuleStatusRequest(), context);
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -85,13 +85,16 @@ describe.each([
         ...failingExecutionRule,
       });
 
-      const response = await server.inject(ruleStatusRequest(), context);
-      const body: RuleStatusResponse = response.body;
+      const request = internalRuleStatusRequest();
+      const ruleId = request.body.ids[0];
+
+      const response = await server.inject(request, context);
+      const responseBody: RuleStatusResponse = response.body;
+      const ruleStatus = responseBody[ruleId].current_status;
+
       expect(response.status).toEqual(200);
-      expect(body[ruleStatusRequest().body.ids[0]].current_status?.status).toEqual('failed');
-      expect(body[ruleStatusRequest().body.ids[0]].current_status?.last_failure_message).toEqual(
-        'Reason: read Message: oops'
-      );
+      expect(ruleStatus?.status).toEqual('failed');
+      expect(ruleStatus?.last_failure_message).toEqual('Reason: read Message: oops');
     });
   });
 

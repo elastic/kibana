@@ -57,12 +57,12 @@ export const newTransformValidate = (
 export const transformValidateBulkError = (
   ruleId: string,
   alert: PartialAlert<RuleParams>,
-  ruleStatus?: IRuleStatusSOAttributes[],
+  ruleStatus?: IRuleStatusSOAttributes,
   isRuleRegistryEnabled?: boolean
 ): RulesSchema | BulkError => {
   if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
-    if (ruleStatus && ruleStatus?.length > 0 && isRuleStatusSavedObjectAttributes(ruleStatus[0])) {
-      const transformed = transformAlertToRule(alert, ruleStatus[0]);
+    if (ruleStatus && isRuleStatusSavedObjectAttributes(ruleStatus)) {
+      const transformed = transformAlertToRule(alert, ruleStatus);
       const [validated, errors] = validateNonExact(transformed, rulesSchema);
       if (errors != null || validated == null) {
         return createBulkErrorObject({
