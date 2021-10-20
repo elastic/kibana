@@ -118,7 +118,6 @@ function createRoot(options: { maxBatchSizeBytes?: number }) {
     {
       migrations: {
         skip: false,
-        enableV2: true,
         batchSize: 1000,
         maxBatchSizeBytes: options.maxBatchSizeBytes,
       },
