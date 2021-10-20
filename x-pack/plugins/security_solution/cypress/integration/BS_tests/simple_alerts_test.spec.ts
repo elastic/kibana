@@ -10,19 +10,18 @@ import { loginAndWaitForPageWithoutDateRange } from "../../tasks/login";
 import { navigateFromHeaderTo, refreshPage } from "../../tasks/security_header";
 import { ALERTS_URL } from "../../urls/navigation";
 
-const addDataScript = 'cypress/integration/BS_tests/send_data.py';
+const addDataScript = 'cypress/integration/BS_tests/send_test_data_to_elasticsearch.py';
 const elasticSearchUrl = 'http://localhost:9220/';
 const ruleName = `Rule ${Math.floor(Math.random() * 1000)}`;
 const indexName = "kuku";
 
-describe("Check alerts for a basic event correlation rule", () => {
+describe("Check alerts for event correlation rule", () => {
     
     before(() => {
         // Deletes all existing rules, cases and more
         cleanKibana();
         // Add test data
         cy.exec(`python3 ${addDataScript} ${elasticSearchUrl}`);
-        cy.log("Done adding data");
         loginAndWaitForPageWithoutDateRange(ALERTS_URL);
         waitForAlertsPanelToBeLoaded();
         waitForAlertsIndexToBeCreated();
