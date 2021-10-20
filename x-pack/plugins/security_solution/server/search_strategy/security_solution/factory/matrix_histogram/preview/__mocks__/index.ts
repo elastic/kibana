@@ -13,7 +13,7 @@ export const mockOptions = {
     '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"match":{"signal.rule.id":"test-preview-id"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
   histogramType: MatrixHistogramType.preview,
   timerange: { interval: '12h', from: '2020-09-08T14:23:04.482Z', to: '2020-09-09T14:23:04.482Z' },
-  stackByField: 'signal.rule.id',
+  stackByField: 'event.category',
 };
 
 export const expectedDsl = {
@@ -25,7 +25,7 @@ export const expectedDsl = {
     aggregations: {
       preview: {
         terms: {
-          field: 'signal.rule.id',
+          field: 'event.category',
           missing: 'All others',
           order: { _count: 'desc' },
           size: 10,
@@ -33,7 +33,7 @@ export const expectedDsl = {
         aggs: {
           preview: {
             date_histogram: {
-              field: '@timestamp',
+              field: 'signal.original_time',
               fixed_interval: '2700000ms',
               min_doc_count: 0,
               extended_bounds: { min: 1599574984482, max: 1599661384482 },
@@ -69,7 +69,7 @@ export const expectedDsl = {
           },
           {
             range: {
-              '@timestamp': {
+              'signal.original_time': {
                 gte: '2020-09-08T14:23:04.482Z',
                 lte: '2020-09-09T14:23:04.482Z',
                 format: 'strict_date_optional_time',

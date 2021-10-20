@@ -115,24 +115,4 @@ describe('PreviewQuery', () => {
 
     expect(wrapper.find('[data-test-subj="preview-histogram-panel"]').exists()).toBeFalsy();
   });
-
-  test('it renders histogram when there is a previewId', () => {
-    (usePreviewRoute as jest.Mock).mockReturnValueOnce({
-      addNoiseWarning: jest.fn(),
-      createPreview: jest.fn(),
-      clearPreview: jest.fn(),
-      errors: [],
-      isPreviewRequestInProgress: false,
-      previewId: 'previewId',
-      warnings: [],
-    });
-
-    const wrapper = mount(
-      <TestProviders>
-        <RulePreview {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="preview-histogram-panel"]').exists()).toBeTruthy();
-  });
 });
