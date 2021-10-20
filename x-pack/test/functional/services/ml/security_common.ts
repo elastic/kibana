@@ -199,7 +199,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       name: 'ft_ml_unauthorized',
       full_name: 'ML Unauthorized',
       password: 'mlu001',
-      roles: ['kibana_admin', 'ft_ml_source_readonly'],
+      roles: ['ft_default_space_ml_none', 'ft_ml_source_readonly'],
     },
   ];
 
