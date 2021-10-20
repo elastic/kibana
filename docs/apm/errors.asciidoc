@@ -2,7 +2,7 @@
 [[errors]]
 === Errors
 
-TIP: {apm-overview-ref-v}/errors.html[Errors] are groups of exceptions with a similar exception or log message.
+TIP: {apm-guide-ref}/data-model-errors.html[Errors] are groups of exceptions with a similar exception or log message.
 
 The *Errors* overview provides a high-level view of the exceptions that APM agents catch,
 or that users manually report with APM agent APIs.
