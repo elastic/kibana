@@ -66,7 +66,7 @@ const SortableControlInner = forwardRef<
   const width = panels[embeddableId].width;
 
   const dragHandle = (
-    <button ref={dragHandleRef} {...dragHandleProps} className="controlFrame--dragHandle">
+    <button ref={dragHandleRef} {...dragHandleProps} className="controlFrame__dragHandle">
       <EuiIcon type="grabHorizontal" />
     </button>
   );
@@ -114,9 +114,9 @@ export const ControlClone = ({ draggingId }: { draggingId: string }) => {
       })}
     >
       {controlStyle === 'twoLine' ? <EuiFormLabel>{title}</EuiFormLabel> : undefined}
-      <EuiFlexGroup gutterSize="none" className={'controlFrame--draggable'}>
+      <EuiFlexGroup gutterSize="none" className={'controlFrame__draggable'}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="grabHorizontal" className="controlFrame--dragHandle" />
+          <EuiIcon type="grabHorizontal" className="controlFrame__dragHandle" />
         </EuiFlexItem>
         {controlStyle === 'oneLine' ? <EuiFlexItem>{title}</EuiFlexItem> : undefined}
       </EuiFlexGroup>

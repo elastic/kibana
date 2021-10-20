@@ -64,7 +64,7 @@ $controlMinWidth: $euiSize * 14;
     cursor: grabbing !important; // prevents cursor flickering while dragging the clone
   }
 
-  .controlFrame--draggable {
+  .controlFrame__draggable {
     cursor: grabbing;
     height: $euiButtonHeight;
     align-items: center;
@@ -76,14 +76,14 @@ $controlMinWidth: $euiSize * 14;
     min-width: $controlMinWidth;
   }
 
-  .controlFrame__formControlLayout, .controlFrame--draggable {
+  .controlFrame__formControlLayout, .controlFrame__draggable {
     &-clone {
       box-shadow: 0 0 0 1px $euiShadowColor,
         0 1px 6px 0 $euiShadowColor;
       cursor: grabbing !important;
     }
 
-    .controlFrame--dragHandle {
+    .controlFrame__dragHandle {
       cursor: grabbing;
     }
   }
@@ -105,7 +105,7 @@ $controlMinWidth: $euiSize * 14;
     }
 
     &:not(.controlFrame__formControlLayout-clone) {
-      .controlFrame--dragHandle {
+      .controlFrame__dragHandle {
         cursor: grab;
       }
     }
@@ -157,7 +157,7 @@ $controlMinWidth: $euiSize * 14;
     }
   }
 
-  .controlFrame--floatingActions {
+  .controlFrameFloatingActions {
     visibility: hidden;
     opacity: 0;
 
@@ -167,23 +167,23 @@ $controlMinWidth: $euiSize * 14;
     z-index: 1;
     position: absolute;
 
-    &-oneLine {
+    &--oneLine {
       right:$euiSizeXS;
       top: -$euiSizeL;
       padding: $euiSizeXS;
       border-radius: $euiBorderRadius;
       background-color: $euiColorEmptyShade;
-      box-shadow: 0 0 0 1pt $euiColorLightShade;
+      box-shadow: 0 0 0 1px $euiColorLightShade;
     }
 
-    &-twoLine {
+    &--twoLine {
       right:$euiSizeXS;
       top: -$euiSizeXS;
     }
   }
 
   &:hover {
-    .controlFrame--floatingActions {
+    .controlFrameFloatingActions {
       transition:visibility .1s, opacity .1s;
       visibility: visible;
       opacity: 1;

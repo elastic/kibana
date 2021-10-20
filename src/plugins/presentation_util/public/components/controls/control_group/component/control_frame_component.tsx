@@ -57,9 +57,9 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
 
   const floatingActions = (
     <div
-      className={classNames('controlFrame--floatingActions', {
-        'controlFrame--floatingActions-twoLine': usingTwoLineLayout,
-        'controlFrame--floatingActions-oneLine': !usingTwoLineLayout,
+      className={classNames('controlFrameFloatingActions', {
+        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
+        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
     >
       <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
