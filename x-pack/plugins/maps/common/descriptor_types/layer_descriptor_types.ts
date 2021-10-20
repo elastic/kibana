@@ -30,8 +30,8 @@ export type JoinDescriptor = {
 
 export type TileMetaFeature = Feature & {
   properties: {
-    MVT_HITS_TOTAL_RELATION: string;
-    MVT_HITS_TOTAL_VALUE: number;
+    'hits.total.relation': string;
+    'hits.total.value': number;
   };
 };
 

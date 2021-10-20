@@ -21,7 +21,6 @@ import {
   GEOTILE_GRID_AGG_NAME,
   GIS_API_PATH,
   GRID_RESOLUTION,
-  MVT_AGGS_SOURCE_LAYER_NAME,
   MVT_GETGRIDTILE_API_PATH,
   MVT_TOKEN_PARAM_NAME,
   RENDER_AS,
@@ -50,6 +49,8 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 
 type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType'>;
+
+const ES_MVT_AGGS_LAYER_NAME = 'aggs';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -421,7 +422,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   getLayerName(): string {
-    return MVT_AGGS_SOURCE_LAYER_NAME;
+    return ES_MVT_AGGS_LAYER_NAME;
   }
 
   async getUrlTemplateWithMeta(

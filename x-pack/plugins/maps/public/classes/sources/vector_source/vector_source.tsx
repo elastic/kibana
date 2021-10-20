@@ -15,7 +15,6 @@ import { IField } from '../../fields/field';
 import {
   ESSearchSourceResponseMeta,
   MapExtent,
-  TileMetaFeature,
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -46,7 +45,6 @@ export interface BoundsRequestMeta {
 
 export interface IVectorSource extends ISource {
   isMvt(): boolean;
-  showTooManyFeaturesBounds(): boolean;
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     layerDataFilters: BoundsRequestMeta,
@@ -77,10 +75,6 @@ export interface IVectorSource extends ISource {
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
   getSourceTooltipConfigFromGeoJson(sourceDataRequest?: DataRequest): SourceTooltipConfig;
-  getSourceTooltipConfigFromTileMeta(
-    tileMetaFeatures: TileMetaFeature[],
-    totalFeaturesCount: number
-  ): SourceTooltipConfig;
   getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
   getDefaultFields(): Promise<Record<string, Record<string, string>>>;
@@ -113,10 +107,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   isBoundsAware(): boolean {
-    return false;
-  }
-
-  showTooManyFeaturesBounds() {
     return false;
   }
 
@@ -183,16 +173,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   getSourceTooltipConfigFromGeoJson(sourceDataRequest?: DataRequest): SourceTooltipConfig {
     return { tooltipContent: null, areResultsTrimmed: false };
-  }
-
-  getSourceTooltipConfigFromTileMeta(
-    tileMetaFeatures: TileMetaFeature[],
-    totalFeaturesCount: number
-  ): SourceTooltipConfig {
-    return {
-      tooltipContent: null,
-      areResultsTrimmed: false,
-    };
   }
 
   getSyncMeta(): object | null {

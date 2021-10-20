@@ -45,6 +45,7 @@ export interface ISource {
   destroy(): void;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): Adapters | undefined;
+  getType(): string;
   isFieldAware(): boolean;
   isFilterByMapBounds(): boolean;
   isGeoGridPrecisionAware(): boolean;
@@ -101,6 +102,10 @@ export class AbstractSource implements ISource {
 
   getInspectorAdapters(): Adapters | undefined {
     return this._inspectorAdapters;
+  }
+
+  getType(): string {
+    return this._descriptor.type;
   }
 
   async getDisplayName(): Promise<string> {

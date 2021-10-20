@@ -31,14 +31,10 @@ import {
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
-  DEFAULT_MAX_RESULT_WINDOW,
   ES_GEO_FIELD_TYPE,
   FIELD_ORIGIN,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
-  MVT_HITS_SOURCE_LAYER_NAME,
-  MVT_HITS_TOTAL_RELATION,
-  MVT_HITS_TOTAL_VALUE,
   MVT_TOKEN_PARAM_NAME,
   SCALING_TYPES,
   SOURCE_TYPES,
@@ -53,7 +49,6 @@ import { registerSource } from '../source_registry';
 import {
   DataRequestMeta,
   ESSearchSourceDescriptor,
-  TileMetaFeature,
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -89,6 +84,8 @@ type ESSearchSourceSyncMeta = Pick<
   | 'topHitsSplitField'
   | 'topHitsSize'
 >;
+
+const ES_MVT_HITS_LAYER_NAME = 'hits';
 
 export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
   const timeRangeBounds = getTimeFilter().calculateBounds(timerange);
@@ -159,40 +156,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       origin: FIELD_ORIGIN.SOURCE,
       canReadFromGeoJson: this._descriptor.scalingType !== SCALING_TYPES.MVT,
     });
-  }
-
-  getSourceTooltipConfigFromTileMeta(
-    tileMetaFeatures: TileMetaFeature[],
-    totalFeaturesCount: number
-  ): SourceTooltipConfig {
-    if (!this.isMvt()) {
-      return super.getSourceTooltipConfigFromTileMeta(tileMetaFeatures, totalFeaturesCount);
-    }
-
-    const isIncomplete: boolean = tileMetaFeatures.some((tileMeta: TileMetaFeature) => {
-      if (tileMeta?.properties?.[MVT_HITS_TOTAL_RELATION] === 'gte') {
-        return tileMeta?.properties?.[MVT_HITS_TOTAL_VALUE] >= DEFAULT_MAX_RESULT_WINDOW;
-      } else {
-        return false;
-      }
-    });
-
-    return {
-      tooltipContent: isIncomplete
-        ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
-            defaultMessage: `Results limited to {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          })
-        : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
-            defaultMessage: `Found {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          }),
-      areResultsTrimmed: isIncomplete,
-    };
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
@@ -608,10 +571,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return this._tooltipFields.length > 0;
   }
 
-  showTooManyFeaturesBounds() {
-    return this.isMvt();
-  }
-
   async _loadTooltipProperties(
     docId: string | number,
     esIndex: string,
@@ -814,7 +773,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   getLayerName(): string {
-    return MVT_HITS_SOURCE_LAYER_NAME;
+    return ES_MVT_HITS_LAYER_NAME;
   }
 
   async _getEditableIndex(): Promise<string> {

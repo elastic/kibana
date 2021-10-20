@@ -17,7 +17,6 @@ import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } fro
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
@@ -32,10 +31,6 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
-  MVT_META_SOURCE_LAYER_NAME,
-  DEFAULT_MAX_RESULT_WINDOW,
-  MVT_HITS_TOTAL_RELATION,
-  MVT_HITS_TOTAL_VALUE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
@@ -953,7 +948,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
-    const tooManyFeaturesLayerId = this._getMbTooManyFeaturesLayerId();
 
     const hasJoins = this.hasJoins();
     if (!mbMap.getLayer(fillLayerId)) {
@@ -981,28 +975,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.addLayer(mbLayer);
     }
 
-    if (this.getSource().showTooManyFeaturesBounds() && !mbMap.getLayer(tooManyFeaturesLayerId)) {
-      const mbTooManyFeaturesLayer: MbLayer = {
-        id: tooManyFeaturesLayerId,
-        type: 'line',
-        source: sourceId,
-        paint: {},
-      };
-      if (mvtSourceLayer) {
-        mbTooManyFeaturesLayer['source-layer'] = MVT_META_SOURCE_LAYER_NAME;
-      }
-      mbMap.addLayer(mbTooManyFeaturesLayer);
-      mbMap.setFilter(tooManyFeaturesLayerId, [
-        'all',
-        ['==', ['get', MVT_HITS_TOTAL_RELATION], 'gte'],
-        ['>=', ['get', MVT_HITS_TOTAL_VALUE], DEFAULT_MAX_RESULT_WINDOW],
-      ]);
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', euiThemeVars.euiColorWarning);
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-width', 3);
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-dasharray', [2, 1]);
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-opacity', this.getAlpha());
-    }
-
     this.getCurrentStyle().setMBPaintProperties({
       alpha: this.getAlpha(),
       mbMap,
@@ -1022,11 +994,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     const lineFilterExpr = getLineFilterExpression(hasJoins, timesliceMaskConfig);
     if (!_.isEqual(lineFilterExpr, mbMap.getFilter(lineLayerId))) {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
-    }
-
-    if (this.getSource().showTooManyFeaturesBounds()) {
-      this.syncVisibilityWithMb(mbMap, tooManyFeaturesLayerId);
-      mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
     }
   }
 
@@ -1125,10 +1092,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.makeMbLayerId('fill');
   }
 
-  _getMbTooManyFeaturesLayerId() {
-    return this.makeMbLayerId('toomanyfeatures');
-  }
-
   getMbTooltipLayerIds() {
     return [
       this._getMbPointLayerId(),
@@ -1141,11 +1104,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   getMbLayerIds() {
-    const layers = this.getMbTooltipLayerIds();
-    if (this.getSource().showTooManyFeaturesBounds()) {
-      layers.push(this._getMbTooManyFeaturesLayerId());
-    }
-    return layers;
+    return this.getMbTooltipLayerIds();
   }
 
   ownsMbLayerId(mbLayerId: string) {

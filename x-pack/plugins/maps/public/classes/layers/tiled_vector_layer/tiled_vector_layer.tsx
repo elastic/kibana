@@ -7,18 +7,21 @@
 
 import type {
   Map as MbMap,
+  AnyLayer as MbLayer,
   GeoJSONSource as MbGeoJSONSource,
   VectorSource as MbVectorSource,
 } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
+import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { parse as parseUrl } from 'url';
+import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
+  DEFAULT_MAX_RESULT_WINDOW,
   LAYER_TYPE,
-  MVT_HITS_TOTAL_VALUE,
-  MVT_META_SOURCE_LAYER_NAME,
   SOURCE_DATA_REQUEST_ID,
+  SOURCE_TYPES,
 } from '../../../../common/constants';
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
@@ -37,6 +40,10 @@ import {
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { CustomIconAndTooltipContent } from '../layer';
+
+const ES_MVT_META_LAYER_NAME = 'meta';
+const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
+const ES_MVT_HITS_TOTAL_VALUE = 'hits.total.value';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -68,22 +75,37 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
-    if (!this._source.isESSource()) {
+    const icon = this.getCurrentStyle().getIcon();
+    if (!this.getSource().isESSource()) {
       // Only ES-sources can have a special meta-tile, not 3rd party vector tile sources
       return {
-        icon: this.getCurrentStyle().getIcon(),
+        icon,
         tooltipContent: null,
         areResultsTrimmed: false,
       };
     }
+
+    //
+    // TODO ES MVT specific - move to es_tiled_vector_layer implementation
+    //
 
     const tileMetaFeatures = this._getMetaFromTiles();
     if (!tileMetaFeatures.length) {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
+    if (this.getSource().getType() !== SOURCE_TYPES.ES_SEARCH) {
+      // aggregation ES sources are never trimmed
+      return {
+        icon,
+        tooltipContent: null,
+        areResultsTrimmed: false,
+      };
+    }
+
     const totalFeaturesCount: number = tileMetaFeatures.reduce((acc: number, tileMeta: Feature) => {
-      const count = tileMeta && tileMeta.properties ? tileMeta.properties[MVT_HITS_TOTAL_VALUE] : 0;
+      const count =
+        tileMeta && tileMeta.properties ? tileMeta.properties[ES_MVT_HITS_TOTAL_VALUE] : 0;
       return count + acc;
     }, 0);
 
@@ -91,13 +113,31 @@ export class TiledVectorLayer extends VectorLayer {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
-    const content = this._source.getSourceTooltipConfigFromTileMeta(
-      tileMetaFeatures,
-      totalFeaturesCount
-    );
+    const isIncomplete: boolean = tileMetaFeatures.some((tileMeta: TileMetaFeature) => {
+      if (tileMeta?.properties?.[ES_MVT_HITS_TOTAL_RELATION] === 'gte') {
+        // TODO do not hard code DEFAULT_MAX_RESULT_WINDOW, load from data request instead
+        return tileMeta?.properties?.[ES_MVT_HITS_TOTAL_VALUE] >= DEFAULT_MAX_RESULT_WINDOW;
+      } else {
+        return false;
+      }
+    });
+
     return {
-      icon: this.getCurrentStyle().getIcon(),
-      ...content,
+      icon,
+      tooltipContent: isIncomplete
+        ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
+            defaultMessage: `Results limited to {count} documents.`,
+            values: {
+              count: totalFeaturesCount.toLocaleString(),
+            },
+          })
+        : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
+            defaultMessage: `Found {count} documents.`,
+            values: {
+              count: totalFeaturesCount.toLocaleString(),
+            },
+          }),
+      areResultsTrimmed: isIncomplete,
     };
   }
 
@@ -208,8 +248,16 @@ export class TiledVectorLayer extends VectorLayer {
     });
   }
 
+  getMbLayerIds() {
+    return [...super.getMbLayerIds(), this._getMbTooManyFeaturesLayerId()];
+  }
+
   ownsMbSourceId(mbSourceId: string): boolean {
     return this._getMbSourceId() === mbSourceId;
+  }
+
+  _getMbTooManyFeaturesLayerId() {
+    return this.makeMbLayerId('toomanyfeatures');
   }
 
   _syncStylePropertiesWithMb(mbMap: MbMap) {
@@ -232,6 +280,40 @@ export class TiledVectorLayer extends VectorLayer {
     this._setMbPointsProperties(mbMap, sourceMeta.layerName);
     this._setMbLinePolygonProperties(mbMap, sourceMeta.layerName);
     this._setMbLabelProperties(mbMap, sourceMeta.layerName);
+    this._syncTooManyFeaturesProperties(mbMap);
+  }
+
+  // TODO ES MVT specific - move to es_tiled_vector_layer implementation
+  _syncTooManyFeaturesProperties(mbMap: MbMap) {
+    if (this.getSource().getType() !== SOURCE_TYPES.ES_SEARCH) {
+      return;
+    }
+
+    const tooManyFeaturesLayerId = this._getMbTooManyFeaturesLayerId();
+
+    if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
+      const mbTooManyFeaturesLayer: MbLayer = {
+        id: tooManyFeaturesLayerId,
+        type: 'line',
+        source: this.getId(),
+        paint: {},
+      };
+      mbTooManyFeaturesLayer['source-layer'] = ES_MVT_META_LAYER_NAME;
+      mbMap.addLayer(mbTooManyFeaturesLayer);
+      mbMap.setFilter(tooManyFeaturesLayerId, [
+        'all',
+        ['==', ['get', ES_MVT_HITS_TOTAL_RELATION], 'gte'],
+        // TODO do not hard code DEFAULT_MAX_RESULT_WINDOW, load from data request instead
+        ['>=', ['get', ES_MVT_HITS_TOTAL_VALUE], DEFAULT_MAX_RESULT_WINDOW],
+      ]);
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', euiThemeVars.euiColorWarning);
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-width', 3);
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-dasharray', [2, 1]);
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-opacity', this.getAlpha());
+    }
+
+    this.syncVisibilityWithMb(mbMap, tooManyFeaturesLayerId);
+    mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   queryTileMetaFeatures(mbMap: MbMap): TileMetaFeature[] | null {
@@ -258,7 +340,7 @@ export class TiledVectorLayer extends VectorLayer {
     // querySourceFeatures can return duplicated features when features cross tile boundaries.
     // Tile meta will never have duplicated features since by there nature, tile meta is a feature contained within a single tile
     const mbFeatures = mbMap.querySourceFeatures(this._getMbSourceId(), {
-      sourceLayer: MVT_META_SOURCE_LAYER_NAME,
+      sourceLayer: ES_MVT_META_LAYER_NAME,
     });
 
     const metaFeatures: Array<TileMetaFeature | null> = (
@@ -333,7 +415,7 @@ export class TiledVectorLayer extends VectorLayer {
         // @ts-expect-error
         mbLayer.sourceLayer !== tiledSourceMeta.layerName &&
         // @ts-expect-error
-        mbLayer.sourceLayer !== MVT_META_SOURCE_LAYER_NAME
+        mbLayer.sourceLayer !== ES_MVT_META_LAYER_NAME
       ) {
         // If the source-pointer of one of the layers is stale, they will all be stale.
         // In this case, all the mb-layers need to be removed and re-added.
