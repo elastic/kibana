@@ -106,34 +106,15 @@ export const hasReadIndexPrivileges = async (args: {
   } = args;
 
   const indexNames = Object.keys(privileges.index);
-  const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
+  const [, indexesWithNoReadPrivileges] = partition(
     indexNames,
     (indexName) => privileges.index[indexName].read
   );
 
-  if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
+  if (indexesWithNoReadPrivileges.length > 0) {
     // some indices have read privileges others do not.
     // set a warning status
-    const errorString = `Missing required read privileges on the following indices: ${JSON.stringify(
-      indexesWithNoReadPrivileges
-    )}`;
-    logger.error(buildRuleMessage(errorString));
-    await ruleStatusClient.logStatusChange({
-      message: errorString,
-      ruleId,
-      ruleName,
-      ruleType,
-      spaceId,
-      newStatus: RuleExecutionStatus['partial failure'],
-    });
-    return true;
-  } else if (
-    indexesWithReadPrivileges.length === 0 &&
-    indexesWithNoReadPrivileges.length === indexNames.length
-  ) {
-    // none of the indices had read privileges so set the status to failed
-    // since we can't search on any indices we do not have read privileges on
-    const errorString = `This rule may not have the required read privileges to the following indices: ${JSON.stringify(
+    const errorString = `This rule may not have the required read privileges to the following indices/index patterns: ${JSON.stringify(
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
@@ -245,6 +226,7 @@ export const checkPrivilegesFromEsClient = async (
         index: [
           {
             names: indices ?? [],
+            allow_restricted_indices: true,
             privileges: ['read'],
           },
         ],

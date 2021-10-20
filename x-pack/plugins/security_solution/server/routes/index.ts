@@ -86,7 +86,7 @@ export const initRoutes = (
 
   // TODO: pass isRuleRegistryEnabled to all relevant routes
 
-  addPrepackedRulesRoute(router, config, security, isRuleRegistryEnabled);
+  addPrepackedRulesRoute(router);
   getPrepackagedRulesStatusRoute(router, config, security, isRuleRegistryEnabled);
   createRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   updateRulesBulkRoute(router, ml, isRuleRegistryEnabled);
@@ -128,7 +128,7 @@ export const initRoutes = (
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
-  createIndexRoute(router, ruleDataService, config);
+  createIndexRoute(router);
   readIndexRoute(router, ruleDataService);
   deleteIndexRoute(router);
 

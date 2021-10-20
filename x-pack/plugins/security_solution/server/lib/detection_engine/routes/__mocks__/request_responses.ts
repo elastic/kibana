@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
@@ -42,7 +43,6 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { FindBulkExecutionLogResponse } from '../../rule_execution_log/types';
-import { ESSearchResponse } from '../../../../../../../../src/core/types/elasticsearch';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleNotificationAlertType } from '../../notifications/legacy_types';
 
@@ -565,7 +565,29 @@ export const getFindBulkResultStatus = (): FindBulkExecutionLogResponse => ({
   ],
 });
 
-export const getEmptySignalsResponse = (): ESSearchResponse<unknown> => ({
+export const getBasicEmptySearchResponse = (): estypes.SearchResponse<unknown> => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: {
+    hits: [],
+    total: { relation: 'eq', value: 0 },
+    max_score: 0,
+  },
+});
+
+export const getBasicNoShardsSearchResponse = (): estypes.SearchResponse<unknown> => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+  hits: {
+    hits: [],
+    total: { relation: 'eq', value: 0 },
+    max_score: 0,
+  },
+});
+
+export const getEmptySignalsResponse = (): estypes.SearchResponse<unknown> => ({
   took: 1,
   timed_out: false,
   _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
@@ -591,7 +613,7 @@ export const getEmptyEqlSequencesResponse = (): EqlSearchResponse<unknown> => ({
   timed_out: false,
 });
 
-export const getSuccessfulSignalUpdateResponse = () => ({
+export const getSuccessfulSignalUpdateResponse = (): estypes.UpdateByQueryResponse => ({
   took: 18,
   timed_out: false,
   total: 1,

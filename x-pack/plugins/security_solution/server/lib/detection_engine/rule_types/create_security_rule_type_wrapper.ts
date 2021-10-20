@@ -7,7 +7,6 @@
 
 import { isEmpty } from 'lodash';
 
-import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -133,16 +132,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             const inputIndices = params.index ?? [];
 
-            const [privileges, timestampFieldCaps] = await Promise.all([
-              checkPrivilegesFromEsClient(esClient, inputIndices),
-              esClient.fieldCaps({
-                index: index ?? ['*'],
-                fields: hasTimestampOverride
-                  ? [TIMESTAMP, timestampOverride as string]
-                  : [TIMESTAMP],
-                include_unmapped: true,
-              }),
-            ]);
+            const privileges = await checkPrivilegesFromEsClient(esClient, inputIndices);
 
             wroteWarningStatus = await hasReadIndexPrivileges({
               ...basicLogArguments,
@@ -153,6 +143,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
 
             if (!wroteWarningStatus) {
+              const timestampFieldCaps = await services.scopedClusterClient.asCurrentUser.fieldCaps(
+                {
+                  index,
+                  fields: hasTimestampOverride
+                    ? ['@timestamp', timestampOverride as string]
+                    : ['@timestamp'],
+                  include_unmapped: true,
+                }
+              );
               wroteWarningStatus = await hasTimestampFields({
                 ...basicLogArguments,
                 timestampField: hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
@@ -165,7 +164,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             }
           }
         } catch (exc) {
-          logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
+          const errorMessage = buildRuleMessage(`Check privileges failed to execute ${exc}`);
+          logger.error(errorMessage);
+          await ruleStatusClient.logStatusChange({
+            ...basicLogArguments,
+            message: errorMessage,
+            newStatus: RuleExecutionStatus['partial failure'],
+          });
+          wroteWarningStatus = true;
         }
         let hasError = false;
         const { tuples, remainingGap } = getRuleRangeTuples({
