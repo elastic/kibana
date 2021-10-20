@@ -57,7 +57,9 @@ export const getSinglePercentileMetricAgg = () => {
       if (Number.isInteger(agg.params.percentile)) {
         valueKey += '.0';
       }
-      return bucket[agg.id].values[valueKey];
+      const { values } = bucket[agg.id] ?? {};
+
+      return values ? values[valueKey] : NaN;
     },
   });
 };

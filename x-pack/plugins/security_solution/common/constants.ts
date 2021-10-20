@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ENABLE_ITOM } from '../../actions/server/constants/connectors';
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
@@ -16,7 +18,7 @@ export const APP_NAME = 'Security';
 export const APP_ICON = 'securityAnalyticsApp';
 export const APP_ICON_SOLUTION = 'logoSecurity';
 export const APP_PATH = `/app/security`;
-export const ADD_DATA_PATH = `/app/home#/tutorial_directory/security`;
+export const ADD_DATA_PATH = `/app/integrations/browse/security`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern';
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
@@ -296,19 +298,25 @@ export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
 */
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
-  '.slack',
+  '.index',
+  '.jira',
   '.pagerduty',
-  '.swimlane',
-  '.webhook',
+  '.resilient',
   '.servicenow',
   '.servicenow-sir',
-  '.jira',
-  '.resilient',
+  '.slack',
+  '.swimlane',
   '.teams',
+  '.webhook',
 ];
 
 if (ENABLE_CASE_CONNECTOR) {
   NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
+}
+
+// TODO: Remove when ITOM is ready
+if (ENABLE_ITOM) {
+  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.servicenow-itom');
 }
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
