@@ -337,6 +337,7 @@ export function DiscoverLayout({
                       stateContainer={stateContainer}
                       onAddFilter={onAddFilter}
                       trackUiMetric={trackUiMetric}
+                      savedSearchRefetch$={savedSearchRefetch$}
                     />
                   )}
                 </EuiFlexGroup>

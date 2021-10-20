@@ -8,7 +8,7 @@
 import { Observable, Subject } from 'rxjs';
 import { CoreStart } from 'kibana/public';
 import ReactDOM from 'react-dom';
-import React, { Suspense, useCallback, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiEmptyPrompt, EuiProgress, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
@@ -80,8 +80,12 @@ export const EmbeddableWrapper = ({
     },
     [dataVisualizerListState, onOutputChange]
   );
-  const { configs, searchQueryLanguage, searchString, extendedColumns, progress } =
+  const { configs, searchQueryLanguage, searchString, extendedColumns, progress, setLastRefresh } =
     useDataVisualizerGridData(input, dataVisualizerListState);
+
+  useEffect(() => {
+    setLastRefresh(Date.now());
+  }, [input?.lastReloadRequestTime, setLastRefresh]);
 
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {

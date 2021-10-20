@@ -21,6 +21,7 @@ import {
 import { SavedSearch } from '../../../saved_searches';
 import { GetStateReturn } from '../../apps/main/services/discover_state';
 import { FIELD_STATISTICS_LOADED } from './constants';
+import { DataRefetch$ } from '../../apps/main/services/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   indexPattern: IndexPattern;
@@ -85,6 +86,7 @@ export interface DiscoverDataVisualizerGridProps {
    * @param eventName
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  savedSearchRefetch$: DataRefetch$;
 }
 
 export const FieldStatisticsTable = (props: DiscoverDataVisualizerGridProps) => {
@@ -98,9 +100,9 @@ export const FieldStatisticsTable = (props: DiscoverDataVisualizerGridProps) => 
     stateContainer,
     onAddFilter,
     trackUiMetric,
+    savedSearchRefetch$,
   } = props;
   const { uiSettings } = services;
-
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
     | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
@@ -121,10 +123,16 @@ export const FieldStatisticsTable = (props: DiscoverDataVisualizerGridProps) => 
       }
     });
 
+    const refetch = savedSearchRefetch$.subscribe(() => {
+      if (embeddable && !isErrorEmbeddable(embeddable)) {
+        embeddable.updateInput({ lastReloadRequestTime: Date.now() });
+      }
+    });
     return () => {
       sub?.unsubscribe();
+      refetch?.unsubscribe();
     };
-  }, [embeddable, stateContainer]);
+  }, [embeddable, stateContainer, savedSearchRefetch$]);
 
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
