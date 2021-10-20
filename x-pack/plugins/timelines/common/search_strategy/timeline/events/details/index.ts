@@ -6,6 +6,7 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { Inspect, Maybe } from '../../../common';
@@ -32,4 +33,5 @@ export interface TimelineEventsDetailsRequestOptions
   indexName: string;
   eventId: string;
   authFilter?: JsonObject;
+  alertConsumers?: AlertConsumers[];
 }

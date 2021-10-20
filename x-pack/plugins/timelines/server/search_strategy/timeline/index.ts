@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
 
@@ -48,6 +53,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
       const securityAuditLogger = security?.audit.asScoped(deps.request);
       const factoryQueryType = request.factoryQueryType;
       const entityType = request.entityType;
+      const alertConsumers = request.alertConsumers;
 
       if (factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
@@ -64,6 +70,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
           queryFactory,
           alerting,
           auditLogger: securityAuditLogger,
+          alertConsumers,
         });
       } else {
         return timelineSearchStrategy({ es, request, options, deps, queryFactory });
@@ -109,6 +116,7 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps,
   queryFactory,
   alerting,
+  alertConsumers = [],
   auditLogger,
 }: {
   es: ISearchStrategy;
@@ -117,6 +125,7 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps: SearchStrategyDependencies;
   alerting: AlertingPluginStartContract;
   queryFactory: TimelineFactory<T>;
+  alertConsumers?: AlertConsumers[];
   auditLogger: AuditLogger | undefined;
 }) => {
   // Based on what solution alerts you want to see, figures out what corresponding
@@ -140,7 +149,11 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
 
   return from(getAuthFilter()).pipe(
     mergeMap(({ filter }) => {
-      const dsl = queryFactory.buildDsl({ ...requestWithAlertsIndices, authFilter: filter });
+      const dsl = queryFactory.buildDsl({
+        ...requestWithAlertsIndices,
+        authFilter: filter,
+        alertConsumers,
+      });
       return es.search({ ...requestWithAlertsIndices, params: dsl }, options, deps);
     }),
     map((response) => {

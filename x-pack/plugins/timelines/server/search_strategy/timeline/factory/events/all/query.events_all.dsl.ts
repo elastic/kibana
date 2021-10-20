@@ -15,6 +15,7 @@ import {
   TimelineRequestSortField,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../server/utils/build_query';
+import { getAlertConsumersFilter } from '../utils';
 
 export const buildTimelineEventsAllQuery = ({
   defaultIndex,
@@ -25,9 +26,9 @@ export const buildTimelineEventsAllQuery = ({
   sort,
   timerange,
   authFilter,
+  alertConsumers,
 }: Omit<TimelineEventsAllRequestOptions, 'fieldRequested'>) => {
   const filterClause = [...createQueryFilterClauses(filterQuery)];
-
   const getTimerangeFilter = (timerangeOption: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerangeOption) {
       const { to, from } = timerangeOption;
@@ -48,7 +49,12 @@ export const buildTimelineEventsAllQuery = ({
     return [];
   };
 
-  const filters = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
+  const filters = [
+    ...filterClause,
+    ...getTimerangeFilter(timerange),
+    ...getAlertConsumersFilter(alertConsumers),
+    { match_all: {} },
+  ];
   const filter = authFilter != null ? [...filters, authFilter] : filters;
 
   const getSortField = (sortFields: TimelineRequestSortField[]) =>

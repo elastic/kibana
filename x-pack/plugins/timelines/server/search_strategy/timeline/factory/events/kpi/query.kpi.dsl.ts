@@ -13,11 +13,13 @@ import {
   TimelineRequestBasicOptions,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/filters';
+import { getAlertConsumersFilter } from '../utils';
 
 export const buildTimelineKpiQuery = ({
   defaultIndex,
   filterQuery,
   timerange,
+  alertConsumers,
 }: TimelineRequestBasicOptions) => {
   const filterClause = [...createQueryFilterClauses(filterQuery)];
 
@@ -41,7 +43,12 @@ export const buildTimelineKpiQuery = ({
     return [];
   };
 
-  const filter = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
+  const filter = [
+    ...filterClause,
+    ...getTimerangeFilter(timerange),
+    ...getAlertConsumersFilter(alertConsumers),
+    { match_all: {} },
+  ];
 
   const dslQuery = {
     allow_no_indices: true,

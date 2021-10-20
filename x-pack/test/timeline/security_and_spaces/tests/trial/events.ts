@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
         expectedNumberAlerts: 2,
         body: {
           ...getPostBody(),
-          defaultIndex: ['.alerts-*'],
+          defaultIndex: ['.alerts*'],
           entityType: 'alerts',
           alertConsumers: ['apm'],
         },
