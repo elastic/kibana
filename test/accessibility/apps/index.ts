@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'settings']);
+  const testSubjects = getService('testSubjects');
 
   describe('a11y tests', function () {
     describe('using flights sample data', function () {
