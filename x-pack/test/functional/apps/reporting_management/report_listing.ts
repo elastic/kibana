@@ -85,7 +85,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             "actions": "",
             "createdAt": "2021-07-19 @ 10:29 PM",
             "report": "Automated report",
-            "status": "Done",
+            "status": "Done, warnings detected",
           },
           Object {
             "actions": "",
@@ -97,13 +97,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             "actions": "",
             "createdAt": "2021-07-19 @ 06:46 PM",
             "report": "Discover search [2021-07-19T11:46:00.132-07:00]",
-            "status": "Done",
+            "status": "Done, warnings detected",
           },
           Object {
             "actions": "",
             "createdAt": "2021-07-19 @ 06:44 PM",
             "report": "Discover search [2021-07-19T11:44:48.670-07:00]",
-            "status": "Done",
+            "status": "Done, warnings detected",
           },
           Object {
             "actions": "",
@@ -121,13 +121,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             "actions": "",
             "createdAt": "2021-07-19 @ 06:41 PM",
             "report": "[Flights] Global Flight Dashboard",
-            "status": "Done, issues detected",
+            "status": "Done, warnings detected",
           },
           Object {
             "actions": "",
             "createdAt": "2021-07-19 @ 06:38 PM",
             "report": "[Flights] Global Flight Dashboard",
-            "status": "Done, issues detected",
+            "status": "Done, warnings detected",
           },
           Object {
             "actions": "",
