@@ -26,7 +26,6 @@ interface MigrationStatus {
 export const useMigrateSystemIndices = () => {
   const {
     services: { api },
-    kibanaVersionInfo: { nextMajor },
   } = useAppContext();
 
   const [showFlyout, setShowFlyout] = useState(false);
@@ -57,7 +56,6 @@ export const useMigrateSystemIndices = () => {
         Component: SystemIndicesFlyout,
         props: {
           data: data!,
-          nextMajor,
           closeFlyout,
         },
         flyoutProps: {
@@ -65,7 +63,7 @@ export const useMigrateSystemIndices = () => {
         },
       });
     }
-  }, [addContentToGlobalFlyout, data, showFlyout, closeFlyout, nextMajor]);
+  }, [addContentToGlobalFlyout, data, showFlyout, closeFlyout]);
 
   const beginSystemIndicesMigration = useCallback(async () => {
     const { error: startMigrationError } = await api.migrateSystemIndices();
