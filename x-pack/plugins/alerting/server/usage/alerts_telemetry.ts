@@ -175,44 +175,6 @@ export async function getTotalCountAggregations(
     },
   };
 
-  const connectorsMetric = {
-    scripted_metric: {
-      init_script:
-        'state.currentAlertActions = 0; state.min_actions = 1000; state.max_actions = 0; state.totalActionsCount = 0;',
-      map_script: `
-        String refName = doc['alert.actions.actionRef'].value;
-        if (refName == 'action_0') {
-          state.currentAlertActions = 1;
-        } else {
-          state.currentAlertActions++;
-        }
-        if (state.currentAlertActions > 0 && state.currentAlertActions < state.min_actions) {
-          state.min_actions = state.currentAlertActions;
-        }
-        if (state.currentAlertActions > 0 && state.currentAlertActions > state.max_actions) {
-          state.max_actions = state.currentAlertActions;
-        }
-        state.totalActionsCount++;
-      `,
-      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
-      // Despite docs that say this is optional, this script can't be blank.
-      combine_script: 'return state',
-      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
-      // This also needs to account for having no data
-      reduce_script: `
-        Map result = [:];
-        for (Map m : states.toArray()) {
-          if (m !== null) {
-            for (String k : m.keySet()) {
-              result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
-            }
-          }
-        }
-        return result;
-      `,
-    },
-  };
-
   const { body: results } = await esClient.search({
     index: kibanaInex,
     body: {
