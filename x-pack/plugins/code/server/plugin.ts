@@ -14,8 +14,7 @@ import { CodeConfigSchema } from './config';
  * Represents Code Plugin instance that will be managed by the Kibana plugin system.
  */
 export class CodePlugin implements Plugin {
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-  }
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public async setup(core: CoreSetup) {
     const config = this.initializerContext.config.get<TypeOf<typeof CodeConfigSchema>>();
@@ -28,30 +27,29 @@ export class CodePlugin implements Plugin {
             level: 'critical',
             deprecationType: 'feature',
             title: i18n.translate('xpack.code.deprecations.removed.title', {
-              defaultMessage: 'The experimental app "Code" has been removed from Kibana'
+              defaultMessage: 'The experimental app "Code" has been removed from Kibana',
             }),
             message: i18n.translate('xpack.code.deprecations.removed.message', {
-              defaultMessage: 'The experimental app "Code" has been removed from Kibana. The associated configuration ' +
-                'properties need to be removed from the Kibana configuration file.'
+              defaultMessage:
+                'The experimental app "Code" has been removed from Kibana. The associated configuration ' +
+                'properties need to be removed from the Kibana configuration file.',
             }),
             requireRestart: true,
             correctiveActions: {
               manualSteps: [
                 i18n.translate('xpack.code.deprecations.removed.manualSteps1', {
-                  defaultMessage: 'Remove all xpack.code.* properties from the Kibana config file.'
+                  defaultMessage: 'Remove all xpack.code.* properties from the Kibana config file.',
                 }),
-              ]
-            }
-          })
+              ],
+            },
+          });
         }
         return deprecations;
-      }
-    })
+      },
+    });
   }
 
-  public start() {
-  }
+  public start() {}
 
-  public stop() {
-  }
+  public stop() {}
 }

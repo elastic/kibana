@@ -66,8 +66,8 @@ describe('Code Plugin', () => {
         requireRestart: true,
         correctiveActions: expect.objectContaining({
           manualSteps: expect.any(Array),
-        })
-      })
+        }),
+      });
     });
   });
 });
