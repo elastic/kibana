@@ -51,7 +51,7 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
     },
 
     async expectForbidden() {
-      const h2 = await find.byCssSelector('body', 20000);
+      const h2 = await testSubjects.find('no_feature_permissions', 20000);
       const text = await h2.getVisibleText();
       expect(text).to.contain('Kibana feature privileges required');
     },
