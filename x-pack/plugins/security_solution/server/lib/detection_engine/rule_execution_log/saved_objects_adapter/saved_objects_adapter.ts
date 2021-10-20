@@ -53,8 +53,7 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
       perPage: logsCount,
       sortField: 'statusDate',
       sortOrder: 'desc',
-      search: ruleId,
-      searchFields: ['references.id'],
+      ruleId,
     });
   }
 
