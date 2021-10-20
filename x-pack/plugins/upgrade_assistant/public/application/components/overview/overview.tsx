@@ -73,7 +73,7 @@ export const Overview: FunctionComponent = () => {
             defaultMessage: 'Upgrade Assistant',
           })}
           description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
-            defaultMessage: 'Get ready for the next version of the Elastic Stack!',
+            defaultMessage: 'Get ready for the next version of Elastic!',
           })}
           rightSideItems={[
             <EuiButtonEmpty
