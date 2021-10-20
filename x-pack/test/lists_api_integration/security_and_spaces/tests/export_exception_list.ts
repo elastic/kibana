@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(400);
 
         expect(exportBody).to.eql({
-          message: 'exception list with list_id: not_exist does not exist',
+          message: 'exception list with list_id: not_exist or id: not_exist does not exist',
           status_code: 400,
         });
       });

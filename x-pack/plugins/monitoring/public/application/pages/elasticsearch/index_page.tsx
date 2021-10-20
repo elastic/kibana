@@ -13,7 +13,7 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { IndexReact } from '../../../components/elasticsearch/index/index_react';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useCharts } from '../../hooks/use_charts';
 import { ItemTemplate } from './item_template';
