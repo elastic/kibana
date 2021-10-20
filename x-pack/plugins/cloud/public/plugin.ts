@@ -16,7 +16,6 @@ import {
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
-import { mapKeys, snakeCase } from 'lodash';
 import type {
   AuthenticatedUser,
   SecurityPluginSetup,
