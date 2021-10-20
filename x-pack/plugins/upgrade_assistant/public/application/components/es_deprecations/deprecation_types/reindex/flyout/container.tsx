@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
 
@@ -15,11 +16,11 @@ import type { ReindexStateContext } from '../context';
 import { ChecklistFlyoutStep } from './checklist_step';
 import { WarningsFlyoutStep } from './warnings_step';
 import { DeprecationBadge } from '../../../../shared';
-
-enum ReindexFlyoutStep {
-  reindexWarnings,
-  checklist,
-}
+import {
+  UIM_REINDEX_START_CLICK,
+  UIM_REINDEX_STOP_CLICK,
+  uiMetricService,
+} from '../../../../../lib/ui_metric';
 
 export interface ReindexFlyoutProps extends ReindexStateContext {
   deprecation: EnrichedDeprecationInfo;
@@ -36,45 +37,54 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
   const { status, reindexWarnings } = reindexState;
   const { index } = deprecation;
 
-  // If there are any warnings and we haven't started reindexing, show the warnings step first.
-  const [currentFlyoutStep, setCurrentFlyoutStep] = useState<ReindexFlyoutStep>(
-    reindexWarnings && reindexWarnings.length > 0 && status === undefined
-      ? ReindexFlyoutStep.reindexWarnings
-      : ReindexFlyoutStep.checklist
+  const [showWarningsStep, setShowWarningsStep] = useState(false);
+
+  const onStartReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_START_CLICK);
+    startReindex();
+  }, [startReindex]);
+
+  const onStopReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_STOP_CLICK);
+    cancelReindex();
+  }, [cancelReindex]);
+
+  const startReindexWithWarnings = () => {
+    if (
+      reindexWarnings &&
+      reindexWarnings.length > 0 &&
+      status !== ReindexStatus.inProgress &&
+      status !== ReindexStatus.completed
+    ) {
+      setShowWarningsStep(true);
+    } else {
+      onStartReindex();
+    }
+  };
+  const flyoutContents = showWarningsStep ? (
+    <WarningsFlyoutStep
+      warnings={reindexState.reindexWarnings ?? []}
+      hideWarningsStep={() => setShowWarningsStep(false)}
+      continueReindex={() => {
+        setShowWarningsStep(false);
+        onStartReindex();
+      }}
+    />
+  ) : (
+    <ChecklistFlyoutStep
+      closeFlyout={closeFlyout}
+      startReindex={startReindexWithWarnings}
+      reindexState={reindexState}
+      cancelReindex={onStopReindex}
+    />
   );
-
-  let flyoutContents: React.ReactNode;
-
-  switch (currentFlyoutStep) {
-    case ReindexFlyoutStep.reindexWarnings:
-      flyoutContents = (
-        <WarningsFlyoutStep
-          closeFlyout={closeFlyout}
-          warnings={reindexState.reindexWarnings!}
-          advanceNextStep={() => setCurrentFlyoutStep(ReindexFlyoutStep.checklist)}
-        />
-      );
-      break;
-    case ReindexFlyoutStep.checklist:
-      flyoutContents = (
-        <ChecklistFlyoutStep
-          closeFlyout={closeFlyout}
-          reindexState={reindexState}
-          startReindex={startReindex}
-          cancelReindex={cancelReindex}
-        />
-      );
-      break;
-    default:
-      throw new Error(`Invalid flyout step: ${currentFlyoutStep}`);
-  }
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
         <DeprecationBadge
           isCritical={deprecation.isCritical}
-          isResolved={reindexState.status === ReindexStatus.completed}
+          isResolved={status === ReindexStatus.completed}
         />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
@@ -87,6 +97,7 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
+
       {flyoutContents}
     </>
   );

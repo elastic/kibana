@@ -772,17 +772,17 @@
     "interfaces": [
       {
         "parentPluginId": "securitySolution",
-        "id": "def-server.AppRequestContext",
+        "id": "def-server.SecuritySolutionApiRequestHandlerContext",
         "type": "Interface",
         "tags": [],
-        "label": "AppRequestContext",
+        "label": "SecuritySolutionApiRequestHandlerContext",
         "description": [],
         "path": "x-pack/plugins/security_solution/server/types.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-server.AppRequestContext.getAppClient",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getAppClient",
             "type": "Function",
             "tags": [],
             "label": "getAppClient",
@@ -804,7 +804,7 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-server.AppRequestContext.getSpaceId",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getSpaceId",
             "type": "Function",
             "tags": [],
             "label": "getSpaceId",
@@ -819,7 +819,7 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-server.AppRequestContext.getExecutionLogClient",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getExecutionLogClient",
             "type": "Function",
             "tags": [],
             "label": "getExecutionLogClient",
@@ -19369,33 +19369,7 @@
         ],
         "signature": [
           "EuiDataGridCellValueElementProps",
-          " & { data: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineNonEcsData",
-            "text": "TimelineNonEcsData"
-          },
-          "[]; eventId: string; header: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.ColumnHeaderOptions",
-            "text": "ColumnHeaderOptions"
-          },
-          "; isDraggable: boolean; linkValues: string[] | undefined; timelineId: string; setFlyoutAlert?: ((data: any) => void) | undefined; ecsData?: ",
-          "Ecs",
-          " | undefined; rowRenderers?: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.RowRenderer",
-            "text": "RowRenderer"
-          },
-          "[] | undefined; browserFields?: Readonly<Record<string, Partial<",
+          " & { asPlainText?: boolean | undefined; browserFields?: Readonly<Record<string, Partial<",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -19403,7 +19377,41 @@
             "section": "def-common.BrowserField",
             "text": "BrowserField"
           },
-          ">>> | undefined; }"
+          ">>> | undefined; data: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TimelineNonEcsData",
+            "text": "TimelineNonEcsData"
+          },
+          "[]; ecsData?: ",
+          "Ecs",
+          " | undefined; eventId: string; globalFilters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; header: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.ColumnHeaderOptions",
+            "text": "ColumnHeaderOptions"
+          },
+          "; isDraggable: boolean; linkValues: string[] | undefined; rowRenderers?: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.RowRenderer",
+            "text": "RowRenderer"
+          },
+          "[] | undefined; setFlyoutAlert?: ((data: any) => void) | undefined; timelineId: string; truncate?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
         "deprecated": false,

@@ -46,7 +46,7 @@ const i18nTexts = {
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
     defaultMessage:
-      'Resolve all critical issues before upgrading. Before making changes, ensure you have a current snapshot of your cluster. Some issues may require reindexing to resolve. ',
+      'Resolve all critical issues before upgrading. Before making changes, ensure you have a current snapshot of your cluster. Indices created before 7.0 must be reindexed or removed. To start multiple reindexing tasks in a single request, use the Kibana batch reindexing API.',
   }),
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
     defaultMessage: 'Loading deprecation issues…',
