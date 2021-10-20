@@ -250,6 +250,13 @@ export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/pre
 export const DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL =
   `${DETECTION_ENGINE_RULES_PREVIEW}/index` as const;
 
+/**
+ * Internal detection engine routes
+ */
+export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
+export const INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/rules/_find_statuses` as const;
+
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
 export const TIMELINES_URL = '/api/timelines' as const;
