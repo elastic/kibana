@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { convertSavedDashboardPanelToPanelState } from '../../../common/embeddable/embeddable_saved_object_converters';
+import {
+  convertSavedDashboardPanelToPanelState,
+  convertPanelStateToSavedDashboardPanel,
+} from '../../../common/embeddable/embeddable_saved_object_converters';
 import type { SavedDashboardPanel, DashboardPanelMap } from '../../types';
 
 export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): DashboardPanelMap => {
@@ -15,4 +18,10 @@ export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): Da
     panelsMap![panel.panelIndex ?? String(idx)] = convertSavedDashboardPanelToPanelState(panel);
   });
   return panelsMap;
+};
+
+export const convertPanelMapToSavedPanels = (panels: DashboardPanelMap, version: string) => {
+  return Object.values(panels).map((panel) =>
+    convertPanelStateToSavedDashboardPanel(panel, version)
+  );
 };
