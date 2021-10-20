@@ -33,7 +33,7 @@ import {
 } from '../../../../plugins/embeddable/public';
 import {
   IExpressionLoaderParams,
-  ExpressionsStart,
+  ExpressionLoader,
   ExpressionRenderError,
   ExpressionAstExpression,
 } from '../../../../plugins/expressions/public';
@@ -83,8 +83,6 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
 };
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
 export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
-
-type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
@@ -312,7 +310,7 @@ export class VisualizeEmbeddable
     );
 
     const expressions = getExpressions();
-    this.handler = new expressions.ExpressionLoader(this.domNode, undefined, {
+    this.handler = await expressions.loader(this.domNode, undefined, {
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },
