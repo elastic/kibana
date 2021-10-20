@@ -13,6 +13,7 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiBadge,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -33,7 +34,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   const [showOptions, setShowOptions] = useState(false);
   const metricOptions = seriesConfig?.metricOptions;
 
-  const { indexPatterns } = useAppIndexPatternContext();
+  const { indexPatterns, loading } = useAppIndexPatternContext();
 
   const onChange = (value?: string) => {
     setSeries(seriesId, {
@@ -78,6 +79,10 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
     };
   });
 
+  if (!indexPattern && !loading) {
+    return <EuiText>{NO_DATA_AVAILABLE}</EuiText>;
+  }
+
   return (
     <>
       {!series.selectedMetricField && (
@@ -88,7 +93,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
               size="s"
-              isLoading={!indexPattern}
+              isLoading={!indexPattern && loading}
             >
               {SELECT_REPORT_METRIC_LABEL}
             </EuiButton>
@@ -138,3 +143,7 @@ const REMOVE_REPORT_METRIC_LABEL = i18n.translate(
     defaultMessage: 'Remove report metric',
   }
 );
+
+const NO_DATA_AVAILABLE = i18n.translate('xpack.observability.expView.seriesEditor.noData', {
+  defaultMessage: 'No data available.',
+});
