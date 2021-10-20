@@ -29,6 +29,7 @@ interface CommonProps {
   allowAllValuesSelection?: boolean;
   cardinalityField?: string;
   required?: boolean;
+  keepHistory?: boolean;
 }
 
 export type FieldValueSuggestionsProps = CommonProps & {

@@ -32,12 +32,30 @@ export function getEsClientForAPIKey({ getService }: FtrProviderContext, esApiKe
   });
 }
 
-export function setupFleetAndAgents({ getService }: FtrProviderContext) {
+export function setupFleetAndAgents(providerContext: FtrProviderContext) {
   before(async () => {
-    await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
-    await getService('supertest')
+    // Use elastic/fleet-server service account to execute setup to verify privilege configuration
+    const es = providerContext.getService('es');
+    const {
+      body: { token },
+      // @ts-expect-error SecurityCreateServiceTokenRequest should not require `name`
+    } = await es.security.createServiceToken({
+      namespace: 'elastic',
+      service: 'fleet-server',
+    });
+    const supetestWithoutAuth = getSupertestWithoutAuth(providerContext);
+
+    await supetestWithoutAuth
+      .post(`/api/fleet/setup`)
+      .set('kbn-xsrf', 'xxx')
+      .set('Authorization', `Bearer ${token.value}`)
+      .send()
+      .expect(200);
+    await supetestWithoutAuth
       .post(`/api/fleet/agents/setup`)
       .set('kbn-xsrf', 'xxx')
-      .send({ forceRecreate: true });
+      .set('Authorization', `Bearer ${token.value}`)
+      .send({ forceRecreate: true })
+      .expect(200);
   });
 }
