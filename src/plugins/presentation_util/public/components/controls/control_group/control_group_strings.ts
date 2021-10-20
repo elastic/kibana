@@ -48,13 +48,9 @@ export const ControlGroupStrings = {
       i18n.translate('presentationUtil.inputControls.controlGroup.management.flyoutTitle', {
         defaultMessage: 'Manage controls',
       }),
-    getDesignTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.management.designTitle', {
-        defaultMessage: 'Design',
-      }),
-    getWidthTitle: () =>
-      i18n.translate('presentationUtil.inputControls.controlGroup.management.widthTitle', {
-        defaultMessage: 'Width',
+    getDefaultWidthTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.management.defaultWidthTitle', {
+        defaultMessage: 'Default width',
       }),
     getLayoutTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.layoutTitle', {
@@ -64,23 +60,20 @@ export const ControlGroupStrings = {
       i18n.translate('presentationUtil.inputControls.controlGroup.management.delete', {
         defaultMessage: 'Delete control',
       }),
+    getSetAllWidthsToDefaultTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.management.setAllWidths', {
+        defaultMessage: 'Set all widths to default',
+      }),
     getDeleteAllButtonTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteAll', {
         defaultMessage: 'Delete all',
       }),
     controlWidth: {
-      getChangeAllControlWidthsTitle: () =>
-        i18n.translate(
-          'presentationUtil.inputControls.controlGroup.management.layout.changeAllControlWidths',
-          {
-            defaultMessage: 'Set width for all controls',
-          }
-        ),
       getWidthSwitchLegend: () =>
         i18n.translate(
           'presentationUtil.inputControls.controlGroup.management.layout.controlWidthLegend',
           {
-            defaultMessage: 'Change individual control width',
+            defaultMessage: 'Change control width',
           }
         ),
       getAutoWidthTitle: () =>
@@ -117,21 +110,31 @@ export const ControlGroupStrings = {
           defaultMessage: 'Two line layout',
         }),
     },
-    deleteAllControls: {
-      getTitle: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteAll.title', {
-          defaultMessage: 'Delete all?',
-        }),
+    deleteControls: {
+      getDeleteAllTitle: () =>
+        i18n.translate(
+          'presentationUtil.inputControls.controlGroup.management.delete.deleteAllTitle',
+          {
+            defaultMessage: 'Delete all controls?',
+          }
+        ),
+      getDeleteTitle: () =>
+        i18n.translate(
+          'presentationUtil.inputControls.controlGroup.management.delete.deleteTitle',
+          {
+            defaultMessage: 'Delete control?',
+          }
+        ),
       getSubtitle: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteAll.sub', {
+        i18n.translate('presentationUtil.inputControls.controlGroup.management.delete.sub', {
           defaultMessage: 'Controls are not recoverable once removed.',
         }),
       getConfirm: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteAll.confirm', {
+        i18n.translate('presentationUtil.inputControls.controlGroup.management.delete.confirm', {
           defaultMessage: 'Delete',
         }),
       getCancel: () =>
-        i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteAll.cancel', {
+        i18n.translate('presentationUtil.inputControls.controlGroup.management.delete.cancel', {
           defaultMessage: 'Cancel',
         }),
     },
@@ -143,7 +146,7 @@ export const ControlGroupStrings = {
       getSubtitle: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.discard.sub', {
           defaultMessage:
-            'Discard changes to this control? Controls are not recoverable once removed.',
+            'Discard changes to this control? Changes are not recoverable once discardsd.',
         }),
       getConfirm: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.discard.confirm', {
@@ -161,7 +164,7 @@ export const ControlGroupStrings = {
         }),
       getSubtitle: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteNew.sub', {
-          defaultMessage: 'Discard new control? Controls are not recoverable once removed.',
+          defaultMessage: 'Discard new control? Controls are not recoverable once discarded.',
         }),
       getConfirm: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteNew.confirm', {
@@ -172,5 +175,15 @@ export const ControlGroupStrings = {
           defaultMessage: 'Cancel',
         }),
     },
+  },
+  floatingActions: {
+    getEditButtonTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.floatingActions.editTitle', {
+        defaultMessage: 'Manage control',
+      }),
+    getRemoveButtonTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.floatingActions.removeTitle', {
+        defaultMessage: 'Remove control',
+      }),
   },
 };

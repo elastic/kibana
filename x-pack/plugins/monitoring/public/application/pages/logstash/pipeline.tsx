@@ -10,7 +10,7 @@ import { find } from 'lodash';
 import moment from 'moment';
 import { useRouteMatch } from 'react-router-dom';
 import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 // @ts-ignore
 import { List } from '../../../components/logstash/pipeline_viewer/models/list';
@@ -24,7 +24,7 @@ import { PipelineState } from '../../../components/logstash/pipeline_viewer/mode
 import { vertexFactory } from '../../../components/logstash/pipeline_viewer/models/graph/vertex_factory';
 import { LogstashTemplate } from './logstash_template';
 import { useTable } from '../../hooks/use_table';
-import { ExternalConfigContext } from '../../external_config_context';
+import { ExternalConfigContext } from '../../contexts/external_config_context';
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';

@@ -126,7 +126,7 @@
         "name": "CTS Vis 2"
       }, {
         "type": "visualization",
-        "id": "cts_vis_3",
+        "id": "cts_vis_3_default",
         "name": "CTS Vis 3"
       }],
       "type": "dashboard",
@@ -158,7 +158,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["default"]
     },
     "type": "_doc"
   }
@@ -186,7 +187,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["default"]
     },
     "type": "_doc"
   }
@@ -195,9 +197,10 @@
 {
   "type": "_doc",
   "value": {
-    "id": "visualization:cts_vis_3",
+    "id": "visualization:cts_vis_3_default",
     "index": ".kibana",
     "source": {
+      "originId": "cts_vis_3",
       "visualization": {
         "title": "CTS vis 3 from default space",
         "description": "AreaChart",
@@ -214,7 +217,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["default"]
     },
     "type": "_doc"
   }
@@ -243,7 +247,7 @@
         },
         {
           "type": "visualization",
-          "id": "cts_vis_3",
+          "id": "cts_vis_3_space_1",
           "name": "CTS Vis 3"
         }
       ],
@@ -258,7 +262,7 @@
 {
   "type": "_doc",
   "value": {
-    "id": "space_1:visualization:cts_vis_1_space_1",
+    "id": "visualization:cts_vis_1_space_1",
     "index": ".kibana",
     "source": {
       "visualization": {
@@ -278,7 +282,7 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespace": "space_1"
+      "namespaces": ["space_1"]
     },
     "type": "_doc"
   }
@@ -287,7 +291,7 @@
 {
   "type": "_doc",
   "value": {
-    "id": "space_1:visualization:cts_vis_2_space_1",
+    "id": "visualization:cts_vis_2_space_1",
     "index": ".kibana",
     "source": {
       "visualization": {
@@ -307,7 +311,7 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespace": "space_1"
+      "namespaces": ["space_1"]
     },
     "type": "_doc"
   }
@@ -316,9 +320,10 @@
 {
   "type": "_doc",
   "value": {
-    "id": "space_1:visualization:cts_vis_3",
+    "id": "visualization:cts_vis_3_space_1",
     "index": ".kibana",
     "source": {
+      "originId": "cts_vis_3",
       "visualization": {
         "title": "CTS vis 3 from space_1 space",
         "description": "AreaChart",
@@ -336,7 +341,7 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespace": "space_1"
+      "namespaces": ["space_1"]
     },
     "type": "_doc"
   }

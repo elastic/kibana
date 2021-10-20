@@ -13,7 +13,7 @@ import { debounce } from 'lodash';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { estypes } from '@elastic/elasticsearch';
 import { Dictionary } from '../../../../../../../common/types/common';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../../../src/plugins/data_views/common';
 import { Query, QueryStringInput } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
@@ -29,7 +29,7 @@ interface ErrorMessage {
 }
 
 export interface ExplorationQueryBarProps {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   setSearchQuery: (update: {
     queryString: string;
     query?: SavedSearchQuery;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { InputControlFactory } from '../types';
 import { ControlsService } from '../controls_service';
+import { InputControlFactory } from '../../../services/controls';
 import { flightFields, getEuiSelectableOptions } from './flights';
 import { OptionsListEmbeddableFactory } from '../control_types/options_list';
 

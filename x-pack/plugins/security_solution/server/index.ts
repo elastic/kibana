@@ -7,7 +7,7 @@
 
 import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
 import { Plugin, PluginSetup, PluginStart } from './plugin';
-import { configSchema, ConfigType } from './config';
+import { configSchema, ConfigSchema, ConfigType } from './config';
 import { SIGNALS_INDEX_KEY } from '../common/constants';
 import { AppClient } from './types';
 
@@ -15,13 +15,12 @@ export const plugin = (context: PluginInitializerContext) => {
   return new Plugin(context);
 };
 
-export const config: PluginConfigDescriptor<ConfigType> = {
+export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enableExperimental: true,
   },
   schema: configSchema,
-  deprecations: ({ deprecate, renameFromRoot }) => [
-    deprecate('enabled', '8.0.0'),
+  deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.siem.enabled', 'xpack.securitySolution.enabled'),
     renameFromRoot(
       'xpack.siem.maxRuleImportExportSize',
@@ -48,5 +47,5 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 
 export { ConfigType, Plugin, PluginSetup, PluginStart };
 export { AppClient };
-export type { AppRequestContext } from './types';
+export type { SecuritySolutionApiRequestHandlerContext } from './types';
 export { EndpointError } from './endpoint/errors';

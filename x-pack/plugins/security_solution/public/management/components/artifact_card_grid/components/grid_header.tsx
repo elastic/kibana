@@ -63,7 +63,7 @@ export const GridHeader = memo<GridHeaderProps>(({ 'data-test-subj': dataTestSub
             </strong>
           </EuiText>
         }
-        actionMenu={false}
+        actionMenu={true}
       />
     </GridHeaderContainer>
   );

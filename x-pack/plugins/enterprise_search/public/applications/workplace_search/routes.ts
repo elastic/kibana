@@ -45,10 +45,9 @@ export const CUSTOM_SOURCE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-ap
 export const CUSTOM_API_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-sources-api.html`;
 export const CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL = `${CUSTOM_SOURCE_DOCS_URL}#custom-api-source-document-level-access-control`;
 export const ENT_SEARCH_LICENSE_MANAGEMENT = `${docLinks.enterpriseSearchBase}/license-management.html`;
-export const SYNCHRONIZATION_DOCS_URL = '#TODO';
-export const DIFFERENT_SYNC_TYPES_DOCS_URL = '#TODO';
-export const SYNC_BEST_PRACTICES_DOCS_URL = '#TODO';
-export const OBJECTS_AND_ASSETS_DOCS_URL = '#TODO';
+export const SYNCHRONIZATION_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#workplace-search-customizing-indexing-rules`;
+export const DIFFERENT_SYNC_TYPES_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#_indexing_schedule`;
+export const OBJECTS_AND_ASSETS_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#workplace-search-customizing-indexing-rules`;
 
 export const PERSONAL_PATH = '/p';
 

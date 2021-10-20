@@ -13,6 +13,10 @@ import exitHook from 'exit-hook';
 import { ToolingLog } from '../tooling_log';
 import { isFailError } from './fail';
 
+/**
+ * A function which will be called when the CLI is torn-down which should
+ * quickly cleanup whatever it needs.
+ */
 export type CleanupTask = () => void;
 
 export class Cleanup {

@@ -30,7 +30,7 @@ import {
 } from '../../../../plugins/embeddable/public';
 import {
   IExpressionLoaderParams,
-  ExpressionsStart,
+  ExpressionLoader,
   ExpressionRenderError,
   ExpressionAstExpression,
 } from '../../../../plugins/expressions/public';
@@ -39,7 +39,7 @@ import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { SavedObjectAttributes } from '../../../../core/types';
-import { SavedVisualizationsLoader } from '../saved_visualizations';
+import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
 
@@ -81,8 +81,6 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
 export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
 
-type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
-
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
   implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>
@@ -108,7 +106,6 @@ export class VisualizeEmbeddable
     VisualizeByValueInput,
     VisualizeByReferenceInput
   >;
-  private savedVisualizationsLoader?: SavedVisualizationsLoader;
 
   constructor(
     timefilter: TimefilterContract,
@@ -119,7 +116,6 @@ export class VisualizeEmbeddable
       VisualizeByValueInput,
       VisualizeByReferenceInput
     >,
-    savedVisualizationsLoader?: SavedVisualizationsLoader,
     parent?: IContainer
   ) {
     super(
@@ -144,7 +140,6 @@ export class VisualizeEmbeddable
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
-    this.savedVisualizationsLoader = savedVisualizationsLoader;
 
     if (this.attributeService) {
       const isByValue = !this.inputIsRefType(initialInput);
@@ -305,7 +300,7 @@ export class VisualizeEmbeddable
     super.render(this.domNode);
 
     const expressions = getExpressions();
-    this.handler = new expressions.ExpressionLoader(this.domNode, undefined, {
+    this.handler = await expressions.loader(this.domNode, undefined, {
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },
@@ -361,7 +356,7 @@ export class VisualizeEmbeddable
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
-    this.updateHandler();
+    await this.updateHandler();
   }
 
   public destroy() {
@@ -455,7 +450,15 @@ export class VisualizeEmbeddable
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const savedVis = await this.savedVisualizationsLoader?.get({});
+    const { savedObjectsClient, data, spaces, savedObjectsTaggingOss } = await this.deps.start()
+      .plugins;
+    const savedVis = await getSavedVisualization({
+      savedObjectsClient,
+      search: data.search,
+      dataViews: data.dataViews,
+      spaces,
+      savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+    });
     if (!savedVis) {
       throw new Error('Error creating a saved vis object');
     }

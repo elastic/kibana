@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { Fields } from './entity';
 import { Serializable } from './serializable';
 
-export class Metricset extends Serializable {}
-
-export function metricset(name: string) {
-  return new Metricset({
-    'metricset.name': name,
-  });
+export class Metricset extends Serializable {
+  constructor(fields: Fields) {
+    super({
+      'processor.event': 'metric',
+      'processor.name': 'metric',
+      ...fields,
+    });
+  }
 }

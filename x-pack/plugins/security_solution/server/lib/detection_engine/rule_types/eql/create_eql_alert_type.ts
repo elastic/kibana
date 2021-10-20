@@ -6,33 +6,16 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { PersistenceServices } from '../../../../../../rule_registry/server';
 import { EQL_RULE_TYPE_ID } from '../../../../../common/constants';
-import { eqlRuleParams, EqlRuleParams } from '../../schemas/rule_schemas';
+import { EqlRuleParams, eqlRuleParams } from '../../schemas/rule_schemas';
 import { eqlExecutor } from '../../signals/executors/eql';
-import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { CreateRuleOptions } from '../types';
+import { CreateRuleOptions, SecurityAlertType } from '../types';
 
-export const createEqlAlertType = (createOptions: CreateRuleOptions) => {
-  const {
-    experimentalFeatures,
-    lists,
-    logger,
-    ignoreFields,
-    mergeStrategy,
-    ruleDataClient,
-    version,
-    ruleDataService,
-  } = createOptions;
-  const createSecurityRuleType = createSecurityRuleTypeFactory({
-    lists,
-    logger,
-    ignoreFields,
-    mergeStrategy,
-    ruleDataClient,
-    ruleDataService,
-  });
-  return createSecurityRuleType<EqlRuleParams, {}, PersistenceServices, {}>({
+export const createEqlAlertType = (
+  createOptions: CreateRuleOptions
+): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
+  const { experimentalFeatures, logger, version } = createOptions;
+  return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
     validate: {
@@ -92,5 +75,5 @@ export const createEqlAlertType = (createOptions: CreateRuleOptions) => {
       });
       return { ...result, state };
     },
-  });
+  };
 };

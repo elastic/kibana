@@ -339,11 +339,19 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_ml_module',
             type: 'ml-module',
           },
+          {
+            id: 'sample_tag',
+            type: 'tag',
+          },
         ],
         installed_es: [
           {
             id: 'logs-all_assets.test_logs-all_assets',
             type: 'data_stream_ilm_policy',
+          },
+          {
+            id: 'default',
+            type: 'ml_model',
           },
           {
             id: 'logs-all_assets.test_logs-0.2.0',
@@ -412,12 +420,14 @@ export default function (providerContext: FtrProviderContext) {
           { id: '28523a82-1328-578d-84cb-800970560200', type: 'epm-packages-assets' },
           { id: 'cc1e3e1d-f27b-5d05-86f6-6e4b9a47c7dc', type: 'epm-packages-assets' },
           { id: '5c3aa147-089c-5084-beca-53c00e72ac80', type: 'epm-packages-assets' },
+          { id: '0c8c3c6a-90cb-5f0e-8359-d807785b046c', type: 'epm-packages-assets' },
           { id: '48e582df-b1d2-5f88-b6ea-ba1fafd3a569', type: 'epm-packages-assets' },
           { id: 'bf3b0b65-9fdc-53c6-a9ca-e76140e56490', type: 'epm-packages-assets' },
           { id: '7f4c5aca-b4f5-5f0a-95af-051da37513fc', type: 'epm-packages-assets' },
           { id: '4281a436-45a8-54ab-9724-fda6849f789d', type: 'epm-packages-assets' },
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
           { id: '4035007b-9c33-5227-9803-2de8a17523b5', type: 'epm-packages-assets' },
+          { id: 'e6ae7d31-6920-5408-9219-91ef1662044b', type: 'epm-packages-assets' },
           { id: 'c7bf1a39-e057-58a0-afde-fb4b48751d8c', type: 'epm-packages-assets' },
           { id: '8c665f28-a439-5f43-b5fd-8fda7b576735', type: 'epm-packages-assets' },
         ],

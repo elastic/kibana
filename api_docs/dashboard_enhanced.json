@@ -617,7 +617,15 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
+              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.AnonymousAccessServiceContract",
+                "text": "AnonymousAccessServiceContract"
+              },
+              ") => void; }"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
             "deprecated": false

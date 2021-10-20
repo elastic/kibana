@@ -168,12 +168,12 @@
                 {
                   "field": "host.name",
                   "type": "mapping",
-                  "value": "threatintel.indicator.domain"
+                  "value": "threat.indicator.domain"
                 }
               ]
             }
           ],
-          "threat_query": "threatintel.indicator.type : \"url\"",
+          "threat_query": "threat.indicator.type : \"url\"",
           "throttle": null,
           "to": "now",
           "type": "threat_match",
@@ -190,7 +190,7 @@
             "event": {
               "category": "threat",
               "created": "2021-08-04T03:53:30.761Z",
-              "dataset": "threatintel.abuseurl",
+              "dataset": "ti_abusech.malware",
               "ingested": "2021-08-04T03:53:37.514040Z",
               "kind": "enrichment",
               "module": "threatintel",
@@ -412,12 +412,12 @@
                 {
                   "field": "host.name",
                   "type": "mapping",
-                  "value": "threatintel.indicator.domain"
+                  "value": "threat.indicator.domain"
                 }
               ]
             }
           ],
-          "threat_query": "threatintel.indicator.type : \"url\"",
+          "threat_query": "threat.indicator.type : \"url\"",
           "throttle": null,
           "to": "now",
           "type": "threat_match",
@@ -434,7 +434,7 @@
             "event": {
               "category": "threat",
               "created": "2021-08-04T03:53:30.761Z",
-              "dataset": "threatintel.abuseurl",
+              "dataset": "ti_abusech.malware",
               "ingested": "2021-08-04T03:53:37.514040Z",
               "kind": "enrichment",
               "module": "threatintel",
