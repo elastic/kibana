@@ -10,6 +10,7 @@ import {
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
 } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { useUiTracker, TrackEvent, METRIC_TYPE } from '../../../../hooks/use_track_metric';
 import type {
   AppDataType,
   ReportViewType,
@@ -62,6 +63,8 @@ export function UrlStorageContextProvider({
   );
 
   const [firstSeries, setFirstSeries] = useState<SeriesUrl>();
+
+  const trackEvent = useUiTracker();
 
   useEffect(() => {
     const firstSeriesT = allSeries?.[0];
@@ -116,11 +119,14 @@ export function UrlStorageContextProvider({
 
       (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
       setLastRefresh(Date.now());
+
+      trackTelemetry(trackEvent, allSeries, reportType);
+
       if (onApply) {
         onApply();
       }
     },
-    [allSeries, storage]
+    [allSeries, storage, trackEvent, reportType]
   );
 
   const value = {
@@ -177,6 +183,70 @@ interface ShortUrlSeries {
     from: string;
   };
 }
+
+const trackTelemetry = (trackEvent: TrackEvent, allSeries: AllSeries, reportType: string) => {
+  trackFilters(trackEvent, allSeries, reportType);
+  trackDataType(trackEvent, allSeries, reportType);
+  trackApplyChanges(trackEvent);
+};
+
+const getAppliedFilters = (allSeries: AllSeries) => {
+  const filtersByDataType = new Map<string, string[]>();
+  allSeries.forEach((series) => {
+    const seriesFilters = filtersByDataType.get(series.dataType);
+    const filterFields = (series.filters || []).map((filter) => filter.field);
+
+    if (seriesFilters) {
+      seriesFilters.push(...filterFields);
+    } else {
+      filtersByDataType.set(series.dataType, [...filterFields]);
+    }
+  });
+  return filtersByDataType;
+};
+
+const trackFilters = (trackEvent: TrackEvent, allSeries: AllSeries, reportType: string) => {
+  const filtersByDataType = getAppliedFilters(allSeries);
+  [...filtersByDataType.keys()].forEach((dataType) => {
+    const filtersForDataType = filtersByDataType.get(dataType);
+
+    (filtersForDataType || []).forEach((filter) => {
+      trackEvent({
+        app: 'observability-overview',
+        metricType: METRIC_TYPE.COUNT,
+        metric: `exploratory_view__filters__filter_${filter}`,
+      });
+      trackEvent({
+        app: 'observability-overview',
+        metricType: METRIC_TYPE.COUNT,
+        metric: `exploratory_view__filters__report_type_${reportType}__data_type_${dataType}__filter_${filter}`,
+      });
+    });
+  });
+};
+
+const trackApplyChanges = (trackEvent: TrackEvent) => {
+  trackEvent({
+    app: 'observability-overview',
+    metricType: METRIC_TYPE.COUNT,
+    metric: 'exploratory_view_apply_changes',
+  });
+};
+
+const trackDataType = (trackEvent: TrackEvent, allSeries: AllSeries, reportType: string) => {
+  const metrics = allSeries.map((series) => ({
+    dataType: series.dataType,
+    metricType: series.selectedMetricField,
+  }));
+
+  metrics.forEach(({ dataType, metricType }) => {
+    trackEvent({
+      app: 'observability-overview',
+      metricType: METRIC_TYPE.COUNT,
+      metric: `exploratory_view__report_type_${reportType}__data_type_${dataType}__metric_type_${metricType}`,
+    });
+  });
+};
 
 export type AllShortSeries = ShortUrlSeries[];
 export type AllSeries = SeriesUrl[];
