@@ -62,23 +62,30 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
       try {
         // Attempt Fleet Setup if user has permissions, otherwise skip
         setIsPermissionsLoading(true);
+        console.log('check if permissions...');
         const permissionsResponse = await sendGetPermissionsCheck();
+        console.log('got permissions!', permissionsResponse);
         setIsPermissionsLoading(false);
 
         if (permissionsResponse.data?.success) {
+          console.log('owaky');
           try {
+            console.log('set setup');
             const setupResponse = await sendSetup();
+            console.log('got setup response', setupResponse);
             if (setupResponse.error) {
               setInitializationError(setupResponse.error);
             }
           } catch (err) {
+            console.log('error', err);
             setInitializationError(err);
           }
           setIsInitialized(true);
         } else {
           setIsInitialized(true);
         }
-      } catch {
+      } catch (e) {
+        console.log('error!!!!!', e);
         // If there's an error checking permissions, default to proceeding without running setup
         // User will only have access to EPM endpoints if they actually have permission
         setIsInitialized(true);
@@ -94,7 +101,8 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
     );
   }
 
-  if (!isInitialized || initializationError) {
+  if (!isInitialized) {
+    console.log('permissionscheck failing', initializationError);
     return (
       <ErrorLayout>
         {initializationError ? (
@@ -114,6 +122,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
     );
   }
 
+  console.log('initialize...');
   return <>{children}</>;
 });
 
@@ -141,6 +150,7 @@ export const IntegrationsAppContext: React.FC<{
     extensions,
     setHeaderActionMenu,
   }) => {
+    console.log('integrationsappcontext');
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
     return (
@@ -177,6 +187,7 @@ export const IntegrationsAppContext: React.FC<{
 );
 
 export const AppRoutes = memo(() => {
+  console.log('Approutes');
   const { modal, setModal } = useUrlModal();
   return (
     <>

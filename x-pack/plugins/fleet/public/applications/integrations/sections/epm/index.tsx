@@ -16,6 +16,7 @@ import { Detail } from './screens/detail';
 import { Policy } from './screens/policy';
 
 export const EPMApp: React.FunctionComponent = () => {
+  console.log('EPMAPP');
   useBreadcrumbs('integrations');
 
   return (
