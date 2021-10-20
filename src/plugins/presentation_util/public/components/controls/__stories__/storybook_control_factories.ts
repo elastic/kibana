@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { flightFields, getEuiSelectableOptions } from './flights';
+import { flightFields, getFlightSearchOptions } from './flights';
 import { OptionsListEmbeddableFactory } from '../control_types/options_list';
 import { InputControlFactory, PresentationControlsService } from '../../../services/controls';
 
@@ -15,8 +15,14 @@ export const populateStorybookControlFactories = (
 ) => {
   const optionsListFactoryStub = new OptionsListEmbeddableFactory(
     ({ field, search }) =>
-      new Promise((r) => setTimeout(() => r(getEuiSelectableOptions(field, search)), 500)),
-    () => Promise.resolve(['demo data flights']),
+      new Promise((r) => setTimeout(() => r(getFlightSearchOptions(field.name, search)), 120)),
+    () =>
+      Promise.resolve([
+        {
+          title: 'demo data flights',
+          fields: [],
+        },
+      ]),
     () => Promise.resolve(flightFields)
   );
 

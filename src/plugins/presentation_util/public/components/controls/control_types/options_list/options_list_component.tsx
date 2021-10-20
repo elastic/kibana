@@ -6,48 +6,74 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import { EuiFilterButton, EuiFilterGroup, EuiPopover } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
-
-import { EuiFilterButton, EuiFilterGroup, EuiPopover, EuiSelectableOption } from '@elastic/eui';
 import { Subject } from 'rxjs';
-import { OptionsListStrings } from './options_list_strings';
+
+import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
+import { OptionsListEmbeddableInput } from './options_list_embeddable';
 import { OptionsListPopover } from './options_list_popover_component';
+import { optionsListReducers } from './options_list_reducers';
+import { OptionsListStrings } from './options_list_strings';
 
 import './options_list.scss';
 import { useStateObservable } from '../../hooks/use_state_observable';
 
+// Availableoptions and loading state is controled by the embeddable, but is not considered embeddable input.
 export interface OptionsListComponentState {
-  availableOptions?: EuiSelectableOption[];
-  selectedOptionsString?: string;
-  selectedOptionsCount?: number;
-  twoLineLayout?: boolean;
-  searchString?: string;
+  availableOptions?: string[];
   loading: boolean;
 }
 
 export const OptionsListComponent = ({
-  componentStateSubject,
   typeaheadSubject,
-  updateOption,
+  componentStateSubject,
 }: {
-  componentStateSubject: Subject<OptionsListComponentState>;
   typeaheadSubject: Subject<string>;
-  updateOption: (index: number) => void;
+  componentStateSubject: Subject<OptionsListComponentState>;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const optionsListState = useStateObservable<OptionsListComponentState>(componentStateSubject, {
-    loading: true,
-  });
+  const [searchString, setSearchString] = useState('');
 
+  // Redux embeddable Context to get state from Embeddable input
   const {
-    selectedOptionsString,
-    selectedOptionsCount,
-    availableOptions,
-    twoLineLayout,
-    searchString,
-    loading,
-  } = optionsListState;
+    useEmbeddableDispatch,
+    useEmbeddableSelector,
+    actions: { replaceSelection },
+  } = useReduxEmbeddableContext<OptionsListEmbeddableInput, typeof optionsListReducers>();
+  const dispatch = useEmbeddableDispatch();
+  const { twoLineLayout, selectedOptions, singleSelect } = useEmbeddableSelector((state) => state);
+
+  // useStateObservable to get component state from Embeddable
+  const { availableOptions, loading } = useStateObservable<OptionsListComponentState>(
+    componentStateSubject,
+    {
+      loading: true,
+    }
+  );
+
+  // remove all other selections if this control is single select
+  useEffect(() => {
+    if (singleSelect && selectedOptions && selectedOptions?.length > 1) {
+      dispatch(replaceSelection(selectedOptions[0]));
+    }
+  }, [selectedOptions, singleSelect, dispatch, replaceSelection]);
+
+  const updateSearchString = useCallback(
+    (newSearchString: string) => {
+      typeaheadSubject.next(newSearchString);
+      setSearchString(newSearchString);
+    },
+    [typeaheadSubject]
+  );
+
+  const { selectedOptionsCount, selectedOptionsString } = useMemo(() => {
+    return {
+      selectedOptionsCount: selectedOptions?.length,
+      selectedOptionsString: selectedOptions?.join(OptionsListStrings.summary.getSeparator()),
+    };
+  }, [selectedOptions]);
 
   const button = (
     <EuiFilterButton
@@ -58,9 +84,9 @@ export const OptionsListComponent = ({
       })}
       onClick={() => setIsPopoverOpen((openState) => !openState)}
       isSelected={isPopoverOpen}
-      numFilters={availableOptions?.length ?? 0}
-      hasActiveFilters={(selectedOptionsCount ?? 0) > 0}
+      numFilters={availableOptions?.length ?? 0} // Remove this once https://github.com/elastic/eui/pull/5268 is in an EUI release
       numActiveFilters={selectedOptionsCount}
+      hasActiveFilters={(selectedOptionsCount ?? 0) > 0}
     >
       {!selectedOptionsCount ? OptionsListStrings.summary.getPlaceholder() : selectedOptionsString}
     </EuiFilterButton>
@@ -79,15 +105,14 @@ export const OptionsListComponent = ({
         anchorClassName="optionsList--anchorOverride"
         closePopover={() => setIsPopoverOpen(false)}
         panelPaddingSize="none"
-        anchorPosition="upLeft"
+        anchorPosition="downCenter"
         ownFocus
         repositionOnScroll
       >
         <OptionsListPopover
           loading={loading}
-          updateOption={updateOption}
           searchString={searchString}
-          typeaheadSubject={typeaheadSubject}
+          updateSearchString={updateSearchString}
           availableOptions={availableOptions}
         />
       </EuiPopover>

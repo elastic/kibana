@@ -7,10 +7,24 @@
   height: 100%;
 }
 
+.optionsList--loadingOverlay {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  background-color: $euiColorEmptyShade;
+}
+
 .optionsList--items {
   @include euiScrollBar;
 
   overflow-y: auto;
+  position: relative;
+  min-height: $euiSize * 5;
   max-height: $euiSize * 30;
   width: $euiSize * 25;
   max-width: 100%;
