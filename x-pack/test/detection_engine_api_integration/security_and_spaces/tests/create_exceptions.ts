@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await deleteAllExceptions(es);
+        await deleteAllExceptions(supertest);
       });
 
       describe('elastic admin', () => {
@@ -550,7 +550,7 @@ export default ({ getService }: FtrProviderContext) => {
         afterEach(async () => {
           await deleteSignalsIndex(supertest);
           await deleteAllAlerts(supertest);
-          await deleteAllExceptions(es);
+          await deleteAllExceptions(supertest);
         });
 
         it('should be able to execute against an exception list that does not include valid entries and get back 10 signals', async () => {

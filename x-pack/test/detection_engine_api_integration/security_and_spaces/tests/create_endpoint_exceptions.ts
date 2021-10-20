@@ -69,7 +69,6 @@ export const getHostHits = async (
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
 
   describe('Rule exception operators for endpoints', () => {
     before(async () => {
@@ -94,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
-      await deleteAllExceptions(es);
+      await deleteAllExceptions(supertest);
       await deleteListsIndex(supertest);
     });
 

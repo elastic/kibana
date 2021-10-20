@@ -22,12 +22,11 @@ import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   describe('export_exception_list_route', () => {
     describe('exporting exception lists', () => {
       afterEach(async () => {
-        await deleteAllExceptions(es);
+        await deleteAllExceptions(supertest);
       });
 
       it('should set the response content types to be expected', async () => {
