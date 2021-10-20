@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/steps/functional/common.sh
+source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/download_build_artifacts.sh
