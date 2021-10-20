@@ -62,12 +62,19 @@ export function useFieldStatsSearchStrategy(
     });
     setFieldStats(undefined);
 
-    if (!searchStrategyParams || !fieldStatsParams) return;
     if (
-      fieldStatsParams.metricConfigs.length === 0 &&
-      fieldStatsParams.nonMetricConfigs.length === 0
-    )
+      !searchStrategyParams ||
+      !fieldStatsParams ||
+      (fieldStatsParams.metricConfigs.length === 0 &&
+        fieldStatsParams.nonMetricConfigs.length === 0)
+    ) {
+      setFetchState({
+        loaded: 100,
+        isRunning: false,
+      });
+
       return;
+    }
 
     const { sortField, sortDirection } = initialDataVisualizerListState;
     /**

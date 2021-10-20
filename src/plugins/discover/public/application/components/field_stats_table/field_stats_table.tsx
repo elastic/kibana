@@ -8,6 +8,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Filter } from '@kbn/es-query';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { IndexPatternField, IndexPattern, DataView, Query } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import {
@@ -19,6 +20,7 @@ import {
 } from '../../../../../embeddable/public';
 import { SavedSearch } from '../../../saved_searches';
 import { GetStateReturn } from '../../apps/main/services/discover_state';
+import { FIELD_STATISTICS_LOADED } from './constants';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   indexPattern: IndexPattern;
@@ -69,14 +71,23 @@ export interface DiscoverDataVisualizerGridProps {
    * Filters query to update the table content
    */
   filters?: Filter[];
+  /**
+   * State container with persisted settings
+   */
   stateContainer?: GetStateReturn;
   /**
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  /**
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
+   */
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
-export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProps) => {
+export const FieldStatisticsTable = (props: DiscoverDataVisualizerGridProps) => {
   const {
     services,
     indexPattern,
@@ -86,6 +97,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
     filters,
     stateContainer,
     onAddFilter,
+    trackUiMetric,
   } = props;
   const { uiSettings } = services;
 
@@ -135,16 +147,10 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
       embeddable.updateInput({
         showPreviewByDefault,
       });
+
       embeddable.reload();
     }
   }, [showPreviewByDefault, uiSettings, embeddable]);
-
-  useEffect(() => {
-    return () => {
-      // Clean up embeddable upon unmounting
-      embeddable?.destroy();
-    };
-  }, [embeddable]);
 
   useEffect(() => {
     let unmounted = false;
@@ -181,8 +187,15 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   useEffect(() => {
     if (embeddableRoot.current && embeddable) {
       embeddable.render(embeddableRoot.current);
+
+      trackUiMetric?.(METRIC_TYPE.LOADED, FIELD_STATISTICS_LOADED);
     }
-  }, [embeddable, embeddableRoot, uiSettings]);
+
+    return () => {
+      // Clean up embeddable upon unmounting
+      embeddable?.destroy();
+    };
+  }, [embeddable, embeddableRoot, uiSettings, trackUiMetric]);
 
   return (
     <div

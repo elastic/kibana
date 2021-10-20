@@ -43,8 +43,12 @@ import {
   SavedSearchURLConflictCallout,
   useSavedSearchAliasMatchRedirect,
 } from '../../../../../saved_searches';
-import { DiscoverDataVisualizerGrid } from '../../../../components/data_visualizer_grid';
+import { FieldStatisticsTable } from '../../../../components/field_stats_table';
 import { VIEW_MODE } from '../view_mode_toggle';
+import {
+  DOCUMENTS_VIEW_CLICK,
+  FIELD_STATISTICS_VIEW_CLICK,
+} from '../../../../components/field_stats_table/constants';
 
 /**
  * Local storage key for sidebar persistence state
@@ -54,7 +58,7 @@ export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
-const DataVisualizerGridMemoized = React.memo(DiscoverDataVisualizerGrid);
+const DataVisualizerGridMemoized = React.memo(FieldStatisticsTable);
 
 export function DiscoverLayout({
   indexPattern,
@@ -95,8 +99,16 @@ export function DiscoverLayout({
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
       stateContainer.setAppState({ viewMode: mode });
+
+      if (trackUiMetric) {
+        if (mode === VIEW_MODE.AGGREGATED_LEVEL) {
+          trackUiMetric(METRIC_TYPE.CLICK, FIELD_STATISTICS_VIEW_CLICK);
+        } else {
+          trackUiMetric(METRIC_TYPE.CLICK, DOCUMENTS_VIEW_CLICK);
+        }
+      }
     },
-    [stateContainer]
+    [trackUiMetric, stateContainer]
   );
 
   const fetchCounter = useRef<number>(0);
@@ -324,6 +336,7 @@ export function DiscoverLayout({
                       columns={columns}
                       stateContainer={stateContainer}
                       onAddFilter={onAddFilter}
+                      trackUiMetric={trackUiMetric}
                     />
                   )}
                 </EuiFlexGroup>

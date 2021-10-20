@@ -8,15 +8,12 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import {
-  DiscoverDataVisualizerGrid,
-  DiscoverDataVisualizerGridProps,
-} from './data_visualizer_grid';
+import { FieldStatisticsTable, DiscoverDataVisualizerGridProps } from './field_stats_table';
 
-export function FieldStatsTableEmbeddable(renderProps: DiscoverDataVisualizerGridProps) {
+export function FieldStatsTableSavedSearchEmbeddable(renderProps: DiscoverDataVisualizerGridProps) {
   return (
     <I18nProvider>
-      <DiscoverDataVisualizerGrid
+      <FieldStatisticsTable
         savedSearch={renderProps.savedSearch}
         services={renderProps.services}
         indexPattern={renderProps.indexPattern}
