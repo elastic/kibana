@@ -17,6 +17,9 @@ export interface MlJobMemoryOverview {
   model_size: number;
 }
 
+const AD_PROCESS_MEMORY_OVERHEAD = 10000000; // 10mb
+const DFA_PROCESS_MEMORY_OVERHEAD = 5000000; // 5mb
+
 /**
  * Provides a service for memory overview across ML.
  * @param mlClient
@@ -53,10 +56,11 @@ export function memoryOverviewServiceProvider(mlClient: MlClient) {
       });
 
       startedDfaJobs.forEach((dfa) => {
-        dfaMemoryKeyByJobId[dfa.id].model_size = numeral(
-          dfa.model_memory_limit?.toUpperCase()
-          // @ts-ignore
-        ).value();
+        dfaMemoryKeyByJobId[dfa.id].model_size =
+          numeral(
+            dfa.model_memory_limit?.toUpperCase()
+            // @ts-ignore
+          ).value() + DFA_PROCESS_MEMORY_OVERHEAD;
       });
 
       return dfaMemoryReport;
@@ -74,7 +78,7 @@ export function memoryOverviewServiceProvider(mlClient: MlClient) {
         .map((jobStats) => {
           return {
             node_id: jobStats.node.id,
-            model_size: jobStats.model_size_stats.model_bytes,
+            model_size: jobStats.model_size_stats.model_bytes + AD_PROCESS_MEMORY_OVERHEAD,
             job_id: jobStats.job_id,
           };
         });
