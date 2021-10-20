@@ -432,6 +432,7 @@ export const staticSourceData = [
       SOURCE_OBJ_TYPES.LEADS,
       SOURCE_OBJ_TYPES.ACCOUNTS,
       SOURCE_OBJ_TYPES.CAMPAIGNS,
+      SOURCE_OBJ_TYPES.CASES,
     ],
     features: {
       basicOrgContext: [
@@ -466,6 +467,7 @@ export const staticSourceData = [
       SOURCE_OBJ_TYPES.LEADS,
       SOURCE_OBJ_TYPES.ACCOUNTS,
       SOURCE_OBJ_TYPES.CAMPAIGNS,
+      SOURCE_OBJ_TYPES.CASES,
     ],
     features: {
       basicOrgContext: [
