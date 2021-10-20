@@ -24,9 +24,9 @@ export const CardHeader = memo<CardHeaderProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
-      <EuiFlexGroup responsive={false} data-test-subj={dataTestSubj}>
+      <EuiFlexGroup responsive={false} alignItems="flexStart" data-test-subj={dataTestSubj}>
         <EuiFlexItem grow={true}>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="flexStart">
             <EuiFlexItem grow={true}>
               <EuiTitle size="s">
                 <h3 data-test-subj={getTestId('title')}>{name}</h3>

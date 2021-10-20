@@ -35,7 +35,7 @@ const ApplicationRequiredCalloutComponent: React.FC<Props> = ({ message }) => {
       <EuiCallOut
         size="m"
         iconType="alert"
-        data-test-subj="snDeprecatedCallout"
+        data-test-subj="snApplicationCallout"
         color="danger"
         title={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.applicationRequiredCallout',
