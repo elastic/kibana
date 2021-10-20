@@ -193,7 +193,7 @@ const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = (
   </EuiText>
 );
 
-export function decodeEnrollmentToken(enrollmentToken: string) {
+export function decodeEnrollmentToken(enrollmentToken: string): EnrollmentToken | undefined {
   try {
     const json = JSON.parse(atob(enrollmentToken)) as EnrollmentToken;
     if (
