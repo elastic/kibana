@@ -66,5 +66,7 @@ export function getFeatureId(feature: Feature, source: IVectorSource): string | 
     return feature.properties?.[GEOJSON_FEATURE_ID_PROPERTY_NAME];
   }
 
-  return source.getType() === SOURCE_TYPES.ES_SEARCH ? feature.properties?.[ES_MVT_FEATURE_ID_PROPERTY_NAME] : feature.id;
+  return source.getType() === SOURCE_TYPES.ES_SEARCH
+    ? feature.properties?.[ES_MVT_FEATURE_ID_PROPERTY_NAME]
+    : feature.id;
 }
