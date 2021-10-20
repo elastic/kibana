@@ -15,7 +15,6 @@ import { Route, Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { mountWithIntl } from '../../../test_helpers';
 import { LogRetentionOptions } from '../log_retention';
 
 import { CurationsRouter } from './';
