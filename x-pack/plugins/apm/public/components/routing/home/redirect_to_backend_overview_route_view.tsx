@@ -16,9 +16,7 @@ export function RedirectToBackendOverviewRouteView() {
     query,
   } = useApmParams('/backends/{backendName}/overview');
 
-  const search = qs.stringify({...query, backendName});
+  const search = qs.stringify({ ...query, backendName });
 
-  return (
-    <Redirect to={{ pathname: `/backends/overview`, search }} />
-  );
+  return <Redirect to={{ pathname: `/backends/overview`, search }} />;
 }
