@@ -7,6 +7,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { ConfigDeprecationProvider } from '../config';
 import type { ServiceConfigDescriptor } from '../internal_types';
 
 const migrationSchema = schema.object({
@@ -20,10 +21,13 @@ const migrationSchema = schema.object({
 
 export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
 
+const migrationDeprecations: ConfigDeprecationProvider = ({ unused }) => [unused('enableV2')];
+
 export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> =
   {
     path: 'migrations',
     schema: migrationSchema,
+    deprecations: migrationDeprecations,
   };
 
 const soSchema = schema.object({
