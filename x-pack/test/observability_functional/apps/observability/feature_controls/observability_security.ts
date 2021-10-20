@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('observability cases read-only privileges', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/logs_and_metrics');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
             observabilityCases: ['read'],
@@ -100,7 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/logs_and_metrics');
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.restoreDefaultTestUserRole();
       });
 
