@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import {
   ENABLE_NEW_SN_ITSM_CONNECTOR,
   ENABLE_NEW_SN_SIR_CONNECTOR,
@@ -32,10 +34,10 @@ export const isDeprecatedConnector = (connector: ActionConnector): boolean => {
     connector as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
   ).config;
 
-  return !!unsafeConfig.isLegacy;
+  return !!unsafeConfig?.isLegacy;
 };
 
-export const getEnabledAndConfiguredConnectors = (
+export const getValidConnectors = (
   connectors: ActionConnector[],
   actionItem: AlertAction,
   actionTypesIndex: ActionTypeIndex
@@ -49,3 +51,10 @@ export const getEnabledAndConfiguredConnectors = (
       (actionType?.enabledInConfig || connector.isPreconfigured)
   );
 };
+
+export const deprecatedMessage = i18n.translate(
+  'xpack.triggersActionsUI.sections.deprecatedTitleMessage',
+  {
+    defaultMessage: '(deprecated)',
+  }
+);

@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { ActionConnector, ActionTypeIndex, AlertAction } from '../../../types';
-import { getEnabledAndConfiguredConnectors } from '../common/connectors';
+import { deprecatedMessage, getValidConnectors, isDeprecatedConnector } from '../common/connectors';
 import { DeprecatedConnectorIcon } from './deprecated_connector';
 
 export interface DropdownProps {
@@ -31,7 +31,7 @@ function ConnectorsDropdownComponent({
   onConnectorSelected,
 }: DropdownProps) {
   const validConnectors = useMemo(
-    () => getEnabledAndConfiguredConnectors(connectors, actionItem, actionTypesIndex),
+    () => getValidConnectors(connectors, actionItem, actionTypesIndex),
     [actionItem, actionTypesIndex, connectors]
   );
 
@@ -71,7 +71,7 @@ const getValueOfSelectedConnector = (
 
 const createConnectorOptions = (connectors: ActionConnector[]) =>
   connectors.map((connector) => {
-    const title = `${connector.name} ${connector.isPreconfigured ? preconfiguredMessage : ''}`;
+    const title = getTitle(connector);
 
     return {
       value: connector.id,
@@ -86,6 +86,20 @@ const createConnectorOptions = (connectors: ActionConnector[]) =>
       'data-test-subj': `dropdown-connector-${connector.id}`,
     };
   });
+
+const getTitle = (connector: ActionConnector) => {
+  let title = connector.name;
+
+  if (connector.isPreconfigured) {
+    title += ` ${preconfiguredMessage}`;
+  }
+
+  if (isDeprecatedConnector(connector)) {
+    title += ` ${deprecatedMessage}`;
+  }
+
+  return title;
+};
 
 const preconfiguredMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',

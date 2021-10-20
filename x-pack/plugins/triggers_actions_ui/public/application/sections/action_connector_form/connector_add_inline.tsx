@@ -27,7 +27,7 @@ import { AlertAction, ActionTypeIndex, ActionConnector } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
-import { getEnabledAndConfiguredConnectors } from '../common/connectors';
+import { getValidConnectors } from '../common/connectors';
 import { ConnectorsDropdown } from './connector_dropdown';
 
 type AddConnectorInFormProps = {
@@ -88,11 +88,7 @@ export const AddConnectorInline = ({
   );
 
   useEffect(() => {
-    const filteredConnectors = getEnabledAndConfiguredConnectors(
-      connectors,
-      actionItem,
-      actionTypesIndex
-    );
+    const filteredConnectors = getValidConnectors(connectors, actionItem, actionTypesIndex);
 
     if (filteredConnectors.length > 0) {
       setHasConnectors(true);

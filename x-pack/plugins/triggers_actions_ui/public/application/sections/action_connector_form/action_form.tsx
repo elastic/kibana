@@ -40,6 +40,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
+import { isDeprecatedConnector } from '../common/connectors';
 
 export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
   omitOptionalMessageVariables?: boolean;
@@ -309,7 +310,7 @@ export const ActionForm = ({
         actions.map((actionItem: AlertAction, index: number) => {
           const actionConnector = connectors.find((field) => field.id === actionItem.id);
           // connectors doesn't exists
-          if (!actionConnector) {
+          if (!actionConnector || isDeprecatedConnector(actionConnector)) {
             return (
               <AddConnectorInline
                 actionTypesIndex={actionTypesIndex}

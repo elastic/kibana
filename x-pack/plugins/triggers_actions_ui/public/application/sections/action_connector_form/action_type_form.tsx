@@ -48,7 +48,6 @@ import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 import { ConnectorsDropdown } from './connector_dropdown';
-import { DeprecatedConnectorIcon } from './deprecated_connector';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -375,7 +374,6 @@ const AccordionButtonContent = ({
                   </>
                 )}
               </EuiFlexItem>
-              <DeprecatedConnectorIcon connector={actionConnector} />
             </EuiFlexGroup>
           </div>
         </EuiText>
