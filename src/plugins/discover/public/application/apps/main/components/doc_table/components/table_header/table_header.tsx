@@ -45,6 +45,7 @@ export function TableHeader({
           <TableHeaderColumn
             key={col.name}
             {...col}
+            customLabel={indexPattern.getFieldByName(col.name)?.customLabel}
             isTimeColumn={indexPattern.timeFieldName === col.name}
             sortOrder={
               sortOrder.length ? sortOrder : getDefaultSort(indexPattern, defaultSortOrder)

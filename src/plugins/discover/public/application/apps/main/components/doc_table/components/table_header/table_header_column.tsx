@@ -19,6 +19,7 @@ interface Props {
   isRemoveable: boolean;
   isSortable: boolean;
   isTimeColumn: boolean;
+  customLabel?: string;
   name: string;
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, idx: number) => void;
@@ -56,6 +57,7 @@ export function TableHeaderColumn({
   isRemoveable,
   isSortable,
   isTimeColumn,
+  customLabel,
   name,
   onChangeSortOrder,
   onMoveColumn,
@@ -193,7 +195,7 @@ export function TableHeaderColumn({
     <th data-test-subj="docTableHeaderField">
       <span data-test-subj={`docTableHeader-${name}`} className="kbnDocTableHeader__actions">
         {showScoreSortWarning && <DocViewTableScoreSortWarning />}
-        {displayName}
+        {customLabel ?? displayName}
         {isTimeColumn && (
           <EuiIconTip
             key="time-icon"
