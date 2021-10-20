@@ -221,18 +221,22 @@ export async function getTotalCountAggregations(
           filter: [{ term: { type: 'alert' } }],
         },
       },
+      runtime_mappings: {
+        alert_action_count: {
+          type: 'long',
+          script: {
+            source:
+              "def alert = params._source['alert']; if (alert != null) { def actions = alert.actions; if (actions != null) { emit(actions.length); } else { emit(0); }}",
+          },
+        },
+      },
       aggs: {
         byAlertTypeId: alertTypeMetric,
         throttleTime: throttleTimeMetric,
         intervalTime: intervalTimeMetric,
-        connectorsAgg: {
-          nested: {
-            path: 'alert.actions',
-          },
-          aggs: {
-            connectors: connectorsMetric,
-          },
-        },
+        max_actions_count: { max: { field: 'alert_action_count' } },
+        min_actions_count: { min: { field: 'alert_action_count' } },
+        avg_actions_count: { avg: { field: 'alert_action_count' } },
       },
     },
   });
@@ -241,16 +245,9 @@ export async function getTotalCountAggregations(
     byAlertTypeId: { value: { types: Record<string, string> } };
     throttleTime: { value: { min: number; max: number; totalCount: number; totalSum: number } };
     intervalTime: { value: { min: number; max: number; totalCount: number; totalSum: number } };
-    connectorsAgg: {
-      connectors: {
-        value: {
-          min_actions: number;
-          max_actions: number;
-          totalActionsCount: number;
-          currentAlertActions: number;
-        };
-      };
-    };
+    max_actions_count: { value: number };
+    min_actions_count: { value: number };
+    avg_actions_count: { value: number };
   };
 
   const totalAlertsCount = Object.keys(aggregations.byAlertTypeId.value.types).reduce(
@@ -289,12 +286,9 @@ export async function getTotalCountAggregations(
       max: `${aggregations.intervalTime.value.max}s`,
     },
     connectors_per_alert: {
-      min: aggregations.connectorsAgg.connectors.value.min_actions,
-      avg:
-        totalAlertsCount > 0
-          ? aggregations.connectorsAgg.connectors.value.totalActionsCount / totalAlertsCount
-          : 0,
-      max: aggregations.connectorsAgg.connectors.value.max_actions,
+      min: aggregations.max_actions_count.value,
+      avg: aggregations.min_actions_count.value,
+      max: aggregations.avg_actions_count.value,
     },
   };
 }
