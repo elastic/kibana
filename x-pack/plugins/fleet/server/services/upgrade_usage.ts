@@ -23,6 +23,7 @@ export interface UpgradeError {
 }
 
 export const MAX_ERROR_SIZE = 100;
+export const FLEET_UPGRADES_CHANNEL_NAME = 'fleet-upgrades';
 
 export function sendTelemetryEvents(
   logger: Logger,
@@ -34,17 +35,20 @@ export function sendTelemetryEvents(
   }
 
   try {
-    eventsTelemetry.queueTelemetryEvents([
-      {
-        package_policy_upgrade: {
-          ...upgradeUsage,
-          error: upgradeUsage.error
-            ? makeErrorGeneric(capErrorSize(upgradeUsage.error, MAX_ERROR_SIZE))
-            : undefined,
+    eventsTelemetry.queueTelemetryEvents(
+      [
+        {
+          package_policy_upgrade: {
+            ...upgradeUsage,
+            error: upgradeUsage.error
+              ? makeErrorGeneric(capErrorSize(upgradeUsage.error, MAX_ERROR_SIZE))
+              : undefined,
+          },
+          id: `${upgradeUsage.package_name}_${upgradeUsage.current_version}_${upgradeUsage.new_version}_${upgradeUsage.status}`,
         },
-        id: `${upgradeUsage.package_name}_${upgradeUsage.current_version}_${upgradeUsage.new_version}_${upgradeUsage.status}`,
-      },
-    ]);
+      ],
+      FLEET_UPGRADES_CHANNEL_NAME
+    );
   } catch (exc) {
     logger.error(`queing telemetry events failed ${exc}`);
   }

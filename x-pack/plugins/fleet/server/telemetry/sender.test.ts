@@ -22,21 +22,11 @@ describe('TelemetryEventsSender', () => {
   describe('queueTelemetryEvents', () => {
     it('queues two events', () => {
       const sender = new TelemetryEventsSender(logger);
-      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
-      expect(sender['queue'].length).toBe(2);
+      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }], 'my-channel');
+      expect(sender['queuesPerChannel']['my-channel']).toBeDefined();
     });
 
-    it('queues more than maxQueueSize events', () => {
-      const sender = new TelemetryEventsSender(logger);
-      sender['maxQueueSize'] = 5;
-      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
-      sender.queueTelemetryEvents([{ 'event.kind': '3' }, { 'event.kind': '4' }]);
-      sender.queueTelemetryEvents([{ 'event.kind': '5' }, { 'event.kind': '6' }]);
-      sender.queueTelemetryEvents([{ 'event.kind': '7' }, { 'event.kind': '8' }]);
-      expect(sender['queue'].length).toBe(5);
-    });
-
-    it('empties the queue when sending', async () => {
+    it('should send events when due', async () => {
       const sender = new TelemetryEventsSender(logger);
       sender['telemetryStart'] = {
         getIsOptedIn: jest.fn(async () => true),
@@ -44,35 +34,53 @@ describe('TelemetryEventsSender', () => {
       sender['telemetrySetup'] = {
         getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
       };
-      sender['sendEvents'] = jest.fn();
 
-      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
-      expect(sender['queue'].length).toBe(2);
+      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }], 'my-channel');
+      sender['queuesPerChannel']['my-channel']['sendEvents'] = jest.fn();
+
       await sender['sendIfDue']();
-      expect(sender['queue'].length).toBe(0);
-      expect(sender['sendEvents']).toBeCalledTimes(1);
-      sender.queueTelemetryEvents([{ 'event.kind': '3' }, { 'event.kind': '4' }]);
-      sender.queueTelemetryEvents([{ 'event.kind': '5' }, { 'event.kind': '6' }]);
-      expect(sender['queue'].length).toBe(4);
-      await sender['sendIfDue']();
-      expect(sender['queue'].length).toBe(0);
-      expect(sender['sendEvents']).toBeCalledTimes(2);
+
+      expect(sender['queuesPerChannel']['my-channel']['sendEvents']).toBeCalledTimes(1);
     });
 
     it("shouldn't send when telemetry is disabled", async () => {
       const sender = new TelemetryEventsSender(logger);
-      sender['sendEvents'] = jest.fn();
       const telemetryStart = {
         getIsOptedIn: jest.fn(async () => false),
       };
       sender['telemetryStart'] = telemetryStart;
 
-      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
-      expect(sender['queue'].length).toBe(2);
+      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }], 'my-channel');
+      sender['queuesPerChannel']['my-channel']['sendEvents'] = jest.fn();
+
       await sender['sendIfDue']();
 
-      expect(sender['queue'].length).toBe(0);
-      expect(sender['sendEvents']).toBeCalledTimes(0);
+      expect(sender['queuesPerChannel']['my-channel']['sendEvents']).toBeCalledTimes(0);
+    });
+
+    it('should send events to separate channels', async () => {
+      const sender = new TelemetryEventsSender(logger);
+      sender['telemetryStart'] = {
+        getIsOptedIn: jest.fn(async () => true),
+      };
+      sender['telemetrySetup'] = {
+        getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
+      };
+
+      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }], 'my-channel');
+      sender['queuesPerChannel']['my-channel']['sendEvents'] = jest.fn();
+
+      expect(sender['queuesPerChannel']['my-channel']['queue'].length).toBe(2);
+
+      sender.queueTelemetryEvents([{ 'event.kind': '3' }], 'my-channel2');
+      sender['queuesPerChannel']['my-channel2']['sendEvents'] = jest.fn();
+
+      expect(sender['queuesPerChannel']['my-channel2']['queue'].length).toBe(1);
+
+      await sender['sendIfDue']();
+
+      expect(sender['queuesPerChannel']['my-channel']['sendEvents']).toBeCalledTimes(1);
+      expect(sender['queuesPerChannel']['my-channel2']['sendEvents']).toBeCalledTimes(1);
     });
   });
 });
@@ -86,22 +94,22 @@ describe('getV3UrlFromV2', () => {
 
   it('should return prod url', () => {
     const sender = new TelemetryEventsSender(logger);
-    expect(
-      sender.getV3UrlFromV2('https://telemetry.elastic.co/xpack/v2/send', 'alerts-endpoint')
-    ).toBe('https://telemetry.elastic.co/v3/send/alerts-endpoint');
+    expect(sender.getV3UrlFromV2('https://telemetry.elastic.co/xpack/v2/send', 'my-channel')).toBe(
+      'https://telemetry.elastic.co/v3/send/my-channel'
+    );
   });
 
   it('should return staging url', () => {
     const sender = new TelemetryEventsSender(logger);
     expect(
-      sender.getV3UrlFromV2('https://telemetry-staging.elastic.co/xpack/v2/send', 'alerts-endpoint')
-    ).toBe('https://telemetry-staging.elastic.co/v3/send/alerts-endpoint');
+      sender.getV3UrlFromV2('https://telemetry-staging.elastic.co/xpack/v2/send', 'my-channel')
+    ).toBe('https://telemetry-staging.elastic.co/v3/send/my-channel');
   });
 
   it('should support ports and auth', () => {
     const sender = new TelemetryEventsSender(logger);
     expect(
-      sender.getV3UrlFromV2('http://user:pass@myproxy.local:1337/xpack/v2/send', 'alerts-endpoint')
-    ).toBe('http://user:pass@myproxy.local:1337/v3/send/alerts-endpoint');
+      sender.getV3UrlFromV2('http://user:pass@myproxy.local:1337/xpack/v2/send', 'my-channel')
+    ).toBe('http://user:pass@myproxy.local:1337/v3/send/my-channel');
   });
 });

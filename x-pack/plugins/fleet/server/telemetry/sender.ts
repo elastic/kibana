@@ -7,16 +7,12 @@
 
 import { URL } from 'url';
 
-import { cloneDeep } from 'lodash';
-import axios from 'axios';
 import type { Logger } from 'src/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 
 import type { TelemetryEvent } from './types';
 import type { TelemetryReceiver } from './receiver';
-
-export const TELEMETRY_MAX_BUFFER_SIZE = 100;
-export const FLEET_CHANNEL_NAME = 'fleet-stats';
+import { TelemetryQueue } from './queue';
 
 /**
  * Simplified version of https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/server/lib/telemetry/sender.ts
@@ -26,13 +22,13 @@ export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 30 * 1000;
   private readonly logger: Logger;
-  private maxQueueSize = TELEMETRY_MAX_BUFFER_SIZE;
+
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
   private intervalId?: NodeJS.Timeout;
   private isSending = false;
   private receiver: TelemetryReceiver | undefined;
-  private queue: TelemetryEvent[] = [];
+  private queuesPerChannel: { [channel: string]: TelemetryQueue } = {};
   private isOptedIn?: boolean = true; // Assume true until the first check
 
   constructor(logger: Logger) {
@@ -60,27 +56,11 @@ export class TelemetryEventsSender {
     }
   }
 
-  public queueTelemetryEvents(events: TelemetryEvent[]) {
-    const qlength = this.queue.length;
-
-    if (events.length === 0) {
-      return;
+  public queueTelemetryEvents(events: TelemetryEvent[], channel: string) {
+    if (!this.queuesPerChannel[channel]) {
+      this.queuesPerChannel[channel] = new TelemetryQueue(this.logger);
     }
-
-    events = events.filter(
-      (event) => !this.queue.find((qItem) => qItem.id && event.id && qItem.id === event.id)
-    );
-
-    if (qlength >= this.maxQueueSize) {
-      // we're full already
-      return;
-    }
-
-    if (events.length > this.maxQueueSize - qlength) {
-      this.queue.push(...events.slice(0, this.maxQueueSize - qlength));
-    } else {
-      this.queue.push(...events);
-    }
+    this.queuesPerChannel[channel].addEvents(events);
   }
 
   public async isTelemetryOptedIn() {
@@ -93,53 +73,31 @@ export class TelemetryEventsSender {
       return;
     }
 
-    if (this.queue.length === 0) {
+    this.isSending = true;
+
+    this.isOptedIn = await this.isTelemetryOptedIn();
+    if (!this.isOptedIn) {
+      this.logger.debug(`Telemetry is not opted-in.`);
+      for (const channel of Object.keys(this.queuesPerChannel)) {
+        this.queuesPerChannel[channel].clearEvents();
+      }
+      this.isSending = false;
       return;
     }
 
-    try {
-      this.isSending = true;
+    const clusterInfo = await this.receiver?.fetchClusterInfo();
 
-      this.isOptedIn = await this.isTelemetryOptedIn();
-      if (!this.isOptedIn) {
-        this.logger.debug(`Telemetry is not opted-in.`);
-        this.queue = [];
-        this.isSending = false;
-        return;
-      }
-
-      const [telemetryUrl, clusterInfo] = await Promise.all([
-        this.fetchTelemetryUrl(FLEET_CHANNEL_NAME),
-        this.receiver?.fetchClusterInfo(),
-      ]);
-
-      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
-      this.logger.debug(
-        `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
+    for (const channel of Object.keys(this.queuesPerChannel)) {
+      await this.queuesPerChannel[channel].sendEvents(
+        await this.fetchTelemetryUrl(channel),
+        clusterInfo
       );
-
-      const toSend: TelemetryEvent[] = cloneDeep(this.queue).map((event) => ({
-        ...event,
-        cluster_uuid: clusterInfo?.cluster_uuid,
-        cluster_name: clusterInfo?.cluster_name,
-      }));
-      this.queue = [];
-
-      this.logger.debug(JSON.stringify(toSend));
-
-      await this.sendEvents(
-        toSend,
-        telemetryUrl,
-        clusterInfo?.cluster_uuid,
-        clusterInfo?.version?.number
-      );
-    } catch (err) {
-      this.logger.warn(`Error sending telemetry events data: ${err}`);
-      this.queue = [];
     }
+
     this.isSending = false;
   }
 
+  // TODO update once kibana uses v3 too https://github.com/elastic/kibana/pull/113525
   private async fetchTelemetryUrl(channel: string): Promise<string> {
     const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
     if (!telemetryUrl) {
@@ -156,37 +114,4 @@ export class TelemetryEventsSender {
     url.pathname = `/v3/send/${channel}`;
     return url.toString();
   }
-
-  private async sendEvents(
-    events: unknown[],
-    telemetryUrl: string,
-    clusterUuid: string | undefined,
-    clusterVersionNumber: string | undefined
-  ) {
-    const ndjson = this.transformDataToNdjson(events);
-
-    try {
-      const resp = await axios.post(telemetryUrl, ndjson, {
-        headers: {
-          'Content-Type': 'application/x-ndjson',
-          'X-Elastic-Cluster-ID': clusterUuid,
-          'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.16.0',
-        },
-      });
-      this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
-    } catch (err) {
-      this.logger.warn(
-        `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
-      );
-    }
-  }
-
-  private transformDataToNdjson = (data: unknown[]): string => {
-    if (data.length !== 0) {
-      const dataString = data.map((dataItem) => JSON.stringify(dataItem)).join('\n');
-      return `${dataString}\n`;
-    } else {
-      return '';
-    }
-  };
 }
