@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 import { IndexPatternField, IndexPattern, IndexPatternType } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { getFieldInfo } from '../../utils';
@@ -92,7 +92,7 @@ const fields = [
 
 describe('IndexedFieldsTable', () => {
   test('should render normally', async () => {
-    const component = shallow(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
       <IndexedFieldsTable
         fields={fields}
         indexPattern={indexPattern}
@@ -112,7 +112,7 @@ describe('IndexedFieldsTable', () => {
   });
 
   test('should filter based on the query bar', async () => {
-    const component = shallow(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
       <IndexedFieldsTable
         fields={fields}
         indexPattern={indexPattern}
@@ -133,7 +133,7 @@ describe('IndexedFieldsTable', () => {
   });
 
   test('should filter based on the type filter', async () => {
-    const component = shallow(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
       <IndexedFieldsTable
         fields={fields}
         indexPattern={indexPattern}
@@ -155,7 +155,7 @@ describe('IndexedFieldsTable', () => {
 
   describe('IndexedFieldsTable with rollup index pattern', () => {
     test('should render normally', async () => {
-      const component = shallow(
+      const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
         <IndexedFieldsTable
           fields={fields}
           indexPattern={rollupIndexPattern}

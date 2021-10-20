@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
 import { IIndexPattern, IndexPattern } from '../../../../../../plugins/data/common';
@@ -60,7 +60,9 @@ describe('ScriptedFieldsTable', () => {
   });
 
   test('should render normally', async () => {
-    const component = shallow<ScriptedFieldsTable>(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow<
+      typeof ScriptedFieldsTable
+    >(
       <ScriptedFieldsTable
         indexPattern={indexPattern}
         helpers={helpers}
@@ -78,7 +80,7 @@ describe('ScriptedFieldsTable', () => {
   });
 
   test('should filter based on the query bar', async () => {
-    const component = shallow(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
       <ScriptedFieldsTable
         indexPattern={indexPattern}
         helpers={helpers}
@@ -99,7 +101,9 @@ describe('ScriptedFieldsTable', () => {
   });
 
   test('should filter based on the lang filter', async () => {
-    const component = shallow<ScriptedFieldsTable>(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow<
+      typeof ScriptedFieldsTable
+    >(
       <ScriptedFieldsTable
         indexPattern={
           getIndexPatternMock({
@@ -128,7 +132,7 @@ describe('ScriptedFieldsTable', () => {
   });
 
   test('should hide the table if there are no scripted fields', async () => {
-    const component = shallow(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
       <ScriptedFieldsTable
         indexPattern={
           getIndexPatternMock({
@@ -150,7 +154,9 @@ describe('ScriptedFieldsTable', () => {
   });
 
   test('should show a delete modal', async () => {
-    const component = shallow<ScriptedFieldsTable>(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow<
+      typeof ScriptedFieldsTable
+    >(
       <ScriptedFieldsTable
         indexPattern={indexPattern}
         helpers={helpers}
@@ -170,7 +176,9 @@ describe('ScriptedFieldsTable', () => {
 
   test('should delete a field', async () => {
     const removeScriptedField = jest.fn();
-    const component = shallow<ScriptedFieldsTable>(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow<
+      typeof ScriptedFieldsTable
+    >(
       <ScriptedFieldsTable
         indexPattern={
           {
@@ -185,10 +193,11 @@ describe('ScriptedFieldsTable', () => {
     ).dive();
 
     await component.update(); // Fire `componentWillMount()`
-    // @ts-expect-error lang is not valid
+    // @ts-expect-error
     component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
 
     await component.update();
+    // @ts-expect-error
     await component.instance().deleteField();
     await component.update();
 
