@@ -2,7 +2,7 @@
   "upstream": "elastic/kibana",
   "targetBranchChoices": [
     { "name": "master", "checked": true },
-    { "name": "7.16", "checked": true },
+    "7.16",
     "7.15",
     "7.14",
     "7.13",
