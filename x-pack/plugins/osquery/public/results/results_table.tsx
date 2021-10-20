@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, keys, map } from 'lodash/fp';
+import { get, isEmpty, isEqual, keys, map, reduce } from 'lodash/fp';
 import {
   EuiCallOut,
   EuiCode,
@@ -17,8 +17,10 @@ import {
   EuiLoadingContent,
   EuiProgress,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { pagePathGetters } from '../../../fleet/public';
@@ -31,9 +33,10 @@ import {
   ViewResultsInDiscoverAction,
   ViewResultsInLensAction,
   ViewResultsActionButtonType,
-} from '../scheduled_query_groups/scheduled_query_group_queries_status_table';
+} from '../packs/pack_queries_status_table';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import { useActionDetails } from '../actions/use_action_details';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -53,6 +56,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
+  const { data: actionDetails } = useActionDetails({ actionId });
+
   const {
     // @ts-expect-error update types
     data: { aggregations },
@@ -155,6 +160,59 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [onChangeItemsPerPage, onChangePage, pagination]
   );
 
+  const ecsMapping = useMemo(() => {
+    const mapping = get('actionDetails._source.data.ecs_mapping', actionDetails);
+    if (!mapping) return;
+
+    return reduce(
+      (acc, [key, value]) => {
+        // @ts-expect-error update types
+        if (value?.field) {
+          // @ts-expect-error update types
+          acc[value?.field] = [...(acc[value?.field] ?? []), key];
+        }
+        return acc;
+      },
+      {},
+      Object.entries(mapping)
+    );
+  }, [actionDetails]);
+
+  const getHeaderDisplay = useCallback(
+    (columnName: string) => {
+      // @ts-expect-error update types
+      if (ecsMapping && ecsMapping[columnName]) {
+        return (
+          <>
+            {columnName}{' '}
+            <EuiIconTip
+              size="s"
+              content={
+                <>
+                  <FormattedMessage
+                    id="xpack.osquery.liveQueryResults.table.fieldMappedLabel"
+                    defaultMessage="Field is mapped to"
+                  />
+                  {`:`}
+                  <ul>
+                    {
+                      // @ts-expect-error update types
+                      ecsMapping[columnName].map((fieldName) => (
+                        <li key={fieldName}>{fieldName}</li>
+                      ))
+                    }
+                  </ul>
+                </>
+              }
+              type="indexMapping"
+            />
+          </>
+        );
+      }
+    },
+    [ecsMapping]
+  );
+
   useEffect(() => {
     if (!allResultsData?.edges) {
       return;
@@ -186,6 +244,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
               data.push({
                 id: fieldName,
                 displayAsText,
+                display: getHeaderDisplay(displayAsText),
                 defaultSortDirection: Direction.asc,
               });
               seen.add(displayAsText);
@@ -198,11 +257,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         { data: [], seen: new Set<string>() } as { data: EuiDataGridColumn[]; seen: Set<string> }
       ).data;
 
-    if (!isEqual(columns, newColumns)) {
-      setColumns(newColumns);
-      setVisibleColumns(map('id', newColumns));
-    }
-  }, [columns, allResultsData?.edges]);
+    setColumns((currentColumns) =>
+      !isEqual(map('id', currentColumns), map('id', newColumns)) ? newColumns : currentColumns
+    );
+    setVisibleColumns(map('id', newColumns));
+  }, [allResultsData?.edges, getHeaderDisplay]);
 
   const toolbarVisibility = useMemo(
     () => ({
