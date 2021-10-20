@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { createStaticIndexPattern } from './create_static_index_pattern';
+import { createStaticDataView } from './create_static_data_view';
 import { Setup } from '../helpers/setup_request';
 import * as HistoricalAgentData from '../../routes/historical_data/has_historical_agent_data';
 import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { APMConfig } from '../..';
 
-function getMockSavedObjectsClient(existingIndexPatternTitle: string) {
+function getMockSavedObjectsClient(existingDataViewTitle: string) {
   return {
     get: jest.fn(() => ({
       attributes: {
-        title: existingIndexPatternTitle,
+        title: existingDataViewTitle,
       },
     })),
     create: jest.fn(),
@@ -31,10 +31,10 @@ const setup = {
   } as APMConfig['indices'],
 } as unknown as Setup;
 
-describe('createStaticIndexPattern', () => {
-  it(`should not create index pattern if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
+describe('createStaticDataView', () => {
+  it(`should not create data view if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
-    await createStaticIndexPattern({
+    await createStaticDataView({
       setup,
       config: { autocreateApmIndexPattern: false } as APMConfig,
       savedObjectsClient,
@@ -43,7 +43,7 @@ describe('createStaticIndexPattern', () => {
     expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
-  it(`should not create index pattern if no APM data is found`, async () => {
+  it(`should not create data view if no APM data is found`, async () => {
     // does not have APM data
     jest
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
@@ -51,7 +51,7 @@ describe('createStaticIndexPattern', () => {
 
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
 
-    await createStaticIndexPattern({
+    await createStaticDataView({
       setup,
       config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
@@ -60,7 +60,7 @@ describe('createStaticIndexPattern', () => {
     expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
-  it(`should create index pattern`, async () => {
+  it(`should create data view`, async () => {
     // does have APM data
     jest
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
@@ -68,7 +68,7 @@ describe('createStaticIndexPattern', () => {
 
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
 
-    await createStaticIndexPattern({
+    await createStaticDataView({
       setup,
       config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
@@ -78,17 +78,17 @@ describe('createStaticIndexPattern', () => {
     expect(savedObjectsClient.create).toHaveBeenCalled();
   });
 
-  it(`should overwrite the index pattern if the new index pattern title does not match the old index pattern title`, async () => {
+  it(`should overwrite the data view if the new data view title does not match the old data view title`, async () => {
     // does have APM data
     jest
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
       .mockResolvedValue(true);
 
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
-    const expectedIndexPatternTitle =
+    const expectedDataViewTitle =
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*';
 
-    await createStaticIndexPattern({
+    await createStaticDataView({
       setup,
       config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,
@@ -99,13 +99,13 @@ describe('createStaticIndexPattern', () => {
     expect(savedObjectsClient.create).toHaveBeenCalled();
     // @ts-ignore
     expect(savedObjectsClient.create.mock.calls[0][1].title).toBe(
-      expectedIndexPatternTitle
+      expectedDataViewTitle
     );
     // @ts-ignore
     expect(savedObjectsClient.create.mock.calls[0][2].overwrite).toBe(true);
   });
 
-  it(`should not overwrite an index pattern if the new index pattern title matches the old index pattern title`, async () => {
+  it(`should not overwrite an data view if the new data view title matches the old data view title`, async () => {
     // does have APM data
     jest
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
@@ -115,7 +115,7 @@ describe('createStaticIndexPattern', () => {
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
     );
 
-    await createStaticIndexPattern({
+    await createStaticDataView({
       setup,
       config: { autocreateApmIndexPattern: true } as APMConfig,
       savedObjectsClient,

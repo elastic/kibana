@@ -6,11 +6,11 @@
  */
 
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
-import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
+import { getApmDataViewTitle } from './get_apm_data_view_title';
 
-describe('getApmIndexPatternTitle', () => {
-  it('returns an index pattern title by combining existing indicies', () => {
-    const title = getApmIndexPatternTitle({
+describe('getApmDataViewTitle', () => {
+  it('returns a data view title by combining existing indicies', () => {
+    const title = getApmDataViewTitle({
       transaction: 'apm-*-transaction-*',
       span: 'apm-*-span-*',
       error: 'apm-*-error-*',
@@ -22,7 +22,7 @@ describe('getApmIndexPatternTitle', () => {
   });
 
   it('removes duplicates', () => {
-    const title = getApmIndexPatternTitle({
+    const title = getApmDataViewTitle({
       transaction: 'apm-*',
       span: 'apm-*',
       error: 'apm-*',

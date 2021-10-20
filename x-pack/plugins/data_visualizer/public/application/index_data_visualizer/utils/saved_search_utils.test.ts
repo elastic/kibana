@@ -18,7 +18,7 @@ import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { fieldFormatsMock } from '../../../../../../../src/plugins/field_formats/common/mocks';
 import { uiSettingsServiceMock } from 'src/core/public/mocks';
 
-// helper function to create index patterns
+// helper function to create data views
 function createMockDataView(id: string) {
   const {
     type,

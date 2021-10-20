@@ -368,8 +368,8 @@ export const buildOSSFeatures = ({
     },
     {
       id: 'indexPatterns',
-      name: i18n.translate('xpack.features.indexPatternFeatureName', {
-        defaultMessage: 'Index Pattern Management',
+      name: i18n.translate('xpack.features.dataViewFeatureName', {
+        defaultMessage: 'Data View Management',
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,

@@ -53,7 +53,7 @@ test('should render without error after mounting', async () => {
   expect(component).toMatchSnapshot();
 });
 
-test('should render with error when index pattern does not have geo_point field', async () => {
+test('should render with error when data view does not have geo_point field', async () => {
   const component = shallow(
     <GeoIndexPatternSelect
       http={{} as unknown as HttpSetup}

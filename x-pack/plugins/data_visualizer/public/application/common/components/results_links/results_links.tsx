@@ -241,8 +241,8 @@ export const ResultsLinks: FC<Props> = ({
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
-                id="xpack.dataVisualizer.file.resultsLinks.indexPatternManagementTitle"
-                defaultMessage="Index Pattern Management"
+                id="xpack.dataVisualizer.file.resultsLinks.dataViewManagementTitle"
+                defaultMessage="Data View Management"
               />
             }
             description=""

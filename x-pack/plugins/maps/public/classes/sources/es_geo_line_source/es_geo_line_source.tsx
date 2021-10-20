@@ -23,7 +23,7 @@ import {
   ESGeoLineSourceResponseMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequest } from '../../util/data_request';
 import { registerSource } from '../source_registry';
@@ -123,9 +123,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         value: geoLineTitle,
       },
       {
-        label: i18n.translate('xpack.maps.source.esGeoLine.indexPatternLabel', {
-          defaultMessage: 'Index pattern',
-        }),
+        label: getDataViewLabel(),
         value: indexPatternTitle,
       },
       {

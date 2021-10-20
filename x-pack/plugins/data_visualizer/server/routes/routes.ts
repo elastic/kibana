@@ -11,7 +11,7 @@ import {
   dataVisualizerFieldHistogramsSchema,
   dataVisualizerFieldStatsSchema,
   dataVisualizerOverallStatsSchema,
-  indexPatternTitleSchema,
+  dataViewTitleSchema,
 } from './schemas';
 import type { Field, StartDeps, HistogramField } from '../types';
 import { DataVisualizer } from '../models/data_visualizer';
@@ -97,33 +97,33 @@ export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>) {
   /**
    * @apiGroup DataVisualizer
    *
-   * @api {post} /internal/data_visualizer/get_field_histograms/:indexPatternTitle Get histograms for fields
+   * @api {post} /internal/data_visualizer/get_field_histograms/:dataViewTitle Get histograms for fields
    * @apiName GetHistogramsForFields
-   * @apiDescription Returns the histograms on a list fields in the specified index pattern.
+   * @apiDescription Returns the histograms on a list fields in the specified data view.
    *
-   * @apiSchema (params) indexPatternTitleSchema
+   * @apiSchema (params) dataViewTitleSchema
    * @apiSchema (body) dataVisualizerFieldHistogramsSchema
    *
    * @apiSuccess {Object} fieldName histograms by field, keyed on the name of the field.
    */
   router.post(
     {
-      path: '/internal/data_visualizer/get_field_histograms/{indexPatternTitle}',
+      path: '/internal/data_visualizer/get_field_histograms/{dataViewTitle}',
       validate: {
-        params: indexPatternTitleSchema,
+        params: dataViewTitleSchema,
         body: dataVisualizerFieldHistogramsSchema,
       },
     },
     async (context, request, response) => {
       try {
         const {
-          params: { indexPatternTitle },
+          params: { dataViewTitle },
           body: { query, fields, samplerShardSize, runtimeMappings },
         } = request;
 
         const results = await getHistogramsForFields(
           context.core.elasticsearch.client,
-          indexPatternTitle,
+          dataViewTitle,
           query,
           fields,
           samplerShardSize,
@@ -142,27 +142,27 @@ export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>) {
   /**
    * @apiGroup DataVisualizer
    *
-   * @api {post} /internal/data_visualizer/get_field_stats/:indexPatternTitle Get stats for fields
+   * @api {post} /internal/data_visualizer/get_field_stats/:dataViewTitle Get stats for fields
    * @apiName GetStatsForFields
-   * @apiDescription Returns the stats on individual fields in the specified index pattern.
+   * @apiDescription Returns the stats on individual fields in the specified data view.
    *
-   * @apiSchema (params) indexPatternTitleSchema
+   * @apiSchema (params) dataViewTitleSchema
    * @apiSchema (body) dataVisualizerFieldStatsSchema
    *
    * @apiSuccess {Object} fieldName stats by field, keyed on the name of the field.
    */
   router.post(
     {
-      path: '/internal/data_visualizer/get_field_stats/{indexPatternTitle}',
+      path: '/internal/data_visualizer/get_field_stats/{dataViewTitle}',
       validate: {
-        params: indexPatternTitleSchema,
+        params: dataViewTitleSchema,
         body: dataVisualizerFieldStatsSchema,
       },
     },
     async (context, request, response) => {
       try {
         const {
-          params: { indexPatternTitle },
+          params: { dataViewTitle },
           body: {
             query,
             fields,
@@ -177,7 +177,7 @@ export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>) {
         } = request;
         const results = await getStatsForFields(
           context.core.elasticsearch.client,
-          indexPatternTitle,
+          dataViewTitle,
           query,
           fields,
           samplerShardSize,
@@ -201,11 +201,11 @@ export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>) {
   /**
    * @apiGroup DataVisualizer
    *
-   * @api {post} /internal/data_visualizer/get_overall_stats/:indexPatternTitle Get overall stats
+   * @api {post} /internal/data_visualizer/get_overall_stats/:dataViewTitle Get overall stats
    * @apiName GetOverallStats
-   * @apiDescription Returns the top level overall stats for the specified index pattern.
+   * @apiDescription Returns the top level overall stats for the specified data view.
    *
-   * @apiSchema (params) indexPatternTitleSchema
+   * @apiSchema (params) dataViewTitleSchema
    * @apiSchema (body) dataVisualizerOverallStatsSchema
    *
    * @apiSuccess {number} totalCount total count of documents.
@@ -216,16 +216,16 @@ export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>) {
    */
   router.post(
     {
-      path: '/internal/data_visualizer/get_overall_stats/{indexPatternTitle}',
+      path: '/internal/data_visualizer/get_overall_stats/{dataViewTitle}',
       validate: {
-        params: indexPatternTitleSchema,
+        params: dataViewTitleSchema,
         body: dataVisualizerOverallStatsSchema,
       },
     },
     async (context, request, response) => {
       try {
         const {
-          params: { indexPatternTitle },
+          params: { dataViewTitle },
           body: {
             query,
             aggregatableFields,
@@ -240,7 +240,7 @@ export function dataVisualizerRoutes(coreSetup: CoreSetup<StartDeps, unknown>) {
 
         const results = await getOverallStats(
           context.core.elasticsearch.client,
-          indexPatternTitle,
+          dataViewTitle,
           query,
           aggregatableFields,
           nonAggregatableFields,

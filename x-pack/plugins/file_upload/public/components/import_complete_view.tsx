@@ -210,7 +210,7 @@ export class ImportCompleteView extends Component<Props, {}> {
         {this._renderCodeEditor(
           this.props.indexPatternResp,
           i18n.translate('xpack.fileUpload.importComplete.indexPatternResponse', {
-            defaultMessage: 'Index pattern response',
+            defaultMessage: 'Data view response',
           }),
           'indexPatternRespCopyButton'
         )}

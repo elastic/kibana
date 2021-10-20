@@ -103,12 +103,12 @@ jest.mock('../../../../../util/index_utils', () => {
 });
 
 const mockOnClose = jest.fn();
-const mockGetIndexPatternAndSavedSearch = getIndexPatternAndSavedSearch as jest.Mock;
+const mockGetDataViewAndSavedSearch = getIndexPatternAndSavedSearch as jest.Mock;
 
 describe('Data Frame Analytics: <SourceSelection />', () => {
   afterEach(() => {
     mockNavigateToPath.mockClear();
-    mockGetIndexPatternAndSavedSearch.mockClear();
+    mockGetDataViewAndSavedSearch.mockClear();
   });
 
   it('renders the title text', async () => {
@@ -122,10 +122,10 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // assert
     expect(screen.queryByText('New analytics job')).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
-    expect(mockGetIndexPatternAndSavedSearch).toHaveBeenCalledTimes(0);
+    expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledTimes(0);
   });
 
-  it('shows the error callout when clicking a remote index pattern', async () => {
+  it('shows the error callout when clicking a remote data view', async () => {
     // prepare
     render(
       <IntlProvider locale="en">
@@ -139,13 +139,13 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
 
     // assert
     expect(
-      screen.queryByText('Index patterns using cross-cluster search are not supported.')
+      screen.queryByText('Data views using cross-cluster search are not supported.')
     ).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
-    expect(mockGetIndexPatternAndSavedSearch).toHaveBeenCalledTimes(0);
+    expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledTimes(0);
   });
 
-  it('calls navigateToPath for a plain index pattern ', async () => {
+  it('calls navigateToPath for a plain data view ', async () => {
     // prepare
     render(
       <IntlProvider locale="en">
@@ -159,16 +159,16 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // assert
     await waitFor(() => {
       expect(
-        screen.queryByText('Index patterns using cross-cluster search are not supported.')
+        screen.queryByText('Data views using cross-cluster search are not supported.')
       ).not.toBeInTheDocument();
       expect(mockNavigateToPath).toHaveBeenCalledWith(
         '/data_frame_analytics/new_job?index=the-plain-index-pattern-id'
       );
-      expect(mockGetIndexPatternAndSavedSearch).toHaveBeenCalledTimes(0);
+      expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledTimes(0);
     });
   });
 
-  it('shows the error callout when clicking a saved search using a remote index pattern', async () => {
+  it('shows the error callout when clicking a saved search using a remote data view', async () => {
     // prepare
     render(
       <IntlProvider locale="en">
@@ -182,18 +182,18 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
 
     // assert
     expect(
-      screen.queryByText('Index patterns using cross-cluster search are not supported.')
+      screen.queryByText('Data views using cross-cluster search are not supported.')
     ).toBeInTheDocument();
     expect(
       screen.queryByText(
-        `The saved search 'the-remote-saved-search-title' uses the index pattern 'my_remote_cluster:index-pattern-title'.`
+        `The saved search 'the-remote-saved-search-title' uses the data view 'my_remote_cluster:index-pattern-title'.`
       )
     ).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
-    expect(mockGetIndexPatternAndSavedSearch).toHaveBeenCalledWith('the-remote-saved-search-id');
+    expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledWith('the-remote-saved-search-id');
   });
 
-  it('calls navigateToPath for a saved search using a plain index pattern ', async () => {
+  it('calls navigateToPath for a saved search using a plain data view ', async () => {
     // prepare
     render(
       <IntlProvider locale="en">
@@ -207,12 +207,12 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // assert
     await waitFor(() => {
       expect(
-        screen.queryByText('Index patterns using cross-cluster search are not supported.')
+        screen.queryByText('Data views using cross-cluster search are not supported.')
       ).not.toBeInTheDocument();
       expect(mockNavigateToPath).toHaveBeenCalledWith(
         '/data_frame_analytics/new_job?savedSearchId=the-plain-saved-search-id'
       );
-      expect(mockGetIndexPatternAndSavedSearch).toHaveBeenCalledWith('the-plain-saved-search-id');
+      expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledWith('the-plain-saved-search-id');
     });
   });
 });

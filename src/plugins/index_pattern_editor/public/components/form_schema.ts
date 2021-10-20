@@ -47,16 +47,16 @@ export const schema = {
   },
   id: {
     label: i18n.translate('indexPatternEditor.editor.form.customIdLabel', {
-      defaultMessage: 'Custom index pattern ID',
+      defaultMessage: 'Custom data view ID',
     }),
     helpText: i18n.translate('indexPatternEditor.editor.form.customIdHelp', {
       defaultMessage:
-        'Kibana provides a unique identifier for each index pattern, or you can create your own.',
+        'Kibana provides a unique identifier for each data view, or you can create your own.',
     }),
   },
   type: {
     label: i18n.translate('indexPatternEditor.editor.form.TypeLabel', {
-      defaultMessage: 'Index pattern type',
+      defaultMessage: 'Data view type',
     }),
     defaultValue: INDEX_PATTERN_TYPE.DEFAULT,
   },

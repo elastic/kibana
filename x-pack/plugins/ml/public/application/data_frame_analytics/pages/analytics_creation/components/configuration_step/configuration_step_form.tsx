@@ -586,7 +586,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
               i18n.translate(
                 'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
                 {
-                  defaultMessage: 'No numeric type fields were found for this index pattern.',
+                  defaultMessage: 'No numeric type fields were found for this data view.',
                 }
               )
             }

@@ -431,7 +431,7 @@ export function registerLogsSampleData(sampleDataRegistry: SampleDataRegistrySet
       attributes: {
         title: 'Kibana Sample Data - Data Logs',
         description:
-          'This is a sample graph based on the data logs index, which shows agents, extensions, source geography of the log, and response codes.  The graph has 200 and 404 response codes blocked, as they have low cardinality.',
+          'This is a sample graph based on the data logs data view, which shows agents, extensions, source geography of the log, and response codes.  The graph has 200 and 404 response codes blocked, as they have low cardinality.',
         numLinks: 61,
         numVertices: 27,
         version: 1,

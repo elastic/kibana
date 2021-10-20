@@ -497,7 +497,7 @@ async function deleteTransforms(
         }
       }
 
-      // Delete the index pattern if there's an index pattern that matches the name of dest index
+      // Delete the data view if there's a data view that matches the name of dest index
       if (destinationIndex && deleteDestIndexPattern) {
         try {
           const indexPatternId = await getIndexPatternId(

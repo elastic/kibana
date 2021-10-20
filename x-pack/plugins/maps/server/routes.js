@@ -537,7 +537,7 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
         });
       } catch (error) {
         logger.warn(
-          `Cannot load index settings for index pattern '${query.indexPatternTitle}', error: ${error.message}.`
+          `Cannot load index settings for data view '${query.indexPatternTitle}', error: ${error.message}.`
         );
         response.custom({
           body: 'Error loading index settings',

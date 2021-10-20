@@ -91,7 +91,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
       <>
         <EuiCallOut
           title={i18n.translate('xpack.stackAlerts.geoContainment.noIndexPattern.messageTitle', {
-            defaultMessage: `Couldn't find any index patterns`,
+            defaultMessage: `Couldn't find any data views`,
           })}
           color="warning"
         >
@@ -105,7 +105,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             >
               <FormattedMessage
                 id="xpack.stackAlerts.geoContainment.noIndexPattern.doThisLinkTextDescription"
-                defaultMessage="Create an index pattern."
+                defaultMessage="Create a data view."
               />
             </EuiLink>
           </p>
@@ -135,7 +135,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
     const error = isIndexPatternInvalid
       ? i18n.translate('xpack.stackAlerts.geoContainment.noGeoFieldInIndexPattern.message', {
           defaultMessage:
-            'Index pattern does not contain any allowed geospatial fields. Must have one of type {geoFields}.',
+            'Data view does not contain any allowed geospatial fields. Must have one of type {geoFields}.',
           values: {
             geoFields: this.props.includedGeoTypes.join(', '),
           },
@@ -148,7 +148,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
 
         <EuiFormRow
           label={i18n.translate('xpack.stackAlerts.geoContainment.indexPatternSelectLabel', {
-            defaultMessage: 'Index pattern',
+            defaultMessage: 'Data view',
           })}
           isInvalid={isIndexPatternInvalid}
           error={error}
@@ -162,7 +162,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
               placeholder={i18n.translate(
                 'xpack.stackAlerts.geoContainment.indexPatternSelectPlaceholder',
                 {
-                  defaultMessage: 'Select index pattern',
+                  defaultMessage: 'Select data view',
                 }
               )}
               fieldTypes={this.props.includedGeoTypes}

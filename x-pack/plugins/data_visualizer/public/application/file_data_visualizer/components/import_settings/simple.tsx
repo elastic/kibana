@@ -73,8 +73,8 @@ export const SimpleSettings: FC<Props> = ({
         id="createIndexPattern"
         label={
           <FormattedMessage
-            id="xpack.dataVisualizer.file.simpleImportSettings.createIndexPatternLabel"
-            defaultMessage="Create index pattern"
+            id="xpack.dataVisualizer.file.simpleImportSettings.createDataViewLabel"
+            defaultMessage="Create data view"
           />
         }
         checked={createIndexPattern === true}

@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { useDynamicIndexPatternFetcher } from '../../../../hooks/use_dynamic_index_pattern';
+import { useDynamicDataViewFetcher } from '../../../../hooks/use_dynamic_data_view';
 import {
-  IndexPattern,
-  IndexPatternSpec,
+  DataView,
+  DataViewSpec,
 } from '../../../../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 
-export function useIndexPattern() {
-  const { indexPattern: indexPatternDynamic } = useDynamicIndexPatternFetcher();
+export function useDataView() {
+  const { dataView } = useDynamicDataViewFetcher();
 
   const {
     services: {
-      data: { indexPatterns },
+      data: { dataViews },
     },
   } = useKibana<{ data: DataPublicPluginStart }>();
 
-  const { data } = useFetcher<Promise<IndexPattern | undefined>>(async () => {
-    if (indexPatternDynamic?.title) {
-      return indexPatterns.create({
-        pattern: indexPatternDynamic?.title,
-      } as IndexPatternSpec);
+  const { data } = useFetcher<Promise<DataView | undefined>>(async () => {
+    if (dataView?.title) {
+      return dataViews.create({
+        pattern: dataView?.title,
+      } as DataViewSpec);
     }
-  }, [indexPatternDynamic?.title, indexPatterns]);
+  }, [dataView?.title, dataViews]);
 
-  return { indexPatternTitle: indexPatternDynamic?.title, indexPattern: data };
+  return { dataViewTitle: dataView?.title, dataView: data };
 }

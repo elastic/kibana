@@ -204,7 +204,7 @@ For ad-hoc diagnostic purposes, your go to tools are Discover and Lens. Your
 user will need to have access to the index, which is considered a Kibana
 system index due to it's prefix.
 
-Add the event log index as an index pattern.  The only customization needed is
+Add the event log index as a data view.  The only customization needed is
 to set the `event.duration` field to a duration in nanoseconds.  You'll
 probably want it displayed as milliseconds.
 

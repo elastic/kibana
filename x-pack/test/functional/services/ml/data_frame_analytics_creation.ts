@@ -549,7 +549,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       const actualCheckState = await this.getCreateIndexPatternSwitchCheckState();
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+        `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 

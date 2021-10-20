@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
+import { createStaticDataView } from '../lib/data_view/create_static_data_view';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getDynamicIndexPattern } from '../lib/index_pattern/get_dynamic_index_pattern';
+import { getDynamicDataView } from '../lib/data_view/get_dynamic_data_view';
 import { createApmServerRoute } from './create_apm_server_route';
 
-const staticIndexPatternRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/index_pattern/static',
+const staticDataViewRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/data_view/static',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const {
@@ -31,30 +31,30 @@ const staticIndexPatternRoute = createApmServerRoute({
 
     const spaceId = spaces?.setup.spacesService.getSpaceId(request);
 
-    const didCreateIndexPattern = await createStaticIndexPattern({
+    const didCreateDataView = await createStaticDataView({
       setup,
       config,
       savedObjectsClient,
       spaceId,
     });
 
-    return { created: didCreateIndexPattern };
+    return { created: didCreateDataView };
   },
 });
 
-const dynamicIndexPatternRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/index_pattern/dynamic',
+const dynamicDataViewRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/data_view/dynamic',
   options: { tags: ['access:apm'] },
   handler: async ({ context, config, logger }) => {
-    const dynamicIndexPattern = await getDynamicIndexPattern({
+    const dynamicDataView = await getDynamicDataView({
       context,
       config,
       logger,
     });
-    return { dynamicIndexPattern };
+    return { dynamicDataView };
   },
 });
 
-export const indexPatternRouteRepository = createApmServerRouteRepository()
-  .add(staticIndexPatternRoute)
-  .add(dynamicIndexPatternRoute);
+export const dataViewRouteRepository = createApmServerRouteRepository()
+  .add(staticDataViewRoute)
+  .add(dynamicDataViewRoute);

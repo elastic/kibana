@@ -109,9 +109,9 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         console.error('Error loading list of dashboards:', resp);
         toasts.addDanger(
           i18n.translate(
-            'xpack.ml.jobsList.editJobFlyout.customUrls.loadIndexPatternsErrorNotificationMessage',
+            'xpack.ml.jobsList.editJobFlyout.customUrls.loadDataViewsErrorNotificationMessage',
             {
-              defaultMessage: 'An error occurred loading the list of saved index patterns',
+              defaultMessage: 'An error occurred loading the list of saved data views',
             }
           )
         );

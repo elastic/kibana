@@ -38,9 +38,9 @@ export const FullTimeRangeSelector: FC<Props> = ({ indexPattern, query, disabled
     >
       <FormattedMessage
         id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
-        defaultMessage="Use full {indexPatternTitle} data"
+        defaultMessage="Use full {dataViewTitle} data"
         values={{
-          indexPatternTitle: indexPattern.title,
+          dataViewTitle: indexPattern.title,
         }}
       />
     </EuiButton>

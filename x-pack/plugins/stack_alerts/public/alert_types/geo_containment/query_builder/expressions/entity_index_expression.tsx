@@ -157,7 +157,7 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
       isInvalid={isInvalid}
       value={indexPattern.title}
       defaultValue={i18n.translate('xpack.stackAlerts.geoContainment.entityIndexSelect', {
-        defaultMessage: 'Select an index pattern and geo point field',
+        defaultMessage: 'Select a data view and geo point field',
       })}
       popoverContent={indexPopover}
       expressionDescription={i18n.translate('xpack.stackAlerts.geoContainment.entityIndexLabel', {

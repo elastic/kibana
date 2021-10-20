@@ -208,16 +208,16 @@ export function IndexPatternDataPanel({
           <EuiFlexItem grow={null}>
             <EuiCallOut
               data-test-subj="indexPattern-no-indexpatterns"
-              title={i18n.translate('xpack.lens.indexPattern.noPatternsLabel', {
-                defaultMessage: 'No index patterns',
+              title={i18n.translate('xpack.lens.indexPattern.noDataViewsLabel', {
+                defaultMessage: 'No data views',
               })}
               color="warning"
               iconType="alert"
             >
               <p>
                 <FormattedMessage
-                  id="xpack.lens.indexPattern.noPatternsDescription"
-                  defaultMessage="Please create an index pattern or switch to another data source"
+                  id="xpack.lens.indexPattern.noDataViewDescription"
+                  defaultMessage="Please create a data view or switch to another data source"
                 />
               </p>
             </EuiCallOut>
@@ -642,7 +642,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       iconType="boxesHorizontal"
                       data-test-subj="lnsIndexPatternActions"
                       aria-label={i18n.translate('xpack.lens.indexPatterns.actionsPopoverLabel', {
-                        defaultMessage: 'Index pattern settings',
+                        defaultMessage: 'Data view settings',
                       })}
                       onClick={() => {
                         setPopoverOpen(!popoverOpen);
@@ -663,7 +663,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                         }}
                       >
                         {i18n.translate('xpack.lens.indexPatterns.addFieldButton', {
-                          defaultMessage: 'Add field to index pattern',
+                          defaultMessage: 'Add field to data view',
                         })}
                       </EuiContextMenuItem>,
                       <EuiContextMenuItem
@@ -677,7 +677,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                         }}
                       >
                         {i18n.translate('xpack.lens.indexPatterns.manageFieldButton', {
-                          defaultMessage: 'Manage index pattern fields',
+                          defaultMessage: 'Manage data view fields',
                         })}
                       </EuiContextMenuItem>,
                     ]}
@@ -709,7 +709,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               data-test-subj="lnsIndexPatternFieldSearch"
               placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
                 defaultMessage: 'Search field names',
-                description: 'Search the list of fields in the index pattern for the provided text',
+                description: 'Search the list of fields in the data view for the provided text',
               })}
               value={localState.nameFilter}
               onChange={(e) => {
@@ -717,7 +717,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               }}
               aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
                 defaultMessage: 'Search field names',
-                description: 'Search the list of fields in the index pattern for the provided text',
+                description: 'Search the list of fields in the data view for the provided text',
               })}
               aria-describedby={fieldSearchDescriptionId}
             />

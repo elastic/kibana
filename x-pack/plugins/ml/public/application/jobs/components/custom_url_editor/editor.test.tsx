@@ -48,8 +48,8 @@ function prepareTest(customUrl: CustomUrlSettings, setEditCustomUrlFn: (url: Url
   ];
 
   const indexPatterns = [
-    { id: 'pattern1', title: 'Index Pattern 1' },
-    { id: 'pattern2', title: 'Index Pattern 2' },
+    { id: 'pattern1', title: 'Data view 1' },
+    { id: 'pattern2', title: 'Data view 2' },
   ] as DataView[];
 
   const queryEntityFieldNames = ['airline'];

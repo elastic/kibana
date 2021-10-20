@@ -178,7 +178,7 @@ export function ApmIndices() {
     <>
       <EuiText color="subdued">
         {i18n.translate('xpack.apm.settings.apmIndices.description', {
-          defaultMessage: `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
+          defaultMessage: `The APM UI uses data views to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
         })}
       </EuiText>
 

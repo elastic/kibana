@@ -7,16 +7,16 @@
 
 import { useFetcher } from './use_fetcher';
 
-export function useDynamicIndexPatternFetcher() {
+export function useDynamicDataViewFetcher() {
   const { data, status } = useFetcher((callApmApi) => {
     return callApmApi({
-      endpoint: 'GET /internal/apm/index_pattern/dynamic',
+      endpoint: 'GET /internal/apm/data_view/dynamic',
       isCachable: true,
     });
   }, []);
 
   return {
-    indexPattern: data?.dynamicIndexPattern,
+    dataView: data?.dynamicDataView,
     status,
   };
 }

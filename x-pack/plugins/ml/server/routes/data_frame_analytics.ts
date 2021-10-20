@@ -708,7 +708,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
   /**
    * @apiGroup DataFrameAnalytics
    *
-   * @api {get} api/data_frame/analytics/fields/:indexPattern Get index pattern fields for analytics
+   * @api {get} api/data_frame/analytics/fields/:indexPattern Get fields for a pattern of indices used for analytics
    * @apiName AnalyticsNewJobCaps
    * @apiDescription Retrieve the index fields for analytics
    */

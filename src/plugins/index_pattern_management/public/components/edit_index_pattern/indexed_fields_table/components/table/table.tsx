@@ -163,8 +163,8 @@ const runtimeIconTipTitle = i18n.translate(
 );
 
 const runtimeIconTipText = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipText',
-  { defaultMessage: 'This field exists on the index pattern only.' }
+  'indexPatternManagement.editDataView.fields.table.runtimeIconTipText',
+  { defaultMessage: 'This field exists on the data view only.' }
 );
 
 interface IndexedFieldProps {
