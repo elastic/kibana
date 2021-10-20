@@ -15,7 +15,7 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiBadge, EuiButton, EuiLoadingSpinner, EuiTab } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiTab } from '@elastic/eui';
 
 import { getPageHeaderActions, getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
 
