@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       const retrievedPrivilege = await es.security.getPrivileges({ application });
-      expect(retrievedPrivilege.body).to.eql({
+      expect(retrievedPrivilege).to.eql({
         foo: {
           // "all" is maintained even though the subsequent update did not specify this privilege
           all: {
