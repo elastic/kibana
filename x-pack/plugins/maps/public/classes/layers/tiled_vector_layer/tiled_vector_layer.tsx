@@ -17,12 +17,7 @@ import uuid from 'uuid/v4';
 import { parse as parseUrl } from 'url';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
-import {
-  DEFAULT_MAX_RESULT_WINDOW,
-  LAYER_TYPE,
-  SOURCE_DATA_REQUEST_ID,
-  SOURCE_TYPES,
-} from '../../../../common/constants';
+import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID, SOURCE_TYPES } from '../../../../common/constants';
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
   VectorLayer,
@@ -38,12 +33,14 @@ import {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
+import { ESSearchSource } from '../../sources/es_search_source';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { CustomIconAndTooltipContent } from '../layer';
 
 const ES_MVT_META_LAYER_NAME = 'meta';
 const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
 const ES_MVT_HITS_TOTAL_VALUE = 'hits.total.value';
+const MAX_RESULT_WINDOW_DATA_REQUEST_ID = 'maxResultWindow';
 
 /*
  * MVT vector layer
@@ -106,6 +103,15 @@ export class TiledVectorLayer extends VectorLayer {
       };
     }
 
+    const maxResultWindow = this._getMaxResultWindow();
+    if (maxResultWindow === undefined) {
+      return {
+        icon,
+        tooltipContent: null,
+        areResultsTrimmed: false,
+      };
+    }
+
     const totalFeaturesCount: number = tileMetaFeatures.reduce((acc: number, tileMeta: Feature) => {
       const count =
         tileMeta && tileMeta.properties ? tileMeta.properties[ES_MVT_HITS_TOTAL_VALUE] : 0;
@@ -118,8 +124,7 @@ export class TiledVectorLayer extends VectorLayer {
 
     const isIncomplete: boolean = tileMetaFeatures.some((tileMeta: TileMetaFeature) => {
       if (tileMeta?.properties?.[ES_MVT_HITS_TOTAL_RELATION] === 'gte') {
-        // TODO do not hard code DEFAULT_MAX_RESULT_WINDOW, load from data request instead
-        return tileMeta?.properties?.[ES_MVT_HITS_TOTAL_VALUE] >= DEFAULT_MAX_RESULT_WINDOW;
+        return tileMeta?.properties?.[ES_MVT_HITS_TOTAL_VALUE] >= maxResultWindow;
       } else {
         return false;
       }
@@ -142,6 +147,36 @@ export class TiledVectorLayer extends VectorLayer {
           }),
       areResultsTrimmed: isIncomplete,
     };
+  }
+
+  _getMaxResultWindow(): number | undefined {
+    const dataRequest = this.getDataRequest(MAX_RESULT_WINDOW_DATA_REQUEST_ID);
+    if (!dataRequest) {
+      return;
+    }
+    const data = dataRequest.getData() as { maxResultWindow: number } | undefined;
+    if (!data) {
+      return;
+    }
+    return data.maxResultWindow;
+  }
+
+  async _syncMaxResultWindow({
+    startLoading,
+    stopLoading,
+    onLoadError,
+    dataFilters,
+    isForceRefresh,
+  }: DataRequestContext) {
+    const prevDataRequest = this.getDataRequest(MAX_RESULT_WINDOW_DATA_REQUEST_ID);
+    if (prevDataRequest) {
+      return;
+    }
+
+    const requestToken = Symbol(`${this.getId()}-${MAX_RESULT_WINDOW_DATA_REQUEST_ID}`);
+    startLoading(MAX_RESULT_WINDOW_DATA_REQUEST_ID, requestToken);
+    const maxResultWindow = await (this.getSource() as ESSearchSource).getMaxResultWindow();
+    stopLoading(MAX_RESULT_WINDOW_DATA_REQUEST_ID, requestToken, { maxResultWindow });
   }
 
   async _syncMVTUrlTemplate({
@@ -218,6 +253,9 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   async syncData(syncContext: DataRequestContext) {
+    if (this.getSource().getType() === SOURCE_TYPES.ES_SEARCH) {
+      await this._syncMaxResultWindow(syncContext);
+    }
     await this._syncSourceStyleMeta(syncContext, this._source, this._style as IVectorStyle);
     await this._syncSourceFormatters(syncContext, this._source, this._style as IVectorStyle);
     await this._syncMVTUrlTemplate(syncContext);
@@ -292,6 +330,11 @@ export class TiledVectorLayer extends VectorLayer {
       return;
     }
 
+    const maxResultWindow = this._getMaxResultWindow();
+    if (maxResultWindow === undefined) {
+      return;
+    }
+
     const tooManyFeaturesLayerId = this._getMbTooManyFeaturesLayerId();
 
     if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
@@ -306,8 +349,7 @@ export class TiledVectorLayer extends VectorLayer {
       mbMap.setFilter(tooManyFeaturesLayerId, [
         'all',
         ['==', ['get', ES_MVT_HITS_TOTAL_RELATION], 'gte'],
-        // TODO do not hard code DEFAULT_MAX_RESULT_WINDOW, load from data request instead
-        ['>=', ['get', ES_MVT_HITS_TOTAL_VALUE], DEFAULT_MAX_RESULT_WINDOW],
+        ['>=', ['get', ES_MVT_HITS_TOTAL_VALUE], maxResultWindow],
       ]);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', euiThemeVars.euiColorWarning);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-width', 3);
