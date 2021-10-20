@@ -161,12 +161,10 @@ export class TelemetryEventsSender {
     clusterUuid: string | undefined,
     clusterVersionNumber: string | undefined
   ) {
-    const ndjson = this.transformDataToNdjson(events);
-
     try {
-      const resp = await axios.post(telemetryUrl, ndjson, {
+      const resp = await axios.post(telemetryUrl, events, {
         headers: {
-          'Content-Type': 'application/x-ndjson',
+          'Content-Type': 'application/json',
           'X-Elastic-Cluster-ID': clusterUuid,
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.16.0',
         },
@@ -178,13 +176,4 @@ export class TelemetryEventsSender {
       );
     }
   }
-
-  private transformDataToNdjson = (data: unknown[]): string => {
-    if (data.length !== 0) {
-      const dataString = data.map((dataItem) => JSON.stringify(dataItem)).join('\n');
-      return `${dataString}\n`;
-    } else {
-      return '';
-    }
-  };
 }

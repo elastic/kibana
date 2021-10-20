@@ -13,6 +13,7 @@ import { loggingSystemMock } from 'src/core/server/mocks';
 import axios from 'axios';
 
 import { TelemetryEventsSender } from './sender';
+import type { ESClusterInfo } from './types';
 
 jest.mock('axios', () => {
   return {
@@ -74,19 +75,28 @@ describe('TelemetryEventsSender', () => {
       sender['telemetrySetup'] = {
         getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
       };
+      sender['receiver'] = {
+        start: jest.fn(),
+        fetchClusterInfo: jest.fn(async () => {
+          return {
+            cluster_uuid: '1',
+            cluster_name: 'name',
+            version: {
+              number: '8.0.0',
+            },
+          } as ESClusterInfo;
+        }),
+      };
 
-      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }], 'my-channel');
-      sender['queuesPerChannel']['my-channel']['getEvents'] = jest.fn(() => [
-        { 'event.kind': '1' },
-        { 'event.kind': '2' },
-      ]);
+      const myChannelEvents = [{ 'event.kind': '1' }, { 'event.kind': '2' }];
+      sender.queueTelemetryEvents(myChannelEvents, 'my-channel');
+      sender['queuesPerChannel']['my-channel']['getEvents'] = jest.fn(() => myChannelEvents);
 
       expect(sender['queuesPerChannel']['my-channel']['queue'].length).toBe(2);
 
-      sender.queueTelemetryEvents([{ 'event.kind': '3' }], 'my-channel2');
-      sender['queuesPerChannel']['my-channel2']['getEvents'] = jest.fn(() => [
-        { 'event.kind': '3' },
-      ]);
+      const myChannel2Events = [{ 'event.kind': '3' }];
+      sender.queueTelemetryEvents(myChannel2Events, 'my-channel2');
+      sender['queuesPerChannel']['my-channel2']['getEvents'] = jest.fn(() => myChannel2Events);
 
       expect(sender['queuesPerChannel']['my-channel2']['queue'].length).toBe(1);
 
@@ -94,15 +104,25 @@ describe('TelemetryEventsSender', () => {
 
       expect(sender['queuesPerChannel']['my-channel']['getEvents']).toBeCalledTimes(1);
       expect(sender['queuesPerChannel']['my-channel2']['getEvents']).toBeCalledTimes(1);
+      const headers = {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Elastic-Cluster-ID': '1',
+          'X-Elastic-Stack-Version': '8.0.0',
+        },
+      };
       expect(axios.post).toHaveBeenCalledWith(
         'https://telemetry.elastic.co/v3/send/my-channel',
-        expect.anything(),
-        expect.anything()
+        [
+          { cluster_name: 'name', cluster_uuid: '1', 'event.kind': '1' },
+          { cluster_name: 'name', cluster_uuid: '1', 'event.kind': '2' },
+        ],
+        headers
       );
       expect(axios.post).toHaveBeenCalledWith(
         'https://telemetry.elastic.co/v3/send/my-channel2',
-        expect.anything(),
-        expect.anything()
+        [{ cluster_name: 'name', cluster_uuid: '1', 'event.kind': '3' }],
+        headers
       );
     });
   });
