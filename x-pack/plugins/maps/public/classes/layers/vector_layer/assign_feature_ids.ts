@@ -7,6 +7,7 @@
 
 import _ from 'lodash';
 import { FeatureCollection, Feature } from 'geojson';
+import { SOURCE_TYPES } from '../../../../common/constants';
 import { IVectorSource } from '../../sources/vector_source';
 
 export const GEOJSON_FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
@@ -65,5 +66,5 @@ export function getFeatureId(feature: Feature, source: IVectorSource): string | 
     return feature.properties?.[GEOJSON_FEATURE_ID_PROPERTY_NAME];
   }
 
-  return source.isESSource() ? feature.properties?.[ES_MVT_FEATURE_ID_PROPERTY_NAME] : feature.id;
+  return source.getType() === SOURCE_TYPES.ES_SEARCH ? feature.properties?.[ES_MVT_FEATURE_ID_PROPERTY_NAME] : feature.id;
 }
