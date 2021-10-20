@@ -14,7 +14,7 @@ export interface LatencyCorrelation extends FieldValuePair {
   ksTest: number;
 }
 
-export interface LatencyCorrelationsRawResponse {
+export interface LatencyCorrelationsResponse {
   ccsWarning: boolean;
   overallHistogram?: HistogramItem[];
   percentileThresholdValue?: number;

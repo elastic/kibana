@@ -24,7 +24,7 @@ export interface FailedTransactionsCorrelation extends FieldValuePair {
 export type FailedTransactionsCorrelationsImpactThreshold =
   typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
 
-export interface FailedTransactionsCorrelationsRawResponse {
+export interface FailedTransactionsCorrelationsResponse {
   ccsWarning: boolean;
   failedTransactionsCorrelations?: FailedTransactionsCorrelation[];
   percentileThresholdValue?: number;

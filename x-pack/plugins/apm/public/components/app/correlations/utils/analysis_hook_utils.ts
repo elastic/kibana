@@ -14,7 +14,6 @@ export interface CorrelationsProgress {
   error?: Error | IHttpFetchError;
   isRunning: boolean;
   loaded: number;
-  total: number;
 }
 
 export function getLatencyCorrelationsSortedByCorrelation(
@@ -29,14 +28,10 @@ export function getFailedTransactionsCorrelationsSortedByScore(
   return failedTransactionsCorrelations.sort((a, b) => b.score - a.score);
 }
 
-export const getInitialRawResponse = () => ({
+export const getInitialResponse = () => ({
   ccsWarning: false,
-});
-
-export const getInitialProgress = (): CorrelationsProgress => ({
   isRunning: false,
   loaded: 0,
-  total: 100,
 });
 
 export const getReducer =

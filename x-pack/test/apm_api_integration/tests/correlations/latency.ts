@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import type { LatencyCorrelationsRawResponse } from '../../../../plugins/apm/common/correlations/latency_correlations/types';
+import type { LatencyCorrelationsResponse } from '../../../../plugins/apm/common/correlations/latency_correlations/types';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a latency correlation analysis.
@@ -86,7 +86,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `Expected status to be '200', got '${significantCorrelationsResponse.status}'`
         );
 
-        const finalRawResponse: LatencyCorrelationsRawResponse = {
+        const finalRawResponse: LatencyCorrelationsResponse = {
           ccsWarning: significantCorrelationsResponse.body?.ccsWarning,
           percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
           overallHistogram: overallDistributionResponse.body?.overallHistogram,
@@ -181,7 +181,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `Expected 1244 total doc count, got ${significantCorrelationsResponse.body?.totalDocCount}.`
         );
 
-        const finalRawResponse: LatencyCorrelationsRawResponse = {
+        const finalRawResponse: LatencyCorrelationsResponse = {
           ccsWarning: significantCorrelationsResponse.body?.ccsWarning,
           percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
           overallHistogram: overallDistributionResponse.body?.overallHistogram,

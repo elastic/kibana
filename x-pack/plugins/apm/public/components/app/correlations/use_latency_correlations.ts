@@ -13,81 +13,56 @@ import type { FieldValuePair } from '../../../../common/correlations/types';
 import { getPrioritizedFieldValuePairs } from '../../../../common/correlations/utils';
 import type {
   LatencyCorrelation,
-  LatencyCorrelationsRawResponse,
+  LatencyCorrelationsResponse,
 } from '../../../../common/correlations/latency_correlations/types';
 
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 
 import {
-  getInitialProgress,
+  getInitialResponse,
   getLatencyCorrelationsSortedByCorrelation,
-  getInitialRawResponse,
   getReducer,
   CorrelationsProgress,
 } from './utils/analysis_hook_utils';
+import { useFetchParams } from './use_fetch_params';
 
-type Response = LatencyCorrelationsRawResponse;
+type Response = LatencyCorrelationsResponse;
 
 export function useLatencyCorrelations() {
-  const { serviceName, transactionType } = useApmServiceContext();
+  const fetchParams = useFetchParams();
 
-  const { urlParams } = useUrlParams();
-  const { transactionName } = urlParams;
-
-  const {
-    query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/transactions/view');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const [rawResponse, setRawResponseRaw] = useReducer(
-    getReducer<Response>(),
-    getInitialRawResponse()
+  const [response, setResponseUnDebounced] = useReducer(
+    getReducer<Response & CorrelationsProgress>(),
+    getInitialResponse()
   );
-  const setRawResponse = useMemo(() => debounce(setRawResponseRaw, 50), []);
+  const setResponse = useMemo(() => debounce(setResponseUnDebounced, 100), []);
 
-  const [fetchState, setFetchStateRaw] = useReducer(
-    getReducer<CorrelationsProgress>(),
-    getInitialProgress()
-  );
-  const setFetchState = useMemo(() => debounce(setFetchStateRaw, 50), []);
-
+  // We're using a ref here because otherwise the startFetch function might have
+  // a stale value for checking if the task has been cancelled.
   const isCancelledRef = useRef(false);
 
   const startFetch = useCallback(async () => {
     isCancelledRef.current = false;
 
-    setRawResponse(getInitialRawResponse());
-    setFetchState({
-      ...getInitialProgress(),
+    setResponse({
+      ...getInitialResponse(),
       isRunning: true,
+      // explicitly set these to undefined to override a possible previous state.
       error: undefined,
+      latencyCorrelations: undefined,
+      percentileThresholdValue: undefined,
+      overallHistogram: undefined,
+      fieldStats: undefined,
     });
-    setRawResponse.flush();
-    setFetchState.flush();
-
-    const query = {
-      serviceName,
-      transactionName,
-      transactionType,
-      kuery,
-      environment,
-      start,
-      end,
-    };
+    setResponse.flush();
 
     try {
-      const rawResponseUpdate = (await callApmApi({
+      const responseUpdate = (await callApmApi({
         endpoint: 'POST /internal/apm/latency/overall_distribution',
         signal: null,
         params: {
           body: {
-            ...query,
+            ...fetchParams,
             percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD + '',
           },
         },
@@ -97,16 +72,17 @@ export function useLatencyCorrelations() {
         return;
       }
 
-      setRawResponse(rawResponseUpdate);
-      setFetchState({
-        loaded: 5,
+      setResponse({
+        ...responseUpdate,
+        loaded: 0.05,
       });
+      setResponse.flush();
 
       const { fieldCandidates } = await callApmApi({
         endpoint: 'GET /internal/apm/correlations/field_candidates',
         signal: null,
         params: {
-          query,
+          query: fetchParams,
         },
       });
 
@@ -114,8 +90,8 @@ export function useLatencyCorrelations() {
         return;
       }
 
-      setFetchState({
-        loaded: 10,
+      setResponse({
+        loaded: 0.1,
       });
 
       const chunkSize = 10;
@@ -130,7 +106,7 @@ export function useLatencyCorrelations() {
           signal: null,
           params: {
             query: {
-              ...query,
+              ...fetchParams,
               fieldCandidates: fieldCandidateChunk,
             },
           },
@@ -144,20 +120,18 @@ export function useLatencyCorrelations() {
           return;
         }
 
-        setFetchState({
+        setResponse({
           loaded:
-            10 + Math.round((chunkLoadCounter / fieldValuePairs.length) * 10),
+            0.1 +
+            Math.round((chunkLoadCounter / fieldCandidateChunks.length) * 30) /
+              100,
         });
-        chunkLoadCounter += chunkSize;
+        chunkLoadCounter++;
       }
 
       if (isCancelledRef.current) {
         return;
       }
-
-      setFetchState({
-        loaded: 20,
-      });
 
       chunkLoadCounter = 0;
 
@@ -173,7 +147,7 @@ export function useLatencyCorrelations() {
           endpoint: 'POST /internal/apm/correlations/significant_correlations',
           signal: null,
           params: {
-            body: { ...query, fieldValuePairs: fieldValuePairChunk },
+            body: { ...fetchParams, fieldValuePairs: fieldValuePairChunk },
           },
         });
 
@@ -184,20 +158,24 @@ export function useLatencyCorrelations() {
           latencyCorrelations.push(
             ...significantCorrelations.latencyCorrelations
           );
-          rawResponseUpdate.latencyCorrelations =
+          responseUpdate.latencyCorrelations =
             getLatencyCorrelationsSortedByCorrelation([...latencyCorrelations]);
-          setRawResponse(rawResponseUpdate);
+          setResponse({
+            ...responseUpdate,
+            loaded:
+              0.4 +
+              Math.round(
+                (chunkLoadCounter / fieldValuePairChunks.length) * 60
+              ) /
+                100,
+          });
         }
 
         if (isCancelledRef.current) {
           return;
         }
 
-        setFetchState({
-          loaded:
-            20 + Math.round((chunkLoadCounter / fieldValuePairs.length) * 80),
-        });
-        chunkLoadCounter += chunkSize;
+        chunkLoadCounter++;
       }
 
       const fieldStats = await callApmApi({
@@ -205,49 +183,33 @@ export function useLatencyCorrelations() {
         signal: null,
         params: {
           body: {
-            ...query,
+            ...fetchParams,
             fieldsToSample: [...fieldsToSample],
           },
         },
       });
 
-      rawResponseUpdate.fieldStats = fieldStats.stats;
-      setRawResponse(rawResponseUpdate);
-
-      setFetchState({
-        loaded: 100,
-      });
-      setRawResponse.flush();
-      setFetchState.flush();
+      responseUpdate.fieldStats = fieldStats.stats;
+      setResponse({ ...responseUpdate, loaded: 1, isRunning: false });
+      setResponse.flush();
     } catch (e) {
+      // TODO Improve error handling
       // const err = e as Error | IHttpFetchError;
       // const message = error.body?.message ?? error.response?.statusText;
-      setFetchState({
+      setResponse({
         error: e as Error,
+        isRunning: false,
       });
+      setResponse.flush();
     }
-
-    setFetchState({
-      isRunning: false,
-    });
-  }, [
-    environment,
-    serviceName,
-    transactionName,
-    transactionType,
-    kuery,
-    start,
-    end,
-    setRawResponse,
-    setFetchState,
-  ]);
+  }, [fetchParams, setResponse]);
 
   const cancelFetch = useCallback(() => {
     isCancelledRef.current = true;
-    setFetchState({
+    setResponse({
       isRunning: false,
     });
-  }, [setFetchState]);
+  }, [setResponse]);
 
   // auto-update
   useEffect(() => {
@@ -255,9 +217,19 @@ export function useLatencyCorrelations() {
     return cancelFetch;
   }, [startFetch, cancelFetch]);
 
+  const { error, loaded, isRunning, ...returnedResponse } = response;
+  const progress = useMemo(
+    () => ({
+      error,
+      loaded,
+      isRunning,
+    }),
+    [error, loaded, isRunning]
+  );
+
   return {
-    progress: fetchState,
-    response: rawResponse,
+    progress,
+    response: returnedResponse,
     startFetch,
     cancelFetch,
   };

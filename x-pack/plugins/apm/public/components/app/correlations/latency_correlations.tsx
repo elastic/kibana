@@ -62,7 +62,6 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const { progress, response, startFetch, cancelFetch } =
     useLatencyCorrelations();
-  const progressNormalized = progress.loaded / progress.total;
   const { overallHistogram, hasData, status } = getOverallHistogram(
     response,
     progress.isRunning
@@ -274,8 +273,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const showCorrelationsTable = progress.isRunning || histogramTerms.length > 0;
   const showCorrelationsEmptyStatePrompt =
-    histogramTerms.length < 1 &&
-    (progressNormalized === 1 || !progress.isRunning);
+    histogramTerms.length < 1 && (progress.loaded === 1 || !progress.isRunning);
 
   const transactionDistributionChartData: TransactionDistributionChartData[] =
     [];
@@ -368,7 +366,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       <EuiSpacer size="s" />
 
       <CorrelationsProgressControls
-        progress={progressNormalized}
+        progress={progress.loaded}
         isRunning={progress.isRunning}
         onRefresh={startFetch}
         onCancel={cancelFetch}

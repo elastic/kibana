@@ -13,81 +13,57 @@ import { EventOutcome } from '../../../../common/event_outcome';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
 import type {
   FailedTransactionsCorrelation,
-  FailedTransactionsCorrelationsRawResponse,
+  FailedTransactionsCorrelationsResponse,
 } from '../../../../common/correlations/failed_transactions_correlations/types';
 
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 
 import {
-  getInitialProgress,
+  getInitialResponse,
   getFailedTransactionsCorrelationsSortedByScore,
-  getInitialRawResponse,
   getReducer,
   CorrelationsProgress,
 } from './utils/analysis_hook_utils';
+import { useFetchParams } from './use_fetch_params';
 
-type Response = FailedTransactionsCorrelationsRawResponse;
+type Response = FailedTransactionsCorrelationsResponse;
 
 export function useFailedTransactionsCorrelations() {
-  const { serviceName, transactionType } = useApmServiceContext();
+  const fetchParams = useFetchParams();
 
-  const { urlParams } = useUrlParams();
-  const { transactionName } = urlParams;
-
-  const {
-    query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/transactions/view');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const [rawResponse, setRawResponseRaw] = useReducer(
-    getReducer<Response>(),
-    getInitialRawResponse()
+  const [response, setResponseUnDebounced] = useReducer(
+    getReducer<Response & CorrelationsProgress>(),
+    getInitialResponse()
   );
-  const setRawResponse = useMemo(() => debounce(setRawResponseRaw, 50), []);
+  const setResponse = useMemo(() => debounce(setResponseUnDebounced, 50), []);
 
-  const [fetchState, setFetchStateRaw] = useReducer(
-    getReducer<CorrelationsProgress>(),
-    getInitialProgress()
-  );
-  const setFetchState = useMemo(() => debounce(setFetchStateRaw, 50), []);
-
+  // We're using a ref here because otherwise the startFetch function might have
+  // a stale value for checking if the task has been cancelled.
   const isCancelledRef = useRef(false);
 
   const startFetch = useCallback(async () => {
     isCancelledRef.current = false;
 
-    setRawResponse(getInitialRawResponse());
-    setFetchState({
-      ...getInitialProgress(),
+    setResponse({
+      ...getInitialResponse(),
       isRunning: true,
+      // explicitly set these to undefined to override a possible previous state.
       error: undefined,
+      failedTransactionsCorrelations: undefined,
+      percentileThresholdValue: undefined,
+      overallHistogram: undefined,
+      errorHistogram: undefined,
+      fieldStats: undefined,
     });
-    setRawResponse.flush();
-    setFetchState.flush();
-
-    const query = {
-      serviceName,
-      transactionName,
-      transactionType,
-      kuery,
-      environment,
-      start,
-      end,
-    };
+    setResponse.flush();
 
     try {
-      const rawResponseUpdate = (await callApmApi({
+      const responseUpdate = (await callApmApi({
         endpoint: 'POST /internal/apm/latency/overall_distribution',
         signal: null,
         params: {
           body: {
-            ...query,
+            ...fetchParams,
             percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
           },
         },
@@ -98,7 +74,7 @@ export function useFailedTransactionsCorrelations() {
         signal: null,
         params: {
           body: {
-            ...query,
+            ...fetchParams,
             percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
             termFilters: [
               { fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure },
@@ -111,19 +87,18 @@ export function useFailedTransactionsCorrelations() {
         return;
       }
 
-      setRawResponse({
-        ...rawResponseUpdate,
+      setResponse({
+        ...responseUpdate,
         errorHistogram,
+        loaded: 0.05,
       });
-      setFetchState({
-        loaded: 5,
-      });
+      setResponse.flush();
 
       const { fieldCandidates: candidates } = await callApmApi({
         endpoint: 'GET /internal/apm/correlations/field_candidates',
         signal: null,
         params: {
-          query,
+          query: fetchParams,
         },
       });
 
@@ -133,15 +108,15 @@ export function useFailedTransactionsCorrelations() {
 
       const fieldCandidates = candidates.filter((t) => !(t === EVENT_OUTCOME));
 
-      setFetchState({
-        loaded: 10,
+      setResponse({
+        loaded: 0.1,
       });
 
       const failedTransactionsCorrelations: FailedTransactionsCorrelation[] =
         [];
       const fieldsToSample = new Set<string>();
       const chunkSize = 10;
-      let loadCounter = 0;
+      let chunkLoadCounter = 0;
 
       const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
 
@@ -150,7 +125,7 @@ export function useFailedTransactionsCorrelations() {
           endpoint: 'POST /internal/apm/correlations/p_values',
           signal: null,
           params: {
-            body: { ...query, fieldCandidates: fieldCandidatesChunk },
+            body: { ...fetchParams, fieldCandidates: fieldCandidatesChunk },
           },
         });
 
@@ -161,21 +136,26 @@ export function useFailedTransactionsCorrelations() {
           failedTransactionsCorrelations.push(
             ...pValues.failedTransactionsCorrelations
           );
-          rawResponseUpdate.failedTransactionsCorrelations =
+          responseUpdate.failedTransactionsCorrelations =
             getFailedTransactionsCorrelationsSortedByScore([
               ...failedTransactionsCorrelations,
             ]);
-          setRawResponse(rawResponseUpdate);
+          setResponse({
+            ...responseUpdate,
+            loaded:
+              0.2 +
+              Math.round(
+                (chunkLoadCounter / fieldCandidatesChunks.length) * 80
+              ) /
+                100,
+          });
         }
 
         if (isCancelledRef.current) {
           return;
         }
 
-        loadCounter += chunkSize;
-        setFetchState({
-          loaded: 20 + Math.round((loadCounter / fieldCandidates.length) * 80),
-        });
+        chunkLoadCounter++;
       }
 
       const fieldStats = await callApmApi({
@@ -183,49 +163,33 @@ export function useFailedTransactionsCorrelations() {
         signal: null,
         params: {
           body: {
-            ...query,
+            ...fetchParams,
             fieldsToSample: [...fieldsToSample],
           },
         },
       });
 
-      rawResponseUpdate.fieldStats = fieldStats.stats;
-      setRawResponse(rawResponseUpdate);
-
-      setFetchState({
-        loaded: 100,
-      });
-      setRawResponse.flush();
-      setFetchState.flush();
+      responseUpdate.fieldStats = fieldStats.stats;
+      setResponse({ ...responseUpdate, loaded: 1, isRunning: false });
+      setResponse.flush();
     } catch (e) {
+      // TODO Improve error handling
       // const err = e as Error | IHttpFetchError;
       // const message = error.body?.message ?? error.response?.statusText;
-      setFetchState({
+      setResponse({
         error: e as Error,
+        isRunning: false,
       });
+      setResponse.flush();
     }
-
-    setFetchState({
-      isRunning: false,
-    });
-  }, [
-    environment,
-    serviceName,
-    transactionName,
-    transactionType,
-    kuery,
-    start,
-    end,
-    setFetchState,
-    setRawResponse,
-  ]);
+  }, [fetchParams, setResponse]);
 
   const cancelFetch = useCallback(() => {
     isCancelledRef.current = true;
-    setFetchState({
+    setResponse({
       isRunning: false,
     });
-  }, [setFetchState]);
+  }, [setResponse]);
 
   // auto-update
   useEffect(() => {
@@ -233,9 +197,19 @@ export function useFailedTransactionsCorrelations() {
     return cancelFetch;
   }, [startFetch, cancelFetch]);
 
+  const { error, loaded, isRunning, ...returnedResponse } = response;
+  const progress = useMemo(
+    () => ({
+      error,
+      loaded,
+      isRunning,
+    }),
+    [error, loaded, isRunning]
+  );
+
   return {
-    progress: fetchState,
-    response: rawResponse,
+    progress,
+    response: returnedResponse,
     startFetch,
     cancelFetch,
   };

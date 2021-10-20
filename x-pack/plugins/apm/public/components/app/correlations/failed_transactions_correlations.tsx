@@ -85,7 +85,6 @@ export function FailedTransactionsCorrelations({
     }, {} as Record<string, FieldStats>);
   }, [response?.fieldStats]);
 
-  const progressNormalized = progress.loaded / progress.total;
   const { overallHistogram, hasData, status } = getOverallHistogram(
     response,
     progress.isRunning
@@ -427,7 +426,7 @@ export function FailedTransactionsCorrelations({
 
   const showCorrelationsEmptyStatePrompt =
     correlationTerms.length < 1 &&
-    (progressNormalized === 1 || !progress.isRunning);
+    (progress.loaded === 1 || !progress.isRunning);
 
   const transactionDistributionChartData: TransactionDistributionChartData[] =
     [];
@@ -609,7 +608,7 @@ export function FailedTransactionsCorrelations({
       <EuiSpacer size="s" />
 
       <CorrelationsProgressControls
-        progress={progressNormalized}
+        progress={progress.loaded}
         isRunning={progress.isRunning}
         onRefresh={startFetch}
         onCancel={cancelFetch}

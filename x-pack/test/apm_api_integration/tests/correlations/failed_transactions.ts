@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import type { FailedTransactionsCorrelationsRawResponse } from '../../../../plugins/apm/common/correlations/failed_transactions_correlations/types';
+import type { FailedTransactionsCorrelationsResponse } from '../../../../plugins/apm/common/correlations/failed_transactions_correlations/types';
 import { EVENT_OUTCOME } from '../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../plugins/apm/common/event_outcome';
 
@@ -86,7 +86,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         `Expected status to be '200', got '${failedTransactionsCorrelationsResponse.status}'`
       );
 
-      const finalRawResponse: FailedTransactionsCorrelationsRawResponse = {
+      const finalRawResponse: FailedTransactionsCorrelationsResponse = {
         ccsWarning: failedTransactionsCorrelationsResponse.body?.ccsWarning,
         percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
         overallHistogram: overallDistributionResponse.body?.overallHistogram,
@@ -171,7 +171,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         `Expected status to be '200', got '${failedTransactionsCorrelationsResponse.status}'`
       );
 
-      const finalRawResponse: FailedTransactionsCorrelationsRawResponse = {
+      const finalRawResponse: FailedTransactionsCorrelationsResponse = {
         ccsWarning: failedTransactionsCorrelationsResponse.body?.ccsWarning,
         percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
         overallHistogram: overallDistributionResponse.body?.overallHistogram,

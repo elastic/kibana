@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -14,52 +14,19 @@ import { EVENT_OUTCOME } from '../../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../../common/event_outcome';
 
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 
 import type { TransactionDistributionChartData } from '../../../shared/charts/transaction_distribution_chart';
 
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
+import { useFetchParams } from '../../correlations/use_fetch_params';
 
 export const useTransactionDistributionChartData = () => {
-  const { serviceName, transactionType } = useApmServiceContext();
+  const params = useFetchParams();
 
   const {
     core: { notifications },
   } = useApmPluginContext();
-
-  const { urlParams } = useUrlParams();
-  const { transactionName } = urlParams;
-
-  const {
-    query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/transactions/view');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const params = useMemo(
-    () => ({
-      serviceName,
-      transactionName,
-      transactionType,
-      kuery,
-      environment,
-      start,
-      end,
-    }),
-    [
-      serviceName,
-      transactionName,
-      transactionType,
-      kuery,
-      environment,
-      start,
-      end,
-    ]
-  );
 
   const {
     data: overallLatencyData = {},
