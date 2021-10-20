@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, FC } from 'react';
 import uuid from 'uuid';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiTextAlign } from '@elastic/eui';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 
 import { decorators } from './decorators';
 import { pluginServices, registry } from '../../../services/storybook';
@@ -18,6 +20,7 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../control_types/options_list/options_list_embeddable';
+import { ViewMode } from '../control_group/types';
 
 export default {
   title: 'Controls',
@@ -25,13 +28,31 @@ export default {
   decorators,
 };
 
-const EmptyControlGroupStoryComponent = ({ panels }: { panels?: ControlsPanels }) => {
+type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
+type EmbeddableType = UnwrapPromise<ReturnType<ControlGroupContainerFactory['create']>>;
+
+const EmptyControlGroupStoryComponent: FC<{
+  panels?: ControlsPanels;
+  edit?: boolean;
+}> = ({ panels, edit }) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
+  const [embeddable, setEmbeddable] = useState<EmbeddableType>();
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    edit === undefined || edit ? ViewMode.EDIT : ViewMode.VIEW
+  );
+
+  const handleToggleViewMode = useCallback(() => {
+    if (embeddable) {
+      const newViewMode =
+        embeddable.getInput().viewMode === ViewMode.EDIT ? ViewMode.VIEW : ViewMode.EDIT;
+      embeddable.updateInput({ viewMode: newViewMode });
+    }
+  }, [embeddable]);
 
   pluginServices.setRegistry(registry.start({}));
   populateStorybookControlFactories(pluginServices.getServices().controls);
 
-  useEffect(() => {
+  useEffectOnce(() => {
     (async () => {
       const factory = new ControlGroupContainerFactory();
       const controlGroupContainerEmbeddable = await factory.create({
@@ -43,17 +64,44 @@ const EmptyControlGroupStoryComponent = ({ panels }: { panels?: ControlsPanels }
         controlStyle: 'oneLine',
         panels: panels ?? {},
         id: uuid.v4(),
+        viewMode,
       });
+
       if (controlGroupContainerEmbeddable && embeddableRoot.current) {
         controlGroupContainerEmbeddable.render(embeddableRoot.current);
       }
+      setEmbeddable(controlGroupContainerEmbeddable);
     })();
-  }, [embeddableRoot, panels]);
+  });
 
-  return <div ref={embeddableRoot} />;
+  useEffect(() => {
+    if (embeddable) {
+      const subscription = embeddable.getInput$().subscribe((updatedInput) => {
+        if (updatedInput.viewMode) {
+          setViewMode(updatedInput.viewMode);
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    }
+  }, [embeddable, setViewMode]);
+
+  return (
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTextAlign textAlign="right">
+            <EuiSwitch checked={viewMode === 'edit'} label="Edit" onChange={handleToggleViewMode} />
+          </EuiTextAlign>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <div ref={embeddableRoot} />
+    </>
+  );
 };
 
-export const EmptyControlGroupStory = () => <EmptyControlGroupStoryComponent />;
+export const EmptyControlGroupStory = () => <EmptyControlGroupStoryComponent edit={false} />;
 export const ConfiguredControlGroupStory = () => (
   <EmptyControlGroupStoryComponent
     panels={{
