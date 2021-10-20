@@ -661,7 +661,6 @@ describe('utils', () => {
       };
       mockLogger.error.mockClear();
       const res = await hasTimestampFields({
-        wroteStatus: false,
         timestampField,
         ruleName: 'myfakerulename',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -705,7 +704,6 @@ describe('utils', () => {
       };
       mockLogger.error.mockClear();
       const res = await hasTimestampFields({
-        wroteStatus: false,
         timestampField,
         ruleName: 'myfakerulename',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -735,7 +733,6 @@ describe('utils', () => {
       };
       mockLogger.error.mockClear();
       const res = await hasTimestampFields({
-        wroteStatus: false,
         timestampField,
         ruleName: 'Endpoint Security',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -765,7 +762,6 @@ describe('utils', () => {
       };
       mockLogger.error.mockClear();
       const res = await hasTimestampFields({
-        wroteStatus: false,
         timestampField,
         ruleName: 'NOT Endpoint Security',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
