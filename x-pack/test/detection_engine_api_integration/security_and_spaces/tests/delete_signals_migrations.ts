@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('deleting signals migrations', () => {
+  describe('FOO deleting signals migrations', () => {
     let outdatedSignalsIndexName: string;
     let createdMigration: CreateResponse;
     let finalizedMigration: FinalizeResponse;
@@ -95,7 +95,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ migration_ids: [createdMigration.migration_id] })
         .expect(200);
 
-      const { body } = await es.indices.getSettings({ index: createdMigration.index });
+      const { body } = await es.indices.getSettings(
+        { index: createdMigration.index },
+        { meta: true }
+      );
       // @ts-expect-error @elastic/elasticsearch supports flatten 'index.*' keys only
       const indexSettings = body[createdMigration.index].settings.index;
       expect(indexSettings.lifecycle.name).to.eql(
