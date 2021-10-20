@@ -415,17 +415,12 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
  * @param supertest The supertest agent.
  */
 export const deleteAllAlerts = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  space?: string
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   await countDownTest(
     async () => {
       const { body } = await supertest
-        .get(
-          space
-            ? `/s/${space}${DETECTION_ENGINE_RULES_URL}/_find?per_page=9999`
-            : `${DETECTION_ENGINE_RULES_URL}/_find?per_page=9999`
-        )
+        .get(`${DETECTION_ENGINE_RULES_URL}/_find?per_page=9999`)
         .set('kbn-xsrf', 'true')
         .send();
 
@@ -434,11 +429,7 @@ export const deleteAllAlerts = async (
       }));
 
       await supertest
-        .post(
-          space
-            ? `/s/${space}${DETECTION_ENGINE_RULES_URL}/_bulk_delete`
-            : `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`
-        )
+        .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
         .send(ids)
         .set('kbn-xsrf', 'true');
 
@@ -901,8 +892,10 @@ export const countDownTest = async (
 };
 
 /**
- * Helper to cut down on the noise in some of the tests. This checks for
- * an expected 200 still and does not try to any retries.
+ * Helper to cut down on the noise in some of the tests. If this detects
+ * a conflict it will try to manually remove the rule before re-adding the rule one time and log
+ * and error about the race condition.
+ * rule a second attempt. It only re-tries adding the rule if it encounters a conflict once.
  * @param supertest The supertest deps
  * @param rule The rule to create
  */
@@ -910,17 +903,69 @@ export const createRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   rule: CreateRulesSchema
 ): Promise<FullResponseSchema> => {
-  const { body } = await supertest
+  const response = await supertest
     .post(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')
-    .send(rule)
-    .expect(200);
-  return body;
+    .send(rule);
+  if (response.status === 409) {
+    if (rule.rule_id != null) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `When creating a rule found an unexpected conflict (409), will attempt a cleanup and one time re-try. This usually indicates a bad cleanup or race condition within the tests: ${JSON.stringify(
+          response.body
+        )}`
+      );
+      await deleteRule(supertest, rule.rule_id);
+      const secondResponseTry = await supertest
+        .post(DETECTION_ENGINE_RULES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(rule);
+      if (secondResponseTry.status !== 200) {
+        throw new Error(
+          `Unexpected non 200 ok when attempting to create a rule (second try): ${JSON.stringify(
+            response.body
+          )}`
+        );
+      } else {
+        return secondResponseTry.body;
+      }
+    } else {
+      throw new Error('When creating a rule found an unexpected conflict (404)');
+    }
+  } else if (response.status !== 200) {
+    throw new Error(
+      `Unexpected non 200 ok when attempting to create a rule: ${JSON.stringify(response.status)}`
+    );
+  } else {
+    return response.body;
+  }
 };
 
 /**
- * Helper to cut down on the noise in some of the tests. This checks for
- * an expected 200 still and does not try to any retries.
+ * Helper to cut down on the noise in some of the tests. Does a delete of a rule.
+ * It does not check for a 200 "ok" on this.
+ * @param supertest The supertest deps
+ * @param id The rule id to delete
+ */
+export const deleteRule = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  ruleId: string
+): Promise<FullResponseSchema> => {
+  const response = await supertest
+    .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
+    .set('kbn-xsrf', 'true');
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      'Did not get an expected 200 "ok" when deleting the rule. CI issues could happen. Suspect this line if you are seeing CI issues.'
+    );
+  }
+
+  return response.body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests.
  * @param supertest The supertest deps
  * @param rule The rule to create
  */
@@ -1019,12 +1064,68 @@ export const createExceptionList = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   exceptionList: CreateExceptionListSchema
 ): Promise<ExceptionListSchema> => {
-  const { body } = await supertest
+  const response = await supertest
     .post(EXCEPTION_LIST_URL)
     .set('kbn-xsrf', 'true')
-    .send(exceptionList)
-    .expect(200);
-  return body;
+    .send(exceptionList);
+
+  if (response.status === 409) {
+    if (exceptionList.list_id != null) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `When creating an exception list found an unexpected conflict (409), will attempt a cleanup and one time re-try. This usually indicates a bad cleanup or race condition within the tests: ${JSON.stringify(
+          response.body
+        )}`
+      );
+      await deleteExceptionList(supertest, exceptionList.list_id);
+      const secondResponseTry = await supertest
+        .post(EXCEPTION_LIST_URL)
+        .set('kbn-xsrf', 'true')
+        .send(exceptionList);
+      if (secondResponseTry.status !== 200) {
+        throw new Error(
+          `Unexpected non 200 ok when attempting to create an exception list (second try): ${JSON.stringify(
+            response.body
+          )}`
+        );
+      } else {
+        return secondResponseTry.body;
+      }
+    } else {
+      throw new Error('When creating an exception list found an unexpected conflict (404)');
+    }
+  } else if (response.status !== 200) {
+    throw new Error(
+      `Unexpected non 200 ok when attempting to create an exception list: ${JSON.stringify(
+        response.status
+      )}`
+    );
+  } else {
+    return response.body;
+  }
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. Does a delete of a rule.
+ * It does not check for a 200 "ok" on this.
+ * @param supertest The supertest deps
+ * @param id The rule id to delete
+ */
+export const deleteExceptionList = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  listId: string
+): Promise<FullResponseSchema> => {
+  const response = await supertest
+    .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}`)
+    .set('kbn-xsrf', 'true');
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      'Did not get an expected 200 "ok" when deleting an exception list. CI issues could happen. Suspect this line if you are seeing CI issues.'
+    );
+  }
+
+  return response.body;
 };
 
 /**
