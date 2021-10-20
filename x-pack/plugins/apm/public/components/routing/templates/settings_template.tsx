@@ -92,14 +92,22 @@ function getTabs({
       label: i18n.translate('xpack.apm.settings.customizeApp', {
         defaultMessage: 'Customize app',
       }),
-      href: getLegacyApmHref({ basePath, path: `/settings/customize-ui`, search }),
+      href: getLegacyApmHref({
+        basePath,
+        path: `/settings/customize-ui`,
+        search,
+      }),
     },
     {
       key: 'apm-indices',
       label: i18n.translate('xpack.apm.settings.indices', {
         defaultMessage: 'Indices',
       }),
-      href: getLegacyApmHref({ basePath, path: `/settings/apm-indices`, search }),
+      href: getLegacyApmHref({
+        basePath,
+        path: `/settings/apm-indices`,
+        search,
+      }),
     },
     {
       key: 'schema',
