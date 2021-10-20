@@ -202,18 +202,6 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
             closePopover();
           },
         },
-        // TODO: Remove this menu option. This is a temporary menu options just for testing,
-        // will be removed once toolbar is implemented
-        isByValueEnabled
-          ? {
-              name: 'Lens',
-              icon: <EuiIcon type="lensApp" size="m" />,
-              onClick: () => {
-                createNewEmbeddable();
-                closePopover();
-              },
-            }
-          : {},
       ],
     };
   };
