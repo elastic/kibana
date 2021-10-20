@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
@@ -17,6 +17,7 @@ import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
 import { APP_ID } from '../../../common/constants';
+import { Case } from '../../../../cases/common';
 
 export const CaseDetailsPage = React.memo(() => {
   const {
@@ -38,6 +39,19 @@ export const CaseDetailsPage = React.memo(() => {
     }
   }, [userPermissions, navigateToApp, search]);
 
+  const [spyState, setSpyState] = useState<{ caseTitle: string | undefined }>({
+    caseTitle: undefined,
+  });
+
+  const onCaseDataSuccess = useCallback(
+    (data: Case) => {
+      if (spyState.caseTitle === undefined || spyState.caseTitle !== data.title) {
+        setSpyState({ caseTitle: data.title });
+      }
+    },
+    [spyState.caseTitle]
+  );
+
   return caseId != null ? (
     <>
       <SecuritySolutionPageWrapper noPadding>
@@ -45,9 +59,10 @@ export const CaseDetailsPage = React.memo(() => {
           caseId={caseId}
           subCaseId={subCaseId}
           userCanCrud={userPermissions?.crud ?? false}
+          onCaseDataSuccess={onCaseDataSuccess}
         />
       </SecuritySolutionPageWrapper>
-      <SpyRoute pageName={SecurityPageName.case} />
+      <SpyRoute state={spyState} pageName={SecurityPageName.case} />
     </>
   ) : null;
 });

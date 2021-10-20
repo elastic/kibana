@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
+import {
+  REPORT_INTERVAL_MS,
+  LOCALSTORAGE_KEY,
+  PAYLOAD_CONTENT_ENCODING,
+} from '../../common/constants';
 import { TelemetryService } from './telemetry_service';
 import { Storage } from '../../../kibana_utils/public';
+import type { EncryptedTelemetryPayload } from '../../common/types';
 
 export class TelemetrySender {
   private readonly telemetryService: TelemetryService;
@@ -57,18 +62,21 @@ export class TelemetrySender {
     this.isSending = true;
     try {
       const telemetryUrl = this.telemetryService.getTelemetryUrl();
-      const telemetryData: string | string[] = await this.telemetryService.fetchTelemetry();
-      const clusters: string[] = ([] as string[]).concat(telemetryData);
+      const telemetryPayload: EncryptedTelemetryPayload =
+        await this.telemetryService.fetchTelemetry();
+
       await Promise.all(
-        clusters.map(
-          async (cluster) =>
+        telemetryPayload.map(
+          async ({ clusterUuid, stats }) =>
             await fetch(telemetryUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
                 'X-Elastic-Stack-Version': this.telemetryService.currentKibanaVersion,
+                'X-Elastic-Cluster-ID': clusterUuid,
+                'X-Elastic-Content-Encoding': PAYLOAD_CONTENT_ENCODING,
               },
-              body: cluster,
+              body: stats,
             })
         )
       );
