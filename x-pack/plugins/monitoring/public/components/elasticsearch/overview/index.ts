@@ -6,4 +6,4 @@
  */
 
 // @ts-ignore
-export { ElasticsearchOverviewReact } from './overview_react';
+export { ElasticsearchOverview } from './overview';

@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { Logs } from '../../logs/logs';
 
-export function ElasticsearchOverviewReact({
+export function ElasticsearchOverview({
   clusterStatus,
   metrics,
   logs,
