@@ -11,7 +11,7 @@ import { fieldValidators } from '../../shared_imports';
 
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 
-const { emptyField, numberGreaterThanField } = fieldValidators;
+const { emptyField, numberGreaterThanField, starCharacterCheck } = fieldValidators;
 
 export const schema = {
   name: {
@@ -28,6 +28,9 @@ export const schema = {
             }
           )
         ),
+      },
+      {
+        validator: starCharacterCheck(),
       },
     ],
   },

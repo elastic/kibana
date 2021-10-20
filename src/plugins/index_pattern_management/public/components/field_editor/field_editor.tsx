@@ -299,18 +299,17 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         }
         isInvalid={isInvalid}
         error={
-          isInvalid
-            ? starCheck
-              ? i18n.translate(
-                  'indexPatternManagement.starCharacterNotAllowedValidationErrorMessage',
-                  {
-                    defaultMessage: 'The field cannot have * in the name.',
-                  }
-                )
-              : i18n.translate('indexPatternManagement.nameErrorMessage', {
-                  defaultMessage: 'Name is required',
-                })
-            : null
+          isInvalid &&
+          (starCheck
+            ? i18n.translate(
+                'indexPatternManagement.starCharacterNotAllowedValidationErrorMessage',
+                {
+                  defaultMessage: 'The field cannot have * in the name.',
+                }
+              )
+            : i18n.translate('indexPatternManagement.nameErrorMessage', {
+                defaultMessage: 'Name is required',
+              }))
         }
       >
         <EuiFieldText

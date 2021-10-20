@@ -311,6 +311,6 @@ describe('FieldEditor', () => {
     await new Promise((resolve) => process.nextTick(resolve));
     (component.instance() as FieldEditor).onFieldChange('name', 'test*123');
     component.update();
-    expect(component).toMatchSnapshot();
+    expect(component.html().includes('The field cannot have * in the name.')).toBe(true);
   });
 });
