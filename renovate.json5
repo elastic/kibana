@@ -12,7 +12,7 @@
   ],
   baseBranches: [
     'master',
-    '7.x',
+    '7.16',
     '7.15',
   ],
   prConcurrentLimit: 0,
@@ -55,7 +55,7 @@
         groupName: '@elastic/elasticsearch',
         packageNames: ['@elastic/elasticsearch'],
         reviewers: ['team:kibana-operations', 'team:kibana-core'],
-        matchBaseBranches: ['7.x'],
+        matchBaseBranches: ['7.16'],
         labels: ['release_note:skip', 'Team:Operations', 'Team:Core', 'backport:skip'],
         enabled: true,
       },
