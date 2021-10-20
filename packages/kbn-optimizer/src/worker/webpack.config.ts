@@ -285,7 +285,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           terserOptions: {
             compress: true,
             keep_classnames: true,
-            mangle: !['kibanaLegacy', 'monitoring'].includes(bundle.id),
+            mangle: true,
           },
         }),
       ],
