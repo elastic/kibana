@@ -31,6 +31,8 @@ type Response = FailedTransactionsCorrelationsResponse;
 export function useFailedTransactionsCorrelations() {
   const fetchParams = useFetchParams();
 
+  // This use of useReducer (the dispatch function won't get reinstantiated
+  // on every update) and debounce avoids flooding consuming components with updates.
   const [response, setResponseUnDebounced] = useReducer(
     getReducer<Response & CorrelationsProgress>(),
     getInitialResponse()
