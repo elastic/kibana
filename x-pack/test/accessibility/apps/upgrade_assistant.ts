@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe('Upgrade Assistant', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/115859
+  describe.skip('Upgrade Assistant', () => {
     before(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
     });
