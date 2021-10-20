@@ -169,7 +169,7 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
                         id="indexPatternEditor.createIndexPattern.emptyState.checkDataButton"
                         values={Object {}}
                       />
-
+                       
                       <EuiIcon
                         size="s"
                         type="refresh"
