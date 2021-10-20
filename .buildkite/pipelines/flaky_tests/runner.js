@@ -33,6 +33,7 @@ for (const key of keys) {
 }
 
 if (totalJobs > 500) {
+  console.error('+++ Too many tests');
   console.error(
     `Buildkite builds can only contain 500 steps in total. Found ${totalJobs} in total. Make sure your test runs are less than ${
       500 - initialJobs
