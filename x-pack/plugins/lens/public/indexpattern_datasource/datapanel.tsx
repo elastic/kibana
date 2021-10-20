@@ -620,7 +620,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }}
                 indexPatternId={currentIndexPatternId}
                 indexPatternRefs={indexPatternRefs}
-                isMissingCurrent={!currentIndexPattern}
                 onChangeIndexPattern={(newId: string) => {
                   onChangeIndexPattern(newId);
                   clearLocalState();
