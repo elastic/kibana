@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
         const rule = getRuleForSignalTesting(['keyword_as_array']);
         const { id } = await createRule(supertest, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
+        await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
+        await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
@@ -153,7 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits).to.eql([[]]);
+        expect(hits.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
       });
     });
 
@@ -281,7 +281,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits).to.eql([[]]);
+        expect(hits.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
       });
     });
 
@@ -328,8 +328,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('"exists" operator', () => {
-      // FLAKY https://github.com/elastic/kibana/issues/115308
-      it.skip('will return 1 results if matching against keyword for the empty array', async () => {
+      it('will return 1 results if matching against keyword for the empty array', async () => {
         const rule = getRuleForSignalTesting(['keyword_as_array']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
@@ -344,7 +343,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits).to.eql([[]]);
+        expect(hits.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
       });
     });
 
@@ -400,7 +399,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
+        await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
@@ -438,7 +437,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
+        await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
@@ -498,8 +497,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql([[], ['word eight', 'word nine', 'word ten']]);
       });
 
-      // FLAKY https://github.com/elastic/kibana/issues/115304
-      it.skip('will return only the empty array for results if we have a list that includes all keywords', async () => {
+      it('will return only the empty array for results if we have a list that includes all keyword', async () => {
         await importFile(
           supertest,
           'keyword',
@@ -524,7 +522,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits).to.eql([[]]);
+        expect(hits.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
       });
     });
 

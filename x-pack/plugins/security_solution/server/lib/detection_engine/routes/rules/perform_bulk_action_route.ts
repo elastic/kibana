@@ -47,6 +47,7 @@ export const performBulkActionRoute = (
 
       try {
         const rulesClient = context.alerting?.getRulesClient();
+        const exceptionsClient = context.lists?.getExceptionListClient();
         const savedObjectsClient = context.core.savedObjects.client;
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
 
@@ -136,13 +137,14 @@ export const performBulkActionRoute = (
           case BulkAction.export:
             const exported = await getExportByObjectIds(
               rulesClient,
+              exceptionsClient,
               savedObjectsClient,
               rules.data.map(({ params }) => ({ rule_id: params.ruleId })),
               logger,
               isRuleRegistryEnabled
             );
 
-            const responseBody = `${exported.rulesNdjson}${exported.exportDetails}`;
+            const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.exportDetails}`;
 
             return response.ok({
               headers: {

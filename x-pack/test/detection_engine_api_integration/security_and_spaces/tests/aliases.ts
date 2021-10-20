@@ -51,10 +51,10 @@ export default ({ getService }: FtrProviderContext) => {
       await waitForRuleSuccessOrStatus(supertest, id);
       await waitForSignalsToBePresent(supertest, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, id);
-      const hits = signalsOpen.hits.hits.map(
-        (signal) => (signal._source?.host_alias as HostAlias).name
-      );
-      expect(hits.sort()).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
+      const hits = signalsOpen.hits.hits
+        .map((signal) => (signal._source?.host_alias as HostAlias).name)
+        .sort();
+      expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
     });
 
     it('should copy alias data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
@@ -63,8 +63,10 @@ export default ({ getService }: FtrProviderContext) => {
       await waitForRuleSuccessOrStatus(supertest, id);
       await waitForSignalsToBePresent(supertest, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, id);
-      const hits = signalsOpen.hits.hits.map((signal) => (signal._source?.host as HostAlias).name);
-      expect(hits.sort()).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
+      const hits = signalsOpen.hits.hits
+        .map((signal) => (signal._source?.host as HostAlias).name)
+        .sort();
+      expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
     });
   });
 };
