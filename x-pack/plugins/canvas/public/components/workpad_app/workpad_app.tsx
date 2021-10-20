@@ -17,6 +17,8 @@ import { State } from '../../../types';
 
 export { WORKPAD_CONTAINER_ID } from './workpad_app.component';
 
+const WorkpadAppComponent = withElementsLoadedTelemetry(Component);
+
 export const WorkpadApp: React.FC = () => {
   const isWriteableProp = useSelector(
     (state: State) => isWriteable(state) && canUserWrite(state),
@@ -34,7 +36,6 @@ export const WorkpadApp: React.FC = () => {
     [dispatch]
   );
 
-  const WorkpadAppComponent = withElementsLoadedTelemetry(Component);
   return (
     <WorkpadAppComponent
       workpad={workpad}
