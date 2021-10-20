@@ -42,7 +42,7 @@ describe('sendTelemetryOptInStatus', () => {
       Array [
         "https://telemetry.elastic.co/v3/send/kibana-opt_in_status",
         Object {
-          "body": "\\"mock_opt_in_hashed_value\\"",
+          "body": "mock_opt_in_hashed_value",
           "headers": Object {
             "Content-Type": "application/json",
             "X-Elastic-Cluster-ID": "mk_uuid",
@@ -73,7 +73,7 @@ describe('sendTelemetryOptInStatus', () => {
       Array [
         "https://telemetry-staging.elastic.co/v3/send/kibana-opt_in_status",
         Object {
-          "body": "\\"mock_opt_in_hashed_value\\"",
+          "body": "mock_opt_in_hashed_value",
           "headers": Object {
             "Content-Type": "application/json",
             "X-Elastic-Cluster-ID": "mk_uuid",
