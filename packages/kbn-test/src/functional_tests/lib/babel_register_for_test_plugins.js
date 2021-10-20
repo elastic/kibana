@@ -45,15 +45,11 @@ const transpileKbnPaths = transpileKbnBasePaths.reduce(
   []
 );
 
-console.log('TEST PATHS: ');
-console.log(transpileKbnPaths);
-throw new Error('WAIT');
-
 // modifies all future calls to require() to automatically
 // compile the required source with babel
 require('@babel/register')({
   ignore: [/[\/\\](node_modules|target|dist)[\/\\]/],
-  only: transpileKbnBasePaths,
+  only: transpileKbnPaths,
   babelrc: false,
   presets: [require.resolve('@kbn/babel-preset/node_preset')],
   extensions: ['.js', '.ts', '.tsx'],
