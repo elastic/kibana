@@ -22,6 +22,7 @@ import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
+  EndpointAppContextServiceSetupContract,
   EndpointAppContextServiceStartContract,
 } from './endpoint_app_context_services';
 import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
@@ -37,6 +38,7 @@ import { parseExperimentalConfigValue } from '../../common/experimental_features
 // a restricted path.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createCasesClientMock } from '../../../cases/server/client/mocks';
+import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
 
 /**
@@ -70,12 +72,24 @@ export const createMockEndpointAppContextService = (
 };
 
 /**
+ * Creates a mocked input contract for the `EndpointAppContextService#setup()` method
+ */
+export const createMockEndpointAppContextServiceSetupContract =
+  (): jest.Mocked<EndpointAppContextServiceSetupContract> => {
+    return {
+      securitySolutionRequestContextFactory: requestContextFactoryMock.create(),
+    };
+  };
+
+/**
  * Creates a mocked input contract for the `EndpointAppContextService#start()` method
  */
 export const createMockEndpointAppContextServiceStartContract =
   (): jest.Mocked<EndpointAppContextServiceStartContract> => {
-    const factory = new AppClientFactory();
     const config = createMockConfig();
+    const factory = new AppClientFactory();
+    factory.setup({ getSpaceId: () => 'mockSpace', config });
+
     const casesClientMock = createCasesClientMock();
     const savedObjectsStart = savedObjectsServiceMock.createStartContract();
     const agentService = createMockAgentService();
@@ -85,8 +99,6 @@ export const createMockEndpointAppContextServiceStartContract =
       agentService,
       agentPolicyService
     );
-
-    factory.setup({ getSpaceId: () => 'mockSpace', config });
 
     return {
       agentService,

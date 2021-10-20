@@ -7,12 +7,17 @@
 
 import { alertsClientMock } from './alert_data_client/alerts_client.mock';
 import { createRuleDataClientMock } from './rule_data_client/rule_data_client.mock';
-import { ruleDataPluginServiceMock } from './rule_data_plugin_service/rule_data_plugin_service.mock';
+import {
+  ruleDataServiceMock,
+  RuleDataServiceMock,
+} from './rule_data_plugin_service/rule_data_plugin_service.mock';
 import { createLifecycleAlertServicesMock } from './utils/lifecycle_alert_services_mock';
 
 export const ruleRegistryMocks = {
   createLifecycleAlertServices: createLifecycleAlertServicesMock,
-  createRuleDataPluginService: ruleDataPluginServiceMock.create,
+  createRuleDataService: ruleDataServiceMock.create,
   createRuleDataClient: createRuleDataClientMock,
   createAlertsClientMock: alertsClientMock,
 };
+
+export { RuleDataServiceMock };
