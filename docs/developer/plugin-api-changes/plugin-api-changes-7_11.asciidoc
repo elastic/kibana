@@ -185,7 +185,7 @@ the attributes of each type. Specifically:
 
 The `data` plugin's high-level search API, `SearchSource`,
 has migrated to use
-the https://www.elastic.co/guide/en/elasticsearch/reference/7.x/search-fields.html#search-fields-param[Elasticsearch search fields param]
+the https://www.elastic.co/guide/en/elasticsearch/reference/7.11/search-fields.html#search-fields-param[Elasticsearch search fields param]
 as the default when constructing a search request body with specific fields.
 To make it as easy as possible for plugins to migrate to the new behavior,
 we've preserved a way for plugins to use the legacy behavior of requesting fields from `_source`:
