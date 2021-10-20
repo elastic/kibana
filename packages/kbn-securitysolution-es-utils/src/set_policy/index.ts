@@ -9,13 +9,13 @@ import type { ElasticsearchClient } from '../elasticsearch_client';
 
 export const setPolicy = async (
   esClient: ElasticsearchClient,
-  policy: string,
+  name: string,
   body: Record<string, unknown>
 ): Promise<unknown> => {
   return (
     await esClient.ilm.putLifecycle(
       {
-        policy,
+        name,
         body,
       },
       { meta: true }
