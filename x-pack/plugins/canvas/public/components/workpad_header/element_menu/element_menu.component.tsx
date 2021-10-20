@@ -18,7 +18,6 @@ import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { AssetManager } from '../../asset_manager';
 import { ClosePopoverFn } from '../../popover';
 import { SavedElementsModal } from '../../saved_elements_modal';
-import { useLabsService } from '../../../services';
 
 interface CategorizedElementLists {
   [key: string]: ElementSpec[];
@@ -125,8 +124,6 @@ export interface Props {
 }
 
 export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) => {
-  const labsService = useLabsService();
-  const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
   const [isAssetModalVisible, setAssetModalVisible] = useState(false);
   const [isSavedElementsModalVisible, setSavedElementsModalVisible] = useState(false);
 

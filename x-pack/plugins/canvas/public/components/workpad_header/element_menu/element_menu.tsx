@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from 'element_menu.component';
+export * from './element_menu.component';
