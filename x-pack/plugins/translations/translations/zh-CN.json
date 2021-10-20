@@ -13384,8 +13384,6 @@
     "xpack.infra.logSourceConfiguration.childFormElementErrorMessage": "至少一个表单字段处于无效状态。",
     "xpack.infra.logSourceConfiguration.emptyColumnListErrorMessage": "列列表不得为空。",
     "xpack.infra.logSourceConfiguration.emptyFieldErrorMessage": "字段“{fieldName}”不得为空。",
-    "xpack.infra.logSourceConfiguration.indexNameReferenceDeprecationDescription": "直接引用 Elasticsearch 索引是配置日志源的方式，但已弃用。现在，日志源与 Kibana 索引模式集成以配置使用的索引。",
-    "xpack.infra.logSourceConfiguration.indexNameReferenceDeprecationTitle": "弃用的配置选项",
     "xpack.infra.logSourceConfiguration.indexPatternManagementLinkText": "索引模式管理模式",
     "xpack.infra.logSourceConfiguration.indexPatternSectionTitle": "索引模式",
     "xpack.infra.logSourceConfiguration.indexPatternSelectorPlaceholder": "选择索引模式",
