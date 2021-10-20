@@ -17,7 +17,7 @@ interface Props {
   engineName: string;
 }
 
-export const History: React.FC<Props> = ({ query, engineName }) => {
+export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName }) => {
   const filters = [
     `appsearch.search_relevance_suggestions.query: ${query}`,
     'event.kind: event',

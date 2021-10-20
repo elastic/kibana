@@ -24,11 +24,11 @@ jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 import { AppSearchPageTemplate } from '../../layout';
 
 import { AutomatedCuration } from './automated_curation';
+import { AutomatedCurationHistory } from './automated_curation_history';
 import { CurationLogic } from './curation_logic';
 
 import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, OrganicDocuments } from './documents';
-import { History } from './history';
 
 describe('AutomatedCuration', () => {
   const values = {
@@ -64,7 +64,7 @@ describe('AutomatedCuration', () => {
     expect(wrapper.is(AppSearchPageTemplate));
     expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
     expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
-    expect(wrapper.find(History)).toHaveLength(0);
+    expect(wrapper.find(AutomatedCurationHistory)).toHaveLength(0);
   });
 
   it('includes tabs', () => {
@@ -91,7 +91,7 @@ describe('AutomatedCuration', () => {
 
     expect(wrapper.find(PromotedDocuments)).toHaveLength(0);
     expect(wrapper.find(OrganicDocuments)).toHaveLength(0);
-    expect(wrapper.find(History)).toHaveLength(1);
+    expect(wrapper.find(AutomatedCurationHistory)).toHaveLength(1);
 
     // Clicking back to the Promoted tab shows promoted documents
     tabs.at(0).simulate('click');
@@ -103,7 +103,7 @@ describe('AutomatedCuration', () => {
 
     expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
     expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
-    expect(wrapper.find(History)).toHaveLength(0);
+    expect(wrapper.find(AutomatedCurationHistory)).toHaveLength(0);
   });
 
   it('initializes CurationLogic with a curationId prop from URL param', () => {

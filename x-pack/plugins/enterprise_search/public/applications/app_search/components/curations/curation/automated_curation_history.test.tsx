@@ -11,11 +11,11 @@ import { shallow } from 'enzyme';
 
 import { EntSearchLogStream } from '../../../../shared/log_stream';
 
-import { History } from './history';
+import { AutomatedCurationHistory } from './automated_curation_history';
 
-describe('History', () => {
+describe('AutomatedCurationHistory', () => {
   it('renders', () => {
-    const wrapper = shallow(<History engineName="foo" query="some text" />);
+    const wrapper = shallow(<AutomatedCurationHistory engineName="foo" query="some text" />);
     expect(wrapper.find(EntSearchLogStream).prop('query')).toEqual(
       'appsearch.search_relevance_suggestions.query: some text and event.kind: event and event.dataset: search-relevance-suggestions and appsearch.search_relevance_suggestions.engine: foo and event.action: curation_suggestion'
     );

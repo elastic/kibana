@@ -25,11 +25,11 @@ import {
 
 import { getCurationsBreadcrumbs } from '../utils';
 
+import { AutomatedCurationHistory } from './automated_curation_history';
 import { HIDDEN_DOCUMENTS_TITLE, PROMOTED_DOCUMENTS_TITLE } from './constants';
 import { CurationLogic } from './curation_logic';
 import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, OrganicDocuments } from './documents';
-import { History } from './history';
 
 const PROMOTED = 'promoted';
 const HISTORY = 'history';
@@ -105,7 +105,7 @@ export const AutomatedCuration: React.FC = () => {
       {selectedPageTab === PROMOTED && <PromotedDocuments />}
       {selectedPageTab === PROMOTED && <OrganicDocuments />}
       {selectedPageTab === HISTORY && (
-        <History query={curation.queries[0]} engineName={engineName} />
+        <AutomatedCurationHistory query={curation.queries[0]} engineName={engineName} />
       )}
     </AppSearchPageTemplate>
   );
