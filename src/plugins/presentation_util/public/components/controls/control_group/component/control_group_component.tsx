@@ -78,10 +78,10 @@ export const ControlGroup = () => {
   );
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const draggingIndex = useMemo(
-    () => (draggingId ? idsInOrder.indexOf(draggingId) : -1),
-    [idsInOrder, draggingId]
-  );
+  const draggingIndex = useMemo(() => (draggingId ? idsInOrder.indexOf(draggingId) : -1), [
+    idsInOrder,
+    draggingId,
+  ]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -104,6 +104,8 @@ export const ControlGroup = () => {
   return (
     <EuiPanel
       borderRadius="m"
+      color={emptyState ? 'subdued' : undefined}
+      paddingSize={emptyState ? 'none' : 's'}
       className={classNames('controlsWrapper', {
         'controlsWrapper--empty': emptyState,
         'controlsWrapper--twoLine': controlStyle === 'twoLine',

@@ -11,8 +11,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Story } from '@storybook/react';
 
 const bar = '#c5ced8';
-const panel = '#f7f9fa';
-const background = '#e0e6ec';
+const panel = '#ffff';
+const background = '#FAFBFD';
 const minHeight = 60;
 
 const panelStyle = {

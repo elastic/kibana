@@ -27,7 +27,7 @@ $controlMinWidth: $euiSize * 14;
         text-align: center;
       }
     }
-    padding-right: $euiSizeL;
+    min-height: $euiSize * 4;
   }
 
   &--twoLine {
