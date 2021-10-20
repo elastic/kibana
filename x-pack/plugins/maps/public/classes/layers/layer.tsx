@@ -69,7 +69,12 @@ export interface ILayer {
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
+
+  /*
+   * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
+   */
   getMbLayerIds(): string[];
+
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;

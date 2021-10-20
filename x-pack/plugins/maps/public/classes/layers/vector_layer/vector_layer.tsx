@@ -90,7 +90,12 @@ export interface VectorLayerArguments {
 }
 
 export interface IVectorLayer extends ILayer {
+  /*
+   * IVectorLayer.getMbLayerIds returns a list of mapbox layers assoicated with this layer for identifing features with tooltips.
+   * Must return ILayer.getMbLayerIds or a subset of ILayer.getMbLayerIds.
+   */
   getMbTooltipLayerIds(): string[];
+
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getJoins(): InnerJoin[];

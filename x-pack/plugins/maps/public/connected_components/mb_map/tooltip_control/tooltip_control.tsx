@@ -28,7 +28,6 @@ import {
 } from '../../../../common/descriptor_types';
 import { TooltipPopover } from './tooltip_popover';
 import { FeatureGeometryFilterForm } from './features_tooltip';
-// import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../classes/util/mb_filter_expressions';
 import { ILayer } from '../../../classes/layers/layer';
 import { IVectorLayer, isVectorLayer, getFeatureId } from '../../../classes/layers/vector_layer';
 import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
@@ -353,7 +352,6 @@ export class TooltipControl extends Component<Props, {}> {
     ] as [MbPoint, MbPoint];
     return this.props.mbMap.queryRenderedFeatures(mbBbox, {
       layers: mbLayerIds,
-      // filter: EXCLUDE_TOO_MANY_FEATURES_BOX,
     });
   }
 
