@@ -54,7 +54,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
   ];
 
   return (
-    <Chart size={['100%', 100]}>
+    <Chart size={['100%', 50]}>
       <Settings
         rotation={90}
         tooltip={{
@@ -65,7 +65,12 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         }}
       />
 
-      <Axis id="left2" position={Position.Bottom} hide tickFormat={(d: any) => bytesFormatter(d)} />
+      <Axis
+        id="ml_memory"
+        position={Position.Bottom}
+        hide
+        tickFormat={(d: number) => bytesFormatter(d)}
+      />
 
       <BarSeries
         id="bars"

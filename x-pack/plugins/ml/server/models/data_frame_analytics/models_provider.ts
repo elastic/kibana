@@ -13,10 +13,15 @@ import type {
   NodesOverviewResponse,
 } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
+import { MemoryOverviewService } from '../memory_overview/memory_overview_service';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
-export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient) {
+export function modelsProvider(
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  memoryOverviewService?: MemoryOverviewService
+) {
   return {
     /**
      * Retrieves the map of model ids and aliases with associated pipelines.
@@ -52,42 +57,15 @@ export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient)
      * Provides the ML nodes overview with allocated models.
      */
     async getNodesOverview(): Promise<NodesOverviewResponse> {
+      if (!memoryOverviewService) {
+        throw new Error('Memory overview service is not provided');
+      }
+
       const { body: deploymentStats } = await mlClient.getTrainedModelsDeploymentStats();
 
-      const {
-        body: { jobs: jobsStats },
-      } = await mlClient.getJobStats();
+      const adMemoryReport = await memoryOverviewService.getAnomalyDetectionMemoryOverview();
 
-      /**
-       * For each model check the node it's running
-       * and model size
-       * adJobName
-       * nodeId:
-       * memory
-       */
-      const adMemoryReport = jobsStats
-        .filter((v) => v.state === 'opened')
-        .map((jobStats) => {
-          return {
-            node_id: jobStats.node.id,
-            model_size: jobStats.model_size_stats.model_bytes,
-            job_id: jobStats.job_id,
-          };
-        });
-
-      const {
-        body: { data_frame_analytics: dfaStats },
-      } = await mlClient.getDataFrameAnalyticsStats();
-
-      const dfaMemoryReport = dfaStats
-        .filter((dfa) => dfa.state === 'started')
-        .map((dfa) => {
-          return {
-            node_id: dfa.node?.id,
-            model_size: dfa.memory_usage.peak_usage_bytes,
-            job_id: dfa.id,
-          };
-        });
+      const dfaMemoryReport = await memoryOverviewService.getDFAMemoryOverview();
 
       const nodesR = deploymentStats.deployment_stats.reduce((acc, curr) => {
         const { nodes, ...modelAttrs } = curr;

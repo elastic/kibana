@@ -14,6 +14,7 @@ import {
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
+import { memoryOverviewServiceProvider } from '../models/memory_overview';
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -200,7 +201,12 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
-        const result = await modelsProvider(client, mlClient).getNodesOverview();
+        const memoryOverviewService = memoryOverviewServiceProvider(mlClient);
+        const result = await modelsProvider(
+          client,
+          mlClient,
+          memoryOverviewService
+        ).getNodesOverview();
         return response.ok({
           body: result,
         });
