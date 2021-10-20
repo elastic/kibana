@@ -38,7 +38,7 @@ import { MovingAverageArgs } from './moving_average';
 export const movingAverageFn = (
   input: Datatable,
   { by, inputColumnId, outputColumnId, outputColumnName, window }: MovingAverageArgs
-) => {
+): Datatable => {
   const resultColumns = buildResultColumns(input, outputColumnId, inputColumnId, outputColumnName);
 
   if (!resultColumns) {

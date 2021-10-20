@@ -41,7 +41,7 @@ import { DerivativeArgs } from './derivative';
 export const derivativeFn = (
   input: Datatable,
   { by, inputColumnId, outputColumnId, outputColumnName }: DerivativeArgs
-) => {
+): Datatable => {
   const resultColumns = buildResultColumns(input, outputColumnId, inputColumnId, outputColumnName);
 
   if (!resultColumns) {

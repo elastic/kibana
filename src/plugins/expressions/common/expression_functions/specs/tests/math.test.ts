@@ -37,24 +37,34 @@ describe('math', () => {
     expect(await fn(testTable, { expression: 'max(price)' })).toBe(605);
   });
 
-  it('does not use the name for math', () => {
-    expect(() => fn(testTable, { expression: 'unique("in_stock label")' })).rejects.lastCalledWith(
-      'Unknown variable'
+  it('does not use the name for math', async () => {
+    await expect(fn(testTable, { expression: 'unique("in_stock label")' })).rejects.toHaveProperty(
+      'message',
+      'Unknown variable: in_stock label'
     );
-    expect(() => fn(testTable, { expression: 'sum("quantity label")' })).rejects.lastCalledWith(
-      'Unknown variable'
+
+    await expect(fn(testTable, { expression: 'sum("quantity label")' })).rejects.toHaveProperty(
+      'message',
+      'Unknown variable: quantity label'
     );
-    expect(() => fn(testTable, { expression: 'mean("price label")' })).rejects.lastCalledWith(
-      'Unknown variable'
+
+    await expect(fn(testTable, { expression: 'mean("price label")' })).rejects.toHaveProperty(
+      'message',
+      'Unknown variable: price label'
     );
-    expect(() => fn(testTable, { expression: 'min("price label")' })).rejects.lastCalledWith(
-      'Unknown variable'
+    await expect(fn(testTable, { expression: 'min("price label")' })).rejects.toHaveProperty(
+      'message',
+      'Unknown variable: price label'
     );
-    expect(() => fn(testTable, { expression: 'median("quantity label")' })).rejects.lastCalledWith(
-      'Unknown variable'
+
+    await expect(fn(testTable, { expression: 'median("quantity label")' })).rejects.toHaveProperty(
+      'message',
+      'Unknown variable: quantity label'
     );
-    expect(() => fn(testTable, { expression: 'max("price label")' })).rejects.lastCalledWith(
-      'Unknown variable'
+
+    await expect(fn(testTable, { expression: 'max("price label")' })).rejects.toHaveProperty(
+      'message',
+      'Unknown variable: price label'
     );
   });
 
@@ -83,69 +93,76 @@ describe('math', () => {
   });
 
   describe('invalid expressions', () => {
-    it('throws when expression evaluates to an array', () => {
-      expect(() => fn(testTable, { expression: 'multiply(price, 2)' })).rejects.lastCalledWith(
-        new RegExp(errors.tooManyResults().message.replace(/[()]/g, '\\$&'))
+    it('throws when expression evaluates to an array', async () => {
+      await expect(fn(testTable, { expression: 'multiply(price, 2)' })).rejects.toHaveProperty(
+        'message',
+        errors.tooManyResults().message
       );
     });
 
-    it('throws when using an unknown context variable', () => {
-      expect(() => fn(testTable, { expression: 'sum(foo)' })).rejects.lastCalledWith(
+    it('throws when using an unknown context variable', async () => {
+      await expect(fn(testTable, { expression: 'sum(foo)' })).rejects.toHaveProperty(
+        'message',
         'Unknown variable: foo'
       );
     });
 
-    it('throws when using non-numeric data', () => {
-      expect(() => fn(testTable, { expression: 'mean(name)' })).rejects.lastCalledWith(
-        new RegExp(errors.executionFailed().message)
+    it('throws when using non-numeric data', async () => {
+      await expect(fn(testTable, { expression: 'mean(name)' })).rejects.toHaveProperty(
+        'message',
+        errors.executionFailed().message
       );
 
-      expect(() => fn(testTable, { expression: 'mean(in_stock)' })).rejects.lastCalledWith(
-        new RegExp(errors.executionFailed().message)
+      await expect(fn(testTable, { expression: 'mean(in_stock)' })).rejects.toHaveProperty(
+        'message',
+        errors.executionFailed().message
       );
     });
 
-    it('throws when missing expression', () => {
-      expect(() => fn(testTable)).rejects.lastCalledWith(
-        new RegExp(errors.emptyExpression().message)
+    it('throws when missing expression', async () => {
+      await expect(fn(testTable)).rejects.toHaveProperty(
+        'message',
+        errors.emptyExpression().message
       );
 
-      expect(() =>
+      await expect(
         fn(testTable, { expession: '' } as unknown as MathArguments)
-      ).rejects.lastCalledWith(new RegExp(errors.emptyExpression().message));
+      ).rejects.toHaveProperty('message', errors.emptyExpression().message);
 
-      expect(() =>
+      await expect(
         fn(testTable, { expession: ' ' } as unknown as MathArguments)
-      ).rejects.lastCalledWith(new RegExp(errors.emptyExpression().message));
+      ).rejects.toHaveProperty('message', errors.emptyExpression().message);
     });
 
-    it('throws when passing a context variable from an empty datatable', () => {
-      expect(() => fn(emptyTable, { expression: 'mean(foo)' })).rejects.lastCalledWith(
-        new RegExp(errors.emptyDatatable().message)
+    it('throws when passing a context variable from an empty datatable', async () => {
+      await expect(() => fn(emptyTable, { expression: 'mean(foo)' })).rejects.toHaveProperty(
+        'message',
+        errors.emptyDatatable().message
       );
     });
 
-    it('should not throw when requesting fallback values for invalid expression', () => {
-      expect(() =>
+    it('should not throw when requesting fallback values for invalid expression', async () => {
+      await expect(
         fn(testTable, { expression: 'mean(name)', onError: 'zero' })
-      ).rejects.not.toBeCalled();
-      expect(() =>
+      ).resolves.toBeDefined();
+      await expect(
         fn(testTable, { expression: 'mean(name)', onError: 'false' })
-      ).rejects.not.toBeCalled();
-      expect(() =>
+      ).resolves.toBeDefined();
+      await expect(
         fn(testTable, { expression: 'mean(name)', onError: 'null' })
-      ).rejects.not.toBeCalled();
+      ).resolves.toBeDefined();
     });
 
-    it('should throw when declared in the onError argument', () => {
-      expect(() =>
+    it('should throw when declared in the onError argument', async () => {
+      await expect(
         fn(testTable, { expression: 'mean(name)', onError: 'throw' })
-      ).rejects.lastCalledWith(new RegExp(errors.executionFailed().message));
+      ).rejects.toHaveProperty('message', errors.executionFailed().message);
     });
 
-    it('should throw when dividing by zero', () => {
-      expect(() => fn(testTable, { expression: '1/0', onError: 'throw' })).rejects.lastCalledWith(
-        new RegExp('Cannot divide by 0')
+    it('should throw when dividing by zero', async () => {
+      await expect(fn(testTable, { expression: '1/0', onError: 'throw' })).rejects.toHaveProperty(
+        'message',
+        'Cannot divide by 0'
       );
     });
   });

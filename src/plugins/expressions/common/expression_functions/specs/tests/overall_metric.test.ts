@@ -470,8 +470,8 @@ describe('interpreter/functions#overall_metric', () => {
     ).toBe(input);
   });
 
-  it('throws an error if output column exists already', () => {
-    expect(() =>
+  it('throws an error if output column exists already', async () => {
+    await expect(
       runFn(
         {
           type: 'datatable',
@@ -488,6 +488,6 @@ describe('interpreter/functions#overall_metric', () => {
         },
         { inputColumnId: 'val', outputColumnId: 'val', metric: 'max' }
       )
-    ).rejects.toBeCalled();
+    ).rejects.toBeDefined();
   });
 });

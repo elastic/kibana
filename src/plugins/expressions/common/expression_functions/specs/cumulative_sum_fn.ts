@@ -13,7 +13,7 @@ import { CumulativeSumArgs } from './cumulative_sum';
 export const cumulativeSumFn = (
   input: Datatable,
   { by, inputColumnId, outputColumnId, outputColumnName }: CumulativeSumArgs
-) => {
+): Datatable => {
   const resultColumns = buildResultColumns(input, outputColumnId, inputColumnId, outputColumnName);
 
   if (!resultColumns) {

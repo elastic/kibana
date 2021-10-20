@@ -329,8 +329,8 @@ describe('interpreter/functions#cumulative_sum', () => {
     );
   });
 
-  it('throws an error if output column exists already', () => {
-    expect(() =>
+  it('throws an error if output column exists already', async () => {
+    await expect(
       runFn(
         {
           type: 'datatable',
@@ -347,6 +347,6 @@ describe('interpreter/functions#cumulative_sum', () => {
         },
         { inputColumnId: 'val', outputColumnId: 'val' }
       )
-    ).rejects.toBeCalled();
+    ).rejects.toBeDefined();
   });
 });

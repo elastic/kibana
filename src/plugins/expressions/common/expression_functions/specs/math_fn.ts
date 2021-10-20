@@ -64,7 +64,7 @@ const fallbackValue = {
   false: false,
 } as const;
 
-export const mathFn = (input: MathInput, args: MathArguments) => {
+export const mathFn = (input: MathInput, args: MathArguments): boolean | number | null => {
   const { expression, onError } = args;
   const onErrorValue = onError ?? 'throw';
 

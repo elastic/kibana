@@ -12,10 +12,10 @@ import { functionWrapper, testTable, tableWithNulls } from './utils';
 describe('mathColumn', () => {
   const fn = functionWrapper(mathColumn);
 
-  it('throws if the id is used', () => {
-    expect(() =>
+  it('throws if the id is used', async () => {
+    await expect(
       fn(testTable, { id: 'price', name: 'price', expression: 'price * 2' })
-    ).rejects.toBeCalledWith(`ID must be unique`);
+    ).rejects.toHaveProperty('message', `ID must be unique`);
   });
 
   it('applies math to each row by id', async () => {
@@ -57,8 +57,9 @@ describe('mathColumn', () => {
       expression: 'quantity',
     };
     expect((await fn(arrayTable, args)).rows[0].output).toEqual(100);
-    expect(() => fn(arrayTable, { ...args, expression: 'price' })).rejects.toBeCalledWith(
-      `Cannot perform math on array values`
+    await expect(fn(arrayTable, { ...args, expression: 'price' })).rejects.toHaveProperty(
+      'message',
+      `Cannot perform math on array values at output`
     );
   });
 
@@ -68,8 +69,8 @@ describe('mathColumn', () => {
       name: 'output',
       expression: 'quantity / 0',
     };
-    expect(() => fn(testTable, args)).rejects.toBeCalledWith(`Cannot divide by 0`);
-    expect(() => fn(testTable, { ...args, onError: 'throw' })).rejects.toBeCalled();
+    await expect(fn(testTable, args)).rejects.toHaveProperty('message', `Cannot divide by 0`);
+    await expect(fn(testTable, { ...args, onError: 'throw' })).rejects.toBeDefined();
     expect((await fn(testTable, { ...args, onError: 'zero' })).rows[0].output).toEqual(0);
     expect((await fn(testTable, { ...args, onError: 'false' })).rows[0].output).toEqual(false);
     expect((await fn(testTable, { ...args, onError: 'null' })).rows[0].output).toEqual(null);

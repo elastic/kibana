@@ -47,7 +47,7 @@ function getValueAsNumberArray(value: unknown) {
 export const overallMetricFn = (
   input: Datatable,
   { by, inputColumnId, outputColumnId, outputColumnName, metric }: OverallMetricArgs
-) => {
+): Datatable => {
   const resultColumns = buildResultColumns(input, outputColumnId, inputColumnId, outputColumnName);
 
   if (!resultColumns) {

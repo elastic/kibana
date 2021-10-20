@@ -57,7 +57,8 @@ const defaultState: State = {
   error: null,
 };
 
-const ReactExpressionRenderer = ({
+// eslint-disable-next-line import/no-default-export
+export default function ReactExpressionRenderer({
   className,
   dataAttrs,
   padding,
@@ -68,7 +69,7 @@ const ReactExpressionRenderer = ({
   reload$,
   debounce,
   ...expressionLoaderOptions
-}: ReactExpressionRendererProps) => {
+}: ReactExpressionRendererProps) {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
   const [state, setState] = useState<State>({ ...defaultState });
   const hasCustomRenderErrorHandler = !!renderError;
@@ -236,8 +237,4 @@ const ReactExpressionRenderer = ({
       />
     </div>
   );
-};
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { ReactExpressionRenderer as default };
+}

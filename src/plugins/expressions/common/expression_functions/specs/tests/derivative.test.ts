@@ -374,8 +374,8 @@ describe('interpreter/functions#derivative', () => {
     );
   });
 
-  it('throws an error if output column exists already', () => {
-    expect(() =>
+  it('throws an error if output column exists already', async () => {
+    await expect(
       runFn(
         {
           type: 'datatable',
@@ -392,6 +392,6 @@ describe('interpreter/functions#derivative', () => {
         },
         { inputColumnId: 'val', outputColumnId: 'val' }
       )
-    ).rejects.toBeCalled();
+    ).rejects.toBeDefined();
   });
 });

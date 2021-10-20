@@ -386,8 +386,8 @@ describe('interpreter/functions#movingAverage', () => {
     ).toBe(input);
   });
 
-  it('throws an error if output column exists already', () => {
-    expect(() =>
+  it('throws an error if output column exists already', async () => {
+    await expect(
       runFn(
         {
           type: 'datatable',
@@ -404,7 +404,7 @@ describe('interpreter/functions#movingAverage', () => {
         },
         { ...defaultArgs, inputColumnId: 'val', outputColumnId: 'val' }
       )
-    ).rejects.toBeCalled();
+    ).rejects.toBeDefined();
   });
 
   it('calculates moving average for window equal to 1', async () => {
