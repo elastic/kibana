@@ -38,7 +38,7 @@ import { ContextMenuItemNavByRouterProps } from '../../../../../components/conte
 import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/artifact_entry_card';
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 import { RemoveTrustedAppFromPolicyModal } from './remove_trusted_app_from_policy_modal';
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 
 const DATA_TEST_SUBJ = 'policyTrustedAppsGrid';
 
@@ -113,7 +113,7 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
 
       for (const trustedApp of trustedAppItems) {
         const isGlobal = trustedApp.effectScope.type === 'global';
-        const viewUrlPath = getTrustedAppsListPath({ id: trustedApp.id, show: 'edit' });
+        const viewUrlPath = getTrustedAppsListPath({ filter: trustedApp.id });
         const assignedPoliciesMenuItems: ArtifactEntryCollapsibleCardProps['policies'] =
           trustedApp.effectScope.type === 'global'
             ? undefined
