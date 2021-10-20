@@ -30,7 +30,7 @@ for (let i = 1; i <= XPACK_CI_GROUPS; i++) {
 const pipeline = {
   steps: [
     {
-      input: 'Number of Runs',
+      input: 'Number of Runs - Click Me',
       fields: inputs,
     },
     {
