@@ -67,7 +67,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dashboardJobSelectionTable = MachineLearningDashboardJobSelectionTableProvider(context);
   const dashboardEmbeddables = MachineLearningDashboardEmbeddablesProvider(
     context,
-    commonUI,
     dashboardJobSelectionTable
   );
 
