@@ -54,8 +54,10 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
     }
 
     async clickRowByResolver(nodeResolver) {
-      await this.waitForPageToFinishLoading();
-      await testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver);
+      await retry.waitForWithTimeout('redirection to node detail', 5000, async () => {
+        await testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver, 1000);
+        return testSubjects.exists('elasticsearchNodeDetailStatus', { timeout: 1000 });
+      });
     }
 
     async waitForPageToFinishLoading() {
