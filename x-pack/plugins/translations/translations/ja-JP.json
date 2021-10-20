@@ -6288,7 +6288,6 @@
     "xpack.apm.errorGroupDetails.occurrencesChartLabel": "オカレンス",
     "xpack.apm.errorGroupDetails.relatedTransactionSample": "関連トランザクションサンプル",
     "xpack.apm.errorGroupDetails.unhandledLabel": "未対応",
-    "xpack.apm.errorRate": "失敗したトランザクション率",
     "xpack.apm.errorRate.chart.errorRate": "失敗したトランザクション率（平均）",
     "xpack.apm.errorRate.chart.errorRate.previousPeriodLabel": "前の期間",
     "xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel": "エラーメッセージと原因",
