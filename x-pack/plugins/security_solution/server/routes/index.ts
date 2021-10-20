@@ -70,7 +70,6 @@ export const initRoutes = (
   security: SetupPlugins['security'],
   telemetrySender: TelemetryEventsSender,
   ml: SetupPlugins['ml'],
-  ruleDataService: RuleDataPluginService,
   logger: Logger,
   isRuleRegistryEnabled: boolean,
   ruleOptions: CreateRuleOptions
