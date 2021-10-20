@@ -13,6 +13,7 @@ import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
+import { createAxiosResponse } from '../swimlane/mocks';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
@@ -32,7 +33,7 @@ axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
 const configurationUtilities = actionsConfigMock.create();
 
-const issueTypesResponse = {
+const issueTypesResponse = createAxiosResponse({
   data: {
     projects: [
       {
@@ -49,9 +50,9 @@ const issueTypesResponse = {
       },
     ],
   },
-};
+});
 
-const fieldsResponse = {
+const fieldsResponse = createAxiosResponse({
   data: {
     projects: [
       {
@@ -98,7 +99,7 @@ const fieldsResponse = {
       },
     ],
   },
-};
+});
 
 const issueResponse = {
   id: '10267',
@@ -107,6 +108,31 @@ const issueResponse = {
 };
 
 const issuesResponse = [issueResponse];
+
+const mockNewAPI = () =>
+  requestMock.mockImplementationOnce(() =>
+    createAxiosResponse({
+      data: {
+        capabilities: {
+          'list-project-issuetypes':
+            'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
+          'list-issuetype-fields':
+            'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+        },
+      },
+    })
+  );
+
+const mockOldAPI = () =>
+  requestMock.mockImplementationOnce(() =>
+    createAxiosResponse({
+      data: {
+        capabilities: {
+          navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
+        },
+      },
+    })
+  );
 
 describe('Jira service', () => {
   let service: ExternalService;
@@ -183,18 +209,34 @@ describe('Jira service', () => {
   });
 
   describe('getIncident', () => {
+    const axiosRes = {
+      data: {
+        id: '1',
+        key: 'CK-1',
+        fields: {
+          summary: 'title',
+          description: 'description',
+          created: '2021-10-20T19:41:02.754+0300',
+          updated: '2021-10-20T19:41:02.754+0300',
+        },
+      },
+    };
+
     test('it returns the incident correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data: { id: '1', key: 'CK-1', fields: { summary: 'title', description: 'description' } },
-      }));
+      requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
       const res = await service.getIncident('1');
-      expect(res).toEqual({ id: '1', key: 'CK-1', summary: 'title', description: 'description' });
+      expect(res).toEqual({
+        id: '1',
+        key: 'CK-1',
+        summary: 'title',
+        description: 'description',
+        created: '2021-10-20T19:41:02.754+0300',
+        updated: '2021-10-20T19:41:02.754+0300',
+      });
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: { id: '1', key: 'CK-1' },
-      }));
+      requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
 
       await service.getIncident('1');
       expect(requestMock).toHaveBeenCalledWith({
@@ -215,9 +257,38 @@ describe('Jira service', () => {
         '[Action][Jira]: Unable to get incident with id 1. Error: An error has occurred Reason: Required field'
       );
     });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ ...axiosRes, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.getIncident('1')).rejects.toThrow(
+        '[Action][Jira]: Unable to get incident with id 1. Error: Response must be a valid JSON Reason: unknown'
+      );
+    });
+
+    test('it should throw if the required attributes are not there', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
+
+      await expect(service.getIncident('1')).rejects.toThrow(
+        '[Action][Jira]: Unable to get incident with id 1. Error: Response is missing expected fields Reason: unknown'
+      );
+    });
   });
 
   describe('createIncident', () => {
+    const incident = {
+      incident: {
+        summary: 'title',
+        description: 'desc',
+        labels: [],
+        issueType: '10006',
+        priority: 'High',
+        parent: 'RJ-107',
+      },
+    };
+
     test('it creates the incident correctly', async () => {
       /* The response from Jira when creating an issue contains only the key and the id.
       The function makes the following calls when creating an issue:
@@ -225,24 +296,19 @@ describe('Jira service', () => {
         2. Create the issue.
         3. Get the created issue with all the necessary fields.
     */
-      requestMock.mockImplementationOnce(() => ({
-        data: { id: '1', key: 'CK-1', fields: { summary: 'title', description: 'description' } },
-      }));
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: { id: '1', key: 'CK-1', fields: { summary: 'title', description: 'description' } },
+        })
+      );
 
-      requestMock.mockImplementationOnce(() => ({
-        data: { id: '1', key: 'CK-1', fields: { created: '2020-04-27T10:59:46.202Z' } },
-      }));
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: { id: '1', key: 'CK-1', fields: { created: '2020-04-27T10:59:46.202Z' } },
+        })
+      );
 
-      const res = await service.createIncident({
-        incident: {
-          summary: 'title',
-          description: 'desc',
-          labels: [],
-          issueType: '10006',
-          priority: 'High',
-          parent: null,
-        },
-      });
+      const res = await service.createIncident(incident);
 
       expect(res).toEqual({
         title: 'CK-1',
@@ -260,24 +326,30 @@ describe('Jira service', () => {
         3. Get the created issue with all the necessary fields.
     */
       // getIssueType mocks
-      requestMock.mockImplementationOnce(() => ({
-        data: {
-          capabilities: {
-            navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            capabilities: {
+              navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
+            },
           },
-        },
-      }));
+        })
+      );
 
       // getIssueType mocks
       requestMock.mockImplementationOnce(() => issueTypesResponse);
 
-      requestMock.mockImplementationOnce(() => ({
-        data: { id: '1', key: 'CK-1', fields: { summary: 'title', description: 'description' } },
-      }));
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: { id: '1', key: 'CK-1', fields: { summary: 'title', description: 'description' } },
+        })
+      );
 
-      requestMock.mockImplementationOnce(() => ({
-        data: { id: '1', key: 'CK-1', fields: { created: '2020-04-27T10:59:46.202Z' } },
-      }));
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: { id: '1', key: 'CK-1', fields: { created: '2020-04-27T10:59:46.202Z' } },
+        })
+      );
 
       const res = await service.createIncident({
         incident: {
@@ -317,25 +389,31 @@ describe('Jira service', () => {
     });
 
     test('removes newline characters and trialing spaces from summary', async () => {
-      requestMock.mockImplementationOnce(() => ({
-        data: {
-          capabilities: {
-            navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            capabilities: {
+              navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
+            },
           },
-        },
-      }));
+        })
+      );
 
       // getIssueType mocks
       requestMock.mockImplementationOnce(() => issueTypesResponse);
 
       // getIssueType mocks
-      requestMock.mockImplementationOnce(() => ({
-        data: { id: '1', key: 'CK-1', fields: { summary: 'test', description: 'description' } },
-      }));
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: { id: '1', key: 'CK-1', fields: { summary: 'test', description: 'description' } },
+        })
+      );
 
-      requestMock.mockImplementationOnce(() => ({
-        data: { id: '1', key: 'CK-1', fields: { created: '2020-04-27T10:59:46.202Z' } },
-      }));
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: { id: '1', key: 'CK-1', fields: { created: '2020-04-27T10:59:46.202Z' } },
+        })
+      );
 
       await service.createIncident({
         incident: {
@@ -368,24 +446,17 @@ describe('Jira service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          id: '1',
-          key: 'CK-1',
-          fields: { created: '2020-04-27T10:59:46.202Z' },
-        },
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            fields: { created: '2020-04-27T10:59:46.202Z' },
+          },
+        })
+      );
 
-      await service.createIncident({
-        incident: {
-          summary: 'title',
-          description: 'desc',
-          labels: [],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
-        },
-      });
+      await service.createIncident(incident);
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
@@ -414,44 +485,55 @@ describe('Jira service', () => {
         throw error;
       });
 
-      await expect(
-        service.createIncident({
-          incident: {
-            summary: 'title',
-            description: 'desc',
-            labels: [],
-            issueType: '10006',
-            priority: 'High',
-            parent: null,
-          },
-        })
-      ).rejects.toThrow(
+      await expect(service.createIncident(incident)).rejects.toThrow(
         '[Action][Jira]: Unable to create incident. Error: An error has occurred. Reason: Required field'
+      );
+    });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.createIncident(incident)).rejects.toThrow(
+        '[Action][Jira]: Unable to create incident. Error: Response must be a valid JSON. Reason: unknown'
+      );
+    });
+
+    test('it should throw if the required attributes are not there', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
+
+      await expect(service.createIncident(incident)).rejects.toThrow(
+        '[Action][Jira]: Unable to create incident. Error: Response is missing expected fields. Reason: unknown'
       );
     });
   });
 
   describe('updateIncident', () => {
-    test('it updates the incident correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          id: '1',
-          key: 'CK-1',
-          fields: { updated: '2020-04-27T10:59:46.202Z' },
-        },
-      }));
+    const incident = {
+      incidentId: '1',
+      incident: {
+        summary: 'title',
+        description: 'desc',
+        labels: [],
+        issueType: '10006',
+        priority: 'High',
+        parent: 'RJ-107',
+      },
+    };
 
-      const res = await service.updateIncident({
-        incidentId: '1',
-        incident: {
-          summary: 'title',
-          description: 'desc',
-          labels: [],
-          issueType: '10006',
-          priority: 'High',
-          parent: null,
-        },
-      });
+    test('it updates the incident correctly', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            fields: { updated: '2020-04-27T10:59:46.202Z' },
+          },
+        })
+      );
+
+      const res = await service.updateIncident(incident);
 
       expect(res).toEqual({
         title: 'CK-1',
@@ -462,25 +544,17 @@ describe('Jira service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          id: '1',
-          key: 'CK-1',
-          fields: { updated: '2020-04-27T10:59:46.202Z' },
-        },
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            fields: { updated: '2020-04-27T10:59:46.202Z' },
+          },
+        })
+      );
 
-      await service.updateIncident({
-        incidentId: '1',
-        incident: {
-          summary: 'title',
-          description: 'desc',
-          labels: [],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
-        },
-      });
+      await service.updateIncident(incident);
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
@@ -509,41 +583,42 @@ describe('Jira service', () => {
         throw error;
       });
 
-      await expect(
-        service.updateIncident({
-          incidentId: '1',
-          incident: {
-            summary: 'title',
-            description: 'desc',
-            labels: [],
-            issueType: '10006',
-            priority: 'High',
-            parent: null,
-          },
-        })
-      ).rejects.toThrow(
+      await expect(service.updateIncident(incident)).rejects.toThrow(
         '[Action][Jira]: Unable to update incident with id 1. Error: An error has occurred. Reason: Required field'
+      );
+    });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.updateIncident(incident)).rejects.toThrow(
+        '[Action][Jira]: Unable to update incident with id 1. Error: Response must be a valid JSON. Reason: unknown'
       );
     });
   });
 
   describe('createComment', () => {
+    const commentReq = {
+      incidentId: '1',
+      comment: {
+        comment: 'comment',
+        commentId: 'comment-1',
+      },
+    };
     test('it creates the comment correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          id: '1',
-          key: 'CK-1',
-          created: '2020-04-27T10:59:46.202Z',
-        },
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            created: '2020-04-27T10:59:46.202Z',
+          },
+        })
+      );
 
-      const res = await service.createComment({
-        incidentId: '1',
-        comment: {
-          comment: 'comment',
-          commentId: 'comment-1',
-        },
-      });
+      const res = await service.createComment(commentReq);
 
       expect(res).toEqual({
         commentId: 'comment-1',
@@ -553,21 +628,17 @@ describe('Jira service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          id: '1',
-          key: 'CK-1',
-          created: '2020-04-27T10:59:46.202Z',
-        },
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            created: '2020-04-27T10:59:46.202Z',
+          },
+        })
+      );
 
-      await service.createComment({
-        incidentId: '1',
-        comment: {
-          comment: 'comment',
-          commentId: 'comment-1',
-        },
-      });
+      await service.createComment(commentReq);
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
@@ -586,29 +657,33 @@ describe('Jira service', () => {
         throw error;
       });
 
-      await expect(
-        service.createComment({
-          incidentId: '1',
-          comment: {
-            comment: 'comment',
-            commentId: 'comment-1',
-          },
-        })
-      ).rejects.toThrow(
+      await expect(service.createComment(commentReq)).rejects.toThrow(
         '[Action][Jira]: Unable to create comment at incident with id 1. Error: An error has occurred. Reason: Required field'
+      );
+    });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.createComment(commentReq)).rejects.toThrow(
+        '[Action][Jira]: Unable to create comment at incident with id 1. Error: Response must be a valid JSON. Reason: unknown'
+      );
+    });
+
+    test('it should throw if the required attributes are not there', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
+
+      await expect(service.createComment(commentReq)).rejects.toThrow(
+        '[Action][Jira]: Unable to create comment at incident with id 1. Error: Response is missing expected fields. Reason: unknown'
       );
     });
   });
 
   describe('getCapabilities', () => {
     test('it should return the capabilities', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          capabilities: {
-            navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
-          },
-        },
-      }));
+      mockOldAPI();
       const res = await service.getCapabilities();
       expect(res).toEqual({
         capabilities: {
@@ -618,13 +693,7 @@ describe('Jira service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          capabilities: {
-            navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
-          },
-        },
-      }));
+      mockOldAPI();
 
       await service.getCapabilities();
 
@@ -649,16 +718,34 @@ describe('Jira service', () => {
       );
     });
 
-    test('it should throw an auth error', async () => {
+    test('it should return unknown if the error is a string', async () => {
       requestMock.mockImplementation(() => {
         const error = new Error('An error has occurred');
-        // @ts-ignore this can happen!
+        // @ts-ignore
         error.response = { data: 'Unauthorized' };
         throw error;
       });
 
       await expect(service.getCapabilities()).rejects.toThrow(
-        '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: Unauthorized'
+        '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: unknown'
+      );
+    });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.getCapabilities()).rejects.toThrow(
+        '[Action][Jira]: Unable to get capabilities. Error: Response must be a valid JSON. Reason: unknown'
+      );
+    });
+
+    test('it should throw if the required attributes are not there', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
+
+      await expect(service.getCapabilities()).rejects.toThrow(
+        '[Action][Jira]: Unable to get capabilities. Error: Response is missing expected fields. Reason: unknown'
       );
     });
   });
@@ -666,13 +753,7 @@ describe('Jira service', () => {
   describe('getIssueTypes', () => {
     describe('Old API', () => {
       test('it should return the issue types', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
-            },
-          },
-        }));
+        mockOldAPI();
 
         requestMock.mockImplementationOnce(() => issueTypesResponse);
 
@@ -691,13 +772,7 @@ describe('Jira service', () => {
       });
 
       test('it should call request with correct arguments', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
-            },
-          },
-        }));
+        mockOldAPI();
 
         requestMock.mockImplementationOnce(() => issueTypesResponse);
 
@@ -713,13 +788,7 @@ describe('Jira service', () => {
       });
 
       test('it should throw an error', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
-            },
-          },
-        }));
+        mockOldAPI();
 
         requestMock.mockImplementation(() => {
           const error: ResponseError = new Error('An error has occurred');
@@ -731,25 +800,30 @@ describe('Jira service', () => {
           '[Action][Jira]: Unable to get issue types. Error: An error has occurred. Reason: Could not get issue types'
         );
       });
+
+      test('it should throw if the request is not a JSON', async () => {
+        mockOldAPI();
+
+        requestMock.mockImplementation(() =>
+          createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+        );
+
+        await expect(service.getIssueTypes()).rejects.toThrow(
+          '[Action][Jira]: Unable to get issue types. Error: Response must be a valid JSON. Reason: unknown'
+        );
+      });
     });
     describe('New API', () => {
       test('it should return the issue types', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              'list-project-issuetypes':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
-              'list-issuetype-fields':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
-            },
-          },
-        }));
+        mockNewAPI();
 
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            values: issueTypesResponse.data.projects[0].issuetypes,
-          },
-        }));
+        requestMock.mockImplementationOnce(() =>
+          createAxiosResponse({
+            data: {
+              values: issueTypesResponse.data.projects[0].issuetypes,
+            },
+          })
+        );
 
         const res = await service.getIssueTypes();
 
@@ -766,22 +840,15 @@ describe('Jira service', () => {
       });
 
       test('it should call request with correct arguments', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              'list-project-issuetypes':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
-              'list-issuetype-fields':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
-            },
-          },
-        }));
+        mockNewAPI();
 
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            values: issueTypesResponse.data.projects[0].issuetypes,
-          },
-        }));
+        requestMock.mockImplementationOnce(() =>
+          createAxiosResponse({
+            data: {
+              values: issueTypesResponse.data.projects[0].issuetypes,
+            },
+          })
+        );
 
         await service.getIssueTypes();
 
@@ -795,16 +862,7 @@ describe('Jira service', () => {
       });
 
       test('it should throw an error', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              'list-project-issuetypes':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
-              'list-issuetype-fields':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
-            },
-          },
-        }));
+        mockNewAPI();
 
         requestMock.mockImplementation(() => {
           const error: ResponseError = new Error('An error has occurred');
@@ -816,19 +874,25 @@ describe('Jira service', () => {
           '[Action][Jira]: Unable to get issue types. Error: An error has occurred. Reason: Could not get issue types'
         );
       });
+
+      test('it should throw if the request is not a JSON', async () => {
+        mockNewAPI();
+
+        requestMock.mockImplementation(() =>
+          createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+        );
+
+        await expect(service.getIssueTypes()).rejects.toThrow(
+          '[Action][Jira]: Unable to get issue types. Error: Response must be a valid JSON. Reason: unknown'
+        );
+      });
     });
   });
 
   describe('getFieldsByIssueType', () => {
     describe('Old API', () => {
       test('it should return the fields', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
-            },
-          },
-        }));
+        mockOldAPI();
 
         requestMock.mockImplementationOnce(() => fieldsResponse);
 
@@ -857,13 +921,7 @@ describe('Jira service', () => {
       });
 
       test('it should call request with correct arguments', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
-            },
-          },
-        }));
+        mockOldAPI();
 
         requestMock.mockImplementationOnce(() => fieldsResponse);
 
@@ -879,13 +937,7 @@ describe('Jira service', () => {
       });
 
       test('it should throw an error', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
-            },
-          },
-        }));
+        mockOldAPI();
 
         requestMock.mockImplementation(() => {
           const error: ResponseError = new Error('An error has occurred');
@@ -897,43 +949,48 @@ describe('Jira service', () => {
           '[Action][Jira]: Unable to get fields. Error: An error has occurred. Reason: Could not get fields'
         );
       });
+
+      test('it should throw if the request is not a JSON', async () => {
+        mockOldAPI();
+
+        requestMock.mockImplementation(() =>
+          createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+        );
+
+        await expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
+          '[Action][Jira]: Unable to get fields. Error: Response must be a valid JSON. Reason: unknown'
+        );
+      });
     });
 
     describe('New API', () => {
       test('it should return the fields', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              'list-project-issuetypes':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
-              'list-issuetype-fields':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
-            },
-          },
-        }));
+        mockNewAPI();
 
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            values: [
-              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
-              {
-                required: false,
-                schema: { type: 'string' },
-                fieldId: 'priority',
-                allowedValues: [
-                  {
+        requestMock.mockImplementationOnce(() =>
+          createAxiosResponse({
+            data: {
+              values: [
+                { required: true, schema: { type: 'string' }, fieldId: 'summary' },
+                {
+                  required: false,
+                  schema: { type: 'string' },
+                  fieldId: 'priority',
+                  allowedValues: [
+                    {
+                      name: 'Medium',
+                      id: '3',
+                    },
+                  ],
+                  defaultValue: {
                     name: 'Medium',
                     id: '3',
                   },
-                ],
-                defaultValue: {
-                  name: 'Medium',
-                  id: '3',
                 },
-              },
-            ],
-          },
-        }));
+              ],
+            },
+          })
+        );
 
         const res = await service.getFieldsByIssueType('10006');
 
@@ -954,39 +1011,32 @@ describe('Jira service', () => {
       });
 
       test('it should call request with correct arguments', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              'list-project-issuetypes':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
-              'list-issuetype-fields':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
-            },
-          },
-        }));
+        mockNewAPI();
 
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            values: [
-              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
-              {
-                required: true,
-                schema: { type: 'string' },
-                fieldId: 'priority',
-                allowedValues: [
-                  {
+        requestMock.mockImplementationOnce(() =>
+          createAxiosResponse({
+            data: {
+              values: [
+                { required: true, schema: { type: 'string' }, fieldId: 'summary' },
+                {
+                  required: true,
+                  schema: { type: 'string' },
+                  fieldId: 'priority',
+                  allowedValues: [
+                    {
+                      name: 'Medium',
+                      id: '3',
+                    },
+                  ],
+                  defaultValue: {
                     name: 'Medium',
                     id: '3',
                   },
-                ],
-                defaultValue: {
-                  name: 'Medium',
-                  id: '3',
                 },
-              },
-            ],
-          },
-        }));
+              ],
+            },
+          })
+        );
 
         await service.getFieldsByIssueType('10006');
 
@@ -1000,16 +1050,7 @@ describe('Jira service', () => {
       });
 
       test('it should throw an error', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              'list-project-issuetypes':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
-              'list-issuetype-fields':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
-            },
-          },
-        }));
+        mockNewAPI();
 
         requestMock.mockImplementation(() => {
           const error: ResponseError = new Error('An error has occurred');
@@ -1021,16 +1062,30 @@ describe('Jira service', () => {
           '[Action][Jira]: Unable to get fields. Error: An error has occurred. Reason: Could not get issue types'
         );
       });
+
+      test('it should throw if the request is not a JSON', async () => {
+        mockNewAPI();
+
+        requestMock.mockImplementation(() =>
+          createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+        );
+
+        await expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
+          '[Action][Jira]: Unable to get fields. Error: Response must be a valid JSON. Reason: unknown'
+        );
+      });
     });
   });
 
   describe('getIssues', () => {
     test('it should return the issues', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          issues: issuesResponse,
-        },
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            issues: issuesResponse,
+          },
+        })
+      );
 
       const res = await service.getIssues('Test title');
 
@@ -1044,11 +1099,13 @@ describe('Jira service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          issues: issuesResponse,
-        },
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            issues: issuesResponse,
+          },
+        })
+      );
 
       await service.getIssues('Test title');
       expect(requestMock).toHaveBeenLastCalledWith({
@@ -1071,13 +1128,25 @@ describe('Jira service', () => {
         '[Action][Jira]: Unable to get issues. Error: An error has occurred. Reason: Could not get issue types'
       );
     });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.getIssues('Test title')).rejects.toThrow(
+        '[Action][Jira]: Unable to get issues. Error: Response must be a valid JSON. Reason: unknown'
+      );
+    });
   });
 
   describe('getIssue', () => {
     test('it should return a single issue', async () => {
-      requestMock.mockImplementation(() => ({
-        data: issueResponse,
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: issueResponse,
+        })
+      );
 
       const res = await service.getIssue('RJ-107');
 
@@ -1089,11 +1158,13 @@ describe('Jira service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          issues: issuesResponse,
-        },
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            issues: issuesResponse,
+          },
+        })
+      );
 
       await service.getIssue('RJ-107');
       expect(requestMock).toHaveBeenLastCalledWith({
@@ -1116,81 +1187,105 @@ describe('Jira service', () => {
         '[Action][Jira]: Unable to get issue with id RJ-107. Error: An error has occurred. Reason: Could not get issue types'
       );
     });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.getIssue('Test title')).rejects.toThrow(
+        '[Action][Jira]: Unable to get issue with id Test title. Error: Response must be a valid JSON. Reason: unknown'
+      );
+    });
   });
 
   describe('getFields', () => {
     const callMocks = () => {
       requestMock
-        .mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              'list-project-issuetypes':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
-              'list-issuetype-fields':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+        .mockImplementationOnce(() =>
+          createAxiosResponse({
+            data: {
+              capabilities: {
+                'list-project-issuetypes':
+                  'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
+                'list-issuetype-fields':
+                  'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+              },
             },
-          },
-        }))
-        .mockImplementationOnce(() => ({
-          data: {
-            values: issueTypesResponse.data.projects[0].issuetypes,
-          },
-        }))
-        .mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              'list-project-issuetypes':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
-              'list-issuetype-fields':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+          })
+        )
+        .mockImplementationOnce(() =>
+          createAxiosResponse({
+            data: {
+              values: issueTypesResponse.data.projects[0].issuetypes,
             },
-          },
-        }))
-        .mockImplementationOnce(() => ({
-          data: {
-            capabilities: {
-              'list-project-issuetypes':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
-              'list-issuetype-fields':
-                'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+          })
+        )
+        .mockImplementationOnce(() =>
+          createAxiosResponse({
+            data: {
+              capabilities: {
+                'list-project-issuetypes':
+                  'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
+                'list-issuetype-fields':
+                  'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+              },
             },
-          },
-        }))
-        .mockImplementationOnce(() => ({
-          data: {
-            values: [
-              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
-              { required: true, schema: { type: 'string' }, fieldId: 'description' },
-              {
-                required: false,
-                schema: { type: 'string' },
-                fieldId: 'priority',
-                allowedValues: [
-                  {
+          })
+        )
+        .mockImplementationOnce(() =>
+          createAxiosResponse({
+            data: {
+              capabilities: {
+                'list-project-issuetypes':
+                  'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
+                'list-issuetype-fields':
+                  'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+              },
+            },
+          })
+        )
+        .mockImplementationOnce(() =>
+          createAxiosResponse({
+            data: {
+              values: [
+                { required: true, schema: { type: 'string' }, fieldId: 'summary' },
+                { required: true, schema: { type: 'string' }, fieldId: 'description' },
+                {
+                  required: false,
+                  schema: { type: 'string' },
+                  fieldId: 'priority',
+                  allowedValues: [
+                    {
+                      name: 'Medium',
+                      id: '3',
+                    },
+                  ],
+                  defaultValue: {
                     name: 'Medium',
                     id: '3',
                   },
-                ],
-                defaultValue: {
-                  name: 'Medium',
-                  id: '3',
                 },
-              },
-            ],
-          },
-        }))
-        .mockImplementationOnce(() => ({
-          data: {
-            values: [
-              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
-              { required: true, schema: { type: 'string' }, fieldId: 'description' },
-            ],
-          },
-        }));
+              ],
+            },
+          })
+        )
+        .mockImplementationOnce(() =>
+          createAxiosResponse({
+            data: {
+              values: [
+                { required: true, schema: { type: 'string' }, fieldId: 'summary' },
+                { required: true, schema: { type: 'string' }, fieldId: 'description' },
+              ],
+            },
+          })
+        );
     };
+
     beforeEach(() => {
       jest.resetAllMocks();
     });
+
     test('it should call request with correct arguments', async () => {
       callMocks();
       await service.getFields();

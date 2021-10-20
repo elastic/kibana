@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { Agent as HttpsAgent } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Logger } from '../../../../../../src/core/server';
-import { addTimeZoneToDate, request, patch, getErrorMessage } from './axios_utils';
+import {
+  addTimeZoneToDate,
+  request,
+  patch,
+  getErrorMessage,
+  throwIfRequestIsNotValid,
+} from './axios_utils';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
@@ -290,5 +296,80 @@ describe('getErrorMessage', () => {
   test('it returns the correct error message', () => {
     const msg = getErrorMessage('My connector name', 'An error has occurred');
     expect(msg).toBe('[Action][My connector name]: An error has occurred');
+  });
+});
+
+describe('throwIfRequestIsNotValid', () => {
+  const res = {
+    headers: { ['content-type']: 'application/json' },
+    data: { incident: { id: '1' } },
+  } as AxiosResponse;
+
+  test('it does NOT throw if the request is valid', () => {
+    expect(() => throwIfRequestIsNotValid({ res })).not.toThrow();
+  });
+
+  test('it does throw if the content-type is not json', () => {
+    expect(() =>
+      throwIfRequestIsNotValid({
+        res: { ...res, headers: { ['content-type']: 'text/html' } },
+      })
+    ).toThrow();
+  });
+
+  test('it does throw if the content-type is defined', () => {
+    expect(() =>
+      throwIfRequestIsNotValid({
+        res: { ...res, headers: {} },
+      })
+    ).toThrow();
+  });
+
+  test('it does throw if the data is not an object or array', () => {
+    expect(() =>
+      throwIfRequestIsNotValid({
+        res: { ...res, data: 'string' },
+      })
+    ).toThrow();
+  });
+
+  test('it does NOT throw if the data is an array', () => {
+    expect(() =>
+      throwIfRequestIsNotValid({
+        res: { ...res, data: ['test'] },
+      })
+    ).not.toThrow();
+  });
+
+  test.each(['', [], {}])('it does NOT throw if the data is %p', (data) => {
+    expect(() =>
+      throwIfRequestIsNotValid({
+        res: { ...res, data },
+      })
+    ).not.toThrow();
+  });
+
+  test('it does throw if the required attribute is not in the response', () => {
+    expect(() =>
+      throwIfRequestIsNotValid({ res, requiredAttributesToBeInTheResponse: ['not-exist'] })
+    ).toThrow();
+  });
+
+  test('it does NOT throw if the required attribute is not in the response and the data are an array', () => {
+    expect(() =>
+      throwIfRequestIsNotValid({
+        res: { ...res, data: ['test'] },
+        requiredAttributesToBeInTheResponse: ['not-exist'],
+      })
+    ).not.toThrow();
+  });
+
+  test('it does NOT throw if the value of the required attribute is null', () => {
+    expect(() =>
+      throwIfRequestIsNotValid({
+        res: { ...res, data: { id: null } },
+        requiredAttributesToBeInTheResponse: ['id'],
+      })
+    ).not.toThrow();
   });
 });
