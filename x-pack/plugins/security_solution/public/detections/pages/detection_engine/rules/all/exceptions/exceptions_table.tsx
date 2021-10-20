@@ -85,6 +85,7 @@ export const ExceptionListsTable = React.memo(() => {
       notifications,
       showTrustedApps: false,
       showEventFilters: false,
+      showHostIsolationExceptions: false,
     });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],

@@ -17,7 +17,6 @@ import { UnderlyingLogClient } from './lib/detection_engine/rule_execution_log/t
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
   maxRuleImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
   maxTimelineImportExportSize: schema.number({ defaultValue: 10000 }),
@@ -113,7 +112,7 @@ export const configSchema = schema.object({
         schema.literal(UnderlyingLogClient.eventLog),
         schema.literal(UnderlyingLogClient.savedObjects),
       ],
-      { defaultValue: UnderlyingLogClient.savedObjects }
+      { defaultValue: UnderlyingLogClient.eventLog }
     ),
   }),
 
