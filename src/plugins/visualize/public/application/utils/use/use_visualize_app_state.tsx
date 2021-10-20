@@ -18,11 +18,7 @@ import {
   toMountPoint,
 } from '../../../../../kibana_react/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
-import {
-  esFilters,
-  connectToQueryState,
-  SerializedSearchSourceFields,
-} from '../../../../../data/public';
+import { esFilters, connectToQueryState } from '../../../../../data/public';
 import {
   VisualizeServices,
   VisualizeAppStateContainer,
