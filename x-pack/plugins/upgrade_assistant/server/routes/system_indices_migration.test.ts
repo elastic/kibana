@@ -29,6 +29,17 @@ const mockedResponse = {
         },
       ],
     },
+    {
+      feature_name: 'kibana',
+      minimum_index_version: '7.1.2',
+      upgrade_status: 'MIGRATION_NEEDED',
+      indices: [
+        {
+          index: '.kibana',
+          version: '7.1.2',
+        },
+      ],
+    },
   ],
   migration_status: 'MIGRATION_NEEDED',
 };
@@ -75,7 +86,12 @@ describe('Migrate system indices API', () => {
         method: 'GET',
         path: '/_migration/system_features',
       });
-      expect(resp.payload).toEqual(mockedResponse);
+      expect(resp.payload).toEqual({
+        ...mockedResponse,
+        features: mockedResponse.features.filter(
+          (feature) => feature.migration_status !== 'NO_MIGRATION_NEEDED'
+        ),
+      });
     });
 
     it('returns an error if it throws', async () => {
