@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from '../../lib/setup_mode';
+import type { RouteDefinitionParams } from '../';
+import { defineKibanaUserRoleDeprecationRoutes } from './kibana_user_role';
+
+export function defineDeprecationsRoutes(params: RouteDefinitionParams) {
+  defineKibanaUserRoleDeprecationRoutes(params);
+}
