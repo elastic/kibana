@@ -6,8 +6,12 @@
  */
 
 import * as t from 'io-ts';
+import Boom from '@hapi/boom';
 
+import { i18n } from '@kbn/i18n';
 import { toNumberRt } from '@kbn/io-ts-utils';
+
+import { isActivePlatinumLicense } from '../../common/license_check';
 
 import { setupRequest } from '../lib/helpers/setup_request';
 import {
@@ -23,6 +27,11 @@ import { withApmSpan } from '../utils/with_apm_span';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
+
+const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
+  defaultMessage:
+    'To use the correlations API, you must be subscribed to an Elastic Platinum license.',
+});
 
 const fieldCandidatesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/correlations/field_candidates',
@@ -40,6 +49,11 @@ const fieldCandidatesRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
+    const { context } = resources;
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
+
     const { indices } = await setupRequest(resources);
     const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
 
@@ -73,6 +87,11 @@ const fieldStatsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
+    const { context } = resources;
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
+
     const { indices } = await setupRequest(resources);
     const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
 
@@ -112,6 +131,11 @@ const fieldValuePairsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
+    const { context } = resources;
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
+
     const { indices } = await setupRequest(resources);
     const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
 
@@ -154,6 +178,11 @@ const significantCorrelationsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
+    const { context } = resources;
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
+
     const { indices } = await setupRequest(resources);
     const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
 
@@ -195,6 +224,11 @@ const pValuesRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
+    const { context } = resources;
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
+
     const { indices } = await setupRequest(resources);
     const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
 
