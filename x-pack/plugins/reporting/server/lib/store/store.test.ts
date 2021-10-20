@@ -418,7 +418,7 @@ describe('ReportingStore', () => {
       const store = new ReportingStore(mockCore, mockLogger);
       await store.start();
 
-      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ policy: 'kibana-reporting' });
+      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
           "body": Object {
@@ -441,7 +441,7 @@ describe('ReportingStore', () => {
       const store = new ReportingStore(mockCore, mockLogger);
       await store.start();
 
-      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ policy: 'kibana-reporting' });
+      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle).not.toHaveBeenCalled();
     });
   });

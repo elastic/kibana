@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
     });
     after(async () => {
-      await esClient.ilm.deleteLifecycle({ policy: policyName });
+      await esClient.ilm.deleteLifecycle({ name: policyName });
     });
 
     it('Loads the app', async () => {

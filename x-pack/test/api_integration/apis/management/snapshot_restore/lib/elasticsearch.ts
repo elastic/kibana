@@ -40,7 +40,7 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
 
   const createRepository = (repoName: string) => {
     return es.snapshot.createRepository({
-      repository: repoName,
+      name: repoName,
       body: {
         type: 'fs',
         settings: {

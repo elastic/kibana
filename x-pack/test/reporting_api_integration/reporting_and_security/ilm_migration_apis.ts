@@ -99,8 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // customize the lifecycle policy
       await es.ilm.putLifecycle({
-        policy: ILM_POLICY_NAME,
-        // @ts-expect-error @elastic/elasticsearch IlmAction is not valid
+        name: ILM_POLICY_NAME,
         body: customLifecycle,
       });
 
@@ -108,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         [ILM_POLICY_NAME]: { policy },
-      } = await es.ilm.getLifecycle({ policy: ILM_POLICY_NAME });
+      } = await es.ilm.getLifecycle({ name: ILM_POLICY_NAME });
 
       expect(policy).to.eql(customLifecycle.policy);
     });

@@ -85,8 +85,7 @@ export class ResourceInstaller {
       // We can install them in parallel
       await Promise.all([
         this.createOrUpdateLifecyclePolicy({
-          policy: getResourceName(DEFAULT_ILM_POLICY_ID),
-          // @ts-expect-error @elastic/elasticsearch IlmAction is not valid
+          name: getResourceName(DEFAULT_ILM_POLICY_ID),
           body: defaultLifecyclePolicy,
         }),
 
@@ -117,7 +116,7 @@ export class ResourceInstaller {
 
       if (ilmPolicy != null) {
         await this.createOrUpdateLifecyclePolicy({
-          policy: indexInfo.getIlmPolicyName(),
+          name: indexInfo.getIlmPolicyName(),
           body: { policy: ilmPolicy },
         });
       }
@@ -386,7 +385,7 @@ export class ResourceInstaller {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
 
-    logger.debug(`Installing lifecycle policy ${policy.policy}`);
+    logger.debug(`Installing lifecycle policy ${policy.name}`);
     return clusterClient.ilm.putLifecycle(policy);
   }
 

@@ -17,7 +17,7 @@ async function deletePolicies(client: ElasticsearchClient, policyName: string): 
     ignore: [404],
   };
 
-  return client.ilm.deleteLifecycle({ policy: policyName }, options);
+  return client.ilm.deleteLifecycle({ name: policyName }, options);
 }
 
 const paramsSchema = schema.object({

@@ -6,7 +6,6 @@
  */
 
 import type { IlmPutLifecycleRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ILM_POLICY_NAME } from '../../../../common/constants';
 
 export const reportingIlmPolicy: IlmPutLifecycleRequest['body'] = {
   policy: {
@@ -15,6 +14,5 @@ export const reportingIlmPolicy: IlmPutLifecycleRequest['body'] = {
         actions: {},
       },
     },
-    name: ILM_POLICY_NAME,
   },
 };

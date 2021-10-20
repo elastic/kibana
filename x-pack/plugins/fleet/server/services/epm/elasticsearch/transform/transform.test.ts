@@ -102,7 +102,6 @@ describe('test transform install', () => {
     );
 
     esClient.transform.getTransform.mockReturnValueOnce(
-      // @ts-expect-error Transform is not valid
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         count: 1,
         transforms: [
@@ -387,7 +386,6 @@ describe('test transform install', () => {
     );
 
     esClient.transform.getTransform.mockReturnValueOnce(
-      // @ts-expect-error Transform is not valid
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         count: 1,
         transforms: [

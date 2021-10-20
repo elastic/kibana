@@ -42,7 +42,7 @@ export function registerSnapshotsRoutes({
       try {
         const { body: repositoriesByName } =
           await clusterClient.asCurrentUser.snapshot.getRepository({
-            repository: '_all',
+            name: '_all',
           });
         repositories = Object.keys(repositoriesByName);
 

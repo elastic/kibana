@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should have updated the ILM policy', async function () {
       const resPolicy = await es.ilm.getLifecycle(
         {
-          policy: 'all_assets',
+          name: 'all_assets',
         },
         { meta: true }
       );
