@@ -12,6 +12,8 @@ import {
   getEmptyFindResult,
   getAlertMock,
   getFindResultWithSingleHit,
+  getBasicEmptySearchResponse,
+  getBasicNoShardsSearchResponse,
 } from '../__mocks__/request_responses';
 import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
@@ -52,7 +54,7 @@ describe.each([
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
+      elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
     importRulesRoute(server.router, config, ml, isRuleRegistryEnabled);
   });
@@ -133,7 +135,9 @@ describe.each([
     test('returns an error if the index does not exist when rule registry not enabled', async () => {
       clients.appClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          getBasicNoShardsSearchResponse()
+        )
       );
       const response = await server.inject(request, context);
       expect(response.status).toEqual(isRuleRegistryEnabled ? 200 : 400);

@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/common/setup_bazel.sh
 
 echo "--- yarn install and bootstrap"
 retry 2 15 yarn kbn bootstrap

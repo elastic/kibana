@@ -6,7 +6,6 @@
  */
 
 import { Logger } from 'src/core/server';
-import { RuleDataPluginService } from '../../../rule_registry/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
 
@@ -67,7 +66,6 @@ export const initRoutes = (
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
-  ruleDataService: RuleDataPluginService,
   logger: Logger,
   isRuleRegistryEnabled: boolean
 ) => {
@@ -85,18 +83,18 @@ export const initRoutes = (
 
   // TODO: pass isRuleRegistryEnabled to all relevant routes
 
-  addPrepackedRulesRoute(router, config, security, isRuleRegistryEnabled);
+  addPrepackedRulesRoute(router);
   getPrepackagedRulesStatusRoute(router, config, security, isRuleRegistryEnabled);
   createRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   updateRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   patchRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesBulkRoute(router, isRuleRegistryEnabled);
-  performBulkActionRoute(router, ml, isRuleRegistryEnabled);
+  performBulkActionRoute(router, ml, logger, isRuleRegistryEnabled);
 
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);
   importRulesRoute(router, config, ml, isRuleRegistryEnabled);
-  exportRulesRoute(router, config, isRuleRegistryEnabled);
+  exportRulesRoute(router, config, logger, isRuleRegistryEnabled);
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);
@@ -127,7 +125,7 @@ export const initRoutes = (
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
-  createIndexRoute(router, ruleDataService, config);
+  createIndexRoute(router);
   readIndexRoute(router, config);
   deleteIndexRoute(router);
 

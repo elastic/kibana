@@ -13,7 +13,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { NodeReact } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useCharts } from '../../hooks/use_charts';
