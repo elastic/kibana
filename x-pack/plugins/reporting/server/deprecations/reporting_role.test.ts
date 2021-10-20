@@ -20,8 +20,9 @@ let context: GetDeprecationsContext;
 let esClient: jest.Mocked<IScopedClusterClient>;
 
 beforeEach(async () => {
-  const mockReportingConfig = createMockConfigSchema({ roles: { enabled: false } });
-  reportingCore = await createMockReportingCore(mockReportingConfig);
+  reportingCore = await createMockReportingCore(
+    createMockConfigSchema({ roles: { enabled: false } })
+  );
 
   esClient = elasticsearchServiceMock.createScopedClusterClient();
   esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
@@ -40,21 +41,32 @@ describe('users assigned to a deprecated role', () => {
       body: { reportron: { username: 'reportron', roles: ['kibana_admin', 'reporting_user'] } },
     });
 
-    const mockReportingConfig = createMockConfigSchema({ roles: { enabled: true } });
-    reportingCore = await createMockReportingCore(mockReportingConfig);
+    reportingCore = await createMockReportingCore(createMockConfigSchema());
 
     expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
   });
 
   test('logs a deprecation when a user was found with a deprecated custom role from the roles.allow setting', async () => {
     reportingCore = await createMockReportingCore(
-      createMockConfigSchema({ roles: { enabled: true, allow: ['my_test_reporting_user'] } })
+      createMockConfigSchema({ roles: { allow: ['my_test_reporting_user'] } })
     );
     esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
       body: {
         reportron: { username: 'reportron', roles: ['kibana_admin', 'my_test_reporting_user'] },
       },
     });
+
+    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
+  });
+
+  test('includes steps to remove the incompatible config, when applicable', async () => {
+    esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
+      body: { reportron: { username: 'reportron', roles: ['kibana_admin', 'reporting_user'] } },
+    });
+
+    reportingCore = await createMockReportingCore(
+      createMockConfigSchema({ roles: { enabled: true } })
+    );
 
     expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
   });
@@ -66,15 +78,14 @@ describe('roles mapped to a deprecated role', () => {
       body: { dungeon_master: { roles: ['reporting_user'] } },
     });
 
-    const mockReportingConfig = createMockConfigSchema({ roles: { enabled: true } });
-    reportingCore = await createMockReportingCore(mockReportingConfig);
+    reportingCore = await createMockReportingCore(createMockConfigSchema());
 
     expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
   });
 
   test('logs a deprecation when a role was found that maps to a deprecated custom role from the roles.allow setting', async () => {
     reportingCore = await createMockReportingCore(
-      createMockConfigSchema({ roles: { enabled: true, allow: ['my_test_reporting_user'] } })
+      createMockConfigSchema({ roles: { allow: ['my_test_reporting_user'] } })
     );
     esClient.asCurrentUser.security.getRoleMapping = jest.fn().mockResolvedValue({
       body: { dungeon_master: { roles: ['my_test_reporting_user'] } },
@@ -82,13 +93,24 @@ describe('roles mapped to a deprecated role', () => {
 
     expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
   });
+
+  test('includes steps to remove the incompatible config, when applicable', async () => {
+    esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
+      body: { reportron: { username: 'reportron', roles: ['kibana_admin', 'reporting_user'] } },
+    });
+
+    reportingCore = await createMockReportingCore(
+      createMockConfigSchema({ roles: { enabled: true } })
+    );
+
+    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
+  });
 });
 
 describe('check deprecations when security is disabled', () => {
   test('logs no deprecations: roles not enabled', async () => {
-    const mockReportingConfig = createMockConfigSchema({ roles: { enabled: false } });
     reportingCore = await createMockReportingCore(
-      mockReportingConfig,
+      createMockConfigSchema({ roles: { enabled: false } }),
       createMockPluginSetup({ security: null })
     );
     expect(await getDeprecationsInfo(context, { reportingCore })).toMatchInlineSnapshot(`Array []`);

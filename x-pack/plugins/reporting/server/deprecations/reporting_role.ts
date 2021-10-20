@@ -153,14 +153,9 @@ async function getRoleMappingsDeprecations(
         : []),
 
       i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepThree', {
-        defaultMessage:
-          'Create one or more custom roles that provide Kibana application' +
-          ' privileges to reporting features in Management > Security > Roles.',
-      }),
-      i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepFour', {
         defaultMessage: 'Create a custom role with Kibana privileges to grant access to Reporting.',
       }),
-      i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepFive', {
+      i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepFour', {
         defaultMessage:
           'Remove the "reporting_user" role from all role mappings and add the custom role. The affected role mappings are: {roleMappings}.',
         values: { roleMappings },
