@@ -53,7 +53,7 @@ function getTabs(disableLinks: boolean): Tab[] {
     {
       id: 'trained_models',
       name: i18n.translate('xpack.ml.navMenu.trainedModelsTabLinkText', {
-        defaultMessage: 'Trained Models',
+        defaultMessage: 'Models Management',
       }),
       disabled: disableLinks,
     },

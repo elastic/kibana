@@ -6,6 +6,7 @@
  */
 
 import type { IScopedClusterClient } from 'kibana/server';
+import { sumBy } from 'lodash';
 import type {
   NodeDeploymentStatsResponse,
   PipelineDefinition,
@@ -47,18 +48,80 @@ export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient)
       return modelIdsMap;
     },
 
+    /**
+     * Provides the ML nodes overview with allocated models.
+     */
     async getNodesOverview(): Promise<NodesOverviewResponse> {
       const { body: deploymentStats } = await mlClient.getTrainedModelsDeploymentStats();
+
+      const {
+        body: { jobs: jobsStats },
+      } = await mlClient.getJobStats();
+
+      /**
+       * For each model check the node it's running
+       * and model size
+       * adJobName
+       * nodeId:
+       * memory
+       */
+      const adMemoryReport = jobsStats
+        .filter((v) => v.state === 'opened')
+        .map((jobStats) => {
+          return {
+            node_id: jobStats.node.id,
+            model_size: jobStats.model_size_stats.model_bytes,
+            job_id: jobStats.job_id,
+          };
+        });
+
+      const {
+        body: { data_frame_analytics: dfaStats },
+      } = await mlClient.getDataFrameAnalyticsStats();
+
+      const dfaMemoryReport = dfaStats
+        .filter((dfa) => dfa.state === 'started')
+        .map((dfa) => {
+          return {
+            node_id: dfa.node?.id,
+            model_size: dfa.memory_usage.peak_usage_bytes,
+            job_id: dfa.id,
+          };
+        });
 
       const nodesR = deploymentStats.deployment_stats.reduce((acc, curr) => {
         const { nodes, ...modelAttrs } = curr;
         nodes.forEach((n) => {
-          Object.entries(n.node).forEach(([id, o]) => {
-            if (acc.has(id)) {
-              const d = acc.get(id)!;
+          Object.entries(n.node).forEach(([nodeId, o]) => {
+            if (acc.has(nodeId)) {
+              const d = acc.get(nodeId)!;
               d.allocated_models.push(modelAttrs);
             } else {
-              acc.set(id, { ...o, id, allocated_models: [modelAttrs] });
+              acc.set(nodeId, {
+                ...o,
+                id: nodeId,
+                allocated_models: [modelAttrs],
+                memory_overview: {
+                  machine_memory: {
+                    total: Number(o.attributes['ml.machine_memory']),
+                  },
+                  anomaly_detection: {
+                    total: sumBy(
+                      adMemoryReport.filter((ad) => ad.node_id === nodeId),
+                      'model_size'
+                    ),
+                  },
+                  dfa_training: {
+                    total: sumBy(
+                      dfaMemoryReport.filter((ad) => ad.node_id === nodeId),
+                      'model_size'
+                    ),
+                  },
+                  trained_models: {
+                    total: 3435973836,
+                  },
+                },
+              });
             }
           });
         });

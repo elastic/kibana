@@ -172,6 +172,26 @@ export interface NodeDeploymentStatsResponse {
     model_threads: number;
     model_size: string;
   }>;
+  memory_overview: {
+    machine_memory: {
+      /** Total machine memory in bytes */
+      total: number;
+      jvm?: number;
+    };
+    /** Open anomaly detection jobs + hardcoded overhead */
+    anomaly_detection: {
+      /** Total size in bytes */
+      total: number;
+    };
+    /** DFA jobs currently in training + hardcoded overhead */
+    dfa_training: {
+      total: number;
+    };
+    /** Allocated trained models */
+    trained_models: {
+      total: number;
+    };
+  };
 }
 
 export interface NodesOverviewResponse {

@@ -6,7 +6,6 @@
  */
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +24,8 @@ import { useTrainedModelsApiService } from '../../services/ml_api_service/traine
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { ExpandedRow } from './expanded_row';
 import { useRefreshAnalyticsList } from '../../data_frame_analytics/common';
+import { MemoryPreviewChart } from './memory_preview_chart';
+import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 
 export type NodeItem = NodeDeploymentStatsResponse;
 
@@ -34,6 +35,7 @@ export interface NodeItemWithStats extends NodeItem {
 
 export const NodesList: FC = () => {
   const trainedModelsApiService = useTrainedModelsApiService();
+  const bytesFormatter = useFieldFormatter('bytes');
   const [items, setItems] = useState<NodeItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
@@ -62,6 +64,7 @@ export const NodesList: FC = () => {
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
+
   const columns: Array<EuiBasicTableColumn<NodeItem>> = [
     {
       align: 'left',
@@ -89,21 +92,29 @@ export const NodesList: FC = () => {
       name: i18n.translate('xpack.ml.trainedModels.nodesList.nodeNameHeader', {
         defaultMessage: 'Name',
       }),
-      width: '200px',
       sortable: true,
       truncateText: true,
       'data-test-subj': 'mlModelsTableColumnId',
     },
     {
-      field: 'allocated_models',
-      name: i18n.translate('xpack.ml.trainedModels.nodesList.allocatedModelsHeader', {
-        defaultMessage: 'Allocated models',
+      name: i18n.translate('xpack.ml.trainedModels.nodesList.nodeTotalMemoryHeader', {
+        defaultMessage: 'Total memory',
       }),
-      sortable: false,
-      truncateText: false,
-      'data-test-subj': 'mlModelsTableColumnDescription',
-      render: (v: NodeItem['allocated_models']) => {
-        return v.map((m) => <EuiBadge color="hollow">{m.model_id}</EuiBadge>);
+      width: '200px',
+      truncateText: true,
+      'data-test-subj': 'mlModelsTableColumnMemory',
+      render: (v: NodeItem) => {
+        return bytesFormatter(v.attributes['ml.machine_memory']);
+      },
+    },
+    {
+      name: i18n.translate('xpack.ml.trainedModels.nodesList.nodeMemoryUsageHeader', {
+        defaultMessage: 'Memory usage',
+      }),
+      truncateText: true,
+      'data-test-subj': 'mlModelsTableColumnMemory',
+      render: (v: NodeItem) => {
+        return <MemoryPreviewChart memoryOverview={v.memory_overview} />;
       },
     },
   ];
