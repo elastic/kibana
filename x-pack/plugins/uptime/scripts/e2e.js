@@ -28,9 +28,14 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'Opens the Playwright Test Runner',
   })
+  .option('kibana-install-dir', {
+    default: '',
+    type: 'string',
+    description: 'Path to the Kibana install directory',
+  })
   .help();
 
-const { server, runner, open } = argv;
+const { server, runner, open, kibanaInstallDir } = argv;
 
 const e2eDir = path.join(__dirname, '../e2e');
 
@@ -44,9 +49,12 @@ if (server) {
 const config = './playwright_run.ts';
 
 function executeRunner() {
-  childProcess.execSync(`node ../../../scripts/${ftrScript} --config ${config}`, {
-    cwd: e2eDir,
-    stdio: 'inherit',
-  });
+  childProcess.execSync(
+    `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'`,
+    {
+      cwd: e2eDir,
+      stdio: 'inherit',
+    }
+  );
 }
 executeRunner();
