@@ -20,7 +20,7 @@ const kibanaVersion = new SemVer(MAJOR_VERSION);
 const schemaLatest = schema.object(
   {
     ui: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
+      enabled: schema.boolean({ defaultValue: false }),
     }),
     /*
      * This will default to true up until the last minor before the next major.
