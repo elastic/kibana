@@ -11508,7 +11508,6 @@
     "xpack.fleet.upgradeAgents.upgradeMultipleTitle": "将{count, plural, one {代理} other { {count} 个代理} =true {所有选定代理}}升级到最新版本",
     "xpack.fleet.upgradeAgents.upgradeSingleDescription": "此操作会将“{hostName}”上运行的代理升级到版本 {version}。此操作无法撤消。是否确定要继续？",
     "xpack.fleet.upgradeAgents.upgradeSingleTitle": "将代理升级到最新版本",
-    "xpack.fleet.upgradePackagePolicy.failedNotificationTitle": "升级 {packagePolicyName} 时出错",
     "xpack.fleet.upgradePackagePolicy.pageDescriptionFromUpgrade": "升级此集成并将更改部署到选定代理策略",
     "xpack.fleet.upgradePackagePolicy.previousVersionFlyout.title": "“{name}”软件包策略",
     "xpack.fleet.upgradePackagePolicy.statusCallout.errorContent": "此集成在版本 {currentVersion} 和 {upgradeVersion} 之间有冲突字段。请复查配置并保存，以执行升级。您可以参考您的 {previousConfigurationLink}以进行比较。",
