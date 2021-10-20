@@ -192,7 +192,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-edit',
-        useLatestPackageVersion: true,
         Component: getLazyEndpointPolicyEditExtension(core, plugins),
       });
 
