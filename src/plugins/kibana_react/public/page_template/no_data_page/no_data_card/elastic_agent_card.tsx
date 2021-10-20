@@ -44,6 +44,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       <EuiCard
         paddingSize="l"
         image={image}
+        textAlign="left"
         title={
           <EuiTextColor color="default">
             {i18n.translate('kibana-react.noDataPage.elasticAgentCard.noPermission.title', {
@@ -92,7 +93,12 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
           defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
         })}
         betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
-        footer={footer}
+        footer={
+          <div className="eui-textCenter">
+            {button}
+            {footer}
+          </div>
+        }
         layout={layout as 'vertical' | undefined}
         {...cardRest}
       />
