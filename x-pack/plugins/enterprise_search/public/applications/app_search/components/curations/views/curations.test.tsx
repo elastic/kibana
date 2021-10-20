@@ -78,8 +78,6 @@ describe('Curations', () => {
 
     tabs.at(2).simulate('click');
     expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(3, 'settings');
-    // The settings tab should NOT have an icon next to it
-    expect(tabs.at(2).prop('prepend')).toBeUndefined();
   });
 
   it('renders less tabs when less than platinum license', () => {
@@ -90,8 +88,6 @@ describe('Curations', () => {
 
     const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
     expect(tabs.length).toBe(2);
-    // The settings tab should have an icon next to it
-    expect(tabs.at(1).prop('prepend')).not.toBeUndefined();
   });
 
   it('renders an overview view', () => {
@@ -120,6 +116,8 @@ describe('Curations', () => {
     const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
 
     expect(tabs.at(2).prop('isSelected')).toEqual(true);
+    // New! badge
+    expect(tabs.at(2).prop('append')).not.toBeUndefined();
 
     expect(wrapper.find(CurationsSettings)).toHaveLength(1);
   });

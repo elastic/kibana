@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../shared/licensing';
@@ -60,17 +60,18 @@ export const Curations: React.FC = () => {
     ),
     isSelected: selectedPageTab === 'settings',
     onClick: () => onSelectPageTab('settings'),
+    append: (
+      <EuiBadge color="success">
+        {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.newBadgeLabel', {
+          defaultMessage: 'New!',
+        })}
+      </EuiBadge>
+    ),
   };
 
   const pageTabs = hasPlatinumLicense
     ? [OVERVIEW_TAB, HISTORY_TAB, SETTINGS_TAB]
-    : [
-        OVERVIEW_TAB,
-        {
-          ...SETTINGS_TAB,
-          prepend: <EuiIcon type="cheer" />,
-        },
-      ];
+    : [OVERVIEW_TAB, SETTINGS_TAB];
 
   useEffect(() => {
     loadCurations();
