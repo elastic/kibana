@@ -29,6 +29,4 @@ export const CalloutGroup: React.FC<{ items: string[]; isError?: boolean }> = ({
         </Fragment>
       ))}
     </>
-  ) : (
-    <></>
-  );
+  ) : null;

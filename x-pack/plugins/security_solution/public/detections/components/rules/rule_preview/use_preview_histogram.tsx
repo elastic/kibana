@@ -50,7 +50,7 @@ export const usePreviewHistogram = ({
       filterQuery,
       histogramType: MatrixHistogramType.preview,
       indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
-      stackByField: 'signal.rule.id',
+      stackByField: 'event.category',
       startDate,
     };
   }, [startDate, endDate, filterQuery, spaceId]);
