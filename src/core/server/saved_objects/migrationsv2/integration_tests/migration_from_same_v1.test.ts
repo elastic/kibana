@@ -20,14 +20,14 @@ import { InternalCoreStart } from '../../../internal_types';
 import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
-const logFilePath = Path.join(__dirname, 'migration_from_older_v1.log');
+
+const logFilePath = Path.join(__dirname, 'migration_from_same_v1.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
 }
-
 const assertMigratedDocuments = (arr: any[], target: any[]) => target.every((v) => arr.includes(v));
 
 function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id: string }) {
@@ -53,9 +53,9 @@ async function fetchDocuments(esClient: ElasticsearchClient, index: string) {
     .sort(sortByTypeAndId);
 }
 
-describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
-  const migratedIndex = `.kibana_${kibanaVersion}_001`;
+describe('migrating from the same Kibana version that used v1 migrations', () => {
   const originalIndex = `.kibana_1`; // v1 migrations index
+  const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
@@ -67,7 +67,7 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
-          license: 'trial',
+          license: 'basic',
           dataArchive,
         },
       },
@@ -77,8 +77,8 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
       {
         migrations: {
           skip: false,
-          // There are 53 docs in fixtures. Batch size configured to enforce 3 migration steps.
-          batchSize: 20,
+          // There are 40 docs in fixtures. Batch size configured to enforce 3 migration steps.
+          batchSize: 15,
         },
         logging: {
           appenders: {
@@ -112,8 +112,7 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
         coreStart = start;
         esClient = coreStart.elasticsearch.client.asInternalUser;
       });
-
-    await Promise.all([startEsPromise, startKibanaPromise]);
+    return await Promise.all([startEsPromise, startKibanaPromise]);
   };
 
   const getExpectedVersionPerType = () =>
@@ -121,18 +120,23 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
       .getTypeRegistry()
       .getAllTypes()
       .reduce((versionMap, type) => {
-        if (type.migrations) {
-          const migrationsMap =
-            typeof type.migrations === 'function' ? type.migrations() : type.migrations;
-          const highestVersion = Object.keys(migrationsMap).sort(Semver.compare).reverse()[0];
+        const { name, migrations, convertToMultiNamespaceTypeVersion } = type;
+        if (migrations || convertToMultiNamespaceTypeVersion) {
+          const migrationsMap = typeof migrations === 'function' ? migrations() : migrations;
+          const migrationsKeys = migrationsMap ? Object.keys(migrationsMap) : [];
+          if (convertToMultiNamespaceTypeVersion) {
+            // Setting this option registers a conversion migration that is reflected in the object's `migrationVersions` field
+            migrationsKeys.push(convertToMultiNamespaceTypeVersion);
+          }
+          const highestVersion = migrationsKeys.sort(Semver.compare).reverse()[0];
           return {
             ...versionMap,
-            [type.name]: highestVersion,
+            [name]: highestVersion,
           };
         } else {
           return {
             ...versionMap,
-            [type.name]: undefined,
+            [name]: undefined,
           };
         }
       }, {} as Record<string, string | undefined>);
@@ -161,7 +165,11 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
     await removeLogFile();
     await startServers({
       oss: false,
-      dataArchive: Path.join(__dirname, 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
+      dataArchive: Path.join(
+        __dirname,
+        'archives',
+        '8.0.0_v1_migrations_sample_data_saved_objects.zip'
+      ),
     });
   });
 
@@ -176,14 +184,13 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
       },
       { ignore: [404] }
     );
-
     const response = body[migratedIndex];
 
     expect(response).toBeDefined();
     expect(Object.keys(response.aliases!).sort()).toEqual(['.kibana', `.kibana_${kibanaVersion}`]);
   });
 
-  it('copies all the document of the previous index to the new one', async () => {
+  it('copies the documents from the previous index to the new one', async () => {
     const originalDocs = await fetchDocuments(esClient, originalIndex);
     const migratedDocs = await fetchDocuments(esClient, migratedIndex);
     expect(assertMigratedDocuments(migratedDocs, originalDocs));
