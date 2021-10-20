@@ -22,7 +22,7 @@ describe('migrations config', function () {
       const { messages } = applyMigrationsDeprecations({ enableV2: true });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"migrations.enableV2\\" is deprecated and will be removed in an upcoming release without any further notice.",
+          "You no longer need to configure \\"migrations.enableV2\\".",
         ]
       `);
     });
@@ -31,7 +31,7 @@ describe('migrations config', function () {
       const { messages } = applyMigrationsDeprecations({ enableV2: false });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"migrations.enableV2\\" is deprecated and will be removed in an upcoming release without any further notice.",
+          "You no longer need to configure \\"migrations.enableV2\\".",
         ]
       `);
     });
