@@ -38,7 +38,7 @@ import { DataMainMsg } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../services/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../types';
-import { useDataState } from '../../utils/use_data_state';
+import { useDataState } from '../../services/use_data_state';
 import {
   SavedSearchURLConflictCallout,
   useSavedSearchAliasMatchRedirect,

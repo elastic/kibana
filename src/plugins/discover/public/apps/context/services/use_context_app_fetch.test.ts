@@ -11,7 +11,7 @@ import { setServices, getServices } from '../../../kibana_services';
 import { createFilterManagerMock } from '../../../../../data/public/query/filter_manager/filter_manager.mock';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
-import { FailureReason, LoadingStatus } from '../services/context_query_state';
+import { FailureReason, LoadingStatus } from './context_query_state';
 import { ContextAppFetchProps, useContextAppFetch } from './use_context_app_fetch';
 import {
   mockAnchorHit,
@@ -19,7 +19,7 @@ import {
   mockSuccessorHits,
 } from '../__mocks__/use_context_app_fetch';
 import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
-import { createContextSearchSourceStub } from '../services/_stubs';
+import { createContextSearchSourceStub } from './_stubs';
 import { IndexPattern } from '../../../../../data_views/common';
 
 const mockFilterManager = createFilterManagerMock();

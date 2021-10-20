@@ -13,7 +13,7 @@ import type {
 import { search } from '../../../../../../data/public';
 import { AppState } from '../../services/discover_state';
 import { DataCharts$, DataChartsMessage } from '../../services/use_saved_search';
-import { useDataState } from '../../utils/use_data_state';
+import { useDataState } from '../../services/use_data_state';
 
 export function useChartPanels(
   state: AppState,

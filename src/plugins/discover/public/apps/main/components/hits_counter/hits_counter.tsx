@@ -19,7 +19,7 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { DataTotalHits$, DataTotalHitsMsg } from '../../services/use_saved_search';
 import { FetchStatus } from '../../../types';
-import { useDataState } from '../../utils/use_data_state';
+import { useDataState } from '../../services/use_data_state';
 
 export interface HitsCounterProps {
   /**

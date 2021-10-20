@@ -29,7 +29,7 @@ import { SavedSearch } from '../../../../services/saved_searches';
 import { DataDocumentsMsg, DataDocuments$ } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { useDataState } from '../../utils/use_data_state';
+import { useDataState } from '../../services/use_data_state';
 import { DocTableInfinite } from '../doc_table/doc_table_infinite';
 import { SortPairArr } from '../doc_table/lib/get_sort';
 

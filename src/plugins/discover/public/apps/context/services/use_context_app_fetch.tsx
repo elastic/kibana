@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '../../../../../../../../../../../private/var/tmp/_bazel_matthiaswilhelm/53196d44f2195c21d2850032b5f3f3c2/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-i18n';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
-import { fetchAnchor } from '../services/anchor';
-import { fetchSurroundingDocs, SurrDocType } from '../services/context';
+import { fetchAnchor } from './anchor';
+import { fetchSurroundingDocs, SurrDocType } from './context';
 import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
 import { IndexPattern, SortDirection } from '../../../../../data/public';
 import {
@@ -18,9 +18,9 @@ import {
   FailureReason,
   getInitialContextQueryState,
   LoadingStatus,
-} from '../services/context_query_state';
-import { AppState } from '../services/context_state';
-import { getFirstSortableField } from '../services/utils/sorting';
+} from './context_query_state';
+import { AppState } from './context_state';
+import { getFirstSortableField } from './utils/sorting';
 import { EsHitRecord } from '../../types';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({

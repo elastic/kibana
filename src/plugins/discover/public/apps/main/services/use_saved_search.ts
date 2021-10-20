@@ -16,11 +16,11 @@ import { RequestAdapter } from '../../../../../inspector/public';
 import type { AutoRefreshDoneFn } from '../../../../../data/public';
 import { validateTimeRange } from '../utils/validate_time_range';
 import { Chart } from '../components/chart/point_series';
-import { useSingleton } from '../utils/use_singleton';
+import { useSingleton } from './use_singleton';
 import { FetchStatus } from '../../types';
 
 import { fetchAll } from '../utils/fetch_all';
-import { useBehaviorSubject } from '../utils/use_behavior_subject';
+import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
 

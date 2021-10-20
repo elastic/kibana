@@ -19,7 +19,7 @@ import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_typ
 import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { DiscoverServices } from '../../build_services';
-import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../main/components/doc_table/doc_table_context';
 import { EsHitRecordList } from '../types';
 import { SortPairArr } from '../main/components/doc_table/lib/get_sort';
