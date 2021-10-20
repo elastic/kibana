@@ -21,6 +21,9 @@ import { RouteComponentProps } from 'react-router-dom';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import { BASE_PATH, INTERNAL_TEST_ROUTE } from '../../../common/constants';
+import SessionView from '../SessionView';
+
+const testSessionId = '4321';
 
 export const TestPage = (props: RouteComponentProps) => {
   // An example of setting using and setting the core services
@@ -77,12 +80,19 @@ export const TestPage = (props: RouteComponentProps) => {
     <EuiPage>
       <EuiPageContent data-test-subj="sessionViewTestPage">
         <EuiFlexGroup direction="column">
+          SessionView component rendered using mock data.
+          <br />
+          <br />
+          <br />
+          <SessionView sessionId={testSessionId} />
+          <br />
+          <br />
+          <br />
           <EuiFlexItem>current path: {props.match.path}</EuiFlexItem>
           <EuiFlexItem>
             Index Name:
             <EuiFieldText value={indexName} onChange={handleOnChange} />
           </EuiFlexItem>
-
           <EuiButton onClick={handleInsertData}>Put Data</EuiButton>
           <EuiFlexItem>
             put network data:

@@ -1,0 +1,44 @@
+import { useEffect } from 'react';
+import _ from 'lodash';
+
+const SCROLL_END_BUFFER_HEIGHT = 20;
+const DEBOUNCE_TIMEOUT = 500;
+
+function getScrollPosition(div: HTMLElement) {
+  if (div) {
+    return div.scrollTop;
+  } else {
+    return document.documentElement.scrollTop || document.body.scrollTop;
+  }
+}
+
+interface IUseScrollDeps {
+  div: HTMLElement | null;
+  handler(pos: number, endReached: boolean): void;
+}
+
+/**
+ * listens to scroll events on given div, if scroll reaches bottom, calls a callback
+ * @param {ref} ref to listen to scroll events on
+ * @param {function} handler function receives params (scrollTop, endReached)
+ */
+export default function useScroll({ div, handler }: IUseScrollDeps) {
+  useEffect(() => {
+    if (div) {
+      const debounced = _.debounce(() => {
+        const pos = getScrollPosition(div);
+        const endReached = pos + div.offsetHeight > div.scrollHeight - SCROLL_END_BUFFER_HEIGHT;
+
+        handler(pos, endReached);
+      }, DEBOUNCE_TIMEOUT);
+
+      div.onscroll = debounced;
+
+      return () => {
+        debounced.cancel();
+
+        div.onscroll = null;
+      };
+    }
+  }, [div, handler]);
+}
