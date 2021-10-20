@@ -67,7 +67,7 @@ interface StepDefineRuleProps extends RuleStepProps {
   defaultValues?: DefineStepRule;
 }
 
-const stepDefineDefaultValue: DefineStepRule = {
+export const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
   index: [],
   machineLearningJobId: [],

@@ -55,6 +55,12 @@ export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
       { value: 'd', text: i18n.LAST_DAY },
       { value: 'w', text: i18n.LAST_WEEK },
     ];
+  } else if (ruleType === 'threat_match') {
+    return [
+      { value: 'h', text: i18n.LAST_HOUR },
+      { value: 'd', text: i18n.LAST_DAY },
+      { value: 'w', text: i18n.LAST_WEEK },
+    ];
   } else {
     return [
       { value: 'h', text: i18n.LAST_HOUR },
@@ -217,10 +223,10 @@ export const getIsRulePreviewDisabled = ({
 }) => {
   if (!isQueryBarValid || index.length === 0) return true;
   if (ruleType === 'threat_match') {
-    if (!isThreatQueryBarValid || !threatIndex.length) return true;
+    if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
     if (
       !threatMapping.length ||
-      !threatMapping[0].entries.length ||
+      !threatMapping[0].entries?.length ||
       !threatMapping[0].entries[0].field ||
       !threatMapping[0].entries[0].value
     )

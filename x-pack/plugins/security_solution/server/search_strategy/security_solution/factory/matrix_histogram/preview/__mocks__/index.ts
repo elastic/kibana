@@ -68,18 +68,6 @@ export const expectedDsl = {
             },
           },
           {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [{ match: { 'signal.rule.created_by': 'preview-created-by' } }],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-            },
-          },
-          {
             range: {
               '@timestamp': {
                 gte: '2020-09-08T14:23:04.482Z',

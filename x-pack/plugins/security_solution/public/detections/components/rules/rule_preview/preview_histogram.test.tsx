@@ -48,7 +48,12 @@ describe('PreviewHistogram', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <PreviewHistogram addNoiseWarning={jest.fn()} timeFrame="M" previewId={'test-preview-id'} />
+        <PreviewHistogram
+          addNoiseWarning={jest.fn()}
+          timeFrame="M"
+          previewId={'test-preview-id'}
+          spaceId={'default'}
+        />
       </TestProviders>
     );
 
@@ -76,7 +81,12 @@ describe('PreviewHistogram', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <PreviewHistogram addNoiseWarning={jest.fn()} timeFrame="M" previewId={'test-preview-id'} />
+        <PreviewHistogram
+          addNoiseWarning={jest.fn()}
+          timeFrame="M"
+          previewId={'test-preview-id'}
+          spaceId={'default'}
+        />
       </TestProviders>
     );
 

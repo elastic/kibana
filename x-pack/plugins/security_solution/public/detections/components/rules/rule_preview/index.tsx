@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Unit } from '@elastic/datemath';
 import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
@@ -23,6 +23,8 @@ import { usePreviewRoute } from './use_preview_route';
 import { PreviewHistogram } from './preview_histogram';
 import { getTimeframeOptions } from './helpers';
 import { CalloutGroup } from './callout_group';
+import { useKibana } from '../../../../common/lib/kibana';
+import { LoadingHistogram } from './loading_histogram';
 
 export interface RulePreviewProps {
   index: string[];
@@ -51,6 +53,14 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   threatQuery,
   threatMapping,
 }) => {
+  const { spaces } = useKibana().services;
+  const [spaceId, setSpaceId] = useState('');
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    }
+  }, [spaces]);
+
   const [timeFrame, setTimeFrame] = useState<Unit>('h');
   const {
     addNoiseWarning,
@@ -95,7 +105,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           <EuiFlexItem grow={false}>
             <PreviewButton
               fill
-              isDisabled={isDisabled || isPreviewRequestInProgress}
+              isLoading={isPreviewRequestInProgress}
+              isDisabled={isDisabled}
               onClick={createPreview}
               data-test-subj="preview-button"
             >
@@ -105,11 +116,13 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         </EuiFlexGroup>
       </EuiFormRow>
       <EuiSpacer size="s" />
-      {previewId && (
+      {isPreviewRequestInProgress && <LoadingHistogram />}
+      {!isPreviewRequestInProgress && previewId && spaceId && (
         <PreviewHistogram
           timeFrame={timeFrame}
           previewId={previewId}
           addNoiseWarning={addNoiseWarning}
+          spaceId={spaceId}
         />
       )}
       <CalloutGroup items={errors} isError />

@@ -22,26 +22,8 @@ export const buildPreviewHistogramQuery = ({
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
-      bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                {
-                  match: {
-                    'signal.rule.created_by': 'preview-created-by',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ],
-      },
-    },
-    {
       range: {
-        '@timestamp': {
+        'signal.original_time': {
           gte: from,
           lte: to,
           format: 'strict_date_optional_time',
@@ -52,7 +34,7 @@ export const buildPreviewHistogramQuery = ({
 
   const getHistogramAggregation = () => {
     const interval = calculateTimeSeriesInterval(from, to);
-    const histogramTimestampField = '@timestamp';
+    const histogramTimestampField = 'signal.original_time';
     const dateHistogram = {
       date_histogram: {
         field: histogramTimestampField,

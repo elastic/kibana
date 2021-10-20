@@ -65,7 +65,7 @@ export const PreviewEqlQueryHistogram = ({
       barConfig={barConfig}
       title={i18n.QUERY_GRAPH_HITS_TITLE}
       subtitle={subtitle}
-      disclaimer={i18n.QUERY_PREVIEW_DISCLAIMER_EQL}
+      disclaimer={i18n.QUERY_PREVIEW_DISCLAIMER_MAX_SIGNALS}
       isLoading={isLoading}
       dataTestSubj="queryPreviewEqlHistogram"
     />
