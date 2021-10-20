@@ -43,7 +43,7 @@ const i18nTexts = {
   apiCompatibilityNoteBody: (docLink: string) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.apiCompatibilityNoteBody"
-      defaultMessage="We recommend you resolve all deprecation issues before upgrading. However, it can be challenging to ensure all requests are fixed. For additional safety, include API version compatibility headers in your requests. {learnMoreLink}."
+      defaultMessage="We recommend you resolve all deprecation issues before upgrading. If needed, you can apply API compatibility headers to requests that use deprecated features. {learnMoreLink}."
       values={{
         learnMoreLink: (
           <EuiLink href={docLink} target="_blank">
@@ -66,7 +66,7 @@ const i18nTexts = {
     'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningBody',
     {
       defaultMessage:
-        'Go to your logs directory to view the deprecation logs or enable log collecting to see them in the UI.',
+        'Go to your logs directory to view the deprecation logs or enable deprecation log collection to see them in Kibana.',
     }
   ),
   deniedPrivilegeTitle: i18n.translate(

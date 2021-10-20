@@ -8,7 +8,6 @@
 import React, { FunctionComponent, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiText,
   EuiButton,
@@ -28,21 +27,13 @@ interface Props {
   setIsComplete: OverviewStepProps['setIsComplete'];
 }
 
-interface StepProps extends OverviewStepProps {
-  nextMajor: number;
-}
-
 const i18nTexts = {
   title: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.title', {
     defaultMessage: 'Migrate system indices',
   }),
-  bodyDescription: (nextMajor: number) => (
-    <FormattedMessage
-      id="xpack.upgradeAssistant.overview.systemIndices.body"
-      defaultMessage="Migrate the indices that store system information before you upgrade to {nextMajor}.0."
-      values={{ nextMajor }}
-    />
-  ),
+  bodyDescription: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.body', {
+    defaultMessage: 'Migrate the indices that store system information before you upgrade.',
+  }),
   startButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.startButtonLabel',
     {
@@ -64,7 +55,7 @@ const i18nTexts = {
   viewSystemIndicesStatus: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.viewSystemIndicesStatus',
     {
-      defaultMessage: 'View migration information',
+      defaultMessage: 'View migration details',
     }
   ),
   retryButtonLabel: i18n.translate(
@@ -172,10 +163,9 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
 };
 
 export const getMigrateSystemIndicesStep = ({
-  nextMajor,
   isComplete,
   setIsComplete,
-}: StepProps): EuiStepProps => {
+}: OverviewStepProps): EuiStepProps => {
   const status = isComplete ? 'complete' : 'incomplete';
 
   return {
@@ -185,7 +175,7 @@ export const getMigrateSystemIndicesStep = ({
     children: (
       <>
         <EuiText>
-          <p>{i18nTexts.bodyDescription(nextMajor)}</p>
+          <p>{i18nTexts.bodyDescription}</p>
         </EuiText>
 
         <EuiSpacer size="m" />

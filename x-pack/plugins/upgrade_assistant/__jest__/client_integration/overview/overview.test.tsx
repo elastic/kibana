@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setupEnvironment, kibanaVersion } from '../helpers';
+import { setupEnvironment } from '../helpers';
 import { OverviewTestBed, setupOverviewPage } from './overview.helpers';
 
 describe('Overview Page', () => {
@@ -22,12 +22,11 @@ describe('Overview Page', () => {
   });
 
   describe('Documentation links', () => {
-    test('Has a whatsNew link and it references nextMajor version', () => {
+    test('Has a whatsNew link and it references target version', () => {
       const { exists, find } = testBed;
-      const nextMajor = kibanaVersion.major + 1;
 
       expect(exists('whatsNewLink')).toBe(true);
-      expect(find('whatsNewLink').text()).toContain(`${nextMajor}.0`);
+      expect(find('whatsNewLink').text()).toContain('8');
     });
 
     test('Has a link for upgrade assistant in page header', () => {
