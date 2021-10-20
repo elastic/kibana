@@ -17,6 +17,7 @@ export const createMockConfig = (): ConfigType => {
   const enableExperimental: string[] = [];
 
   return {
+    enabled: true,
     [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
     maxRuleImportExportSize: 10000,
     maxRuleImportPayloadBytes: 10485760,
