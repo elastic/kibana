@@ -6,7 +6,7 @@
  */
 
 import { get, isEmpty, unset, set } from 'lodash';
-import { satisfies } from 'semver';
+import satisfies from 'semver/functions/satisfies';
 import {
   EuiFlexGroup,
   EuiFlexItem,

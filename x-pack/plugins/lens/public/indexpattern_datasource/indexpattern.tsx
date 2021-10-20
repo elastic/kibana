@@ -43,7 +43,7 @@ import {
   getDatasourceSuggestionsForVisualizeCharts,
 } from './indexpattern_suggestions';
 
-import { isDraggedField, normalizeOperationDataType } from './utils';
+import { isColumnInvalid, isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
@@ -267,6 +267,11 @@ export function getIndexPatternDatasource({
       });
 
       return columnLabelMap;
+    },
+
+    isValidColumn: (state: IndexPatternPrivateState, layerId: string, columnId: string) => {
+      const layer = state.layers[layerId];
+      return !isColumnInvalid(layer, columnId, state.indexPatterns[layer.indexPatternId]);
     },
 
     renderDimensionTrigger: (
