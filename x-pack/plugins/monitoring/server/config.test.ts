@@ -106,7 +106,6 @@ describe('config schema', () => {
             "index": "metricbeat-*",
           },
           "min_interval_seconds": 10,
-          "render_react_app": true,
           "show_license_expiration": true,
         },
       }
