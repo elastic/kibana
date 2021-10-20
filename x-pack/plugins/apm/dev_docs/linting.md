@@ -17,5 +17,5 @@ yarn prettier  "./x-pack/plugins/apm/**/*.{tsx,ts,js}" --write
 ### ESLint
 
 ```
-node scripts/eslint.js x-pack/legacy/plugins/apm
+node scripts/eslint.js x-pack/plugins/apm
 ```
