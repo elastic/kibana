@@ -85,7 +85,7 @@ describe('roles mapped to a deprecated role', () => {
 });
 
 describe('check deprecations when security is disabled', () => {
-  test('logs no deprecations: roles enabled', async () => {
+  test('logs no deprecations: roles not enabled', async () => {
     const mockReportingConfig = createMockConfigSchema({ roles: { enabled: false } });
     reportingCore = await createMockReportingCore(
       mockReportingConfig,
@@ -94,7 +94,7 @@ describe('check deprecations when security is disabled', () => {
     expect(await getDeprecationsInfo(context, { reportingCore })).toMatchInlineSnapshot(`Array []`);
   });
 
-  test('logs no deprecations: roles not enabled', async () => {
+  test('logs no deprecations: roles enabled', async () => {
     const mockReportingConfig = createMockConfigSchema(); // roles.enabled: true is default in 7.x / 8.0
     reportingCore = await createMockReportingCore(
       mockReportingConfig,

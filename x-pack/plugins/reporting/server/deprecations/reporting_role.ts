@@ -33,7 +33,7 @@ export async function getDeprecationsInfo(
   const { security } = reportingCore.getPluginSetupDeps();
 
   // Nothing to do if security is disabled
-  if (!security) {
+  if (!security?.license.isEnabled()) {
     return [];
   }
 
