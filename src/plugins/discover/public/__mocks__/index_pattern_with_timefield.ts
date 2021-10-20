@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { flattenHit, IIndexPatternFieldList } from '../../../data/common';
+import { IIndexPatternFieldList } from '../../../data/common';
 import { IndexPattern } from '../../../data/common';
-import type { estypes } from '@elastic/elasticsearch';
 
 const fields = [
   {
@@ -64,23 +63,16 @@ const indexPattern = {
   id: 'index-pattern-with-timefield-id',
   title: 'index-pattern-with-timefield',
   metaFields: ['_index', '_score'],
-  flattenHit: undefined,
-  formatHit: jest.fn((hit) => hit._source),
   fields,
   getComputedFields: () => ({}),
   getSourceFiltering: () => ({}),
   getFieldByName: (name: string) => fields.getByName(name),
   timeFieldName: 'timestamp',
-  getFormatterForField: () => ({ convert: () => 'formatted' }),
+  getFormatterForField: () => ({ convert: (value: unknown) => value }),
   isTimeNanosBased: () => false,
   popularizeField: () => {},
 } as unknown as IndexPattern;
 
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
-indexPattern.formatField = (hit: Record<string, unknown>, fieldName: string) => {
-  return fieldName === '_source'
-    ? hit._source
-    : flattenHit(hit as unknown as estypes.SearchHit, indexPattern)[fieldName];
-};
 
 export const indexPatternWithTimefieldMock = indexPattern;
