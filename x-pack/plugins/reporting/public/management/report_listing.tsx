@@ -276,6 +276,7 @@ class ReportListingUi extends Component<Props, State> {
    * per column basis.
    */
   private readonly tableColumnWidths = {
+    type: '5%',
     title: '30%',
     status: '20%',
     createdAt: '25%',
@@ -288,7 +289,7 @@ class ReportListingUi extends Component<Props, State> {
     const tableColumns: TableColumn[] = [
       {
         field: 'type',
-        width: undefined, // take remainder of space
+        width: tableColumnWidths.type,
         name: i18n.translate('xpack.reporting.listing.tableColumns.typeTitle', {
           defaultMessage: 'Type',
         }),
