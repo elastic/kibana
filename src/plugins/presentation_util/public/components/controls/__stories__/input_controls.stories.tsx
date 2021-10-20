@@ -95,6 +95,7 @@ const EmptyControlGroupStoryComponent: FC<{
           </EuiTextAlign>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <br />
 
       <div ref={embeddableRoot} />
     </>
@@ -112,9 +113,15 @@ export const ConfiguredControlGroupStory = () => (
         explicitInput: {
           title: 'Origin City',
           id: 'optionsList1',
-          indexPattern: 'demo data flights',
-          field: 'OriginCityName',
-          defaultSelections: ['Toronto'],
+          indexPattern: {
+            title: 'demo data flights',
+          },
+          field: {
+            name: 'OriginCityName',
+            type: 'string',
+            aggregatable: true,
+          },
+          selectedOptions: ['Toronto'],
         } as OptionsListEmbeddableInput,
       },
       optionsList2: {
@@ -124,9 +131,15 @@ export const ConfiguredControlGroupStory = () => (
         explicitInput: {
           title: 'Destination City',
           id: 'optionsList2',
-          indexPattern: 'demo data flights',
-          field: 'DestCityName',
-          defaultSelections: ['London'],
+          indexPattern: {
+            title: 'demo data flights',
+          },
+          field: {
+            name: 'DestCityName',
+            type: 'string',
+            aggregatable: true,
+          },
+          selectedOptions: ['London'],
         } as OptionsListEmbeddableInput,
       },
       optionsList3: {
@@ -136,8 +149,14 @@ export const ConfiguredControlGroupStory = () => (
         explicitInput: {
           title: 'Carrier',
           id: 'optionsList3',
-          indexPattern: 'demo data flights',
-          field: 'Carrier',
+          indexPattern: {
+            title: 'demo data flights',
+          },
+          field: {
+            name: 'Carrier',
+            type: 'string',
+            aggregatable: true,
+          },
         } as OptionsListEmbeddableInput,
       },
     }}
