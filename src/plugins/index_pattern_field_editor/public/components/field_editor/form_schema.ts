@@ -30,7 +30,14 @@ export const schema = {
         ),
       },
       {
-        validator: starCharacterCheck(),
+        validator: starCharacterCheck(
+          i18n.translate(
+            'indexPatternFieldEditor.editor.form.validations.starCharacterNotAllowedValidationErrorMessage',
+            {
+              defaultMessage: 'The field cannot have * in the name.',
+            }
+          )
+        ),
       },
     ],
   },

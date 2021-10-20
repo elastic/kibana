@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ValidationFunc } from '../../hook_form_lib';
 import { ERROR_CODE } from './types';
 
 export const starCharacterCheck =
-  () =>
+  (message: string) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
     const [{ value, path }] = args;
 
@@ -19,12 +18,7 @@ export const starCharacterCheck =
       return {
         code: 'ERR_STAR_CHARACTER',
         path,
-        message: i18n.translate(
-          'indexPatternFieldEditor.editor.form.validations.starCharacterNotAllowedValidationErrorMessage',
-          {
-            defaultMessage: 'The field cannot have * in the name.',
-          }
-        ),
+        message,
       };
     }
     return undefined;
