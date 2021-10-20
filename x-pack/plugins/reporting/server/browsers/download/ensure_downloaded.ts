@@ -46,12 +46,10 @@ async function ensureDownloaded(browsers: BrowserDownload[], logger: GenericLeve
             const path = pSet.resolvePath(p);
             const pathExists = existsSync(path);
 
-            let foundChecksum: string | null = null;
+            let foundChecksum: string | undefined;
             try {
               foundChecksum = await md5(path);
-            } catch (err) {
-              // ignore file not existing
-            }
+            } catch {}
 
             if (pathExists && foundChecksum === archiveChecksum) {
               logger.debug(`Browser archive for ${p.platform}/${p.architecture} found in ${path} `);
