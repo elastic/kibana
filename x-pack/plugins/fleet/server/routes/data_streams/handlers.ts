@@ -43,6 +43,25 @@ interface ESDataStreamStats {
   maximum_timestamp: number;
 }
 
+const extractPartsFromDataStreamName = (dataStreamName: string) => {
+  let type = '';
+  let dataset = '';
+  let namespace = '';
+  const firstHyphenIndex = dataStreamName.indexOf('-');
+  const lastHyphenIndex = dataStreamName.lastIndexOf('-');
+
+  if (firstHyphenIndex < 0 || lastHyphenIndex < 0) {
+    return { type, dataset, namespace };
+  }
+  // dataStreamName format is $type-$dataset-$namespace
+  // dataset could have a hyphen in it, we use the first and last hyphen to extract it
+  type = dataStreamName.slice(0, firstHyphenIndex);
+  dataset = dataStreamName.slice(firstHyphenIndex + 1, lastHyphenIndex);
+  namespace = dataStreamName.slice(lastHyphenIndex + 1);
+
+  return { type, dataset, namespace };
+};
+
 export const getListHandler: RequestHandler = async (context, request, response) => {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
@@ -116,7 +135,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
 
     // Query additional information for each data stream
     const formattedDataStreams = Object.entries(dataStreams).map(([dataStreamName, dataStream]) => {
-      const [type, dataset, namespace] = dataStreamName.split('-');
+      const { type, dataset, namespace } = extractPartsFromDataStreamName(dataStreamName);
       const dataStreamResponse: DataStream = {
         index: dataStreamName,
         dataset,
