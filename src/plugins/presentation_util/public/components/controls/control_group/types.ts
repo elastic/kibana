@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { PanelState, EmbeddableInput } from '../../../../../embeddable/public';
+import { PanelState, EmbeddableInput, ViewMode } from '../../../../../embeddable/public';
 import { InputControlInput } from '../../../services/controls';
 import { ControlStyle, ControlWidth } from '../types';
+
+export { ViewMode };
 
 export interface ControlGroupInput
   extends EmbeddableInput,
