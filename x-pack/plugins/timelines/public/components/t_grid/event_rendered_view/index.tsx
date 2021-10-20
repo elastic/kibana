@@ -139,7 +139,7 @@ const EventRenderedViewComponent = ({
             </ActionsContainer>
           );
         },
-        width: '120px',
+        width: '152px',
       },
       {
         field: 'ecs.timestamp',
