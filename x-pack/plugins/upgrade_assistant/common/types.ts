@@ -126,8 +126,6 @@ export interface ReindexWarning {
 }
 
 // Telemetry types
-export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant-telemetry';
-export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant-telemetry';
 export type UIOpenOption = 'overview' | 'elasticsearch' | 'kibana';
 export type UIReindexOption = 'close' | 'open' | 'start' | 'stop';
 
@@ -144,41 +142,12 @@ export interface UIReindex {
   stop: boolean;
 }
 
-export interface UpgradeAssistantTelemetrySavedObject {
-  ui_open: {
-    overview: number;
-    elasticsearch: number;
-    kibana: number;
-  };
-  ui_reindex: {
-    close: number;
-    open: number;
-    start: number;
-    stop: number;
-  };
-}
-
 export interface UpgradeAssistantTelemetry {
-  ui_open: {
-    overview: number;
-    elasticsearch: number;
-    kibana: number;
-  };
-  ui_reindex: {
-    close: number;
-    open: number;
-    start: number;
-    stop: number;
-  };
   features: {
     deprecation_logging: {
       enabled: boolean;
     };
   };
-}
-
-export interface UpgradeAssistantTelemetrySavedObjectAttributes {
-  [key: string]: any;
 }
 
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
@@ -264,12 +233,12 @@ export interface DeprecationLoggingStatus {
   isDeprecationLoggingEnabled: boolean;
 }
 
-export type UPGRADE_STATUS = 'UPGRADE_NEEDED' | 'NO_UPGRADE_NEEDED' | 'IN_PROGRESS' | 'ERROR';
+export type MIGRATION_STATUS = 'MIGRATION_NEEDED' | 'NO_MIGRATION_NEEDED' | 'IN_PROGRESS' | 'ERROR';
 export interface SystemIndicesMigrationFeature {
   id?: string;
   feature_name: string;
   minimum_index_version: string;
-  upgrade_status: UPGRADE_STATUS;
+  migration_status: MIGRATION_STATUS;
   indices: Array<{
     index: string;
     version: string;
@@ -277,7 +246,7 @@ export interface SystemIndicesMigrationFeature {
 }
 export interface SystemIndicesMigrationStatus {
   features: SystemIndicesMigrationFeature[];
-  upgrade_status: UPGRADE_STATUS;
+  migration_status: MIGRATION_STATUS;
 }
 export interface SystemIndicesMigrationStarted {
   features: SystemIndicesMigrationFeature[];

@@ -15,14 +15,18 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiLink,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { ReindexStatus } from '../../../../../../../common/types';
 import { LoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { ReindexProgress } from './progress';
+import { useAppContext } from '../../../../../app_context';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
@@ -44,14 +48,21 @@ const buttonLabel = (status?: ReindexStatus) => {
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.resumeLabel"
-          defaultMessage="Resume"
+          defaultMessage="Resume reindexing"
+        />
+      );
+    case ReindexStatus.cancelled:
+      return (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.restartLabel"
+          defaultMessage="Restart reindexing"
         />
       );
     default:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
-          defaultMessage="Run reindex"
+          defaultMessage="Start reindexing"
         />
       );
   }
@@ -66,6 +77,12 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   startReindex: () => void;
   cancelReindex: () => void;
 }> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
+  const {
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
+
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
   const isCompleted = status === ReindexStatus.completed;
@@ -115,31 +132,32 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             </EuiCallOut>
           </>
         )}
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.calloutTitle"
-              defaultMessage="Index is unable to ingest, update, or delete documents while reindexing"
-            />
-          }
-          color="warning"
-          iconType="alert"
-        >
+        <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.cantStopDetail"
-              defaultMessage="If you can’t stop document updates or need to reindex into a new cluster,
-                consider using a different upgrade strategy."
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
+              defaultMessage="The index will be read-only during reindexing. You won't be able to add, update, or delete documents until reindexing is complete. If you need to reindex to a new cluster, use the reindex API. {docsLink}"
+              values={{
+                docsLink: (
+                  <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.remoteReindex}>
+                    {i18n.translate(
+                      'xpack.upgradeAssistant.checkupTab.reindexing.flyout.learnMoreLinkLabel',
+                      {
+                        defaultMessage: 'Learn more',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
             />
           </p>
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
-              defaultMessage="Reindexing will continue in the background, but if Kibana shuts down or restarts you will
-                need to return to this page to resume reindexing."
+              defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress or resume reindexing after a Kibana restart."
             />
           </p>
-        </EuiCallOut>
+        </EuiText>
         <EuiSpacer />
         <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
       </EuiFlyoutBody>

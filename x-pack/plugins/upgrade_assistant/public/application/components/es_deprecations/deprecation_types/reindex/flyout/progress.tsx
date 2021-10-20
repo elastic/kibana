@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
-import { LoadingState } from '../../../../types';
+import { CancelLoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { StepProgress, StepProgressStep } from './step_progress';
 import { getReindexProgressLabel } from '../../../../../lib/utils';
@@ -40,13 +33,34 @@ const PausedCallout = () => (
   />
 );
 
-const CancelReindexingDocumentsButton: React.FunctionComponent<{
+const ReindexingDocumentsStepTitle: React.FunctionComponent<{
   reindexState: ReindexState;
   cancelReindex: () => void;
 }> = ({ reindexState: { lastCompletedStep, status, cancelLoadingState }, cancelReindex }) => {
+  if (status === ReindexStatus.cancelled) {
+    return (
+      <>
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelledTitle"
+          defaultMessage="Reindexing cancelled."
+        />
+      </>
+    );
+  }
+
+  // step is in progress after the new index is created and while it's not completed yet
+  const stepInProgress =
+    status === ReindexStatus.inProgress &&
+    (lastCompletedStep === ReindexStep.newIndexCreated ||
+      lastCompletedStep === ReindexStep.reindexStarted);
+  // but the reindex can only be cancelled after it has started
+  const showCancelLink =
+    status === ReindexStatus.inProgress && lastCompletedStep === ReindexStep.reindexStarted;
+
   let cancelText: React.ReactNode;
   switch (cancelLoadingState) {
-    case LoadingState.Loading:
+    case CancelLoadingState.Requested:
+    case CancelLoadingState.Loading:
       cancelText = (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancellingLabel"
@@ -54,7 +68,7 @@ const CancelReindexingDocumentsButton: React.FunctionComponent<{
         />
       );
       break;
-    case LoadingState.Success:
+    case CancelLoadingState.Success:
       cancelText = (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
@@ -62,7 +76,7 @@ const CancelReindexingDocumentsButton: React.FunctionComponent<{
         />
       );
       break;
-    case LoadingState.Error:
+    case CancelLoadingState.Error:
       cancelText = (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.errorLabel"
@@ -80,22 +94,77 @@ const CancelReindexingDocumentsButton: React.FunctionComponent<{
   }
 
   return (
-    <EuiButtonEmpty
-      data-test-subj="cancelReindexingDocumentsButton"
-      onClick={cancelReindex}
-      disabled={
-        cancelLoadingState === LoadingState.Loading ||
-        status !== ReindexStatus.inProgress ||
-        lastCompletedStep !== ReindexStep.reindexStarted
-      }
-      isLoading={cancelLoadingState === LoadingState.Loading}
-    >
-      {cancelText}
-    </EuiButtonEmpty>
+    <EuiFlexGroup component="span">
+      <EuiFlexItem grow={false}>
+        {stepInProgress ? (
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
+            defaultMessage="Reindexing documents."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
+            defaultMessage="Reindex documents."
+          />
+        )}
+      </EuiFlexItem>
+      {showCancelLink && (
+        <EuiFlexItem>
+          <EuiLink
+            data-test-subj="cancelReindexingDocumentsButton"
+            onClick={cancelReindex}
+            disabled={cancelLoadingState !== undefined}
+          >
+            {cancelText}
+          </EuiLink>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
 
 const orderedSteps = Object.values(ReindexStep).sort() as number[];
+const getStepTitle = (step: ReindexStep, inProgress?: boolean): ReactNode => {
+  if (step === ReindexStep.readonly) {
+    return inProgress ? (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.readonlyStepTitle"
+        defaultMessage="Setting original index to read-only."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
+        defaultMessage="Set original index to read-only."
+      />
+    );
+  }
+  if (step === ReindexStep.newIndexCreated) {
+    return inProgress ? (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.createIndexStepTitle"
+        defaultMessage="Creating new index."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
+        defaultMessage="Create new index."
+      />
+    );
+  }
+  if (step === ReindexStep.aliasCreated) {
+    return inProgress ? (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.aliasSwapStepTitle"
+        defaultMessage="Swapping original index with alias."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
+        defaultMessage="Swap original index with alias."
+      />
+    );
+  }
+};
 
 /**
  * Displays a list of steps in the reindex operation, the current status, a progress bar,
@@ -111,33 +180,39 @@ export const ReindexProgress: React.FunctionComponent<{
     status,
     reindexTaskPercComplete,
   } = props.reindexState;
-  const stepDetails = (thisStep: ReindexStep): Pick<StepProgressStep, 'status' | 'children'> => {
+  const getProgressStep = (thisStep: ReindexStep): StepProgressStep => {
     const previousStep = orderedSteps[orderedSteps.indexOf(thisStep) - 1];
 
     if (status === ReindexStatus.failed && lastCompletedStep === previousStep) {
       return {
+        title: getStepTitle(thisStep),
         status: 'failed',
         children: <ErrorCallout {...{ errorMessage }} />,
       };
     } else if (status === ReindexStatus.paused && lastCompletedStep === previousStep) {
       return {
+        title: getStepTitle(thisStep),
         status: 'paused',
         children: <PausedCallout />,
       };
     } else if (status === ReindexStatus.cancelled && lastCompletedStep === previousStep) {
       return {
+        title: getStepTitle(thisStep),
         status: 'cancelled',
       };
     } else if (status === undefined || lastCompletedStep < previousStep) {
       return {
+        title: getStepTitle(thisStep),
         status: 'incomplete',
       };
     } else if (lastCompletedStep === previousStep) {
       return {
+        title: getStepTitle(thisStep, true),
         status: 'inProgress',
       };
     } else {
       return {
+        title: getStepTitle(thisStep),
         status: 'complete',
       };
     }
@@ -145,22 +220,7 @@ export const ReindexProgress: React.FunctionComponent<{
 
   // The reindexing step is special because it generally lasts longer and can be cancelled mid-flight
   const reindexingDocsStep = {
-    title: (
-      <EuiFlexGroup alignItems={'center'}>
-        <EuiFlexItem>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
-            defaultMessage="Reindexing documents"
-          />
-        </EuiFlexItem>
-        {(lastCompletedStep === ReindexStep.newIndexCreated ||
-          lastCompletedStep === ReindexStep.reindexStarted) && (
-          <EuiFlexItem grow={false}>
-            <CancelReindexingDocumentsButton {...props} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ),
+    title: <ReindexingDocumentsStepTitle {...props} />,
   } as StepProgressStep;
 
   if (
@@ -195,34 +255,10 @@ export const ReindexProgress: React.FunctionComponent<{
   }
 
   const steps = [
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
-          defaultMessage="Setting old index to read-only"
-        />
-      ),
-      ...stepDetails(ReindexStep.readonly),
-    },
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
-          defaultMessage="Creating new index"
-        />
-      ),
-      ...stepDetails(ReindexStep.newIndexCreated),
-    },
+    getProgressStep(ReindexStep.readonly),
+    getProgressStep(ReindexStep.newIndexCreated),
     reindexingDocsStep,
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
-          defaultMessage="Swapping original index with alias"
-        />
-      ),
-      ...stepDetails(ReindexStep.aliasCreated),
-    },
+    getProgressStep(ReindexStep.aliasCreated),
   ];
 
   return (

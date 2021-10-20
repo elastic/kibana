@@ -18,9 +18,11 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useAppContext } from '../../app_context';
+import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
 import { getBackupStep } from './backup_step';
 import { getFixIssuesStep } from './fix_issues_step';
 import { getFixLogsStep } from './fix_logs_step';
@@ -31,24 +33,16 @@ type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'fix_lo
 
 export const Overview: FunctionComponent = () => {
   const {
-    kibanaVersionInfo: { nextMajor },
     services: {
       breadcrumbs,
-      api,
       core: { docLinks },
     },
     plugins: { cloud },
   } = useAppContext();
 
   useEffect(() => {
-    async function sendTelemetryData() {
-      await api.sendPageTelemetryData({
-        overview: true,
-      });
-    }
-
-    sendTelemetryData();
-  }, [api]);
+    uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_OVERVIEW_PAGE_LOAD);
+  }, []);
 
   useEffect(() => {
     breadcrumbs.setBreadcrumbs('overview');
@@ -78,7 +72,7 @@ export const Overview: FunctionComponent = () => {
             defaultMessage: 'Upgrade Assistant',
           })}
           description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
-            defaultMessage: 'Get ready for the next version of the Elastic Stack!',
+            defaultMessage: 'Get ready for the next version of Elastic!',
           })}
           rightSideItems={[
             <EuiButtonEmpty
@@ -98,8 +92,7 @@ export const Overview: FunctionComponent = () => {
             <EuiLink href={docLinks.links.elasticsearch.releaseHighlights} target="_blank">
               <FormattedMessage
                 id="xpack.upgradeAssistant.overview.whatsNewLink"
-                defaultMessage="What's new in version {nextMajor}.0?"
-                values={{ nextMajor }}
+                defaultMessage="What's new in 8.x?"
               />
             </EuiLink>
           </EuiText>
@@ -115,12 +108,10 @@ export const Overview: FunctionComponent = () => {
               setIsComplete: setCompletedStep.bind(null, 'backup'),
             }),
             getMigrateSystemIndicesStep({
-              nextMajor,
               isComplete: isStepComplete('migrate_system_indices'),
               setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
             }),
             getFixIssuesStep({
-              nextMajor,
               isComplete: isStepComplete('fix_issues'),
               setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
             }),
@@ -128,7 +119,7 @@ export const Overview: FunctionComponent = () => {
               isComplete: isStepComplete('fix_logs'),
               setIsComplete: setCompletedStep.bind(null, 'fix_logs'),
             }),
-            getUpgradeStep({ nextMajor }),
+            getUpgradeStep(),
           ]}
         />
       </EuiPageContent>
