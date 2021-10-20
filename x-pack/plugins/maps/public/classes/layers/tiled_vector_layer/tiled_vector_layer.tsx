@@ -158,10 +158,7 @@ export class TiledVectorLayer extends VectorLayer {
     return data ? data.maxResultWindow : undefined;
   }
 
-  async _syncMaxResultWindow({
-    startLoading,
-    stopLoading,
-  }: DataRequestContext) {
+  async _syncMaxResultWindow({ startLoading, stopLoading }: DataRequestContext) {
     const prevDataRequest = this.getDataRequest(MAX_RESULT_WINDOW_DATA_REQUEST_ID);
     if (prevDataRequest) {
       return;
