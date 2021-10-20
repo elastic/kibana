@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { useEffect, useRef, useState } from 'react';
-import { NewPackagePolicy } from '../../../../fleet/public';
-import { ConfigKeys, DataStream, Validation, ICustomFields } from './types';
-import { formatters } from './helpers/formatters';
+import { NewPackagePolicy } from '../../../../../fleet/public';
+import { ConfigKeys, DataStream, Validation, ICustomFields } from '../types';
+import { formatters } from '../helpers/formatters';
 
 interface Props {
   monitorType: DataStream;

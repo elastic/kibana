@@ -97,6 +97,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
         defaultMonitorType={monitorType}
         defaultIsTLSEnabled={isTLSEnabled}
         defaultIsZipUrlTLSEnabled={isZipUrlTLSEnabled}
+        isEditable={true}
       >
         <TLSFieldsContextProvider defaultValues={isTLSEnabled ? defaultTLSConfig : undefined}>
           <HTTPContextProvider defaultValues={fullDefaultConfig?.[DataStream.HTTP]}>

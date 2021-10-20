@@ -14,7 +14,6 @@ import {
 } from '../common/normalizers';
 
 import { defaultBrowserSimpleFields, defaultBrowserAdvancedFields } from '../contexts';
-import { tlsJsonToObjectNormalizer, tlsStringToObjectNormalizer } from '../tls/normalizers';
 
 export type BrowserNormalizerMap = Record<keyof BrowserFields, Normalizer>;
 
@@ -42,33 +41,22 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKeys.PARAMS]: getBrowserNormalizer(ConfigKeys.PARAMS),
   [ConfigKeys.SCREENSHOTS]: getBrowserNormalizer(ConfigKeys.SCREENSHOTS),
   [ConfigKeys.SYNTHETICS_ARGS]: getBrowserJsonToJavascriptNormalizer(ConfigKeys.SYNTHETICS_ARGS),
-  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: (fields) =>
-    tlsJsonToObjectNormalizer(
-      fields?.[ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]?.value,
-      ConfigKeys.TLS_CERTIFICATE_AUTHORITIES
-    ),
-  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE]: (fields) =>
-    tlsJsonToObjectNormalizer(
-      fields?.[ConfigKeys.ZIP_URL_TLS_CERTIFICATE]?.value,
-      ConfigKeys.TLS_CERTIFICATE
-    ),
-  [ConfigKeys.ZIP_URL_TLS_KEY]: (fields) =>
-    tlsJsonToObjectNormalizer(fields?.[ConfigKeys.ZIP_URL_TLS_KEY]?.value, ConfigKeys.TLS_KEY),
-  [ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]: (fields) =>
-    tlsStringToObjectNormalizer(
-      fields?.[ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]?.value,
-      ConfigKeys.TLS_KEY_PASSPHRASE
-    ),
-  [ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]: (fields) =>
-    tlsStringToObjectNormalizer(
-      fields?.[ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]?.value,
-      ConfigKeys.TLS_VERIFICATION_MODE
-    ),
-  [ConfigKeys.ZIP_URL_TLS_VERSION]: (fields) =>
-    tlsJsonToObjectNormalizer(
-      fields?.[ConfigKeys.ZIP_URL_TLS_VERSION]?.value,
-      ConfigKeys.TLS_VERSION
-    ),
+  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: getBrowserJsonToJavascriptNormalizer(
+    ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES
+  ),
+  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE]: getBrowserJsonToJavascriptNormalizer(
+    ConfigKeys.ZIP_URL_TLS_CERTIFICATE
+  ),
+  [ConfigKeys.ZIP_URL_TLS_KEY]: getBrowserJsonToJavascriptNormalizer(ConfigKeys.ZIP_URL_TLS_KEY),
+  [ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]: getBrowserNormalizer(
+    ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE
+  ),
+  [ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]: getBrowserNormalizer(
+    ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE
+  ),
+  [ConfigKeys.ZIP_URL_TLS_VERSION]: getBrowserJsonToJavascriptNormalizer(
+    ConfigKeys.ZIP_URL_TLS_VERSION
+  ),
   [ConfigKeys.JOURNEY_FILTERS_MATCH]: getBrowserJsonToJavascriptNormalizer(
     ConfigKeys.JOURNEY_FILTERS_MATCH
   ),

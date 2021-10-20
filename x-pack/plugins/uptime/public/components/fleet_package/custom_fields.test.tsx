@@ -54,21 +54,17 @@ const defaultTCPConfig = defaultConfig[DataStream.TCP];
 describe.skip('<CustomFields />', () => {
   const WrappedComponent = ({
     validate = defaultValidation,
-    typeEditable = false,
+    isEditable = false,
     dataStreams = [DataStream.HTTP, DataStream.TCP, DataStream.ICMP, DataStream.BROWSER],
   }) => {
     return (
       <HTTPContextProvider>
-        <PolicyConfigContextProvider>
+        <PolicyConfigContextProvider isEditable={isEditable}>
           <TCPContextProvider>
             <BrowserContextProvider>
               <ICMPSimpleFieldsContextProvider>
                 <TLSFieldsContextProvider>
-                  <CustomFields
-                    validate={validate}
-                    typeEditable={typeEditable}
-                    dataStreams={dataStreams}
-                  />
+                  <CustomFields validate={validate} dataStreams={dataStreams} />
                 </TLSFieldsContextProvider>
               </ICMPSimpleFieldsContextProvider>
             </BrowserContextProvider>
@@ -80,7 +76,7 @@ describe.skip('<CustomFields />', () => {
 
   it('renders CustomFields', async () => {
     const { getByText, getByLabelText, queryByLabelText } = render(<WrappedComponent />);
-    const monitorType = queryByLabelText('Monitor Type') as HTMLInputElement;
+    const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
     const url = getByLabelText('URL') as HTMLInputElement;
     const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
@@ -88,7 +84,7 @@ describe.skip('<CustomFields />', () => {
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
-    expect(monitorType).not.toBeInTheDocument();
+    expect(monitorType).toBeInTheDocument();
     expect(url).toBeInTheDocument();
     expect(url.value).toEqual(defaultHTTPConfig[ConfigKeys.URLS]);
     expect(proxyUrl).toBeInTheDocument();
@@ -115,6 +111,13 @@ describe.skip('<CustomFields />', () => {
     await waitFor(() => {
       expect(getByLabelText('Request method')).toBeInTheDocument();
     });
+  });
+
+  it('does not show monitor type dropdown when isEditable is true', async () => {
+    const { queryByLabelText } = render(<WrappedComponent isEditable />);
+    const monitorType = queryByLabelText('Monitor Type') as HTMLInputElement;
+
+    expect(monitorType).not.toBeInTheDocument();
   });
 
   it('shows SSL fields when Enable SSL Fields is checked', async () => {
@@ -180,7 +183,7 @@ describe.skip('<CustomFields />', () => {
 
   it('handles switching monitor type', () => {
     const { getByText, getByLabelText, queryByLabelText, getAllByLabelText } = render(
-      <WrappedComponent typeEditable />
+      <WrappedComponent />
     );
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
     expect(monitorType).toBeInTheDocument();
@@ -244,7 +247,7 @@ describe.skip('<CustomFields />', () => {
   });
 
   it('shows resolve hostnames locally field when proxy url is filled for tcp monitors', () => {
-    const { getByLabelText, queryByLabelText } = render(<WrappedComponent typeEditable />);
+    const { getByLabelText, queryByLabelText } = render(<WrappedComponent />);
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
     fireEvent.change(monitorType, { target: { value: DataStream.TCP } });
 
@@ -302,10 +305,7 @@ describe.skip('<CustomFields />', () => {
 
   it('does not show monitor options that are not contained in datastreams', async () => {
     const { getByText, queryByText, queryByLabelText } = render(
-      <WrappedComponent
-        dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP]}
-        typeEditable
-      />
+      <WrappedComponent dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP]} />
     );
 
     const monitorType = queryByLabelText('Monitor Type') as HTMLInputElement;

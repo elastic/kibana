@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useUpdatePolicy } from './use_update_policy';
 import { renderHook } from '@testing-library/react-hooks';
-import { NewPackagePolicy } from '../../../../fleet/public';
-import { validate } from './validation';
+import { useUpdatePolicy } from './use_update_policy';
+import { NewPackagePolicy } from '../../../../../fleet/public';
+import { validate } from '../validation';
 import {
   ConfigKeys,
   DataStream,
@@ -20,8 +19,8 @@ import {
   ITLSFields,
   HTTPFields,
   BrowserFields,
-} from './types';
-import { defaultConfig } from './synthetics_policy_create_extension';
+} from '../types';
+import { defaultConfig } from '../synthetics_policy_create_extension';
 
 describe('useBarChartsHooks', () => {
   const newPolicy: NewPackagePolicy = {
