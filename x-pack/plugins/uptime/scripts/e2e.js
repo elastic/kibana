@@ -50,7 +50,7 @@ const config = './playwright_run.ts';
 
 function executeRunner() {
   childProcess.execSync(
-    `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}`,
+    `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'`,
     {
       cwd: e2eDir,
       stdio: 'inherit',
