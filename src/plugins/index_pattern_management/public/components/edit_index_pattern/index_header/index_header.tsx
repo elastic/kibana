@@ -27,11 +27,11 @@ const setDefaultTooltip = i18n.translate('indexPatternManagement.editDataView.se
 });
 
 const removeAriaLabel = i18n.translate('indexPatternManagement.editDataView.removeAria', {
-  defaultMessage: 'Remove data view.',
+  defaultMessage: 'Delete data view.',
 });
 
 const removeTooltip = i18n.translate('indexPatternManagement.editDataView.removeTooltip', {
-  defaultMessage: 'Remove data view.',
+  defaultMessage: 'Delete data view.',
 });
 
 export const IndexHeader: React.FC<IndexHeaderProps> = ({
