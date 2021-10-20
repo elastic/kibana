@@ -20,7 +20,7 @@ import { useTrackPageview } from '../../../../observability/public';
 
 function PageLoadingUI() {
   return (
-    <EuiPage style={{ height: 'calc(100vh - 50px)' }} data-test-subj="monitoringPageLoading">
+    <EuiPage style={{ height: 'calc(100vh - 50px)' }}>
       <EuiPageBody>
         <EuiPageContent
           verticalPosition="center"
