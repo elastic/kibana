@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiSpacer,
   EuiInMemoryTable,
   EuiTitle,
 } from '@elastic/eui';
