@@ -7,12 +7,10 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
 import { MlDashboardJobSelectionTable } from './dashboard_job_selection_table';
 
 export function MachineLearningDashboardEmbeddablesProvider(
   { getService }: FtrProviderContext,
-  mlCommonUI: MlCommonUI,
   mlDashboardJobSelectionTable: MlDashboardJobSelectionTable
 ) {
   const retry = getService('retry');
@@ -22,14 +20,14 @@ export function MachineLearningDashboardEmbeddablesProvider(
 
   return {
     async assertAnomalyChartsEmbeddableInitializerExists() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('mlAnomalyChartsEmbeddableInitializer');
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.existOrFail('mlAnomalyChartsEmbeddableInitializer', { timeout: 1000 });
       });
     },
 
     async assertAnomalyChartsEmbeddableInitializerNotExists() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.missingOrFail('mlAnomalyChartsEmbeddableInitializer');
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.missingOrFail('mlAnomalyChartsEmbeddableInitializer', { timeout: 1000 });
       });
     },
 

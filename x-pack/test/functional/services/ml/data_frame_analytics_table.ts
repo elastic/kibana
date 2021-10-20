@@ -196,6 +196,11 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       analyticsId: string,
       shouldBeDisplayed: boolean
     ) {
+      await this.waitForRefreshButtonLoaded();
+      await testSubjects.click('~mlAnalyticsRefreshListButton');
+      await this.waitForRefreshButtonLoaded();
+      await testSubjects.existOrFail('mlAnalyticsJobList', { timeout: 30 * 1000 });
+
       if (shouldBeDisplayed) {
         await this.filterWithSearchString(analyticsId, 1);
       } else {
