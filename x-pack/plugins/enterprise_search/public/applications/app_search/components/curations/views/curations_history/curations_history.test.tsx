@@ -10,9 +10,9 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import {
-  CurationChangesPanel,
-  IgnoredSuggestionsPanel,
-  RejectedCurationsPanel,
+  AutomatedCurationsHistoryPanel,
+  IgnoredQueriesPanel,
+  RejectedCurationsHistoryPanel,
 } from './components';
 import { CurationsHistory } from './curations_history';
 
@@ -20,8 +20,8 @@ describe('CurationsHistory', () => {
   it('renders', () => {
     const wrapper = shallow(<CurationsHistory />);
 
-    expect(wrapper.find(CurationChangesPanel)).toHaveLength(1);
-    expect(wrapper.find(RejectedCurationsPanel)).toHaveLength(1);
-    expect(wrapper.find(IgnoredSuggestionsPanel)).toHaveLength(1);
+    expect(wrapper.find(AutomatedCurationsHistoryPanel)).toHaveLength(1);
+    expect(wrapper.find(RejectedCurationsHistoryPanel)).toHaveLength(1);
+    expect(wrapper.find(IgnoredQueriesPanel)).toHaveLength(1);
   });
 });

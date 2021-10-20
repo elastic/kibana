@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
+import { useLocation } from 'react-router-dom';
+
+import { Location } from 'history';
 import { useActions } from 'kea';
 
 import {
@@ -22,6 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { parseQueryParams } from '../../../shared/query_params';
 import { EuiCardTo } from '../../../shared/react_router_helpers';
 import { DOCS_PREFIX, ENGINE_CRAWLER_PATH } from '../../routes';
 import { generateEnginePath } from '../engine';
@@ -34,6 +38,20 @@ interface Props {
 
 export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) => {
   const { openDocumentCreation } = useActions(DocumentCreationLogic);
+
+  const { search } = useLocation() as Location;
+  const { method } = parseQueryParams(search);
+
+  useEffect(() => {
+    switch (method) {
+      case 'json':
+        openDocumentCreation('file');
+        break;
+      case 'api':
+        openDocumentCreation('api');
+        break;
+    }
+  }, []);
 
   const crawlerLink = generateEnginePath(ENGINE_CRAWLER_PATH);
 
