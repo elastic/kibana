@@ -43,29 +43,31 @@ export const setSignalsStatusRoute = (
     },
     async (context, request, response) => {
       const { conflicts, signal_ids: signalIds, query, status } = request.body;
-      // Sometimes the ids are in the query not passed in the request?
-      const toSendAlertIds = signalIds || get(query, 'bool.filter.terms._id');
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const siemClient = context.securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
       const validationErrors = setSignalStatusValidateTypeDependents(request.body);
-
-      // Get Context for Insights Payloads
-      const clusterId = await sender.getClusterID();
-      const username = await security?.authc.getCurrentUser(request)?.username;
-      const insightsService = new InsightsService(clusterId);
-      const sessionId = insightsService.getSessionIDfromKibanaRequest(request);
       const isTelemetryOptedIn = await sender.isTelemetryOptedIn();
-      if (isTelemetryOptedIn && username && toSendAlertIds) {
-        const insightsPayloads = insightsService.createAlertStatusPayloads(
-          toSendAlertIds,
-          sessionId,
-          username,
-          DETECTION_ENGINE_SIGNALS_STATUS_URL,
-          status
-        );
-        logger.debug(`Sending Insights Payloads ${JSON.stringify(insightsPayloads)}`);
-        await sender.sendOnDemand(INSIGHTS_CHANNEL, insightsPayloads);
+      if (isTelemetryOptedIn) {
+        // Sometimes the ids are in the query not passed in the request?
+        const toSendAlertIds = signalIds || get(query, 'bool.filter.terms._id');
+
+        // Get Context for Insights Payloads
+        const clusterId = await sender.getClusterID();
+        const username = await security?.authc.getCurrentUser(request)?.username;
+        const insightsService = new InsightsService(clusterId);
+        const sessionId = insightsService.getSessionIDfromKibanaRequest(request);
+        if (username && toSendAlertIds) {
+          const insightsPayloads = insightsService.createAlertStatusPayloads(
+            toSendAlertIds,
+            sessionId,
+            username,
+            DETECTION_ENGINE_SIGNALS_STATUS_URL,
+            status
+          );
+          logger.debug(`Sending Insights Payloads ${JSON.stringify(insightsPayloads)}`);
+          await sender.sendOnDemand(INSIGHTS_CHANNEL, insightsPayloads);
+        }
       }
 
       if (validationErrors.length) {

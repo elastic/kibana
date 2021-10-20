@@ -284,10 +284,7 @@ export class TelemetryEventsSender {
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
-      this.logger.warn(`Error sending events (1): ${err}`);
-      this.logger.warn(
-        `Error sending events (2): ${err.response.status} ${JSON.stringify(err.response.data)}`
-      );
+      this.logger.debug(`Error sending events: ${err}`);
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_lost',
