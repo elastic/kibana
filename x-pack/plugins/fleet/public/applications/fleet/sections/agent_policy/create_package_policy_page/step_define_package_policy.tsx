@@ -105,11 +105,12 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             agentPolicy?.id || '',
             packagePolicy.output_id,
             packagePolicy.namespace,
-            `${packageInfo.name}-${
-              pkgPoliciesWithMatchingNames.length
-                ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-                : 1
-            }`,
+            packagePolicy.name ||
+              `${packageInfo.name}-${
+                pkgPoliciesWithMatchingNames.length
+                  ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
+                  : 1
+              }`,
             packagePolicy.description,
             integrationToEnable
           )

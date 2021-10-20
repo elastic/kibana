@@ -61,7 +61,11 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
     const isEdit = useMemo(() => ['edit', 'package-edit'].includes(from), [from]);
     const isUpgrade = useMemo(
       () =>
-        ['upgrade-from-fleet-policy-list', 'upgrade-from-integrations-policy-list'].includes(from),
+        [
+          'upgrade-from-fleet-policy-list',
+          'upgrade-from-integrations-policy-list',
+          'upgrade-from-extension',
+        ].includes(from),
       [from]
     );
 
