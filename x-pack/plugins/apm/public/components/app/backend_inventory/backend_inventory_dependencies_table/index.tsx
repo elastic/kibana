@@ -68,7 +68,7 @@ export function BackendInventoryDependenciesTable() {
           type={location.spanType}
           subtype={location.spanSubtype}
           query={{
-            comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+            comparisonEnabled,
             comparisonType,
             environment,
             kuery,

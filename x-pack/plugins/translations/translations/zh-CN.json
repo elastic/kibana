@@ -6339,7 +6339,6 @@
     "xpack.apm.errorGroupDetails.relatedTransactionSample": "相关的事务样本",
     "xpack.apm.errorGroupDetails.unhandledLabel": "未处理",
     "xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel": "在 Discover 中查看 {occurrencesCount} 次{occurrencesCount, plural, other {发生}}",
-    "xpack.apm.errorRate": "失败事务率",
     "xpack.apm.errorRate.chart.errorRate": "失败事务率（平均值）",
     "xpack.apm.errorRate.chart.errorRate.previousPeriodLabel": "上一时段",
     "xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel": "错误消息和原因",

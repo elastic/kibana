@@ -7,13 +7,11 @@
 
 import moment from 'moment';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
+import {
+  TimeRangeComparisonType,
+  TimeRangeComparisonEnum,
+} from '../../../../common/runtime_types/comparison_type_rt';
 import { getDateDifference } from '../../../../common/utils/formatters';
-
-export enum TimeRangeComparisonType {
-  WeekBefore = 'week',
-  DayBefore = 'day',
-  PeriodBefore = 'period',
-}
 
 export function getComparisonChartTheme(theme: EuiTheme) {
   return {
@@ -63,17 +61,17 @@ export function getTimeRangeComparison({
   let offset: string;
 
   switch (comparisonType) {
-    case TimeRangeComparisonType.DayBefore:
+    case TimeRangeComparisonEnum.DayBefore:
       diff = oneDayInMilliseconds;
       offset = '1d';
       break;
 
-    case TimeRangeComparisonType.WeekBefore:
+    case TimeRangeComparisonEnum.WeekBefore:
       diff = oneWeekInMilliseconds;
       offset = '1w';
       break;
 
-    case TimeRangeComparisonType.PeriodBefore:
+    case TimeRangeComparisonEnum.PeriodBefore:
       diff = getDateDifference({
         start: startMoment,
         end: endMoment,

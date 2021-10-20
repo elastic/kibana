@@ -8,28 +8,30 @@
 import {
   Axis,
   Chart,
-  HistogramBarSeries,
+  BarSeries,
   niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
-  SettingsSpec,
-  TooltipValue,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
-import d3 from 'd3';
 import React, { Suspense, useState } from 'react';
 import type { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED } from '@kbn/rule-data-utils';
 // @ts-expect-error
 import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { i18n } from '@kbn/i18n';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
+import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
 import { useTheme } from '../../../../hooks/use_theme';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { AlertType } from '../../../../../common/alert_types';
 import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_annotations';
+import { ChartContainer } from '../../../shared/charts/chart_container';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { LazyAlertsFlyout } from '../../../../../../observability/public';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { Coordinate } from '../../../../../typings/timeseries';
 
 const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
   ALERT_RULE_TYPE_ID_NON_TYPED;
@@ -37,70 +39,85 @@ const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
 type ErrorDistributionAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
 
-interface FormattedBucket {
-  x0: number;
-  x: number;
-  y: number | undefined;
-}
-
-export function getFormattedBuckets(
-  buckets: ErrorDistributionAPIResponse['buckets'],
-  bucketSize: number
-): FormattedBucket[] {
+export function getCoordinatedBuckets(
+  buckets:
+    | ErrorDistributionAPIResponse['currentPeriod']
+    | ErrorDistributionAPIResponse['previousPeriod']
+): Coordinate[] {
   return buckets.map(({ count, key }) => {
     return {
-      x0: key,
-      x: key + bucketSize,
+      x: key,
       y: count,
     };
   });
 }
-
 interface Props {
+  fetchStatus: FETCH_STATUS;
   distribution: ErrorDistributionAPIResponse;
   title: React.ReactNode;
 }
 
-export function ErrorDistribution({ distribution, title }: Props) {
+export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const theme = useTheme();
-  const buckets = getFormattedBuckets(
-    distribution.buckets,
-    distribution.bucketSize
-  );
+  const currentPeriod = getCoordinatedBuckets(distribution.currentPeriod);
+  const previousPeriod = getCoordinatedBuckets(distribution.previousPeriod);
 
-  const xMin = d3.min(buckets, (d) => d.x0);
-  const xMax = d3.max(buckets, (d) => d.x0);
+  const { urlParams } = useUrlParams();
+  const { comparisonEnabled } = urlParams;
 
-  const xFormatter = niceTimeFormatter([xMin, xMax]);
+  const timeseries = [
+    {
+      data: currentPeriod,
+      color: theme.eui.euiColorVis1,
+      title: i18n.translate('xpack.apm.errorGroup.chart.ocurrences', {
+        defaultMessage: 'Occurences',
+      }),
+    },
+    ...(comparisonEnabled
+      ? [
+          {
+            data: offsetPreviousPeriodCoordinates({
+              currentPeriodTimeseries: currentPeriod,
+              previousPeriodTimeseries: previousPeriod,
+            }),
+            color: theme.eui.euiColorMediumShade,
+            title: i18n.translate(
+              'xpack.apm.errorGroup.chart.ocurrences.previousPeriodLabel',
+              { defaultMessage: 'Previous period' }
+            ),
+          },
+        ]
+      : []),
+  ];
+
+  const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
+
+  const min = Math.min(...xValues);
+  const max = Math.max(...xValues);
+
+  const xFormatter = niceTimeFormatter([min, max]);
   const { observabilityRuleTypeRegistry } = useApmPluginContext();
-
   const { alerts } = useApmServiceContext();
   const { getFormatter } = observabilityRuleTypeRegistry;
   const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
     undefined
   );
 
-  const tooltipProps: SettingsSpec['tooltip'] = {
-    stickTo: 'top',
-    headerFormatter: (tooltip: TooltipValue) => {
-      const serie = buckets.find((bucket) => bucket.x0 === tooltip.value);
-      if (serie) {
-        return asRelativeDateTimeRange(serie.x0, serie.x);
-      }
-      return `${tooltip.value}`;
-    },
-  };
-
   return (
     <>
       <EuiTitle size="xs">
         <span>{title}</span>
       </EuiTitle>
-      <div style={{ height: 180 }}>
+      <ChartContainer
+        hasData={!!distribution}
+        height={256}
+        status={fetchStatus}
+        id="errorDistribution"
+      >
         <Chart>
           <Settings
-            xDomain={{ min: xMin, max: xMax }}
-            tooltip={tooltipProps}
+            xDomain={{ min, max }}
+            tooltip={{ stickTo: 'top' }}
             showLegend
             showLegendExtra
             legendPosition={Position.Bottom}
@@ -117,22 +134,27 @@ export function ErrorDistribution({ distribution, title }: Props) {
             ticks={2}
             gridLine={{ visible: true }}
           />
-          <HistogramBarSeries
-            minBarHeight={2}
-            id="errorOccurrences"
-            name="Occurences"
-            xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x0"
-            yAccessors={['y']}
-            data={buckets}
-            color={theme.eui.euiColorVis1}
-          />
+
+          {timeseries.map((serie) => {
+            return (
+              <BarSeries
+                key={serie.title}
+                id={serie.title}
+                minBarHeight={2}
+                xScaleType={ScaleType.Linear}
+                yScaleType={ScaleType.Linear}
+                xAccessor="x"
+                yAccessors={['y']}
+                data={serie.data}
+                color={serie.color}
+              />
+            );
+          })}
           {getAlertAnnotations({
             alerts: alerts?.filter(
               (alert) => alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.ErrorCount
             ),
-            chartStartTime: buckets[0]?.x0,
+            chartStartTime: xValues[0],
             getFormatter,
             selectedAlertId,
             setSelectedAlertId,
@@ -150,7 +172,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
             />
           </Suspense>
         </Chart>
-      </div>
+      </ChartContainer>
     </>
   );
 }

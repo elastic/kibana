@@ -86,7 +86,6 @@ export async function getBuckets({
   );
 
   return {
-    noHits: resp.hits.total.value === 0,
     buckets: resp.hits.total.value > 0 ? buckets : [],
   };
 }
