@@ -46,48 +46,6 @@ export const jobTypeAriaLabels = {
   }),
 };
 
-export const jobTypeLabels = {
-  [JOB_FIELD_TYPES.BOOLEAN]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.booleanTypeLabel', {
-    defaultMessage: 'Boolean',
-  }),
-  [JOB_FIELD_TYPES.DATE]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.dateTypeLabel', {
-    defaultMessage: 'Date',
-  }),
-  [JOB_FIELD_TYPES.GEO_POINT]: i18n.translate(
-    'xpack.dataVisualizer.fieldTypeIcon.geoPointTypeLabel',
-    {
-      defaultMessage: 'Geo point',
-    }
-  ),
-  [JOB_FIELD_TYPES.GEO_SHAPE]: i18n.translate(
-    'xpack.dataVisualizer.fieldTypeIcon.geoShapeTypeLabel',
-    {
-      defaultMessage: 'Geo shape',
-    }
-  ),
-  [JOB_FIELD_TYPES.IP]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.ipTypeLabel', {
-    defaultMessage: 'IP',
-  }),
-  [JOB_FIELD_TYPES.KEYWORD]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.keywordTypeLabel', {
-    defaultMessage: 'Keyword',
-  }),
-  [JOB_FIELD_TYPES.NUMBER]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.numberTypeLabel', {
-    defaultMessage: 'Number',
-  }),
-  [JOB_FIELD_TYPES.HISTOGRAM]: i18n.translate(
-    'xpack.dataVisualizer.fieldTypeIcon.histogramTypeLabel',
-    {
-      defaultMessage: 'Histogram',
-    }
-  ),
-  [JOB_FIELD_TYPES.TEXT]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.textTypeLabel', {
-    defaultMessage: 'Text',
-  }),
-  [JOB_FIELD_TYPES.UNKNOWN]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.unknownTypeLabel', {
-    defaultMessage: 'Unknown',
-  }),
-};
-
 export const getJobTypeAriaLabel = (type: string) => {
   const requestedFieldType = Object.keys(JOB_FIELD_TYPES).find(
     (k) => JOB_FIELD_TYPES[k as keyof typeof JOB_FIELD_TYPES] === type
