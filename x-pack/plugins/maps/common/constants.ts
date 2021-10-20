@@ -48,13 +48,6 @@ export const CHECK_IS_DRAWING_INDEX = `/${GIS_API_PATH}/checkIsDrawingIndex`;
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 
-// Identifies vector tile "too many features" feature.
-// "too many features" feature is a box showing area that contains too many features for single ES search response
-export const KBN_METADATA_FEATURE = '__kbn_metadata_feature__';
-export const KBN_FEATURE_COUNT = '__kbn_feature_count__';
-export const KBN_IS_TILE_COMPLETE = '__kbn_is_tile_complete__';
-export const KBN_VECTOR_SHAPE_TYPE_COUNTS = '__kbn_vector_shape_type_counts__';
-export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
 // Identifies centroid feature.
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
 export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';

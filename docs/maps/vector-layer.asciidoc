@@ -29,7 +29,7 @@ Results exceeding `index.max_result_window` are not displayed.
 
 * *Use vector tiles.* Vector tiles partition your map into tiles.
 Each tile request is limited to the `index.max_result_window` index setting.
-When a tile exceeds `index.max_result_window`, results exceeding `index.max_result_window` are not contained in the tile and a dashed rectangle of the bounding box containing all geo values within the tile is displayed.
+When a tile exceeds `index.max_result_window`, results exceeding `index.max_result_window` are not contained in the tile and a dashed rectangle outlining the bounding box containing all geo values within the tile is displayed.
 
 *EMS Boundaries*:: Administrative boundaries from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
 
