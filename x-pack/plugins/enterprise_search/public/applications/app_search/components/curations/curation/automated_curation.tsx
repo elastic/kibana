@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
@@ -31,23 +31,19 @@ import { CurationLogic } from './curation_logic';
 import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, OrganicDocuments } from './documents';
 
-const PROMOTED = 'promoted';
-const HISTORY = 'history';
-
 export const AutomatedCuration: React.FC = () => {
   const { curationId } = useParams<{ curationId: string }>();
   const logic = CurationLogic({ curationId });
-  const { convertToManual } = useActions(logic);
-  const { activeQuery, dataLoading, queries, curation } = useValues(logic);
+  const { convertToManual, onSelectPageTab } = useActions(logic);
+  const { activeQuery, dataLoading, queries, curation, selectedPageTab } = useValues(logic);
   const { engineName } = useValues(EngineLogic);
-  const [selectedPageTab, setSelectedPageTab] = useState(PROMOTED);
 
   const pageTabs = [
     {
       label: PROMOTED_DOCUMENTS_TITLE,
       append: <EuiBadge>{curation.promoted.length}</EuiBadge>,
-      isSelected: selectedPageTab === PROMOTED,
-      onClick: () => setSelectedPageTab(PROMOTED),
+      isSelected: selectedPageTab === 'promoted',
+      onClick: () => onSelectPageTab('promoted'),
     },
     {
       label: HIDDEN_DOCUMENTS_TITLE,
@@ -62,8 +58,8 @@ export const AutomatedCuration: React.FC = () => {
           defaultMessage: 'History',
         }
       ),
-      isSelected: selectedPageTab === HISTORY,
-      onClick: () => setSelectedPageTab(HISTORY),
+      isSelected: selectedPageTab === 'history',
+      onClick: () => onSelectPageTab('history'),
     },
   ];
 
@@ -102,9 +98,9 @@ export const AutomatedCuration: React.FC = () => {
       }}
       isLoading={dataLoading}
     >
-      {selectedPageTab === PROMOTED && <PromotedDocuments />}
-      {selectedPageTab === PROMOTED && <OrganicDocuments />}
-      {selectedPageTab === HISTORY && (
+      {selectedPageTab === 'promoted' && <PromotedDocuments />}
+      {selectedPageTab === 'promoted' && <OrganicDocuments />}
+      {selectedPageTab === 'history' && (
         <AutomatedCurationHistory query={curation.queries[0]} engineName={engineName} />
       )}
     </AppSearchPageTemplate>
