@@ -513,7 +513,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { isDimensionComplete: true, forceRender: false },
+    ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...initialState,
       layers: {
@@ -545,7 +548,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { isDimensionComplete: true, forceRender: false },
+    ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
       layers: {
@@ -1037,7 +1043,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
 
       expect(setState.mock.calls.length).toEqual(2);
-      expect(setState.mock.calls[1]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+      expect(setState.mock.calls[1]).toEqual([
+        expect.any(Function),
+        { isDimensionComplete: true, forceRender: false },
+      ]);
       expect(setState.mock.calls[1][0](state)).toEqual({
         ...state,
         layers: {
@@ -1921,7 +1930,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { isDimensionComplete: true, forceRender: false },
+    ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
       layers: {
@@ -2263,7 +2275,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     ).toBeTruthy();
   });
 
-  it('should now show the static_value tab when not supported', () => {
+  it('should not show the static_value tab when not supported', () => {
     const stateWithFormulaColumn: IndexPatternPrivateState = getStateWithColumns({
       col1: {
         label: 'Formula',
@@ -2336,5 +2348,29 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(
       wrapper.find('[data-test-subj="lens-dimensionTabs-static_value"]').first().prop('isSelected')
     ).toBeTruthy();
+  });
+
+  it('should not show any tab when formula is in full screen mode', () => {
+    const stateWithFormulaColumn: IndexPatternPrivateState = getStateWithColumns({
+      col1: {
+        label: 'Formula',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'formula',
+        references: ['ref1'],
+        params: {},
+      },
+    });
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        state={stateWithFormulaColumn}
+        supportStaticValue
+        isFullscreen
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="lens-dimensionTabs"]').exists()).toBeFalsy();
   });
 });

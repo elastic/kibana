@@ -23,9 +23,9 @@ export const buildActionDetailsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: '.fleet-actions',
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: { bool: { filter } },
       size: 1,

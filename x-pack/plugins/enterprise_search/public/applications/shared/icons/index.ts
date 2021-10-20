@@ -6,3 +6,4 @@
  */
 
 export { LightbulbIcon } from './lightbulb_icon';
+export { LeafIcon } from './leaf_icon';

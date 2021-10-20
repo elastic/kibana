@@ -13,7 +13,6 @@ import { TaskManagerConfig } from '../config';
 describe('Configuration Statistics Aggregator', () => {
   test('merges the static config with the merged configs', async () => {
     const configuration: TaskManagerConfig = {
-      enabled: true,
       max_workers: 10,
       index: 'foo',
       max_attempts: 9,

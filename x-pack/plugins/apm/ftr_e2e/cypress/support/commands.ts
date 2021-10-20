@@ -21,6 +21,7 @@ Cypress.Commands.add(
     cy.log(`Logging in as ${username}`);
     const kibanaUrl = Cypress.env('KIBANA_URL');
     cy.request({
+      log: false,
       method: 'POST',
       url: `${kibanaUrl}/internal/security/login`,
       body: {

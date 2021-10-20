@@ -17,8 +17,19 @@ export class EndpointError extends Error {
 
 export class NotFoundError extends EndpointError {}
 
+export class EndpointAppContentServicesNotSetUpError extends EndpointError {
+  constructor() {
+    super('EndpointAppContextService has not been set up (EndpointAppContextService.setup())');
+  }
+}
+
 export class EndpointAppContentServicesNotStartedError extends EndpointError {
   constructor() {
     super('EndpointAppContextService has not been started (EndpointAppContextService.start())');
+  }
+}
+export class EndpointLicenseError extends EndpointError {
+  constructor() {
+    super('Your license level does not allow for this action.');
   }
 }

@@ -8,20 +8,21 @@
 import type { SavedObjectsClientContract } from 'kibana/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isEqual } from 'lodash/fp';
 import { ExceptionListClient } from '../../../../../lists/server';
 
 import {
   DeleteTrustedAppsRequestParams,
   GetOneTrustedAppResponse,
   GetTrustedAppsListRequest,
+  GetTrustedAppsListResponse,
+  GetTrustedAppsSummaryRequest,
   GetTrustedAppsSummaryResponse,
-  GetTrustedListAppsResponse,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
   PutTrustedAppUpdateRequest,
   PutTrustedAppUpdateResponse,
-  GetTrustedAppsSummaryRequest,
+  TrustedApp,
 } from '../../../../common/endpoint/types';
 
 import {
@@ -32,11 +33,12 @@ import {
 } from './mapping';
 import {
   TrustedAppNotFoundError,
-  TrustedAppVersionConflictError,
   TrustedAppPolicyNotExistsError,
+  TrustedAppVersionConflictError,
 } from './errors';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { PackagePolicy } from '../../../../../fleet/common';
+import { EndpointLicenseError } from '../../errors';
 
 const getNonExistingPoliciesFromTrustedApp = async (
   savedObjectClient: SavedObjectsClientContract,
@@ -63,30 +65,83 @@ const getNonExistingPoliciesFromTrustedApp = async (
   return policies.filter((policy) => policy.version === undefined);
 };
 
-export const deleteTrustedApp = async (
+const isUserTryingToModifyEffectScopeWithoutPermissions = (
+  currentTrustedApp: TrustedApp,
+  updatedTrustedApp: PutTrustedAppUpdateRequest,
+  isAtLeastPlatinum: boolean
+): boolean => {
+  if (updatedTrustedApp.effectScope.type === 'global') {
+    return false;
+  } else if (isAtLeastPlatinum) {
+    return false;
+  } else if (
+    isEqual(
+      currentTrustedApp.effectScope.type === 'policy' &&
+        currentTrustedApp.effectScope.policies.sort(),
+      updatedTrustedApp.effectScope.policies.sort()
+    )
+  ) {
+    return false;
+  } else {
+    return true;
+  }
+};
+
+/**
+ * Attempts to first fine the ExceptionItem using `item_id` and if not found, then a second attempt wil be done
+ * against the Saved Object `id`.
+ * @param exceptionsListClient
+ * @param id
+ */
+export const findTrustedAppExceptionItemByIdOrItemId = async (
   exceptionsListClient: ExceptionListClient,
-  { id }: DeleteTrustedAppsRequestParams
-) => {
-  const exceptionListItem = await exceptionsListClient.deleteExceptionListItem({
-    id,
-    itemId: undefined,
+  id: string
+): Promise<ExceptionListItemSchema | null> => {
+  const trustedAppExceptionItem = await exceptionsListClient.getExceptionListItem({
+    itemId: id,
+    id: undefined,
     namespaceType: 'agnostic',
   });
 
-  if (!exceptionListItem) {
+  if (trustedAppExceptionItem) {
+    return trustedAppExceptionItem;
+  }
+
+  return exceptionsListClient.getExceptionListItem({
+    itemId: undefined,
+    id,
+    namespaceType: 'agnostic',
+  });
+};
+
+export const deleteTrustedApp = async (
+  exceptionsListClient: ExceptionListClient,
+  { id }: DeleteTrustedAppsRequestParams
+): Promise<void> => {
+  const trustedAppExceptionItem = await findTrustedAppExceptionItemByIdOrItemId(
+    exceptionsListClient,
+    id
+  );
+
+  if (!trustedAppExceptionItem) {
     throw new TrustedAppNotFoundError(id);
   }
+
+  await exceptionsListClient.deleteExceptionListItem({
+    id: trustedAppExceptionItem.id,
+    itemId: undefined,
+    namespaceType: 'agnostic',
+  });
 };
 
 export const getTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
   id: string
 ): Promise<GetOneTrustedAppResponse> => {
-  const trustedAppExceptionItem = await exceptionsListClient.getExceptionListItem({
-    itemId: '',
-    id,
-    namespaceType: 'agnostic',
-  });
+  const trustedAppExceptionItem = await findTrustedAppExceptionItemByIdOrItemId(
+    exceptionsListClient,
+    id
+  );
 
   if (!trustedAppExceptionItem) {
     throw new TrustedAppNotFoundError(id);
@@ -100,7 +155,7 @@ export const getTrustedApp = async (
 export const getTrustedAppsList = async (
   exceptionsListClient: ExceptionListClient,
   { page, per_page: perPage, kuery }: GetTrustedAppsListRequest
-): Promise<GetTrustedListAppsResponse> => {
+): Promise<GetTrustedAppsListResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
 
@@ -118,6 +173,7 @@ export const getTrustedAppsList = async (
     data: results?.data.map(exceptionListItemToTrustedApp) ?? [],
     total: results?.total ?? 0,
     page: results?.page ?? 1,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     per_page: results?.per_page ?? perPage!,
   };
 };
@@ -126,10 +182,15 @@ export const createTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
   savedObjectClient: SavedObjectsClientContract,
   packagePolicyClient: PackagePolicyServiceInterface,
-  newTrustedApp: PostTrustedAppCreateRequest
+  newTrustedApp: PostTrustedAppCreateRequest,
+  isAtLeastPlatinum: boolean
 ): Promise<PostTrustedAppCreateResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
+
+  if (newTrustedApp.effectScope.type === 'policy' && !isAtLeastPlatinum) {
+    throw new EndpointLicenseError();
+  }
 
   const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(
     savedObjectClient,
@@ -156,16 +217,26 @@ export const updateTrustedApp = async (
   savedObjectClient: SavedObjectsClientContract,
   packagePolicyClient: PackagePolicyServiceInterface,
   id: string,
-  updatedTrustedApp: PutTrustedAppUpdateRequest
+  updatedTrustedApp: PutTrustedAppUpdateRequest,
+  isAtLeastPlatinum: boolean
 ): Promise<PutTrustedAppUpdateResponse> => {
-  const currentTrustedApp = await exceptionsListClient.getExceptionListItem({
-    itemId: '',
-    id,
-    namespaceType: 'agnostic',
-  });
+  const currentTrustedAppExceptionItem = await findTrustedAppExceptionItemByIdOrItemId(
+    exceptionsListClient,
+    id
+  );
 
-  if (!currentTrustedApp) {
+  if (!currentTrustedAppExceptionItem) {
     throw new TrustedAppNotFoundError(id);
+  }
+
+  if (
+    isUserTryingToModifyEffectScopeWithoutPermissions(
+      exceptionListItemToTrustedApp(currentTrustedAppExceptionItem),
+      updatedTrustedApp,
+      isAtLeastPlatinum
+    )
+  ) {
+    throw new EndpointLicenseError();
   }
 
   const unexistingPolicies = await getNonExistingPoliciesFromTrustedApp(
@@ -185,7 +256,10 @@ export const updateTrustedApp = async (
 
   try {
     updatedTrustedAppExceptionItem = await exceptionsListClient.updateExceptionListItem(
-      updatedTrustedAppToUpdateExceptionListItemOptions(currentTrustedApp, updatedTrustedApp)
+      updatedTrustedAppToUpdateExceptionListItemOptions(
+        currentTrustedAppExceptionItem,
+        updatedTrustedApp
+      )
     );
   } catch (e) {
     if (e?.output?.statusCode === 409) {
@@ -222,6 +296,7 @@ export const getTrustedAppsSummary = async (
   let page = 1;
 
   while (paging) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { data, total } = (await exceptionsListClient.findExceptionListItem({
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page,

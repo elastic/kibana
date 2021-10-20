@@ -26,12 +26,6 @@ import { Job } from '../lib/job';
 import { InternalApiClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
 import { KibanaContextProvider } from '../shared_imports';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
-
 interface PayloadMock {
   payload: Omit<ReportApiJSON['payload'], 'browserTimezone' | 'version' | 'layout'>;
 }

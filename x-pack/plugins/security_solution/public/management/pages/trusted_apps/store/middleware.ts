@@ -191,6 +191,7 @@ const submitCreationIfNeeded = async (
       if (editMode) {
         responseTrustedApp = (
           await trustedAppsService.updateTrustedApp(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             { id: editItemId(currentState)! },
             // TODO: try to remove the cast
             entry as PostTrustedAppCreateRequest
@@ -412,11 +413,9 @@ const fetchEditTrustedAppIfNeeded = async (
         dispatch({
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
-            // No easy way to get around this that I can see. `previousState` does not
-            // seem to allow everything that `editItem` state can hold, so not even sure if using
-            // type guards would work here
-            // @ts-ignore
+            // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
             type: 'LoadingResourceState',
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             previousState: editItemState(currentState)!,
           },
         });

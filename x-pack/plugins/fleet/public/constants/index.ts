@@ -19,6 +19,9 @@ export {
   // Fleet Server index
   AGENTS_INDEX,
   ENROLLMENT_API_KEYS_INDEX,
+  // Preconfiguration
+  AUTO_UPDATE_PACKAGES,
+  DEFAULT_PACKAGES,
 } from '../../common/constants';
 
 export * from './page_paths';

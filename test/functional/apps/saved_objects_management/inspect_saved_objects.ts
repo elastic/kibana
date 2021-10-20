@@ -32,7 +32,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     return bools.every((currBool) => currBool === true);
   };
 
-  describe('saved objects edition page', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/68400
+  describe.skip('saved objects edition page', () => {
     beforeEach(async () => {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/edit_saved_object'

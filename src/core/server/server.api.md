@@ -11,6 +11,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
 import { ClientOptions } from '@elastic/elasticsearch';
 import { ConfigDeprecation } from '@kbn/config';
+import { ConfigDeprecationContext } from '@kbn/config';
 import { ConfigDeprecationFactory } from '@kbn/config';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
@@ -32,6 +33,7 @@ import { LoggerFactory } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { LogRecord } from '@kbn/logging';
+import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
@@ -71,12 +73,11 @@ export interface AppCategory {
 
 // Warning: (ae-forgotten-export) The symbol "ConsoleAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "FileAppenderConfig" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "LegacyAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "RewriteAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "RollingFileAppenderConfig" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig | RewriteAppenderConfig | RollingFileAppenderConfig;
+export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | RewriteAppenderConfig | RollingFileAppenderConfig;
 
 // @public @deprecated
 export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
@@ -153,6 +154,27 @@ export interface AuthToolkit {
     redirected: (headers: {
         location: string;
     } & ResponseHeaders) => AuthResult;
+}
+
+// @public
+export interface BaseDeprecationDetails {
+    correctiveActions: {
+        api?: {
+            path: string;
+            method: 'POST' | 'PUT';
+            body?: {
+                [key: string]: any;
+            };
+            omitContextFromBody?: boolean;
+        };
+        manualSteps: string[];
+    };
+    deprecationType?: 'config' | 'feature';
+    documentationUrl?: string;
+    level: 'warning' | 'critical' | 'fetch_error';
+    message: string;
+    requireRestart?: boolean;
+    title: string;
 }
 
 // @public
@@ -246,6 +268,16 @@ export const config: {
 };
 
 export { ConfigDeprecation }
+
+export { ConfigDeprecationContext }
+
+// @public (undocumented)
+export interface ConfigDeprecationDetails extends BaseDeprecationDetails {
+    // (undocumented)
+    configPath: string;
+    // (undocumented)
+    deprecationType: 'config';
+}
 
 export { ConfigDeprecationFactory }
 
@@ -752,8 +784,6 @@ export class CspConfig implements ICspConfig {
     // (undocumented)
     readonly header: string;
     // (undocumented)
-    readonly rules: string[];
-    // (undocumented)
     readonly strict: boolean;
     // (undocumented)
     readonly warnLegacyBrowsers: boolean;
@@ -801,30 +831,8 @@ export interface DeprecationsClient {
     getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
 }
 
-// Warning: (ae-missing-release-tag) "DeprecationsDetails" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
-export interface DeprecationsDetails {
-    // (undocumented)
-    correctiveActions: {
-        api?: {
-            path: string;
-            method: 'POST' | 'PUT';
-            body?: {
-                [key: string]: any;
-            };
-        };
-        manualSteps: string[];
-    };
-    deprecationType?: 'config' | 'feature';
-    // (undocumented)
-    documentationUrl?: string;
-    level: 'warning' | 'critical' | 'fetch_error';
-    message: string;
-    // (undocumented)
-    requireRestart?: boolean;
-    title: string;
-}
+export type DeprecationsDetails = ConfigDeprecationDetails | FeatureDeprecationDetails;
 
 // @public
 export interface DeprecationSettings {
@@ -975,6 +983,12 @@ export interface FakeRequest {
     headers: Headers;
 }
 
+// @public (undocumented)
+export interface FeatureDeprecationDetails extends BaseDeprecationDetails {
+    // (undocumented)
+    deprecationType?: 'feature' | undefined;
+}
+
 // @public
 export type GetAuthHeaders = (request: KibanaRequest) => AuthHeaders | undefined;
 
@@ -984,8 +998,6 @@ export type GetAuthState = <T = unknown>(request: KibanaRequest) => {
     state: T;
 };
 
-// Warning: (ae-missing-release-tag) "GetDeprecationsContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
 export interface GetDeprecationsContext {
     // (undocumented)
@@ -1139,7 +1151,6 @@ export type IContextProvider<Context extends RequestHandlerContext, ContextName 
 export interface ICspConfig {
     readonly disableEmbedding: boolean;
     readonly header: string;
-    readonly rules: string[];
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
 }
@@ -1700,12 +1711,8 @@ export type RedirectResponseOptions = HttpResponseOptions & {
     };
 };
 
-// Warning: (ae-missing-release-tag) "RegisterDeprecationsConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
 export interface RegisterDeprecationsConfig {
-    // Warning: (ae-forgotten-export) The symbol "MaybePromise" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     getDeprecations: (context: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
 }

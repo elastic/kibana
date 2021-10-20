@@ -41,6 +41,7 @@ const showMLJobNotification = (
   basePath: string,
   range: { to: string; from: string },
   success: boolean,
+  awaitingNodeAssignment: boolean,
   error?: Error
 ) => {
   if (success) {
@@ -51,7 +52,9 @@ const showMLJobNotification = (
         ),
         text: toMountPoint(
           <p>
-            {labels.JOB_CREATED_SUCCESS_MESSAGE}
+            {awaitingNodeAssignment
+              ? labels.JOB_CREATED_LAZY_SUCCESS_MESSAGE
+              : labels.JOB_CREATED_SUCCESS_MESSAGE}
             <MLJobLink monitorId={monitorId} basePath={basePath} dateRange={range}>
               {labels.VIEW_JOB}
             </MLJobLink>
@@ -107,7 +110,8 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
           monitorId as string,
           basePath,
           { to: dateRangeEnd, from: dateRangeStart },
-          true
+          true,
+          hasMLJob.awaitingNodeAssignment
         );
         const loadMLJob = (jobId: string) =>
           dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
@@ -122,6 +126,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
           monitorId as string,
           basePath,
           { to: dateRangeEnd, from: dateRangeStart },
+          false,
           false,
           error as Error
         );

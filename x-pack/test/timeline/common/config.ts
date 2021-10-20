@@ -91,7 +91,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.security.audit.appender.type=file',
           `--xpack.security.audit.appender.fileName=${auditLogPath}`,
           '--xpack.security.audit.appender.layout.type=json',
-          `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
+          `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

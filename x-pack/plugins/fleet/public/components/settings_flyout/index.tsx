@@ -36,7 +36,7 @@ import {
   useGetSettings,
   useInput,
   sendPutSettings,
-  useGetOutputs,
+  useDefaultOutput,
   sendPutOutput,
 } from '../../hooks';
 import { isDiffPathProtocol, normalizeHostsForAgents } from '../../../common';
@@ -258,8 +258,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
 
   const settingsRequest = useGetSettings();
   const settings = settingsRequest?.data?.item;
-  const outputsRequest = useGetOutputs();
-  const output = outputsRequest.data?.items?.[0];
+  const { output } = useDefaultOutput();
   const { inputs, submit, validate, isLoading } = useSettingsForm(output?.id, onClose);
 
   const [isConfirmModalVisible, setConfirmModalVisible] = React.useState(false);
@@ -383,7 +382,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
                   >
                     <FormattedMessage
                       id="xpack.fleet.settings.userGuideLink"
-                      defaultMessage="Fleet User Guide"
+                      defaultMessage="Fleet and Elastic Agent Guide"
                     />
                   </EuiLink>
                 ),

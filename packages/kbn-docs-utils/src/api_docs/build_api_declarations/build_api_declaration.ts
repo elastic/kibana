@@ -7,11 +7,11 @@
  */
 
 import { FunctionTypeNode, Node } from 'ts-morph';
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { buildClassDec } from './build_class_dec';
 import { buildFunctionDec } from './build_function_dec';
 import { isNamedNode } from '../tsmorph_utils';
-import { ApiDeclaration } from '../types';
+import { ApiDeclaration, PluginOrPackage } from '../types';
 import { buildVariableDec } from './build_variable_dec';
 import { buildTypeLiteralDec } from './build_type_literal_dec';
 import { ApiScope } from '../types';
@@ -25,7 +25,7 @@ import { buildApiId } from './utils';
 export function buildApiDeclarationTopNode(
   node: Node,
   opts: {
-    plugins: KibanaPlatformPlugin[];
+    plugins: PluginOrPackage[];
     log: ToolingLog;
     currentPluginId: string;
     captureReferences: boolean;

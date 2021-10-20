@@ -63,5 +63,6 @@ which must be enabled in your Nginx installation. \
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['web', 'security'],
   };
 }

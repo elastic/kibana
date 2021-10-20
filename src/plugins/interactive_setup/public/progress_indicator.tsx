@@ -9,20 +9,21 @@
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiPanel, EuiSteps } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useTimeoutFn from 'react-use/lib/useTimeoutFn';
 
 import { i18n } from '@kbn/i18n';
+import type { IHttpFetchError } from 'kibana/public';
 
-import { useHttp } from './use_http';
+import { useKibana } from './use_kibana';
 
 export interface ProgressIndicatorProps {
   onSuccess?(): void;
 }
 
 export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ onSuccess }) => {
-  const http = useHttp();
+  const { http } = useKibana();
   const [status, checkStatus] = useAsyncFn(async () => {
     let isAvailable: boolean | undefined = false;
     let isPastPreboot: boolean | undefined = false;
@@ -30,7 +31,8 @@ export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ o
       const { response } = await http.get('/api/status', { asResponse: true });
       isAvailable = response ? response.status < 500 : undefined;
       isPastPreboot = response?.headers.get('content-type')?.includes('application/json');
-    } catch ({ response }) {
+    } catch (error) {
+      const { response } = error as IHttpFetchError;
       isAvailable = response ? response.status < 500 : undefined;
       isPastPreboot = response?.headers.get('content-type')?.includes('application/json');
     }
@@ -91,16 +93,20 @@ export interface LoadingStepsProps {
 }
 
 export const LoadingSteps: FunctionComponent<LoadingStepsProps> = ({ currentStepId, steps }) => {
+  const [stepIndex, setStepIndex] = useState(0);
   const currentStepIndex = steps.findIndex((step) => step.id === currentStepId);
+
+  // Ensure that loading progress doesn't move backwards
+  useEffect(() => {
+    if (currentStepIndex > stepIndex) {
+      setStepIndex(currentStepIndex);
+    }
+  }, [currentStepIndex, stepIndex]);
+
   return (
     <EuiSteps
       steps={steps.map((step, i) => ({
-        status:
-          i <= currentStepIndex
-            ? 'complete'
-            : steps[i - 1]?.id === currentStepId
-            ? 'loading'
-            : 'incomplete',
+        status: i <= stepIndex ? 'complete' : i - 1 === stepIndex ? 'loading' : 'incomplete',
         children: null,
         ...step,
       }))}

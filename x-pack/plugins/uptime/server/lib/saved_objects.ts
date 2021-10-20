@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../common/constants';
 import { DynamicSettings } from '../../common/runtime_types';
 import { SavedObjectsType, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
@@ -42,6 +43,14 @@ export const umDynamicSettings: SavedObjectsType = {
       },
       */
     },
+  },
+  management: {
+    importableAndExportable: true,
+    icon: 'uptimeApp',
+    getTitle: () =>
+      i18n.translate('xpack.uptime.uptimeSettings.index', {
+        defaultMessage: 'Uptime Settings - Index',
+      }),
   },
 };
 

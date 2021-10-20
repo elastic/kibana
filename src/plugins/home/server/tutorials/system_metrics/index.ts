@@ -59,5 +59,6 @@ It collects system wide statistics and statistics per process and filesystem. \
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['os_system', 'security'],
   };
 }

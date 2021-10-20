@@ -24,21 +24,9 @@ import {
 import { storedPackagePoliciesToAgentInputs, dataTypes, outputType } from '../../../common';
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
-import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES, DEFAULT_OUTPUT } from '../../constants';
+import { DEFAULT_OUTPUT } from '../../constants';
 
-const MONITORING_DATASETS = [
-  'elastic_agent',
-  'elastic_agent.elastic_agent',
-  'elastic_agent.apm_server',
-  'elastic_agent.filebeat',
-  'elastic_agent.fleet_server',
-  'elastic_agent.metricbeat',
-  'elastic_agent.osquerybeat',
-  'elastic_agent.packetbeat',
-  'elastic_agent.endpoint_security',
-  'elastic_agent.auditbeat',
-  'elastic_agent.heartbeat',
-];
+import { getMonitoringPermissions } from './monitoring_permissions';
 
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
@@ -82,12 +70,14 @@ export async function getFullAgentPolicy(
   if (!monitoringOutput) {
     throw new Error(`Monitoring output not found ${monitoringOutputId}`);
   }
-
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
-        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(output);
+        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
+          output,
+          standalone
+        );
 
         return acc;
       }, {}),
@@ -125,41 +115,17 @@ export async function getFullAgentPolicy(
     cluster: DEFAULT_PERMISSIONS.cluster,
   };
 
-  // TODO: fetch this from the elastic agent package https://github.com/elastic/kibana/issues/107738
-  const monitoringNamespace = fullAgentPolicy.agent?.monitoring.namespace;
-  const monitoringPermissions: FullAgentPolicyOutputPermissions =
-    monitoringOutputId === dataOutputId
-      ? dataPermissions
-      : {
-          _elastic_agent_checks: {
-            cluster: DEFAULT_PERMISSIONS.cluster,
-          },
-        };
-  if (
-    fullAgentPolicy.agent?.monitoring.enabled &&
-    monitoringNamespace &&
-    monitoringOutput &&
-    monitoringOutput.type === outputType.Elasticsearch
-  ) {
-    let names: string[] = [];
-    if (fullAgentPolicy.agent.monitoring.logs) {
-      names = names.concat(
-        MONITORING_DATASETS.map((dataset) => `logs-${dataset}-${monitoringNamespace}`)
-      );
-    }
-    if (fullAgentPolicy.agent.monitoring.metrics) {
-      names = names.concat(
-        MONITORING_DATASETS.map((dataset) => `metrics-${dataset}-${monitoringNamespace}`)
-      );
-    }
-
-    monitoringPermissions._elastic_agent_checks.indices = [
-      {
-        names,
-        privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
-      },
-    ];
-  }
+  const monitoringPermissions = await getMonitoringPermissions(
+    soClient,
+    {
+      logs: agentPolicy.monitoring_enabled?.includes(dataTypes.Logs) ?? false,
+      metrics: agentPolicy.monitoring_enabled?.includes(dataTypes.Metrics) ?? false,
+    },
+    agentPolicy.namespace
+  );
+  monitoringPermissions._elastic_agent_checks = {
+    cluster: DEFAULT_PERMISSIONS.cluster,
+  };
 
   // Only add permissions if output.type is "elasticsearch"
   fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
@@ -167,10 +133,16 @@ export async function getFullAgentPolicy(
   >((outputPermissions, outputId) => {
     const output = fullAgentPolicy.outputs[outputId];
     if (output && output.type === outputType.Elasticsearch) {
-      outputPermissions[outputId] =
-        outputId === getOutputIdForAgentPolicy(dataOutput)
-          ? dataPermissions
-          : monitoringPermissions;
+      const permissions: FullAgentPolicyOutputPermissions = {};
+      if (outputId === getOutputIdForAgentPolicy(monitoringOutput)) {
+        Object.assign(permissions, monitoringPermissions);
+      }
+
+      if (outputId === getOutputIdForAgentPolicy(dataOutput)) {
+        Object.assign(permissions, dataPermissions);
+      }
+
+      outputPermissions[outputId] = permissions;
     }
     return outputPermissions;
   }, {});
@@ -209,8 +181,8 @@ function transformOutputToFullPolicyOutput(
 
   if (standalone) {
     delete newOutput.api_key;
-    newOutput.username = 'ES_USERNAME';
-    newOutput.password = 'ES_PASSWORD';
+    newOutput.username = '{ES_USERNAME}';
+    newOutput.password = '{ES_PASSWORD}';
   }
 
   return newOutput;

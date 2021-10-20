@@ -5,10 +5,11 @@
  * 2.0.
  */
 import SemVer from 'semver/classes/semver';
+
+import { MAJOR_VERSION } from '../../../common';
 import { Index } from '../../../common';
 
-const version = '8.0.0';
-const kibanaVersion = new SemVer(version);
+const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 export const isHiddenIndex = (index: Index): boolean => {
   if (kibanaVersion.major < 8) {

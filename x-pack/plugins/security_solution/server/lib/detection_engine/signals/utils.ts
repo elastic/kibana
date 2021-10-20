@@ -16,7 +16,6 @@ import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
-import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   TimestampOverrideOrUndefined,
@@ -99,43 +98,39 @@ export const hasReadIndexPrivileges = async (args: {
   buildRuleMessage: BuildRuleMessage;
   ruleStatusClient: IRuleExecutionLogClient;
   ruleId: string;
+  ruleName: string;
+  ruleType: string;
   spaceId: string;
 }): Promise<boolean> => {
-  const { privileges, logger, buildRuleMessage, ruleStatusClient, ruleId, spaceId } = args;
+  const {
+    privileges,
+    logger,
+    buildRuleMessage,
+    ruleStatusClient,
+    ruleId,
+    ruleName,
+    ruleType,
+    spaceId,
+  } = args;
 
   const indexNames = Object.keys(privileges.index);
-  const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
+  const [, indexesWithNoReadPrivileges] = partition(
     indexNames,
     (indexName) => privileges.index[indexName].read
   );
 
-  if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
+  if (indexesWithNoReadPrivileges.length > 0) {
     // some indices have read privileges others do not.
     // set a warning status
-    const errorString = `Missing required read privileges on the following indices: ${JSON.stringify(
+    const errorString = `This rule may not have the required read privileges to the following indices/index patterns: ${JSON.stringify(
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
-      spaceId,
-      newStatus: RuleExecutionStatus['partial failure'],
-    });
-    return true;
-  } else if (
-    indexesWithReadPrivileges.length === 0 &&
-    indexesWithNoReadPrivileges.length === indexNames.length
-  ) {
-    // none of the indices had read privileges so set the status to failed
-    // since we can't search on any indices we do not have read privileges on
-    const errorString = `This rule may not have the required read privileges to the following indices: ${JSON.stringify(
-      indexesWithNoReadPrivileges
-    )}`;
-    logger.error(buildRuleMessage(errorString));
-    await ruleStatusClient.logStatusChange({
-      message: errorString,
-      ruleId,
+      ruleName,
+      ruleType,
       spaceId,
       newStatus: RuleExecutionStatus['partial failure'],
     });
@@ -145,7 +140,6 @@ export const hasReadIndexPrivileges = async (args: {
 };
 
 export const hasTimestampFields = async (args: {
-  wroteStatus: boolean;
   timestampField: string;
   ruleName: string;
   // any is derived from here
@@ -156,23 +150,24 @@ export const hasTimestampFields = async (args: {
   ruleStatusClient: IRuleExecutionLogClient;
   ruleId: string;
   spaceId: string;
+  ruleType: string;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
 }): Promise<boolean> => {
   const {
-    wroteStatus,
     timestampField,
     ruleName,
     timestampFieldCapsResponse,
     inputIndices,
     ruleStatusClient,
     ruleId,
+    ruleType,
     spaceId,
     logger,
     buildRuleMessage,
   } = args;
 
-  if (!wroteStatus && isEmpty(timestampFieldCapsResponse.body.indices)) {
+  if (isEmpty(timestampFieldCapsResponse.body.indices)) {
     const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
     )} was found. This warning will continue to appear until a matching index is created or this rule is de-activated. ${
@@ -184,15 +179,16 @@ export const hasTimestampFields = async (args: {
     await ruleStatusClient.logStatusChange({
       message: errorString.trimEnd(),
       ruleId,
+      ruleName,
+      ruleType,
       spaceId,
       newStatus: RuleExecutionStatus['partial failure'],
     });
     return true;
   } else if (
-    !wroteStatus &&
-    (isEmpty(timestampFieldCapsResponse.body.fields) ||
-      timestampFieldCapsResponse.body.fields[timestampField] == null ||
-      timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null)
+    isEmpty(timestampFieldCapsResponse.body.fields) ||
+    timestampFieldCapsResponse.body.fields[timestampField] == null ||
+    timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null
   ) {
     // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
     // warning
@@ -210,12 +206,14 @@ export const hasTimestampFields = async (args: {
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
+      ruleName,
+      ruleType,
       spaceId,
       newStatus: RuleExecutionStatus['partial failure'],
     });
     return true;
   }
-  return wroteStatus;
+  return false;
 };
 
 export const checkPrivileges = async (
@@ -236,6 +234,7 @@ export const checkPrivilegesFromEsClient = async (
         index: [
           {
             names: indices ?? [],
+            allow_restricted_indices: true,
             privileges: ['read'],
           },
         ],
@@ -414,46 +413,23 @@ export const parseInterval = (intervalString: string): moment.Duration | null =>
   }
 };
 
-export const getDriftTolerance = ({
-  from,
-  to,
-  intervalDuration,
-  now = moment(),
-}: {
-  from: string;
-  to: string;
-  intervalDuration: moment.Duration;
-  now?: moment.Moment;
-}): moment.Duration => {
-  const toDate = parseScheduleDates(to) ?? now;
-  const fromDate = parseScheduleDates(from) ?? dateMath.parse('now-6m');
-  const timeSegment = toDate.diff(fromDate);
-  const duration = moment.duration(timeSegment);
-
-  return duration.subtract(intervalDuration);
-};
-
 export const getGapBetweenRuns = ({
   previousStartedAt,
-  intervalDuration,
-  from,
-  to,
-  now = moment(),
+  originalFrom,
+  originalTo,
+  startedAt,
 }: {
   previousStartedAt: Date | undefined | null;
-  intervalDuration: moment.Duration;
-  from: string;
-  to: string;
-  now?: moment.Moment;
+  originalFrom: moment.Moment;
+  originalTo: moment.Moment;
+  startedAt: Date;
 }): moment.Duration => {
   if (previousStartedAt == null) {
     return moment.duration(0);
   }
-  const driftTolerance = getDriftTolerance({ from, to, intervalDuration });
-
-  const diff = moment.duration(now.diff(previousStartedAt));
-  const drift = diff.subtract(intervalDuration);
-  return drift.subtract(driftTolerance);
+  const driftTolerance = moment.duration(originalTo.diff(originalFrom));
+  const currentDuration = moment.duration(moment(startedAt).diff(previousStartedAt));
+  return currentDuration.subtract(driftTolerance);
 };
 
 export const makeFloatString = (num: number): string => Number(num).toFixed(2);
@@ -508,6 +484,7 @@ export const getRuleRangeTuples = ({
   interval,
   maxSignals,
   buildRuleMessage,
+  startedAt,
 }: {
   logger: Logger;
   previousStartedAt: Date | null | undefined;
@@ -516,9 +493,10 @@ export const getRuleRangeTuples = ({
   interval: string;
   maxSignals: number;
   buildRuleMessage: BuildRuleMessage;
+  startedAt: Date;
 }) => {
-  const originalTo = dateMath.parse(to);
-  const originalFrom = dateMath.parse(from);
+  const originalTo = dateMath.parse(to, { forceNow: startedAt });
+  const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   if (originalTo == null || originalFrom == null) {
     throw new Error(buildRuleMessage('dateMath parse failed'));
   }
@@ -534,14 +512,19 @@ export const getRuleRangeTuples = ({
     logger.error(`Failed to compute gap between rule runs: could not parse rule interval`);
     return { tuples, remainingGap: moment.duration(0) };
   }
-  const gap = getGapBetweenRuns({ previousStartedAt, intervalDuration, from, to });
+  const gap = getGapBetweenRuns({
+    previousStartedAt,
+    originalTo,
+    originalFrom,
+    startedAt,
+  });
   const catchup = getNumCatchupIntervals({
     gap,
     intervalDuration,
   });
   const catchupTuples = getCatchupTuples({
-    to: originalTo,
-    from: originalFrom,
+    originalTo,
+    originalFrom,
     ruleParamsMaxSignals: maxSignals,
     catchup,
     intervalDuration,
@@ -564,22 +547,22 @@ export const getRuleRangeTuples = ({
  * @param intervalDuration moment.Duration the interval which the rule runs
  */
 export const getCatchupTuples = ({
-  to,
-  from,
+  originalTo,
+  originalFrom,
   ruleParamsMaxSignals,
   catchup,
   intervalDuration,
 }: {
-  to: moment.Moment;
-  from: moment.Moment;
+  originalTo: moment.Moment;
+  originalFrom: moment.Moment;
   ruleParamsMaxSignals: number;
   catchup: number;
   intervalDuration: moment.Duration;
 }): RuleRangeTuple[] => {
   const catchupTuples: RuleRangeTuple[] = [];
   const intervalInMilliseconds = intervalDuration.asMilliseconds();
-  let currentTo = to;
-  let currentFrom = from;
+  let currentTo = originalTo;
+  let currentFrom = originalFrom;
   // This loop will create tuples with overlapping time ranges, the same way rule runs have overlapping time
   // ranges due to the additional lookback. We could choose to create tuples that don't overlap here by using the
   // "from" value from one tuple as "to" in the next one, however, the overlap matters for rule types like EQL and
@@ -719,6 +702,20 @@ export const createSearchAfterReturnTypeFromResponse = ({
   });
 };
 
+export interface PreviewReturnType {
+  totalCount: number;
+  matrixHistogramData: unknown[];
+  errors?: string[] | undefined;
+  warningMessages?: string[] | undefined;
+}
+
+export const createPreviewReturnType = (): PreviewReturnType => ({
+  matrixHistogramData: [],
+  totalCount: 0,
+  errors: [],
+  warningMessages: [],
+});
+
 export const createSearchAfterReturnType = ({
   success,
   warning,
@@ -853,6 +850,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
       aggregations: newAggregations,
       hits: {
         total: calculateTotal(prev.hits.total, next.hits.total),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         max_score: Math.max(newHits.max_score!, existingHits.max_score!),
         hits: [...existingHits.hits, ...newHits.hits],
       },

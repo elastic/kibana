@@ -34,8 +34,8 @@ export interface UsageStats {
   'discover:showMultiFields': boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
-  'apm:enableSignificantTerms': boolean;
   'observability:enableInspectEsQueries': boolean;
+  'observability:maxSuggestions': number;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;

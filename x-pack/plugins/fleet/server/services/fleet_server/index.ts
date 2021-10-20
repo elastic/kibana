@@ -50,22 +50,25 @@ export async function startFleetServerSetup() {
     _onResolve = resolve;
   });
   const logger = appContextService.getLogger();
+
+  // Check for security
   if (!appContextService.hasSecurity()) {
     // Fleet will not work if security is not enabled
     logger?.warn('Fleet requires the security plugin to be enabled.');
     return;
   }
 
+  // Log information about custom registry URL
+  const customUrl = appContextService.getConfig()?.registryUrl;
+  if (customUrl) {
+    logger.info(
+      `Custom registry url is an experimental feature and is unsupported. Using custom registry at ${customUrl}`
+    );
+  }
+
   try {
     // We need licence to be initialized before using the SO service.
     await licenseService.getLicenseInformation$()?.pipe(first())?.toPromise();
-
-    const customUrl = appContextService.getConfig()?.registryUrl;
-    const isEnterprise = licenseService.isEnterprise();
-    if (customUrl && isEnterprise) {
-      logger.info('Custom registry url is an experimental feature and is unsupported.');
-    }
-
     await runFleetServerMigration();
     _isFleetServerSetup = true;
   } catch (err) {

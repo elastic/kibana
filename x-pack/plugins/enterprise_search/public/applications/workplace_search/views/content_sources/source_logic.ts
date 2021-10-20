@@ -23,10 +23,11 @@ import { PRIVATE_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes
 import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';
 
 export interface SourceActions {
-  onInitializeSource(contentSource: ContentSourceFullData): ContentSourceFullData;
+  setContentSource(contentSource: ContentSourceFullData): ContentSourceFullData;
   onUpdateSourceName(name: string): string;
   setSearchResults(searchResultsResponse: SearchResultsResponse): SearchResultsResponse;
   initializeFederatedSummary(sourceId: string): { sourceId: string };
+  initializeSourceSynchronization(sourceId: string): { sourceId: string };
   onUpdateSummary(summary: DocumentSummaryItem[]): DocumentSummaryItem[];
   setContentFilterValue(contentFilterValue: string): string;
   setActivePage(activePage: number): number;
@@ -73,7 +74,7 @@ interface SourceUpdatePayload {
 export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
   path: ['enterprise_search', 'workplace_search', 'source_logic'],
   actions: {
-    onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
+    setContentSource: (contentSource: ContentSourceFullData) => contentSource,
     onUpdateSourceName: (name: string) => name,
     onUpdateSummary: (summary: object[]) => summary,
     setSearchResults: (searchResultsResponse: SearchResultsResponse) => searchResultsResponse,
@@ -81,6 +82,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     setActivePage: (activePage: number) => activePage,
     initializeSource: (sourceId: string) => ({ sourceId }),
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
+    initializeSourceSynchronization: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
     updateContentSource: (sourceId: string, source: SourceUpdatePayload) => ({ sourceId, source }),
     removeContentSource: (sourceId: string) => ({
@@ -93,7 +95,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     contentSource: [
       {} as ContentSourceFullData,
       {
-        onInitializeSource: (_, contentSource) => contentSource,
+        setContentSource: (_, contentSource) => contentSource,
         onUpdateSourceName: (contentSource, name) => ({
           ...contentSource,
           name,
@@ -108,8 +110,9 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     dataLoading: [
       true,
       {
-        onInitializeSource: () => false,
+        setContentSource: () => false,
         resetSourceState: () => true,
+        removeContentSource: () => true,
       },
     ],
     buttonLoading: [
@@ -117,7 +120,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       {
         setButtonNotLoading: () => false,
         resetSourceState: () => false,
-        removeContentSource: () => true,
       },
     ],
     sectionLoading: [
@@ -158,7 +160,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       try {
         const response = await HttpLogic.values.http.get(route);
-        actions.onInitializeSource(response);
+        actions.setContentSource(response);
         if (response.isFederatedSource) {
           actions.initializeFederatedSummary(sourceId);
         }
@@ -252,6 +254,15 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         flashAPIErrors(e);
       } finally {
         actions.setButtonNotLoading();
+      }
+    },
+    initializeSourceSynchronization: async ({ sourceId }) => {
+      const route = `/internal/workplace_search/org/sources/${sourceId}/sync`;
+      try {
+        await HttpLogic.values.http.post(route);
+        actions.initializeSource(sourceId);
+      } catch (e) {
+        flashAPIErrors(e);
       }
     },
     onUpdateSourceName: (name: string) => {

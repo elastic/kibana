@@ -8,6 +8,7 @@
 
 import { escapeRegExp } from 'lodash/fp';
 import type { IndexPattern } from 'src/plugins/data/public';
+import { getFieldSubtypeNested } from '../../../../../../data/common';
 
 /**
  * This function checks if the given field in a given index pattern is a nested field's parent.
@@ -51,7 +52,8 @@ export function isNestedFieldParent(fieldName: string, indexPattern: IndexPatter
     !!indexPattern.fields.getAll().find((patternField) => {
       // We only want to match a full path segment
       const nestedRootRegex = new RegExp(escapeRegExp(fieldName) + '(\\.|$)');
-      return nestedRootRegex.test(patternField.subType?.nested?.path ?? '');
+      const subTypeNested = getFieldSubtypeNested(patternField);
+      return nestedRootRegex.test(subTypeNested?.nested.path ?? '');
     })
   );
 }

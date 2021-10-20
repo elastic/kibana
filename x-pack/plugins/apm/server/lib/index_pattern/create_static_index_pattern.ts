@@ -34,7 +34,7 @@ export async function createStaticIndexPattern({
 }): Promise<boolean> {
   return withApmSpan('create_static_index_pattern', async () => {
     // don't autocreate APM index pattern if it's been disabled via the config
-    if (!config['xpack.apm.autocreateApmIndexPattern']) {
+    if (!config.autocreateApmIndexPattern) {
       return false;
     }
 

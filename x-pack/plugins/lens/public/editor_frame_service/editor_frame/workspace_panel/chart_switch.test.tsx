@@ -200,10 +200,13 @@ describe('chart_switch', () => {
     expect(lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/switchVisualization',
       payload: {
-        initialState: 'suggestion visB',
-        newVisualizationId: 'visB',
-        datasourceId: 'testDatasource',
-        datasourceState: {},
+        suggestion: {
+          visualizationState: 'suggestion visB',
+          newVisualizationId: 'visB',
+          datasourceId: 'testDatasource',
+          datasourceState: {},
+        },
+        clearStagedPreview: true,
       },
     });
   });
@@ -238,8 +241,11 @@ describe('chart_switch', () => {
     expect(lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/switchVisualization',
       payload: {
-        initialState: 'visB initial state',
-        newVisualizationId: 'visB',
+        suggestion: {
+          visualizationState: 'visB initial state',
+          newVisualizationId: 'visB',
+        },
+        clearStagedPreview: true,
       },
     });
     expect(lensStore.dispatch).toHaveBeenCalledWith({
@@ -522,10 +528,13 @@ describe('chart_switch', () => {
     expect(lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/switchVisualization',
       payload: {
-        datasourceId: undefined,
-        datasourceState: undefined,
-        initialState: 'visB initial state',
-        newVisualizationId: 'visB',
+        suggestion: {
+          datasourceId: undefined,
+          datasourceState: undefined,
+          visualizationState: 'visB initial state',
+          newVisualizationId: 'visB',
+        },
+        clearStagedPreview: true,
       },
     });
   });
@@ -598,10 +607,13 @@ describe('chart_switch', () => {
     expect(lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/switchVisualization',
       payload: {
-        datasourceId: 'testDatasource',
-        datasourceState: {},
-        initialState: 'switched',
-        newVisualizationId: 'visC',
+        suggestion: {
+          datasourceId: 'testDatasource',
+          datasourceState: {},
+          visualizationState: 'switched',
+          newVisualizationId: 'visC',
+        },
+        clearStagedPreview: true,
       },
     });
     expect(datasourceMap.testDatasource.removeLayer).not.toHaveBeenCalled();
@@ -694,10 +706,13 @@ describe('chart_switch', () => {
     expect(lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/switchVisualization',
       payload: {
-        newVisualizationId: 'visB',
-        datasourceId: 'testDatasource',
-        datasourceState: 'testDatasource suggestion',
-        initialState: 'suggestion visB',
+        suggestion: {
+          newVisualizationId: 'visB',
+          datasourceId: 'testDatasource',
+          datasourceState: 'testDatasource suggestion',
+          visualizationState: 'suggestion visB',
+        },
+        clearStagedPreview: true,
       },
     });
   });
@@ -731,10 +746,13 @@ describe('chart_switch', () => {
     expect(lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/switchVisualization',
       payload: {
-        initialState: 'suggestion visB visB',
-        newVisualizationId: 'visB',
-        datasourceId: 'testDatasource',
-        datasourceState: {},
+        suggestion: {
+          visualizationState: 'suggestion visB visB',
+          newVisualizationId: 'visB',
+          datasourceId: 'testDatasource',
+          datasourceState: {},
+        },
+        clearStagedPreview: true,
       },
     });
   });

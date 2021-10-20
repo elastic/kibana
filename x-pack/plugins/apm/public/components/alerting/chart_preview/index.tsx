@@ -96,14 +96,14 @@ export function ChartPreview({
           position={Position.Left}
           tickFormat={yTickFormat}
           ticks={5}
-          domain={{ max: yMax }}
+          domain={{ max: yMax, min: NaN }}
         />
         <BarSeries
           color={theme.eui.euiColorVis1}
           data={data}
           id="chart_preview_bar_series"
           xAccessor="x"
-          xScaleType={ScaleType.Linear}
+          xScaleType={ScaleType.Time}
           yAccessors={['y']}
           yScaleType={ScaleType.Linear}
         />

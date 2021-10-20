@@ -12,7 +12,6 @@ import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import { VisualizationsSetup } from '../../../visualizations/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
-import { KibanaLegacyStart } from '../../../kibana_legacy/public';
 import { LEGACY_PIE_CHARTS_LIBRARY } from '../../pie/common/index';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
@@ -31,7 +30,6 @@ export interface VisTypeVislibPluginSetupDependencies {
 /** @internal */
 export interface VisTypeVislibPluginStartDependencies {
   data: DataPublicPluginStart;
-  kibanaLegacy: KibanaLegacyStart;
 }
 
 export type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
