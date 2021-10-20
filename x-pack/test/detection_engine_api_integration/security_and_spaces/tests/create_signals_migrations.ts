@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
     afterEach(async () => {
       // Finalize the migration after each test so that the .siem-signals alias gets added to the migrated index -
       // this allows deleteSignalsIndex to find and delete the migrated index
-      await sleep(5000);
+      await sleep(5000); // Allow the migration to complete
       await supertest
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
