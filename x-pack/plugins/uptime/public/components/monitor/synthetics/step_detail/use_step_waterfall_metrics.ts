@@ -57,7 +57,10 @@ export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest, step
           },
         })
       : {},
-    [heartbeatIndices, checkGroup, hasNavigationRequest]
+    [heartbeatIndices, checkGroup, hasNavigationRequest],
+    {
+      name: 'getWaterfallStepMetrics',
+    }
   );
 
   if (!hasNavigationRequest) {

@@ -108,7 +108,7 @@ export const ExpandableEvent = React.memo<Props>(
           <EventDetails
             browserFields={browserFields}
             data={detailsData ?? []}
-            id={event.eventId!}
+            id={event.eventId}
             isAlert={isAlert}
             isDraggable={isDraggable}
             timelineId={timelineId}

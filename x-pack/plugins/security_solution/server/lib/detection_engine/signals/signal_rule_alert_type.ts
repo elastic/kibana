@@ -69,7 +69,7 @@ import { wrapSequencesFactory } from './wrap_sequences_factory';
 import { ConfigType } from '../../../config';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { injectReferences, extractReferences } from './saved_object_references';
-import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
+import { RuleExecutionLogClient, truncateMessageList } from '../rule_execution_log';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 import { IEventLogService } from '../../../../../event_log/server';
@@ -171,6 +171,12 @@ export const signalRulesAlertType = ({
         ...basicLogArguments,
         newStatus: RuleExecutionStatus['going to run'],
       });
+
+      const notificationRuleParams: NotificationRuleTypeParams = {
+        ...params,
+        name,
+        id: savedObject.id,
+      };
 
       // check if rule has permissions to access given index pattern
       // move this collection of lines into a function in utils
@@ -384,7 +390,9 @@ export const signalRulesAlertType = ({
           throw new Error(`unknown rule type ${type}`);
         }
         if (result.warningMessages.length) {
-          const warningMessage = buildRuleMessage(result.warningMessages.join());
+          const warningMessage = buildRuleMessage(
+            truncateMessageList(result.warningMessages).join()
+          );
           await ruleStatusClient.logStatusChange({
             ...basicLogArguments,
             newStatus: RuleExecutionStatus['partial failure'],
@@ -394,12 +402,6 @@ export const signalRulesAlertType = ({
 
         if (result.success) {
           if (actions.length) {
-            const notificationRuleParams: NotificationRuleTypeParams = {
-              ...params,
-              name,
-              id: savedObject.id,
-            };
-
             const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
             const toInMs = parseScheduleDates('now')?.format('x');
             const resultsLink = getNotificationResultsLink({
@@ -424,8 +426,10 @@ export const signalRulesAlertType = ({
                   ?.kibana_siem_app_url,
                 outputIndex,
                 ruleId,
+                signals: result.createdSignals,
                 esClient: services.scopedClusterClient.asCurrentUser,
                 notificationRuleParams,
+                logger,
               });
             } else if (result.createdSignalsCount) {
               const alertInstance = services.alertInstanceFactory(alertId);
@@ -469,9 +473,26 @@ export const signalRulesAlertType = ({
             )
           );
         } else {
+          // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
+          if (savedObject.attributes.throttle != null) {
+            await scheduleThrottledNotificationActions({
+              alertInstance: services.alertInstanceFactory(alertId),
+              throttle: savedObject.attributes.throttle,
+              startedAt,
+              id: savedObject.id,
+              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                ?.kibana_siem_app_url,
+              outputIndex,
+              ruleId,
+              signals: result.createdSignals,
+              esClient: services.scopedClusterClient.asCurrentUser,
+              notificationRuleParams,
+              logger,
+            });
+          }
           const errorMessage = buildRuleMessage(
             'Bulk Indexing of signals failed:',
-            result.errors.join()
+            truncateMessageList(result.errors).join()
           );
           logger.error(errorMessage);
           await ruleStatusClient.logStatusChange({
@@ -486,6 +507,23 @@ export const signalRulesAlertType = ({
           });
         }
       } catch (error) {
+        // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
+        if (savedObject.attributes.throttle != null) {
+          await scheduleThrottledNotificationActions({
+            alertInstance: services.alertInstanceFactory(alertId),
+            throttle: savedObject.attributes.throttle,
+            startedAt,
+            id: savedObject.id,
+            kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+              ?.kibana_siem_app_url,
+            outputIndex,
+            ruleId,
+            signals: result.createdSignals,
+            esClient: services.scopedClusterClient.asCurrentUser,
+            notificationRuleParams,
+            logger,
+          });
+        }
         const errorMessage = error.message ?? '(no error message given)';
         const message = buildRuleMessage(
           'An error occurred during rule execution:',

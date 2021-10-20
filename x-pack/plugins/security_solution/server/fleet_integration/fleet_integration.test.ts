@@ -343,9 +343,10 @@ describe('ingest_integration tests ', () => {
       });
     });
 
-    it("doesn't remove policy from trusted app FF disabled", async () => {
+    it("doesn't remove policy from trusted app if feature flag is disabled", async () => {
       await invokeDeleteCallback({
         ...allowedExperimentalValues,
+        trustedAppsByPolicyEnabled: false, // since it was changed to `true` by default
       });
 
       expect(exceptionListClient.findExceptionListItem).toHaveBeenCalledTimes(0);

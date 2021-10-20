@@ -57,7 +57,7 @@ export const RouteInit: React.FC<RouteInitProps> = ({
 
     // check if we need to redirect because of attempt at unsupported multi-cluster monitoring
     const clusterSupported = cluster.isSupported || clusters.length === 1;
-    if (location.pathname !== 'home' && !clusterSupported) {
+    if (location.pathname !== '/home' && !clusterSupported) {
       return <Redirect to="/home" />;
     }
   }

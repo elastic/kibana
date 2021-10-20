@@ -10,6 +10,7 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
+import { flattenHit } from '../../../../../../../../data/common';
 import { DocViewer } from '../../../../../components/doc_viewer/doc_viewer';
 import { FilterManager, IndexPattern } from '../../../../../../../../data/public';
 import { TableCell } from './table_row/table_cell';
@@ -57,7 +58,7 @@ export const TableRow = ({
   });
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';
 
-  const flattenedRow = useMemo(() => indexPattern.flattenHit(row), [indexPattern, row]);
+  const flattenedRow = useMemo(() => flattenHit(row, indexPattern), [indexPattern, row]);
   const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
 
   // toggle display of the rows details, a full list of the fields from each row

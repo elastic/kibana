@@ -17,7 +17,7 @@ import {
   getSetupModeState,
   isSetupModeFeatureEnabled,
   updateSetupModeData,
-} from '../setup_mode/setup_mode';
+} from '../../lib/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
 import { AlertsDropdown } from '../../alerts/alerts_dropdown';
 import { ActionMenu } from '../../components/action_menu';
@@ -92,7 +92,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   };
 
   return (
-    <div className="app-container">
+    <div className="app-container" data-test-subj="monitoringAppContainer">
       <ActionMenu>
         <AlertsDropdown />
       </ActionMenu>

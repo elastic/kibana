@@ -32,7 +32,6 @@ exports.externals = {
    */
   angular: '__kbnSharedDeps__.Angular',
   '@kbn/i18n': '__kbnSharedDeps__.KbnI18n',
-  '@kbn/i18n/angular': '__kbnSharedDeps__.KbnI18nAngular',
   '@kbn/i18n/react': '__kbnSharedDeps__.KbnI18nReact',
   '@emotion/react': '__kbnSharedDeps__.EmotionReact',
   jquery: '__kbnSharedDeps__.Jquery',
