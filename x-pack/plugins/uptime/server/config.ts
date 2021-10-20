@@ -9,9 +9,11 @@ import { PluginConfigDescriptor } from 'kibana/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const config: PluginConfigDescriptor = {
-  schema: schema.object({
-    index: schema.string(),
-  }),
+  schema: schema.maybe(
+    schema.object({
+      index: schema.string(),
+    })
+  ),
 };
 
 export type UptimeConfig = TypeOf<typeof config.schema>;
