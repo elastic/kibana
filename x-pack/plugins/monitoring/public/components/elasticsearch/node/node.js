@@ -23,15 +23,7 @@ import { MonitoringTimeseriesContainer } from '../../chart';
 import { AlertsCallout } from '../../../alerts/callout';
 import { ShardAllocationReact } from '../shard_allocation';
 
-export const NodeReact = ({
-  nodeSummary,
-  metrics,
-  logs,
-  alerts,
-  nodeId,
-  clusterUuid,
-  ...props
-}) => {
+export const Node = ({ nodeSummary, metrics, logs, alerts, nodeId, clusterUuid, ...props }) => {
   /*
   // This isn't doing anything due to a possible bug.  https://github.com/elastic/kibana/issues/106309
   if (alerts) {

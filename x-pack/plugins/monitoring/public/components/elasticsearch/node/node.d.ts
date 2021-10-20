@@ -7,8 +7,8 @@
 
 import { FunctionComponent } from 'react';
 
-export const NodeReact: FunctionComponent<NodeReactProps>;
-export interface NodeReactProps {
+export const Node: FunctionComponent<NodeProps>;
+export interface NodeProps {
   nodeSummary: unknown;
   metrics: unknown;
   logs: unknown;
