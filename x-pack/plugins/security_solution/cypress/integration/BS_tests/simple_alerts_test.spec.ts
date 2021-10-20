@@ -7,7 +7,7 @@ import { createEventCorrelationRule } from "../../tasks/api_calls/rules";
 import { cleanKibana } from "../../tasks/common";
 import { waitForAlertsToPopulate } from "../../tasks/create_new_rule";
 import { loginAndWaitForPageWithoutDateRange } from "../../tasks/login";
-import { navigateFromHeaderTo } from "../../tasks/security_header";
+import { navigateFromHeaderTo, refreshPage } from "../../tasks/security_header";
 import { ALERTS_URL } from "../../urls/navigation";
 
 const addDataScript = 'cypress/integration/BS_tests/send_data.py';
@@ -37,14 +37,15 @@ describe("Check alerts for a basic event correlation rule", () => {
           createEventCorrelationRule(newRule, "testing_rule", false);
         });
         cy.log(`Done creating rule ${ruleName}`);
-        cy.get(ALERT_DATA_GRID, {timeout: 3000}).should("not.exist");
+        cy.get(ALERT_DATA_GRID).should("not.exist");
     });
 
     it("Activate rule and assert alerts for the rule", () => {
       navigateFromHeaderTo(RULES);
       activateRule(0);
       navigateFromHeaderTo(ALERTS);
-      waitForAlertsToPopulate();
+      waitForAlertsToPopulate(1, {timeout: Cypress.config("pageLoadTimeout")});
+      refreshPage();
       cy.get(ALERT_RULE_NAME).first().should('have.text', ruleName);
     })
 })

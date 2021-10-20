@@ -529,11 +529,11 @@ export const previewResults = () => {
   cy.get(QUERY_PREVIEW_BUTTON).click();
 };
 
-export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
+export const waitForAlertsToPopulate = async (alertCountThreshold = 1, options = {}) => {
   cy.waitUntil(
     () => {
       refreshPage();
-      cy.get(LOADING_INDICATOR).should('not.exist');
+      cy.get(LOADING_INDICATOR, options).should('not.exist');
       return cy
         .get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
