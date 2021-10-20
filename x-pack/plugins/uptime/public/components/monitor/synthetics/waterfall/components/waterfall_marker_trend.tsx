@@ -40,7 +40,7 @@ const getLast48Intervals = (activeStep: JourneyStep) => {
 export function WaterfallMarkerTrend({ title, field }: { title: string; field: string }) {
   const { observability } = useUptimeStartPlugins();
 
-  const EmbeddableExpVIew = observability!.ExploratoryViewEmbeddable;
+  const EmbeddableExpView = observability!.ExploratoryViewEmbeddable;
 
   const { basePath } = useUptimeSettingsContext();
 
@@ -75,7 +75,7 @@ export function WaterfallMarkerTrend({ title, field }: { title: string; field: s
 
   return (
     <Wrapper>
-      <EmbeddableExpVIew
+      <EmbeddableExpView
         title={title}
         appendTitle={
           <EuiButton iconType={'visArea'} href={href} target="_blank" size="s">
