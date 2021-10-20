@@ -33,12 +33,10 @@ export function BackendDetailTemplate({ title, children }: Props) {
       }
 
       return callApmApi({
-        endpoint: 'GET /internal/apm/backends/{backendName}/metadata',
+        endpoint: 'GET /internal/apm/backends/metadata',
         params: {
-          path: {
-            backendName,
-          },
           query: {
+            backendName,
             start,
             end,
           },
@@ -54,7 +52,7 @@ export function BackendDetailTemplate({ title, children }: Props) {
         data: backendMetadataFetch.data,
         status: backendMetadataFetch.status,
       } as {
-        data?: APIReturnType<'GET /internal/apm/backends/{backendName}/metadata'>;
+        data?: APIReturnType<'GET /internal/apm/backends/metadata'>;
         status?: FETCH_STATUS;
       },
     };

@@ -38,10 +38,10 @@ export function BackendContents({
     (callApmApi) => {
       if (backendName) {
         return callApmApi({
-          endpoint: 'GET /internal/apm/service-map/backend/{backendName}',
+          endpoint: 'GET /internal/apm/service-map/backend',
           params: {
-            path: { backendName },
             query: {
+              backendName,
               environment,
               start,
               end,

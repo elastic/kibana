@@ -37,12 +37,10 @@ export function BackendLatencyChart({ height }: { height: number }) {
       }
 
       return callApmApi({
-        endpoint: 'GET /internal/apm/backends/{backendName}/charts/latency',
+        endpoint: 'GET /internal/apm/backends/charts/latency',
         params: {
-          path: {
-            backendName,
-          },
           query: {
+            backendName,
             start,
             end,
             offset,

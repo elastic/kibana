@@ -41,12 +41,17 @@ export function BackendDetailDependenciesTable() {
       }
 
       return callApmApi({
-        endpoint: 'GET /internal/apm/backends/{backendName}/upstream_services',
+        endpoint: 'GET /internal/apm/backends/upstream_services',
         params: {
-          path: {
+          query: {
             backendName,
+            start,
+            end,
+            environment,
+            numBuckets: 20,
+            offset,
+            kuery,
           },
-          query: { start, end, environment, numBuckets: 20, offset, kuery },
         },
       });
     },
