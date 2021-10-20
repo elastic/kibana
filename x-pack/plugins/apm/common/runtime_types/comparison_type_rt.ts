@@ -6,6 +6,12 @@
  */
 import * as t from 'io-ts';
 
+export enum TimeRangeComparisonEnum {
+  WeekBefore = 'week',
+  DayBefore = 'day',
+  PeriodBefore = 'period',
+}
+
 export const comparisonTypeRt = t.union([
   t.literal('day'),
   t.literal('week'),

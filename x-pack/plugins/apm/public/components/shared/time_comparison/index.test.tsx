@@ -16,11 +16,13 @@ import {
 import { getSelectOptions, TimeComparison } from './';
 import * as urlHelpers from '../../shared/Links/url_helpers';
 import moment from 'moment';
-import { TimeRangeComparisonEnum } from './get_time_range_comparison';
 import { getComparisonTypes } from './get_comparison_types';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { TimeRangeComparisonType } from '../../../../common/runtime_types/comparison_type_rt';
+import {
+  TimeRangeComparisonType,
+  TimeRangeComparisonEnum,
+} from '../../../../common/runtime_types/comparison_type_rt';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 
 function getWrapper({

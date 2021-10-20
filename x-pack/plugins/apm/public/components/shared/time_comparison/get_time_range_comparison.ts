@@ -7,14 +7,12 @@
 
 import moment from 'moment';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
-import { TimeRangeComparisonType } from '../../../../common/runtime_types/comparison_type_rt';
+import {
+  TimeRangeComparisonType,
+  TimeRangeComparisonEnum,
+} from '../../../../common/runtime_types/comparison_type_rt';
 import { getDateDifference } from '../../../../common/utils/formatters';
 
-export enum TimeRangeComparisonEnum {
-  WeekBefore = 'week',
-  DayBefore = 'day',
-  PeriodBefore = 'period',
-}
 export function getComparisonChartTheme(theme: EuiTheme) {
   return {
     areaSeriesStyle: {

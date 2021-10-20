@@ -13,6 +13,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
+import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import { ServiceInventory } from '.';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -25,7 +26,6 @@ import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_p
 import { SessionStorageMock } from '../../../services/__mocks__/SessionStorageMock';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import * as hook from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { TimeRangeComparisonEnum } from '../../shared/time_comparison/get_time_range_comparison';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },

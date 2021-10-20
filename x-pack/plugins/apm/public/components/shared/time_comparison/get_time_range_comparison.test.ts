@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  getTimeRangeComparison,
-  TimeRangeComparisonEnum,
-} from './get_time_range_comparison';
+import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
+import { getTimeRangeComparison } from './get_time_range_comparison';
 
 describe('getTimeRangeComparison', () => {
   describe('return empty object', () => {

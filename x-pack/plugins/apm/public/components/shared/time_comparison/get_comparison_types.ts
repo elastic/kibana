@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
+import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import { getDateDifference } from '../../../../common/utils/formatters';
-import { TimeRangeComparisonEnum } from './get_time_range_comparison';
 
 export function getComparisonTypes({
   start,
