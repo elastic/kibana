@@ -454,7 +454,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('timeout behavior', () => {
-        it('will return an error if a rule execution exceeds the rule interval', async () => {
+        // Flaky
+        it.skip('will return an error if a rule execution exceeds the rule interval', async () => {
           const rule: CreateRulesSchema = {
             description: 'Detecting root and admin users',
             name: 'Query with a short interval',
