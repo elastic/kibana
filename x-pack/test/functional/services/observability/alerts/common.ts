@@ -193,12 +193,12 @@ export function ObservabilityAlertsCommonProvider({
     if (isAbsoluteRange) {
       const startButton = await testSubjects.find('superDatePickerstartDatePopoverButton');
       const endButton = await testSubjects.find('superDatePickerendDatePopoverButton');
-
       return `${await startButton.getVisibleText()} - ${await endButton.getVisibleText()}`;
     }
 
     const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
-    return await datePickerButton.getVisibleText();
+    const buttonText = await datePickerButton.getVisibleText();
+    return buttonText.substring(0, buttonText.indexOf('\n'));
   };
 
   return {

@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe('Observability alerts page', function () {
+  describe('Observability alerts page / State synchronization', function () {
     this.tags('includeFirefox');
 
     const find = getService('find');
@@ -36,47 +36,74 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         `?_a=(kuery:'kibana.alert.evaluation.threshold > 75',rangeFrom:now-30d,rangeTo:now-10d,workflowStatus:closed)`,
         { ensureCurrentUrl: false }
       );
-      expect(await (await observability.alerts.common.getQueryBar()).getVisibleText()).to.be(
-        'kibana.alert.evaluation.threshold > 75'
-      );
-      expect(await observability.alerts.common.getWorkflowStatusFilterValue()).to.be('Closed');
-      const timeRange = await observability.alerts.common.getTimeRange();
-      expect(timeRange).to.be('~ a month ago - ~ 10 days ago');
+
+      await assertAlertsPageState({
+        kuery: 'kibana.alert.evaluation.threshold > 75',
+        workflowStatus: 'Closed',
+        timeRange: '~ a month ago - ~ 10 days ago',
+      });
     });
 
     it('should not sync URL state to shared time range on page load ', async () => {
       await (await find.byLinkText('Stream')).click();
-      const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
-      expect(await datePickerButton.getVisibleText()).to.contain('Last 1 day');
+
+      await assertLogsStreamPageTimeRange('Last 1 day');
     });
 
     it('should apply defaults if URL state is missing', async () => {
       await (await find.byLinkText('Alerts')).click();
-      expect(await (await observability.alerts.common.getQueryBar()).getVisibleText()).to.be('');
-      expect(await observability.alerts.common.getWorkflowStatusFilterValue()).to.be('Open');
-      const timeRange = await observability.alerts.common.getTimeRange();
-      expect(timeRange).to.contain('Last 15 minutes');
+
+      await assertAlertsPageState({
+        kuery: '',
+        workflowStatus: 'Open',
+        timeRange: 'Last 15 minutes',
+      });
     });
 
     it('should use shared time range if set', async () => {
       await (await find.byLinkText('Stream')).click();
-      await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
-      const numerOfDaysField = await find.byCssSelector('[aria-label="Time value"]');
-      await numerOfDaysField.type('0');
-      await find.clickByButtonText('Apply');
+      await setTimeRangeToXDaysAgo(10);
       await (await find.byLinkText('Alerts')).click();
-      const timeRange = await observability.alerts.common.getTimeRange();
-      expect(timeRange).to.contain('Last 10 days');
+
+      expect(await observability.alerts.common.getTimeRange()).to.be('Last 10 days');
     });
 
     it('should set the shared time range', async () => {
+      await setTimeRangeToXDaysAgo(100);
+      await (await find.byLinkText('Stream')).click();
+
+      await assertLogsStreamPageTimeRange('Last 100 days');
+    });
+
+    async function assertAlertsPageState(expected: {
+      kuery: string;
+      workflowStatus: string;
+      timeRange: string;
+    }) {
+      expect(await (await observability.alerts.common.getQueryBar()).getVisibleText()).to.be(
+        expected.kuery
+      );
+      expect(await observability.alerts.common.getWorkflowStatusFilterValue()).to.be(
+        expected.workflowStatus
+      );
+      const timeRange = await observability.alerts.common.getTimeRange();
+      expect(timeRange).to.be(expected.timeRange);
+    }
+
+    async function assertLogsStreamPageTimeRange(expected: string) {
+      // Only handles relative time ranges
+      const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
+      const buttonText = await datePickerButton.getVisibleText();
+      const timerange = buttonText.substring(0, buttonText.indexOf('\n'));
+      expect(timerange).to.be(expected);
+    }
+
+    async function setTimeRangeToXDaysAgo(numberOfDays: number) {
       await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
       const numerOfDaysField = await find.byCssSelector('[aria-label="Time value"]');
-      await numerOfDaysField.type('0');
+      await numerOfDaysField.clearValueWithKeyboard();
+      await numerOfDaysField.type(numberOfDays.toString());
       await find.clickByButtonText('Apply');
-      await (await find.byLinkText('Stream')).click();
-      const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
-      expect(await datePickerButton.getVisibleText()).to.contain('Last 100 days');
-    });
+    }
   });
 };
