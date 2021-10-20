@@ -162,6 +162,7 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
 };
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
+  cy.get(LOADING_INDICATOR).should('not.exist');
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
   cy.get(TIMELINE_DATA_PROVIDER_VALUE).should('have.focus'); // make sure the focus is ready before start typing
 
