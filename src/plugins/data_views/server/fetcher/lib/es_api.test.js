@@ -61,7 +61,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
       expect(resp).toBe(football);
     });
 
-    it('sets ignoreUnavailable and allowNoIndices params', async () => {
+    it('sets ignore_unavailable and allow_no_indices params', async () => {
       const getAlias = sinon.stub();
       const callCluster = {
         indices: {
@@ -149,7 +149,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
       expect(resp).toBe(football);
     });
 
-    it('sets ignoreUnavailable, allowNoIndices, and fields params', async () => {
+    it('sets ignore_unavailable, allow_no_indices, and fields params', async () => {
       const fieldCaps = sinon.stub();
       const callCluster = {
         indices: {
