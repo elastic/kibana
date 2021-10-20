@@ -74,7 +74,7 @@ export function createHitIterator(logger: LevelLogger) {
       logger.debug('executing clearScroll request');
       try {
         await elasticsearchClient.clearScroll({
-          body: { scroll_id: scrollId },
+          scroll_id: scrollId,
         });
       } catch (err) {
         // Do not throw the error, as the job can still be completed successfully

@@ -430,7 +430,7 @@ describe('ReportingStore', () => {
               },
             },
           },
-          "policy": "kibana-reporting",
+          "name": "kibana-reporting",
         }
       `);
     });
