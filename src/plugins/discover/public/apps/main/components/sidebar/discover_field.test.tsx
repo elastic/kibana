@@ -14,7 +14,7 @@ import { DiscoverField } from './discover_field';
 import { IndexPatternField } from '../../../../../../data/public';
 import { stubIndexPattern } from '../../../../../../data/common/stubs';
 
-jest.mock('../../../../../kibana_services', () => ({
+jest.mock('../../../../kibana_services', () => ({
   getUiActions: jest.fn(() => {
     return {
       getTriggerCompatibleActions: jest.fn(() => []),

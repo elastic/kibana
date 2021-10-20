@@ -23,7 +23,7 @@ import {
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
-import { useDataGridColumns } from '../../../../utils/use_data_grid_columns';
+import { useDataGridColumns } from '../../../../services/use_data_grid_columns';
 import { IndexPattern } from '../../../../../../data/common';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { DataDocumentsMsg, DataDocuments$ } from '../../services/use_saved_search';

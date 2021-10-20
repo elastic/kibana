@@ -7,7 +7,7 @@
  */
 
 import { showSaveModal } from '../../../../../../saved_objects/public';
-jest.mock('../../../../../../../saved_objects/public');
+jest.mock('../../../../../../saved_objects/public');
 
 import { onSaveSearch } from './on_save_search';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';

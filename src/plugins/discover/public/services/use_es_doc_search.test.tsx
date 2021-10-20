@@ -16,7 +16,7 @@ import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../c
 
 const mockSearchResult = new Observable();
 
-jest.mock('../../kibana_services', () => ({
+jest.mock('../kibana_services', () => ({
   getServices: () => ({
     data: {
       search: {

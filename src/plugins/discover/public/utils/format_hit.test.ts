@@ -12,8 +12,8 @@ import { formatHit } from './format_hit';
 import { discoverServiceMock } from '../__mocks__/services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../common';
 
-jest.mock('../../kibana_services', () => ({
-  getServices: () => jest.requireActual('../../__mocks__/services').discoverServiceMock,
+jest.mock('../kibana_services', () => ({
+  getServices: () => jest.requireActual('../__mocks__/services').discoverServiceMock,
 }));
 
 describe('formatHit', () => {

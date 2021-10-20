@@ -13,14 +13,14 @@ import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { flattenHit } from 'src/plugins/data/common';
 
-jest.mock('../../../../../kibana_react/public', () => ({
+jest.mock('../../../../kibana_react/public', () => ({
   useUiSetting: () => true,
   withKibana: (comp: ReactWrapper) => {
     return comp;
   },
 }));
 
-jest.mock('../../../kibana_services', () => ({
+jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     uiSettings: {
       get: jest.fn(),

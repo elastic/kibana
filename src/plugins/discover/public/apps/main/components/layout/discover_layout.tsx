@@ -35,7 +35,7 @@ import { getResultState } from '../../utils/get_result_state';
 import { InspectorSession } from '../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { DataMainMsg } from '../../services/use_saved_search';
-import { useDataGridColumns } from '../../../../utils/use_data_grid_columns';
+import { useDataGridColumns } from '../../../../services/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../utils/use_data_state';

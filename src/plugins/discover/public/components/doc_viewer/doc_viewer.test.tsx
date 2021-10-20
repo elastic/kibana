@@ -13,7 +13,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDocViewsRegistry } from '../../kibana_services';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
-jest.mock('../../../kibana_services', () => {
+jest.mock('../../kibana_services', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let registry: any[] = [];
   return {

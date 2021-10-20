@@ -12,7 +12,7 @@ import { formatFieldValue } from './format_value';
 
 import { getServices } from '../kibana_services';
 
-jest.mock('../../kibana_services', () => {
+jest.mock('../kibana_services', () => {
   const services = {
     fieldFormats: {
       getDefaultInstance: jest.fn<FieldFormat, [string]>(

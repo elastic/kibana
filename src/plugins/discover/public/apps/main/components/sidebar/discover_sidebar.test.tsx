@@ -23,7 +23,7 @@ import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks__/services';
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
 
-jest.mock('../../../../../kibana_services', () => ({
+jest.mock('../../../../kibana_services', () => ({
   getServices: () => mockDiscoverServices,
 }));
 

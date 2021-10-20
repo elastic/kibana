@@ -15,7 +15,7 @@ const mockCapabilities = jest.fn().mockReturnValue({
   },
 });
 
-jest.mock('../../../../../kibana_services', () => {
+jest.mock('../../../../kibana_services', () => {
   return {
     getServices: () => ({
       core: { uiSettings: {}, savedObjects: {} },

@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getServices } from '../../../../kibana_services';
 
-jest.mock('../../../../../kibana_services', () => {
+jest.mock('../../../../kibana_services', () => {
   const mockUiSettings = new Map();
   return {
     getServices: () => ({

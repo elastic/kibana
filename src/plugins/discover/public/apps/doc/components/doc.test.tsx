@@ -18,7 +18,7 @@ import { indexPatternMock } from '../../../__mocks__/index_pattern';
 
 const mockSearchApi = jest.fn();
 
-jest.mock('../../../../kibana_services', () => {
+jest.mock('../../../kibana_services', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let registry: any[] = [];
 

@@ -26,7 +26,7 @@ const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldN
   () => Promise.resolve([])
 );
 
-jest.mock('../../../../../../kibana_services', () => ({
+jest.mock('../../../../../kibana_services', () => ({
   getUiActions: () => ({
     getTriggerCompatibleActions: mockGetActions,
   }),

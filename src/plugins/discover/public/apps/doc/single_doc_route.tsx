@@ -13,7 +13,7 @@ import { DiscoverServices } from '../../build_services';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { Doc } from './components/doc';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useIndexPattern } from '../../utils/use_index_pattern';
+import { useIndexPattern } from '../../services/use_index_pattern';
 
 export interface SingleDocRouteProps {
   /**

@@ -33,8 +33,8 @@ import { RequestAdapter } from '../../../../../../inspector';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 
-jest.mock('../../../../../kibana_services', () => ({
-  ...jest.requireActual('../../../../../kibana_services'),
+jest.mock('../../../../kibana_services', () => ({
+  ...jest.requireActual('../../../../kibana_services'),
   getServices: () => ({
     fieldFormats: {
       getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),

@@ -55,7 +55,7 @@ const mockCalcFieldCounts = jest.fn(() => {
   return mockfieldCounts;
 });
 
-jest.mock('../../../../../kibana_services', () => ({
+jest.mock('../../../../kibana_services', () => ({
   getUiActions: jest.fn(() => {
     return {
       getTriggerCompatibleActions: jest.fn(() => []),

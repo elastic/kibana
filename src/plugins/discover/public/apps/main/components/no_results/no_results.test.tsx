@@ -12,7 +12,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
 
-jest.mock('../../../../../kibana_services', () => {
+jest.mock('../../../../kibana_services', () => {
   return {
     getServices: () => ({
       docLinks: {

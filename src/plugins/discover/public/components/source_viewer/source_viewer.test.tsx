@@ -15,7 +15,7 @@ import * as useUiSettingHook from 'src/plugins/kibana_react/public/ui_settings/u
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../json_code_editor/json_code_editor_common';
 
-jest.mock('../../../kibana_services', () => ({
+jest.mock('../../kibana_services', () => ({
   getServices: jest.fn(),
 }));
 

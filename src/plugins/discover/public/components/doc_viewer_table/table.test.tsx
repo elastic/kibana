@@ -13,7 +13,7 @@ import { DocViewerTable, DocViewerTableProps } from './table';
 import { IndexPattern } from '../../../../data/public';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
-jest.mock('../../../kibana_services', () => ({
+jest.mock('../../kibana_services', () => ({
   getServices: jest.fn(),
 }));
 
