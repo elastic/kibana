@@ -217,10 +217,10 @@ export const getIsRulePreviewDisabled = ({
 }) => {
   if (!isQueryBarValid || index.length === 0) return true;
   if (ruleType === 'threat_match') {
-    if (!isThreatQueryBarValid || !threatIndex.length) return true;
+    if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
     if (
       !threatMapping.length ||
-      !threatMapping[0].entries.length ||
+      !threatMapping[0].entries?.length ||
       !threatMapping[0].entries[0].field ||
       !threatMapping[0].entries[0].value
     )
