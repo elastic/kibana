@@ -86,9 +86,8 @@ export const throwIfRequestIsNotValid = ({
   requiredAttributesToBeInTheResponse?: string[];
 }) => {
   const requiredContentType = 'application/json';
-  const contentType = res.headers['content-type'];
+  const contentType = res.headers['content-type'] ?? '';
   const data = res.data;
-
   /**
    * This check ensures that the response is a valid JSON.
    * First we check that the content-type of the response is application/json.
