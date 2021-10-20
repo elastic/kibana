@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export type { SecurityLicense } from './licensing';
-export type { AuthenticatedUser, PrivilegeDeprecationsService } from './model';
+import type { RouteDefinitionParams } from '../';
+import { defineKibanaUserRoleDeprecationRoutes } from './kibana_user_role';
+
+export function defineDeprecationsRoutes(params: RouteDefinitionParams) {
+  defineKibanaUserRoleDeprecationRoutes(params);
+}
