@@ -20,6 +20,11 @@ configuration using `${MY_ENV_VAR}` syntax.
 [cols="2*<"]
 |===
 
+| `console.ui.enabled:`
+Toggling this causes the server to regenerate assets on the next startup,
+which may cause a delay before pages start being served.
+Set to `false` to disable Console. *Default: `true`*
+
 | `csp.rules:`
  | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
 A https://w3c.github.io/webappsec-csp/[Content Security Policy] template
@@ -275,7 +280,7 @@ that the {kib} server uses to perform maintenance on the {kib} index at startup.
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
 | `enterpriseSearch.host`
-  | The URL of your Enterprise Search instance
+  | The http(s) URL of your Enterprise Search instance. For example, in a local self-managed setup, set this to `http://localhost:3002`. Authentication between Kibana and the Enterprise Search host URL, such as via OAuth, is not supported. You can also {enterprise-search-ref}/configure-ssl-tls.html#configure-ssl-tls-in-kibana[configure Kibana to trust your Enterprise Search TLS certificate authority].
 
 | `interpreter.enableInVisualize`
   | Enables use of interpreter in Visualize. *Default: `true`*
@@ -681,6 +686,10 @@ out through *Advanced Settings*. *Default: `true`*
  | Set this value to true to allow Vega to use any URL to access external data
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
+| `xpack.ccr.ui.enabled`
+Set this value to false to disable the Cross-Cluster Replication UI.
+*Default: `true`*
+
 |[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.`
 `exploreDataInContextMenu.enabled`
  | Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
@@ -688,6 +697,31 @@ sources and images. When false, Vega can only get data from {es}. *Default: `fal
 |[[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.`
 `exploreDataInChart.enabled`
  | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
+
+| `xpack.ilm.ui.enabled`
+Set this value to false to disable the Index Lifecycle Policies UI.
+*Default: `true`*
+
+| `xpack.index_management.ui.enabled`
+Set this value to false to disable the Index Management UI.
+*Default: `true`*
+
+| `xpack.license_management.ui.enabled`
+Set this value to false to disable the License Management UI.
+*Default: `true`*
+
+| `xpack.remote_clusters.ui.enabled`
+Set this value to false to disable the Remote Clusters UI.
+*Default: `true`*
+
+| `xpack.rollup.ui.enabled:`
+Set this value to false to disable the Rollup Jobs UI. *Default: true*
+
+| `xpack.snapshot_restore.ui.enabled:`
+Set this value to false to disable the Snapshot and Restore UI. *Default: true*
+
+| `xpack.upgrade_assistant.ui.enabled:`
+Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
 | `i18n.locale` {ess-icon}
  | Set this value to change the {kib} interface language.

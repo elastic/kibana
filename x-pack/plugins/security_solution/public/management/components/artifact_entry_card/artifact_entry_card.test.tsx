@@ -12,6 +12,8 @@ import { act, fireEvent, getByTestId } from '@testing-library/react';
 import { AnyArtifact } from './types';
 import { isTrustedApp } from './utils';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
+import { OS_LINUX, OS_MAC, OS_WINDOWS } from './components/translations';
+import { TrustedApp } from '../../../../common/endpoint/types';
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
@@ -111,6 +113,22 @@ describe.each([
     );
   });
 
+  it('should display multiple OSs in the criteria conditions', () => {
+    if (isTrustedApp(item)) {
+      // Trusted apps does not support multiple OS, so this is just so the test will pass
+      // for the trusted app run (the top level `describe()` uses a `.each()`)
+      item.os = [OS_LINUX, OS_MAC, OS_WINDOWS].join(', ') as TrustedApp['os'];
+    } else {
+      item.os_types = ['linux', 'macos', 'windows'];
+    }
+
+    render();
+
+    expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
+      ` OSIS ${OS_LINUX}, ${OS_MAC}, ${OS_WINDOWS}AND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS /one/two/three`
+    );
+  });
+
   it('should NOT show the action menu button if no actions were provided', async () => {
     render();
     const menuButton = await renderResult.queryByTestId('testCard-header-actions-button');
@@ -198,7 +216,9 @@ describe.each([
         renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
       ).not.toBeNull();
 
-      expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one');
+      expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
+        'Policy oneView details'
+      );
     });
 
     it('should display policy ID if no policy menu item found in `policies` prop', async () => {
