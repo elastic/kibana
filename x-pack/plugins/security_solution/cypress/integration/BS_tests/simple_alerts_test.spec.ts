@@ -10,7 +10,7 @@ import { loginAndWaitForPageWithoutDateRange } from "../../tasks/login";
 import { navigateFromHeaderTo } from "../../tasks/security_header";
 import { ALERTS_URL } from "../../urls/navigation";
 
-const addDataScript = 'cypress/integration/my_tests/send_data.py';
+const addDataScript = 'cypress/integration/BS_tests/send_data.py';
 const elasticSearchUrl = 'http://localhost:9220/';
 const ruleName = `Rule ${Math.floor(Math.random() * 1000)}`;
 const indexName = "kuku";
