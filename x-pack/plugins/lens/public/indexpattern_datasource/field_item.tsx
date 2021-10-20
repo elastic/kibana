@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import {
   Axis,
-  BarSeries,
+  HistogramBarSeries,
   Chart,
   niceTimeFormatter,
   Position,
@@ -636,7 +636,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             showOverlappingTicks={true}
           />
 
-          <BarSeries
+          <HistogramBarSeries
             data={histogram.buckets}
             id={specId}
             xAccessor={'key'}
@@ -664,7 +664,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             tickFormat={(d) => formatter.convert(d)}
           />
 
-          <BarSeries
+          <HistogramBarSeries
             data={histogram.buckets}
             id={specId}
             xAccessor={'key'}
