@@ -54,21 +54,15 @@ export const removeFilterFunction: ExpressionFunctionRemoveFilter = {
     },
   },
 
-  fn(input, args) {
+  fn(input, { group, from, ungrouped }) {
     return {
       ...input,
       filters:
-        input.filters?.filter((filter) => {
-          if (
-            (!args.group && !args.ungrouped) ||
-            args.group === filter.meta.group ||
-            (args.ungrouped && !filter.meta.group)
-          ) {
-            if (!args.from || args.from === filter.meta.controlledBy) {
-              return false;
-            }
-          }
-          return true;
+        input.filters?.filter(({ meta }) => {
+          const isGroupMatching =
+            (!group && !ungrouped) || group === meta.group || (ungrouped && !meta.group);
+          const isOriginMatching = !from || from === meta.controlledBy;
+          return !isGroupMatching && !isOriginMatching;
         }) || [],
     };
   },

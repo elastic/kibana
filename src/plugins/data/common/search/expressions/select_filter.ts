@@ -54,20 +54,15 @@ export const selectFilterFunction: ExpressionFunctionSelectFilter = {
     },
   },
 
-  fn(input, args) {
+  fn(input, { group, ungrouped, from }) {
     return {
       ...input,
       filters:
-        input.filters?.filter((filter) => {
-          if (
-            (!args.group && !args.ungrouped) ||
-            args.group === filter.meta.group ||
-            (args.ungrouped && !filter.meta.group)
-          ) {
-            if (!args.from || args.from === filter.meta.controlledBy) {
-              return true;
-            }
-          }
+        input.filters?.filter(({ meta }) => {
+          const isGroupMatching =
+            (!group && !ungrouped) || group === meta.group || (ungrouped && !meta.group);
+          const isOriginMatching = !from || from === meta.controlledBy;
+          return !isGroupMatching && !isOriginMatching;
         }) || [],
     };
   },
