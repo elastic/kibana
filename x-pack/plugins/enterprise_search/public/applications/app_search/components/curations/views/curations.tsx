@@ -77,6 +77,8 @@ export const Curations: React.FC = () => {
     loadCurations();
   }, [meta.page.current]);
 
+  const isLoading = curationsSettingsDataLoading || curationsDataLoading;
+
   return (
     <AppSearchPageTemplate
       pageChrome={getCurationsBreadcrumbs()}
@@ -91,9 +93,9 @@ export const Curations: React.FC = () => {
             {CREATE_NEW_CURATION_TITLE}
           </EuiButtonTo>,
         ],
-        tabs: pageTabs,
+        tabs: isLoading ? undefined : pageTabs,
       }}
-      isLoading={curationsSettingsDataLoading || curationsDataLoading}
+      isLoading={isLoading}
     >
       {selectedPageTab === 'overview' && <CurationsOverview />}
       {selectedPageTab === 'history' && <CurationsHistory />}
