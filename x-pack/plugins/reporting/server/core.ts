@@ -13,6 +13,7 @@ import {
   BasePath,
   IClusterClient,
   KibanaRequest,
+  PackageInfo,
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
@@ -57,7 +58,7 @@ export interface ReportingInternalStart {
 }
 
 export class ReportingCore {
-  private kibanaVersion: string;
+  private packageInfo: PackageInfo;
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
@@ -72,8 +73,7 @@ export class ReportingCore {
   public getContract: () => ReportingSetup;
 
   constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
-    // TODO: capture the entire packageInfo so we can form documentation links on the server
-    this.kibanaVersion = context.env.packageInfo.version;
+    this.packageInfo = context.env.packageInfo;
     const syncConfig = context.config.get<ReportingConfigType>();
     this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
@@ -87,7 +87,7 @@ export class ReportingCore {
   }
 
   public getKibanaVersion() {
-    return this.kibanaVersion;
+    return this.packageInfo;
   }
 
   /*
