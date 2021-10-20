@@ -30,7 +30,6 @@ import {
   mockSourcererState,
 } from '../../mock';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { isSignalIndex } from '../../store/sourcerer/helpers';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -198,7 +197,7 @@ describe('Sourcerer Hooks', () => {
           selectedPatterns: [
             mockSourcererState.signalIndexName,
             ...mockSourcererState.defaultDataView.patternList.filter(
-              (p) => !isSignalIndex(p, mockSourcererState.signalIndexName)
+              (p) => p !== mockSourcererState.signalIndexName
             ),
           ].sort(),
         },

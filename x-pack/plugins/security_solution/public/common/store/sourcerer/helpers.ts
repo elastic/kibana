@@ -18,9 +18,6 @@ export interface Args {
   state: SourcererModel;
 }
 
-export const isSignalIndex = (index: string, signalIndex: string | null): boolean =>
-  index === signalIndex;
-
 export const getScopePatternListSelection = (
   theDataView: KibanaDataView | undefined,
   sourcererScope: SourcererScopeName,
@@ -35,7 +32,7 @@ export const getScopePatternListSelection = (
   // when our SIEM data view is set, here are the defaults
   switch (sourcererScope) {
     case SourcererScopeName.default:
-      return patternList.filter((index) => !isSignalIndex(index, signalIndexName)).sort();
+      return patternList.filter((index) => index !== signalIndexName).sort();
     case SourcererScopeName.detections:
       // set to signalIndexName whether or not it exists yet in the patternList
       return (signalIndexName != null ? [signalIndexName] : []).sort();
@@ -44,7 +41,7 @@ export const getScopePatternListSelection = (
         signalIndexName != null
           ? [
               // remove signalIndexName in case its already in there and add it whether or not it exists yet in the patternList
-              ...patternList.filter((index) => !isSignalIndex(index, signalIndexName)),
+              ...patternList.filter((index) => index !== signalIndexName),
               signalIndexName,
             ]
           : patternList
@@ -99,16 +96,14 @@ export const defaultDataViewByEventType = ({
     };
   } else if (eventType === 'raw') {
     return {
-      selectedPatterns: patternList
-        .filter((index) => !isSignalIndex(index, signalIndexName))
-        .sort(),
+      selectedPatterns: patternList.filter((index) => index !== signalIndexName).sort(),
       selectedDataViewId: id,
     };
   }
   return {
     selectedPatterns: [
       // remove signalIndexName in case its already in there and add it whether or not it exists yet in the patternList
-      ...patternList.filter((index) => !isSignalIndex(index, signalIndexName)),
+      ...patternList.filter((index) => index !== signalIndexName),
       signalIndexName,
     ].sort(),
     selectedDataViewId: id,

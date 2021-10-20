@@ -8,11 +8,19 @@
 import { I18nProvider } from '@kbn/i18n/react';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+import SemVer from 'semver/classes/semver';
 
 import { ReindexWarning } from '../../../../../../../common/types';
-import { mockKibanaSemverVersion } from '../../../../../../../common/constants';
+import { MAJOR_VERSION } from '../../../../../../../common/constants';
 
 import { idForWarning, WarningsFlyoutStep } from './warnings_step';
+
+const kibanaVersion = new SemVer(MAJOR_VERSION);
+const mockKibanaVersionInfo = {
+  currentMajor: kibanaVersion.major,
+  prevMajor: kibanaVersion.major - 1,
+  nextMajor: kibanaVersion.major + 1,
+};
 
 jest.mock('../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual(
@@ -23,11 +31,7 @@ jest.mock('../../../../../app_context', () => {
     useAppContext: () => {
       return {
         docLinks: docLinksServiceMock.createStartContract(),
-        kibanaVersionInfo: {
-          currentMajor: mockKibanaSemverVersion.major,
-          prevMajor: mockKibanaSemverVersion.major - 1,
-          nextMajor: mockKibanaSemverVersion.major + 1,
-        },
+        kibanaVersionInfo: mockKibanaVersionInfo,
       };
     },
   };
@@ -45,7 +49,7 @@ describe('WarningsFlyoutStep', () => {
     expect(shallow(<WarningsFlyoutStep {...defaultProps} />)).toMatchSnapshot();
   });
 
-  if (mockKibanaSemverVersion.major === 7) {
+  if (kibanaVersion.major === 7) {
     it('does not allow proceeding until all are checked', () => {
       const defaultPropsWithWarnings = {
         ...defaultProps,

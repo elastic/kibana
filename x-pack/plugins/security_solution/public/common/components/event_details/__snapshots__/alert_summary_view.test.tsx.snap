@@ -138,12 +138,17 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.status"
               >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  open
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    open
+                  </div>
                 </div>
               </div>
               <div
@@ -204,10 +209,11 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-@timestamp"
               >
                 <div
-                  class="eventFieldsTable__fieldValue"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
                   <span
                     class="euiToolTipAnchor eui-textTruncate eui-alignMiddle"
@@ -274,12 +280,17 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.rule.name"
               >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  xxx
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    xxx
+                  </div>
                 </div>
               </div>
               <div
@@ -340,12 +351,17 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.rule.severity"
               >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  low
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    low
+                  </div>
                 </div>
               </div>
               <div
@@ -406,12 +422,17 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.rule.risk_score"
               >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  21
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    21
+                  </div>
                 </div>
               </div>
               <div
@@ -472,12 +493,17 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-host.name"
               >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  windows-native
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    windows-native
+                  </div>
                 </div>
               </div>
               <div
@@ -538,12 +564,17 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-user.name"
               >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  administrator
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    administrator
+                  </div>
                 </div>
               </div>
               <div
@@ -604,10 +635,11 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-source.ip"
               >
                 <div
-                  class="eventFieldsTable__fieldValue"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
                   <span
                     class="euiToolTipAnchor"
@@ -800,12 +832,17 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.status"
               >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  open
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    open
+                  </div>
                 </div>
               </div>
               <div
@@ -866,10 +903,11 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-@timestamp"
               >
                 <div
-                  class="eventFieldsTable__fieldValue"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
                   <span
                     class="euiToolTipAnchor eui-textTruncate eui-alignMiddle"
@@ -936,12 +974,17 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.rule.name"
               >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  xxx
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    xxx
+                  </div>
                 </div>
               </div>
               <div
@@ -1002,12 +1045,17 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.rule.severity"
               >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  low
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    low
+                  </div>
                 </div>
               </div>
               <div
@@ -1068,12 +1116,17 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.rule.risk_score"
               >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  21
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    21
+                  </div>
                 </div>
               </div>
               <div
@@ -1134,12 +1187,17 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-host.name"
               >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  windows-native
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    windows-native
+                  </div>
                 </div>
               </div>
               <div
@@ -1200,12 +1258,17 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-user.name"
               >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  administrator
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    administrator
+                  </div>
                 </div>
               </div>
               <div
@@ -1266,10 +1329,11 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
+                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-source.ip"
               >
                 <div
-                  class="eventFieldsTable__fieldValue"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
                   <span
                     class="euiToolTipAnchor"
