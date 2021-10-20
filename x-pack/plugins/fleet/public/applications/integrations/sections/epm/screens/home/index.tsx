@@ -12,6 +12,7 @@ import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../..
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
 
+import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import type { PackageListItem } from '../../../../types';
@@ -31,7 +32,10 @@ export const getParams = (params: CategoryParams, search: string) => {
   const selectedCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  return { selectedCategory, searchParam };
+  return { selectedCategory, searchParam } as {
+    selectedCategory: IntegrationCategory & '';
+    searchParam: string;
+  };
 };
 
 export const categoryExists = (category: string, categories: CategoryFacet[]) => {
@@ -62,8 +66,15 @@ export const mapToCard = (
     uiInternalPathUrl = url;
   }
 
+  let release: 'ga' | 'beta' | 'experimental' | undefined;
+  if ('release' in item) {
+    release = item.release;
+  } else if (item.isBeta === true) {
+    release = 'beta';
+  }
+
   return {
-    id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}-${item.id}`,
+    id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}:${item.id}`,
     description: item.description,
     icons: !item.icons || !item.icons.length ? [] : item.icons,
     title: item.title,
@@ -71,7 +82,8 @@ export const mapToCard = (
     integration: 'integration' in item ? item.integration || '' : '',
     name: 'name' in item ? item.name || '' : '',
     version: 'version' in item ? item.version || '' : '',
-    release: 'release' in item ? item.release : undefined,
+    release,
+    categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
   };
 };
 

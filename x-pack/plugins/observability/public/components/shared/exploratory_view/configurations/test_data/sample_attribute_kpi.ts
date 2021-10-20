@@ -89,6 +89,7 @@ export const sampleAttributeKpi = {
       ],
       legend: {
         isVisible: true,
+        showSingleSeries: true,
         position: 'right',
       },
       preferredSeriesType: 'line',

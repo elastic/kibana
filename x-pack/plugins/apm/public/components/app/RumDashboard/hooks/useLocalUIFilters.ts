@@ -81,6 +81,7 @@ export function useLocalUIFilters({
   const clearValues = () => {
     const search = omit(toQuery(history.location.search), [
       ...filterNames,
+      'searchTerm',
       'transactionUrl',
     ]);
 

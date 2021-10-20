@@ -313,12 +313,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 advanced: { agent: { connection_delay: 'true' } },
                 malware: { mode: 'prevent' },
                 behavior_protection: { mode: 'prevent', supported: true },
+                memory_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
                   behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
+                  },
+                  memory_protection: {
                     enabled: true,
                     message: 'Elastic Security {action} {rule}',
                   },
@@ -329,12 +334,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
                 behavior_protection: { mode: 'prevent', supported: true },
+                memory_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
                   behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
+                  },
+                  memory_protection: {
                     enabled: true,
                     message: 'Elastic Security {action} {rule}',
                   },
@@ -537,12 +547,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 advanced: { agent: { connection_delay: 'true' } },
                 malware: { mode: 'prevent' },
                 behavior_protection: { mode: 'prevent', supported: true },
+                memory_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
                   behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
+                  },
+                  memory_protection: {
                     enabled: true,
                     message: 'Elastic Security {action} {rule}',
                   },
@@ -553,12 +568,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
                 behavior_protection: { mode: 'prevent', supported: true },
+                memory_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
                   behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
+                  },
+                  memory_protection: {
                     enabled: true,
                     message: 'Elastic Security {action} {rule}',
                   },
@@ -758,12 +778,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
                 behavior_protection: { mode: 'prevent', supported: true },
+                memory_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
                   behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
+                  },
+                  memory_protection: {
                     enabled: true,
                     message: 'Elastic Security {action} {rule}',
                   },
@@ -774,12 +799,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
                 behavior_protection: { mode: 'prevent', supported: true },
+                memory_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
                   behavior_protection: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {rule}',
+                  },
+                  memory_protection: {
                     enabled: true,
                     message: 'Elastic Security {action} {rule}',
                   },

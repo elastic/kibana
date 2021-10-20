@@ -45,6 +45,7 @@ import { DefaultLayout, DefaultPageTitle, WithoutHeaderLayout, WithHeaderLayout 
 import { AgentPolicyApp } from './sections/agent_policy';
 import { DataStreamApp } from './sections/data_stream';
 import { AgentsApp } from './sections/agents';
+import { MissingESRequirementsPage } from './sections/agents/agent_requirements_page';
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 
@@ -70,6 +71,53 @@ const Panel = styled(EuiPanel)`
   margin-right: auto;
   margin-left: auto;
 `;
+
+const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ error }) => {
+  if (error === 'MISSING_SECURITY') {
+    return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
+  }
+
+  if (error === 'MISSING_SUPERUSER_ROLE') {
+    return (
+      <Panel>
+        <EuiEmptyPrompt
+          iconType="securityApp"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.fleet.permissionDeniedErrorTitle"
+                defaultMessage="Permission denied"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.permissionDeniedErrorMessage"
+                defaultMessage="You are not authorized to access Fleet. Fleet requires {roleName} privileges."
+                values={{ roleName: <EuiCode>superuser</EuiCode> }}
+              />
+            </p>
+          }
+        />
+      </Panel>
+    );
+  }
+
+  return (
+    <Error
+      title={
+        <FormattedMessage
+          id="xpack.fleet.permissionsRequestErrorMessageTitle"
+          defaultMessage="Unable to check permissions"
+        />
+      }
+      error={i18n.translate('xpack.fleet.permissionsRequestErrorMessageDescription', {
+        defaultMessage: 'There was a problem checking Fleet permissions',
+      })}
+    />
+  );
+});
 
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('base');
@@ -121,58 +169,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   if (isPermissionsLoading || permissionsError) {
     return (
       <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
-        {isPermissionsLoading ? (
-          <Loading />
-        ) : permissionsError === 'REQUEST_ERROR' ? (
-          <Error
-            title={
-              <FormattedMessage
-                id="xpack.fleet.permissionsRequestErrorMessageTitle"
-                defaultMessage="Unable to check permissions"
-              />
-            }
-            error={i18n.translate('xpack.fleet.permissionsRequestErrorMessageDescription', {
-              defaultMessage: 'There was a problem checking Fleet permissions',
-            })}
-          />
-        ) : (
-          <Panel>
-            <EuiEmptyPrompt
-              iconType="securityApp"
-              title={
-                <h2>
-                  {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
-                    <FormattedMessage
-                      id="xpack.fleet.permissionDeniedErrorTitle"
-                      defaultMessage="Permission denied"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.securityRequiredErrorTitle"
-                      defaultMessage="Security is not enabled"
-                    />
-                  )}
-                </h2>
-              }
-              body={
-                <p>
-                  {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
-                    <FormattedMessage
-                      id="xpack.fleet.permissionDeniedErrorMessage"
-                      defaultMessage="You are not authorized to access Fleet. Fleet requires {roleName} privileges."
-                      values={{ roleName: <EuiCode>superuser</EuiCode> }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.securityRequiredErrorMessage"
-                      defaultMessage="You must enable security in Kibana and Elasticsearch to use Fleet."
-                    />
-                  )}
-                </p>
-              }
-            />
-          </Panel>
-        )}
+        {isPermissionsLoading ? <Loading /> : <PermissionsError error={permissionsError!} />}
       </ErrorLayout>
     );
   }

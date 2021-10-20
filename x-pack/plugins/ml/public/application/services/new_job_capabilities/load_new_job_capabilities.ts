@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IIndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
+import { DataView, DataViewsContract } from '../../../../../../../src/plugins/data_views/public';
 import { getIndexPatternAndSavedSearch } from '../../util/index_utils';
 import { JobType } from '../../../../common/types/saved_objects';
 import { newJobCapsServiceAnalytics } from '../new_job_capabilities/new_job_capabilities_service_analytics';
@@ -19,7 +19,7 @@ export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';
 export function loadNewJobCapabilities(
   indexPatternId: string,
   savedSearchId: string,
-  indexPatterns: IndexPatternsContract,
+  indexPatterns: DataViewsContract,
   jobType: JobType
 ) {
   return new Promise(async (resolve, reject) => {
@@ -29,7 +29,7 @@ export function loadNewJobCapabilities(
 
       if (indexPatternId !== undefined) {
         // index pattern is being used
-        const indexPattern: IIndexPattern = await indexPatterns.get(indexPatternId);
+        const indexPattern: DataView = await indexPatterns.get(indexPatternId);
         await serviceToUse.initializeFromIndexPattern(indexPattern);
         resolve(serviceToUse.newJobCaps);
       } else if (savedSearchId !== undefined) {

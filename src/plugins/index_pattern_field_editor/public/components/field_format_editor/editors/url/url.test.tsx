@@ -15,12 +15,6 @@ import { createKibanaReactContext } from '../../../../../../kibana_react/public'
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@elastic/eui/lib/services/accessibility', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
-
 const fieldType = 'string';
 const format = {
   getConverterFor: jest

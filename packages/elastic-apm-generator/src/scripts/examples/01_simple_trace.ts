@@ -7,17 +7,18 @@
  */
 
 import { service, timerange, getTransactionMetrics, getSpanDestinationMetrics } from '../..';
+import { getBreakdownMetrics } from '../../lib/utils/get_breakdown_metrics';
 
 export function simpleTrace(from: number, to: number) {
   const instance = service('opbeans-go', 'production', 'go').instance('instance');
 
   const range = timerange(from, to);
 
-  const transactionName = '100rpm (75% success) failed 1000ms';
+  const transactionName = '240rpm/60% 1000ms';
 
   const successfulTraceEvents = range
-    .interval('1m')
-    .rate(75)
+    .interval('1s')
+    .rate(3)
     .flatMap((timestamp) =>
       instance
         .transaction(transactionName)
@@ -31,24 +32,47 @@ export function simpleTrace(from: number, to: number) {
             .success()
             .destination('elasticsearch')
             .timestamp(timestamp),
-          instance.span('custom_operation', 'app').duration(50).success().timestamp(timestamp)
+          instance.span('custom_operation', 'custom').duration(100).success().timestamp(timestamp)
         )
         .serialize()
     );
 
   const failedTraceEvents = range
-    .interval('1m')
-    .rate(25)
+    .interval('1s')
+    .rate(1)
     .flatMap((timestamp) =>
       instance
         .transaction(transactionName)
         .timestamp(timestamp)
         .duration(1000)
         .failure()
+        .errors(
+          instance.error('[ResponseError] index_not_found_exception').timestamp(timestamp + 50)
+        )
         .serialize()
     );
 
+  const metricsets = range
+    .interval('30s')
+    .rate(1)
+    .flatMap((timestamp) =>
+      instance
+        .appMetrics({
+          'system.memory.actual.free': 800,
+          'system.memory.total': 1000,
+          'system.cpu.total.norm.pct': 0.6,
+          'system.process.cpu.total.norm.pct': 0.7,
+        })
+        .timestamp(timestamp)
+        .serialize()
+    );
   const events = successfulTraceEvents.concat(failedTraceEvents);
 
-  return events.concat(getTransactionMetrics(events)).concat(getSpanDestinationMetrics(events));
+  return [
+    ...events,
+    ...metricsets,
+    ...getTransactionMetrics(events),
+    ...getSpanDestinationMetrics(events),
+    ...getBreakdownMetrics(events),
+  ];
 }

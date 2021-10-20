@@ -67,7 +67,7 @@ export const tutorialProvider =
       ],
     };
 
-    if (apmConfig['xpack.apm.ui.enabled']) {
+    if (apmConfig.ui.enabled) {
       // @ts-expect-error artifacts.application is readonly
       artifacts.application = {
         path: '/app/apm',

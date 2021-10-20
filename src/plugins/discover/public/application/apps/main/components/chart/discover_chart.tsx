@@ -25,6 +25,7 @@ import { DiscoverServices } from '../../../../../build_services';
 import { useChartPanels } from './use_chart_panels';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
+export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 
 export function DiscoverChart({
   resetSavedSearch,
@@ -47,7 +48,8 @@ export function DiscoverChart({
 }) {
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
 
-  const { data } = services;
+  const { data, storage } = services;
+
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
     element: null,
     moveFocus: false,
@@ -71,7 +73,8 @@ export function DiscoverChart({
     const newHideChart = !state.hideChart;
     stateContainer.setAppState({ hideChart: newHideChart });
     chartRef.current.moveFocus = !newHideChart;
-  }, [state, stateContainer]);
+    storage.set(CHART_HIDDEN_KEY, newHideChart);
+  }, [state.hideChart, stateContainer, storage]);
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
