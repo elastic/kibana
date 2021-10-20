@@ -77,7 +77,6 @@ describe('migrating from the same Kibana version that used v1 migrations', () =>
       {
         migrations: {
           skip: false,
-          enableV2: true,
           // There are 40 docs in fixtures. Batch size configured to enforce 3 migration steps.
           batchSize: 15,
         },

@@ -6,38 +6,47 @@
  */
 
 import { buildRuleWithOverrides, buildRuleWithoutOverrides } from './build_rule';
-import {
-  sampleDocNoSortId,
-  expectedRule,
-  sampleDocSeverity,
-  sampleRuleSO,
-} from './__mocks__/es_results';
+import { sampleDocNoSortId, expectedRule, sampleDocSeverity } from './__mocks__/es_results';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
-import { getQueryRuleParams, getThreatRuleParams } from '../schemas/rule_schemas.mock';
-import { ThreatRuleParams } from '../schemas/rule_schemas';
+import {
+  getCompleteRuleMock,
+  getQueryRuleParams,
+  getThreatRuleParams,
+} from '../schemas/rule_schemas.mock';
+import {
+  CompleteRule,
+  QueryRuleParams,
+  RuleParams,
+  ThreatRuleParams,
+} from '../schemas/rule_schemas';
 
 describe('buildRuleWithoutOverrides', () => {
+  let params: RuleParams;
+  let completeRule: CompleteRule<QueryRuleParams>;
+
+  beforeEach(() => {
+    params = getQueryRuleParams();
+    completeRule = getCompleteRuleMock<QueryRuleParams>(params);
+  });
+
   test('builds a rule using rule alert', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
-    const rule = buildRuleWithoutOverrides(ruleSO);
+    const rule = buildRuleWithoutOverrides(completeRule);
     expect(rule).toEqual(expectedRule());
   });
 
   test('builds a rule and removes internal tags', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
-    ruleSO.attributes.tags = [
+    completeRule.ruleConfig.tags = [
       'some fake tag 1',
       'some fake tag 2',
       `${INTERNAL_RULE_ID_KEY}:rule-1`,
       `${INTERNAL_IMMUTABLE_KEY}:true`,
     ];
-    const rule = buildRuleWithoutOverrides(ruleSO);
+    const rule = buildRuleWithoutOverrides(completeRule);
     expect(rule.tags).toEqual(['some fake tag 1', 'some fake tag 2']);
   });
 
   test('it builds a rule as expected with filters present', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const ruleFilters = [
       {
         query: 'host.name: Rebecca',
@@ -49,8 +58,8 @@ describe('buildRuleWithoutOverrides', () => {
         query: 'host.name: Braden',
       },
     ];
-    ruleSO.attributes.params.filters = ruleFilters;
-    const rule = buildRuleWithoutOverrides(ruleSO);
+    completeRule.ruleParams.filters = ruleFilters;
+    const rule = buildRuleWithoutOverrides(completeRule);
     expect(rule.filters).toEqual(ruleFilters);
   });
 
@@ -90,8 +99,8 @@ describe('buildRuleWithoutOverrides', () => {
       threatIndex: ['threat_index'],
       threatLanguage: 'kuery',
     };
-    const ruleSO = sampleRuleSO(ruleParams);
-    const threatMatchRule = buildRuleWithoutOverrides(ruleSO);
+    const threatMatchCompleteRule = getCompleteRuleMock<ThreatRuleParams>(ruleParams);
+    const threatMatchRule = buildRuleWithoutOverrides(threatMatchCompleteRule);
     const expected: Partial<RulesSchema> = {
       threat_mapping: ruleParams.threatMapping,
       threat_filters: ruleParams.threatFilters,
@@ -105,10 +114,17 @@ describe('buildRuleWithoutOverrides', () => {
 });
 
 describe('buildRuleWithOverrides', () => {
+  let params: RuleParams;
+  let completeRule: CompleteRule<QueryRuleParams>;
+
+  beforeEach(() => {
+    params = getQueryRuleParams();
+    completeRule = getCompleteRuleMock<QueryRuleParams>(params);
+  });
+
   test('it applies rule name override in buildRule', () => {
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
-    ruleSO.attributes.params.ruleNameOverride = 'someKey';
-    const rule = buildRuleWithOverrides(ruleSO, sampleDocNoSortId()._source);
+    completeRule.ruleParams.ruleNameOverride = 'someKey';
+    const rule = buildRuleWithOverrides(completeRule, sampleDocNoSortId()._source!);
     const expected = {
       ...expectedRule(),
       name: 'someValue',
@@ -123,8 +139,7 @@ describe('buildRuleWithOverrides', () => {
 
   test('it applies risk score override in buildRule', () => {
     const newRiskScore = 79;
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
-    ruleSO.attributes.params.riskScoreMapping = [
+    completeRule.ruleParams.riskScoreMapping = [
       {
         field: 'new_risk_score',
         // value and risk_score aren't used for anything but are required in the schema
@@ -135,11 +150,11 @@ describe('buildRuleWithOverrides', () => {
     ];
     const doc = sampleDocNoSortId();
     doc._source.new_risk_score = newRiskScore;
-    const rule = buildRuleWithOverrides(ruleSO, doc._source);
+    const rule = buildRuleWithOverrides(completeRule, doc._source!);
     const expected = {
       ...expectedRule(),
       risk_score: newRiskScore,
-      risk_score_mapping: ruleSO.attributes.params.riskScoreMapping,
+      risk_score_mapping: completeRule.ruleParams.riskScoreMapping,
       meta: {
         riskScoreOverridden: true,
         someMeta: 'someField',
@@ -150,8 +165,7 @@ describe('buildRuleWithOverrides', () => {
 
   test('it applies severity override in buildRule', () => {
     const eventSeverity = '42';
-    const ruleSO = sampleRuleSO(getQueryRuleParams());
-    ruleSO.attributes.params.severityMapping = [
+    completeRule.ruleParams.severityMapping = [
       {
         field: 'event.severity',
         value: eventSeverity,
@@ -160,11 +174,11 @@ describe('buildRuleWithOverrides', () => {
       },
     ];
     const doc = sampleDocSeverity(Number(eventSeverity));
-    const rule = buildRuleWithOverrides(ruleSO, doc._source!);
+    const rule = buildRuleWithOverrides(completeRule, doc._source!);
     const expected = {
       ...expectedRule(),
       severity: 'critical',
-      severity_mapping: ruleSO.attributes.params.severityMapping,
+      severity_mapping: completeRule.ruleParams.severityMapping,
       meta: {
         severityOverrideField: 'event.severity',
         someMeta: 'someField',
