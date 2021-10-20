@@ -27,8 +27,12 @@ import {
 import { findNewUuid } from './lib/find_new_uuid';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { GlobalStateContext } from '../../application/contexts/global_state_context';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useRequestErrorHandler } from '../../application/hooks/use_request_error_handler';
 
-export class SetupModeRenderer extends React.Component {
+export class WrappedSetupModeRenderer extends React.Component {
+  globalState;
   state = {
     renderState: false,
     isFlyoutOpen: false,
@@ -38,9 +42,11 @@ export class SetupModeRenderer extends React.Component {
   };
 
   UNSAFE_componentWillMount() {
-    const { scope, injector } = this.props;
-    initSetupModeState(scope, injector, (_oldData) => {
+    this.globalState = this.context;
+    const { kibana, onHttpError } = this.props;
+    initSetupModeState(this.globalState, kibana.services.http, onHttpError, (_oldData) => {
       const newState = { renderState: true };
+
       const { productName } = this.props;
       if (!productName) {
         this.setState(newState);
@@ -207,3 +213,13 @@ export class SetupModeRenderer extends React.Component {
     });
   }
 }
+
+function withErrorHandler(Component) {
+  return function WrappedComponent(props) {
+    const handleRequestError = useRequestErrorHandler();
+    return <Component {...props} onHttpError={handleRequestError} />;
+  };
+}
+
+WrappedSetupModeRenderer.contextType = GlobalStateContext;
+export const SetupModeRenderer = withKibana(withErrorHandler(WrappedSetupModeRenderer));
