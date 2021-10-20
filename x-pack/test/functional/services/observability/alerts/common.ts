@@ -32,6 +32,7 @@ export function ObservabilityAlertsCommonProvider({
   const pageObjects = getPageObjects(['common']);
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const kibanaServer = getService('kibanaServer');
 
   const navigateToTimeWithData = async () => {
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
@@ -39,6 +40,12 @@ export function ObservabilityAlertsCommonProvider({
       '/alerts',
       `?${querystring.stringify(DATE_WITH_DATA)}`
     );
+  };
+
+  const setKibanaTimeZoneToUTC = async () => {
+    await kibanaServer.uiSettings.update({
+      'dateFormat:tz': 'UTC',
+    });
   };
 
   const getTableColumnHeaders = async () => {
@@ -199,6 +206,7 @@ export function ObservabilityAlertsCommonProvider({
     getTableColumnHeaders,
     getTableOrFail,
     navigateToTimeWithData,
+    setKibanaTimeZoneToUTC,
     openAlertsFlyout,
     setWorkflowStatusForRow,
     setWorkflowStatusFilter,

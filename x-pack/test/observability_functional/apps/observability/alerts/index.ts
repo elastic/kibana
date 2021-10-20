@@ -31,7 +31,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await observability.alerts.common.navigateToTimeWithData();
+      const setup = async () => {
+        await observability.alerts.common.setKibanaTimeZoneToUTC();
+        await observability.alerts.common.navigateToTimeWithData();
+      };
+      await setup();
     });
 
     after(async () => {
@@ -142,9 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             ];
             const expectedDescriptions = [
               'Active',
-              // NOTE: This *should* be 15:00, e.g. UTC, I'm investigating why the feature controls tests change the timezone to Browser (this is a known issue
-              // when using custom spaces, but those tests don't AFAICS). This *will* break at some point if not fixed.
-              'Oct 19, 2021 @ 16:00:41.555',
+              'Oct 19, 2021 @ 15:00:41.555',
               '20 minutes',
               '5',
               '30.73',
