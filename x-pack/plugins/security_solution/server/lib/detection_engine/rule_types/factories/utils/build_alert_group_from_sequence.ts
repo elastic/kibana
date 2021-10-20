@@ -9,10 +9,9 @@ import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { Logger } from 'kibana/server';
 
-import { SavedObject } from 'src/core/types';
 import type { ConfigType } from '../../../../../config';
 import { buildRuleWithoutOverrides } from '../../../signals/build_rule';
-import { AlertAttributes, Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';
+import { Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { RACAlert, WrappedRACAlert } from '../../types';
 import { buildAlert, buildAncestors, generateAlertId } from './build_alert';
 import { buildBulkBody } from './build_bulk_body';
@@ -25,31 +24,32 @@ import {
   ALERT_GROUP_ID,
   ALERT_GROUP_INDEX,
 } from '../../field_maps/field_names';
+import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -
  * one signal for each event in the sequence, and a "shell" signal that ties them all together. All N+1 signals
  * share the same signal.group.id to make it easy to query them.
  * @param sequence The raw ES documents that make up the sequence
- * @param ruleSO SavedObject representing the rule that found the sequence
+ * @param completeRule object representing the rule that found the sequence
  */
 export const buildAlertGroupFromSequence = (
   logger: Logger,
   sequence: EqlSequence<SignalSource>,
-  ruleSO: SavedObject<AlertAttributes>,
+  completeRule: CompleteRule<RuleParams>,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage
 ): WrappedRACAlert[] => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
-  if (ancestors.some((ancestor) => ancestor?.rule === ruleSO.id)) {
+  if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
     return [];
   }
 
   let buildingBlocks: RACAlert[] = [];
   try {
     buildingBlocks = sequence.events.map((event) => ({
-      ...buildBulkBody(spaceId, ruleSO, event, mergeStrategy, [], false, buildReasonMessage),
+      ...buildBulkBody(spaceId, completeRule, event, mergeStrategy, [], false, buildReasonMessage),
       [ALERT_BUILDING_BLOCK_TYPE]: 'default',
     }));
   } catch (error) {
@@ -70,7 +70,7 @@ export const buildAlertGroupFromSequence = (
   // Now that we have an array of building blocks for the events in the sequence,
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
-  const doc = buildAlertRoot(wrappedBuildingBlocks, ruleSO, spaceId, buildReasonMessage);
+  const doc = buildAlertRoot(wrappedBuildingBlocks, completeRule, spaceId, buildReasonMessage);
   const sequenceAlert = {
     _id: generateAlertId(doc),
     _index: '',
@@ -87,11 +87,11 @@ export const buildAlertGroupFromSequence = (
 
 export const buildAlertRoot = (
   wrappedBuildingBlocks: WrappedRACAlert[],
-  ruleSO: SavedObject<AlertAttributes>,
+  completeRule: CompleteRule<RuleParams>,
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage
 ): RACAlert => {
-  const rule = buildRuleWithoutOverrides(ruleSO);
+  const rule = buildRuleWithoutOverrides(completeRule);
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({ rule, mergedDoc: mergedAlerts as SignalSourceHit });
   const doc = buildAlert(wrappedBuildingBlocks, rule, spaceId, reason);

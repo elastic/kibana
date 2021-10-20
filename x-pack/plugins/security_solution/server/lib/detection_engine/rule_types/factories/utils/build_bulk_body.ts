@@ -8,22 +8,16 @@
 import { EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { SavedObject } from 'src/core/types';
 import { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
 import { buildRuleWithOverrides, buildRuleWithoutOverrides } from '../../../signals/build_rule';
 import { BuildReasonMessage } from '../../../signals/reason_formatters';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
-import {
-  AlertAttributes,
-  BaseSignalHit,
-  SignalSource,
-  SignalSourceHit,
-  SimpleHit,
-} from '../../../signals/types';
+import { BaseSignalHit, SignalSource, SignalSourceHit, SimpleHit } from '../../../signals/types';
 import { RACAlert } from '../../types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
+import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 
 const isSourceDoc = (
   hit: SignalSourceHit
@@ -43,13 +37,13 @@ const buildEventTypeAlert = (doc: BaseSignalHit): object => {
  * "best effort" merged "fields" with the "_source" object, then build the signal object,
  * then the event object, and finally we strip away any additional temporary data that was added
  * such as the "threshold_result".
- * @param ruleSO The rule saved object to build overrides
+ * @param completeRule The rule saved object to build overrides
  * @param doc The SignalSourceHit with "_source", "fields", and additional data such as "threshold_result"
  * @returns The body that can be added to a bulk call for inserting the signal.
  */
 export const buildBulkBody = (
   spaceId: string | null | undefined,
-  ruleSO: SavedObject<AlertAttributes>,
+  completeRule: CompleteRule<RuleParams>,
   doc: SimpleHit,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   ignoreFields: ConfigType['alertIgnoreFields'],
@@ -58,8 +52,8 @@ export const buildBulkBody = (
 ): RACAlert => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const rule = applyOverrides
-    ? buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {})
-    : buildRuleWithoutOverrides(ruleSO);
+    ? buildRuleWithOverrides(completeRule, mergedDoc._source ?? {})
+    : buildRuleWithoutOverrides(completeRule);
   const eventFields = buildEventTypeAlert(mergedDoc);
   const filteredSource = filterSource(mergedDoc);
   const reason = buildReasonMessage({ mergedDoc, rule });

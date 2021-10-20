@@ -9,7 +9,7 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { thresholdExecutor } from '../../signals/executors/threshold';
 import { ThresholdAlertState } from '../../signals/types';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
@@ -50,7 +50,7 @@ export const createThresholdAlertType = (
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
-        runOpts: { buildRuleMessage, bulkCreate, exceptionItems, rule, tuple, wrapHits },
+        runOpts: { buildRuleMessage, bulkCreate, exceptionItems, completeRule, tuple, wrapHits },
         services,
         startedAt,
         state,
@@ -62,7 +62,7 @@ export const createThresholdAlertType = (
         exceptionItems,
         experimentalFeatures,
         logger,
-        rule,
+        completeRule: completeRule as CompleteRule<ThresholdRuleParams>,
         services,
         startedAt,
         state,
