@@ -138,7 +138,9 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     }
   }
 
-  set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
+  if (opts.pluginDir.length) {
+    set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
+  }
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
   merge(extraCliOptions);
@@ -171,10 +173,10 @@ export default function (program) {
     )
     .option(
       '--plugin-dir <path>',
-      'A path to scan for plugins, this can be specified multiple ' +
+      'Deprecated, A path to scan for plugins, this can be specified multiple ' +
         'times to specify multiple directories',
       pluginDirCollector,
-      [fromRoot('plugins')]
+      []
     )
     .option(
       '--plugin-path <path>',
@@ -183,7 +185,7 @@ export default function (program) {
       pluginPathCollector,
       []
     )
-    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
+    .option('--plugins <path>', 'Deprecated, an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (!isKibanaDistributable()) {

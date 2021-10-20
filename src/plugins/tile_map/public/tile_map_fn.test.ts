@@ -7,6 +7,7 @@
  */
 
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
+import { Datatable } from '../../expressions';
 import { createTileMapFn } from './tile_map_fn';
 
 jest.mock('./utils', () => ({
@@ -32,7 +33,7 @@ describe('interpreter/functions#tilemap', () => {
     type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
-  };
+  } as unknown as Datatable;
   const visConfig = {
     colorSchema: 'Yellow to Red',
     mapType: 'Scaled Circle Markers',

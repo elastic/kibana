@@ -72,6 +72,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       }),
       pollInterval
     ).subscribe();
@@ -106,6 +107,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       }),
       pollInterval,
       retryDelay
@@ -151,6 +153,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       })
     ).toPromise();
 
@@ -182,6 +185,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       })
     ).toPromise();
 
@@ -213,6 +217,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       })
     ).toPromise();
 
@@ -241,6 +246,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       }),
       retryDelay
     ).subscribe((status) => {
@@ -272,6 +278,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       }),
       retryDelay
     ).subscribe((status) => {
@@ -309,6 +316,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '20m',
       })
     ).toPromise();
 

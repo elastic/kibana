@@ -32,10 +32,12 @@ import { mlExecutor } from './executors/ml';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
-import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
+import { eventLogServiceMock } from '../../../../../event_log/server/mocks';
+import { createMockConfig } from '../routes/__mocks__';
 
 jest.mock('./utils', () => {
   const original = jest.requireActual('./utils');
@@ -57,7 +59,7 @@ jest.mock('@kbn/securitysolution-io-ts-utils', () => {
     parseScheduleDates: jest.fn(),
   };
 });
-
+jest.mock('../notifications/schedule_throttle_notification_actions');
 const mockRuleExecutionLogClient = ruleExecutionLogClientMock.create();
 
 jest.mock('../rule_execution_log/rule_execution_log_client', () => ({
@@ -124,12 +126,12 @@ describe('signal_rule_alert_type', () => {
   let alert: ReturnType<typeof signalRulesAlertType>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
-  let ruleDataService: ReturnType<typeof ruleRegistryMocks.createRuleDataPluginService>;
+  let eventLogService: ReturnType<typeof eventLogServiceMock.create>;
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
     logger = loggingSystemMock.createLogger();
-    ruleDataService = ruleRegistryMocks.createRuleDataPluginService();
+    eventLogService = eventLogServiceMock.create();
     (getListsClient as jest.Mock).mockReturnValue({
       listClient: getListClientMock(),
       exceptionsClient: getExceptionListClientMock(),
@@ -194,12 +196,12 @@ describe('signal_rule_alert_type', () => {
       version,
       ml: mlMock,
       lists: listMock.createSetup(),
-      mergeStrategy: 'missingFields',
-      ignoreFields: [],
-      ruleDataService,
+      config: createMockConfig(),
+      eventLogService,
     });
 
     mockRuleExecutionLogClient.logStatusChange.mockClear();
+    (scheduleThrottledNotificationActions as jest.Mock).mockClear();
   });
 
   describe('executor', () => {
@@ -217,11 +219,18 @@ describe('signal_rule_alert_type', () => {
       payload.previousStartedAt = moment().subtract(100, 'm').toDate();
       await alert.executor(payload);
       expect(logger.warn).toHaveBeenCalled();
-      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus['going to run'],
+        })
+      );
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
           newStatus: RuleExecutionStatus.failed,
           metrics: {
-            gap: 'an hour',
+            executionGap: expect.any(Object),
           },
         })
       );
@@ -254,7 +263,8 @@ describe('signal_rule_alert_type', () => {
         2,
         expect.objectContaining({
           newStatus: RuleExecutionStatus['partial failure'],
-          message: 'Missing required read privileges on the following indices: ["some*"]',
+          message:
+            'This rule may not have the required read privileges to the following indices/index patterns: ["some*"]',
         })
       );
     });
@@ -284,7 +294,7 @@ describe('signal_rule_alert_type', () => {
         expect.objectContaining({
           newStatus: RuleExecutionStatus['partial failure'],
           message:
-            'This rule may not have the required read privileges to the following indices: ["myfa*","some*"]',
+            'This rule may not have the required read privileges to the following indices/index patterns: ["myfa*","some*"]',
         })
       );
     });
@@ -512,6 +522,89 @@ describe('signal_rule_alert_type', () => {
           newStatus: RuleExecutionStatus.failed,
         })
       );
+    });
+
+    it('should call scheduleThrottledNotificationActions if result is false to prevent the throttle from being reset', async () => {
+      const result: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        lastLookBackDate: null,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        warningMessages: [],
+        errors: ['Error that bubbled up.'],
+      };
+      (queryExecutor as jest.Mock).mockResolvedValue(result);
+      const ruleAlert = getAlertMock(false, getQueryRuleParams());
+      ruleAlert.throttle = '1h';
+      const payLoadWithThrottle = getPayload(
+        ruleAlert,
+        alertServices
+      ) as jest.Mocked<RuleExecutorOptions>;
+      payLoadWithThrottle.rule.throttle = '1h';
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      await alert.executor(payLoadWithThrottle);
+      expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should NOT call scheduleThrottledNotificationActions if result is false and the throttle is not set', async () => {
+      const result: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        lastLookBackDate: null,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        warningMessages: [],
+        errors: ['Error that bubbled up.'],
+      };
+      (queryExecutor as jest.Mock).mockResolvedValue(result);
+      await alert.executor(payload);
+      expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(0);
+    });
+
+    it('should call scheduleThrottledNotificationActions if an error was thrown to prevent the throttle from being reset', async () => {
+      (queryExecutor as jest.Mock).mockRejectedValue({});
+      const ruleAlert = getAlertMock(false, getQueryRuleParams());
+      ruleAlert.throttle = '1h';
+      const payLoadWithThrottle = getPayload(
+        ruleAlert,
+        alertServices
+      ) as jest.Mocked<RuleExecutorOptions>;
+      payLoadWithThrottle.rule.throttle = '1h';
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      await alert.executor(payLoadWithThrottle);
+      expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should NOT call scheduleThrottledNotificationActions if an error was thrown to prevent the throttle from being reset if throttle is not defined', async () => {
+      const result: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        lastLookBackDate: null,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        warningMessages: [],
+        errors: ['Error that bubbled up.'],
+      };
+      (queryExecutor as jest.Mock).mockRejectedValue(result);
+      await alert.executor(payload);
+      expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(0);
     });
   });
 });

@@ -124,4 +124,33 @@ export function registerDeprecationLoggingRoutes({
       }
     )
   );
+
+  router.delete(
+    {
+      path: `${API_BASE_PATH}/deprecation_logging/cache`,
+      validate: false,
+    },
+    versionCheckHandlerWrapper(
+      async (
+        {
+          core: {
+            elasticsearch: { client },
+          },
+        },
+        request,
+        response
+      ) => {
+        try {
+          await client.asCurrentUser.transport.request({
+            method: 'DELETE',
+            path: '/_logging/deprecation_cache',
+          });
+
+          return response.ok({ body: 'ok' });
+        } catch (error) {
+          return handleEsError({ error, response });
+        }
+      }
+    )
+  );
 }

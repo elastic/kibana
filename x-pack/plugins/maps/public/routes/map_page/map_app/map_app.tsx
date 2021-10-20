@@ -18,6 +18,7 @@ import {
   getCoreChrome,
   getMapsCapabilities,
   getNavigation,
+  getSpacesApi,
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
@@ -40,7 +41,8 @@ import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
 import { goToSpecifiedPath } from '../../../render_app';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { getFullPath, APP_ID } from '../../../../common/constants';
+import { getEditPath, getFullPath, APP_ID } from '../../../../common/constants';
+import { getMapEmbeddableDisplayName } from '../../../../common/i18n_getters';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
@@ -85,6 +87,7 @@ export interface Props {
   isSaveDisabled: boolean;
   query: Query | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  history: AppMountParameters['history'];
 }
 
 export interface State {
@@ -347,6 +350,16 @@ export class MapApp extends React.Component<Props, State> {
       return;
     }
 
+    const sharingSavedObjectProps = this.props.savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
+      // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newPath = `${getEditPath(newObjectId)}${this.props.history.location.hash}`;
+      await spaces.ui.redirectLegacyUrl(newPath, getMapEmbeddableDisplayName());
+      return;
+    }
+
     this.props.savedMap.setBreadcrumbs();
     getCoreChrome().docTitle.change(this.props.savedMap.getTitle());
     const savedObjectId = this.props.savedMap.getSavedObjectId();
@@ -437,6 +450,21 @@ export class MapApp extends React.Component<Props, State> {
     this._onFiltersChange([...this.props.filters, ...newFilters]);
   };
 
+  _renderLegacyUrlConflict() {
+    const sharingSavedObjectProps = this.props.savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    return spaces && sharingSavedObjectProps?.outcome === 'conflict'
+      ? spaces.ui.components.getLegacyUrlConflict({
+          objectNoun: getMapEmbeddableDisplayName(),
+          currentObjectId: this.props.savedMap.getSavedObjectId()!,
+          otherObjectId: sharingSavedObjectProps.aliasTargetId!,
+          otherObjectPath: `${getEditPath(sharingSavedObjectProps.aliasTargetId!)}${
+            this.props.history.location.hash
+          }`,
+        })
+      : null;
+  }
+
   render() {
     if (!this.state.initialized) {
       return null;
@@ -447,6 +475,7 @@ export class MapApp extends React.Component<Props, State> {
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root">
+          {this._renderLegacyUrlConflict()}
           <MapContainer
             addFilters={this._addFilter}
             title={this.props.savedMap.getAttributes().title}

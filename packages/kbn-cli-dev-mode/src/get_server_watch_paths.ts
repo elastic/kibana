@@ -52,7 +52,7 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
 
   const ignorePaths = [
     /[\\\/](\..*|node_modules|bower_components|target|public|__[a-z0-9_]+__|coverage)([\\\/]|$)/,
-    /\.test\.(js|tsx?)$/,
+    /\.(test|spec)\.(js|ts|tsx)$/,
     /\.(md|sh|txt)$/,
     /debug\.log$/,
     ...pluginInternalDirsIgnore,
@@ -66,6 +66,7 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
     fromRoot('x-pack/plugins/security_solution/scripts'),
     fromRoot('x-pack/plugins/security_solution/server/lib/detection_engine/scripts'),
     fromRoot('x-pack/plugins/metrics_entities/server/scripts'),
+    fromRoot('x-pack/plugins/uptime/e2e'),
   ];
 
   return {

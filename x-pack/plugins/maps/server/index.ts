@@ -34,6 +34,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
         return completeConfig;
       }
       addDeprecation({
+        configPath: 'xpack.maps.showMapVisualizationTypes',
         message: i18n.translate('xpack.maps.deprecation.showMapVisualizationTypes.message', {
           defaultMessage:
             'xpack.maps.showMapVisualizationTypes is deprecated and is no longer used',
@@ -52,14 +53,15 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
     (
       completeConfig: Record<string, any>,
       rootPath: string,
-      addDeprecation: AddConfigDeprecation
+      addDeprecation: AddConfigDeprecation,
+      { branch }
     ) => {
       if (_.get(completeConfig, 'map.proxyElasticMapsServiceInMaps') === undefined) {
         return completeConfig;
       }
       addDeprecation({
-        documentationUrl:
-          'https://www.elastic.co/guide/en/kibana/current/maps-connect-to-ems.html#elastic-maps-server',
+        configPath: 'map.proxyElasticMapsServiceInMaps',
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/maps-connect-to-ems.html#elastic-maps-server`,
         message: i18n.translate('xpack.maps.deprecation.proxyEMS.message', {
           defaultMessage: 'map.proxyElasticMapsServiceInMaps is deprecated and is no longer used',
         }),
@@ -86,6 +88,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
         return completeConfig;
       }
       addDeprecation({
+        configPath: 'map.regionmap',
         message: i18n.translate('xpack.maps.deprecation.regionmap.message', {
           defaultMessage: 'map.regionmap is deprecated and is no longer used',
         }),

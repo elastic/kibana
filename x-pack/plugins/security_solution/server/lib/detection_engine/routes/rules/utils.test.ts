@@ -38,7 +38,8 @@ import {
 } from '../../schemas/rule_schemas.mock';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRuleAlertAction } from '../../rule_actions/legacy_types';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -306,7 +307,7 @@ describe.each([
     });
 
     test('outputs 200 if the data is of type siem alert and has a legacy rule action', () => {
-      const actions: RuleAlertAction[] = [
+      const actions: LegacyRuleAlertAction[] = [
         {
           id: '456',
           params: {},
@@ -468,12 +469,12 @@ describe.each([
 
   describe('transformAlertsToRules', () => {
     test('given an empty array returns an empty array', () => {
-      expect(transformAlertsToRules([])).toEqual([]);
+      expect(transformAlertsToRules([], {})).toEqual([]);
     });
 
     test('given single alert will return the alert transformed', () => {
       const result1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
-      const transformed = transformAlertsToRules([result1]);
+      const transformed = transformAlertsToRules([result1], {});
       const expected = getOutputRuleAlertForRest();
       expect(transformed).toEqual([expected]);
     });
@@ -484,7 +485,7 @@ describe.each([
       result2.id = 'some other id';
       result2.params.ruleId = 'some other id';
 
-      const transformed = transformAlertsToRules([result1, result2]);
+      const transformed = transformAlertsToRules([result1, result2], {});
       const expected1 = getOutputRuleAlertForRest();
       const expected2 = getOutputRuleAlertForRest();
       expected2.id = 'some other id';

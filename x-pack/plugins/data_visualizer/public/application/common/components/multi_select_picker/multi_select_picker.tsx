@@ -98,7 +98,7 @@ export const MultiSelectPicker: FC<{
   );
 
   return (
-    <EuiFilterGroup data-test-subj={dataTestSubj}>
+    <EuiFilterGroup data-test-subj={dataTestSubj} style={{ marginLeft: 8 }}>
       <EuiPopover
         ownFocus
         data-test-subj={`${dataTestSubj}-popover`}

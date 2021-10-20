@@ -9,8 +9,10 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { LicensingLogic } from '../../../../shared/licensing';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
 import { ENGINE_CURATIONS_NEW_PATH } from '../../../routes';
@@ -21,35 +23,54 @@ import { CURATIONS_OVERVIEW_TITLE, CREATE_NEW_CURATION_TITLE } from '../constant
 import { CurationsLogic } from '../curations_logic';
 import { getCurationsBreadcrumbs } from '../utils';
 
+import { CurationsHistory } from './curations_history/curations_history';
 import { CurationsOverview } from './curations_overview';
 import { CurationsSettings } from './curations_settings';
 
 export const Curations: React.FC = () => {
   const { dataLoading, curations, meta, selectedPageTab } = useValues(CurationsLogic);
   const { loadCurations, onSelectPageTab } = useActions(CurationsLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const pageTabs = [
-    {
-      label: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.curations.overviewPageTabLabel',
+  const OVERVIEW_TAB = {
+    label: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.engine.curations.overviewPageTabLabel',
+      {
+        defaultMessage: 'Overview',
+      }
+    ),
+    isSelected: selectedPageTab === 'overview',
+    onClick: () => onSelectPageTab('overview'),
+  };
+
+  const HISTORY_TAB = {
+    label: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.historyPageTabLabel', {
+      defaultMessage: 'History',
+    }),
+    isSelected: selectedPageTab === 'history',
+    onClick: () => onSelectPageTab('history'),
+  };
+
+  const SETTINGS_TAB = {
+    label: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.engine.curations.settingsPageTabLabel',
+      {
+        defaultMessage: 'Settings',
+      }
+    ),
+    isSelected: selectedPageTab === 'settings',
+    onClick: () => onSelectPageTab('settings'),
+  };
+
+  const pageTabs = hasPlatinumLicense
+    ? [OVERVIEW_TAB, HISTORY_TAB, SETTINGS_TAB]
+    : [
+        OVERVIEW_TAB,
         {
-          defaultMessage: 'Overview',
-        }
-      ),
-      isSelected: selectedPageTab === 'overview',
-      onClick: () => onSelectPageTab('overview'),
-    },
-    {
-      label: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.curations.settingsPageTabLabel',
-        {
-          defaultMessage: 'Settings',
-        }
-      ),
-      isSelected: selectedPageTab === 'settings',
-      onClick: () => onSelectPageTab('settings'),
-    },
-  ];
+          ...SETTINGS_TAB,
+          prepend: <EuiIcon type="cheer" />,
+        },
+      ];
 
   useEffect(() => {
     loadCurations();
@@ -74,6 +95,7 @@ export const Curations: React.FC = () => {
       isLoading={dataLoading && !curations.length}
     >
       {selectedPageTab === 'overview' && <CurationsOverview />}
+      {selectedPageTab === 'history' && <CurationsHistory />}
       {selectedPageTab === 'settings' && <CurationsSettings />}
     </AppSearchPageTemplate>
   );

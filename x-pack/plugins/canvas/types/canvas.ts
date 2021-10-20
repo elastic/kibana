@@ -53,6 +53,7 @@ export interface CanvasWorkpad {
   variables: CanvasVariable[];
   height: number;
   id: string;
+  aliasId?: string;
   isWriteable: boolean;
   name: string;
   page: number;

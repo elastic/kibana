@@ -27,6 +27,7 @@ import { allowSorting } from '../helpers';
 const defaultActions: EuiDataGridColumnActions = {
   showSortAsc: true,
   showSortDesc: true,
+  showHide: false,
 };
 
 const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>

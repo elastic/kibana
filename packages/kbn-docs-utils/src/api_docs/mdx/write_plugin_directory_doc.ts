@@ -75,9 +75,9 @@ export function writePluginDirectoryDoc(
     dedent(`
 ---
 id: kibDevDocsPluginDirectory
-slug: /kibana-dev-docs/plugin-directory
-title: Plugin directory
-summary: Plugin directory
+slug: /kibana-dev-docs/api-meta/plugin-api-directory
+title: Directory
+summary: Directory of public APIs available through plugins or packages.
 date: 2021-09-22
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
@@ -85,7 +85,7 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 ### Overall stats
 
-| Plugin Count | Plugins with a <br /> public API | Number of teams | 
+| Count | Plugins or Packages with a <br /> public API | Number of teams | 
 |--------------|----------|------------------------|
 | ${totalStats.pluginCnt} | ${totalStats.pluginCntWithPublicApi} | ${totalStats.teamCnt} |
 
@@ -101,29 +101,61 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 | Plugin name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | Maintaining team | Description | API Cnt | Any Cnt | Missing<br />comments | Missing<br />exports | 
 |--------------|----------------|-----------|--------------|----------|---------------|--------|
-${Object.keys(pluginApiMap)
-  .sort()
-  .map((id) => {
-    const metaInfo = pluginStatsMap[id];
-    const doc = pluginApiMap[id];
-    const docWithLink = hasPublicApi(doc)
-      ? `<DocLink id="${getPluginApiDocId(doc.id)}" text="${doc.id}"/>`
-      : doc.id;
-    const contact = metaInfo.owner.githubTeam
-      ? `[${metaInfo.owner.name}](https://github.com/orgs/elastic/teams/${metaInfo.owner.githubTeam})`
-      : metaInfo.owner.name;
+${getDirectoryTable(pluginApiMap, pluginStatsMap, true)}
 
-    return `| ${[
-      docWithLink,
-      contact,
-      metaInfo.description || '-',
-      metaInfo.apiCount,
-      metaInfo.isAnyType.length,
-      metaInfo.missingComments.length,
-      metaInfo.missingExports,
-    ].join(' | ')} |`;
-  })
-  .join('\n')}`) + '\n\n';
+## Package Directory
+
+| Package name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | Maintaining team | Description | API Cnt | Any Cnt | Missing<br />comments | Missing<br />exports | 
+|--------------|----------------|-----------|--------------|----------|---------------|--------|
+${getDirectoryTable(pluginApiMap, pluginStatsMap, false)}
+
+`) + '\n\n';
 
   fs.writeFileSync(Path.resolve(folder, 'plugin_directory.mdx'), mdx);
+}
+
+function getDirectoryTable(
+  pluginApiMap: { [key: string]: PluginApi },
+  pluginStatsMap: { [key: string]: PluginMetaInfo },
+  includePlugins: boolean
+): string {
+  return Object.keys(pluginApiMap)
+    .sort()
+    .reduce<string[]>((acc, id) => {
+      const metaInfo = pluginStatsMap[id];
+      const doc = pluginApiMap[id];
+      const hasApi = hasPublicApi(doc);
+      if (!includePlugins) {
+        // We are building the package list, skip plugins.
+        if (metaInfo.isPlugin) return acc;
+
+        // Also don't include packages without a public API. These are much more likely to be internal build/ops code and not
+        // of interest to any plugin developer.
+        if (!hasApi) return acc;
+      }
+
+      if (metaInfo.isPlugin && !includePlugins) return acc;
+      if (!metaInfo.isPlugin && includePlugins) return acc;
+
+      const docWithLink = hasApi
+        ? `<DocLink id="${getPluginApiDocId(doc.id)}" text="${doc.id}"/>`
+        : doc.id;
+      const contact = metaInfo.owner.githubTeam
+        ? `[${metaInfo.owner.name}](https://github.com/orgs/elastic/teams/${metaInfo.owner.githubTeam})`
+        : metaInfo.owner.name;
+
+      acc.push(
+        `| ${[
+          docWithLink,
+          contact,
+          metaInfo.description || '-',
+          metaInfo.apiCount,
+          metaInfo.isAnyType.length,
+          metaInfo.missingComments.length,
+          metaInfo.missingExports,
+        ].join(' | ')} |`
+      );
+      return acc;
+    }, [] as string[])
+    .join('\n');
 }

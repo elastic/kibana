@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { ReindexStatus } from '../../../../../../common/types';
+import { getReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
 import { useReindexContext } from './context';
 
@@ -54,7 +55,7 @@ const i18nTexts = {
   reindexCanceledText: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.reindex.reindexCanceledText',
     {
-      defaultMessage: 'Reindex canceled',
+      defaultMessage: 'Reindex cancelled',
     }
   ),
   reindexPausedText: i18n.translate(
@@ -70,7 +71,7 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.reindex.resolutionTooltipLabel',
     {
       defaultMessage:
-        'Resolve this deprecation by reindexing this index. This is an automated resolution.',
+        'Resolve this issue by reindexing this index. This issue can be resolved automatically.',
     }
   ),
 };
@@ -99,7 +100,13 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
             <EuiLoadingSpinner size="m" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexInProgressText}</EuiText>
+            <EuiText size="s">
+              {i18nTexts.reindexInProgressText}{' '}
+              {getReindexProgressLabel(
+                reindexState.reindexTaskPercComplete,
+                reindexState.lastCompletedStep
+              )}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -144,17 +151,6 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexPausedText}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    case ReindexStatus.cancelled:
-      return (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" color="danger" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexCanceledText}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );

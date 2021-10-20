@@ -64,7 +64,7 @@ export type ExpressionAstFunctionDebug = {
   /**
    * Raw error that was thrown by the function, if any.
    */
-  rawError?: any | Error;
+  rawError?: any | Error; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   /**
    * Time in milliseconds it took to execute the function. Duration can be

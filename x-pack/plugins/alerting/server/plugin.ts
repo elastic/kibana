@@ -286,6 +286,7 @@ export class AlertingPlugin {
       encryptedSavedObjects: plugins.encryptedSavedObjects,
     });
 
+    const alertingConfig = this.config;
     return {
       registerType<
         Params extends AlertTypeParams = AlertTypeParams,
@@ -309,7 +310,14 @@ export class AlertingPlugin {
         if (!(alertType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${alertType.minimumLicenseRequired}" is not a valid license type`);
         }
-        ruleTypeRegistry.register(alertType);
+        if (!alertType.ruleTaskTimeout) {
+          alertingConfig.then((config) => {
+            alertType.ruleTaskTimeout = config.defaultRuleTaskTimeout;
+            ruleTypeRegistry.register(alertType);
+          });
+        } else {
+          ruleTypeRegistry.register(alertType);
+        }
       },
     };
   }
@@ -366,6 +374,7 @@ export class AlertingPlugin {
       eventLog: plugins.eventLog,
       kibanaVersion: this.kibanaVersion,
       authorization: alertingAuthorizationClientFactory,
+      eventLogger: this.eventLogger,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {

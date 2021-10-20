@@ -2,27 +2,20 @@ pageLoadAssetSize:
   advancedSettings: 27596
   alerting: 106936
   apm: 64385
-  apmOss: 18996
-  bfetch: 51874
   canvas: 1066647
   charts: 95000
   cloud: 21076
   console: 46235
   core: 435325
   crossClusterReplication: 65408
-  dashboard: 374267
+  dashboard: 186763
   dashboardEnhanced: 65646
   dashboardMode: 22716
-  data: 830000
-  dataEnhanced: 50420
   devTools: 38781
   discover: 99999
   discoverEnhanced: 42730
-  embeddable: 242753
-  embeddableEnhanced: 41145
   enterpriseSearch: 35741
   features: 21723
-  fieldFormats: 92628
   globalSearch: 29696
   globalSearchBar: 50403
   globalSearchProviders: 25554
@@ -31,8 +24,6 @@ pageLoadAssetSize:
   home: 30182
   indexLifecycleManagement: 107090
   indexManagement: 140608
-  indexPatternManagement: 28222
-  indexPatternEditor: 40000
   infra: 184320
   fleet: 250000
   ingestPipelines: 58003
@@ -40,8 +31,6 @@ pageLoadAssetSize:
   inspector: 148711
   kibanaLegacy: 107711
   kibanaOverview: 56279
-  kibanaReact: 188705
-  kibanaUtils: 198829
   lens: 96624
   licenseManagement: 41817
   licensing: 29004
@@ -58,7 +47,6 @@ pageLoadAssetSize:
   painlessLab: 179892
   regionMap: 66098
   remoteClusters: 51327
-  reporting: 183418
   rollup: 97204
   savedObjects: 108518
   savedObjectsManagement: 101836
@@ -66,23 +54,18 @@ pageLoadAssetSize:
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
   security: 95864
-  securityOss: 30806
   spaces: 57868
   telemetry: 51957
   telemetryManagementSection: 38586
   tileMap: 65337
   transform: 41151
   triggersActionsUi: 100000
-  uiActions: 97717
-  uiActionsEnhanced: 48000
   upgradeAssistant: 81241
   uptime: 40825
-  urlDrilldown: 70674
   urlForwarding: 32579
   usageCollection: 39762
   visDefaultEditor: 50178
   visTypeMarkdown: 30896
-  visTypeMetric: 42790
   visTypeTable: 95078
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
@@ -96,7 +79,6 @@ pageLoadAssetSize:
   runtimeFields: 41752
   stackAlerts: 29684
   presentationUtil: 94301
-  indexPatternFieldEditor: 50000
   osquery: 107090
   fileUpload: 25664
   dataVisualizer: 27530
@@ -119,3 +101,21 @@ pageLoadAssetSize:
   share: 100298
   snapshotRestore: 63225
   customIntegrations: 28810
+  expressionMetricVis: 23121
+  visTypeMetric: 23332
+  bfetch: 22837
+  kibanaUtils: 79713
+  data: 491273
+  dataViews: 42532
+  fieldFormats: 65209
+  kibanaReact: 84422
+  uiActions: 35121
+  dataEnhanced: 24980
+  embeddable: 87309
+  embeddableEnhanced: 22107
+  uiActionsEnhanced: 38494
+  urlDrilldown: 30063
+  indexPatternEditor: 19123
+  indexPatternFieldEditor: 34448
+  indexPatternManagement: 19165
+  reporting: 57003

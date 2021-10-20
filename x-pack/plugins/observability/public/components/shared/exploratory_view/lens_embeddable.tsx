@@ -7,19 +7,22 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Dispatch, SetStateAction, useCallback } from 'react';
-import { combineTimeRanges } from './exploratory_view';
+import styled from 'styled-components';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useExpViewTimeRange } from './hooks/use_time_range';
+import { parseRelativeDate } from './components/date_range_picker';
+import type { ChartTimeRange } from './header/last_updated';
 
 interface Props {
   lensAttributes: TypedLensByValueInput['attributes'];
-  setLastUpdated: Dispatch<SetStateAction<number | undefined>>;
+  setChartTimeRangeContext: Dispatch<SetStateAction<ChartTimeRange | undefined>>;
 }
 
 export function LensEmbeddable(props: Props) {
-  const { lensAttributes, setLastUpdated } = props;
+  const { lensAttributes, setChartTimeRangeContext } = props;
 
   const {
     services: { lens, notifications },
@@ -27,19 +30,25 @@ export function LensEmbeddable(props: Props) {
 
   const LensComponent = lens?.EmbeddableComponent;
 
-  const { firstSeriesId, firstSeries: series, setSeries, allSeries } = useSeriesStorage();
+  const { firstSeries, setSeries, reportType } = useSeriesStorage();
 
-  const timeRange = combineTimeRanges(allSeries, series);
+  const firstSeriesId = 0;
+
+  const timeRange = useExpViewTimeRange();
 
   const onLensLoad = useCallback(() => {
-    setLastUpdated(Date.now());
-  }, [setLastUpdated]);
+    setChartTimeRangeContext({
+      lastUpdated: Date.now(),
+      to: parseRelativeDate(timeRange?.to || '').valueOf(),
+      from: parseRelativeDate(timeRange?.from || '').valueOf(),
+    });
+  }, [setChartTimeRangeContext, timeRange]);
 
   const onBrushEnd = useCallback(
     ({ range }: { range: number[] }) => {
-      if (series?.reportType !== 'data-distribution') {
+      if (reportType !== 'data-distribution' && firstSeries) {
         setSeries(firstSeriesId, {
-          ...series,
+          ...firstSeries,
           time: {
             from: new Date(range[0]).toISOString(),
             to: new Date(range[1]).toISOString(),
@@ -53,16 +62,30 @@ export function LensEmbeddable(props: Props) {
         );
       }
     },
-    [notifications?.toasts, series, firstSeriesId, setSeries]
+    [reportType, setSeries, firstSeries, notifications?.toasts]
   );
 
+  if (!timeRange || !firstSeries) {
+    return null;
+  }
+
   return (
-    <LensComponent
-      id="exploratoryView"
-      timeRange={timeRange}
-      attributes={lensAttributes}
-      onLoad={onLensLoad}
-      onBrushEnd={onBrushEnd}
-    />
+    <LensWrapper>
+      <LensComponent
+        id="exploratoryView"
+        timeRange={timeRange}
+        attributes={lensAttributes}
+        onLoad={onLensLoad}
+        onBrushEnd={onBrushEnd}
+      />
+    </LensWrapper>
   );
 }
+
+const LensWrapper = styled.div`
+  height: 100%;
+
+  &&& > div {
+    height: 100%;
+  }
+`;

@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+/** endpoint data streams that are used for host isolation  */
+/** for index patterns `.logs-endpoint.actions-* and .logs-endpoint.action.responses-*`*/
+export const ENDPOINT_ACTIONS_DS = '.logs-endpoint.actions';
+export const ENDPOINT_ACTIONS_INDEX = `${ENDPOINT_ACTIONS_DS}-default`;
+export const ENDPOINT_ACTION_RESPONSES_DS = '.logs-endpoint.action.responses';
+export const ENDPOINT_ACTION_RESPONSES_INDEX = `${ENDPOINT_ACTION_RESPONSES_DS}-default`;
+
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
 
@@ -17,10 +24,13 @@ export const metadataCurrentIndexPattern = 'metrics-endpoint.metadata_current_*'
 /** The metadata Transform Name prefix with NO (package) version) */
 export const metadataTransformPrefix = 'endpoint.metadata_current-default';
 
-/** The metadata Transform Name prefix with NO namespace and NO (package) version) */
-export const metadataTransformPattern = 'endpoint.metadata_current-*';
+// metadata transforms pattern for matching all metadata transform ids
+export const METADATA_TRANSFORMS_PATTERN = 'endpoint.metadata_*';
 
+// united metadata transform id
 export const METADATA_UNITED_TRANSFORM = 'endpoint.metadata_united-default';
+
+// united metadata transform destination index
 export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default';
 
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
@@ -50,3 +60,5 @@ export const UNISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/unisolate`;
 /** Endpoint Actions Log Routes */
 export const ENDPOINT_ACTION_LOG_ROUTE = `/api/endpoint/action_log/{agent_id}`;
 export const ACTION_STATUS_ROUTE = `/api/endpoint/action_status`;
+
+export const failedFleetActionErrorCode = '424';

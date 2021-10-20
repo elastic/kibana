@@ -131,6 +131,7 @@ const defaultArgs: IndicesConfigurationPanelStoryArgs = {
       id: 'INDEX_PATTERN_A',
       title: 'pattern-a-*',
       timeFieldName: '@timestamp',
+      type: undefined,
       fields: [
         {
           name: '@timestamp',
@@ -149,6 +150,8 @@ const defaultArgs: IndicesConfigurationPanelStoryArgs = {
     {
       id: 'INDEX_PATTERN_B',
       title: 'pattern-b-*',
+      timeFieldName: '@timestamp',
+      type: undefined,
       fields: [],
     },
   ],

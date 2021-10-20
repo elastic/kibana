@@ -26,6 +26,7 @@ export {
   AgentPolicyServiceInterface,
   ArtifactsClientInterface,
   Artifact,
+  ListArtifactsProps,
 } from './services';
 
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
@@ -88,6 +89,7 @@ export const config: PluginConfigDescriptor = {
         delete fullConfig.xpack.fleet.agents.elasticsearch.host;
         fullConfig.xpack.fleet.agents.elasticsearch.hosts = [oldValue];
         addDeprecation({
+          configPath: 'xpack.fleet.agents.elasticsearch.host',
           message: `Config key [xpack.fleet.agents.elasticsearch.host] is deprecated and replaced by [xpack.fleet.agents.elasticsearch.hosts]`,
           correctiveActions: {
             manualSteps: [

@@ -22,7 +22,8 @@ import { stubWebWorker } from '@kbn/test/jest';
 import { createMemoryHistory } from 'history';
 stubWebWorker();
 
-describe('<IndexManagementHome />', () => {
+// unhandled promise rejection https://github.com/elastic/kibana/issues/112699
+describe.skip('<IndexManagementHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: IndicesTestBed;
 

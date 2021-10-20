@@ -9,9 +9,11 @@ import { RouteDependencies } from '../types';
 
 import { registerAppRoutes } from './app';
 import { registerCloudBackupStatusRoutes } from './cloud_backup_status';
+import { registerClusterUpgradeStatusRoutes } from './cluster_upgrade_status';
+import { registerSystemIndicesMigrationRoutes } from './system_indices_migration';
 import { registerESDeprecationRoutes } from './es_deprecations';
 import { registerDeprecationLoggingRoutes } from './deprecation_logging';
-import { registerReindexIndicesRoutes } from './reindex_indices';
+import { registerReindexIndicesRoutes, registerBatchReindexIndicesRoutes } from './reindex_indices';
 import { registerUpdateSettingsRoute } from './update_index_settings';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
 import { ReindexWorker } from '../lib/reindexing';
@@ -20,9 +22,12 @@ import { registerUpgradeStatusRoute } from './status';
 export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
   registerAppRoutes(dependencies);
   registerCloudBackupStatusRoutes(dependencies);
+  registerClusterUpgradeStatusRoutes(dependencies);
+  registerSystemIndicesMigrationRoutes(dependencies);
   registerESDeprecationRoutes(dependencies);
   registerDeprecationLoggingRoutes(dependencies);
   registerReindexIndicesRoutes(dependencies, getWorker);
+  registerBatchReindexIndicesRoutes(dependencies, getWorker);
   registerUpdateSettingsRoute(dependencies);
   registerMlSnapshotRoutes(dependencies);
   // Route for cloud to retrieve the upgrade status for ES and Kibana

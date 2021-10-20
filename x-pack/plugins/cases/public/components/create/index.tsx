@@ -58,6 +58,8 @@ const CreateCaseComponent = ({
       caseType={caseType}
       hideConnectorServiceNowSir={hideConnectorServiceNowSir}
       onSuccess={onSuccess}
+      // if we are disabling alerts, then we should not sync alerts
+      syncAlertsDefaultValue={!disableAlerts}
     >
       <CreateCaseForm
         hideConnectorServiceNowSir={hideConnectorServiceNowSir}

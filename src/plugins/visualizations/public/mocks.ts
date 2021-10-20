@@ -10,6 +10,7 @@ import { PluginInitializerContext } from '../../../core/public';
 import { Schema, VisualizationsSetup, VisualizationsStart } from './';
 import { Schemas } from './vis_types';
 import { VisualizationsPlugin } from './plugin';
+import { spacesPluginMock } from '../../../../x-pack/plugins/spaces/public/mocks';
 import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
@@ -18,6 +19,7 @@ import { usageCollectionPluginMock } from '../../../plugins/usage_collection/pub
 import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
 import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
 import { savedObjectsPluginMock } from '../../../plugins/saved_objects/public/mocks';
+import { savedObjectTaggingOssPluginMock } from '../../saved_objects_tagging_oss/public/mocks';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
@@ -34,6 +36,9 @@ const createStartContract = (): VisualizationsStart => ({
   savedVisualizationsLoader: {
     get: jest.fn(),
   } as any,
+  getSavedVisualization: jest.fn(),
+  saveVisualization: jest.fn(),
+  findListItems: jest.fn(),
   showNewVisModal: jest.fn(),
   createVis: jest.fn(),
   convertFromSerializedVis: jest.fn(),
@@ -61,9 +66,11 @@ const createInstance = async () => {
       uiActions: uiActionsPluginMock.createStartContract(),
       application: applicationServiceMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
+      spaces: spacesPluginMock.createStartContract(),
       getAttributeService: jest.fn(),
       savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjects: savedObjectsPluginMock.createStartContract(),
+      savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
     });
 
   return {

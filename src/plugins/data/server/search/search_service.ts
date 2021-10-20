@@ -89,6 +89,7 @@ import { getKibanaContext } from './expressions/kibana_context';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
+import { CachedUiSettingsClient } from './services';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -458,7 +459,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         searchSessionsClient,
         savedObjectsClient,
         esClient: elasticsearch.client.asScoped(request),
-        uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
+        uiSettingsClient: new CachedUiSettingsClient(
+          uiSettings.asScopedToClient(savedObjectsClient)
+        ),
         request,
       };
       return {

@@ -19,7 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('returns false when there is no data', async () => {
         const response = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/observability_overview/has_data',
+          endpoint: 'GET /internal/apm/observability_overview/has_data',
         });
         expect(response.status).to.be(200);
         expect(response.body.hasData).to.eql(false);
@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('returns false when there is only onboarding data', async () => {
         const response = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/observability_overview/has_data',
+          endpoint: 'GET /internal/apm/observability_overview/has_data',
         });
         expect(response.status).to.be(200);
         expect(response.body.hasData).to.eql(false);
@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('returns true when there is at least one document on transaction, error or metrics indices', async () => {
         const response = await apmApiClient.readUser({
-          endpoint: 'GET /api/apm/observability_overview/has_data',
+          endpoint: 'GET /internal/apm/observability_overview/has_data',
         });
         expect(response.status).to.be(200);
         expect(response.body.hasData).to.eql(true);

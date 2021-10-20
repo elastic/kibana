@@ -41,7 +41,7 @@ import {
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { Dataset, RuleDataPluginService } from '../rule_data_plugin_service';
+import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
 
 const getEsQueryConfig: typeof getEsQueryConfigTyped = getEsQueryConfigNonTyped;
 const getSafeSortIds: typeof getSafeSortIdsTyped = getSafeSortIdsNonTyped;
@@ -71,7 +71,7 @@ export interface ConstructorOptions {
   authorization: PublicMethodsOf<AlertingAuthorization>;
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
-  ruleDataService: RuleDataPluginService;
+  ruleDataService: IRuleDataService;
 }
 
 export interface UpdateOptions<Params extends AlertTypeParams> {
@@ -116,7 +116,7 @@ export class AlertsClient {
   private readonly authorization: PublicMethodsOf<AlertingAuthorization>;
   private readonly esClient: ElasticsearchClient;
   private readonly spaceId: string | undefined;
-  private readonly ruleDataService: RuleDataPluginService;
+  private readonly ruleDataService: IRuleDataService;
 
   constructor(options: ConstructorOptions) {
     this.logger = options.logger;
@@ -395,7 +395,7 @@ export class AlertsClient {
         esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
         [
           authzFilter as unknown as Filter,
-          { term: { [SPACE_IDS]: alertSpaceId } } as unknown as Filter,
+          { query: { term: { [SPACE_IDS]: alertSpaceId } } } as unknown as Filter,
         ],
         config
       );

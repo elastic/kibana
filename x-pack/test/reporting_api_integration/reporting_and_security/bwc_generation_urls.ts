@@ -36,7 +36,8 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
-    describe('Pre 6_2', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/93354
+    describe.skip('Pre 6_2', () => {
       // The URL being tested was captured from release 6.4 and then the layout section was removed to test structure before
       // preserve_layout was introduced. See https://github.com/elastic/kibana/issues/23414
       it('job posted successfully', async () => {

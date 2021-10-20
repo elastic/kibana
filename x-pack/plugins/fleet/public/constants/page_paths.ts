@@ -26,7 +26,6 @@ export type DynamicPage =
   | 'integration_details_custom'
   | 'integration_policy_edit'
   | 'policy_details'
-  | 'add_integration_from_policy'
   | 'add_integration_to_policy'
   | 'edit_integration'
   | 'upgrade_package_policy'
@@ -56,8 +55,6 @@ export const FLEET_ROUTING_PATHS = {
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
   upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
-  // TODO: Review uses and remove if it is no longer used or linked to in any UX flows
-  add_integration_from_policy: '/policies/:policyId/add-integration',
   enrollment_tokens: '/enrollment-tokens',
   data_streams: '/data-streams',
 
@@ -126,11 +123,6 @@ export const pagePathGetters: {
   policy_details: ({ policyId, tabId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
-  ],
-  // TODO: This might need to be removed because we do not have a way to pick an integration in line anymore
-  add_integration_from_policy: ({ policyId }) => [
-    FLEET_BASE_PATH,
-    `/policies/${policyId}/add-integration`,
   ],
   add_integration_to_policy: ({ pkgkey, integration, agentPolicyId }) => [
     FLEET_BASE_PATH,

@@ -17,12 +17,26 @@ import { defaultConfig } from './synthetics_policy_create_extension';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
-jest.mock('./code_editor', () => ({
-  CodeEditor: () => <div>code editor mock</div>,
-}));
+jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../../src/plugins/kibana_react/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
 
 const defaultNewPolicy: NewPackagePolicy = {
   name: 'samplePolicyName',
@@ -43,6 +57,10 @@ const defaultNewPolicy: NewPackagePolicy = {
             dataset: 'http',
           },
           vars: {
+            __ui: {
+              value: JSON.stringify({ is_tls_enabled: true }),
+              type: 'yaml',
+            },
             type: {
               value: 'http',
               type: 'text',
@@ -366,10 +384,10 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(timeout).toBeInTheDocument();
     expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKeys.TIMEOUT]}`);
     // expect TLS settings to be in the document when at least one tls key is populated
-    expect(enableTLSConfig.checked).toBe(true);
+    expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('true');
     expect(verificationMode).toBeInTheDocument();
     expect(verificationMode.value).toEqual(
-      `${defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE].value}`
+      `${defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]}`
     );
 
     // ensure other monitor type options are not in the DOM
@@ -553,6 +571,17 @@ describe('<SyntheticsPolicyEditExtension />', () => {
         })
       );
     });
+  });
+
+  it('shows tls fields when metadata.is_tls_enabled is true', async () => {
+    const { getByLabelText } = render(<WrappedComponent />);
+    const verificationMode = getByLabelText('Verification mode') as HTMLInputElement;
+    const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
+    expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('true');
+    expect(verificationMode).toBeInTheDocument();
+    expect(verificationMode.value).toEqual(
+      `${defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]}`
+    );
   });
 
   it('handles browser validation', async () => {
@@ -825,7 +854,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     /* expect TLS settings not to be in the document when and Enable TLS settings not to be checked
      * when all TLS values are falsey */
-    expect(enableTLSConfig.checked).toBe(false);
+    expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('false');
     expect(queryByText('Verification mode')).not.toBeInTheDocument();
 
     // ensure other monitor type options are not in the DOM
@@ -1044,5 +1073,84 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(queryByLabelText('Url')).not.toBeInTheDocument();
     expect(queryByLabelText('Proxy URL')).not.toBeInTheDocument();
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    [true, 'Testing script'],
+    [false, 'Inline script'],
+  ])(
+    'browser monitors - auto selects the right tab depending on source metadata',
+    async (isGeneratedScript, text) => {
+      const currentPolicy = {
+        ...defaultCurrentPolicy,
+        inputs: [
+          {
+            ...defaultNewPolicy.inputs[0],
+            enabled: false,
+          },
+          {
+            ...defaultNewPolicy.inputs[1],
+            enabled: false,
+          },
+          {
+            ...defaultNewPolicy.inputs[2],
+            enabled: false,
+          },
+          {
+            ...defaultNewPolicy.inputs[3],
+            enabled: true,
+            streams: [
+              {
+                ...defaultNewPolicy.inputs[3].streams[0],
+                vars: {
+                  ...defaultNewPolicy.inputs[3].streams[0].vars,
+                  'source.inline.script': {
+                    type: 'yaml',
+                    value: JSON.stringify('step(() => {})'),
+                  },
+                  __ui: {
+                    type: 'yaml',
+                    value: JSON.stringify({
+                      script_source: {
+                        is_generated_script: isGeneratedScript,
+                      },
+                    }),
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { getByText } = render(<WrappedComponent policy={currentPolicy} />);
+
+      expect(getByText(text)).toBeInTheDocument();
+    }
+  );
+  it('hides tls fields when metadata.is_tls_enabled is false', async () => {
+    const { getByLabelText, queryByLabelText } = render(
+      <WrappedComponent
+        policy={{
+          ...defaultCurrentPolicy,
+          inputs: [
+            {
+              ...defaultNewPolicy.inputs[0],
+              enabled: false,
+            },
+            {
+              ...defaultNewPolicy.inputs[1],
+              enabled: true,
+            },
+            defaultNewPolicy.inputs[2],
+            defaultNewPolicy.inputs[3],
+          ],
+        }}
+      />
+    );
+    const verificationMode = queryByLabelText('Verification mode');
+    const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
+    expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('false');
+    expect(verificationMode).not.toBeInTheDocument();
   });
 });

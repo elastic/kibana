@@ -15,7 +15,7 @@ import {
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
-import { isNestedField, IndexPatternField } from '../../../data_views/fields';
+import { isNestedField, IndexPatternField } from '../../../../../data_views/common';
 
 const filterByType = propFilter('type');
 

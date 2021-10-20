@@ -134,7 +134,7 @@ describe('core deprecations', () => {
 
   describe('rewriteBasePath', () => {
     it('logs a warning is server.basePath is set and server.rewriteBasePath is not', () => {
-      const { messages } = applyCoreDeprecations({
+      const { messages, levels } = applyCoreDeprecations({
         server: {
           basePath: 'foo',
         },
@@ -142,6 +142,11 @@ describe('core deprecations', () => {
       expect(messages).toMatchInlineSnapshot(`
         Array [
           "You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, Kibana will expect that all requests start with server.basePath rather than expecting you to rewrite the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the current behavior and silence this warning.",
+        ]
+      `);
+      expect(levels).toMatchInlineSnapshot(`
+        Array [
+          "warning",
         ]
       `);
     });
@@ -267,42 +272,33 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.ops\\" has been deprecated and will be removed in 8.0. To access ops data moving forward, please enable debug logs for the \\"metrics.ops\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+          "\\"logging.events.ops\\" has been deprecated and will be removed in 8.0. To access ops data moving forward, please enable debug logs for the \\"metrics.ops\\" context in your logging configuration.",
         ]
       `);
     });
   });
 
-  describe('logging.events.request and logging.events.response', () => {
-    it('warns when request and response events are used', () => {
-      const { messages } = applyCoreDeprecations({
-        logging: { events: { request: '*', response: '*' } },
-      });
-      expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
-        ]
-      `);
-    });
-
-    it('warns when only request event is used', () => {
+  describe('logging.events.request', () => {
+    it('warns when request event is used', () => {
       const { messages } = applyCoreDeprecations({
         logging: { events: { request: '*' } },
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+          "\\"logging.events.request\\" has been deprecated and will be removed in 8.0. To access request data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration.",
         ]
       `);
     });
+  });
 
-    it('warns when only response event is used', () => {
+  describe('logging.events.response', () => {
+    it('warns when response event is used', () => {
       const { messages } = applyCoreDeprecations({
         logging: { events: { response: '*' } },
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+          "\\"logging.events.response\\" has been deprecated and will be removed in 8.0. To access response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration.",
         ]
       `);
     });
@@ -315,7 +311,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.timezone\\" has been deprecated and will be removed in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+          "\\"logging.timezone\\" has been deprecated and will be removed in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern in your logging configuration.",
         ]
       `);
     });
@@ -328,7 +324,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.dest\\" has been deprecated and will be removed in 8.0. To set the destination moving forward, you can use the \\"console\\" appender in your logging configuration or define a custom one. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+          "\\"logging.dest\\" has been deprecated and will be removed in 8.0. To set the destination moving forward, you can use the \\"console\\" appender in your logging configuration or define a custom one.",
         ]
       `);
     });
@@ -338,7 +334,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.dest\\" has been deprecated and will be removed in 8.0. To set the destination moving forward, you can use the \\"console\\" appender in your logging configuration or define a custom one. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+          "\\"logging.dest\\" has been deprecated and will be removed in 8.0. To set the destination moving forward, you can use the \\"console\\" appender in your logging configuration or define a custom one.",
         ]
       `);
     });
@@ -384,7 +380,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.json\\" has been deprecated and will be removed in 8.0. To specify log message format moving forward, you can configure the \\"appender.layout\\" property for every custom appender in your logging configuration. There is currently no default layout for custom appenders and each one must be declared explicitly. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
+          "\\"logging.json\\" has been deprecated and will be removed in 8.0. To specify log message format moving forward, you can configure the \\"appender.layout\\" property for every custom appender in your logging configuration. There is currently no default layout for custom appenders and each one must be declared explicitly.",
         ]
       `);
     });
@@ -397,7 +393,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration.",
         ]
       `);
     });
@@ -408,7 +404,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration.",
         ]
       `);
     });
@@ -419,7 +415,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration.",
         ]
       `);
     });
@@ -430,7 +426,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration.",
         ]
       `);
     });

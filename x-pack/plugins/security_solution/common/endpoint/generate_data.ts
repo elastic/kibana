@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import semverLte from 'semver/functions/lte';
 import { assertNever } from '@kbn/std';
@@ -32,9 +31,10 @@ import {
 import {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
-} from '../../../fleet/common/types/rest_spec';
-import { EsAssetReference, KibanaAssetReference } from '../../../fleet/common/types/models';
-import { agentPolicyStatuses } from '../../../fleet/common/constants';
+  EsAssetReference,
+  KibanaAssetReference,
+  agentPolicyStatuses,
+} from '../../../fleet/common';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import { EventOptions } from './types/generator';
 import { BaseDataGenerator } from './data_generators/base_data_generator';
@@ -406,6 +406,7 @@ const alertsDefaultDataStream = {
 export class EndpointDocGenerator extends BaseDataGenerator {
   commonInfo: HostInfo;
   sequence: number = 0;
+
   /**
    * The EndpointDocGenerator parameters
    *
@@ -523,6 +524,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       data_stream: metadataDataStream,
     };
   }
+
   /**
    * Creates a malware alert from the simulated host represented by this EndpointDocGenerator
    * @param ts - Timestamp to put in the event
@@ -744,6 +746,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     }
     return newAlert;
   }
+
   /**
    * Creates an alert from the simulated host represented by this EndpointDocGenerator
    * @param ts - Timestamp to put in the event
@@ -900,6 +903,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     };
     return newAlert;
   }
+
   /**
    * Returns the default DLLs used in alerts
    */
@@ -1663,6 +1667,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           install_status: 'installed',
           install_started_at: '2020-06-24T14:41:23.098Z',
           install_source: 'registry',
+          keep_policies_up_to_date: false,
         },
         references: [],
         updated_at: '2020-06-24T14:41:23.098Z',
@@ -1868,10 +1873,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         dataset: 'endpoint.policy',
       },
     };
-  }
-
-  private seededUUIDv4(): string {
-    return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
   }
 
   private randomHostPolicyResponseActionNames(): string[] {
