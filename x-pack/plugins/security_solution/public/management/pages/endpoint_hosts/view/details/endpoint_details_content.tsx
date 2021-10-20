@@ -249,7 +249,6 @@ export const EndpointDetailsContent = memo(
 
     return (
       <>
-        <EuiSpacer size="l" />
         <StyledEuiInMemoryTable>
           <EuiInMemoryTable<typeof detailsResults[0]>
             data-test-subj="endpointDetailsList"
