@@ -155,18 +155,12 @@ export class TiledVectorLayer extends VectorLayer {
       return;
     }
     const data = dataRequest.getData() as { maxResultWindow: number } | undefined;
-    if (!data) {
-      return;
-    }
-    return data.maxResultWindow;
+    return data ? data.maxResultWindow : undefined;
   }
 
   async _syncMaxResultWindow({
     startLoading,
     stopLoading,
-    onLoadError,
-    dataFilters,
-    isForceRefresh,
   }: DataRequestContext) {
     const prevDataRequest = this.getDataRequest(MAX_RESULT_WINDOW_DATA_REQUEST_ID);
     if (prevDataRequest) {
