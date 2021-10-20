@@ -24,8 +24,8 @@ export interface SearchServiceParams {
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
-  start?: string;
-  end?: string;
+  start?: string | number;
+  end?: string | number;
   percentileThreshold?: number;
   analyzeCorrelations?: boolean;
 }
