@@ -501,7 +501,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           ]);
           await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
+          await waitForSignalsToBePresent(supertest, 3, [id]);
           const signalsOpen = await getSignalsById(supertest, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['2', '3', '4']);
