@@ -111,19 +111,15 @@ export const createExternalService = (
       .filter((item) => !isEmpty(item))
       .join(', ');
 
-  const createErrorMessage = (errorResponse: ResponseError | string | null | undefined): string => {
+  const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
     if (errorResponse == null) {
-      return '';
-    }
-    if (typeof errorResponse === 'string') {
-      // Jira error.response.data can be string!!
-      return errorResponse;
+      return 'unknown';
     }
 
     const { errorMessages, errors } = errorResponse;
 
     if (errors == null) {
-      return '';
+      return 'unknown';
     }
 
     if (Array.isArray(errorMessages) && errorMessages.length > 0) {
