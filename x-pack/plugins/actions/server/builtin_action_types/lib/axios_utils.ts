@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isObjectLike } from 'lodash';
 import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axios';
 import { Logger } from '../../../../../../src/core/server';
 import { getCustomAgents } from './get_custom_agents';
@@ -75,4 +76,38 @@ export const addTimeZoneToDate = (date: string, timezone = 'GMT'): string => {
 
 export const getErrorMessage = (connector: string, msg: string) => {
   return `[Action][${connector}]: ${msg}`;
+};
+
+export const throwIfRequestIsNotValid = ({
+  connectorName,
+  res,
+  requiredAttributesToBeInTheResponse = [],
+}: {
+  connectorName: string;
+  res: AxiosResponse;
+  requiredAttributesToBeInTheResponse?: string[];
+}) => {
+  const requiredContentType = 'application/json';
+  const contentType = res.headers['content-type'];
+  const data = res.data;
+
+  /**
+   * This check ensures that the response is a valid JSON.
+   * First we check that the content-type of the response is application/json.
+   * Then we check the response is a JS object (data != null && typeof data === 'object')
+   * in case the content type is application/json but for some reason the response is not.
+   * Axios converts automatically JSON to JS objects.
+   */
+  if (contentType !== requiredContentType || !isObjectLike(data)) {
+    throw new Error(getErrorMessage(connectorName, 'Response must be a valid JSON'));
+  }
+
+  if (requiredAttributesToBeInTheResponse.length > 0) {
+    requiredAttributesToBeInTheResponse.forEach((attr) => {
+      // Check only for undefined as null is a valid value
+      if (data[attr] === undefined) {
+        throw new Error(getErrorMessage(connectorName, 'Response is missing expected fields'));
+      }
+    });
+  }
 };
