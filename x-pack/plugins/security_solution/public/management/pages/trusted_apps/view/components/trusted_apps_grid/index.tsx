@@ -39,6 +39,7 @@ import {
 import { AppAction } from '../../../../../../common/store/actions';
 import { APP_ID } from '../../../../../../../common/constants';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
+import { EmptyState } from '../empty_state';
 
 export interface PaginationBarProps {
   pagination: Pagination;

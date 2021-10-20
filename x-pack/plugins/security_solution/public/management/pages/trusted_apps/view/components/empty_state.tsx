@@ -6,8 +6,9 @@
  */
 
 import React, { memo } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ManagementEmptyStateWraper } from '../../../../components/management_empty_state_wraper';
 
 export const EmptyState = memo<{
   onAdd: () => void;
@@ -15,7 +16,7 @@ export const EmptyState = memo<{
   isAddDisabled?: boolean;
 }>(({ onAdd, isAddDisabled = false }) => {
   return (
-    <EuiPageTemplate template="centeredContent">
+    <ManagementEmptyStateWraper template="centeredContent">
       <EuiEmptyPrompt
         data-test-subj="trustedAppEmptyState"
         iconType="plusInCircle"
@@ -30,7 +31,7 @@ export const EmptyState = memo<{
         body={
           <FormattedMessage
             id="xpack.securitySolution.trustedapps.listEmptyState.message"
-            defaultMessage="Trusted applications improve performance and alleviate conflicts with other applications running on your hosts. They are applied to hosts running the Endpoint Security integration on their agents."
+            defaultMessage="There are currently no trusted application exceptions"
           />
         }
         actions={
@@ -47,7 +48,7 @@ export const EmptyState = memo<{
           </EuiButton>
         }
       />
-    </EuiPageTemplate>
+    </ManagementEmptyStateWraper>
   );
 });
 

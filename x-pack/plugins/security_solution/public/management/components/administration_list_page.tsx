@@ -85,12 +85,11 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
             >
               <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
             </EuiPageContent>
-
-            <SpyRoute pageName={SecurityPageName.administration} />
           </>
         ) : (
           children
         )}
+        <SpyRoute pageName={SecurityPageName.administration} />
       </div>
     );
   }

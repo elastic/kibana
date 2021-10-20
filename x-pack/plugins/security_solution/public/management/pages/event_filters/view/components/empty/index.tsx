@@ -7,8 +7,9 @@
 
 import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
-import { EuiButton, EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ManagementEmptyStateWraper } from '../../../../../components/management_empty_state_wraper';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   ${() => css`
@@ -22,7 +23,7 @@ export const EventFiltersListEmptyState = memo<{
   isAddDisabled?: boolean;
 }>(({ onAdd, isAddDisabled = false }) => {
   return (
-    <EuiPageTemplate template="centeredContent">
+    <ManagementEmptyStateWraper template="centeredContent">
       <EmptyPrompt
         data-test-subj="eventFiltersEmpty"
         iconType="plusInCircle"
@@ -54,7 +55,7 @@ export const EventFiltersListEmptyState = memo<{
           </EuiButton>
         }
       />
-    </EuiPageTemplate>
+    </ManagementEmptyStateWraper>
   );
 });
 

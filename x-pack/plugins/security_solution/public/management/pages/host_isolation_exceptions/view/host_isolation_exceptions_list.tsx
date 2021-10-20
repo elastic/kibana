@@ -8,7 +8,7 @@
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
 import React, { Dispatch, useCallback, useEffect } from 'react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -166,8 +166,6 @@ export const HostIsolationExceptionsList = () => {
           )}
         />
       ) : null}
-
-      <EuiSpacer size="l" />
 
       <PaginatedContent<ExceptionListItemSchema, typeof ArtifactEntryCard>
         items={listItems}
