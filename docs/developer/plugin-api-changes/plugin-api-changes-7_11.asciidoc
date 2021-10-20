@@ -219,7 +219,7 @@ fields in an index pattern to avoid a situation where {kib} might
 receive a date field from {es}
 https://github.com/elastic/kibana/issues/22897#issuecomment-604998405[that it doesn't know how to format].
 With the introduction of the
-https://www.elastic.co/guide/en/elasticsearch/reference/7.x/search-fields.html#search-fields-param[Elasticsearch search fields param],
+{ref-7x}/search-fields.html#search-fields-param[Elasticsearch search fields param],
 which supports requesting fields in a particular format, we no longer need to rely
 on `docvalue_fields` for this behavior.
 
