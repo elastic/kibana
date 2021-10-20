@@ -52,9 +52,9 @@ tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
 echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
 
 if [ "$branch" == "master" ]; then
-  echo "Creating bootstrap cache for 7.x";
+  echo "Creating bootstrap cache for 7.16";
 
-  git clone https://github.com/elastic/kibana.git --branch 7.x --depth 1 /tmp/kibana-7.x
-  (cd /tmp/kibana-7.x && ./.ci/packer_cache.sh);
-  rm -rf /tmp/kibana-7.x;
+  git clone https://github.com/elastic/kibana.git --branch 7.16 --depth 1 /tmp/kibana-7.16
+  (cd /tmp/kibana-7.16 && ./.ci/packer_cache.sh);
+  rm -rf /tmp/kibana-7.16;
 fi
