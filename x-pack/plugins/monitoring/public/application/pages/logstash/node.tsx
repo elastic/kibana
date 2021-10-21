@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, useState, useCallback, useMemo } from 'react';
+import React, { useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
@@ -33,16 +33,18 @@ import { useCharts } from '../../hooks/use_charts';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
   const match = useRouteMatch<{ uuid: string | undefined }>();
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
-  });
+  }) as any;
   const [data, setData] = useState({} as any);
   const [alerts, setAlerts] = useState<AlertsByName>({});
   const { zoomInfo, onBrush } = useCharts();
@@ -59,6 +61,16 @@ export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
       nodeName: data.nodeSummary ? data.nodeSummary.name : '',
     },
   });
+
+  useEffect(() => {
+    if (cluster && data.nodeSummary) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inLogstash: true,
+        instance: data.nodeSummary.host,
+        name: 'nodes',
+      });
+    }
+  }, [cluster, data, generateBreadcrumbs]);
 
   const getPageData = useCallback(async () => {
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/node/${match.params.uuid}`;

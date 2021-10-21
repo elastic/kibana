@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 // @ts-ignore
@@ -25,6 +25,7 @@ import { useTable } from '../../hooks/use_table';
 // @ts-ignore
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { useCharts } from '../../hooks/use_charts';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -35,7 +36,9 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
   const { onBrush, zoomInfo } = useCharts();
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
-  });
+  }) as any;
+
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
 
   const { getPaginationTableProps, getPaginationRouteOptions, updateTotalItemCount } =
     useTable('logstash.pipelines');
@@ -82,6 +85,16 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
     updateTotalItemCount,
     match.params.uuid,
   ]);
+
+  useEffect(() => {
+    if (cluster && data.nodeSummary) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inLogstash: true,
+        instance: data.nodeSummary.host,
+        name: 'nodes',
+      });
+    }
+  }, [cluster, data, generateBreadcrumbs]);
 
   return (
     <LogstashTemplate
