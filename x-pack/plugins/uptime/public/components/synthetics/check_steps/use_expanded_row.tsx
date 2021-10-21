@@ -28,7 +28,7 @@ export const useExpandedRow = ({ loading, steps, allSteps }: HookProps) => {
 
   const { checkGroupId } = useParams<{ checkGroupId: string }>();
 
-  const getBrowserConsole = useCallback(
+  const getBrowserConsoles = useCallback(
     (index: number) => {
       return allSteps
         .filter(
@@ -50,7 +50,7 @@ export const useExpandedRow = ({ loading, steps, allSteps }: HookProps) => {
         expandedRowsN[expandedRowKey] = (
           <ExecutedStep
             step={step}
-            browserConsoles={getBrowserConsole(expandedRowKey)}
+            browserConsoles={getBrowserConsoles(expandedRowKey)}
             index={step.synthetics?.step?.index!}
             loading={loading}
           />
@@ -79,7 +79,7 @@ export const useExpandedRow = ({ loading, steps, allSteps }: HookProps) => {
         [stepIndex]: (
           <ExecutedStep
             step={journeyStep}
-            browserConsoles={getBrowserConsole(stepIndex + 1)}
+            browserConsoles={getBrowserConsoles(stepIndex + 1)}
             index={journeyStep.synthetics?.step?.index!}
             loading={loading}
           />
