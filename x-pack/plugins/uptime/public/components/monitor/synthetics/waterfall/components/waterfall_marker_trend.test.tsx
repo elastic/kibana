@@ -47,7 +47,17 @@ describe('<WaterfallMarkerTrend />', () => {
     const { getByLabelText, getByText, getByRole } = render(
       <TestWrapper activeStep={activeStep} basePath={BASE_PATH}>
         <WaterfallMarkerTrend title="test title" field="field" />
-      </TestWrapper>
+      </TestWrapper>,
+      {
+        core: {
+          http: {
+            // @ts-expect-error incomplete implementation for testing purposes
+            basePath: {
+              get: () => BASE_PATH,
+            },
+          },
+        },
+      }
     );
     const heading = getByRole('heading');
     expect(heading.innerHTML).toEqual('test title');

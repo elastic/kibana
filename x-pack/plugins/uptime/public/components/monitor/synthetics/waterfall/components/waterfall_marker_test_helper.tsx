@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { UptimeSettingsContext, UptimeStartupPluginsContext } from '../../../../../contexts';
+import { UptimeStartupPluginsContext } from '../../../../../contexts';
 import { WaterfallContext } from '../context/waterfall_chart';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 
@@ -48,23 +48,12 @@ export const TestWrapper = ({
       },
     }}
   >
-    <UptimeSettingsContext.Provider
+    <WaterfallContext.Provider
       value={{
-        basePath,
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
-        isApmAvailable: true,
-        isInfraAvailable: true,
-        isLogsAvailable: true,
+        activeStep,
       }}
     >
-      <WaterfallContext.Provider
-        value={{
-          activeStep,
-        }}
-      >
-        {children}
-      </WaterfallContext.Provider>
-    </UptimeSettingsContext.Provider>
+      {children}
+    </WaterfallContext.Provider>
   </UptimeStartupPluginsContext.Provider>
 );

@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { useUptimeStartPlugins } from '../../../../../contexts/uptime_startup_plugins_context';
-import { useUptimeSettingsContext } from '../../../../../contexts/uptime_settings_context';
 import { AllSeries, createExploratoryViewUrl } from '../../../../../../../observability/public';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useWaterfallContext } from '../context/waterfall_chart';
@@ -42,7 +42,7 @@ export function WaterfallMarkerTrend({ title, field }: { title: string; field: s
 
   const EmbeddableExpView = observability!.ExploratoryViewEmbeddable;
 
-  const { basePath } = useUptimeSettingsContext();
+  const basePath = useKibana().services.http?.basePath?.get();
 
   const { activeStep } = useWaterfallContext();
 
