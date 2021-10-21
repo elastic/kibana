@@ -16,5 +16,6 @@ export interface IndexedFieldItem extends IndexedFieldItemBase {
   excluded: boolean;
   kbnType: string;
   isMapped: boolean;
+  isUserEditable: boolean;
   hasRuntime: boolean;
 }

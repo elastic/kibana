@@ -9,8 +9,10 @@
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
+import { IndexPatternManagmentContext } from '../../../types';
 
 interface IndexedFieldsTableProps {
   fields: IndexPatternField[];
@@ -23,16 +25,23 @@ interface IndexedFieldsTableProps {
     getFieldInfo: (indexPattern: IndexPattern, field: IndexPatternField) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
+  userEditPermission: boolean;
 }
 
 interface IndexedFieldsTableState {
   fields: IndexedFieldItem[];
 }
 
-export class IndexedFieldsTable extends Component<
-  IndexedFieldsTableProps,
-  IndexedFieldsTableState
-> {
+const withHooks = (Comp: typeof Component) => {
+  return (props: any) => {
+    const { application } = useKibana<IndexPatternManagmentContext>().services;
+    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+
+    return <Comp userEditPermission={userEditPermission} {...props} />;
+  };
+};
+
+class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTableState> {
   constructor(props: IndexedFieldsTableProps) {
     super(props);
 
@@ -50,7 +59,7 @@ export class IndexedFieldsTable extends Component<
   }
 
   mapFields(fields: IndexPatternField[]): IndexedFieldItem[] {
-    const { indexPattern, fieldWildcardMatcher, helpers } = this.props;
+    const { indexPattern, fieldWildcardMatcher, helpers, userEditPermission } = this.props;
     const sourceFilters =
       indexPattern.sourceFilters &&
       indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
@@ -68,6 +77,7 @@ export class IndexedFieldsTable extends Component<
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
             info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field),
             isMapped: !!field.isMapped,
+            isUserEditable: userEditPermission,
             hasRuntime: !!field.runtimeField,
           };
         })) ||
@@ -114,3 +124,5 @@ export class IndexedFieldsTable extends Component<
     );
   }
 }
+
+export const IndexedFieldsTable = withHooks(IndexedFields);

@@ -22,7 +22,9 @@ interface HeaderProps extends RouteComponentProps {
 }
 
 export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
-  const docLinks = useKibana<IndexPatternManagmentContext>().services.docLinks?.links;
+  const { application, docLinks } = useKibana<IndexPatternManagmentContext>().services;
+  const links = docLinks?.links;
+  const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -39,7 +41,7 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
               defaultMessage="Scripted fields are deprecated. Use {runtimeDocs} instead."
               values={{
                 runtimeDocs: (
-                  <EuiLink target="_blank" href={docLinks.runtimeFields.overview}>
+                  <EuiLink target="_blank" href={links.runtimeFields.overview}>
                     <FormattedMessage
                       id="indexPatternManagement.header.runtimeLink"
                       defaultMessage="runtime fields"
@@ -52,17 +54,19 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
         </EuiText>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          data-test-subj="addScriptedFieldLink"
-          {...reactRouterNavigate(history, `patterns/${indexPatternId}/create-field/`)}
-        >
-          <FormattedMessage
-            id="indexPatternManagement.editIndexPattern.scripted.addFieldButton"
-            defaultMessage="Add scripted field"
-          />
-        </EuiButton>
-      </EuiFlexItem>
+      {userEditPermission && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="addScriptedFieldLink"
+            {...reactRouterNavigate(history, `patterns/${indexPatternId}/create-field/`)}
+          >
+            <FormattedMessage
+              id="indexPatternManagement.editIndexPattern.scripted.addFieldButton"
+              defaultMessage="Add scripted field"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 });

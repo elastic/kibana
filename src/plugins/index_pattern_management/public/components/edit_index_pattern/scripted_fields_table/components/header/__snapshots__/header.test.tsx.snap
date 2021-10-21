@@ -6,23 +6,7 @@ exports[`Header should render normally 1`] = `
     Object {
       "action": "PUSH",
       "block": [MockFunction],
-      "createHref": [MockFunction] {
-        "calls": Array [
-          Array [
-            Object {
-              "hash": "",
-              "pathname": "patterns/test/create-field/",
-              "search": "",
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      },
+      "createHref": [MockFunction],
       "createSubHistory": [MockFunction],
       "go": [MockFunction],
       "goBack": [MockFunction],
@@ -134,69 +118,6 @@ exports[`Header should render normally 1`] = `
               </p>
             </div>
           </EuiText>
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <EuiButton
-            data-test-subj="addScriptedFieldLink"
-            onClick={[Function]}
-          >
-            <EuiButtonDisplay
-              baseClassName="euiButton"
-              data-test-subj="addScriptedFieldLink"
-              disabled={false}
-              element="button"
-              isDisabled={false}
-              onClick={[Function]}
-              type="button"
-            >
-              <button
-                className="euiButton euiButton--primary"
-                data-test-subj="addScriptedFieldLink"
-                disabled={false}
-                onClick={[Function]}
-                style={
-                  Object {
-                    "minWidth": undefined,
-                  }
-                }
-                type="button"
-              >
-                <EuiButtonContent
-                  className="euiButton__content"
-                  iconSide="left"
-                  textProps={
-                    Object {
-                      "className": "euiButton__text",
-                    }
-                  }
-                >
-                  <span
-                    className="euiButtonContent euiButton__content"
-                  >
-                    <span
-                      className="euiButton__text"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Add scripted field"
-                        id="indexPatternManagement.editIndexPattern.scripted.addFieldButton"
-                        values={Object {}}
-                      >
-                        <span>
-                          Add scripted field
-                        </span>
-                      </FormattedMessage>
-                    </span>
-                  </span>
-                </EuiButtonContent>
-              </button>
-            </EuiButtonDisplay>
-          </EuiButton>
         </div>
       </EuiFlexItem>
     </div>
