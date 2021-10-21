@@ -327,8 +327,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     registerPrivilegeDeprecations({
       deprecationsService: core.deprecations,
-      getKibanaRolesByFeatureId:
-        plugins.security?.privilegeDeprecationsService.getKibanaRolesByFeatureId,
+      getKibanaRoles: plugins.security?.privilegeDeprecationsService.getKibanaRoles,
       logger: this.logger.get('deprecations'),
     });
 

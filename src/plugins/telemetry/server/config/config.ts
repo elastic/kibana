@@ -9,8 +9,8 @@
 import { schema, TypeOf, Type } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
 import { PluginConfigDescriptor } from 'kibana/server';
-import { TELEMETRY_ENDPOINT } from '../../common/constants';
 import { deprecateEndpointConfigs } from './deprecations';
+import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 
 const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
   schema.literal('prod'),
@@ -44,10 +44,10 @@ const configSchema = schema.object({
     schema.contextRef('dist'),
     schema.literal(false), // Point to staging if it's not a distributable release
     schema.string({
-      defaultValue: TELEMETRY_ENDPOINT.MAIN_CHANNEL.STAGING,
+      defaultValue: getTelemetryChannelEndpoint({ channelName: 'snapshot', env: 'staging' }),
     }),
     schema.string({
-      defaultValue: TELEMETRY_ENDPOINT.MAIN_CHANNEL.PROD,
+      defaultValue: getTelemetryChannelEndpoint({ channelName: 'snapshot', env: 'prod' }),
     })
   ),
   /**
@@ -58,10 +58,10 @@ const configSchema = schema.object({
     schema.contextRef('dist'),
     schema.literal(false), // Point to staging if it's not a distributable release
     schema.string({
-      defaultValue: TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.STAGING,
+      defaultValue: getTelemetryChannelEndpoint({ channelName: 'optInStatus', env: 'staging' }),
     }),
     schema.string({
-      defaultValue: TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.PROD,
+      defaultValue: getTelemetryChannelEndpoint({ channelName: 'optInStatus', env: 'prod' }),
     })
   ),
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
