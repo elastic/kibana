@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import uuid from 'uuid';
 import { IRouter } from '../../../../../src/core/server';
 import { INTERNAL_TEST_ROUTE } from '../../common/constants';
 
@@ -14,41 +15,63 @@ export const registerTestRoute = (router: IRouter) => {
     {
       path: INTERNAL_TEST_ROUTE,
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
+        query: schema.object({
+          index: schema.maybe(schema.string()),
+        }),
       },
     },
     async (context, request, response) => {
       // TODO (Jiawei & Paulo): Evaluate saved objects & ES client
-      const savedObjectClient = context.core.savedObjects.client;
-      return response.ok({
+      const client = context.core.elasticsearch.client.asCurrentUser;
+
+      const { index } = request.query;
+
+      const search = await client.search({
+        index: [`${index}*`],
         body: {
-          value: 'get value!',
-        },
-        headers: {
-          'content-type': 'application/json',
+          size: 20,
+          timeout: '30s',
+          query: {
+            bool: {
+              filter: [],
+            },
+          },
         },
       });
-    },
+
+      return response.ok({ body: search.body.hits });
+    }
   );
 
   router.put(
     {
       path: INTERNAL_TEST_ROUTE,
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
+        body: schema.object({
+          index: schema.string(),
+        }),
       },
     },
     async (context, request, response) => {
       // TODO (Jiawei & Paulo): Evaluate saved objects & ES client
-      const savedObjectClient = context.core.savedObjects.client;
-      return response.ok({
+      const { index } = request.body;
+
+      const client = context.core.elasticsearch.client.asCurrentUser;
+
+      client.create({
+        index,
+        id: uuid(),
         body: {
-          value: 'put value!',
-        },
-        headers: {
-          'content-type': 'application/json',
+          message: 'Test Message',
+          timestamp: new Date().toISOString(),
         },
       });
-    },
+
+      return response.ok({
+        body: {
+          message: 'success',
+        },
+      });
+    }
   );
 };
