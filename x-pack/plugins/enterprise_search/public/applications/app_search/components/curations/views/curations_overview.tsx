@@ -16,11 +16,17 @@ import { CurationsTable, EmptyState } from '../components';
 import { SuggestionsTable } from '../components/suggestions_table';
 import { CurationsLogic } from '../curations_logic';
 
+import { CurationsSettingsLogic } from './curations_settings';
+
 export const CurationsOverview: React.FC = () => {
   const { curations } = useValues(CurationsLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const shouldShowSuggestions = hasPlatinumLicense;
+  const {
+    curationsSettings: { enabled },
+  } = useValues(CurationsSettingsLogic);
+
+  const shouldShowSuggestions = enabled && hasPlatinumLicense;
 
   return (
     <>
