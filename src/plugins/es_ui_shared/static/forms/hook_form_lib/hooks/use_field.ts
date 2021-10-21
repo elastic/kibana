@@ -95,6 +95,14 @@ export const useField = <T, FormType = FormData, I = T>(
     errors: null,
   });
 
+  const hasAsyncValidation = useMemo(
+    () =>
+      validations === undefined
+        ? false
+        : validations.some((validation) => validation.isAsync === true),
+    [validations]
+  );
+
   // ----------------------------------
   // -- HELPERS
   // ----------------------------------
@@ -246,8 +254,6 @@ export const useField = <T, FormType = FormData, I = T>(
         const validationErrors: ValidationError[] = [];
 
         for (const validation of validations) {
-          inflightValidation.current = null;
-
           const {
             validator,
             exitOnFail = true,
@@ -268,6 +274,8 @@ export const useField = <T, FormType = FormData, I = T>(
           }) as Promise<ValidationError>;
 
           const validationResult = await inflightValidation.current;
+
+          inflightValidation.current = null;
 
           if (!validationResult) {
             continue;
@@ -343,12 +351,17 @@ export const useField = <T, FormType = FormData, I = T>(
         return validationErrors;
       };
 
+      if (hasAsyncValidation) {
+        return runAsync();
+      }
+
       // We first try to run the validations synchronously
       return runSync();
     },
     [
       cancelInflightValidation,
       validations,
+      hasAsyncValidation,
       getFormData,
       getFields,
       path,
@@ -386,7 +399,6 @@ export const useField = <T, FormType = FormData, I = T>(
         onlyBlocking = false,
       } = validationData;
 
-      setIsValidated(true);
       setValidating(true);
 
       // By the time our validate function has reached completion, it’s possible
@@ -399,6 +411,7 @@ export const useField = <T, FormType = FormData, I = T>(
         if (validateIteration === validateCounter.current && isMounted.current) {
           // This is the most recent invocation
           setValidating(false);
+          setIsValidated(true);
           // Update the errors array
           setStateErrors((prev) => {
             const filteredErrors = filterErrors(prev, validationType);

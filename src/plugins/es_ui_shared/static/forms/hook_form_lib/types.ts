@@ -239,4 +239,12 @@ export interface ValidationConfig<
    */
   isBlocking?: boolean;
   exitOnFail?: boolean;
+  /**
+   * Flag to indicate if the validation is asynchronous. If not specified the lib will
+   * first try to run all the validations synchronously and if it detects a Promise it
+   * will run the validations a second time asynchronously.
+   * This means that HTTP request will be called twice which is not ideal. It is then
+   * recommended to set the "isAsync" flag to `true` to all asynchronous validations.
+   */
+  isAsync?: boolean;
 }
