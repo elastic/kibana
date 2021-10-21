@@ -21,7 +21,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <span
           aria-label="Primary time field."
-          color="primary"
           data-euiicon-type="clock"
           tabindex="0"
         />

@@ -122,7 +122,6 @@ describe('Discover grid columns ', function () {
              
             <EuiIconTip
               aria-label="Primary time field."
-              color="primary"
               content="This field represents the time that events occurred."
               type="clock"
             />

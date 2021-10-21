@@ -99,12 +99,7 @@ export function buildEuiGridColumn(
     column.display = (
       <Fragment>
         {indexPatternField?.customLabel ?? indexPattern.timeFieldName}{' '}
-        <EuiIconTip
-          type="clock"
-          color="primary"
-          aria-label={primaryTimeAriaLabel}
-          content={primaryTimeTooltip}
-        />
+        <EuiIconTip type="clock" aria-label={primaryTimeAriaLabel} content={primaryTimeTooltip} />
       </Fragment>
     );
     column.initialWidth = defaultTimeColumnWidth;
