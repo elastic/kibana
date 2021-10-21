@@ -233,6 +233,7 @@ export async function getTotalCountAggregations(
 
   const { body: results } = await esClient.search({
     index: kibanaInex,
+    size: 0,
     body: {
       query: {
         bool: {
@@ -314,6 +315,7 @@ export async function getTotalCountAggregations(
 export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaInex: string) {
   const { body: searchResult } = await esClient.search({
     index: kibanaInex,
+    size: 0,
     body: {
       query: {
         bool: {
