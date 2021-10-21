@@ -18,6 +18,8 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
   EuiSelect,
   EuiSwitch,
   EuiSwitchEvent,
@@ -29,6 +31,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FieldIcon, FieldButton } from '../../../../kibana_react/public';
+
+export type FieldOnlyDataType = 'document' | 'ip' | 'histogram' | 'geo_point' | 'geo_shape';
+export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
 export interface State {
   searchable: string;
@@ -39,49 +45,31 @@ export interface State {
 }
 
 export interface Props {
-  /**
-   * triggered on input of user into search field
-   */
-  onChange: (field: string, value: string | boolean | undefined) => void;
+  onSearchChange: (value: string) => void;
+  searchValue?: string;
 
-  /**
-   * the input value of the user
-   */
-  value?: string;
+  onFieldTypesChange: (value: DataType[]) => void;
+  fieldTypesValue: DataType[];
 
-  /**
-   * types for the type filter
-   */
-  types: string[];
+  availableFieldTypes: DataType[];
 }
 
-export function FieldSearch({ onChange, value, types }: Props) {
+export function FieldSearch({
+  onSearchChange,
+  searchValue,
+  onFieldTypesChange,
+  fieldTypesValue,
+  availableFieldTypes,
+}: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
-  const aggregatableLabel = i18n.translate('discover.fieldChooser.filter.aggregatableLabel', {
-    defaultMessage: 'Aggregatable',
-  });
-  const searchableLabel = i18n.translate('discover.fieldChooser.filter.searchableLabel', {
-    defaultMessage: 'Searchable',
-  });
+
   const typeLabel = i18n.translate('discover.fieldChooser.filter.typeLabel', {
     defaultMessage: 'Type',
   });
-  const typeOptions = types
-    ? types.map((type) => {
-        return { value: type, text: type };
-      })
-    : [{ value: 'any', text: 'any' }];
 
-  const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const [values, setValues] = useState<State>({
-    searchable: 'any',
-    aggregatable: 'any',
-    type: 'any',
-    missing: true,
-  });
 
   const filterBtnAriaLabel = isPopoverOpen
     ? i18n.translate('discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
@@ -95,64 +83,15 @@ export function FieldSearch({ onChange, value, types }: Props) {
     setPopoverOpen(!isPopoverOpen);
   };
 
-  const applyFilterValue = (id: string, filterValue: string | boolean) => {
-    switch (filterValue) {
-      case 'any':
-        if (id !== 'type') {
-          onChange(id, undefined);
-        } else {
-          onChange(id, filterValue);
-        }
-        break;
-      case 'true':
-        onChange(id, true);
-        break;
-      case 'false':
-        onChange(id, false);
-        break;
-      default:
-        onChange(id, filterValue);
-    }
-  };
-
-  const isFilterActive = (name: string, filterValue: string | boolean) => {
-    return name !== 'missing' && filterValue !== 'any';
-  };
-
-  const handleValueChange = (name: string, filterValue: string | boolean) => {
-    const previousValue = values[name];
-    updateFilterCount(name, previousValue, filterValue);
-    const updatedValues = { ...values };
-    updatedValues[name] = filterValue;
-    setValues(updatedValues);
-    applyFilterValue(name, filterValue);
-  };
-
-  const updateFilterCount = (
-    name: string,
-    previousValue: string | boolean,
-    currentValue: string | boolean
-  ) => {
-    const previouslyFilterActive = isFilterActive(name, previousValue);
-    const filterActive = isFilterActive(name, currentValue);
-    const diff = Number(filterActive) - Number(previouslyFilterActive);
-    setActiveFiltersCount(activeFiltersCount + diff);
-  };
-
-  const handleMissingChange = (e: EuiSwitchEvent) => {
-    const missingValue = e.target.checked;
-    handleValueChange('missing', missingValue);
-  };
-
   const buttonContent = (
     <EuiFilterButton
       aria-label={filterBtnAriaLabel}
       data-test-subj="toggleFieldFilterButton"
       iconType="arrowDown"
-      isSelected={activeFiltersCount > 0}
+      isSelected={fieldTypesValue.length > 0}
       numFilters={0}
-      hasActiveFilters={activeFiltersCount > 0}
-      numActiveFilters={activeFiltersCount}
+      hasActiveFilters={fieldTypesValue.length > 0}
+      numActiveFilters={fieldTypesValue.length}
       onClick={handleFilterButtonClicked}
     >
       <FormattedMessage
@@ -160,97 +99,6 @@ export function FieldSearch({ onChange, value, types }: Props) {
         defaultMessage="Filter by type"
       />
     </EuiFilterButton>
-  );
-
-  const select = (
-    id: string,
-    selectOptions: Array<{ text: ReactNode } & OptionHTMLAttributes<HTMLOptionElement>>,
-    selectValue: string
-  ) => {
-    return (
-      <EuiSelect
-        id={`${id}-select`}
-        options={selectOptions}
-        value={selectValue}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-          handleValueChange(id, e.target.value)
-        }
-        aria-label={i18n.translate('discover.fieldChooser.filter.fieldSelectorLabel', {
-          defaultMessage: 'Selection of {id} filter options',
-          values: { id },
-        })}
-        data-test-subj={`${id}Select`}
-        compressed
-      />
-    );
-  };
-
-  const toggleButtons = (id: string) => {
-    return [
-      {
-        id: `${id}-any`,
-        label: i18n.translate('discover.fieldChooser.filter.toggleButton.any', {
-          defaultMessage: 'any',
-        }),
-      },
-      {
-        id: `${id}-true`,
-        label: i18n.translate('discover.fieldChooser.filter.toggleButton.yes', {
-          defaultMessage: 'yes',
-        }),
-      },
-      {
-        id: `${id}-false`,
-        label: i18n.translate('discover.fieldChooser.filter.toggleButton.no', {
-          defaultMessage: 'no',
-        }),
-      },
-    ];
-  };
-
-  const buttonGroup = (id: string, legend: string) => {
-    return (
-      <EuiButtonGroup
-        legend={legend}
-        options={toggleButtons(id)}
-        idSelected={`${id}-${values[id]}`}
-        onChange={(optionId: string) => handleValueChange(id, optionId.replace(`${id}-`, ''))}
-        buttonSize="compressed"
-        isFullWidth
-        data-test-subj={`${id}ButtonGroup`}
-      />
-    );
-  };
-
-  const footer = () => {
-    return (
-      <EuiPopoverFooter paddingSize="s">
-        <EuiSwitch
-          label={i18n.translate('discover.fieldChooser.filter.hideEmptyFieldsLabel', {
-            defaultMessage: 'Hide empty fields',
-          })}
-          checked={values.missing}
-          onChange={handleMissingChange}
-          data-test-subj="missingSwitch"
-        />
-      </EuiPopoverFooter>
-    );
-  };
-
-  const selectionPanel = (
-    <div className="dscFieldSearch__formWrapper">
-      <EuiForm data-test-subj="filterSelectionPanel">
-        <EuiFormRow fullWidth label={aggregatableLabel} display="columnCompressed">
-          {buttonGroup('aggregatable', aggregatableLabel)}
-        </EuiFormRow>
-        <EuiFormRow fullWidth label={searchableLabel} display="columnCompressed">
-          {buttonGroup('searchable', searchableLabel)}
-        </EuiFormRow>
-        <EuiFormRow fullWidth label={typeLabel} display="columnCompressed">
-          {select('type', typeOptions, values.type)}
-        </EuiFormRow>
-      </EuiForm>
-    </div>
   );
 
   return (
@@ -261,9 +109,9 @@ export function FieldSearch({ onChange, value, types }: Props) {
             aria-label={searchPlaceholder}
             data-test-subj="fieldFilterSearchInput"
             fullWidth
-            onChange={(event) => onChange('name', event.currentTarget.value)}
+            onChange={(event) => onSearchChange(event.currentTarget.value)}
             placeholder={searchPlaceholder}
-            value={value}
+            value={searchValue}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -282,13 +130,38 @@ export function FieldSearch({ onChange, value, types }: Props) {
             }}
             button={buttonContent}
           >
-            <EuiPopoverTitle paddingSize="s">
+            <EuiContextMenuPanel
+              watchedItemProps={['icon', 'disabled']}
+              data-test-subj="lnsIndexPatternTypeFilterOptions"
+              items={(availableFieldTypes as DataType[]).map((type) => (
+                <EuiContextMenuItem
+                  className="lnsInnerIndexPatternDataPanel__filterType"
+                  key={type}
+                  icon={fieldTypesValue.includes(type) ? 'check' : 'empty'}
+                  data-test-subj={`typeFilter-${type}`}
+                  onClick={() => {
+                    if (fieldTypesValue.includes(type)) {
+                      onFieldTypesChange(fieldTypesValue.filter((f) => f !== type));
+                    } else {
+                      onFieldTypesChange([...fieldTypesValue, type]);
+                    }
+                  }}
+                >
+                  <span className="lnsInnerIndexPatternDataPanel__filterTypeInner">
+                    <FieldIcon type={type} label={type} />
+                    {type}
+                  </span>
+                </EuiContextMenuItem>
+              ))}
+            />
+
+            {/* <EuiPopoverTitle paddingSize="s">
               {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
                 defaultMessage: 'Filter by type',
               })}
             </EuiPopoverTitle>
             {selectionPanel}
-            {footer()}
+            {footer()} */}
           </EuiPopover>
         </EuiFilterGroup>
       </EuiOutsideClickDetector>
