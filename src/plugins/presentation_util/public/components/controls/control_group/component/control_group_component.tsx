@@ -36,7 +36,7 @@ import {
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
 
-import { ControlGroupInput } from '../types';
+import { ControlGroupInput, ViewMode } from '../types';
 import { pluginServices } from '../../../../services';
 import { ControlGroupStrings } from '../control_group_strings';
 import { CreateControlButton } from '../editor/create_control';
@@ -64,7 +64,9 @@ export const ControlGroup = () => {
   const dispatch = useEmbeddableDispatch();
 
   // current state
-  const { panels, controlStyle } = useEmbeddableSelector((state) => state);
+  const { panels, viewMode, controlStyle } = useEmbeddableSelector((state) => state);
+
+  const isEditable = viewMode === ViewMode.EDIT;
 
   const idsInOrder = useMemo(
     () =>
@@ -100,6 +102,10 @@ export const ControlGroup = () => {
   };
 
   const emptyState = !(idsInOrder && idsInOrder.length > 0);
+  // Empty, non-editable view is null
+  if (!isEditable && emptyState) {
+    return null;
+  }
 
   return (
     <EuiPanel
@@ -141,6 +147,7 @@ export const ControlGroup = () => {
                     (controlId, index) =>
                       panels[controlId] && (
                         <SortableControl
+                          isEditable={isEditable}
                           dragInfo={{ index, draggingIndex }}
                           embeddableId={controlId}
                           key={controlId}
@@ -154,33 +161,35 @@ export const ControlGroup = () => {
               </DragOverlay>
             </DndContext>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} className="groupEditActions" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
-                  <EuiButtonIcon
-                    aria-label={ControlGroupStrings.management.getManageButtonTitle()}
-                    iconType="gear"
-                    color="subdued"
-                    data-test-subj="inputControlsSortingButton"
-                    onClick={() => {
-                      const flyoutInstance = openFlyout(
-                        forwardAllContext(
-                          <EditControlGroup closeFlyout={() => flyoutInstance.close()} />,
-                          reduxContainerContext
-                        )
-                      );
-                    }}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
-                  <CreateControlButton isIconButton={true} />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {isEditable && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} className="groupEditActions" gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
+                    <EuiButtonIcon
+                      aria-label={ControlGroupStrings.management.getManageButtonTitle()}
+                      iconType="gear"
+                      color="subdued"
+                      data-test-subj="inputControlsSortingButton"
+                      onClick={() => {
+                        const flyoutInstance = openFlyout(
+                          forwardAllContext(
+                            <EditControlGroup closeFlyout={() => flyoutInstance.close()} />,
+                            reduxContainerContext
+                          )
+                        );
+                      }}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
+                    <CreateControlButton isIconButton={true} />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       ) : (
         <>
