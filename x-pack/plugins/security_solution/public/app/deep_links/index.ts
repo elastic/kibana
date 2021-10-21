@@ -382,13 +382,13 @@ export function getDeepLinks(
         if (!isPremium && PREMIUM_DEEP_LINK_IDS.has(deepLink.id)) {
           return false;
         }
-        if (deepLink.id === SecurityPageName.case) {
+        if (deepLink.path && deepLink.path.startsWith(CASES_PATH)) {
           return capabilities == null || capabilities[CASES_FEATURE_ID]?.read_cases === true;
         }
         if (deepLink.id === SecurityPageName.ueba) {
           return enableExperimental.uebaEnabled;
         }
-        if (!isEmpty(deepLink.deepLinks)) {
+        if (deepLink.navLinkStatus === AppNavLinkStatus.hidden) {
           return true;
         }
         return capabilities == null || capabilities[SERVER_APP_ID]?.show === true;
