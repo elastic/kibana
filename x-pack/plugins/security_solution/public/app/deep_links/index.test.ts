@@ -74,7 +74,6 @@ describe('deepLinks', () => {
   });
 
   it('should return case links with deepLinks for basic license with crud_cases capabilities', () => {
-    const basicLicense = 'basic';
     const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
       [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
       [SERVER_APP_ID]: { show: true },

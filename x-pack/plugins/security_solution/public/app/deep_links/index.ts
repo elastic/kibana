@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 
+import { isEmpty } from 'lodash';
 import { LicenseType } from '../../../../licensing/common/types';
 import { SecurityPageName } from '../types';
 import { AppDeepLink, ApplicationStart, AppNavLinkStatus } from '../../../../../../src/core/public';
@@ -388,7 +388,7 @@ export function getDeepLinks(
         if (deepLink.id === SecurityPageName.ueba) {
           return enableExperimental.uebaEnabled;
         }
-        if (deepLink.navLinkStatus === AppNavLinkStatus.hidden) {
+        if (!isEmpty(deepLink.deepLinks)) {
           return true;
         }
         return capabilities == null || capabilities[SERVER_APP_ID]?.show === true;
