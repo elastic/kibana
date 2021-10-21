@@ -15,11 +15,19 @@ import { CODE_PATH_ELASTICSEARCH } from '../../../common/constants';
 
 const CODE_PATHS = [CODE_PATH_ELASTICSEARCH];
 
-export const LoadingPage = () => {
+export const LoadingPage = ({ staticLoadingState }: { staticLoadingState?: boolean }) => {
   const { clusters, loaded } = useClusters(null, undefined, CODE_PATHS);
   const title = i18n.translate('xpack.monitoring.loading.pageTitle', {
     defaultMessage: 'Loading',
   });
+
+  if (staticLoadingState) {
+    return (
+      <PageTemplate title={title}>
+        <PageLoading />;
+      </PageTemplate>
+    );
+  }
 
   return (
     <PageTemplate title={title}>

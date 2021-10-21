@@ -17,7 +17,7 @@ export function getShardTimeout(config: SharedGlobalConfig): Pick<Search, 'timeo
 }
 
 export async function getDefaultSearchParams(
-  uiSettingsClient: IUiSettingsClient
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>
 ): Promise<
   Pick<Search, 'max_concurrent_shard_requests' | 'ignore_unavailable' | 'track_total_hits'>
 > {

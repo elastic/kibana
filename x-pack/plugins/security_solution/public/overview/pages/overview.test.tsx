@@ -30,9 +30,9 @@ import {
   mockCtiLinksResponse,
 } from '../components/overview_cti_links/mock';
 import { useCtiDashboardLinks } from '../containers/overview_cti_links';
-import { EndpointPrivileges } from '../../common/components/user_privileges/use_endpoint_privileges';
-import { useRiskyHostLinks } from '../containers/overview_risky_host_links/use_risky_host_links';
+import { EndpointPrivileges } from '../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useHostsRiskScore } from '../containers/overview_risky_host_links/use_hosts_risk_score';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -86,9 +86,9 @@ jest.mock('../containers/overview_cti_links/use_is_threat_intel_module_enabled')
 const useIsThreatIntelModuleEnabledMock = useIsThreatIntelModuleEnabled as jest.Mock;
 useIsThreatIntelModuleEnabledMock.mockReturnValue(true);
 
-jest.mock('../containers/overview_risky_host_links/use_risky_host_links');
-const useRiskyHostLinksMock = useRiskyHostLinks as jest.Mock;
-useRiskyHostLinksMock.mockReturnValue({
+jest.mock('../containers/overview_risky_host_links/use_hosts_risk_score');
+const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;
+useHostsRiskScoreMock.mockReturnValue({
   loading: false,
   isModuleEnabled: false,
   listItems: [],
@@ -298,29 +298,6 @@ describe('Overview', () => {
           </TestProviders>
         );
         expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
-      });
-
-      it('does not show Endpoint get ready button when ingest is not enabled', () => {
-        const wrapper = mount(
-          <TestProviders>
-            <MemoryRouter>
-              <Overview />
-            </MemoryRouter>
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(false);
-      });
-
-      it('shows Endpoint get ready button when ingest is enabled', () => {
-        mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: true }));
-        const wrapper = mount(
-          <TestProviders>
-            <MemoryRouter>
-              <Overview />
-            </MemoryRouter>
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(true);
       });
     });
   });

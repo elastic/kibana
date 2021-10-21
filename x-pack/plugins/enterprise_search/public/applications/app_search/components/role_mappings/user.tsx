@@ -69,6 +69,7 @@ export const User: React.FC = () => {
       username={singleUserRoleMapping.elasticsearchUser.username}
       email={singleUserRoleMapping.elasticsearchUser.email as string}
       roleType={singleUserRoleMapping.roleMapping.roleType}
+      showKibanaAccessWarning={!singleUserRoleMapping.hasEnterpriseSearchRole}
     />
   );
 

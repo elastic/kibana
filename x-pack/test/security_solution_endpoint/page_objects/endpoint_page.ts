@@ -35,6 +35,20 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
       });
     },
 
+    async waitForTableToHaveNumberOfEntries(
+      dataTestSubj: string,
+      numberOfEntries = 1,
+      timeout = 2000
+    ) {
+      await retry.waitForWithTimeout('table to have data', timeout, async () => {
+        const tableData = await pageObjects.endpointPageUtils.tableData(dataTestSubj);
+        if (tableData[1][0] === 'No items found' || tableData.length < numberOfEntries + 1) {
+          return false;
+        }
+        return true;
+      });
+    },
+
     async waitForTableToNotHaveData(dataTestSubj: string) {
       await retry.waitForWithTimeout('table to not have data', 2000, async () => {
         const tableData = await pageObjects.endpointPageUtils.tableData(dataTestSubj);

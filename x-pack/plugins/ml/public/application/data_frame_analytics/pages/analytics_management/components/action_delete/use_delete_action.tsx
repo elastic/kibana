@@ -8,9 +8,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-
-import { IIndexPattern } from 'src/plugins/data/common';
-
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -48,8 +45,9 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { savedObjects } = useMlKibana().services;
-  const savedObjectsClient = savedObjects.client;
+  const {
+    data: { dataViews },
+  } = useMlKibana().services;
 
   const indexName = item?.config.dest.index ?? '';
 
@@ -57,17 +55,8 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   const checkIndexPatternExists = async () => {
     try {
-      const response = await savedObjectsClient.find<IIndexPattern>({
-        type: 'index-pattern',
-        perPage: 10,
-        search: `"${indexName}"`,
-        searchFields: ['title'],
-        fields: ['title'],
-      });
-      const ip = response.savedObjects.find(
-        (obj) => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
-      );
-      if (ip !== undefined) {
+      const dv = (await dataViews.find(indexName)).find(({ title }) => title === indexName);
+      if (dv !== undefined) {
         setIndexPatternExists(true);
       } else {
         setIndexPatternExists(false);
@@ -79,19 +68,18 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
       toastNotificationService.displayDangerToast(
         i18n.translate(
-          'xpack.ml.dataframe.analyticsList.errorWithCheckingIfIndexPatternExistsNotificationErrorMessage',
+          'xpack.ml.dataframe.analyticsList.errorWithCheckingIfDataViewExistsNotificationErrorMessage',
           {
-            defaultMessage:
-              'An error occurred checking if index pattern {indexPattern} exists: {error}',
-            values: { indexPattern: indexName, error },
+            defaultMessage: 'An error occurred checking if data view {dataView} exists: {error}',
+            values: { dataView: indexName, error },
           }
         )
       );
     }
   };
-  const checkUserIndexPermission = () => {
+  const checkUserIndexPermission = async () => {
     try {
-      const userCanDelete = canDeleteIndex(indexName, toastNotificationService);
+      const userCanDelete = await canDeleteIndex(indexName, toastNotificationService);
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
       }
@@ -114,10 +102,10 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   useEffect(() => {
     setIsLoading(true);
-    // Check if an index pattern exists corresponding to current DFA job
-    // if pattern does exist, show it to user
+    // Check if a data view exists corresponding to current DFA job
+    // if data view does exist, show it to user
     checkIndexPatternExists();
-    // Check if an user has permission to delete the index & index pattern
+    // Check if an user has permission to delete the index & data view
     checkUserIndexPermission();
   }, [isModalVisible]);
 

@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
             securitySolutionCases: ['all', 'read'],
             infrastructure: ['all', 'read'],
             logs: ['all', 'read'],
-            apm: ['all', 'read', 'minimal_all', 'minimal_read', 'alerts_all', 'alerts_read'],
+            apm: ['all', 'read'],
             discover: [
               'all',
               'read',
@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
               'packs_read',
             ],
           },
-          reserved: ['ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+          reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
         };
 
         await supertest

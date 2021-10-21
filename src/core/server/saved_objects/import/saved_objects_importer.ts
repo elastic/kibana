@@ -81,7 +81,7 @@ export class SavedObjectsImporter {
 
   /**
    * Resolve and return saved object import errors.
-   * See the {@link SavedObjectsResolveImportErrorsOptions | options} for more detailed informations.
+   * See the {@link SavedObjectsResolveImportErrorsOptions | options} for more detailed information.
    *
    * @throws SavedObjectsImportError
    */

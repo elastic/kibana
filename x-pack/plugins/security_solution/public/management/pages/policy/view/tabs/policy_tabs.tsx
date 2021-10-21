@@ -12,8 +12,8 @@ import { EuiTabbedContent, EuiSpacer, EuiTabbedContentTab } from '@elastic/eui';
 
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import {
-  isOnPolicyFormPage,
-  isOnPolicyTrustedAppsPage,
+  isOnPolicyFormView,
+  isOnPolicyTrustedAppsView,
   policyIdFromParams,
 } from '../../store/policy_details/selectors';
 
@@ -23,8 +23,8 @@ import { getPolicyDetailPath, getPolicyTrustedAppsPath } from '../../../../commo
 
 export const PolicyTabs = React.memo(() => {
   const history = useHistory();
-  const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormPage);
-  const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsPage);
+  const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormView);
+  const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
 
   const tabs = useMemo(
@@ -57,15 +57,17 @@ export const PolicyTabs = React.memo(() => {
     []
   );
 
-  const getInitialSelectedTab = () => {
+  const currentSelectedTab = useMemo(() => {
     let initialTab = tabs[0];
 
-    if (isInSettingsTab) initialTab = tabs[0];
-    else if (isInTrustedAppsTab) initialTab = tabs[1];
-    else initialTab = tabs[0];
+    if (isInSettingsTab) {
+      initialTab = tabs[0];
+    } else if (isInTrustedAppsTab) {
+      initialTab = tabs[1];
+    }
 
     return initialTab;
-  };
+  }, [isInSettingsTab, isInTrustedAppsTab, tabs]);
 
   const onTabClickHandler = useCallback(
     (selectedTab: EuiTabbedContentTab) => {
@@ -81,8 +83,7 @@ export const PolicyTabs = React.memo(() => {
   return (
     <EuiTabbedContent
       tabs={tabs}
-      initialSelectedTab={getInitialSelectedTab()}
-      autoFocus="selected"
+      selectedTab={currentSelectedTab}
       size="l"
       onTabClick={onTabClickHandler}
     />

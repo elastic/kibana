@@ -20,7 +20,7 @@ import { createApmServerRouteRepository } from './create_apm_server_route_reposi
 import { environmentRt, rangeRt } from './default_api_types';
 
 const serviceMapRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/service-map',
+  endpoint: 'GET /internal/apm/service-map',
   params: t.type({
     query: t.intersection([
       t.partial({
@@ -33,7 +33,7 @@ const serviceMapRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const { config, context, params, logger } = resources;
-    if (!config['xpack.apm.serviceMapEnabled']) {
+    if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
     if (!isActivePlatinumLicense(context.licensing.license)) {
@@ -70,7 +70,7 @@ const serviceMapRoute = createApmServerRoute({
 });
 
 const serviceMapServiceNodeRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/service-map/service/{serviceName}',
+  endpoint: 'GET /internal/apm/service-map/service/{serviceName}',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -81,7 +81,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
   handler: async (resources) => {
     const { config, context, params } = resources;
 
-    if (!config['xpack.apm.serviceMapEnabled']) {
+    if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
     if (!isActivePlatinumLicense(context.licensing.license)) {
@@ -114,7 +114,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 });
 
 const serviceMapBackendNodeRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/service-map/backend/{backendName}',
+  endpoint: 'GET /internal/apm/service-map/backend/{backendName}',
   params: t.type({
     path: t.type({
       backendName: t.string,
@@ -125,7 +125,7 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
   handler: async (resources) => {
     const { config, context, params } = resources;
 
-    if (!config['xpack.apm.serviceMapEnabled']) {
+    if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
     if (!isActivePlatinumLicense(context.licensing.license)) {

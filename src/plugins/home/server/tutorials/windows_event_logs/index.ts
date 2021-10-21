@@ -56,5 +56,6 @@ export function windowsEventLogsSpecProvider(context: TutorialContext): Tutorial
     onPrem: onPremInstructions(context),
     elasticCloud: cloudInstructions(),
     onPremElasticCloud: onPremCloudInstructions(),
+    integrationBrowserCategories: ['os_system', 'security'],
   };
 }

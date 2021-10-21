@@ -63,8 +63,7 @@ export async function getSearchAggregatedTransactions({
   apmEventClient: APMEventClient;
   kuery: string;
 }): Promise<boolean> {
-  const searchAggregatedTransactions =
-    config['xpack.apm.searchAggregatedTransactions'];
+  const searchAggregatedTransactions = config.searchAggregatedTransactions;
 
   if (
     kuery ||

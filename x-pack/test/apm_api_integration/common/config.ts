@@ -15,6 +15,7 @@ import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
 import { registry } from './registry';
+import { traceData } from './trace_data';
 
 interface Config {
   name: APMFtrConfigName;
@@ -76,7 +77,7 @@ export function createTestConfig(config: Config) {
       servers,
       services: {
         ...services,
-
+        traceData,
         apmApiClient: async (context: InheritedFtrProviderContext) => {
           const security = context.getService('security');
           await security.init();

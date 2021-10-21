@@ -7,12 +7,10 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from 'kibana/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
+import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
 
 import {
@@ -39,41 +37,34 @@ import { Error, Loading, SettingFlyout } from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
-import { DefaultLayout, WithoutHeaderLayout } from './layouts';
+import { DefaultLayout } from './layouts';
 import { PackageInstallProvider } from './hooks';
 import { useBreadcrumbs, UIExtensionsContext } from './hooks';
+import { IntegrationsHeader } from './components/header';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>
-    <DefaultLayout>
-      <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
-    </DefaultLayout>
+    <DefaultLayout>{children}</DefaultLayout>
   </EuiErrorBoundary>
 );
-
-const Panel = styled(EuiPanel)`
-  max-width: 500px;
-  margin-right: auto;
-  margin-left: auto;
-`;
 
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('integrations');
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
-  const [permissionsError, setPermissionsError] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
   const [initializationError, setInitializationError] = useState<Error | null>(null);
 
   useEffect(() => {
     (async () => {
-      setPermissionsError(undefined);
       setIsInitialized(false);
       setInitializationError(null);
       try {
+        // Attempt Fleet Setup if user has permissions, otherwise skip
         setIsPermissionsLoading(true);
         const permissionsResponse = await sendGetPermissionsCheck();
         setIsPermissionsLoading(false);
+
         if (permissionsResponse.data?.success) {
           try {
             const setupResponse = await sendSetup();
@@ -85,69 +76,20 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
           }
           setIsInitialized(true);
         } else {
-          setPermissionsError(permissionsResponse.data?.error || 'REQUEST_ERROR');
+          setIsInitialized(true);
         }
-      } catch (err) {
-        setPermissionsError('REQUEST_ERROR');
+      } catch {
+        // If there's an error checking permissions, default to proceeding without running setup
+        // User will only have access to EPM endpoints if they actually have permission
+        setIsInitialized(true);
       }
     })();
   }, []);
 
-  if (isPermissionsLoading || permissionsError) {
+  if (isPermissionsLoading) {
     return (
       <ErrorLayout>
-        {isPermissionsLoading ? (
-          <Loading />
-        ) : permissionsError === 'REQUEST_ERROR' ? (
-          <Error
-            title={
-              <FormattedMessage
-                id="xpack.fleet.permissionsRequestErrorMessageTitle"
-                defaultMessage="Unable to check permissions"
-              />
-            }
-            error={i18n.translate('xpack.fleet.permissionsRequestErrorMessageDescription', {
-              defaultMessage: 'There was a problem checking Fleet permissions',
-            })}
-          />
-        ) : (
-          <Panel>
-            <EuiEmptyPrompt
-              iconType="securityApp"
-              title={
-                <h2>
-                  {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
-                    <FormattedMessage
-                      id="xpack.fleet.permissionDeniedErrorTitle"
-                      defaultMessage="Permission denied"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.securityRequiredErrorTitle"
-                      defaultMessage="Security is not enabled"
-                    />
-                  )}
-                </h2>
-              }
-              body={
-                <p>
-                  {permissionsError === 'MISSING_SUPERUSER_ROLE' ? (
-                    <FormattedMessage
-                      id="xpack.fleet.integrationsPermissionDeniedErrorMessage"
-                      defaultMessage="You are not authorized to access Integrations. Integrations requires {roleName} privileges."
-                      values={{ roleName: <EuiCode>superuser</EuiCode> }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.integrationsSecurityRequiredErrorMessage"
-                      defaultMessage="You must enable security in Kibana and Elasticsearch to use Integrations."
-                    />
-                  )}
-                </p>
-              }
-            />
-          </Panel>
-        )}
+        <Loading />
       </ErrorLayout>
     );
   }
@@ -186,39 +128,53 @@ export const IntegrationsAppContext: React.FC<{
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   /** For testing purposes only */
   routerHistory?: History<any>; // TODO remove
-}> = memo(({ children, startServices, config, history, kibanaVersion, extensions }) => {
-  const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+}> = memo(
+  ({
+    children,
+    startServices,
+    config,
+    history,
+    kibanaVersion,
+    extensions,
+    setHeaderActionMenu,
+  }) => {
+    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
-  return (
-    <RedirectAppLinks application={startServices.application}>
-      <startServices.i18n.Context>
-        <KibanaContextProvider services={{ ...startServices }}>
-          <EuiErrorBoundary>
-            <ConfigContext.Provider value={config}>
-              <KibanaVersionContext.Provider value={kibanaVersion}>
-                <EuiThemeProvider darkMode={isDarkMode}>
-                  <UIExtensionsContext.Provider value={extensions}>
-                    <FleetStatusProvider>
-                      <Router history={history}>
-                        <AgentPolicyContextProvider>
-                          <PackageInstallProvider notifications={startServices.notifications}>
-                            {children}
-                          </PackageInstallProvider>
-                        </AgentPolicyContextProvider>
-                      </Router>
-                    </FleetStatusProvider>
-                  </UIExtensionsContext.Provider>
-                </EuiThemeProvider>
-              </KibanaVersionContext.Provider>
-            </ConfigContext.Provider>
-          </EuiErrorBoundary>
-        </KibanaContextProvider>
-      </startServices.i18n.Context>
-    </RedirectAppLinks>
-  );
-});
+    return (
+      <RedirectAppLinks application={startServices.application}>
+        <startServices.i18n.Context>
+          <KibanaContextProvider services={{ ...startServices }}>
+            <EuiErrorBoundary>
+              <ConfigContext.Provider value={config}>
+                <KibanaVersionContext.Provider value={kibanaVersion}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <UIExtensionsContext.Provider value={extensions}>
+                      <FleetStatusProvider>
+                        <startServices.customIntegrations.ContextProvider>
+                          <Router history={history}>
+                            <AgentPolicyContextProvider>
+                              <PackageInstallProvider notifications={startServices.notifications}>
+                                <IntegrationsHeader {...{ setHeaderActionMenu }} />
+                                {children}
+                              </PackageInstallProvider>
+                            </AgentPolicyContextProvider>
+                          </Router>
+                        </startServices.customIntegrations.ContextProvider>
+                      </FleetStatusProvider>
+                    </UIExtensionsContext.Provider>
+                  </EuiThemeProvider>
+                </KibanaVersionContext.Provider>
+              </ConfigContext.Provider>
+            </EuiErrorBoundary>
+          </KibanaContextProvider>
+        </startServices.i18n.Context>
+      </RedirectAppLinks>
+    );
+  }
+);
 
 export const AppRoutes = memo(() => {
   const { modal, setModal } = useUrlModal();

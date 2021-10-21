@@ -33,11 +33,11 @@ import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { InstanceActionsMenu } from './instance_actions_menu';
 
 type ServiceInstanceMainStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem =
   ServiceInstanceMainStatistics['currentPeriod'][0];
 type ServiceInstanceDetailedStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 export function getColumns({
   serviceName,

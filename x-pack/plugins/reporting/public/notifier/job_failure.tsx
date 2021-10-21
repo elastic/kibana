@@ -35,6 +35,7 @@ export const getFailureToast = (
           })}
           color="danger"
           iconType="alert"
+          data-test-errorText={errorText}
         >
           {errorText}
         </EuiCallOut>

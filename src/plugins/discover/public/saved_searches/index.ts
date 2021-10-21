@@ -6,5 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { createSavedSearchesLoader } from './saved_searches';
-export { SavedSearch, SavedSearchLoader } from './types';
+export { getSavedSearch } from './get_saved_searches';
+export {
+  getSavedSearchUrl,
+  getSavedSearchFullPathUrl,
+  getSavedSearchUrlConflictMessage,
+  throwErrorOnSavedSearchUrlConflict,
+} from './saved_searches_utils';
+export { useSavedSearchAliasMatchRedirect } from './saved_search_alias_match_redirect';
+export { SavedSearchURLConflictCallout } from './saved_search_url_conflict_callout';
+export { saveSavedSearch, SaveSavedSearchOptions } from './save_saved_searches';
+export { SAVED_SEARCH_TYPE } from './constants';
+export type { SavedSearch, SortOrder } from './types';

@@ -9,32 +9,30 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiLoadingContent, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { LeafIcon } from '../../../../../shared/icons';
 
 import { DataPanel } from '../../../data_panel';
 import { Result } from '../../../result/types';
 
-import {
-  RESULT_ACTIONS_DIRECTIONS,
-  PROMOTE_DOCUMENT_ACTION,
-  HIDE_DOCUMENT_ACTION,
-} from '../../constants';
+import { PROMOTE_DOCUMENT_ACTION, HIDE_DOCUMENT_ACTION } from '../../constants';
 import { CurationLogic } from '../curation_logic';
 import { CurationResult } from '../results';
 
 export const OrganicDocuments: React.FC = () => {
   const { addPromotedId, addHiddenId } = useActions(CurationLogic);
-  const { curation, activeQuery, organicDocumentsLoading } = useValues(CurationLogic);
+  const { curation, activeQuery, isAutomated, organicDocumentsLoading } = useValues(CurationLogic);
 
-  const documents = curation.organic;
+  const documents = curation.organic || [];
   const hasDocuments = documents.length > 0 && !organicDocumentsLoading;
   const currentQuery = activeQuery;
 
   return (
     <DataPanel
-      filled
-      iconType="search"
+      iconType={LeafIcon}
       title={
         <h2>
           {i18n.translate(
@@ -46,36 +44,53 @@ export const OrganicDocuments: React.FC = () => {
           )}
         </h2>
       }
-      subtitle={RESULT_ACTIONS_DIRECTIONS}
     >
       {hasDocuments ? (
-        documents.map((document: Result) => (
-          <CurationResult
-            result={document}
-            key={document.id.raw}
-            actions={[
-              {
-                ...HIDE_DOCUMENT_ACTION,
-                onClick: () => addHiddenId(document.id.raw),
-              },
-              {
-                ...PROMOTE_DOCUMENT_ACTION,
-                onClick: () => addPromotedId(document.id.raw),
-              },
-            ]}
-          />
-        ))
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {documents.map((document: Result, index) => (
+            <EuiFlexItem key={index}>
+              <CurationResult
+                result={document}
+                index={index}
+                actions={
+                  isAutomated
+                    ? []
+                    : [
+                        {
+                          ...HIDE_DOCUMENT_ACTION,
+                          onClick: () => addHiddenId(document.id.raw),
+                        },
+                        {
+                          ...PROMOTE_DOCUMENT_ACTION,
+                          onClick: () => addPromotedId(document.id.raw),
+                        },
+                      ]
+                }
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       ) : organicDocumentsLoading ? (
         <EuiLoadingContent lines={5} />
       ) : (
         <EuiEmptyPrompt
-          body={i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.emptyDescription',
-            {
-              defaultMessage:
-                'No organic results to display. Add or change the active query above.',
-            }
-          )}
+          body={
+            <FormattedMessage
+              id="xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.description"
+              defaultMessage="No organic results to display.{manualDescription}"
+              values={{
+                manualDescription: !isAutomated && (
+                  <>
+                    {' '}
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.manualDescription"
+                      defaultMessage="Add or change the active query above."
+                    />
+                  </>
+                ),
+              }}
+            />
+          }
         />
       )}
     </DataPanel>

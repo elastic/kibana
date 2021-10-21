@@ -14,7 +14,7 @@ import { rangeRt, kueryRt } from './default_api_types';
 import { environmentRt } from '../../common/environment_rt';
 
 const serviceNodesRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/serviceNodes',
+  endpoint: 'GET /internal/apm/services/{serviceName}/serviceNodes',
   params: t.type({
     path: t.type({
       serviceName: t.string,
