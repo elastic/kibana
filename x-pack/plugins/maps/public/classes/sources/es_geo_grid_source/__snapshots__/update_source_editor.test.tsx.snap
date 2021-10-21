@@ -20,7 +20,7 @@ exports[`source editor geo_grid_source default vector layer config should allow 
     <MetricsEditor
       allowMultipleMetrics={true}
       fields={Array []}
-      key="1c4df149-224d-415a-a859-d3c4cdee1d19"
+      key="12345"
       metrics={Array []}
       onChange={[Function]}
     />
@@ -81,7 +81,7 @@ exports[`source editor geo_grid_source should put limitations based on heatmap-r
     <MetricsEditor
       allowMultipleMetrics={false}
       fields={Array []}
-      key="7da47982-cf76-4bdd-9e79-e5fda412bc5e"
+      key="12345"
       metrics={Array []}
       metricsFilter={[Function]}
       onChange={[Function]}
