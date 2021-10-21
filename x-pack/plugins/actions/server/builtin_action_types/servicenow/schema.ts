@@ -14,7 +14,7 @@ export const ExternalIncidentServiceConfigurationBase = {
 
 export const ExternalIncidentServiceConfiguration = {
   ...ExternalIncidentServiceConfigurationBase,
-  isLegacy: schema.boolean({ defaultValue: false }),
+  isLegacy: schema.boolean({ defaultValue: true }),
 };
 
 export const ExternalIncidentServiceConfigurationBaseSchema = schema.object(
