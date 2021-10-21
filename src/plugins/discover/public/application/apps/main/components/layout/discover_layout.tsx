@@ -8,6 +8,7 @@
 import './discover_layout.scss';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiSpacer,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +17,6 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';

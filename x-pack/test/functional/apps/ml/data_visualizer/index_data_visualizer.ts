@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
-  farequoteIndexPatternTestData,
+  farequoteDataViewTestData,
   farequoteKQLSearchTestData,
   farequoteLuceneSearchTestData,
   sampleLogTestData,
@@ -157,13 +157,13 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('with farequote', function () {
       // Run tests on full farequote index.
-      it(`${farequoteIndexPatternTestData.suiteTitle} loads the data visualizer selector page`, async () => {
+      it(`${farequoteDataViewTestData.suiteTitle} loads the data visualizer selector page`, async () => {
         // Start navigation from the base of the ML app.
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToDataVisualizer();
       });
 
-      runTests(farequoteIndexPatternTestData);
+      runTests(farequoteDataViewTestData);
 
       // Run tests on farequote KQL saved search.
       it(`${farequoteKQLSearchTestData.suiteTitle} loads the data visualizer selector page`, async () => {

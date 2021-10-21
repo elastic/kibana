@@ -22,7 +22,6 @@ import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from 
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
-import { DATA_VISUALIZER_APP_LOCATOR } from './application/index_data_visualizer/locator';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -66,22 +65,6 @@ export class DataVisualizerPlugin
 
   public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {
     setStartServices(core, plugins);
-    if (plugins.data) {
-      plugins.data.search.session.enableStorage({
-        getName: async () => {
-          // return the name you want to give the saved Search Session
-          return `dataVisualizer_${Math.random()}`;
-        },
-        getUrlGeneratorData: async () => {
-          return {
-            urlGeneratorId: DATA_VISUALIZER_APP_LOCATOR,
-            initialState: { shouldRestoreSearchSession: false },
-            restoreState: { shouldRestoreSearchSession: true },
-          };
-        },
-      });
-    }
-
     return {
       getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,

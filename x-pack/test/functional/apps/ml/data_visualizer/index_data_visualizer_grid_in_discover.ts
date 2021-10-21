@@ -11,7 +11,7 @@ import { TestData, MetricFieldVisConfig } from './types';
 
 const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 import {
-  farequoteIndexPatternTestData,
+  farequoteDataViewTestData,
   farequoteKQLSearchTestData,
   farequoteLuceneFiltersSearchTestData,
   farequoteKQLFiltersSearchTestData,
@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clearAdvancedSetting(SHOW_FIELD_STATISTICS);
       });
 
-      runTests(farequoteIndexPatternTestData);
+      runTests(farequoteDataViewTestData);
       runTests(farequoteKQLSearchTestData);
       runTests(farequoteLuceneSearchTestData);
       runTests(farequoteKQLFiltersSearchTestData);
@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await setAdvancedSettingCheckbox(SHOW_FIELD_STATISTICS, false);
       });
 
-      runTestsWhenDisabled(farequoteIndexPatternTestData);
+      runTestsWhenDisabled(farequoteDataViewTestData);
     });
   });
 }
