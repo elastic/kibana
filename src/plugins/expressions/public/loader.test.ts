@@ -88,8 +88,8 @@ jest.mock('./services', () => {
 });
 
 describe('execute helper function', () => {
-  it('returns ExpressionLoader instance', () => {
-    const response = loader(element, '', {});
+  it('returns ExpressionLoader instance', async () => {
+    const response = await loader(element, '', {});
     expect(response).toBeInstanceOf(ExpressionLoader);
   });
 });
