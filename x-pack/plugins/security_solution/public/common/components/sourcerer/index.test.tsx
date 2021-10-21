@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiToolTip } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from './index';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
