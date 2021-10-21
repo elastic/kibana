@@ -762,7 +762,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       });
     } else if (this._descriptor.scalingType === SCALING_TYPES.MVT) {
       reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReasonMvt', {
-        defaultMessage: 'Joins are not supported when scaling by mvt vector tiles',
+        defaultMessage: 'Joins are not supported when scaling by vector tiles',
       });
     } else {
       reason = null;

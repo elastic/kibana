@@ -124,7 +124,7 @@ export class ResolutionEditor extends Component<Props, State> {
         <p>
           <FormattedMessage
             id="xpack.maps.source.esGrid.vectorTileModal.message"
-            defaultMessage="Super fine grid resolution uses Elasticsearch vector tile API. Elasticsearch vector tile API does not support 'Top terms' metric. Switching to super fine grid resolution will remove all 'Top terms' metrics from your layer configuration."
+            defaultMessage="Super fine grid resolution uses vector tiles from the Elasticsearch vector tile API. Elasticsearch vector tile API does not support 'Top terms' metric. Switching to super fine grid resolution will remove all 'Top terms' metrics from your layer configuration."
           />
         </p>
       </EuiConfirmModal>
@@ -135,7 +135,7 @@ export class ResolutionEditor extends Component<Props, State> {
     const helpText =
       this.props.resolution === GRID_RESOLUTION.SUPER_FINE
         ? i18n.translate('xpack.maps.source.esGrid.superFineHelpText', {
-            defaultMessage: 'Super fine grid resolution uses Elasticsearch vector tile API.',
+            defaultMessage: 'Super fine grid resolution uses vector tiles.',
           })
         : undefined;
     return (
