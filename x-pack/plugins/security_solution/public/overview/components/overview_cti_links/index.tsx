@@ -15,27 +15,27 @@ export type ThreatIntelLinkPanelProps = Pick<
   GlobalTimeArgs,
   'from' | 'to' | 'deleteQuery' | 'setQuery'
 > & {
-  isThreatIntelModuleEnabled: boolean | undefined;
+  hasSomeThreatIntelData: boolean | undefined;
+  someIntegrationsInstalled: boolean | undefined;
+  someIntegrationIsDisabled: boolean | undefined;
 };
 
 const ThreatIntelLinkPanelComponent: React.FC<ThreatIntelLinkPanelProps> = (props) => {
-  switch (props.isThreatIntelModuleEnabled) {
-    case true:
-      return (
-        <div data-test-subj="cti-enabled-module">
-          <CtiEnabledModule {...props} />
-        </div>
-      );
-    case false:
-      return (
-        <div data-test-subj="cti-disabled-module">
-          <CtiDisabledModule />
-        </div>
-      );
-    case undefined:
-    default:
-      return null;
+  const { hasSomeThreatIntelData, someIntegrationsInstalled } = props;
+  if (hasSomeThreatIntelData === undefined || someIntegrationsInstalled === undefined) {
+    return null;
   }
+
+  const isThreatIntelModuleEnabled = hasSomeThreatIntelData || someIntegrationsInstalled;
+  return isThreatIntelModuleEnabled ? (
+    <div data-test-subj="cti-enabled-module">
+      <CtiEnabledModule {...props} />
+    </div>
+  ) : (
+    <div data-test-subj="cti-disabled-module">
+      <CtiDisabledModule />
+    </div>
+  );
 };
 
 export const ThreatIntelLinkPanel = React.memo(ThreatIntelLinkPanelComponent);

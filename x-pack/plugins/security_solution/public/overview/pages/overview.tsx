@@ -33,6 +33,7 @@ import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
+import { useTIIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { RiskyHostLinks } from '../components/overview_risky_host_links';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -77,7 +78,8 @@ const OverviewComponent = () => {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
-  const isThreatIntelModuleEnabled = useIsThreatIntelModuleEnabled();
+  const hasSomeThreatIntelData = useIsThreatIntelModuleEnabled();
+  const { someIntegrationsInstalled, someIntegrationIsDisabled } = useTIIntegrations();
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
@@ -154,7 +156,9 @@ const OverviewComponent = () => {
                     <EuiFlexGroup direction="row">
                       <EuiFlexItem grow={1}>
                         <ThreatIntelLinkPanel
-                          isThreatIntelModuleEnabled={isThreatIntelModuleEnabled}
+                          hasSomeThreatIntelData={hasSomeThreatIntelData}
+                          someIntegrationsInstalled={someIntegrationsInstalled}
+                          someIntegrationIsDisabled={someIntegrationIsDisabled}
                           deleteQuery={deleteQuery}
                           from={from}
                           setQuery={setQuery}
