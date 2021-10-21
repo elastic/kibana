@@ -15,8 +15,10 @@ import { IIndexPattern } from 'src/plugins/data/public';
 
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
 
-// @ts-expect-error invalid lang type
-const items: ScriptedFieldItem[] = [{ name: '1', lang: 'Elastic', script: '' }];
+const items: ScriptedFieldItem[] = [
+  { name: '1', lang: 'painless', script: '', isUserEditable: true },
+  { name: '2', lang: 'painless', script: '', isUserEditable: false },
+];
 
 describe('Table', () => {
   let indexPattern: IIndexPattern;
@@ -92,5 +94,20 @@ describe('Table', () => {
     // Click the delete button
     component.prop('columns')[4].actions[1].onClick();
     expect(deleteField).toBeCalled();
+  });
+
+  test('should not allow edit or deletion for user with only read access', () => {
+    const component = shallow(
+      <Table
+        indexPattern={indexPattern}
+        items={items}
+        editField={() => {}}
+        deleteField={() => {}}
+      />
+    );
+    const editAvailable = component.prop('columns')[4].actions[0].available(items[1]);
+    const deleteAvailable = component.prop('columns')[4].actions[1].available(items[1]);
+    expect(editAvailable).toBeFalsy();
+    expect(deleteAvailable).toBeFalsy();
   });
 });
