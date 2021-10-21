@@ -15,9 +15,12 @@ import type { AlertWorkflowStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
+import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimefilterService } from '../../hooks/use_timefilter_service';
 import { callObservabilityApi } from '../../services/call_observability_api';
+import { getNoDataConfig } from '../../utils/no_data_config';
+import { LoadingObservability } from '../overview/loading_observability';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { Provider, alertsPageStateContainer, useAlertsPageStateContainer } from './state_container';
@@ -137,8 +140,25 @@ function AlertsPage() {
     refetch.current = ref;
   }, []);
 
+  const { hasAnyData, isAllRequestsComplete } = useHasData();
+
+  // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
+  const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
+
+  if (!hasAnyData && !isAllRequestsComplete) {
+    return <LoadingObservability />;
+  }
+
+  const noDataConfig = getNoDataConfig({
+    hasData,
+    basePath: core.http.basePath,
+    docsLink: core.docLinks.links.observability.guide,
+  });
+
   return (
     <ObservabilityPageTemplate
+      noDataConfig={noDataConfig}
+      data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       pageHeader={{
         pageTitle: (
           <>
