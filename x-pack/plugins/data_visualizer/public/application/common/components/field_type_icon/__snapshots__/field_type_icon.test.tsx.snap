@@ -10,7 +10,7 @@ exports[`FieldTypeIcon render component when type matches a field type 1`] = `
 >
   <FieldTypeIconContainer
     ariaLabel="keyword type"
-    iconType="tokenTag"
+    iconType="tokenKeyword"
     needsAria={false}
   />
 </EuiToolTip>
