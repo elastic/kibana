@@ -218,7 +218,7 @@ async function installPipeline({
   if (pipeline.extension === 'yml') {
     esClientRequestOptions.headers = {
       // pipeline is YAML
-      'Content-Type': 'application/yaml',
+      'Content-Type': 'application/yaml; compatible-with=8',
       // but we want JSON responses (to extract error messages, status code, or other metadata)
       Accept: 'application/json',
     };
