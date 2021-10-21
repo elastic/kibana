@@ -60,7 +60,11 @@ Object {
         aggregations: {
           byAlertTypeId: {
             value: {
-              ruleTypes: { '.index-threshold': 2, 'logs.alert.document.count': 1, 'document.test.': 1 },
+              ruleTypes: {
+                '.index-threshold': 2,
+                'logs.alert.document.count': 1,
+                'document.test.': 1,
+              },
             },
           },
           throttleTime: { value: { min: 0, max: 10, totalCount: 20, totalSum: 40 } },

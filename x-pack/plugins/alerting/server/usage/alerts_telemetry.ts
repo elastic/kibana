@@ -52,138 +52,6 @@ export async function getTotalCountAggregations(
     | 'count_rules_namespaces'
   >
 > {
-  const throttleTimeMetric = {
-    scripted_metric: {
-      init_script: 'state.min = 0; state.max = 0; state.totalSum = 0; state.totalCount = 0;',
-      map_script: `
-        if (doc['alert.throttle'].size() > 0) {
-          def throttle = doc['alert.throttle'].value;
-
-          if (throttle.length() > 1) {
-              // get last char
-              String timeChar = throttle.substring(throttle.length() - 1);
-              // remove last char
-              throttle = throttle.substring(0, throttle.length() - 1);
-
-              if (throttle.chars().allMatch(Character::isDigit)) {
-                // using of regex is not allowed in painless language
-                int parsed = Integer.parseInt(throttle);
-
-                if (timeChar.equals("s")) {
-                  parsed = parsed;
-                } else if (timeChar.equals("m")) {
-                  parsed = parsed * 60;
-                } else if (timeChar.equals("h")) {
-                  parsed = parsed * 60 * 60;
-                } else if (timeChar.equals("d")) {
-                  parsed = parsed * 24 * 60 * 60;
-                }
-                if (state.min === 0 || parsed < state.min) {
-                  state.min = parsed;
-                }
-                if (parsed > state.max) {
-                  state.max = parsed;
-                }
-                state.totalSum += parsed;
-                state.totalCount++;
-              }
-          }
-        }
-      `,
-      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
-      // Despite docs that say this is optional, this script can't be blank.
-      combine_script: 'return state',
-      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
-      // This also needs to account for having no data
-      reduce_script: `
-        double min = 0;
-        double max = 0;
-        long totalSum = 0;
-        long totalCount = 0;
-        for (Map m : states.toArray()) {
-          if (m !== null) {
-            min = min > 0 ? Math.min(min, m.min) : m.min;
-            max = Math.max(max, m.max);
-            totalSum += m.totalSum;
-            totalCount += m.totalCount;
-          }
-        }
-        Map result = new HashMap();
-        result.min = min;
-        result.max = max;
-        result.totalSum = totalSum;
-        result.totalCount = totalCount;
-        return result;
-      `,
-    },
-  };
-
-  const intervalTimeMetric = {
-    scripted_metric: {
-      init_script: 'state.min = 0; state.max = 0; state.totalSum = 0; state.totalCount = 0;',
-      map_script: `
-        if (doc['alert.schedule.interval'].size() > 0) {
-          def interval = doc['alert.schedule.interval'].value;
-
-          if (interval.length() > 1) {
-              // get last char
-              String timeChar = interval.substring(interval.length() - 1);
-              // remove last char
-              interval = interval.substring(0, interval.length() - 1);
-
-              if (interval.chars().allMatch(Character::isDigit)) {
-                // using of regex is not allowed in painless language
-                int parsed = Integer.parseInt(interval);
-
-                if (timeChar.equals("s")) {
-                  parsed = parsed;
-                } else if (timeChar.equals("m")) {
-                  parsed = parsed * 60;
-                } else if (timeChar.equals("h")) {
-                  parsed = parsed * 60 * 60;
-                } else if (timeChar.equals("d")) {
-                  parsed = parsed * 24 * 60 * 60;
-                }
-                if (state.min === 0 || parsed < state.min) {
-                  state.min = parsed;
-                }
-                if (parsed > state.max) {
-                  state.max = parsed;
-                }
-                state.totalSum += parsed;
-                state.totalCount++;
-              }
-          }
-        }
-      `,
-      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
-      // Despite docs that say this is optional, this script can't be blank.
-      combine_script: 'return state',
-      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
-      // This also needs to account for having no data
-      reduce_script: `
-        double min = 0;
-        double max = 0;
-        long totalSum = 0;
-        long totalCount = 0;
-        for (Map m : states.toArray()) {
-          if (m !== null) {
-            min = min > 0 ? Math.min(min, m.min) : m.min;
-            max = Math.max(max, m.max);
-            totalSum += m.totalSum;
-            totalCount += m.totalCount;
-          }
-        }
-        Map result = new HashMap();
-        result.min = min;
-        result.max = max;
-        result.totalSum = totalSum;
-        result.totalCount = totalCount;
-        return result;
-      `,
-    },
-  };
-
   const { body: results } = await esClient.search({
     index: kibanaInex,
     body: {
@@ -200,11 +68,85 @@ export async function getTotalCountAggregations(
               "def alert = params._source['alert']; if (alert != null) { def actions = alert.actions; if (actions != null) { emit(actions.length); } else { emit(0); }}",
           },
         },
+        alert_interval: {
+          type: 'long',
+          script: {
+            source: `
+              int parsed = 0;
+              if (doc['alert.schedule.interval'].size() > 0) {
+                def interval = doc['alert.schedule.interval'].value;
+
+                if (interval.length() > 1) {
+                    // get last char
+                    String timeChar = interval.substring(interval.length() - 1);
+                    // remove last char
+                    interval = interval.substring(0, interval.length() - 1);
+
+                    if (interval.chars().allMatch(Character::isDigit)) {
+                      // using of regex is not allowed in painless language
+                      parsed = Integer.parseInt(interval);
+
+                      if (timeChar.equals("s")) {
+                        parsed = parsed;
+                      } else if (timeChar.equals("m")) {
+                        parsed = parsed * 60;
+                      } else if (timeChar.equals("h")) {
+                        parsed = parsed * 60 * 60;
+                      } else if (timeChar.equals("d")) {
+                        parsed = parsed * 24 * 60 * 60;
+                      }
+                      emit(parsed);
+                    }
+                }
+              }
+              emit(parsed);
+            `,
+          },
+        },
+        alert_throttle: {
+          type: 'long',
+          script: {
+            source: `
+              int parsed = 0;
+              if (doc['alert.throttle'].size() > 0) {
+              def throttle = doc['alert.throttle'].value;
+
+              if (throttle.length() > 1) {
+                  // get last char
+                  String timeChar = throttle.substring(throttle.length() - 1);
+                  // remove last char
+                  throttle = throttle.substring(0, throttle.length() - 1);
+
+                  if (throttle.chars().allMatch(Character::isDigit)) {
+                    // using of regex is not allowed in painless language
+                    int parsed = Integer.parseInt(throttle);
+
+                    if (timeChar.equals("s")) {
+                      parsed = parsed;
+                    } else if (timeChar.equals("m")) {
+                      parsed = parsed * 60;
+                    } else if (timeChar.equals("h")) {
+                      parsed = parsed * 60 * 60;
+                    } else if (timeChar.equals("d")) {
+                      parsed = parsed * 24 * 60 * 60;
+                    }
+                    emit(parsed);
+                  }
+              }
+            }
+            emit(parsed);
+            `,
+          },
+        },
       },
       aggs: {
         byAlertTypeId: alertTypeMetric,
-        throttleTime: throttleTimeMetric,
-        intervalTime: intervalTimeMetric,
+        max_throttle_time: { max: { field: 'alert_throttle' } },
+        min_throttle_time: { min: { field: 'alert_throttle' } },
+        avg_throttle_time: { avg: { field: 'alert_throttle' } },
+        max_interval_time: { max: { field: 'alert_interval' } },
+        min_interval_time: { min: { field: 'alert_interval' } },
+        avg_interval_time: { avg: { field: 'alert_interval' } },
         max_actions_count: { max: { field: 'alert_action_count' } },
         min_actions_count: { min: { field: 'alert_action_count' } },
         avg_actions_count: { avg: { field: 'alert_action_count' } },
@@ -214,8 +156,12 @@ export async function getTotalCountAggregations(
 
   const aggregations = results.aggregations as {
     byAlertTypeId: { value: { ruleTypes: Record<string, string> } };
-    throttleTime: { value: { min: number; max: number; totalCount: number; totalSum: number } };
-    intervalTime: { value: { min: number; max: number; totalCount: number; totalSum: number } };
+    max_throttle_time: { value: number };
+    min_throttle_time: { value: number };
+    avg_throttle_time: { value: number };
+    max_interval_time: { value: number };
+    min_interval_time: { value: number };
+    avg_interval_time: { value: number };
     max_actions_count: { value: number };
     min_actions_count: { value: number };
     avg_actions_count: { value: number };
@@ -239,22 +185,14 @@ export async function getTotalCountAggregations(
       {}
     ),
     throttle_time: {
-      min: `${aggregations.throttleTime.value.min}s`,
-      avg: `${
-        aggregations.throttleTime.value.totalCount > 0
-          ? aggregations.throttleTime.value.totalSum / aggregations.throttleTime.value.totalCount
-          : 0
-      }s`,
-      max: `${aggregations.throttleTime.value.max}s`,
+      min: `${aggregations.min_throttle_time.value}s`,
+      avg: `${aggregations.avg_throttle_time.value}s`,
+      max: `${aggregations.max_throttle_time.value}s`,
     },
     schedule_time: {
-      min: `${aggregations.intervalTime.value.min}s`,
-      avg: `${
-        aggregations.intervalTime.value.totalCount > 0
-          ? aggregations.intervalTime.value.totalSum / aggregations.intervalTime.value.totalCount
-          : 0
-      }s`,
-      max: `${aggregations.intervalTime.value.max}s`,
+      min: `${aggregations.min_interval_time.value}s`,
+      avg: `${aggregations.avg_interval_time.value}s`,
+      max: `${aggregations.max_interval_time.value}s`,
     },
     connectors_per_alert: {
       min: aggregations.min_actions_count.value,
