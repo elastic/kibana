@@ -15,10 +15,8 @@ import { TRUNCATE_MAX_HEIGHT } from '../../../common';
 const TRUNCATE_GRADIENT_HEIGHT = 15;
 const globalThemeCache = createCache({ key: 'truncation' });
 
-export function injectTruncateStyles(uiSettings: IUiSettingsClient) {
-  const maxHeight = uiSettings.get(TRUNCATE_MAX_HEIGHT);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const truncateStyles: any = `
+const buildStylesheet = (maxHeight: number) => {
+  return `
     .truncate-by-height {
       overflow: hidden;
       max-height: ${maxHeight > 0 ? `${maxHeight}px !important` : 'none'};
@@ -30,10 +28,24 @@ export function injectTruncateStyles(uiSettings: IUiSettingsClient) {
       }px;
     }
   `;
+};
 
-  const serialized = serializeStyles(truncateStyles, cache.registered);
+const flushThemedGlobals = () => {
+  globalThemeCache.sheet.flush();
+  globalThemeCache.inserted = {};
+  globalThemeCache.registered = {};
+};
 
+export const injectTruncateStyles = (uiSettings: IUiSettingsClient) => {
+  const maxHeight = uiSettings.get(TRUNCATE_MAX_HEIGHT);
+  if (maxHeight === 0) {
+    flushThemedGlobals();
+    return;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const serialized = serializeStyles(buildStylesheet(maxHeight) as any, cache.registered);
   if (!globalThemeCache.inserted[serialized.name]) {
     globalThemeCache.insert('', serialized, globalThemeCache.sheet, true);
   }
-}
+};

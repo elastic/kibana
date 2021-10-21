@@ -44,6 +44,7 @@ import {
   setScopedHistory,
   getScopedHistory,
   syncHistoryLocations,
+  getServices,
 } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
@@ -340,6 +341,7 @@ export class DiscoverPlugin
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
+        injectTruncateStyles(getServices().uiSettings);
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
         const unlistenParentHistory = params.history.listen(() => {
@@ -408,8 +410,6 @@ export class DiscoverPlugin
 
     const services = buildServices(core, plugins, this.initializerContext);
     setServices(services);
-
-    injectTruncateStyles(services.uiSettings);
 
     return {
       urlGenerator: this.urlGenerator,
