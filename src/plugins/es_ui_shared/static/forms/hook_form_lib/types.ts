@@ -50,15 +50,15 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
    * all the fields to their initial values.
    */
   reset: (options?: { resetValues?: boolean; defaultValue?: Partial<T> }) => void;
-  readonly __options: Required<FormOptions>;
-  __getFormData$: () => Subject<FormData>;
-  __addField: (field: FieldHook) => void;
-  __removeField: (fieldNames: string | string[]) => void;
-  __validateFields: (
+  validateFields: (
     fieldNames: string[],
     /** Run only blocking validations */
     onlyBlocking?: boolean
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
+  readonly __options: Required<FormOptions>;
+  __getFormData$: () => Subject<FormData>;
+  __addField: (field: FieldHook) => void;
+  __removeField: (fieldNames: string | string[]) => void;
   __updateFormDataAt: (field: string, value: unknown) => void;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: (field: string) => FieldConfig;

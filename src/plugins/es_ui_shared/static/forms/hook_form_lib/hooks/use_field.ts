@@ -7,8 +7,6 @@
  */
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 
 import {
   FormHook,
@@ -33,9 +31,12 @@ export const useField = <T, FormType = FormData, I = T>(
   valueChangeListener?: (value: I) => void,
   errorChangeListener?: (errors: string[] | null) => void,
   {
-    customValidationData$,
     customValidationData = null,
-  }: { customValidationData$?: Observable<unknown>; customValidationData?: unknown } = {}
+    customValidationDataProvider,
+  }: {
+    customValidationData?: unknown;
+    customValidationDataProvider?: () => Promise<unknown>;
+  } = {}
 ) => {
   const {
     type = FIELD_TYPES.TEXT,
@@ -59,7 +60,7 @@ export const useField = <T, FormType = FormData, I = T>(
     __addField,
     __removeField,
     __updateFormDataAt,
-    __validateFields,
+    validateFields,
     __getFormData$,
   } = form;
 
@@ -147,7 +148,7 @@ export const useField = <T, FormType = FormData, I = T>(
     __updateFormDataAt(path, value);
 
     // Validate field(s) (this will update the form.isValid state)
-    await __validateFields(fieldsToValidateOnChange ?? [path]);
+    await validateFields(fieldsToValidateOnChange ?? [path]);
 
     if (isMounted.current === false) {
       return;
@@ -156,7 +157,7 @@ export const useField = <T, FormType = FormData, I = T>(
     /**
      * If we have set a delay to display the error message after the field value has changed,
      * we first check that this is the last "change iteration" (=== the last keystroke from the user)
-     * and then, we verify how long we've already waited for as form.__validateFields() is asynchronous
+     * and then, we verify how long we've already waited for as form.validateFields() is asynchronous
      * and might already have taken more than the specified delay)
      */
     if (changeIteration === changeCounter.current) {
@@ -181,7 +182,7 @@ export const useField = <T, FormType = FormData, I = T>(
     valueChangeDebounceTime,
     fieldsToValidateOnChange,
     __updateFormDataAt,
-    __validateFields,
+    validateFields,
   ]);
 
   // Cancel any inflight validation (e.g an HTTP Request)
@@ -238,11 +239,8 @@ export const useField = <T, FormType = FormData, I = T>(
         return false;
       };
 
-      let dataProvider: () => Promise<unknown> = () => Promise.resolve(null);
-
-      if (customValidationData$) {
-        dataProvider = () => customValidationData$.pipe(first()).toPromise();
-      }
+      const dataProvider: () => Promise<any> =
+        customValidationDataProvider ?? (() => Promise.resolve(undefined));
 
       const runAsync = async () => {
         const validationErrors: ValidationError[] = [];
@@ -355,7 +353,7 @@ export const useField = <T, FormType = FormData, I = T>(
       getFields,
       path,
       customValidationData,
-      customValidationData$,
+      customValidationDataProvider,
     ]
   );
 

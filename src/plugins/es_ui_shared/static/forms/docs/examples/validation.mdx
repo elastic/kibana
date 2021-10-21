@@ -334,7 +334,7 @@ const MyForm = () => {
 
 Great. Now let's imagine that you want to add a validation to the `indexName` field and mark it as invalid if it does not match at least one index in the cluster. For that you need to provide dynamic data (the list of indices fetched) which is not immediately accesible when the field value changes (and the validation kicks in). We need to ask the validation to **wait** until we have fetched the indices and then have access to the dynamic data.
 
-For that we will use the `validationData$` Observable that you can pass to the field. Whenever a value is sent to the observable (**after** the field value has changed, important!), it will be available in the validator through the `customData.provider()` handler.
+For that we will use the `validationDataProvider` prop that you can pass to the field. This data provider will be available in the validator through the `customData.provider()` handler.
 
 ```js
 // form.schema.ts
@@ -360,12 +360,21 @@ const schema = {
 const MyForm = () => {
   ...
   const [indices, setIndices] = useState([]);
-  const [indices$, nextIndices] = useAsyncValidationData(); // Use the provided hook to create the Observable
+  const [indices$, nextIndices] = useBehaviorSubject(null); // Use the provided util hook to create an observable
+
+  const indicesProvider = useCallback(() => {
+    // We wait until we get
+    return await indices$.pipe(first((data) => data !== null)).toPromise();
+  }, [indices$, nextIndices]);
 
   const fetchIndices = useCallback(async () => {
+    nextIndices(null);
+
     const result = await httpClient.get(`/api/search/${indexName}`);
     setIndices(result);
-    nextIndices(result); // Send the indices to your validator "provider()"
+
+    // Send the indices to the BehaviorSubject to resolve the validator "provider()"
+    nextIndices(result);
   }, [indexName]);
 
   // Whenever the indexName changes we fetch the indices
@@ -377,7 +386,7 @@ const MyForm = () => {
     <>
       <Form form={form}>
         /* Pass the Observable to your field */
-        <UseField path="indexName" validationData$={indices$} />
+        <UseField path="indexName" validationDataProvider={indicesProvider} />
       </Form>
 
       ...

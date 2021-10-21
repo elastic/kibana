@@ -158,7 +158,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     });
   }, [fieldsToArray]);
 
-  const validateFields: FormHook<T, I>['__validateFields'] = useCallback(
+  const validateFields: FormHook<T, I>['validateFields'] = useCallback(
     async (fieldNames, onlyBlocking = false) => {
       const fieldsToValidate = fieldNames
         .map((name) => fieldsRefs.current[name])
@@ -458,6 +458,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       getFormData,
       getErrors,
       reset,
+      validateFields,
       __options: formOptions,
       __getFormData$: getFormData$,
       __updateFormDataAt: updateFormDataAt,
@@ -467,7 +468,6 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       __addField: addField,
       __removeField: removeField,
       __getFieldsRemoved: getFieldsRemoved,
-      __validateFields: validateFields,
     };
   }, [
     isSubmitted,
