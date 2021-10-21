@@ -16,11 +16,11 @@ import {
   PresentationUtilPluginSetup,
   PresentationUtilPluginStart,
   GetControlEditorComponent,
-  OPTIONS_LIST_CONTROL,
-  CONTROL_GROUP_TYPE,
   IEditableControlFactory,
+  OPTIONS_LIST_CONTROL,
 } from './types';
 import { OptionsListEmbeddableFactory } from './components/controls/control_types/options_list';
+import { CONTROL_GROUP_TYPE } from '.';
 
 export class PresentationUtilPlugin
   implements
@@ -34,13 +34,18 @@ export class PresentationUtilPlugin
   private inlineEditors: { [key: string]: GetControlEditorComponent | undefined } = {};
 
   public setup(
-    _coreSetup: CoreSetup<PresentationUtilPluginSetup>,
+    _coreSetup: CoreSetup<PresentationUtilPluginStartDeps, PresentationUtilPluginStart>,
     _setupPlugins: PresentationUtilPluginSetupDeps
   ): PresentationUtilPluginSetup {
-    const { embeddable } = _setupPlugins;
+    _coreSetup.getStartServices().then(([coreStart, deps]) => {
+      // register control group embeddable factory
+      embeddable.registerEmbeddableFactory(
+        CONTROL_GROUP_TYPE,
+        new ControlGroupContainerFactory(deps.embeddable)
+      );
+    });
 
-    // register control group embeddable factory
-    embeddable.registerEmbeddableFactory(CONTROL_GROUP_TYPE, new ControlGroupContainerFactory());
+    const { embeddable } = _setupPlugins;
 
     // create control type embeddable factories.
     const optionsListFactory = new OptionsListEmbeddableFactory();

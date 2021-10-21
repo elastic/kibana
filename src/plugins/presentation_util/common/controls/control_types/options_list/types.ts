@@ -6,6 +6,15 @@
  * Side Public License, v 1.
  */
 
-export * from './utils';
-export * from './test_helpers';
-export * from '../controls';
+import { ControlInput } from '../../types';
+
+export const OPTIONS_LIST_CONTROL = 'optionsListControl';
+
+export interface OptionsListEmbeddableInput extends ControlInput {
+  fieldName: string;
+  dataViewId: string;
+
+  selectedOptions?: string[];
+  singleSelect?: boolean;
+  loading?: boolean;
+}

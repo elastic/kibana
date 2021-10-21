@@ -121,7 +121,7 @@ export const OptionsListPopover = ({
                   dispatch(selectOption(availableOption));
                 }}
               >
-                {availableOption}
+                {`${availableOption}`}
               </EuiFilterSelectItem>
             ))}
 
@@ -145,7 +145,7 @@ export const OptionsListPopover = ({
                   key={index}
                   onClick={() => dispatch(deselectOption(availableOption))}
                 >
-                  {availableOption}
+                  {`${availableOption}`}
                 </EuiFilterSelectItem>
               ))}
             {(!selectedOptions || selectedOptions.length === 0) && (

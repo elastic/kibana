@@ -22,11 +22,11 @@ import { pluginServices } from '../../../../services';
 import { forwardAllContext } from './forward_all_context';
 import { OverlayRef } from '../../../../../../../core/public';
 import { ControlGroupStrings } from '../control_group_strings';
-import { DEFAULT_CONTROL_WIDTH } from '../control_group_constants';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlWidth, IEditableControlFactory, ControlInput } from '../../types';
 import { EmbeddableFactoryNotFoundError } from '../../../../../../embeddable/public';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
+import { DEFAULT_CONTROL_WIDTH } from './editor_constants';
 
 export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean }) => {
   // Presentation Services Context

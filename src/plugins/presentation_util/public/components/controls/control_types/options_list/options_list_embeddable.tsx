@@ -24,6 +24,7 @@ import { ReduxEmbeddableWrapper } from '../../../redux_embeddables/redux_embedda
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
 import { PresentationDataViewsService } from '../../../../services/data_views';
 import { Embeddable, IContainer } from '../../../../../../embeddable/public';
+import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
 import { PresentationDataService } from '../../../../services/data';
 import { DataView } from '../../../../../../data_views/public';
 import { optionsListReducers } from './options_list_reducers';
@@ -53,16 +54,6 @@ interface OptionsListDataFetchProps {
 
 const fieldMissingError = (fieldName: string) =>
   new Error(`field ${fieldName} not found in index pattern`);
-
-export const OPTIONS_LIST_CONTROL = 'optionsListControl';
-export interface OptionsListEmbeddableInput extends ControlInput {
-  fieldName: string;
-  dataViewId: string;
-
-  selectedOptions?: string[];
-  singleSelect?: boolean;
-  loading?: boolean;
-}
 
 export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput, ControlOutput> {
   public readonly type = OPTIONS_LIST_CONTROL;
@@ -101,11 +92,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private setupSubscriptions = () => {
     const dataFetchPipe = this.getInput$().pipe(
       map((newInput) => ({
-        fieldName: newInput.fieldName,
+        lastReloadRequestTime: newInput.lastReloadRequestTime,
         dataViewId: newInput.dataViewId,
-        query: newInput.query,
-        filters: newInput.filters,
+        fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
+        filters: newInput.filters,
+        query: newInput.query,
       })),
       distinctUntilChanged(diffDataFetchProps)
     );

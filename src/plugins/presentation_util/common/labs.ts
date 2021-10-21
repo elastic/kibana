@@ -40,10 +40,10 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
     isActive: false,
     isDisplayed: true,
     environments: ['kibana', 'browser', 'session'],
-    name: i18n.translate('presentationUtil.labs.enableDeferBelowFoldProjectName', {
+    name: i18n.translate('presentationUtil.labs.enableDashboardControlsProjectName', {
       defaultMessage: 'Enable dashboard controls',
     }),
-    description: i18n.translate('presentationUtil.labs.enableDeferBelowFoldProjectDescription', {
+    description: i18n.translate('presentationUtil.labs.enableDashboardControlsProjectDescription', {
       defaultMessage:
         'Enables the controls system for dashboard, which allows dashboard authors to more easily build interactive elements for their users.',
     }),

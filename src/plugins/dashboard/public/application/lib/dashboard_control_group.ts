@@ -11,13 +11,13 @@ import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter } from '@kbn/es-query';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 import {
   ControlGroupContainer,
   ControlGroupInput,
   ControlGroupOutput,
-  ControlStyle,
   CONTROL_GROUP_TYPE,
+  ControlStyle,
 } from '../../../../presentation_util/public';
 import { DashboardContainer } from '..';
 import { EmbeddableStart, isErrorEmbeddable } from '../../services/embeddable';
@@ -29,6 +29,11 @@ export interface DashboardControlGroupInput {
   panels: ControlGroupInput['panels'];
   controlStyle: ControlGroupInput['controlStyle'];
 }
+
+type DashboardControlGroupCommonKeys = keyof Pick<
+  DashboardContainerInput | ControlGroupInput,
+  'filters' | 'lastReloadRequestTime' | 'timeRange' | 'query'
+>;
 
 export const getDefaultDashboardControlGroupInput = () => ({
   controlStyle: 'oneLine' as ControlStyle,
@@ -61,7 +66,7 @@ export const createAndSyncDashboardControlGroup = async ({
       dashboardContainer.getInput().controlGroupInput
     );
 
-  // Because dashboard container stores control group state, any control group changes need to be passed to dashboard container
+  // Because dashboard container stores control group state, certain control group changes need to be passed up dashboard container
   subscriptions.add(
     controlGroup.getInput$().subscribe(() => {
       const { panels, controlStyle } = controlGroup.getInput();
@@ -71,47 +76,58 @@ export const createAndSyncDashboardControlGroup = async ({
     })
   );
 
+  const refetchDiffMethods: {
+    [key: string]: (a?: unknown, b?: unknown) => boolean;
+  } = {
+    filters: (a, b) =>
+      compareFilters((a as Filter[]) ?? [], (b as Filter[]) ?? [], COMPARE_ALL_OPTIONS),
+    lastReloadRequestTime: deepEqual,
+    timeRange: deepEqual,
+    query: deepEqual,
+  };
+
+  // pass down any pieces of input needed to refetch or force refetch data for the controls
   subscriptions.add(
     dashboardContainer
       .getInput$()
       .pipe(
-        // skip updates when nothing of interest has changed. This prevents changes in lastReloadRequestTime from overwriting control group input
         distinctUntilChanged(
           (a, b) =>
-            !(
-              ['controlGroupInput', 'filters', 'timeRange', 'query'] as Array<
-                keyof DashboardContainerInput
-              >
-            )
+            !(Object.keys(refetchDiffMethods) as DashboardControlGroupCommonKeys[])
               .map((key) => deepEqual(a[key], b[key]))
               .includes(false)
         )
       )
       .subscribe(() => {
-        let newInput: Partial<ControlGroupInput> = {};
-        if (!isControlGroupInputEqual()) {
-          newInput = { ...dashboardContainer.getInput().controlGroupInput };
-        }
-        // pass filters, query and time range down from
-        if (
-          !compareFilters(
-            controlGroup.getInput().filters || [],
-            dashboardContainer.getInput().filters || [],
-            COMPARE_ALL_OPTIONS
-          )
-        ) {
-          newInput.filters = dashboardContainer.getInput().filters;
-        }
-        if (
-          !deepEqual(controlGroup.getInput().timeRange, dashboardContainer.getInput().timeRange)
-        ) {
-          newInput.timeRange = dashboardContainer.getInput().timeRange;
-        }
-        if (!deepEqual(controlGroup.getInput().query, dashboardContainer.getInput().query)) {
-          newInput.query = dashboardContainer.getInput().query;
-        }
+        const newInput: { [key: string]: unknown } = {};
+        (Object.keys(refetchDiffMethods) as DashboardControlGroupCommonKeys[]).forEach((key) => {
+          if (
+            !refetchDiffMethods[key]?.(
+              dashboardContainer.getInput()[key],
+              controlGroup.getInput()[key]
+            )
+          ) {
+            newInput[key] = dashboardContainer.getInput()[key];
+          }
+        });
         if (Object.keys(newInput).length > 0) {
           controlGroup.updateInput(newInput);
+        }
+      })
+  );
+
+  // dashboard may reset the control group input when discarding changes. Subscribe to these changes and update accordingly
+  subscriptions.add(
+    dashboardContainer
+      .getInput$()
+      .pipe(distinctUntilKeyChanged('controlGroupInput'))
+      .subscribe(() => {
+        if (!isControlGroupInputEqual()) {
+          if (!dashboardContainer.getInput().controlGroupInput) {
+            controlGroup.updateInput(getDefaultDashboardControlGroupInput());
+            return;
+          }
+          controlGroup.updateInput({ ...dashboardContainer.getInput().controlGroupInput });
         }
       })
   );
@@ -148,11 +164,16 @@ export const serializeControlGroupToDashboardSavedObject = (
   dashboardState: DashboardState
 ) => {
   // only save to saved object if control group is not default
-  if (controlGroupInputIsEqual(dashboardState.controlGroupInput, {} as ControlGroupInput)) return;
-  dashboardSavedObject.controlGroupInput = {
-    controlStyle: dashboardState.controlGroupInput?.controlStyle,
-    panelsJSON: JSON.stringify(dashboardState.controlGroupInput?.panels),
-  };
+  if (controlGroupInputIsEqual(dashboardState.controlGroupInput, {} as ControlGroupInput)) {
+    dashboardSavedObject.controlGroupInput = undefined;
+    return;
+  }
+  if (dashboardState.controlGroupInput) {
+    dashboardSavedObject.controlGroupInput = {
+      controlStyle: dashboardState.controlGroupInput.controlStyle,
+      panelsJSON: JSON.stringify(dashboardState.controlGroupInput.panels),
+    };
+  }
 };
 
 export const deserializeControlGroupFromDashboardSavedObject = (

@@ -98,7 +98,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       this.state;
     return (
       <>
-        <div ref={this.controlsRoot} />
+        <div className="dshDashboardViewport-controlGroup" ref={this.controlsRoot} />
         <div
           data-shared-items-count={Object.values(panels).length}
           data-shared-items-container
