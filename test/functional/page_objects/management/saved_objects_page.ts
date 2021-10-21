@@ -99,15 +99,27 @@ export class SavedObjectsPageObject extends FtrService {
   }
 
   async waitTableIsLoaded() {
-    return this.retry.try(async () => {
+    return await this.retry.try(async () => {
       const isLoaded = await this.find.existsByDisplayedByCssSelector(
         '*[data-test-subj="savedObjectsTable"] :not(.euiBasicTable-loading)'
       );
-
       if (isLoaded) {
         return true;
       } else {
+        this.log.debug(`still waiting for the table to load ${isLoaded}`);
         throw new Error('Waiting');
+      }
+    });
+  }
+  async waitInspectObjectIsLoaded() {
+    return await this.retry.try(async () => {
+      this.log.debug(`wait for inspect view to load`);
+      const isLoaded = await this.find.byClassName('kibanaCodeEditor');
+      const visibleContainerText = await isLoaded.getVisibleText();
+      if (visibleContainerText) {
+        return true;
+      } else {
+        this.log.debug(`still waiting for json view to load ${isLoaded}`);
       }
     });
   }
@@ -157,8 +169,10 @@ export class SavedObjectsPageObject extends FtrService {
   }
 
   async clickInspectByTitle(title: string) {
+    this.log.debug(`inspecting ${title} object through the context menu`);
     const table = keyBy(await this.getElementsInTable(), 'title');
     if (table[title].menuElement) {
+      this.log.debug(`${title} has a menuElement`);
       await table[title].menuElement?.click();
       // Wait for context menu to render
       const menuPanel = await this.find.byCssSelector('.euiContextMenuPanel');
@@ -166,6 +180,9 @@ export class SavedObjectsPageObject extends FtrService {
       await panelButton.click();
     } else {
       // or the action elements are on the row without the menu
+      this.log.debug(
+        `${title} doesn't have a menu element, trying to copy the object instead using`
+      );
       await table[title].copySaveObjectsElement?.click();
     }
   }
