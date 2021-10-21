@@ -140,7 +140,49 @@ export const TimeSeries = ({
     [palettesService, series, syncColors]
   );
 
-  console.log(`LEGACY_TIME_AXIS (TSVB): ${useLegacyTimeAxis}`); // eslint-disable-line
+  const darkMode = uiSettings.get('theme:darkMode');
+  const gridLineStyle = !useLegacyTimeAxis
+    ? {
+        visible: showGrid,
+        strokeWidth: 0.1,
+        stroke: darkMode ? 'white' : 'black',
+      }
+    : {
+        ...GRID_LINE_CONFIG,
+        visible: showGrid,
+      };
+  const xAxisStyle = !useLegacyTimeAxis
+    ? {
+        tickLabel: {
+          visible: true,
+          fontSize: 11,
+          padding: 0,
+          alignment: {
+            vertical: Position.Bottom,
+            horizontal: Position.Left,
+          },
+          offset: {
+            x: 1.5,
+            y: 0,
+          },
+        },
+        axisLine: {
+          stroke: darkMode ? 'lightgray' : 'darkgray',
+          strokeWidth: 1,
+        },
+        tickLine: {
+          size: 12,
+          strokeWidth: 0.15,
+          stroke: darkMode ? 'white' : 'black',
+          padding: -10,
+          visible: true,
+        },
+        axisTitle: {
+          visible: true,
+          padding: 0,
+        },
+      }
+    : {};
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -332,10 +374,9 @@ export const TimeSeries = ({
         position={Position.Bottom}
         title={getAxisLabelString(interval)}
         tickFormat={xAxisFormatter}
-        gridLine={{
-          ...GRID_LINE_CONFIG,
-          visible: showGrid,
-        }}
+        gridLine={gridLineStyle}
+        style={xAxisStyle}
+        timeAxisLayerCount={useLegacyTimeAxis ? 0 : 3}
       />
     </Chart>
   );
