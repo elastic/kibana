@@ -7,8 +7,10 @@
 
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { fromExpression } from '@kbn/interpreter/common';
 import { CANVAS_APP } from '../../../../common/lib';
-import { encode } from '../../../../common/lib/embeddable_dataurl';
+import { decode, encode } from '../../../../common/lib/embeddable_dataurl';
+import { CanvasElement, CanvasPage } from '../../../../types';
 import { useEmbeddablesService, useLabsService } from '../../../services';
 // @ts-expect-error unconverted file
 import { addElement } from '../../../state/actions/elements';
@@ -21,7 +23,7 @@ import {
 } from '../../../state/actions/embeddable';
 import { clearValue } from '../../../state/actions/resolved_args';
 
-export const useIncomingEmbeddable = (pageId: string) => {
+export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
   const embeddablesService = useEmbeddablesService();
   const labsService = useLabsService();
   const dispatch = useDispatch();
@@ -33,31 +35,52 @@ export const useIncomingEmbeddable = (pageId: string) => {
 
   useEffect(() => {
     if (isByValueEnabled && incomingEmbeddable) {
-      const { embeddableId, input, type } = incomingEmbeddable;
+      const { embeddableId, input: incomingInput, type } = incomingEmbeddable;
 
-      const config = encode(input);
-      const expression = `embeddable config="${config}"
-  type="${type}" 
-| render`;
+      // retrieve existing element
+      const originalElement = selectedPage.elements.find(
+        ({ id }: CanvasElement) => id === embeddableId
+      );
 
-      if (embeddableId) {
+      if (originalElement) {
+        const originalAst = fromExpression(originalElement!.expression);
+
+        const functionIndex = originalAst.chain.findIndex(
+          ({ function: fn }) => fn === 'embeddable'
+        );
+
+        const originalInput = decode(
+          originalAst.chain[functionIndex].arguments.config[0] as string
+        );
+
         // clear out resolved arg for old embeddable
         const argumentPath = [embeddableId, 'expressionRenderable'];
         dispatch(clearValue({ path: argumentPath }));
 
-        // update existing embeddable expression
+        const updatedInput = { ...originalInput, ...incomingInput };
+
+        const expression = `embeddable config="${encode(updatedInput)}"
+  type="${type}" 
+| render`;
+
         dispatch(
-          updateEmbeddableExpression({ elementId: embeddableId, embeddableExpression: expression })
+          updateEmbeddableExpression({
+            elementId: originalElement.id,
+            embeddableExpression: expression,
+          })
         );
 
         // update resolved args
-        dispatch(fetchEmbeddableRenderable(embeddableId));
+        dispatch(fetchEmbeddableRenderable(originalElement.id));
 
         // select new embeddable element
         dispatch(selectToplevelNodes([embeddableId]));
       } else {
-        dispatch(addElement(pageId, { expression }));
+        const expression = `embeddable config="${encode(incomingInput)}"
+  type="${type}" 
+| render`;
+        dispatch(addElement(selectedPage.id, { expression }));
       }
     }
-  }, [dispatch, pageId, incomingEmbeddable, isByValueEnabled]);
+  }, [dispatch, selectedPage, incomingEmbeddable, isByValueEnabled]);
 };
