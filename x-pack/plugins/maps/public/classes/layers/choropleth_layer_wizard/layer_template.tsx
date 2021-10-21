@@ -19,6 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../common/i18n_getters';
 import { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../components/ems_file_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
@@ -40,7 +41,7 @@ const BOUNDARIES_OPTIONS = [
   {
     id: BOUNDARIES_SOURCE.EMS,
     label: i18n.translate('xpack.maps.choropleth.boundaries.ems', {
-      defaultMessage: 'Administrative boundaries from Elastic Maps Service',
+      defaultMessage: 'Administrative boundaries from the Elastic Maps Service',
     }),
   },
   {
@@ -426,15 +427,9 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
 
         <EuiSpacer size="m" />
 
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.choropleth.rightSourceLabel', {
-            defaultMessage: 'Index pattern',
-          })}
-        >
+        <EuiFormRow label={getDataViewLabel()}>
           <IndexPatternSelect
-            placeholder={i18n.translate('xpack.maps.maps.choropleth.rightSourcePlaceholder', {
-              defaultMessage: 'Select index pattern',
-            })}
+            placeholder={getDataViewSelectPlaceholder()}
             indexPatternId={this.state.rightIndexPatternId}
             onChange={this._onRightIndexPatternChange}
             isClearable={false}

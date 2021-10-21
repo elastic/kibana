@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const OPEN_ALERTS_ROWS_COUNT = 12;
+const OPEN_ALERTS_ROWS_COUNT = 33;
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(11);
+        expect(tableRows.length).to.be(32);
       });
     });
 
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(3);
+        expect(tableRows.length).to.be(6);
       });
     });
 
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(2);
+        expect(tableRows.length).to.be(5);
       });
     });
 
@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(4);
+        expect(tableRows.length).to.be(3);
       });
     });
 
@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(3);
+        expect(tableRows.length).to.be(2);
       });
     });
 
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(12);
+        expect(tableRows.length).to.be(3);
       });
     });
   });

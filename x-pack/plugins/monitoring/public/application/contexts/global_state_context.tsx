@@ -32,31 +32,8 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
   toasts,
   children,
 }) => {
-  // TODO: remove fakeAngularRootScope and fakeAngularLocation when angular is removed
-  const fakeAngularRootScope: Partial<ng.IRootScopeService> = {
-    $on:
-      (name: string, listener: (event: ng.IAngularEvent, ...args: any[]) => any): (() => void) =>
-      () => {},
-    $applyAsync: () => {},
-  };
-
-  const fakeAngularLocation: Partial<ng.ILocationService> = {
-    search: () => {
-      return {} as any;
-    },
-    replace: () => {
-      return {} as any;
-    },
-  };
-
   const localState: State = {};
-  const state = new GlobalState(
-    query,
-    toasts,
-    fakeAngularRootScope,
-    fakeAngularLocation,
-    localState as { [key: string]: unknown }
-  );
+  const state = new GlobalState(query, toasts, localState as { [key: string]: unknown });
 
   const initialState: any = state.getState();
   for (const key in initialState) {
