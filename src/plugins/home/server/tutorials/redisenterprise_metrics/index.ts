@@ -28,8 +28,7 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.redisenterpriseMetrics.shortDescription', {
-      defaultMessage:
-        'Collect monitoring metrics from Redis Enterprise servers with Metricbeat.',
+      defaultMessage: 'Collect monitoring metrics from Redis Enterprise servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.redisenterpriseMetrics.longDescription', {
       defaultMessage:
