@@ -7,6 +7,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
+const REPO_NAME = 'test';
 const POLICY_NAME = 'ilm-a11y-test';
 const POLICY_ALL_PHASES = {
   policy: {
@@ -23,7 +24,7 @@ const POLICY_ALL_PHASES = {
       frozen: {
         actions: {
           searchable_snapshot: {
-            snapshot_repository: 'test',
+            snapshot_repository: REPO_NAME,
           },
         },
       },
@@ -57,11 +58,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     throw new Error(`Could not find ${policyName} in policy table`);
   };
 
-  // FLAKY
-  // https://github.com/elastic/kibana/issues/114541
-  // https://github.com/elastic/kibana/issues/114542
-  describe.skip('Index Lifecycle Management', async () => {
+  describe('Index Lifecycle Management', async () => {
     before(async () => {
+      await esClient.snapshot.createRepository({
+        repository: REPO_NAME,
+        body: {
+          type: 'fs',
+          settings: {
+            // use one of the values defined in path.repo in test/functional/config.js
+            location: '/tmp/',
+          },
+        },
+        verify: false,
+      });
       await esClient.ilm.putLifecycle({ policy: POLICY_NAME, body: POLICY_ALL_PHASES });
       await esClient.indices.putIndexTemplate({
         name: indexTemplateName,
@@ -79,6 +88,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      await esClient.snapshot.deleteRepository({
+        repository: REPO_NAME,
+      });
       // @ts-expect-error @elastic/elasticsearch DeleteSnapshotLifecycleRequest.policy_id is required
       await esClient.ilm.deleteLifecycle({ policy: POLICY_NAME });
       await esClient.indices.deleteIndexTemplate({ name: indexTemplateName });
