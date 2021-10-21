@@ -17,7 +17,7 @@ import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { isRESTApiError, isLegacyConnector } from './helpers';
 import { InstallationCallout } from './installation_callout';
-import { UpdateConnectorModal } from './update_connector_modal';
+import { UpdateConnector } from './update_connector';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
 
@@ -36,11 +36,11 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
       http,
       notifications: { toasts },
     } = useKibana().services;
-    const { apiUrl } = action.config;
+    const { apiUrl, isLegacy } = action.config;
     const { username, password } = action.secrets;
     const isOldConnector = isLegacyConnector(action);
 
-    const [showModal, setShowModal] = useState(false);
+    const [showUpdateConnector, setShowUpdateConnector] = useState(false);
 
     const { fetchAppInfo, isLoading } = useGetAppInfo({
       actionTypeId: action.actionTypeId,
@@ -79,28 +79,38 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
       [beforeActionConnectorSave, setCallbacks]
     );
 
-    const onMigrateClick = useCallback(() => setShowModal(true), []);
-    const onModalCancel = useCallback(() => setShowModal(false), []);
+    const onMigrateClick = useCallback(() => setShowUpdateConnector(true), []);
+    const onModalCancel = useCallback(() => setShowUpdateConnector(false), []);
 
-    const onModalConfirm = useCallback(async () => {
-      await getApplicationInfo();
-      await updateActionConnector({
-        http,
-        connector: {
-          name: action.name,
-          config: { apiUrl, isLegacy: false },
-          secrets: { username, password },
-        },
-        id: action.id,
-      });
+    const onUpdateConnectorConfirm = useCallback(async () => {
+      try {
+        await getApplicationInfo();
 
-      editActionConfig('isLegacy', false);
-      setShowModal(false);
+        await updateActionConnector({
+          http,
+          connector: {
+            name: action.name,
+            config: { apiUrl, isLegacy: false },
+            secrets: { username, password },
+          },
+          id: action.id,
+        });
 
-      toasts.addSuccess({
-        title: i18n.MIGRATION_SUCCESS_TOAST_TITLE(action.name),
-        text: i18n.MIGRATION_SUCCESS_TOAST_TEXT,
-      });
+        editActionConfig('isLegacy', false);
+        setShowUpdateConnector(false);
+
+        toasts.addSuccess({
+          title: i18n.UPDATE_SUCCESS_TOAST_TITLE(action.name),
+          text: i18n.UPDATE_SUCCESS_TOAST_TEXT,
+        });
+      } catch (err) {
+        /**
+         * getApplicationInfo may throw an error if the request
+         * fails or if there is a REST api error.
+         *
+         * We silent the errors as a callout will show and inform the user
+         */
+      }
     }, [
       getApplicationInfo,
       http,
@@ -113,10 +123,22 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
       toasts,
     ]);
 
+    /**
+     * Defaults the isLegacy attribute to false
+     * if it is not defined. The isLegacy attribute
+     * will be undefined only at the creation of
+     * the connector.
+     */
+    useEffect(() => {
+      if (isLegacy == null) {
+        editActionConfig('isLegacy', false);
+      }
+    });
+
     return (
       <>
-        {showModal && (
-          <UpdateConnectorModal
+        {showUpdateConnector && (
+          <UpdateConnector
             action={action}
             applicationInfoErrorMsg={applicationInfoErrorMsg}
             errors={errors}
@@ -124,7 +146,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
             isLoading={isLoading}
             editActionSecrets={editActionSecrets}
             editActionConfig={editActionConfig}
-            onConfirm={onModalConfirm}
+            onConfirm={onUpdateConnectorConfirm}
             onCancel={onModalCancel}
           />
         )}

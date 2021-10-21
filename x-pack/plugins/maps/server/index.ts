@@ -17,13 +17,11 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   // exposeToBrowser specifies kibana.yml settings to expose to the browser
   // the value `true` in this context signals configuration is exposed to browser
   exposeToBrowser: {
-    enabled: true,
     showMapsInspectorAdapter: true,
     preserveDrawingBuffer: true,
   },
   schema: configSchema,
-  deprecations: ({ deprecate }) => [
-    deprecate('enabled', '8.0.0'),
+  deprecations: () => [
     (
       completeConfig: Record<string, any>,
       rootPath: string,

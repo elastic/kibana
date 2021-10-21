@@ -6,7 +6,6 @@
  */
 
 import type SuperTest from 'supertest';
-import type { Client } from '@elastic/elasticsearch';
 
 import type {
   Type,
@@ -14,10 +13,15 @@ import type {
   ListItemSchema,
   ExceptionListSchema,
   ExceptionListItemSchema,
+  ExceptionList,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { LIST_INDEX, LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import {
+  EXCEPTION_LIST_URL,
+  LIST_INDEX,
+  LIST_ITEM_URL,
+} from '@kbn/securitysolution-list-constants';
 import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
-import { countDownES, countDownTest } from '../detection_engine_api_integration/utils';
+import { countDownTest } from '../detection_engine_api_integration/utils';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
@@ -160,22 +164,34 @@ export const binaryToString = (res: any, callback: any): void => {
 };
 
 /**
- * Remove all exceptions from the .kibana index
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
- * @param es The ElasticSearch handle
+ * Remove all exceptions
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
+ * @param supertest The supertest handle
  */
-export const deleteAllExceptions = async (es: Client): Promise<void> => {
-  return countDownES(async () => {
-    return es.deleteByQuery(
-      {
-        index: '.kibana',
-        q: 'type:exception-list or type:exception-list-agnostic',
-        wait_for_completion: true,
-        refresh: true,
-      },
-      { meta: true }
-    );
-  }, 'deleteAllExceptions');
+export const deleteAllExceptions = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>
+): Promise<void> => {
+  await countDownTest(
+    async () => {
+      const { body } = await supertest
+        .get(`${EXCEPTION_LIST_URL}/_find?per_page=9999`)
+        .set('kbn-xsrf', 'true')
+        .send();
+
+      const ids: string[] = body.data.map((exception: ExceptionList) => exception.id);
+      for await (const id of ids) {
+        await supertest.delete(`${EXCEPTION_LIST_URL}?id=${id}`).set('kbn-xsrf', 'true').send();
+      }
+      const { body: finalCheck } = await supertest
+        .get(`${EXCEPTION_LIST_URL}/_find`)
+        .set('kbn-xsrf', 'true')
+        .send();
+      return finalCheck.data.length === 0;
+    },
+    'deleteAllExceptions',
+    50,
+    1000
+  );
 };
 
 /**

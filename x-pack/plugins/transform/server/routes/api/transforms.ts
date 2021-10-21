@@ -59,6 +59,7 @@ import { registerTransformNodesRoutes } from './transforms_nodes';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 import { isLatestTransform } from '../../../common/types/transform';
 import { isKeywordDuplicate } from '../../../common/utils/field_utils';
+import { transformHealthServiceProvider } from '../../lib/alerting/transform_health_rule_type/transform_health_service';
 
 enum TRANSFORM_ACTIONS {
   STOP = 'stop',
@@ -89,6 +90,17 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
               ...req.params,
             }
           );
+
+          if (ctx.alerting) {
+            const transformHealthService = transformHealthServiceProvider(
+              ctx.core.elasticsearch.client.asCurrentUser,
+              ctx.alerting.getRulesClient()
+            );
+
+            // @ts-ignore
+            await transformHealthService.populateTransformsWithAssignedRules(body.transforms);
+          }
+
           return res.ok({ body });
         } catch (e) {
           return res.customError(wrapError(wrapEsError(e)));
@@ -133,7 +145,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
    */
   router.get(
     { path: addBasePath('transforms/_stats'), validate: false },
-    license.guardApiRoute<estypes.TransformGetTransformStatsRequest, undefined, undefined>(
+    license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
       async (ctx, req, res) => {
         try {
           const { body } =
@@ -485,7 +497,7 @@ async function deleteTransforms(
         }
       }
 
-      // Delete the index pattern if there's an index pattern that matches the name of dest index
+      // Delete the data view if there's a data view that matches the name of dest index
       if (destinationIndex && deleteDestIndexPattern) {
         try {
           const indexPatternId = await getIndexPatternId(

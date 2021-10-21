@@ -373,6 +373,7 @@ export class AlertingPlugin {
       eventLog: plugins.eventLog,
       kibanaVersion: this.kibanaVersion,
       authorization: alertingAuthorizationClientFactory,
+      eventLogger: this.eventLogger,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {

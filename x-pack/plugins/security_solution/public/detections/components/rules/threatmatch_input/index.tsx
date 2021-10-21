@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 
 import { ThreatMapEntries } from '../../../../common/components/threat_match/types';
@@ -35,6 +35,7 @@ interface ThreatMatchInputProps {
   threatIndexPatternsLoading: boolean;
   threatIndexModified: boolean;
   handleResetThreatIndices: () => void;
+  onValidityChange: (isValid: boolean) => void;
 }
 
 const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
@@ -45,15 +46,25 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
   threatIndexPatterns,
   threatIndexPatternsLoading,
   threatBrowserFields,
+  onValidityChange,
 }: ThreatMatchInputProps) => {
   const { setValue, value: threatItems } = threatMapping;
-  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(threatMapping);
+
+  const { isInvalid: isThreatMappingInvalid, errorMessage } =
+    getFieldValidityAndErrorMessage(threatMapping);
+  const [isThreatIndexPatternValid, setIsThreatIndexPatternValid] = useState(false);
+
+  useEffect(() => {
+    onValidityChange(!isThreatMappingInvalid && isThreatIndexPatternValid);
+  }, [isThreatIndexPatternValid, isThreatMappingInvalid, onValidityChange]);
+
   const handleBuilderOnChange = useCallback(
     ({ entryItems }: { entryItems: ThreatMapEntries[] }): void => {
       setValue(entryItems);
     },
     [setValue]
   );
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -96,6 +107,7 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
               isLoading: threatIndexPatternsLoading,
               dataTestSubj: 'detectionEngineStepDefineThreatRuleQueryBar',
               openTimelineSearch: false,
+              onValidityChange: setIsThreatIndexPatternValid,
             }}
           />
         </EuiFlexItem>
@@ -106,7 +118,7 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
         labelAppend={threatMapping.labelAppend}
         helpText={threatMapping.helpText}
         error={errorMessage}
-        isInvalid={isInvalid}
+        isInvalid={isThreatMappingInvalid}
         fullWidth
       >
         <ThreatMatchComponent
