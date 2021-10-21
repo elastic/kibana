@@ -17,7 +17,7 @@ Other versions: {kibana-ref-all}/7.15/plugin-api-changes.html[7.15] |
 {kibana-ref-all}/7.8/breaking-changes-7.8.html#general-plugin-API-changes-78[7.8]
 
 [[breaking_plugin_v7.16.0_112602]]
-.Deprecation warnings logged for plugins that won't be disable-able
+.Deprecation warnings logged for plugins that cannot be disabled
 [%collapsible]
 ====
 
@@ -27,12 +27,12 @@ be disabled using this option.
 
 You can still opt-in to this feature by explicitly adding an
 `enabled` property to your config schema. However, we recommend against
-this when possible. It affects whether or not a plugin's code is loaded by
-{kib}'s core, thus introducing complexity and creating a new set of configuration
+this when possible. This change affects whether or not a plugin's code is loaded by
+{kib}'s core, introducing complexity and creating a new set of configuration
 scenarios that must be tested.
 
-If you would like to make some aspects of your plugin disable-able,
-for example the ability to remove it from {kib}'s UI entirely,
+To allow some aspects of your plugin to be disabled,
+for example the ability to remove it from the {kib} UI,
 we recommend creating "nested" configuration options. For example, use
 `{plugin_name}.ui.enabled` instead of `{plugin_name}.enabled`, and then read
 from the configuration at runtime to conditionally render your application.
@@ -49,6 +49,7 @@ Refer to https://github.com/elastic/kibana/pull/112602[#112602].
 
 You can no longer use the `directive` property when registering a `DocView` via
 the `addDocView()` method in *Discover* to register an Angular doc view.
+Going forward, we no longer support Angular in our plugin APIs.
 
 Refer to https://github.com/elastic/kibana/pull/109368[#109368].
 
