@@ -74,6 +74,10 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.existOrFail(ALERTS_TABLE_CONTAINER_SELECTOR);
   };
 
+  const getNoDataPageOrFail = async () => {
+    return await testSubjects.existOrFail('noDataPage');
+  };
+
   const getNoDataStateOrFail = async () => {
     return await testSubjects.existOrFail('tGridEmptyState');
   };
@@ -221,6 +225,7 @@ export function ObservabilityAlertsCommonProvider({
     getCopyToClipboardButton,
     getFilterForValueButton,
     copyToClipboardButtonExists,
+    getNoDataPageOrFail,
     getNoDataStateOrFail,
     getTableCells,
     getTableCellsInRows,
