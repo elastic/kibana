@@ -7,23 +7,29 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Router, Route, Switch } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
-import { ReportingExampleApp } from './components/app';
+import { CaptureTest } from './containers/capture_test';
+import { Main } from './containers/main';
+import { ApplicationContextProvider } from './application_context';
 import { SetupDeps, StartDeps, MyForwardableState } from './types';
+import { ROUTES } from './constants';
 
 export const renderApp = (
   coreStart: CoreStart,
   deps: Omit<StartDeps & SetupDeps, 'developerExamples'>,
-  { appBasePath, element }: AppMountParameters, // FIXME: appBasePath is deprecated
+  { appBasePath, element, history }: AppMountParameters, // FIXME: appBasePath is deprecated
   forwardedParams: MyForwardableState
 ) => {
   ReactDOM.render(
-    <ReportingExampleApp
-      basename={appBasePath}
-      {...coreStart}
-      {...deps}
-      forwardedParams={forwardedParams}
-    />,
+    <ApplicationContextProvider forwardedState={forwardedParams}>
+      <Router history={history}>
+        <Switch>
+          <Route path={ROUTES.captureTest} exact render={() => <CaptureTest />} />
+          <Route render={() => <Main basename={appBasePath} {...coreStart} {...deps} />} />
+        </Switch>
+      </Router>
+    </ApplicationContextProvider>,
     element
   );
 

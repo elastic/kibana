@@ -1,0 +1,10 @@
+.reportingExample {
+  &__captureContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    margin-top: $euiSizeM;
+    margin-bottom: $euiSizeM;
+  }
+}
