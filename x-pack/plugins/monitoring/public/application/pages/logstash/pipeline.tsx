@@ -29,6 +29,7 @@ import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { PipelineVersions } from './pipeline_versions_dropdown';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => {
   const match = useRouteMatch<{ id: string | undefined; hash: string | undefined }>();
@@ -43,7 +44,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
-  });
+  }) as any;
   const [data, setData] = useState({} as any);
   const [detailVertexId, setDetailVertexId] = useState<string | null | undefined>(undefined);
   const { updateTotalItemCount } = useTable('logstash.pipelines');
@@ -125,6 +126,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
   }, [data]);
 
   const timeseriesTooltipXValueFormatter = (xValue: any) => moment(xValue).format(dateFormat);
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
 
   const onVertexChange = useCallback((vertex: any) => {
     if (!vertex) {
@@ -145,6 +147,15 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
       `#/logstash/pipelines/${pipelineId}/${pipelineHash}`
     );
   }, [pipelineId, pipelineHash]);
+
+  useEffect(() => {
+    if (cluster) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inLogstash: true,
+        page: 'pipeline',
+      });
+    }
+  }, [cluster, data, generateBreadcrumbs]);
 
   return (
     <LogstashTemplate
