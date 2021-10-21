@@ -52,6 +52,10 @@ export interface HeaderSectionProps extends HeaderProps {
   hideSubtitle?: boolean;
 }
 
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  column-gap: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   border,
   children,
@@ -67,10 +71,11 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   inspectMultiple = false,
   hideSubtitle = false,
 }) => (
+  // $isLastItem={!children}
   <Header data-test-subj="header-section" border={border} height={height}>
-    <EuiFlexGroup alignItems="center" gutterSize="none">
+    <StyledEuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={growLeftSplit}>
-        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+        <StyledEuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
           <EuiFlexItem>
             <EuiTitle size={titleSize}>
               <h4 data-test-subj="header-section-title">
@@ -99,7 +104,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
               />
             </EuiFlexItem>
           )}
-        </EuiFlexGroup>
+        </StyledEuiFlexGroup>
       </EuiFlexItem>
 
       {children && (
@@ -107,7 +112,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
           {children}
         </EuiFlexItem>
       )}
-    </EuiFlexGroup>
+    </StyledEuiFlexGroup>
   </Header>
 );
 
