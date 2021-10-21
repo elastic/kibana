@@ -22,11 +22,7 @@ async function getDependencies(cwd: string, entries: string[]) {
 export async function findUsedDependencies(listedPkgDependencies: any, baseDir: any) {
   // Define the entry points for the server code in order to
   // start here later looking for the server side dependencies
-  const mainCodeEntries = [
-    Path.resolve(baseDir, `src/cli/dist.js`),
-    Path.resolve(baseDir, `src/cli_keystore/dist.js`),
-    Path.resolve(baseDir, `src/cli_plugin/dist.js`),
-  ];
+  const mainCodeEntries = await globby(normalize(Path.resolve(baseDir, `src/cli*/dist.js`)));
 
   const discoveredPluginEntries = await globby([
     normalize(Path.resolve(baseDir, `src/plugins/**/server/index.js`)),
