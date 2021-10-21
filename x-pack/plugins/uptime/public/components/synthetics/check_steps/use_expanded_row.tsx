@@ -30,11 +30,13 @@ export const useExpandedRow = ({ loading, steps, allSteps }: HookProps) => {
 
   const getBrowserConsole = useCallback(
     (index: number) => {
-      return allSteps.find(
-        (stepF) =>
-          stepF.synthetics?.type === 'journey/browserconsole' &&
-          stepF.synthetics?.step?.index! === index
-      )?.synthetics?.payload?.text;
+      return allSteps
+        .filter(
+          (stepF) =>
+            stepF.synthetics?.type === 'journey/browserconsole' &&
+            stepF.synthetics?.step?.index! === index
+        )
+        .map((stepF) => stepF.synthetics?.payload?.text!);
     },
     [allSteps]
   );
@@ -48,7 +50,7 @@ export const useExpandedRow = ({ loading, steps, allSteps }: HookProps) => {
         expandedRowsN[expandedRowKey] = (
           <ExecutedStep
             step={step}
-            browserConsole={getBrowserConsole(expandedRowKey)}
+            browserConsoles={getBrowserConsole(expandedRowKey)}
             index={step.synthetics?.step?.index!}
             loading={loading}
           />
@@ -77,7 +79,7 @@ export const useExpandedRow = ({ loading, steps, allSteps }: HookProps) => {
         [stepIndex]: (
           <ExecutedStep
             step={journeyStep}
-            browserConsole={getBrowserConsole(stepIndex)}
+            browserConsoles={getBrowserConsole(stepIndex + 1)}
             index={journeyStep.synthetics?.step?.index!}
             loading={loading}
           />
