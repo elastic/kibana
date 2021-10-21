@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const config = getService('config');
   const retry = getService('retry');
+  const log = getService('log');
 
   describe('Interactive Setup Functional Tests (Enrolment token)', function () {
     this.tags(['skipCloud', 'ciGroup2']);
@@ -29,47 +30,53 @@ export default function ({ getService }: FtrProviderContext) {
     before(async function () {
       verificationCode = (await supertest.get('/test_endpoints/verification_code').expect(200)).body
         .verificationCode;
+      log.info(`Verification code: ${verificationCode}`);
 
       caFingerprint = (
         await getElasticsearchCaCertificate(elasticsearchConfig.hostname, elasticsearchConfig.port)
       ).fingerprint256
         .replace(/:/g, '')
         .toLowerCase();
+      log.info(`Elasticsearch ca fingerprint: ${caFingerprint}`);
     });
 
     let enrollmentAPIKey: string;
     beforeEach(async function () {
-      const apiResponse = await es.security.createApiKey({ body: { name: 'enrollment_api_key' } });
+      const apiResponse = await es.security.createApiKey({ body: { name: 'enrolment_api_key' } });
       enrollmentAPIKey = `${apiResponse.body.id}:${apiResponse.body.api_key}`;
+      log.info(`API key for enrolment token: ${enrollmentAPIKey}`);
     });
 
     afterEach(async function () {
-      await es.security.invalidateApiKey({ body: { name: 'enrollment_api_key' } });
+      await es.security.invalidateApiKey({ body: { name: 'enrolment_api_key' } });
     });
 
     it('should configure Kibana successfully', async function () {
       this.timeout(120_000);
 
+      const enrolmentToken = btoa(
+        JSON.stringify({
+          ver: kibanaPackageJson.version,
+          adr: [`${elasticsearchConfig.hostname}:${elasticsearchConfig.port}`],
+          fgr: caFingerprint,
+          key: enrollmentAPIKey,
+        })
+      );
+
       await browser.get(`${deployment.getHostPort()}?code=${verificationCode}`);
-      const url = await browser.getCurrentUrl();
+      const initialUrl = await browser.getCurrentUrl();
+      log.info(`Opened interactive setup: ${initialUrl}`);
 
       const tokenField = await find.byName('token');
       await tokenField.clearValueWithKeyboard();
-      await tokenField.type(
-        btoa(
-          JSON.stringify({
-            ver: kibanaPackageJson.version,
-            adr: [`${elasticsearchConfig.hostname}:${elasticsearchConfig.port}`],
-            fgr: caFingerprint,
-            key: enrollmentAPIKey,
-          })
-        )
-      );
+      await tokenField.type(enrolmentToken);
+      log.info(`Entered enrolment token: ${enrolmentToken}`);
 
       await find.clickByButtonText('Configure Elastic');
+      log.info('Submitted form');
 
       await retry.waitForWithTimeout('redirect to login page', 120_000, async () => {
-        return (await browser.getCurrentUrl()) !== url;
+        return (await browser.getCurrentUrl()) !== initialUrl;
       });
     });
   });
