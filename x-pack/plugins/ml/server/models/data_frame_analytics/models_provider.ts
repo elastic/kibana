@@ -15,7 +15,10 @@ import type {
   NodesOverviewResponse,
 } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
-import { MemoryOverviewService } from '../memory_overview/memory_overview_service';
+import {
+  MemoryOverviewService,
+  NATIVE_EXECUTABLE_CODE_OVERHEAD,
+} from '../memory_overview/memory_overview_service';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
@@ -104,6 +107,27 @@ export function modelsProvider(
             };
           });
 
+          const memoryRes = {
+            adTotalMemory: sumBy(
+              adMemoryReport.filter((ad) => ad.node_id === nodeId),
+              'model_size'
+            ),
+            dfaTotalMemory: sumBy(
+              dfaMemoryReport.filter((dfa) => dfa.node_id === nodeId),
+              'model_size'
+            ),
+            trainedModelsTotalMemory: sumBy(modelsMemoryUsage, 'model_size'),
+          };
+
+          for (const key of Object.keys(memoryRes)) {
+            // @ts-ignore
+            if (memoryRes[key] > 0) {
+              // @ts-ignore
+              memoryRes[key] += NATIVE_EXECUTABLE_CODE_OVERHEAD;
+              break;
+            }
+          }
+
           return {
             id: nodeId,
             ...nodeFields,
@@ -114,19 +138,13 @@ export function modelsProvider(
                 jvm: Number(node.attributes['ml.max_jvm_size']),
               },
               anomaly_detection: {
-                total: sumBy(
-                  adMemoryReport.filter((ad) => ad.node_id === nodeId),
-                  'model_size'
-                ),
+                total: memoryRes.adTotalMemory,
               },
               dfa_training: {
-                total: sumBy(
-                  dfaMemoryReport.filter((dfa) => dfa.node_id === nodeId),
-                  'model_size'
-                ),
+                total: memoryRes.dfaTotalMemory,
               },
               trained_models: {
-                total: sumBy(modelsMemoryUsage, 'model_size'),
+                total: memoryRes.trainedModelsTotalMemory,
                 by_model: modelsMemoryUsage,
               },
             },

@@ -19,6 +19,7 @@ export interface MlJobMemoryOverview {
 
 const AD_PROCESS_MEMORY_OVERHEAD = 10000000; // 10mb
 const DFA_PROCESS_MEMORY_OVERHEAD = 5000000; // 5mb
+export const NATIVE_EXECUTABLE_CODE_OVERHEAD = 30000000; // 30mb
 
 /**
  * Provides a service for memory overview across ML.
