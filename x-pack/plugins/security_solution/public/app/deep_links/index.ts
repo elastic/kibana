@@ -352,28 +352,18 @@ export function getDeepLinks(
 ): AppDeepLink[] {
   const isPremium = isPremiumLicense(licenseType);
 
+  /**
+   * Recursive DFS function to filter deepLinks by permissions (licence and capabilities).
+   * Checks "end" deepLinks with no children first, the other parent deepLinks will be included if 
+   * they still have children deepLinks after filtering
+   */
   const filterDeepLinks = (deepLinks: AppDeepLink[]): AppDeepLink[] => {
     return deepLinks
-      .filter((deepLink) => {
-        if (!isPremium && PREMIUM_DEEP_LINK_IDS.has(deepLink.id)) {
-          return false;
-        }
-        if (deepLink.id === SecurityPageName.case) {
-          return capabilities == null || capabilities[CASES_FEATURE_ID].read_cases === true;
-        }
-        if (deepLink.id === SecurityPageName.ueba) {
-          return enableExperimental.uebaEnabled;
-        }
-        if (!isEmpty(deepLink.deepLinks)) {
-          return true;
-        }
-        return capabilities == null || capabilities[SERVER_APP_ID].show === true;
-      })
       .map((deepLink) => {
         if (
           deepLink.id === SecurityPageName.case &&
           capabilities != null &&
-          capabilities[CASES_FEATURE_ID].crud_cases === false
+          capabilities[CASES_FEATURE_ID]?.crud_cases === false
         ) {
           return {
             ...deepLink,
@@ -387,6 +377,21 @@ export function getDeepLinks(
           };
         }
         return deepLink;
+      })
+      .filter((deepLink) => {
+        if (!isPremium && PREMIUM_DEEP_LINK_IDS.has(deepLink.id)) {
+          return false;
+        }
+        if (deepLink.id === SecurityPageName.case) {
+          return capabilities == null || capabilities[CASES_FEATURE_ID]?.read_cases === true;
+        }
+        if (deepLink.id === SecurityPageName.ueba) {
+          return enableExperimental.uebaEnabled;
+        }
+        if (!isEmpty(deepLink.deepLinks)) { 
+          return true;
+        }
+        return capabilities == null || capabilities[SERVER_APP_ID]?.show === true;
       });
   };
 

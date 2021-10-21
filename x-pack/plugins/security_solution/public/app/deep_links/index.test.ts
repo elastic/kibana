@@ -96,6 +96,12 @@ describe('deepLinks', () => {
     expect(findDeepLink(SecurityPageName.case, basicLinks)).toBeFalsy();
   });
 
+  it('should return empty links for any license', () => {
+    const basicLicense = 'basic';
+    const emptyDeepLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {});
+    expect(emptyDeepLinks.length).toBe(0);
+  });
+
   it('should return case links for basic license with undefined capabilities', () => {
     const basicLicense = 'basic';
     const basicLinks = getDeepLinks(
