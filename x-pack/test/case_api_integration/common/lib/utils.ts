@@ -330,6 +330,7 @@ export const getServiceNowConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
+    isLegacy: false,
   },
 });
 
@@ -386,6 +387,7 @@ export const getServiceNowSIRConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
+    isLegacy: false,
   },
 });
 
