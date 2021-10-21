@@ -6,8 +6,9 @@
  */
 
 import type { IScopedClusterClient } from 'kibana/server';
-import { sumBy } from 'lodash';
+import { sumBy, pick } from 'lodash';
 import numeral from '@elastic/numeral';
+import { NodesInfoNodeInfo } from '@elastic/elasticsearch/api/types';
 import type {
   NodeDeploymentStatsResponse,
   PipelineDefinition,
@@ -17,6 +18,18 @@ import type { MlClient } from '../../lib/ml_client';
 import { MemoryOverviewService } from '../memory_overview/memory_overview_service';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
+
+const NODE_FIELDS = [
+  'attributes',
+  'name',
+  'roles',
+  'ip',
+  'host',
+  'transport_address',
+  'version',
+] as const;
+
+export type RequiredNodeFields = Pick<NodesInfoNodeInfo, typeof NODE_FIELDS[number]>;
 
 export function modelsProvider(
   client: IScopedClusterClient,
@@ -77,6 +90,8 @@ export function modelsProvider(
 
       const nodeDeploymentStatsResponses: NodeDeploymentStatsResponse[] = mlNodes.map(
         ([nodeId, node]) => {
+          const nodeFields = pick(node, NODE_FIELDS);
+
           const allocatedModels = deploymentStats.deployment_stats.filter((v) =>
             v.nodes.some((n) => Object.keys(n.node)[0] === nodeId)
           );
@@ -90,12 +105,13 @@ export function modelsProvider(
           });
 
           return {
-            ...node,
             id: nodeId,
+            ...nodeFields,
             allocated_models: allocatedModels,
             memory_overview: {
               machine_memory: {
                 total: Number(node.attributes['ml.machine_memory']),
+                jvm: Number(node.attributes['ml.max_jvm_size']),
               },
               anomaly_detection: {
                 total: sumBy(
