@@ -8,7 +8,6 @@
 
 import uuid from 'uuid';
 import { Filter } from '@kbn/es-query';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import { SavedObjectReference } from '../../../../core/types';
 import { MigrateFunctionsObject } from '../../../kibana_utils/common';
@@ -53,7 +52,7 @@ export const inject = (filters: Filter[], references: SavedObjectReference[]) =>
   });
 };
 
-export const telemetry = (filters: SerializableRecord, collector: unknown) => {
+export const telemetry = (filters: Filter[], collector: unknown) => {
   return {};
 };
 

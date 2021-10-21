@@ -8,13 +8,7 @@
 
 import { CoreSetup, Plugin } from 'kibana/server';
 import { querySavedObjectType } from '../saved_objects';
-import {
-  extract,
-  getAllMigrations,
-  inject,
-  migrateToLatest,
-  telemetry,
-} from '../../common/query/persistable_state';
+import { extract, getAllMigrations, inject, telemetry } from '../../common/query/persistable_state';
 import { registerSavedQueryRoutes } from './routes';
 import {
   registerSavedQueryRouteHandlerContext,
@@ -35,7 +29,6 @@ export class QueryService implements Plugin<void> {
         extract,
         inject,
         telemetry,
-        migrateToLatest,
         getAllMigrations,
       },
     };
