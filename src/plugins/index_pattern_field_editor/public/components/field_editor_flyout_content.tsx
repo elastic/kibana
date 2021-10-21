@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -18,6 +18,7 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import type { Field } from '../types';
@@ -70,14 +71,17 @@ const FieldEditorFlyoutContentComponent = ({
   isSavingField,
   onMounted,
 }: Props) => {
+  const isMounted = useRef(false);
   const isEditingExistingField = !!field;
   const { indexPattern } = useFieldEditorContext();
   const {
     panel: { isVisible: isPanelVisible },
+    error: painlessScriptError,
   } = useFieldPreviewContext();
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,
+    isSubmitting: false,
     isValid: field ? true : undefined,
     submit: field
       ? async () => ({ isValid: true, data: field })
@@ -87,7 +91,7 @@ const FieldEditorFlyoutContentComponent = ({
   const [modalVisibility, setModalVisibility] = useState(defaultModalVisibility);
   const [isFormModified, setIsFormModified] = useState(false);
 
-  const { submit, isValid: isFormValid, isSubmitted } = formState;
+  const { submit, isValid: isFormValid, isSubmitted, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
 
   const canCloseValidator = useCallback(() => {
@@ -102,13 +106,15 @@ const FieldEditorFlyoutContentComponent = ({
 
   const onClickSave = useCallback(async () => {
     const { isValid, data } = await submit();
-    const nameChange = field?.name !== data.name;
-    const typeChange = field?.type !== data.type;
+
+    if (!isMounted.current) {
+      // User has closed the flyout meanwhile submitting the form
+      return;
+    }
 
     if (isValid) {
-
-          return;
-        }
+      const nameChange = field?.name !== data.name;
+      const typeChange = field?.type !== data.type;
 
       if (isEditingExistingField && (nameChange || typeChange)) {
         setModalVisibility({
@@ -175,6 +181,14 @@ const FieldEditorFlyoutContentComponent = ({
     }
   }, [onMounted, canCloseValidator]);
 
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   return (
     <>
       <FlyoutPanels.Group
@@ -227,12 +241,26 @@ const FieldEditorFlyoutContentComponent = ({
 
           <FlyoutPanels.Footer>
             <>
+              {Boolean(painlessScriptError) && (
+                <>
+                  <EuiText
+                    data-test-subj="painlessScriptError"
+                    size="s"
+                    style={{ fontWeight: 500 }}
+                  >
+                    <EuiTextColor color="danger">
+                      <p>{painlessScriptError!.error.reason}</p>
+                    </EuiTextColor>
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                </>
+              )}
               {isSubmitted && hasErrors && (
                 <>
                   <EuiCallOut
                     title={i18nTexts.formErrorsCalloutTitle}
                     color="danger"
-                    iconType="cross"
+                    iconType="alert"
                     data-test-subj="formError"
                   />
                   <EuiSpacer size="m" />
@@ -257,7 +285,7 @@ const FieldEditorFlyoutContentComponent = ({
                     data-test-subj="fieldSaveButton"
                     fill
                     disabled={hasErrors}
-                    isLoading={isSavingField || isValidating}
+                    isLoading={isSavingField || isSubmitting}
                   >
                     {i18nTexts.saveButtonLabel}
                   </EuiButton>

@@ -49,6 +49,7 @@ import { AdvancedParametersSection } from './advanced_parameters_section';
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
+  isSubmitting: boolean;
   submit: FormHook<Field>['submit'];
 }
 
@@ -160,7 +161,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     deserializer: formDeserializer,
     serializer: formSerializer,
   });
-  const { submit, isValid: isFormValid, isSubmitted, getFields } = form;
+  const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const i18nTexts = geti18nTexts();
@@ -190,9 +191,9 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
   useEffect(() => {
     if (onChange) {
-      onChange({ isValid: isFormValid, isSubmitted, submit });
+      onChange({ isValid: isFormValid, isSubmitted, isSubmitting, submit });
     }
-  }, [onChange, isFormValid, isSubmitted, submit]);
+  }, [onChange, isFormValid, isSubmitted, isSubmitting, submit]);
 
   useEffect(() => {
     updatePreviewParams({
@@ -217,6 +218,8 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       form={form}
       className="indexPatternFieldEditor__form"
       data-test-subj="indexPatternFieldEditorForm"
+      isInvalid={isSubmitted && isFormValid === false}
+      error={form.getErrors()}
     >
       <EuiFlexGroup>
         {/* Name */}
