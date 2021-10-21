@@ -70,11 +70,11 @@ Object {
               },
             },
           },
-          throttleTime: { value: { min: 0, max: 10, totalCount: 10, totalSum: 20, }, },
-          intervalTime: { value: { min: 0, max: 2, totalCount: 2, totalSum: 5, }, },
+          throttleTime: { value: { min: 0, max: 10, totalCount: 10, totalSum: 20 } },
+          intervalTime: { value: { min: 0, max: 2, totalCount: 2, totalSum: 5 } },
           connectorsAgg: {
             connectors: {
-              value: { min: 0, max: 5, totalActionsCount: 10, totalAlertsCount: 2, },
+              value: { min: 0, max: 5, totalActionsCount: 10, totalAlertsCount: 2 },
             },
           },
         },
