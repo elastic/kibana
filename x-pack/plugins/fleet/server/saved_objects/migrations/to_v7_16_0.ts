@@ -7,7 +7,7 @@
 
 import type { SavedObjectMigrationFn } from 'kibana/server';
 
-import type { Installation } from '../../../common';
+import type { Installation, PackagePolicy } from '../../../common';
 import { AUTO_UPDATE_PACKAGES, DEFAULT_PACKAGES } from '../../../common';
 
 import { migratePackagePolicyToV7160 as SecSolMigratePackagePolicyToV7160 } from './security_solution';
