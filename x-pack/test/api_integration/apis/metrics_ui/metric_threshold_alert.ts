@@ -104,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
             metricAlias: 'filebeat-*',
           };
           const timeFrame = { end: DATES.ten_thousand_plus.max };
+          // @ts-expect-error es FTR service is a Client, not a KibanaClient
           const results = await evaluateAlert(esClient, params, config, [], timeFrame);
           expect(results).to.eql([
             {
@@ -145,6 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
             metricAlias: 'filebeat-*',
           };
           const timeFrame = { end: DATES.ten_thousand_plus.max };
+          // @ts-expect-error es FTR service is a Client, not a KibanaClient
           const results = await evaluateAlert(esClient, params, config, [], timeFrame);
           expect(results).to.eql([
             {

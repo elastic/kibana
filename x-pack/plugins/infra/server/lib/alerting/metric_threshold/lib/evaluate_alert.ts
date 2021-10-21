@@ -198,8 +198,9 @@ const getMetric: (
         (response) => response.aggregations?.groupings?.after_key
       );
       const compositeBuckets = (await getAllCompositeData(
+        // must provide meta: true as this function is also consumed with a plain client from FTR
         // @ts-expect-error @elastic/elasticsearch SearchResponse.body.timeout is not required
-        (body) => esClient.search({ body, index }),
+        (body) => esClient.search({ body, index }, { meta: true }),
         searchBody,
         bucketSelector,
         afterKeyHandler
@@ -221,11 +222,15 @@ const getMetric: (
       );
       return groupedResults;
     }
-    const { body: result } = await esClient.search({
-      // @ts-expect-error buckets_path is not compatible
-      body: searchBody,
-      index,
-    });
+    const { body: result } = await esClient.search(
+      {
+        // @ts-expect-error buckets_path is not compatible
+        body: searchBody,
+        index,
+      },
+      // must provide meta: true as this function is also consumed with a plain client from FTR
+      { meta: true }
+    );
 
     return {
       [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(
