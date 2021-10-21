@@ -145,7 +145,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
    */
   router.get(
     { path: addBasePath('transforms/_stats'), validate: false },
-    license.guardApiRoute<TransformGetTransformStats, undefined, undefined>(
+    license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
       async (ctx, req, res) => {
         try {
           const { body } =
@@ -555,7 +555,6 @@ const previewTransformHandler: RequestHandler<
   try {
     const reqBody = req.body;
     const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
-      // @ts-expect-error max_page_search_size is required in TransformPivot
       body: reqBody,
     });
     if (isLatestTransform(reqBody)) {
