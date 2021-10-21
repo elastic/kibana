@@ -13,14 +13,12 @@ import useEffectOnce from 'react-use/lib/useEffectOnce';
 import uuid from 'uuid';
 import { decorators } from './decorators';
 import { ControlsPanels } from '../control_group/types';
+import { ViewMode } from '../../../../../embeddable/public';
 import { pluginServices, registry } from '../../../services/storybook';
+import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../../..';
+import { embeddablePluginMock } from '../../../../../embeddable/public/mocks';
 import { populateStorybookControlFactories } from './storybook_control_factories';
 import { ControlGroupContainerFactory } from '../control_group/embeddable/control_group_container_factory';
-import {
-  OptionsListEmbeddableInput,
-  OPTIONS_LIST_CONTROL,
-} from '../control_types/options_list/options_list_embeddable';
-import { ViewMode } from '../../../../../embeddable/public';
 
 export default {
   title: 'Controls',
@@ -54,7 +52,7 @@ const ControlGroupStoryComponent: FC<{
 
   useEffectOnce(() => {
     (async () => {
-      const factory = new ControlGroupContainerFactory();
+      const factory = new ControlGroupContainerFactory(embeddablePluginMock.createStartContract());
       const controlGroupContainerEmbeddable = await factory.create({
         controlStyle: 'oneLine',
         panels: panels ?? {},

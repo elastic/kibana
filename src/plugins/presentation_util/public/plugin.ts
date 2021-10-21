@@ -17,10 +17,9 @@ import {
   PresentationUtilPluginStart,
   GetControlEditorComponent,
   IEditableControlFactory,
-  OPTIONS_LIST_CONTROL,
 } from './types';
 import { OptionsListEmbeddableFactory } from './components/controls/control_types/options_list';
-import { CONTROL_GROUP_TYPE } from '.';
+import { CONTROL_GROUP_TYPE, OPTIONS_LIST_CONTROL } from '.';
 
 export class PresentationUtilPlugin
   implements

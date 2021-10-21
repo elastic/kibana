@@ -11,9 +11,9 @@ import React, { useEffect, useState } from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiSuperSelectOption, EuiSwitch } from '@elastic/eui';
 
 import { ControlEditorProps, GetControlEditorComponentProps } from '../../types';
-import { OptionsListEmbeddableInput } from './options_list_embeddable';
 import { OptionsListStrings } from './options_list_strings';
 import { pluginServices } from '../../../../services';
+import { OptionsListEmbeddableInput } from './types';
 
 interface OptionsListEditorProps extends ControlEditorProps {
   onChange: GetControlEditorComponentProps<OptionsListEmbeddableInput>['onChange'];

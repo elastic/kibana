@@ -20,11 +20,11 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
+import { OptionsListEmbeddableInput } from './types';
 import { OptionsListStrings } from './options_list_strings';
-import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
-import { OptionsListEmbeddableInput } from './options_list_embeddable';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListComponentState } from './options_list_component';
+import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
 
 export const OptionsListPopover = ({
   loading,

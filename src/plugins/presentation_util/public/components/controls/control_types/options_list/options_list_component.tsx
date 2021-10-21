@@ -8,18 +8,18 @@
 
 import { EuiFilterButton, EuiFilterGroup, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import classNames from 'classnames';
 import { BehaviorSubject, Subject } from 'rxjs';
-
+import classNames from 'classnames';
 import { debounce } from 'lodash';
-import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
-import { OptionsListEmbeddableInput } from './options_list_embeddable';
-import { OptionsListPopover } from './options_list_popover_component';
-import { optionsListReducers } from './options_list_reducers';
+
 import { OptionsListStrings } from './options_list_strings';
+import { optionsListReducers } from './options_list_reducers';
+import { OptionsListPopover } from './options_list_popover_component';
+import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
 
 import './options_list.scss';
 import { useStateObservable } from '../../hooks/use_state_observable';
+import { OptionsListEmbeddableInput } from './types';
 
 // Availableoptions and loading state is controled by the embeddable, but is not considered embeddable input.
 export interface OptionsListComponentState {
