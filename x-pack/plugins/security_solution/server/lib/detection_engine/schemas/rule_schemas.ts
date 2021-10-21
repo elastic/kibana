@@ -72,6 +72,7 @@ import {
   EQL_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '../../../../common/constants';
+import { SanitizedRuleConfig } from '../../../../../alerting/common';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 export const baseRuleParams = t.exact(
@@ -198,6 +199,12 @@ export type TypeSpecificRuleParams = t.TypeOf<typeof typeSpecificRuleParams>;
 
 export const ruleParams = t.intersection([baseRuleParams, typeSpecificRuleParams]);
 export type RuleParams = t.TypeOf<typeof ruleParams>;
+
+export interface CompleteRule<T extends RuleParams> {
+  alertId: string;
+  ruleParams: T;
+  ruleConfig: SanitizedRuleConfig;
+}
 
 export const notifyWhen = t.union([
   t.literal('onActionGroupChange'),
