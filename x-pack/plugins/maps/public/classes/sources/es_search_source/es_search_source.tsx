@@ -854,9 +854,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),
-      urlTemplate: searchFilters.searchSessionId
-        ? urlTemplate + `&searchSessionId=${searchFilters.searchSessionId}`
-        : urlTemplate,
+      urlTemplate,
     };
   }
 

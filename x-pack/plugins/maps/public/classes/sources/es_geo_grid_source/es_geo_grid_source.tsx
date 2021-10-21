@@ -457,9 +457,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),
-      urlTemplate: searchFilters.searchSessionId
-        ? urlTemplate + `&searchSessionId=${searchFilters.searchSessionId}`
-        : urlTemplate,
+      urlTemplate,
     };
   }
 
