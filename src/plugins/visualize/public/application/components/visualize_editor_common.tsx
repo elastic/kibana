@@ -16,6 +16,7 @@ import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { useKibana } from '../../../../kibana_react/public';
 import { urlFor } from '../../../../visualizations/public';
+import { getUISettings } from '../../services';
 import {
   SavedVisInstance,
   VisualizeAppState,
@@ -23,6 +24,7 @@ import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
+import { DeprecationWarning, LEGACY_PIE_CHARTS_LIBRARY } from './deprecation_vis_warning';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -58,6 +60,7 @@ export const VisualizeEditorCommon = ({
   visEditorRef,
 }: VisualizeEditorCommonProps) => {
   const { services } = useKibana<VisualizeServices>();
+  const hasPieLegacyChartsEnabled = getUISettings().get(LEGACY_PIE_CHARTS_LIBRARY);
 
   useEffect(() => {
     async function aliasMatchRedirect() {
@@ -126,6 +129,9 @@ export const VisualizeEditorCommon = ({
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
+      {/* Adds a deprecation warning for vislib xy axis charts */}
+      {/* Should be removed when this issue is closed https://github.com/elastic/kibana/issues/103209 */}
+      {visInstance?.vis.type.name === 'pie' && hasPieLegacyChartsEnabled && <DeprecationWarning />}
       {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}
       {getLegacyUrlConflictCallout()}
       {visInstance && (
