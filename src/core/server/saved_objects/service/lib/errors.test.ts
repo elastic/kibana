@@ -362,7 +362,6 @@ describe('savedObjectsClient/errorTypes', () => {
   });
 
   describe('EsUnavailable error', () => {
-    // TODO double check we're including es ProductNotSupported errors
     describe('decorateEsUnavailableError', () => {
       it('returns original object', () => {
         const error = new Error();
