@@ -8,8 +8,8 @@
 import {
   ADD_POLICY_BTN,
   CONFIRM_MODAL_BTN,
-  CONFIRM_MODAL_BTN_SEL,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
+  FLYOUT_CLOSE_BTN_SEL,
   INTEGRATION_NAME_LINK,
 } from '../screens/integrations';
 
@@ -17,15 +17,16 @@ export const addIntegration = () => {
   cy.getBySel(ADD_POLICY_BTN).click();
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
-  closeModalIfVisible();
+  cy.getBySel(CONFIRM_MODAL_BTN).click();
 
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).should('not.exist');
+  clickIfVisible(FLYOUT_CLOSE_BTN_SEL);
 };
 
-function closeModalIfVisible() {
+export function clickIfVisible(selector: string) {
   cy.get('body').then(($body) => {
-    if ($body.find(CONFIRM_MODAL_BTN_SEL).length) {
-      cy.getBySel(CONFIRM_MODAL_BTN).click();
+    if ($body.find(selector).length) {
+      cy.get(selector).click();
     }
   });
 }
