@@ -30,8 +30,9 @@ import type { ArchiveEntry } from './index';
 import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
+const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
 // Updated to accomodate larger package size in some ML model packages
-const MAX_ES_ASSET_BYTES = 50 * 1024 * 1024;
+const ML_MAX_ES_ASSET_BYTES = 50 * 1024 * 1024;
 
 export interface PackageAsset {
   package_name: string;
@@ -65,15 +66,20 @@ export async function archiveEntryToESDocument(opts: {
   const bufferIsBinary = await isBinaryFile(buffer);
   const dataUtf8 = bufferIsBinary ? '' : buffer.toString('utf8');
   const dataBase64 = bufferIsBinary ? buffer.toString('base64') : '';
+  const currentMaxAssetBytes = path.includes('ml_model')
+    ? ML_MAX_ES_ASSET_BYTES
+    : MAX_ES_ASSET_BYTES;
 
   // validation: filesize? asset type? anything else
-  if (dataUtf8.length > MAX_ES_ASSET_BYTES) {
-    throw new Error(`File at ${path} is larger than maximum allowed size of ${MAX_ES_ASSET_BYTES}`);
+  if (dataUtf8.length > currentMaxAssetBytes) {
+    throw new Error(
+      `File at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
+    );
   }
 
-  if (dataBase64.length > MAX_ES_ASSET_BYTES) {
+  if (dataBase64.length > currentMaxAssetBytes) {
     throw new Error(
-      `After base64 encoding file at ${path} is larger than maximum allowed size of ${MAX_ES_ASSET_BYTES}`
+      `After base64 encoding file at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
     );
   }
 
