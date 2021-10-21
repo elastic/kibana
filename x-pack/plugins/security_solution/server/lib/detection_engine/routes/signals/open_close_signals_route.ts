@@ -21,7 +21,10 @@ import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { InsightsService } from '../../../telemetry/insights';
+import {
+  getSessionIDfromKibanaRequest,
+  createAlertStatusPayloads,
+} from '../../../telemetry/insights';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -65,10 +68,10 @@ export const setSignalsStatusRoute = (
         // Sometimes the ids are in the query not passed in the request?
         const toSendAlertIds = get(query, 'bool.filter.terms._id') || signalIds;
         // Get Context for Insights Payloads
-        const insightsService = new InsightsService(clusterId);
-        const sessionId = insightsService.getSessionIDfromKibanaRequest(request);
+        const sessionId = getSessionIDfromKibanaRequest(clusterId, request);
         if (username && toSendAlertIds && sessionId && status) {
-          const insightsPayloads = insightsService.createAlertStatusPayloads(
+          const insightsPayloads = createAlertStatusPayloads(
+            clusterId,
             toSendAlertIds,
             sessionId,
             username,

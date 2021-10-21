@@ -11,7 +11,6 @@ import { sha256 } from 'js-sha256';
 
 interface AlertContext {
   alert_id: string;
-  rule_id?: string;
 }
 
 interface AlertStatusAction {
@@ -21,7 +20,7 @@ interface AlertStatusAction {
 
 export interface InsightsPayload {
   state: {
-    page: string;
+    route: string;
     cluster_id: string;
     user_id: string;
     session_id: string;
@@ -29,69 +28,55 @@ export interface InsightsPayload {
   };
   action: AlertStatusAction;
 }
-
-// Generic insights service class that works with the insights observable
-// Both server and client plugins instancates a singleton version of this class
-export class InsightsService {
-  private clusterId: string;
-
-  constructor(clusterId: string) {
-    this.clusterId = clusterId;
+export function getSessionIDfromKibanaRequest(clusterId: string, request: KibanaRequest): string {
+  const rawCookieHeader = request.headers.cookie;
+  if (!rawCookieHeader) {
+    return '';
   }
+  const cookieHeaders = Array.isArray(rawCookieHeader) ? rawCookieHeader : [rawCookieHeader];
+  let tokenPackage: string | undefined;
 
-  public getSessionIDfromKibanaRequest(request: KibanaRequest): string {
-    const rawCookieHeader = request.headers.cookie;
-    if (!rawCookieHeader) {
-      return '';
-    }
-    const cookieHeaders = Array.isArray(rawCookieHeader) ? rawCookieHeader : [rawCookieHeader];
-    let tokenPackage: string | undefined;
+  cookieHeaders
+    .flatMap((rawHeader) => rawHeader.split('; '))
+    .forEach((rawCookie) => {
+      const [cookieName, cookieValue] = rawCookie.split('=');
+      if (cookieName === 'sid') tokenPackage = cookieValue;
+    });
 
-    cookieHeaders
-      .flatMap((rawHeader) => rawHeader.split('; '))
-      .forEach((rawCookie) => {
-        const [cookieName, cookieValue] = rawCookie.split('=');
-        if (cookieName === 'sid') tokenPackage = cookieValue;
-      });
-
-    if (tokenPackage) {
-      const concatValue = tokenPackage + this.clusterId;
-      const sha = sha256.create().update(concatValue).hex();
-      return sha;
-    } else {
-      return '';
-    }
+  if (tokenPackage) {
+    return getClusterHashSalt(clusterId, tokenPackage);
+  } else {
+    return '';
   }
+}
 
-  private getUserHash(username: string): string {
-    const concatValue = username + this.clusterId;
-    const sha = sha256.create().update(concatValue).hex();
-    return sha;
-  }
+function getClusterHashSalt(clusterId: string, toHash: string): string {
+  const concatValue = toHash + clusterId;
+  const sha = sha256.create().update(concatValue).hex();
+  return sha;
+}
 
-  public createAlertStatusPayloads(
-    alertIds: string[],
-    sessionId: string,
-    username: string,
-    page: string,
-    status: string,
-    ruleId?: string
-  ): InsightsPayload[] {
-    return alertIds.map((alertId) => ({
-      state: {
-        page,
-        cluster_id: this.clusterId,
-        user_id: this.getUserHash(username),
-        session_id: sessionId,
-        context: {
-          alert_id: alertId,
-          rule_id: ruleId,
-        },
+export function createAlertStatusPayloads(
+  clusterId: string,
+  alertIds: string[],
+  sessionId: string,
+  username: string,
+  route: string,
+  status: string
+): InsightsPayload[] {
+  return alertIds.map((alertId) => ({
+    state: {
+      route,
+      cluster_id: clusterId,
+      user_id: getClusterHashSalt(clusterId, username),
+      session_id: sessionId,
+      context: {
+        alert_id: alertId,
       },
-      action: {
-        alert_status: status,
-        action_timestamp: moment().toISOString(),
-      },
-    }));
-  }
+    },
+    action: {
+      alert_status: status,
+      action_timestamp: moment().toISOString(),
+    },
+  }));
 }
