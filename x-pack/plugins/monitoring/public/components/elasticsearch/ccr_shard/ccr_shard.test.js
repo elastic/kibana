@@ -9,14 +9,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { CcrShard } from './ccr_shard';
 
-jest.mock('../../../legacy_shims', () => {
-  return {
-    Legacy: {
-      shims: { getAngularInjector: () => ({ get: () => ({ get: () => 'utc' }) }) },
-    },
-  };
-});
-
 jest.mock('../../chart', () => ({
   MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
 }));
