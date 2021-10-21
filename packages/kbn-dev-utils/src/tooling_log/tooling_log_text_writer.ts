@@ -12,8 +12,6 @@ import { format } from 'util';
 
 import chalk from 'chalk';
 
-import { ansiEscapes } from './lib/ansi';
-
 import { LogLevel, parseLogLevel, ParsedLogLevel } from './log_levels';
 import { Writer } from './writer';
 import { Message, MessageTypes } from './message';
@@ -86,21 +84,6 @@ export class ToolingLogTextWriter implements Writer {
       throw new Error(
         'ToolingLogTextWriter requires the `writeTo` option be set to a stream (like process.stdout)'
       );
-    }
-    this.patchStdout();
-  }
-
-  patchStdout() {
-    const origWrite = process.stdout.write;
-    // casting required to calm typescript
-    process.stdout.write = replace as typeof process.stdout.write;
-    function replace(
-      ...args: [Uint8Array | string, BufferEncoding, (err?: Error) => void]
-    ): boolean {
-      origWrite.call(process.stdout, ansiEscapes.eraseLine);
-      origWrite.call(process.stdout, ansiEscapes.cursorLeft);
-      origWrite.apply(process.stdout, args);
-      return origWrite.call(process.stdout, 'status ' + Math.random());
     }
   }
 

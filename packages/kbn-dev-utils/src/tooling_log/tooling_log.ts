@@ -11,6 +11,7 @@ import * as Rx from 'rxjs';
 import { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
 import { Writer } from './writer';
 import { Message, MessageTypes } from './message';
+import { StdoutPatcher } from './tooling_stdout_patcher';
 
 export interface ToolingLogOptions {
   /**
@@ -39,6 +40,7 @@ export class ToolingLog {
       ? options.parent.writers$
       : new Rx.BehaviorSubject<Writer[]>([]);
     if (!options?.parent && writerConfig) {
+      new StdoutPatcher(process.stdout);
       this.writers$.next([new ToolingLogTextWriter(writerConfig)]);
     }
 
