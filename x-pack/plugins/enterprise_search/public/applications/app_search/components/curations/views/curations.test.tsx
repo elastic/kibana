@@ -166,18 +166,20 @@ describe('Curations', () => {
   });
 
   describe('loading state', () => {
-    it('renders a full-page loading state on initial page load', () => {
+    it('renders a full-page loading state and hides tabs on initial page load', () => {
       setMockValues({ ...values, dataLoading: true });
       const wrapper = shallow(<Curations />);
 
       expect(wrapper.prop('isLoading')).toEqual(true);
+      expect(wrapper.prop('tabs')).toBeUndefined();
     });
 
-    it('does not re-render a full-page loading state when data is loaded', () => {
+    it('does not re-render a full-page loading and shows tabs state when data is loaded', () => {
       setMockValues({ ...values, dataLoading: false });
       const wrapper = shallow(<Curations />);
 
       expect(wrapper.prop('isLoading')).toEqual(false);
+      expect(typeof wrapper.prop('tabs')).not.toBeUndefined();
     });
   });
 

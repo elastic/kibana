@@ -15,7 +15,7 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiBadge, EuiButton, EuiLoadingSpinner, EuiTab } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiTab } from '@elastic/eui';
 
 import { getPageHeaderActions, getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
 
@@ -32,7 +32,6 @@ import { History } from './history';
 
 describe('AutomatedCuration', () => {
   const values = {
-    dataLoading: false,
     queries: ['query A', 'query B'],
     isFlyoutOpen: false,
     curation: {
@@ -113,15 +112,6 @@ describe('AutomatedCuration', () => {
 
     expect(pageTitle.text()).toContain('query A');
     expect(pageTitle.find(EuiBadge)).toHaveLength(1);
-  });
-
-  it('displays a spinner in the title when loading', () => {
-    setMockValues({ ...values, dataLoading: true });
-
-    const wrapper = shallow(<AutomatedCuration />);
-    const pageTitle = shallow(<div>{getPageTitle(wrapper)}</div>);
-
-    expect(pageTitle.find(EuiLoadingSpinner)).toHaveLength(1);
   });
 
   it('contains a button to delete the curation', () => {
