@@ -17,7 +17,9 @@ steps:
     label: 'Default CI Group'
     parallelism: 13
     agents:
-      queue: ci-group-6
+      queue: ci-group-6-idle
+    concurrency: 4
+    concurrency_group: 'test-reusable-agents'
     depends_on: build
     timeout_in_minutes: 150
     key: default-cigroup
@@ -29,7 +31,9 @@ steps:
   - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Docker CI Group'
     agents:
-      queue: ci-group-6
+      queue: ci-group-6-idle
+    concurrency: 4
+    concurrency_group: 'test-reusable-agents'
     depends_on: build
     timeout_in_minutes: 120
     key: default-cigroup-docker
@@ -42,7 +46,9 @@ steps:
     label: 'OSS CI Group'
     parallelism: 11
     agents:
-      queue: ci-group-4d
+      queue: ci-group-4d-idle
+    concurrency: 4
+    concurrency_group: 'test-reusable-agents'
     depends_on: build
     timeout_in_minutes: 120
     key: oss-cigroup
@@ -117,19 +123,23 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/test/jest_integration.sh
-    label: 'Jest Integration Tests'
-    agents:
-      queue: n2-4
-    timeout_in_minutes: 120
-    key: jest-integration
-
   - command: .buildkite/scripts/steps/test/api_integration.sh
     label: 'API Integration Tests'
     agents:
-      queue: n2-2
+      queue: ci-group-4d-idle
+    concurrency: 1
+    concurrency_group: 'test-reusable-agents-2'
     timeout_in_minutes: 120
     key: api-integration
+
+  - command: .buildkite/scripts/steps/test/jest_integration.sh
+    label: 'Jest Integration Tests'
+    agents:
+      queue: ci-group-4d-idle
+    concurrency: 1
+    concurrency_group: 'test-reusable-agents-2'
+    timeout_in_minutes: 120
+    key: jest-integration
 
   - command: .buildkite/scripts/steps/test/jest.sh
     label: 'Jest Tests'
