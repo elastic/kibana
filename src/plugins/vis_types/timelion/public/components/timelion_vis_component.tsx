@@ -39,6 +39,7 @@ import type { Sheet } from '../helpers/timelion_request_handler';
 import type { IInterpreterRenderHandlers } from '../../../../expressions';
 import type { TimelionVisDependencies } from '../plugin';
 import type { RangeFilterParams } from '../../../../data/public';
+import { LEGACY_TIME_AXIS } from '../../../../charts/common';
 import type { Series } from '../helpers/timelion_request_handler';
 
 import './timelion_vis.scss';
@@ -103,6 +104,8 @@ const TimelionVisComponent = ({
   const chartRef = useRef<Chart>(null);
   const chart = seriesList.list;
   const chartsService = getCharts();
+  const useLegacyTimeAxis = kibana.services.uiSettings.get(LEGACY_TIME_AXIS);
+  console.log(`LEGACY_TIME_AXIS (Timelion): ${useLegacyTimeAxis}`); // eslint-disable-line
 
   const chartTheme = chartsService.theme.useChartsTheme();
   const chartBaseTheme = chartsService.theme.useChartsBaseTheme();
