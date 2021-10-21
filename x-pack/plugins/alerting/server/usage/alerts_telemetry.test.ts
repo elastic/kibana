@@ -60,21 +60,14 @@ Object {
         aggregations: {
           byAlertTypeId: {
             value: {
-              types: { '.index-threshold': 2, 'logs.alert.document.count': 1, 'document.test.': 1 },
+              ruleTypes: { '.index-threshold': 2, 'logs.alert.document.count': 1, 'document.test.': 1 },
             },
           },
-          throttleTime: { value: { min: '0s', max: '0s', totalCount: '0s', totalSum: '0s' } },
-          intervalTime: { value: { min: '0s', max: '0s', totalCount: '0s', totalSum: '0s' } },
-          connectorsAgg: {
-            connectors: {
-              value: {
-                min_actions: 1,
-                max_actions: 2,
-                totalActionsCount: 3,
-                currentAlertActions: 3,
-              },
-            },
-          },
+          throttleTime: { value: { min: 0, max: 10, totalCount: 20, totalSum: 40 } },
+          intervalTime: { value: { min: 0, max: 10, totalCount: 20, totalSum: 40 } },
+          max_actions_count: { value: 4 },
+          min_actions_count: { value: 0 },
+          avg_actions_count: { value: 2.5 },
         },
         hits: {
           hits: [],
@@ -89,9 +82,26 @@ Object {
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
   "connectors_per_alert": Object {
-    "min": 1,
-    "max": 3,
-    "avg": 2,
+    "avg": 2.5,
+    "max": 4,
+    "min": 0,
+  },
+  "count_by_type": Object {
+    "__index-threshold": 2,
+    "document.test__": 1,
+    "logs.alert.document.count": 1,
+  },
+  "count_rules_namespaces": 0,
+  "count_total": 4,
+  "schedule_time": Object {
+    "avg": "2s",
+    "max": "10s",
+    "min": "0s",
+  },
+  "throttle_time": Object {
+    "avg": "2s",
+    "max": "10s",
+    "min": "0s",
   },
 }
 `);

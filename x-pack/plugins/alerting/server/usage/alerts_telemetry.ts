@@ -257,9 +257,9 @@ export async function getTotalCountAggregations(
       max: `${aggregations.intervalTime.value.max}s`,
     },
     connectors_per_alert: {
-      min: aggregations.max_actions_count.value,
-      avg: aggregations.min_actions_count.value,
-      max: aggregations.avg_actions_count.value,
+      min: aggregations.min_actions_count.value,
+      avg: aggregations.avg_actions_count.value,
+      max: aggregations.max_actions_count.value,
     },
     count_rules_namespaces: 0,
   };
