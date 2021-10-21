@@ -183,7 +183,7 @@ export class ImportCompleteView extends Component<Props, {}> {
           <a
             data-test-subj="indexManagementNewIndexLink"
             target="_blank"
-            href={getHttp().basePath.prepend('/app/management/kibana/indexPatterns')}
+            href={getHttp().basePath.prepend('/app/management/kibana/dataViews')}
           >
             <FormattedMessage
               id="xpack.fileUpload.importComplete.indexMgmtLink"

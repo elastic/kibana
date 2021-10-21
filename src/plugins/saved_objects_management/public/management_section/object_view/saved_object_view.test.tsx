@@ -158,9 +158,9 @@ describe('SavedObjectEdition', () => {
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
-        editUrl: '#/management/kibana/indexPatterns/patterns/1',
+        editUrl: '#/management/kibana/dataViews/dataView/1',
         inAppUrl: {
-          path: '/management/kibana/indexPatterns/patterns/1',
+          path: '/management/kibana/dataViews/dataView/1',
           uiCapabilitiesPath: 'management.kibana.indexPatterns',
         },
         hiddenType: false,
@@ -187,7 +187,7 @@ describe('SavedObjectEdition', () => {
     const headerComponent = component.find('Header');
     expect(headerComponent.prop('canViewInApp')).toBe(true);
     expect(headerComponent.prop('canDelete')).toBe(true);
-    expect(headerComponent.prop('viewUrl')).toEqual('/management/kibana/indexPatterns/patterns/1');
+    expect(headerComponent.prop('viewUrl')).toEqual('/management/kibana/dataViews/dataView/1');
     const inspectComponent = component.find('Inspect');
     expect(inspectComponent.prop('object')).toEqual(savedObjectItem);
   });
@@ -225,9 +225,9 @@ describe('SavedObjectEdition', () => {
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
-        editUrl: '#/management/kibana/indexPatterns/patterns/1',
+        editUrl: '#/management/kibana/dataViews/dataView/1',
         inAppUrl: {
-          path: '/management/kibana/indexPatterns/patterns/1',
+          path: '/management/kibana/dataViews/dataView/1',
           uiCapabilitiesPath: 'management.kibana.indexPatterns',
         },
         hiddenType: false,
