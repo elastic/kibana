@@ -26,11 +26,13 @@ describe('set signal status', () => {
   beforeEach(() => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
-    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+
+    context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         getSuccessfulSignalUpdateResponse()
       )
     );
+
     setSignalsStatusRoute(server.router);
   });
 

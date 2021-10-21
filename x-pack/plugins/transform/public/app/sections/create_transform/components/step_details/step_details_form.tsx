@@ -29,7 +29,7 @@ import {
   isEsIndices,
   isPostTransformsPreviewResponseSchema,
 } from '../../../../../../common/api_schemas/type_guards';
-import { TransformId, TransformPivotConfig } from '../../../../../../common/types/transform';
+import { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
@@ -158,7 +158,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             ),
           });
         } else {
-          setTransformIds(resp.transforms.map((transform: TransformPivotConfig) => transform.id));
+          setTransformIds(resp.transforms.map((transform) => transform.id));
         }
 
         const indices = await api.getEsIndices();
@@ -180,12 +180,9 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           setIndexPatternTitles(await deps.data.indexPatterns.getTitles());
         } catch (e) {
           toastNotifications.addDanger({
-            title: i18n.translate(
-              'xpack.transform.stepDetailsForm.errorGettingIndexPatternTitles',
-              {
-                defaultMessage: 'An error occurred getting the existing index pattern titles:',
-              }
-            ),
+            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingDataViewTitles', {
+              defaultMessage: 'An error occurred getting the existing data view titles:',
+            }),
             text: toMountPoint(
               <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
             ),
@@ -449,16 +446,16 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             error={
               createIndexPattern &&
               indexPatternTitleExists && [
-                i18n.translate('xpack.transform.stepDetailsForm.indexPatternTitleError', {
-                  defaultMessage: 'An index pattern with this title already exists.',
+                i18n.translate('xpack.transform.stepDetailsForm.dataViewTitleError', {
+                  defaultMessage: 'A data view with this title already exists.',
                 }),
               ]
             }
           >
             <EuiSwitch
               name="transformCreateIndexPattern"
-              label={i18n.translate('xpack.transform.stepCreateForm.createIndexPatternLabel', {
-                defaultMessage: 'Create Kibana index pattern',
+              label={i18n.translate('xpack.transform.stepCreateForm.createDataViewLabel', {
+                defaultMessage: 'Create Kibana data view',
               })}
               checked={createIndexPattern === true}
               onChange={() => setCreateIndexPattern(!createIndexPattern)}
