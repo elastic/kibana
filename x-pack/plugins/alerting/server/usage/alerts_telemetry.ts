@@ -55,6 +55,7 @@ export async function getTotalCountAggregations(
   const { body: results } = await esClient.search({
     index: kibanaInex,
     body: {
+      size: 0,
       query: {
         bool: {
           filter: [{ term: { type: 'alert' } }],
@@ -193,14 +194,14 @@ export async function getTotalCountAggregations(
       {}
     ),
     throttle_time: {
-      min: `${aggregations.min_throttle_time.value}s`,
-      avg: `${aggregations.avg_throttle_time.value}s`,
-      max: `${aggregations.max_throttle_time.value}s`,
+      min: aggregations.min_throttle_time.value,
+      avg: aggregations.avg_throttle_time.value,
+      max: aggregations.max_throttle_time.value,
     },
     schedule_time: {
-      min: `${aggregations.min_interval_time.value}s`,
-      avg: `${aggregations.avg_interval_time.value}s`,
-      max: `${aggregations.max_interval_time.value}s`,
+      min: aggregations.min_interval_time.value,
+      avg: aggregations.avg_interval_time.value,
+      max: aggregations.max_interval_time.value,
     },
     connectors_per_alert: {
       min: aggregations.min_actions_count.value,
@@ -214,6 +215,7 @@ export async function getTotalCountAggregations(
 export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaInex: string) {
   const { body: searchResult } = await esClient.search({
     index: kibanaInex,
+    size: 0,
     body: {
       query: {
         bool: {
