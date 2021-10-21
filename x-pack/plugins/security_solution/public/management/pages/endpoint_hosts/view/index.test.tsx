@@ -167,7 +167,7 @@ describe('when on the endpoint list page', () => {
 
   it('should NOT display timeline', async () => {
     const renderResult = render();
-    const timelineFlyout = await renderResult.queryByTestId('flyoutOverlay');
+    const timelineFlyout = renderResult.queryByTestId('flyoutOverlay');
     expect(timelineFlyout).toBeNull();
   });
 
@@ -460,7 +460,7 @@ describe('when on the endpoint list page', () => {
         const outOfDates = await renderResult.findAllByTestId('rowPolicyOutOfDate');
         expect(outOfDates).toHaveLength(4);
 
-        outOfDates.forEach((item, index) => {
+        outOfDates.forEach((item) => {
           expect(item.textContent).toEqual('Out-of-date');
           expect(item.querySelector(`[data-euiicon-type][color=warning]`)).not.toBeNull();
         });
@@ -512,8 +512,8 @@ describe('when on the endpoint list page', () => {
 
   // FLAKY: https://github.com/elastic/kibana/issues/75721
   describe.skip('when polling on Endpoint List', () => {
-    beforeEach(async () => {
-      await reactTestingLibrary.act(() => {
+    beforeEach(() => {
+      reactTestingLibrary.act(() => {
         const hostListData = mockEndpointResultList({ total: 4 }).hosts;
 
         setEndpointListApiMockImplementation(coreStart.http, {
@@ -881,7 +881,7 @@ describe('when on the endpoint list page', () => {
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
-        const hostNameLinks = await renderResult.getAllByTestId('hostnameCellLink');
+        const hostNameLinks = renderResult.getAllByTestId('hostnameCellLink');
         reactTestingLibrary.fireEvent.click(hostNameLinks[0]);
       });
 
@@ -896,7 +896,7 @@ describe('when on the endpoint list page', () => {
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
         });
-        const endpointDetailsFlyout = await renderResult.queryByTestId('endpointDetailsFlyoutBody');
+        const endpointDetailsFlyout = renderResult.queryByTestId('endpointDetailsFlyoutBody');
         expect(endpointDetailsFlyout).not.toBeNull();
       });
 
@@ -909,7 +909,7 @@ describe('when on the endpoint list page', () => {
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
         });
-        const logEntries = await renderResult.queryAllByTestId('timelineEntry');
+        const logEntries = renderResult.queryAllByTestId('timelineEntry');
         expect(logEntries.length).toEqual(3);
         expect(`${logEntries[0]} .euiCommentTimeline__icon--update`).not.toBe(null);
         expect(`${logEntries[1]} .euiCommentTimeline__icon--regular`).not.toBe(null);
@@ -927,7 +927,7 @@ describe('when on the endpoint list page', () => {
             getMockData({ hasLogsEndpointActionResponses: true })
           );
         });
-        const logEntries = await renderResult.queryAllByTestId('timelineEntry');
+        const logEntries = renderResult.queryAllByTestId('timelineEntry');
         expect(logEntries.length).toEqual(4);
         expect(`${logEntries[0]} .euiCommentTimeline__icon--update`).not.toBe(null);
         expect(`${logEntries[1]} .euiCommentTimeline__icon--update`).not.toBe(null);
@@ -943,7 +943,7 @@ describe('when on the endpoint list page', () => {
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('failed', getMockData());
         });
-        const emptyState = await renderResult.queryByTestId('activityLogEmpty');
+        const emptyState = renderResult.queryByTestId('activityLogEmpty');
         expect(emptyState).not.toBe(null);
       });
 
@@ -963,10 +963,10 @@ describe('when on the endpoint list page', () => {
           });
         });
 
-        const emptyState = await renderResult.queryByTestId('activityLogEmpty');
+        const emptyState = renderResult.queryByTestId('activityLogEmpty');
         expect(emptyState).toBe(null);
 
-        const superDatePicker = await renderResult.queryByTestId('activityLogSuperDatePicker');
+        const superDatePicker = renderResult.queryByTestId('activityLogSuperDatePicker');
         expect(superDatePicker).not.toBe(null);
       });
 
@@ -985,7 +985,7 @@ describe('when on the endpoint list page', () => {
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
         });
-        const logEntries = await renderResult.queryAllByTestId('timelineEntry');
+        const logEntries = renderResult.queryAllByTestId('timelineEntry');
         expect(logEntries.length).toEqual(3);
       });
 
@@ -1030,7 +1030,7 @@ describe('when on the endpoint list page', () => {
         reactTestingLibrary.act(() => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
         });
-        const commentTexts = await renderResult.queryAllByTestId('activityLogCommentText');
+        const commentTexts = renderResult.queryAllByTestId('activityLogCommentText');
         expect(commentTexts.length).toEqual(1);
         expect(commentTexts[0].textContent).toEqual('some comment');
         expect(commentTexts[0].parentElement?.parentElement?.className).toContain(
@@ -1064,7 +1064,7 @@ describe('when on the endpoint list page', () => {
       afterEach(reactTestingLibrary.cleanup);
 
       it('should hide the host details panel', async () => {
-        const endpointDetailsFlyout = await renderResult.queryByTestId('endpointDetailsFlyoutBody');
+        const endpointDetailsFlyout = renderResult.queryByTestId('endpointDetailsFlyoutBody');
         expect(endpointDetailsFlyout).toBeNull();
       });
 
@@ -1311,8 +1311,8 @@ describe('when on the endpoint list page', () => {
         ).toBe(true);
       });
 
-      it('should NOT show the flyout footer', async () => {
-        await expect(renderResult.queryByTestId('endpointDetailsFlyoutFooter')).toBeNull();
+      it('should NOT show the flyout footer', () => {
+        expect(renderResult.queryByTestId('endpointDetailsFlyoutFooter')).toBeNull();
       });
     });
   });
