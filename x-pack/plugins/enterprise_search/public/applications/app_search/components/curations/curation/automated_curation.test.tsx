@@ -24,11 +24,11 @@ jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 import { AppSearchPageTemplate } from '../../layout';
 
 import { AutomatedCuration } from './automated_curation';
+import { AutomatedCurationHistory } from './automated_curation_history';
 import { CurationLogic } from './curation_logic';
 
 import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, OrganicDocuments } from './documents';
-import { History } from './history';
 
 describe('AutomatedCuration', () => {
   const values = {
@@ -96,7 +96,7 @@ describe('AutomatedCuration', () => {
 
     expect(tabs.at(2).prop('isSelected')).toEqual(true);
 
-    expect(wrapper.find(History)).toHaveLength(1);
+    expect(wrapper.find(AutomatedCurationHistory)).toHaveLength(1);
   });
 
   it('initializes CurationLogic with a curationId prop from URL param', () => {
