@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { URL } from 'url';
-
 import type { Logger } from 'src/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 
@@ -145,9 +143,8 @@ export class TelemetryEventsSender {
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
     }
-    const url = new URL(telemetryUrl);
-    url.pathname = `/v3/send/${channel}`;
-    return url.toString();
+    telemetryUrl.pathname = `/v3/send/${channel}`;
+    return telemetryUrl.toString();
   }
 
   private async send(
