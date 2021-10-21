@@ -66,7 +66,7 @@ import {
   Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
+import { updateTooltipStateForLayer } from './tooltip_actions';
 import { VectorLayer } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE } from './ui_actions';
 import { expandToTileBoundaries } from '../../common/geo_tile_utils';
@@ -177,7 +177,7 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
     if (prevZoom !== nextZoom) {
       getLayerList(getState()).map((layer) => {
         if (!layer.showAtZoomLevel(nextZoom)) {
-          dispatch(cleanTooltipStateForLayer(layer.getId()));
+          dispatch(updateTooltipStateForLayer(layer.getId()));
         }
       });
     }

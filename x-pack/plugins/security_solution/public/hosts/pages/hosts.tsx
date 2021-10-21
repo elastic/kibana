@@ -179,6 +179,7 @@ const HostsComponent = () => {
                   />
                 }
                 title={i18n.PAGE_TITLE}
+                border
               />
 
               <HostsKpiComponent
@@ -216,8 +217,6 @@ const HostsComponent = () => {
         </StyledFullHeightContainer>
       ) : (
         <SecuritySolutionPageWrapper>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
-
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}

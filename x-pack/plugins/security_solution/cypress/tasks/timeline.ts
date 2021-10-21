@@ -20,9 +20,9 @@ import {
   CASE,
   CLOSE_TIMELINE_BTN,
   COMBO_BOX,
+  COMBO_BOX_INPUT,
   CREATE_NEW_TIMELINE,
   FIELD_BROWSER,
-  ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
   ID_HOVER_ACTION_OVERFLOW_BTN,
@@ -68,8 +68,6 @@ import {
   TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
-
-import { drag, drop } from '../tasks/common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from '../tasks/fields_browser';
 
@@ -121,10 +119,6 @@ export const goToCorrelationTab = () => {
   return cy.root().find(TIMELINE_CORRELATION_TAB);
 };
 
-export const getNotePreviewByNoteId = (noteId: string) => {
-  return cy.get(`[data-test-subj="note-preview-${noteId}"]`);
-};
-
 export const goToQueryTab = () => {
   cy.root()
     .pipe(($el) => {
@@ -171,9 +165,12 @@ export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuer
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
   cy.get(TIMELINE_DATA_PROVIDER_VALUE).should('have.focus'); // make sure the focus is ready before start typing
 
-  cy.get(TIMELINE_DATA_PROVIDER_FIELD).type(`${filter.field}{downarrow}{enter}`);
-  cy.get(TIMELINE_DATA_PROVIDER_OPERATOR).type(filter.operator);
-  cy.get(COMBO_BOX).contains(filter.operator).click();
+  cy.get(TIMELINE_DATA_PROVIDER_FIELD)
+    .find(COMBO_BOX_INPUT)
+    .type(`${filter.field}{downarrow}{enter}`);
+  cy.get(TIMELINE_DATA_PROVIDER_OPERATOR)
+    .find(COMBO_BOX_INPUT)
+    .type(`${filter.operator}{downarrow}{enter}`);
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_DATA_PROVIDER_VALUE).type(`${filter.value}{enter}`);
   }
@@ -302,10 +299,6 @@ export const populateTimeline = () => {
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
 };
 
-export const unpinFirstEvent = () => {
-  cy.get(PIN_EVENT).first().click({ force: true });
-};
-
 const clickTimestampHoverActionOverflowButton = () => {
   cy.get(TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN).should('exist');
 
@@ -318,16 +311,6 @@ export const clickTimestampToggleField = () => {
   cy.get(TIMESTAMP_TOGGLE_FIELD).should('exist');
 
   cy.get(TIMESTAMP_TOGGLE_FIELD).click({ force: true });
-};
-
-export const dragAndDropIdToggleFieldToTimeline = () => {
-  cy.get(ID_HEADER_FIELD).should('not.exist');
-
-  cy.get(ID_FIELD).then((field) => drag(field));
-
-  cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`)
-    .first()
-    .then((headersDropArea) => drop(headersDropArea));
 };
 
 export const removeColumn = (columnName: string) => {
@@ -348,10 +331,6 @@ export const selectCase = (caseId: string) => {
 export const waitForTimelineChanges = () => {
   cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('exist');
   cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('not.exist');
-};
-
-export const waitForEventsPanelToBeLoaded = () => {
-  cy.get(QUERY_TAB_BUTTON).find('.euiBadge').should('exist');
 };
 
 /**

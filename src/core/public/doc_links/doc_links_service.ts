@@ -26,12 +26,14 @@ export class DocLinksService {
     const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
     const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
     const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
+    const STACK_GETTING_STARTED = `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-get-started/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
         settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
+        elasticStackGetStarted: `${STACK_GETTING_STARTED}get-started-elastic-stack.html`,
         apm: {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
           supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
@@ -233,6 +235,9 @@ export class DocLinksService {
           networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
           troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
         },
+        securitySolution: {
+          trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
+        },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
           kueryQuerySyntax: `${KIBANA_DOCS}kuery-query.html`,
@@ -322,6 +327,7 @@ export class DocLinksService {
           preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
           preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}index-action-type.html#preconfigured-connector-alert-history`,
           serviceNowAction: `${KIBANA_DOCS}servicenow-action-type.html#configuring-servicenow`,
+          serviceNowSIRAction: `${KIBANA_DOCS}servicenow-sir-action-type.html`,
           setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
           slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
           teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
@@ -351,6 +357,7 @@ export class DocLinksService {
           clusterPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-cluster`,
           elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
           elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}configuring-stack-security.html`,
+          elasticsearchEnableApiKeys: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
           indicesPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-indices`,
           kibanaTLS: `${ELASTICSEARCH_DOCS}security-basic-setup.html#encrypt-internode-communication`,
           kibanaPrivileges: `${KIBANA_DOCS}kibana-privileges.html`,
@@ -471,12 +478,14 @@ export class DocLinksService {
           settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
-          elasticAgent: `${FLEET_DOCS}elastic-agent-installation-configuration.html`,
+          elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
           datastreams: `${FLEET_DOCS}data-streams.html`,
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
+          installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
+          apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -490,7 +499,7 @@ export class DocLinksService {
           netGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
           perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/${DOC_LINK_VERSION}/index.html`,
           phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/index.html`,
-          pythonGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
+          pythonGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/python-api/${DOC_LINK_VERSION}/index.html`,
           rubyOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/ruby_client.html`,
           rustGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/index.html`,
         },
@@ -505,6 +514,7 @@ export interface DocLinksStart {
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
     readonly settings: string;
+    readonly elasticStackGetStarted: string;
     readonly apm: {
       readonly kibanaSettings: string;
       readonly supportedServiceMaps: string;
@@ -641,6 +651,9 @@ export interface DocLinksStart {
       readonly networkMap: string;
       readonly troubleshootGaps: string;
     };
+    readonly securitySolution: {
+      readonly trustedApps: string;
+    };
     readonly query: {
       readonly eql: string;
       readonly kueryQuerySyntax: string;
@@ -703,6 +716,7 @@ export interface DocLinksStart {
       clusterPrivileges: string;
       elasticsearchSettings: string;
       elasticsearchEnableSecurity: string;
+      elasticsearchEnableApiKeys: string;
       indicesPrivileges: string;
       kibanaTLS: string;
       kibanaPrivileges: string;
@@ -729,9 +743,11 @@ export interface DocLinksStart {
       elasticAgent: string;
       datastreams: string;
       datastreamsNamingScheme: string;
+      installElasticAgent: string;
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
       learnMoreBlog: string;
+      apiKeysLearnMore: string;
     }>;
     readonly ecs: {
       readonly guide: string;

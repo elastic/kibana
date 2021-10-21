@@ -23,8 +23,11 @@ import { DiscoverHistogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { useChartPanels } from './use_chart_panels';
+import { VIEW_MODE, DocumentViewModeToggle } from '../view_mode_toggle';
+import { SHOW_FIELD_STATISTICS } from '../../../../../../common';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
+export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 
 export function DiscoverChart({
   resetSavedSearch,
@@ -35,6 +38,8 @@ export function DiscoverChart({
   state,
   stateContainer,
   timefield,
+  viewMode,
+  setDiscoverViewMode,
 }: {
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;
@@ -44,10 +49,14 @@ export function DiscoverChart({
   state: AppState;
   stateContainer: GetStateReturn;
   timefield?: string;
+  viewMode: VIEW_MODE;
+  setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
 }) {
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
+  const showViewModeToggle = services.uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
-  const { data } = services;
+  const { data, storage } = services;
+
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
     element: null,
     moveFocus: false,
@@ -71,7 +80,8 @@ export function DiscoverChart({
     const newHideChart = !state.hideChart;
     stateContainer.setAppState({ hideChart: newHideChart });
     chartRef.current.moveFocus = !newHideChart;
-  }, [state, stateContainer]);
+    storage.set(CHART_HIDDEN_KEY, newHideChart);
+  }, [state.hideChart, stateContainer, storage]);
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
@@ -105,6 +115,16 @@ export function DiscoverChart({
               onResetQuery={resetSavedSearch}
             />
           </EuiFlexItem>
+
+          {showViewModeToggle && (
+            <EuiFlexItem grow={false}>
+              <DocumentViewModeToggle
+                viewMode={viewMode}
+                setDiscoverViewMode={setDiscoverViewMode}
+              />
+            </EuiFlexItem>
+          )}
+
           {timefield && (
             <EuiFlexItem className="dscResultCount__toggle" grow={false}>
               <EuiPopover
