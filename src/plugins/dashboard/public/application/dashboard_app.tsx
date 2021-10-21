@@ -9,7 +9,6 @@
 import { History } from 'history';
 import React, { useEffect, useMemo } from 'react';
 
-import { css, Global } from '@emotion/react';
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
 import { useKibana } from '../../../kibana_react/public';
@@ -30,8 +29,6 @@ export interface DashboardAppProps {
   embedSettings?: DashboardEmbedSettings;
 }
 
-const TRUNCATE_GRADIENT_HEIGHT = 15;
-
 export function DashboardApp({
   savedDashboardId,
   embedSettings,
@@ -40,7 +37,6 @@ export function DashboardApp({
 }: DashboardAppProps) {
   const { core, chrome, embeddable, onAppLeave, uiSettings, data, spacesService } =
     useKibana<DashboardAppServices>().services;
-  const maxHeight = useMemo(() => uiSettings.get('truncate:maxHeight'), [uiSettings]);
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -105,26 +101,8 @@ export function DashboardApp({
     };
   }, [data.search.session]);
 
-  const discoverEmbeddableTruncateStyles = (
-    <Global
-      styles={css`
-        .truncate-by-height {
-          overflow: hidden;
-          max-height: ${maxHeight > 0 ? `${maxHeight}px !important` : 'none'};
-          display: inline-block;
-        }
-        .truncate-by-height:before {
-          top: ${maxHeight > 0
-            ? maxHeight - TRUNCATE_GRADIENT_HEIGHT
-            : TRUNCATE_GRADIENT_HEIGHT * -1}px;
-        }
-      `}
-    />
-  );
-
   return (
     <>
-      {maxHeight !== 0 && discoverEmbeddableTruncateStyles}
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
           <DashboardTopNav
