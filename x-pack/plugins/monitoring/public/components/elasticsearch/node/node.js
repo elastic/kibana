@@ -14,6 +14,7 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NodeDetailStatus } from '../node_detail_status';
@@ -53,6 +54,14 @@ export const Node = ({ nodeSummary, metrics, logs, alerts, nodeId, clusterUuid, 
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.node.heading"
+              defaultMessage="Elasticsearch node"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPanel>
           <NodeDetailStatus stats={nodeSummary} alerts={alerts} />
         </EuiPanel>
