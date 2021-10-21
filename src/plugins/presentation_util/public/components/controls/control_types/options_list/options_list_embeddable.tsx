@@ -8,26 +8,17 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { merge, Subject } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { EuiSelectableOption } from '@elastic/eui';
-import { tap, debounceTime, map, distinctUntilChanged } from 'rxjs/operators';
+import { merge, Subject, Subscription } from 'rxjs';
+import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
-import { esFilters } from '../../../../../../data/public';
-import { OptionsListStrings } from './options_list_strings';
-import { Embeddable, IContainer } from '../../../../../../embeddable/public';
+import { isEqual } from 'lodash';
+import { ReduxEmbeddableWrapper } from '../../../redux_embeddables/redux_embeddable_wrapper';
 import { InputControlInput, InputControlOutput } from '../../../../services/controls';
+import { esFilters, IIndexPattern, IFieldType } from '../../../../../../data/public';
+import { Embeddable, IContainer } from '../../../../../../embeddable/public';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
-
-const toggleAvailableOptions = (
-  indices: number[],
-  availableOptions: EuiSelectableOption[],
-  enabled?: boolean
-) => {
-  const newAvailableOptions = [...availableOptions];
-  indices.forEach((index) => (newAvailableOptions[index].checked = enabled ? 'on' : undefined));
-  return newAvailableOptions;
-};
+import { optionsListReducers } from './options_list_reducers';
 
 const diffDataFetchProps = (
   current?: OptionsListDataFetchProps,
@@ -42,28 +33,29 @@ const diffDataFetchProps = (
 };
 
 interface OptionsListDataFetchProps {
-  field: string;
   search?: string;
-  indexPattern: string;
+  field: IFieldType;
+  indexPattern: IIndexPattern;
   query?: InputControlInput['query'];
   filters?: InputControlInput['filters'];
   timeRange?: InputControlInput['timeRange'];
 }
 
-export type OptionsListIndexPatternFetcher = () => Promise<string[]>; // TODO: use the proper types here.
-export type OptionsListFieldFetcher = (indexPattern: string) => Promise<string[]>; // TODO: use the proper types here.
+export type OptionsListIndexPatternFetcher = () => Promise<IIndexPattern[]>;
+export type OptionsListFieldFetcher = (indexPattern: IIndexPattern) => Promise<IFieldType[]>;
 
-export type OptionsListDataFetcher = (
-  props: OptionsListDataFetchProps
-) => Promise<EuiSelectableOption[]>;
+export type OptionsListDataFetcher = (props: OptionsListDataFetchProps) => Promise<string[]>;
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 export interface OptionsListEmbeddableInput extends InputControlInput {
-  field: string;
-  indexPattern: string;
+  field: IFieldType;
+  indexPattern: IIndexPattern;
+
+  selectedOptions?: string[];
   singleSelect?: boolean;
-  defaultSelections?: string[];
+  loading?: boolean;
 }
+
 export class OptionsListEmbeddable extends Embeddable<
   OptionsListEmbeddableInput,
   InputControlOutput
@@ -72,8 +64,8 @@ export class OptionsListEmbeddable extends Embeddable<
   private node?: HTMLElement;
 
   // internal state for this input control.
-  private selectedOptions: Set<string>;
   private typeaheadSubject: Subject<string> = new Subject<string>();
+  private searchString = '';
 
   private componentState: OptionsListComponentState;
   private componentStateSubject$ = new Subject<OptionsListComponentState>();
@@ -85,109 +77,73 @@ export class OptionsListEmbeddable extends Embeddable<
     this.componentStateSubject$.next(this.componentState);
   }
 
+  private subscriptions: Subscription = new Subscription();
+
   constructor(
     input: OptionsListEmbeddableInput,
     output: InputControlOutput,
     private fetchData: OptionsListDataFetcher,
     parent?: IContainer
   ) {
-    super(input, output, parent);
+    super({ ...input, loading: true }, output, parent);
     this.fetchData = fetchData;
 
-    // populate default selections from input
-    this.selectedOptions = new Set<string>(input.defaultSelections ?? []);
-    const { selectedOptionsCount, selectedOptionsString } = this.buildSelectedOptionsString();
+    const dataFetchPipe = this.getInput$().pipe(
+      map((newInput) => ({
+        field: newInput.field,
+        indexPattern: newInput.indexPattern,
+        query: newInput.query,
+        filters: newInput.filters,
+        timeRange: newInput.timeRange,
+      })),
+      distinctUntilChanged(diffDataFetchProps)
+    );
+
+    // push searchString changes into a debounced typeahead subject
+    this.typeaheadSubject = new Subject<string>();
+    const typeaheadPipe = this.typeaheadSubject.pipe(
+      tap((newSearchString) => (this.searchString = newSearchString), debounceTime(100))
+    );
 
     // fetch available options when input changes or when search string has changed
-    const typeaheadPipe = this.typeaheadSubject.pipe(
-      tap((newSearchString) => this.updateComponentState({ searchString: newSearchString })),
-      debounceTime(100)
+    this.subscriptions.add(
+      merge(dataFetchPipe, typeaheadPipe).subscribe(this.fetchAvailableOptions)
     );
-    const inputPipe = this.getInput$().pipe(
-      map(
-        (newInput) => ({
-          field: newInput.field,
-          indexPattern: newInput.indexPattern,
-          query: newInput.query,
-          filters: newInput.filters,
-          timeRange: newInput.timeRange,
-        }),
-        distinctUntilChanged(diffDataFetchProps)
-      )
+
+    // clear all selections when field or index pattern change
+    this.subscriptions.add(
+      this.getInput$()
+        .pipe(
+          distinctUntilChanged(
+            (a, b) => isEqual(a.field, b.field) && isEqual(a.indexPattern, b.indexPattern)
+          ),
+          skip(1) // skip the first change to preserve default selections after init
+        )
+        .subscribe(() => this.updateInput({ selectedOptions: [] }))
     );
-    merge(typeaheadPipe, inputPipe).subscribe(this.fetchAvailableOptions);
 
-    // push changes from input into component state
-    this.getInput$().subscribe((newInput) => {
-      if (newInput.twoLineLayout !== this.componentState.twoLineLayout)
-        this.updateComponentState({ twoLineLayout: newInput.twoLineLayout });
-    });
-
-    this.componentState = {
-      loading: true,
-      selectedOptionsCount,
-      selectedOptionsString,
-      twoLineLayout: input.twoLineLayout,
-    };
+    this.componentState = { loading: true };
     this.updateComponentState(this.componentState);
   }
 
   private fetchAvailableOptions = async () => {
     this.updateComponentState({ loading: true });
-
     const { indexPattern, timeRange, filters, field, query } = this.getInput();
-    let newOptions = await this.fetchData({
-      search: this.componentState.searchString,
+    const newOptions = await this.fetchData({
+      search: this.searchString,
       indexPattern,
       timeRange,
       filters,
       field,
       query,
     });
-
-    // We now have new 'availableOptions', we need to ensure the selected options are still selected in the new list.
-    const enabledIndices: number[] = [];
-    this.selectedOptions?.forEach((selectedOption) => {
-      const optionIndex = newOptions.findIndex(
-        (availableOption) => availableOption.label === selectedOption
-      );
-      if (optionIndex >= 0) enabledIndices.push(optionIndex);
-    });
-    newOptions = toggleAvailableOptions(enabledIndices, newOptions, true);
-    this.updateComponentState({ loading: false, availableOptions: newOptions });
+    this.updateComponentState({ availableOptions: newOptions, loading: false });
   };
 
-  private updateOption = (index: number) => {
-    const item = this.componentState.availableOptions?.[index];
-    if (!item) return;
-    const toggleOff = item.checked === 'on';
-
-    // update availableOptions to show selection check marks
-    const newAvailableOptions = toggleAvailableOptions(
-      [index],
-      this.componentState.availableOptions ?? [],
-      !toggleOff
-    );
-    this.componentState.availableOptions = newAvailableOptions;
-
-    // update selectedOptions string
-    if (toggleOff) this.selectedOptions.delete(item.label);
-    else this.selectedOptions.add(item.label);
-    const { selectedOptionsString, selectedOptionsCount } = this.buildSelectedOptionsString();
-    this.updateComponentState({ selectedOptionsString, selectedOptionsCount });
+  public destroy = () => {
+    super.destroy();
+    this.subscriptions.unsubscribe();
   };
-
-  private buildSelectedOptionsString(): {
-    selectedOptionsString: string;
-    selectedOptionsCount: number;
-  } {
-    const selectedOptionsArray = Array.from(this.selectedOptions ?? []);
-    const selectedOptionsString = selectedOptionsArray.join(
-      OptionsListStrings.summary.getSeparator()
-    );
-    const selectedOptionsCount = selectedOptionsArray.length;
-    return { selectedOptionsString, selectedOptionsCount };
-  }
 
   reload = () => {
     this.fetchAvailableOptions();
@@ -199,11 +155,15 @@ export class OptionsListEmbeddable extends Embeddable<
     }
     this.node = node;
     ReactDOM.render(
-      <OptionsListComponent
-        updateOption={this.updateOption}
-        typeaheadSubject={this.typeaheadSubject}
-        componentStateSubject={this.componentStateSubject$}
-      />,
+      <ReduxEmbeddableWrapper<OptionsListEmbeddableInput>
+        embeddable={this}
+        reducers={optionsListReducers}
+      >
+        <OptionsListComponent
+          componentStateSubject={this.componentStateSubject$}
+          typeaheadSubject={this.typeaheadSubject}
+        />
+      </ReduxEmbeddableWrapper>,
       node
     );
   };
