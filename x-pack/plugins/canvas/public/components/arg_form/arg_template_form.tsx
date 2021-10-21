@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, RefObject, createRef } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { RenderToDom } from '../render_to_dom';
 import { ExpressionFormHandlers } from '../../../common/lib/expression_form_handlers';
+import { UpdatePropsRef } from '../../lib/template_from_react_component';
 
 interface ArgTemplateFormProps {
   template?: (
     domNode: HTMLElement,
     config: ArgTemplateFormProps['argumentProps'],
-    handlers: ArgTemplateFormProps['handlers']
-  ) => void;
+    handlers: ArgTemplateFormProps['handlers'],
+    onDone?: (ref) => void,
+  ) => RefObject<UpdatePropsRef>;
   argumentProps: {
     valueMissing?: boolean;
     label?: string;
@@ -42,11 +44,26 @@ export const ArgTemplateForm: React.FunctionComponent<ArgTemplateFormProps> = ({
   errorTemplate,
 }) => {
   const [updatedHandlers, setHandlers] = useState(mergeWithFormHandlers(handlers));
+  const [mounted, setMounted] = useState(false);
   const previousError = usePrevious(error);
+  const prevMounted = usePrevious(mounted);
+  const r = useRef();
+
   const domNodeRef = useRef<HTMLElement>();
+
   const renderTemplate = useCallback(
-    (domNode) => template && template(domNode, argumentProps, updatedHandlers),
-    [template, argumentProps, updatedHandlers]
+    (domNode) => {
+      return (
+        template &&
+        template(domNode, argumentProps, updatedHandlers, (ref) => {
+          if (!r.current && ref) {
+            r.current = ref;
+            setMounted(true);
+          }
+        })
+      );
+    },
+    [argumentProps, template, updatedHandlers]
   );
 
   const renderErrorTemplate = useCallback(
@@ -65,10 +82,16 @@ export const ArgTemplateForm: React.FunctionComponent<ArgTemplateFormProps> = ({
   }, [previousError, error, updatedHandlers]);
 
   useEffect(() => {
-    if (!error) {
+    if (!error && mounted && !prevMounted && !r.current) {
       renderTemplate(domNodeRef.current);
     }
-  }, [error, renderTemplate, domNodeRef]);
+  }, [error, mounted, prevMounted, renderTemplate]);
+
+  useEffect(() => {
+    if (r.current) {
+      r.current?.updateProps(argumentProps);
+    }
+  }, [argumentProps]);
 
   if (error) {
     return renderErrorTemplate();
@@ -82,7 +105,7 @@ export const ArgTemplateForm: React.FunctionComponent<ArgTemplateFormProps> = ({
     <RenderToDom
       render={(domNode) => {
         domNodeRef.current = domNode;
-        renderTemplate(domNode);
+        setMounted(true);
       }}
     />
   );

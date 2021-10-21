@@ -5,7 +5,18 @@
  * 2.0.
  */
 
-import React, { ComponentType, FC } from 'react';
+import React, {
+  ComponentType,
+  FC,
+  forwardRef,
+  ForwardRefRenderFunction,
+  MutableRefObject,
+  Ref,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { unmountComponentAtNode, render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -16,38 +27,73 @@ export interface Props {
   renderError: Function;
 }
 
+export interface UpdatePropsRef {
+  updateProps: (newProps: Props) => void;
+}
+
 export const templateFromReactComponent = (Component: ComponentType<any>) => {
-  const WrappedComponent: FC<Props> = (props) => (
-    <ErrorBoundary>
-      {({ error }) => {
-        if (error) {
-          props.renderError();
-          return null;
-        }
+  const WrappedComponent: ForwardRefRenderFunction<UpdatePropsRef, Props> = (props, ref) => {
+    const [updatedProps, setUpdatedProps] = useState<Props>(props);
+    useImperativeHandle(ref, () => ({
+      updateProps: (newProps: Props) => {
+        console.log('new props', newProps);
+        setUpdatedProps(newProps);
+      },
+    }));
 
-        return (
-          <I18nProvider>
-            <Component {...props} />
-          </I18nProvider>
-        );
-      }}
-    </ErrorBoundary>
-  );
+    useEffect(() => {
+      return () => {
+        console.log('unmounted');
+      };
+    }, []);
 
-  WrappedComponent.propTypes = {
+    console.log(Component);
+    return <Component {...updatedProps} />;
+
+    return (
+      <ErrorBoundary>
+        {({ error }) => {
+          if (error) {
+            props.renderError();
+            return null;
+          }
+
+          return (
+            <I18nProvider>
+              <Component {...updatedProps} />
+            </I18nProvider>
+          );
+        }}
+      </ErrorBoundary>
+    );
+  };
+
+  const ForwardRefWrappedComponent = forwardRef(WrappedComponent);
+
+  ForwardRefWrappedComponent.propTypes = {
     renderError: PropTypes.func,
   };
 
-  return (domNode: HTMLElement, config: Props, handlers: ArgumentHandlers) => {
+  return (domNode: HTMLElement, config: Props, handlers: ArgumentHandlers, onRef) => {
     try {
-      const el = React.createElement(WrappedComponent, config);
+      console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!');
+      const el = (
+        <ForwardRefWrappedComponent
+          {...config}
+          ref={(ref) => {
+            onRef?.(ref);
+          }}
+        />
+      );
       render(el, domNode, () => {
         handlers.done();
+        console.log('done');
       });
 
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });
+
     } catch (err) {
       handlers.done();
       config.renderError();
