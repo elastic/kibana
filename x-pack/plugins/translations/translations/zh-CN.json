@@ -19533,7 +19533,6 @@
     "xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle": "已为 {reportObjectType}“{reportObjectTitle}”创建报告",
     "xpack.reporting.redirectApp.errorTitle": "重定向错误",
     "xpack.reporting.redirectApp.redirectConsoleErrorPrefixLabel": "重定向页面错误：",
-    "xpack.reporting.redirectApp.redirectingMessage": "正在重定向......",
     "xpack.reporting.registerFeature.reportingDescription": "管理您从 Discover、Visualize 和 Dashboard 生成的报告。",
     "xpack.reporting.registerFeature.reportingTitle": "Reporting",
     "xpack.reporting.screencapture.browserWasClosed": "浏览器已意外关闭！有关更多信息，请查看服务器日志。",
