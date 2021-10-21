@@ -23,7 +23,11 @@ export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props
     case 0:
       return (
         <div data-test-subj="cti-with-no-events">
-          <CtiNoEvents to={to} from={from} />
+          <CtiNoEvents
+            to={to}
+            from={from}
+            someIntegrationIsDisabled={props.someIntegrationIsDisabled}
+          />
         </div>
       );
     default:
@@ -34,6 +38,7 @@ export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props
             totalCount={totalCount}
             to={to}
             from={from}
+            someIntegrationIsDisabled={props.someIntegrationIsDisabled}
           />
         </div>
       );

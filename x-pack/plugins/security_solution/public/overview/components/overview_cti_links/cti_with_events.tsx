@@ -15,11 +15,13 @@ export const CtiWithEventsComponent = ({
   from,
   to,
   totalCount,
+  someIntegrationIsDisabled,
 }: {
   eventCountsByDataset: { [key: string]: number };
   from: string;
   to: string;
   totalCount: number;
+  someIntegrationIsDisabled: boolean;
 }) => {
   const { buttonHref, isPluginDisabled, listItems } = useCtiDashboardLinks(
     eventCountsByDataset,
@@ -33,6 +35,7 @@ export const CtiWithEventsComponent = ({
       isPluginDisabled={isPluginDisabled}
       listItems={listItems}
       totalCount={totalCount}
+      someIntegrationIsDisabled={someIntegrationIsDisabled}
     />
   );
 };
