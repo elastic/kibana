@@ -329,7 +329,6 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             threat_query: 'source.ip: "188.166.120.93"',
-            throttle: null,
             to: 'now',
             type: 'threat_match',
             updated_at: fullSignal[ALERT_RULE_UPDATED_AT],
