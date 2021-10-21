@@ -19188,10 +19188,10 @@ listr@^0.14.1:
     p-map "^2.0.0"
     rxjs "^6.3.3"
 
-lmdb-store@^1.6.10:
-  version "1.6.10"
-  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-1.6.10.tgz#1f4a4d2827c4045156dd9e6d21ca0f9cec8f1bba"
-  integrity sha512-eON9oD8NLM3DpJ+mQfzw24Pd/gVDxEaXmi+L53j092Oqc3C+pc1G6/a2bmmG9kAUfiwdd5tQMvhDOVpodpkaPA==
+lmdb-store@^1.6.11:
+  version "1.6.11"
+  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-1.6.11.tgz#801da597af8c7a01c81f87d5cc7a7497e381236d"
+  integrity sha512-hIvoGmHGsFhb2VRCmfhodA/837ULtJBwRHSHKIzhMB7WtPH6BRLPsvXp1MwD3avqGzuZfMyZDUp3tccLvr721Q==
   dependencies:
     nan "^2.14.2"
     node-gyp-build "^4.2.3"
