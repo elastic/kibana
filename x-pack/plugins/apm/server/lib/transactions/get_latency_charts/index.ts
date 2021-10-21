@@ -17,10 +17,11 @@ import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../../../lib/helpers/aggregated_transactions';
+
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../../../lib/helpers/transactions';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import {
@@ -63,7 +64,7 @@ function searchLatency({
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    ...getDocumentTypeFilterForAggregatedTransactions(
+    ...getDocumentTypeFilterForTransactions(
       searchAggregatedTransactions
     ),
     ...rangeQuery(start, end),
@@ -80,14 +81,14 @@ function searchLatency({
   }
 
   const transactionDurationField =
-    getTransactionDurationFieldForAggregatedTransactions(
+    getTransactionDurationFieldForTransactions(
       searchAggregatedTransactions
     );
 
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
+        getProcessorEventForTransactions(
           searchAggregatedTransactions
         ),
       ],

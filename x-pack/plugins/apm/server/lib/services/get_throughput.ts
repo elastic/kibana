@@ -14,9 +14,9 @@ import {
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
 import { calculateThroughputWithInterval } from '../helpers/calculate_throughput';
 
@@ -52,7 +52,7 @@ export async function getThroughput({
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    ...getDocumentTypeFilterForAggregatedTransactions(
+    ...getDocumentTypeFilterForTransactions(
       searchAggregatedTransactions
     ),
     ...rangeQuery(start, end),
@@ -71,7 +71,7 @@ export async function getThroughput({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
+        getProcessorEventForTransactions(
           searchAggregatedTransactions
         ),
       ],

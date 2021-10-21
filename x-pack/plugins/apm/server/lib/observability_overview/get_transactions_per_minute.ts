@@ -13,9 +13,9 @@ import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
 import { Setup } from '../helpers/setup_request';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import {
   calculateThroughputWithInterval,
   calculateThroughputWithRange,
@@ -43,7 +43,7 @@ export async function getTransactionsPerMinute({
     {
       apm: {
         events: [
-          getProcessorEventForAggregatedTransactions(
+          getProcessorEventForTransactions(
             searchAggregatedTransactions
           ),
         ],
@@ -54,7 +54,7 @@ export async function getTransactionsPerMinute({
           bool: {
             filter: [
               ...rangeQuery(start, end),
-              ...getDocumentTypeFilterForAggregatedTransactions(
+              ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
             ],

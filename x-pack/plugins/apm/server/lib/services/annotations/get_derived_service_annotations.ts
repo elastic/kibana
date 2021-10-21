@@ -15,9 +15,9 @@ import {
 import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../../helpers/transactions';
 import { Setup } from '../../helpers/setup_request';
 
 export async function getDerivedServiceAnnotations({
@@ -39,7 +39,7 @@ export async function getDerivedServiceAnnotations({
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    ...getDocumentTypeFilterForAggregatedTransactions(
+    ...getDocumentTypeFilterForTransactions(
       searchAggregatedTransactions
     ),
     ...environmentQuery(environment),
@@ -50,7 +50,7 @@ export async function getDerivedServiceAnnotations({
       await apmEventClient.search('get_derived_service_annotations', {
         apm: {
           events: [
-            getProcessorEventForAggregatedTransactions(
+            getProcessorEventForTransactions(
               searchAggregatedTransactions
             ),
           ],
@@ -83,7 +83,7 @@ export async function getDerivedServiceAnnotations({
         {
           apm: {
             events: [
-              getProcessorEventForAggregatedTransactions(
+              getProcessorEventForTransactions(
                 searchAggregatedTransactions
               ),
             ],

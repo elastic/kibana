@@ -14,11 +14,13 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
   getSearchAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
+import {
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../../helpers/transactions';
 import { Setup } from '../../helpers/setup_request';
 
 export async function getTransactionDurationChartPreview({
@@ -52,7 +54,7 @@ export async function getTransactionDurationChartPreview({
           : []),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
-        ...getDocumentTypeFilterForAggregatedTransactions(
+        ...getDocumentTypeFilterForTransactions(
           searchAggregatedTransactions
         ),
       ] as QueryDslQueryContainer[],
@@ -60,7 +62,7 @@ export async function getTransactionDurationChartPreview({
   };
 
   const transactionDurationField =
-    getTransactionDurationFieldForAggregatedTransactions(
+    getTransactionDurationFieldForTransactions(
       searchAggregatedTransactions
     );
 
@@ -91,7 +93,7 @@ export async function getTransactionDurationChartPreview({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
+        getProcessorEventForTransactions(
           searchAggregatedTransactions
         ),
       ],

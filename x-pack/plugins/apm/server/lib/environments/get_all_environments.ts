@@ -12,7 +12,7 @@ import {
   SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getProcessorEventForTransactions } from '../helpers/transactions';
 
 /**
  * This is used for getting *all* environments, and does not filter by range.
@@ -45,7 +45,7 @@ export async function getAllEnvironments({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
+        getProcessorEventForTransactions(
           searchAggregatedTransactions
         ),
         ProcessorEvent.error,

@@ -9,7 +9,6 @@ import { SearchAggregatedTransactionSetting } from '../../../../common/aggregate
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
-  TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
 } from '../../../../common/elasticsearch_fieldnames';
 import { APMConfig } from '../../..';
@@ -77,26 +76,3 @@ export async function getSearchAggregatedTransactions({
   );
 }
 
-export function getTransactionDurationFieldForAggregatedTransactions(
-  searchAggregatedTransactions: boolean
-) {
-  return searchAggregatedTransactions
-    ? TRANSACTION_DURATION_HISTOGRAM
-    : TRANSACTION_DURATION;
-}
-
-export function getDocumentTypeFilterForAggregatedTransactions(
-  searchAggregatedTransactions: boolean
-) {
-  return searchAggregatedTransactions
-    ? [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }]
-    : [];
-}
-
-export function getProcessorEventForAggregatedTransactions(
-  searchAggregatedTransactions: boolean
-): ProcessorEvent.metric | ProcessorEvent.transaction {
-  return searchAggregatedTransactions
-    ? ProcessorEvent.metric
-    : ProcessorEvent.transaction;
-}

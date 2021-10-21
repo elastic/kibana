@@ -6,7 +6,7 @@
  */
 
 import { ProcessorEvent } from '../../../common/processor_event';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getProcessorEventForTransactions } from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
 
 export async function getSuggestions({
@@ -27,7 +27,7 @@ export async function getSuggestions({
   const response = await apmEventClient.termsEnum('get_suggestions', {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
+        getProcessorEventForTransactions(
           searchAggregatedTransactions
         ),
         ProcessorEvent.error,
