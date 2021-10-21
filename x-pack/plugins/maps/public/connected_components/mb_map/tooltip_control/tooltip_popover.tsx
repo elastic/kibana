@@ -44,15 +44,12 @@ interface Props {
 interface State {
   x?: number;
   y?: number;
-  isVisible: boolean;
 }
 
 export class TooltipPopover extends Component<Props, State> {
   private readonly _popoverRef: RefObject<EuiPopover> = React.createRef();
 
-  state: State = {
-    isVisible: true,
-  };
+  state: State = {};
 
   componentDidMount() {
     this._updatePopoverPosition();
@@ -74,15 +71,19 @@ export class TooltipPopover extends Component<Props, State> {
     const lat = this.props.location[LAT_INDEX];
     const lon = this.props.location[LON_INDEX];
     const bounds = this.props.mbMap.getBounds();
-    this.setState({
-      x: nextPoint.x,
-      y: nextPoint.y,
-      isVisible:
-        lat < bounds.getNorth() &&
-        lat > bounds.getSouth() &&
-        lon > bounds.getWest() &&
-        lon < bounds.getEast(),
-    });
+    const isVisible =
+      lat < bounds.getNorth() &&
+      lat > bounds.getSouth() &&
+      lon > bounds.getWest() &&
+      lon < bounds.getEast();
+    if (!isVisible) {
+      this.props.closeTooltip();
+    } else {
+      this.setState({
+        x: nextPoint.x,
+        y: nextPoint.y,
+      });
+    }
   };
 
   _loadFeatureProperties = async ({
@@ -104,8 +105,15 @@ export class TooltipPopover extends Component<Props, State> {
       targetFeature = tooltipLayer.getFeatureById(featureId);
     }
 
-    const properties = targetFeature ? targetFeature.properties : mbProperties;
-    return await tooltipLayer.getPropertiesForTooltip(properties ? properties : {});
+    let properties: GeoJsonProperties | undefined;
+    if (mbProperties) {
+      properties = mbProperties;
+    } else if (targetFeature?.properties) {
+      properties = targetFeature?.properties;
+    } else {
+      properties = {};
+    }
+    return await tooltipLayer.getPropertiesForTooltip(properties);
   };
 
   _getLayerName = async (layerId: string) => {
@@ -143,7 +151,7 @@ export class TooltipPopover extends Component<Props, State> {
   };
 
   render() {
-    if (!this.state.isVisible || this.state.x === undefined || this.state.y === undefined) {
+    if (this.state.x === undefined || this.state.y === undefined) {
       return null;
     }
 

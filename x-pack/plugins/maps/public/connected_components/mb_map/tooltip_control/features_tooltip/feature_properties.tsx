@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import React, { Component, CSSProperties, RefObject, ReactNode } from 'react';
 import {
   EuiCallOut,
@@ -57,6 +58,7 @@ export class FeatureProperties extends Component<Props, State> {
   private _isMounted = false;
   private _prevLayerId: string = '';
   private _prevFeatureId?: string | number = '';
+  private _prevMbProperties?: GeoJsonProperties;
   private readonly _tableRef: RefObject<HTMLTableElement> = React.createRef();
 
   state: State = {
@@ -118,13 +120,18 @@ export class FeatureProperties extends Component<Props, State> {
     nextFeatureId?: string | number;
     mbProperties: GeoJsonProperties;
   }) => {
-    if (this._prevLayerId === nextLayerId && this._prevFeatureId === nextFeatureId) {
+    if (
+      this._prevLayerId === nextLayerId &&
+      this._prevFeatureId === nextFeatureId &&
+      _.isEqual(this._prevMbProperties, mbProperties)
+    ) {
       // do not reload same feature properties
       return;
     }
 
     this._prevLayerId = nextLayerId;
     this._prevFeatureId = nextFeatureId;
+    this._prevMbProperties = mbProperties;
     this.setState({
       properties: null,
       loadPropertiesErrorMsg: null,
