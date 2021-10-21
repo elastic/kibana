@@ -36,7 +36,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await testSubjects.click('savedObjectSearchBar');
   };
 
-  describe('saved objects management integration', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/115320
+  describe.skip('saved objects management integration', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management'
