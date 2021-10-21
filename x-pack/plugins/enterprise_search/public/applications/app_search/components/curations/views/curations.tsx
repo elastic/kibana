@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../shared/licensing';
@@ -25,12 +25,18 @@ import { getCurationsBreadcrumbs } from '../utils';
 
 import { CurationsHistory } from './curations_history/curations_history';
 import { CurationsOverview } from './curations_overview';
-import { CurationsSettings } from './curations_settings';
+import { CurationsSettings, CurationsSettingsLogic } from './curations_settings';
 
 export const Curations: React.FC = () => {
-  const { dataLoading, curations, meta, selectedPageTab } = useValues(CurationsLogic);
+  const { dataLoading: curationsDataLoading, meta, selectedPageTab } = useValues(CurationsLogic);
   const { loadCurations, onSelectPageTab } = useActions(CurationsLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const {
+    dataLoading: curationsSettingsDataLoading,
+    curationsSettings: { enabled: curationsSettingsEnabled },
+  } = useValues(CurationsSettingsLogic);
+
+  const suggestionsEnabled = hasPlatinumLicense && curationsSettingsEnabled;
 
   const OVERVIEW_TAB = {
     label: i18n.translate(
@@ -60,17 +66,18 @@ export const Curations: React.FC = () => {
     ),
     isSelected: selectedPageTab === 'settings',
     onClick: () => onSelectPageTab('settings'),
+    append: suggestionsEnabled ? undefined : (
+      <EuiBadge color="success">
+        {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.newBadgeLabel', {
+          defaultMessage: 'New!',
+        })}
+      </EuiBadge>
+    ),
   };
 
   const pageTabs = hasPlatinumLicense
     ? [OVERVIEW_TAB, HISTORY_TAB, SETTINGS_TAB]
-    : [
-        OVERVIEW_TAB,
-        {
-          ...SETTINGS_TAB,
-          prepend: <EuiIcon type="cheer" />,
-        },
-      ];
+    : [OVERVIEW_TAB, SETTINGS_TAB];
 
   useEffect(() => {
     loadCurations();
@@ -92,7 +99,7 @@ export const Curations: React.FC = () => {
         ],
         tabs: pageTabs,
       }}
-      isLoading={dataLoading && !curations.length}
+      isLoading={curationsSettingsDataLoading || curationsDataLoading}
     >
       {selectedPageTab === 'overview' && <CurationsOverview />}
       {selectedPageTab === 'history' && <CurationsHistory />}
