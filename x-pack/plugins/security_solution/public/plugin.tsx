@@ -38,8 +38,6 @@ import { SOLUTION_NAME } from './common/translations';
 import {
   APP_ID,
   APP_UI_ID,
-  OVERVIEW_PATH,
-  APP_OVERVIEW_PATH,
   APP_PATH,
   DEFAULT_INDEX_KEY,
   APP_ICON_SOLUTION,
@@ -112,7 +110,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             'Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.',
         }),
         icon: 'logoSecurity',
-        path: APP_OVERVIEW_PATH,
+        path: APP_PATH,
         order: 300,
       });
     }
@@ -141,7 +139,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       category: DEFAULT_APP_CATEGORIES.security,
       navLinkStatus: AppNavLinkStatus.hidden,
       searchable: true,
-      defaultPath: OVERVIEW_PATH,
       updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
       deepLinks: getDeepLinks(this.experimentalFeatures),

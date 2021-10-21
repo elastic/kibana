@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
-import { matchPath, RouteProps } from 'react-router-dom';
+import { matchPath, RouteProps, Redirect } from 'react-router-dom';
 
 import { Capabilities, CoreStart } from '../../../../src/core/public';
 import {
@@ -19,6 +19,8 @@ import {
   RISKY_HOSTS_INDEX_PREFIX,
   SERVER_APP_ID,
   CASES_FEATURE_ID,
+  OVERVIEW_PATH,
+  CASES_PATH,
 } from '../common/constants';
 import {
   FactoryQueryTypes,
@@ -167,18 +169,24 @@ export const getSubPluginRoutesByCapabilities = (
   subPlugins: StartedSubPlugins,
   capabilities: Capabilities
 ): RouteProps[] => {
-  return Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
-    if (isSubPluginAvailable(key, capabilities)) {
-      return [...acc, ...value.routes];
-    }
-    return [
-      ...acc,
-      ...value.routes.map((route: RouteProps) => ({
-        path: route.path,
-        component: () => <NoPrivilegesPage subPluginKey={key} />,
-      })),
-    ];
-  }, []);
+  return [
+    ...Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
+      if (isSubPluginAvailable(key, capabilities)) {
+        return [...acc, ...value.routes];
+      }
+      return [
+        ...acc,
+        ...value.routes.map((route: RouteProps) => ({
+          path: route.path,
+          component: () => <NoPrivilegesPage subPluginKey={key} />,
+        })),
+      ];
+    }, []),
+    {
+      path: '',
+      component: () => <RedirectRoute capabilities={capabilities} />,
+    },
+  ];
 };
 
 export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabilities): boolean => {
@@ -187,3 +195,16 @@ export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabiliti
   }
   return capabilities[SERVER_APP_ID].show === true;
 };
+
+export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capabilities }) => {
+  const overviewAvailable = isSubPluginAvailable('overview', capabilities);
+  const casesAvailable = isSubPluginAvailable(CASES_SUB_PLUGIN_KEY, capabilities);
+  if (overviewAvailable) {
+    return <Redirect to={OVERVIEW_PATH} />;
+  }
+  if (casesAvailable) {
+    return <Redirect to={CASES_PATH} />;
+  }
+  return <Redirect to={OVERVIEW_PATH} />;
+});
+RedirectRoute.displayName = 'RedirectRoute';
