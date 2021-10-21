@@ -31,7 +31,8 @@ export class MonacoEditorService extends FtrService {
   public async typeCodeEditorValue(value: string, testSubjId: string) {
     const editor = await this.testSubjects.find(testSubjId);
     const textarea = await editor.findByCssSelector('textarea');
-    textarea.type(value);
+
+    await textarea.type(value);
   }
 
   public async setCodeEditorValue(value: string, nthIndex = 0) {
