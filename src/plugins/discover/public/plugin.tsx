@@ -342,7 +342,6 @@ export class DiscoverPlugin
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
-        injectTruncateStyles(getServices().uiSettings.get(TRUNCATE_MAX_HEIGHT));
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
         const unlistenParentHistory = params.history.listen(() => {
@@ -411,6 +410,8 @@ export class DiscoverPlugin
 
     const services = buildServices(core, plugins, this.initializerContext);
     setServices(services);
+
+    injectTruncateStyles(services.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     return {
       urlGenerator: this.urlGenerator,
