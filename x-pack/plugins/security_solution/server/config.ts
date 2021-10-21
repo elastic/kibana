@@ -148,7 +148,6 @@ export const createConfig = (context: PluginInitializerContext): ConfigType => {
 
   return {
     ...pluginConfig,
-    kibanaIndex,
     experimentalFeatures,
   };
 };
