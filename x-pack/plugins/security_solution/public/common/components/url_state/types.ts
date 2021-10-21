@@ -73,6 +73,7 @@ export interface PreviousLocationUrlState {
   pathName: string | undefined;
   pageName: string | undefined;
   urlState: UrlState;
+  search: string | undefined;
 }
 
 export interface UrlStateToRedux {

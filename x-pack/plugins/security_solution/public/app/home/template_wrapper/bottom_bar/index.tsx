@@ -16,6 +16,7 @@ import { getScopeFromPath, useSourcererDataView } from '../../../../common/conta
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
 import { Flyout } from '../../../../timelines/components/flyout';
+import { useResolveRedirect } from '../../../../common/hooks/use_resolve_redirect';
 
 export const BOTTOM_BAR_CLASSNAME = 'timeline-bottom-bar';
 
@@ -26,6 +27,7 @@ export const SecuritySolutionBottomBar = React.memo(
     const [showTimeline] = useShowTimeline();
 
     const { indicesExist } = useSourcererDataView(getScopeFromPath(pathname));
+    useResolveRedirect();
 
     return indicesExist && showTimeline ? (
       <>

@@ -17,7 +17,7 @@ import { mockBrowserFields, mockDocValueFields } from '../../../../common/contai
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
-const mockUseSourcererScope: jest.Mock = useSourcererDataView as jest.Mock;
+const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
 jest.mock('../../../../common/containers/sourcerer');
 
 const mockUseTimelineKpis: jest.Mock = useTimelineKpis as jest.Mock;
@@ -62,7 +62,7 @@ describe('header', () => {
 
   beforeEach(() => {
     // Mocking these services is required for the header component to render.
-    mockUseSourcererScope.mockImplementation(() => defaultMocks);
+    mockUseSourcererDataView.mockImplementation(() => defaultMocks);
     useKibanaMock().services.application.capabilities = {
       navLinks: {},
       management: {},

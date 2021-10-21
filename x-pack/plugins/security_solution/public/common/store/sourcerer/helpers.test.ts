@@ -128,6 +128,50 @@ describe('sourcerer store helpers', () => {
         },
       });
     });
+    describe('handles missing dataViewId, 7.16 -> 8.0', () => {
+      it('selectedPatterns.length > 0 & all selectedPatterns exist in defaultDataView, set dataViewId to defaultDataView.id', () => {
+        const result = validateSelectedPatterns(mockGlobalState.sourcerer, {
+          ...payload,
+          id: SourcererScopeName.timeline,
+          selectedDataViewId: '',
+          selectedPatterns: [
+            mockGlobalState.sourcerer.defaultDataView.patternList[3],
+            mockGlobalState.sourcerer.defaultDataView.patternList[4],
+          ],
+        });
+        expect(result).toEqual({
+          [SourcererScopeName.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            selectedDataViewId: dataView.id,
+            selectedPatterns: [
+              mockGlobalState.sourcerer.defaultDataView.patternList[3],
+              mockGlobalState.sourcerer.defaultDataView.patternList[4],
+            ],
+          },
+        });
+      });
+      it('selectedPatterns.length > 0 & a pattern in selectedPatterns does not exist in defaultDataView, set dataViewId to null', () => {
+        const result = validateSelectedPatterns(mockGlobalState.sourcerer, {
+          ...payload,
+          id: SourcererScopeName.timeline,
+          selectedDataViewId: '',
+          selectedPatterns: [
+            mockGlobalState.sourcerer.defaultDataView.patternList[3],
+            'journalbeat-*',
+          ],
+        });
+        expect(result).toEqual({
+          [SourcererScopeName.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            selectedDataViewId: null,
+            selectedPatterns: [
+              mockGlobalState.sourcerer.defaultDataView.patternList[3],
+              'journalbeat-*',
+            ],
+          },
+        });
+      });
+    });
   });
   describe('defaultDataViewByEventType', () => {
     it('defaults with no eventType', () => {

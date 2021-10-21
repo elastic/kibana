@@ -70,10 +70,10 @@ const mockProps = {
   capabilitiesFetched: true,
   hasMlUserPermissions: true,
 };
-const mockUseSourcererScope = useSourcererDataView as jest.Mock;
+const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 describe('Network page - rendering', () => {
   test('it renders the Setup Instructions text when no index is available', () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       selectedPatterns: [],
       indicesExist: false,
     });
@@ -89,7 +89,7 @@ describe('Network page - rendering', () => {
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       selectedPatterns: [],
       indicesExist: true,
       indexPattern: {},
@@ -138,7 +138,7 @@ describe('Network page - rendering', () => {
         },
       },
     ];
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       selectedPatterns: [],
       indicesExist: true,
       indexPattern: { fields: [], title: 'title' },

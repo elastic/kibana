@@ -9,6 +9,7 @@
 export {
   AppMountParameters,
   CoreSetup,
+  Capabilities,
   PluginInitializerContext,
   ScopedHistory,
   NotificationsStart,

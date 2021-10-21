@@ -95,7 +95,7 @@ jest.mock('../../../timelines/containers', () => ({
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
-const mockUseSourcererScope: jest.Mock = useSourcererDataView as jest.Mock;
+const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
 jest.mock('../../containers/sourcerer');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
@@ -175,7 +175,7 @@ describe('EventsViewer', () => {
     mockUseTimelineEvents.mockReset();
   });
   beforeAll(() => {
-    mockUseSourcererScope.mockImplementation(() => defaultMocks);
+    mockUseSourcererDataView.mockImplementation(() => defaultMocks);
   });
 
   describe('event details', () => {
@@ -284,7 +284,7 @@ describe('EventsViewer', () => {
 
   describe('loading', () => {
     beforeAll(() => {
-      mockUseSourcererScope.mockImplementation(() => ({ ...defaultMocks, loading: true }));
+      mockUseSourcererDataView.mockImplementation(() => ({ ...defaultMocks, loading: true }));
     });
     beforeEach(() => {
       mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponse]);

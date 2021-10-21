@@ -49,7 +49,7 @@ import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
 } from './__mocks__';
-import { getTimeline } from '../../containers/api';
+import { resolveTimeline } from '../../containers/api';
 
 jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
@@ -505,7 +505,7 @@ describe('helpers', () => {
       };
 
       beforeAll(async () => {
-        (getTimeline as jest.Mock).mockRejectedValue(mockError);
+        (resolveTimeline as jest.Mock).mockRejectedValue(mockError);
         queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
@@ -540,7 +540,7 @@ describe('helpers', () => {
       };
 
       beforeAll(async () => {
-        (getTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
+        (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
         await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
@@ -556,7 +556,7 @@ describe('helpers', () => {
       });
 
       test('get timeline by Id', () => {
-        expect(getTimeline).toHaveBeenCalled();
+        expect(resolveTimeline).toHaveBeenCalled();
       });
 
       test('it does not call onError when an error does not occur', () => {
@@ -565,7 +565,7 @@ describe('helpers', () => {
 
       test('Do not override daterange if TimelineStatus is active', () => {
         const { timeline } = formatTimelineResultToModel(
-          omitTypenameInTimeline(getOr({}, 'data.getOneTimeline', selectedTimeline)),
+          omitTypenameInTimeline(getOr({}, 'data.timeline', selectedTimeline)),
           args.duplicate,
           args.timelineType
         );
@@ -598,7 +598,7 @@ describe('helpers', () => {
       };
 
       beforeAll(async () => {
-        (getTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
+        (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
         await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
@@ -614,12 +614,12 @@ describe('helpers', () => {
       });
 
       test('get timeline by Id', () => {
-        expect(getTimeline).toHaveBeenCalled();
+        expect(resolveTimeline).toHaveBeenCalled();
       });
 
       test('should not override daterange if TimelineStatus is active', () => {
         const { timeline } = formatTimelineResultToModel(
-          omitTypenameInTimeline(getOr({}, 'data.getOneTimeline', selectedTimeline)),
+          omitTypenameInTimeline(getOr({}, 'data.timeline', selectedTimeline)),
           args.duplicate,
           args.timelineType
         );
@@ -639,6 +639,10 @@ describe('helpers', () => {
           to: '2020-07-08T08:20:18.966Z',
           notes: [],
           id: TimelineId.active,
+          resolveTimelineConfig: {
+            outcome: 'exactMatch',
+            alias_target_id: undefined,
+          },
         });
       });
 
@@ -666,12 +670,12 @@ describe('helpers', () => {
       };
 
       beforeAll(async () => {
-        (getTimeline as jest.Mock).mockResolvedValue(template);
+        (resolveTimeline as jest.Mock).mockResolvedValue(template);
         await queryTimelineById<{}>(args as unknown as QueryTimelineById<{}>);
       });
 
       afterAll(() => {
-        (getTimeline as jest.Mock).mockReset();
+        (resolveTimeline as jest.Mock).mockReset();
         jest.clearAllMocks();
       });
 
@@ -683,12 +687,12 @@ describe('helpers', () => {
       });
 
       test('get timeline by Id', () => {
-        expect(getTimeline).toHaveBeenCalled();
+        expect(resolveTimeline).toHaveBeenCalled();
       });
 
       test('override daterange if TimelineStatus is immutable', () => {
         const { timeline } = formatTimelineResultToModel(
-          omitTypenameInTimeline(getOr({}, 'data.getOneTimeline', template)),
+          omitTypenameInTimeline(getOr({}, 'data.timeline', template)),
           args.duplicate,
           args.timelineType
         );

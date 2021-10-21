@@ -57,10 +57,10 @@ const mockHistory = {
   createHref: jest.fn(),
   listen: jest.fn(),
 };
-const mockUseSourcererScope = useSourcererDataView as jest.Mock;
+const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 describe('Hosts - rendering', () => {
   test('it renders the Setup Instructions text when no index is available', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: false,
     });
 
@@ -75,7 +75,7 @@ describe('Hosts - rendering', () => {
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
@@ -90,7 +90,7 @@ describe('Hosts - rendering', () => {
   });
 
   test('it should render tab navigation', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
@@ -137,7 +137,7 @@ describe('Hosts - rendering', () => {
         },
       },
     ];
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: { fields: [], title: 'title' },
     });
