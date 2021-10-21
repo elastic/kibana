@@ -124,7 +124,7 @@ export class TiledVectorLayer extends VectorLayer {
 
     const isIncomplete: boolean = tileMetaFeatures.some((tileMeta: TileMetaFeature) => {
       if (tileMeta?.properties?.[ES_MVT_HITS_TOTAL_RELATION] === 'gte') {
-        return tileMeta?.properties?.[ES_MVT_HITS_TOTAL_VALUE] >= maxResultWindow;
+        return tileMeta?.properties?.[ES_MVT_HITS_TOTAL_VALUE] >= maxResultWindow + 1;
       } else {
         return false;
       }
@@ -340,7 +340,7 @@ export class TiledVectorLayer extends VectorLayer {
       mbMap.setFilter(tooManyFeaturesLayerId, [
         'all',
         ['==', ['get', ES_MVT_HITS_TOTAL_RELATION], 'gte'],
-        ['>=', ['get', ES_MVT_HITS_TOTAL_VALUE], maxResultWindow],
+        ['>=', ['get', ES_MVT_HITS_TOTAL_VALUE], maxResultWindow + 1],
       ]);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', euiThemeVars.euiColorWarning);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-width', 3);

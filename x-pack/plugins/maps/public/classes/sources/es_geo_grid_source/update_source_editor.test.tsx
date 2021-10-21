@@ -17,7 +17,6 @@ jest.mock('uuid/v4', () => {
   };
 });
 
-
 const defaultProps = {
   currentLayerType: LAYER_TYPE.VECTOR,
   indexPatternId: 'foobar',

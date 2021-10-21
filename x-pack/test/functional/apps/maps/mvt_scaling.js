@@ -95,7 +95,7 @@ export default function ({ getPageObjects, getService }) {
         filter: [
           'all',
           ['==', ['get', 'hits.total.relation'], 'gte'],
-          ['>=', ['get', 'hits.total.value'], 10001],
+          ['>=', ['get', 'hits.total.value'], 10002],
         ],
         layout: { visibility: 'visible' },
         paint: {

@@ -43,6 +43,7 @@ export async function getEsTile({
       query: requestBody.query,
       fields,
       runtime_mappings: requestBody.runtime_mappings,
+      track_total_hits: requestBody.size + 1,
     };
     const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
       method: 'GET',
