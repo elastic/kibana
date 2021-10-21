@@ -409,8 +409,6 @@ export class DiscoverPlugin
     const services = buildServices(core, plugins, this.initializerContext);
     setServices(services);
 
-    // eslint-disable-next-line no-console
-    console.log('starting');
     injectTruncateStyles(services.uiSettings);
 
     return {
