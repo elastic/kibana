@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { NodeStatusIcon } from './status_icon';
-export { Node } from './node';
+import type { Ensure, SerializableRecord } from '@kbn/utility-types';
+
+export type MyForwardableState = Ensure<
+  SerializableRecord & { captureTest: 'A' },
+  SerializableRecord
+>;

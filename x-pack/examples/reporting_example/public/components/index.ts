@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { NodeStatusIcon } from './status_icon';
-export { Node } from './node';
+export { TestImageA } from './test_image_a';
