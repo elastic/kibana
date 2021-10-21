@@ -67,9 +67,10 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
     [palette, paletteColorStops, updatePalette]
   );
 
-  const stopColorPickers = paletteColorStops.map((colorStop, index) => (
+  const stopColorPickers = paletteColorStops.map(({ id, ...rest }, index) => (
     <StopColorPicker
-      {...colorStop}
+      {...rest}
+      key={index}
       onDelete={() => deleteColorStopAndApply(index)}
       onChange={(cp: ColorStop) => updateColorStopAndApply(index, cp)}
     />

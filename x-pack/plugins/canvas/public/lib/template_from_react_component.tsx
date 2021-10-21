@@ -7,14 +7,9 @@
 
 import React, {
   ComponentType,
-  FC,
   forwardRef,
   ForwardRefRenderFunction,
-  MutableRefObject,
-  Ref,
-  useEffect,
   useImperativeHandle,
-  useRef,
   useState,
 } from 'react';
 import { unmountComponentAtNode, render } from 'react-dom';
@@ -36,19 +31,9 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
     const [updatedProps, setUpdatedProps] = useState<Props>(props);
     useImperativeHandle(ref, () => ({
       updateProps: (newProps: Props) => {
-        console.log('new props', newProps);
         setUpdatedProps(newProps);
       },
     }));
-
-    useEffect(() => {
-      return () => {
-        console.log('unmounted');
-      };
-    }, []);
-
-    console.log(Component);
-    return <Component {...updatedProps} />;
 
     return (
       <ErrorBoundary>
@@ -74,9 +59,13 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
     renderError: PropTypes.func,
   };
 
-  return (domNode: HTMLElement, config: Props, handlers: ArgumentHandlers, onRef) => {
+  return (
+    domNode: HTMLElement,
+    config: Props,
+    handlers: ArgumentHandlers,
+    onRef: (ref: UpdatePropsRef | null) => void
+  ) => {
     try {
-      console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!');
       const el = (
         <ForwardRefWrappedComponent
           {...config}
@@ -87,13 +76,11 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
       );
       render(el, domNode, () => {
         handlers.done();
-        console.log('done');
       });
 
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });
-
     } catch (err) {
       handlers.done();
       config.renderError();

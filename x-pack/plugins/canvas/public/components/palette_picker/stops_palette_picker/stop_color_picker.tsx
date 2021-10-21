@@ -12,11 +12,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { ColorStop } from '../types';
 
 interface Props {
-  id: string;
   stop?: number;
   color?: string;
   onDelete: () => void;
@@ -24,38 +24,52 @@ interface Props {
 }
 
 export const StopColorPicker: FC<Props> = (props) => {
-  const { id, stop, color, onDelete, onChange } = props;
-
+  const { stop, color, onDelete, onChange } = props;
   const [colorStop, setColorStop] = useState<ColorStop>({ stop: stop ?? 0, color: color ?? '' });
+
   const onChangeInput = (updatedColorStop: ColorStop) => {
-    onChange(updatedColorStop);
+    setColorStop(updatedColorStop);
   };
-  const onBlur = () => onChange(colorStop);
+
+  const [, cancel] = useDebounce(
+    () => {
+      if (stop !== colorStop.stop || color !== colorStop.color) {
+        onChange(colorStop);
+      }
+    },
+    200,
+    [colorStop, stop, color]
+  );
+
+  useEffect(() => {
+    return () => {
+      cancel();
+    };
+  }, [cancel]);
 
   return (
-    <EuiFlexItem key={id}>
+    <EuiFlexItem>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber
             compressed
-            value={stop}
+            value={colorStop.stop}
             min={-Infinity}
             onChange={({ target: { valueAsNumber } }) =>
               onChangeInput({ ...colorStop, stop: valueAsNumber })
             }
-            onBlur={onBlur}
           />
         </EuiFlexItem>
 
         <EuiFlexItem>
           <EuiColorPicker
-            key={id}
             secondaryInputDisplay="top"
-            color={color}
+            color={colorStop.color}
             showAlpha
             compressed
-            onChange={(newColor) => onChangeInput({ ...colorStop, color: newColor })}
-            onBlur={onBlur}
+            onChange={(newColor) => {
+              onChangeInput({ ...colorStop, color: newColor });
+            }}
           />
         </EuiFlexItem>
 
