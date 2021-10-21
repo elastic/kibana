@@ -130,7 +130,7 @@ jest.mock('./agent_policy', () => {
 
 jest.mock('./epm/packages/cleanup', () => {
   return {
-    removeOldAssets: jest.fn()
+    removeOldAssets: jest.fn(),
   };
 });
 
