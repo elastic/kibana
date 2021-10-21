@@ -29,9 +29,27 @@ export type SearchSessionSavedObjectAttributesPre$7$13$0 = Omit<
  * but what is important for 7.14.0 is that the version is less then "7.14.0"
  */
 export type SearchSessionSavedObjectAttributesPre$7$14$0 = Omit<
-  SearchSessionSavedObjectAttributesLatest,
+  SearchSessionSavedObjectAttributesPre$8$0$0,
   'version'
 >;
+
+/**
+ * In 8.0.0, we migrated from using URL generators to the locators service. As a result, we move
+ * from using `urlGeneratorId` to `locatorId`.
+ */
+export type SearchSessionSavedObjectAttributesPre$8$0$0 = Omit<
+  SearchSessionSavedObjectAttributesLatest,
+  'locatorId'
+> & {
+  urlGeneratorId?: string;
+};
+
+function getLocatorId(urlGeneratorId?: string) {
+  if (!urlGeneratorId) return;
+  if (urlGeneratorId === 'DISCOVER_APP_URL_GENERATOR') return 'DISCOVER_APP_LOCATOR';
+  if (urlGeneratorId === 'DASHBOARD_APP_URL_GENERATOR') return 'DASHBOARD_APP_LOCATOR';
+  throw new Error(`No migration found for search session URL generator ${urlGeneratorId}`);
+}
 
 export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
   '7.13.0': (
@@ -60,10 +78,14 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
       },
     };
   },
-  '7.16.0': (
-    doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest>
+  '8.0.0': (
+    doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$0$0>
   ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
-    // TODO: Convert `urlGeneratorId` to `locatorId` (do we need to convert state as well?)
-    return doc;
+    const {
+      attributes: { urlGeneratorId, ...otherAttrs },
+    } = doc;
+    const locatorId = getLocatorId(urlGeneratorId);
+    const attributes = { ...otherAttrs, locatorId };
+    return { ...doc, attributes };
   },
 };
