@@ -7,7 +7,6 @@
  */
 
 import * as esKuery from '@kbn/es-query';
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsSerializer } from '../../serialization';
@@ -199,15 +198,6 @@ async function getObjectsAndReferences({
       { body: { docs: makeBulkGetDocs(bulkGetObjects) } },
       { ignore: [404] }
     );
-    // exit early if we can't verify a 404 response is from Elasticsearch
-    if (
-      isNotFoundFromUnsupportedServer({
-        statusCode: bulkGetResponse.statusCode,
-        headers: bulkGetResponse.headers,
-      })
-    ) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-    }
     const newObjectsToGet = new Set<string>();
     for (let i = 0; i < bulkGetObjects.length; i++) {
       // For every element in bulkGetObjects, there should be a matching element in bulkGetResponse.body.docs
