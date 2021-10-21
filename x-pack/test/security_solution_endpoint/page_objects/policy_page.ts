@@ -99,7 +99,17 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async confirmAndSave() {
       await this.ensureIsOnDetailsPage();
-      await (await this.findSaveButton()).click();
+
+      const saveButton = await this.findSaveButton();
+
+      // Sometimes, data retrieval errors may have been encountered by other security solution processes
+      // (ex. index fields search here: `x-pack/plugins/security_solution/public/common/containers/source/index.tsx:181`)
+      // which are displayed using one or more Toast messages. This in turn prevents the user from
+      // actually clicking the Save button. Because those errors are not associated with Policy details,
+      // we'll first check that all toasts are cleared
+      await pageObjects.common.clearAllToasts();
+
+      await saveButton.click();
       await testSubjects.existOrFail('policyDetailsConfirmModal');
       await pageObjects.common.clickConfirmOnModal();
     },
