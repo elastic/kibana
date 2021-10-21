@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { isNoisy, getTimeframeOptions, getInfoFromQueryBar } from './helpers';
+import {
+  isNoisy,
+  getTimeframeOptions,
+  getInfoFromQueryBar,
+  getIsRulePreviewDisabled,
+} from './helpers';
 
 describe('query_preview/helpers', () => {
   describe('isNoisy', () => {
@@ -61,6 +66,90 @@ describe('query_preview/helpers', () => {
       const isItNoisy = isNoisy(1, 'M');
 
       expect(isItNoisy).toBeFalsy();
+    });
+  });
+
+  describe('isRulePreviewDisabled', () => {
+    test('disabled when there is no index', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'threat_match',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: [],
+        threatIndex: ['threat-*'],
+        threatMapping: [
+          { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
+        ],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when query bar is invalid', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'threat_match',
+        isQueryBarValid: false,
+        isThreatQueryBarValid: true,
+        index: ['test-*'],
+        threatIndex: ['threat-*'],
+        threatMapping: [
+          { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
+        ],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when threat query bar is invalid', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'threat_match',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: false,
+        index: ['test-*'],
+        threatIndex: ['threat-*'],
+        threatMapping: [
+          { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
+        ],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when there is no threat index', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'threat_match',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: ['test-*'],
+        threatIndex: [],
+        threatMapping: [
+          { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
+        ],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when there is no threat mapping', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'threat_match',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: ['test-*'],
+        threatIndex: ['threat-*'],
+        threatMapping: [],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('enabled', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'threat_match',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: ['test-*'],
+        threatIndex: ['threat-*'],
+        threatMapping: [
+          { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
+        ],
+      });
+      expect(isDisabled).toEqual(false);
     });
   });
 

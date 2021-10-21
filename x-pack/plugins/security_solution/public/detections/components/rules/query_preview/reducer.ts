@@ -9,12 +9,12 @@ import { Unit } from '@elastic/datemath';
 import { EuiSelectOption } from '@elastic/eui';
 
 import { Type, Language } from '@kbn/securitysolution-io-ts-alerting-types';
-import * as i18n from './translations';
+import * as i18n from '../rule_preview/translations';
 import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 import { ESQuery } from '../../../../../common/typed_json';
 import { FieldValueQueryBar } from '../query_bar';
 import { formatDate } from '../../../../common/components/super_date_picker';
-import { getInfoFromQueryBar, getTimeframeOptions } from './helpers';
+import { getInfoFromQueryBar, getTimeframeOptions } from '../rule_preview/helpers';
 import { Threshold } from '.';
 
 export interface State {

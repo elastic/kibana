@@ -124,7 +124,7 @@ export const QUERY_PREVIEW_DISCLAIMER = i18n.translate(
   }
 );
 
-export const QUERY_PREVIEW_DISCLAIMER_EQL = i18n.translate(
+export const QUERY_PREVIEW_DISCLAIMER_MAX_SIGNALS = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimerEql',
   {
     defaultMessage:

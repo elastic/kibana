@@ -431,3 +431,9 @@ export const fullResponseSchema = t.intersection([
   t.exact(t.partial(responseOptionalFields)),
 ]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
+
+export interface PreviewResponse {
+  previewId: string | undefined;
+  errors: string[] | undefined;
+  warnings: string[] | undefined;
+}

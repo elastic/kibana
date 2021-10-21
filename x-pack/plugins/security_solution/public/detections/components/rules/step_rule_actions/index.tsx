@@ -43,7 +43,7 @@ interface StepRuleActionsProps extends RuleStepProps {
   actionMessageParams: ActionVariables;
 }
 
-const stepActionsDefaultValue: ActionsStepRule = {
+export const stepActionsDefaultValue: ActionsStepRule = {
   enabled: true,
   actions: [],
   kibanaSiemAppUrl: '',
