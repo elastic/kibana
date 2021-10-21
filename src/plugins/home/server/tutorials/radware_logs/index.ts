@@ -24,12 +24,12 @@ export function radwareLogsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'radwareLogs',
     name: i18n.translate('home.tutorials.radwareLogs.nameTitle', {
-      defaultMessage: 'Radware DefensePro logs',
+      defaultMessage: 'Radware DefensePro Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.radwareLogs.shortDescription', {
-      defaultMessage: 'Collect Radware DefensePro logs over syslog or from a file.',
+      defaultMessage: 'Collect and parse logs from Radware DefensePro with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.radwareLogs.longDescription', {
       defaultMessage:

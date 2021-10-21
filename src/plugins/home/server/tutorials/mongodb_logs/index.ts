@@ -24,12 +24,12 @@ export function mongodbLogsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'mongodbLogs',
     name: i18n.translate('home.tutorials.mongodbLogs.nameTitle', {
-      defaultMessage: 'MongoDB logs',
+      defaultMessage: 'MongoDB Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.mongodbLogs.shortDescription', {
-      defaultMessage: 'Collect MongoDB logs.',
+      defaultMessage: 'Collect and parse logs from MongoDB servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mongodbLogs.longDescription', {
       defaultMessage:

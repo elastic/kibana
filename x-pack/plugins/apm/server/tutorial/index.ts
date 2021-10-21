@@ -22,7 +22,7 @@ import apmDataView from './index_pattern.json';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
-    'Collect in-depth performance metrics and errors from inside your applications.',
+    'Collect performance metrics from your applications with Elastic APM.',
 });
 const moduleName = 'apm';
 

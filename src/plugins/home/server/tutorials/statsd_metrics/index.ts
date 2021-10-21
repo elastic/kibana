@@ -20,16 +20,16 @@ export function statsdMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: 'statsdMetrics',
     name: i18n.translate('home.tutorials.statsdMetrics.nameTitle', {
-      defaultMessage: 'Statsd metrics',
+      defaultMessage: 'Statsd Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.statsdMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from statsd.',
+      defaultMessage: 'Collect metrics from Statsd servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.statsdMetrics.longDescription', {
       defaultMessage:
-        'The `statsd` Metricbeat module fetches monitoring metrics from statsd. \
+        'The `statsd` Metricbeat module fetches metrics from statsd. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-statsd.html',

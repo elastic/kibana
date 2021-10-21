@@ -24,7 +24,7 @@ export function systemLogsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'systemLogs',
     name: i18n.translate('home.tutorials.systemLogs.nameTitle', {
-      defaultMessage: 'System logs',
+      defaultMessage: 'System Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
