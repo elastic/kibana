@@ -29,11 +29,11 @@ export function auditdLogsSpecProvider(context: TutorialContext): TutorialSchema
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.auditdLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the Linux audit daemon with Filebeat.',
+      defaultMessage: 'Collect and parse logs from Linux audit daemon with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.auditdLogs.longDescription', {
       defaultMessage:
-        'The  module collects and parses logs from the audit daemon ( `auditd`). \
+        'The  module collects and parses logs from audit daemon ( `auditd`). \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-auditd.html',

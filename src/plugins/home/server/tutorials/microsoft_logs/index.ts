@@ -29,7 +29,7 @@ export function microsoftLogsSpecProvider(context: TutorialContext): TutorialSch
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.microsoftLogs.shortDescription', {
-      defaultMessage: 'Collect and parse alerts from the Microsoft Defender ATP with Filebeat.',
+      defaultMessage: 'Collect and parse alerts from Microsoft Defender ATP with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.microsoftLogs.longDescription', {
       defaultMessage:

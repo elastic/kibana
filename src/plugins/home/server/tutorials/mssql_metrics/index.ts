@@ -29,7 +29,7 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.mssqlMetrics.shortDescription', {
       defaultMessage:
-        'Collect monitoring metrics from the Microsoft SQL Server instances with Metricbeat.',
+        'Collect monitoring metrics from Microsoft SQL Server instances with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mssqlMetrics.longDescription', {
       defaultMessage:

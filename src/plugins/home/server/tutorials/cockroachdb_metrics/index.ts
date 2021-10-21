@@ -28,7 +28,7 @@ export function cockroachdbMetricsSpecProvider(context: TutorialContext): Tutori
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.cockroachdbMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from the CockroachDB servers with Metricbeat.',
+      defaultMessage: 'Collect monitoring metrics from CockroachDB servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.cockroachdbMetrics.longDescription', {
       defaultMessage:

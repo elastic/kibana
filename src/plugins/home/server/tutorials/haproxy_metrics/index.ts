@@ -29,7 +29,7 @@ export function haproxyMetricsSpecProvider(context: TutorialContext): TutorialSc
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.haproxyMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the HAProxy servers with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from HAProxy servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.haproxyMetrics.longDescription', {
       defaultMessage:

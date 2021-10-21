@@ -29,7 +29,7 @@ export function kafkaLogsSpecProvider(context: TutorialContext): TutorialSchema 
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.kafkaLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the Kafka servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from Kafka servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kafkaLogs.longDescription', {
       defaultMessage:

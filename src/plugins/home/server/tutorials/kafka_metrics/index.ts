@@ -29,7 +29,7 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kafkaMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the Kafka servers with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from Kafka servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kafkaMetrics.longDescription', {
       defaultMessage:

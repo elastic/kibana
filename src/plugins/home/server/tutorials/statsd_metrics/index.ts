@@ -25,7 +25,7 @@ export function statsdMetricsSpecProvider(context: TutorialContext): TutorialSch
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.statsdMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from the Statsd servers with Metricbeat.',
+      defaultMessage: 'Collect monitoring metrics from Statsd servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.statsdMetrics.longDescription', {
       defaultMessage:

@@ -28,7 +28,7 @@ export function couchdbMetricsSpecProvider(context: TutorialContext): TutorialSc
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.couchdbMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from the CouchDB servers with Metricbeat.',
+      defaultMessage: 'Collect monitoring metrics from CouchDB servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.couchdbMetrics.longDescription', {
       defaultMessage:

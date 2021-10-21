@@ -29,7 +29,7 @@ export function tomcatLogsSpecProvider(context: TutorialContext): TutorialSchema
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.tomcatLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the Apache Tomcat servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from Apache Tomcat servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.tomcatLogs.longDescription', {
       defaultMessage:

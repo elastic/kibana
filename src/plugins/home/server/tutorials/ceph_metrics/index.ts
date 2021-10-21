@@ -29,7 +29,7 @@ export function cephMetricsSpecProvider(context: TutorialContext): TutorialSchem
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.cephMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the Ceph servers with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from Ceph servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.cephMetrics.longDescription', {
       defaultMessage:

@@ -33,7 +33,7 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
     }),
     longDescription: i18n.translate('home.tutorials.phpFpmMetrics.longDescription', {
       defaultMessage:
-        'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server. \
+        'The `php_fpm` Metricbeat module fetches internal metrics from PHP-FPM server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html',

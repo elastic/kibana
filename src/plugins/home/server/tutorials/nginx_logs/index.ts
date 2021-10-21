@@ -29,7 +29,7 @@ export function nginxLogsSpecProvider(context: TutorialContext): TutorialSchema 
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.nginxLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the Nginx HTTP servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from Nginx HTTP servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.nginxLogs.longDescription', {
       defaultMessage:

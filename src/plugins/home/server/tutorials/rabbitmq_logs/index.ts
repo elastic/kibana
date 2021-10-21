@@ -29,7 +29,7 @@ export function rabbitmqLogsSpecProvider(context: TutorialContext): TutorialSche
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.rabbitmqLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the RabbitMQ servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from RabbitMQ servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.rabbitmqLogs.longDescription', {
       defaultMessage:

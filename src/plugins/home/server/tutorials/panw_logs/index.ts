@@ -30,7 +30,7 @@ export function panwLogsSpecProvider(context: TutorialContext): TutorialSchema {
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.panwLogs.shortDescription', {
       defaultMessage:
-        'Collect and parse threat and traffic logs from the Palo Alto Networks PAN-OS with Filebeat.',
+        'Collect and parse threat and traffic logs from Palo Alto Networks PAN-OS with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.panwLogs.longDescription', {
       defaultMessage:

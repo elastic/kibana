@@ -28,11 +28,11 @@ export function apacheMetricsSpecProvider(context: TutorialContext): TutorialSch
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.apacheMetrics.shortDescription', {
-      defaultMessage: 'Collect metrics from the Apache HTTP servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from Apache HTTP servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.apacheMetrics.longDescription', {
       defaultMessage:
-        'The `apache` Metricbeat module fetches internal metrics from the Apache 2 HTTP server. \
+        'The `apache` Metricbeat module fetches internal metrics from Apache 2 HTTP server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-apache.html',

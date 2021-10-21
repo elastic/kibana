@@ -29,11 +29,11 @@ export function postgresqlMetricsSpecProvider(context: TutorialContext): Tutoria
     category: TutorialsCategory.METRICS,
     isBeta: false,
     shortDescription: i18n.translate('home.tutorials.postgresqlMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the PostgreSQL servers with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from PostgreSQL servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.postgresqlMetrics.longDescription', {
       defaultMessage:
-        'The `postgresql` Metricbeat module fetches internal metrics from the PostgreSQL server. \
+        'The `postgresql` Metricbeat module fetches internal metrics from PostgreSQL server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-postgresql.html',

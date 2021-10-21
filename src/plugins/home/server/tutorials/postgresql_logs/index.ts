@@ -29,7 +29,7 @@ export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSc
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.postgresqlLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the PostgreSQL servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from PostgreSQL servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.postgresqlLogs.longDescription', {
       defaultMessage:

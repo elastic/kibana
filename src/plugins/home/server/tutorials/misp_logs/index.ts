@@ -33,7 +33,7 @@ export function mispLogsSpecProvider(context: TutorialContext): TutorialSchema {
     }),
     longDescription: i18n.translate('home.tutorials.mispLogs.longDescription', {
       defaultMessage:
-        'This is a filebeat module for reading threat intel information from the MISP platform ( https://www.circl.lu/doc/misp/). It uses the httpjson input to access the MISP REST API interface. \
+        'This is a filebeat module for reading threat intel information from MISP platform ( https://www.circl.lu/doc/misp/). It uses the httpjson input to access the MISP REST API interface. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-misp.html',

@@ -33,7 +33,7 @@ export function gsuiteLogsSpecProvider(context: TutorialContext): TutorialSchema
     }),
     longDescription: i18n.translate('home.tutorials.gsuiteLogs.longDescription', {
       defaultMessage:
-        'This is a module for ingesting data from the different GSuite audit reports APIs. \
+        'This is a module for ingesting data from different GSuite audit reports APIs. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-gsuite.html',

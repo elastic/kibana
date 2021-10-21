@@ -28,11 +28,11 @@ export function mongodbMetricsSpecProvider(context: TutorialContext): TutorialSc
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.mongodbMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the MongoDB servers with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from MongoDB servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mongodbMetrics.longDescription', {
       defaultMessage:
-        'The `mongodb` Metricbeat module fetches internal metrics from the MongoDB server. \
+        'The `mongodb` Metricbeat module fetches internal metrics from MongoDB server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mongodb.html',

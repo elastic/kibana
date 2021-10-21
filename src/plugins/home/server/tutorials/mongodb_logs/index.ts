@@ -29,7 +29,7 @@ export function mongodbLogsSpecProvider(context: TutorialContext): TutorialSchem
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.mongodbLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the MongoDB servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from MongoDB servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mongodbLogs.longDescription', {
       defaultMessage:

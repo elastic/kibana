@@ -30,7 +30,7 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
     category: TutorialsCategory.LOGGING,
     isBeta: true,
     shortDescription: i18n.translate('home.tutorials.natsLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the NATS servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from NATS servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.natsLogs.longDescription', {
       defaultMessage:

@@ -78,7 +78,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         {
           defaultMessage:
             'First time using Metricbeat? See the [Quick Start]({metricbeatLink}).\n\
- 1. Download the Metricbeat Windows zip file from the [Download]({elasticLink}) page.\n\
+ 1. Download the Metricbeat Windows zip file from [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Metricbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
@@ -415,7 +415,7 @@ export function metricbeatStatusCheck(moduleName: string) {
       defaultMessage: 'Module status',
     }),
     text: i18n.translate('home.tutorials.common.metricbeatStatusCheck.text', {
-      defaultMessage: 'Check that data is received from the Metricbeat `{moduleName}` module',
+      defaultMessage: 'Check that data is received from Metricbeat `{moduleName}` module',
       values: { moduleName },
     }),
     btnLabel: i18n.translate('home.tutorials.common.metricbeatStatusCheck.buttonLabel', {

@@ -29,7 +29,7 @@ export function awsLogsSpecProvider(context: TutorialContext): TutorialSchema {
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.awsLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the AWS S3 buckets with Filebeat.',
+      defaultMessage: 'Collect and parse logs from AWS S3 buckets with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.awsLogs.longDescription', {
       defaultMessage:

@@ -82,7 +82,7 @@ export const createAuditbeatInstructions = (context?: TutorialContext) => ({
         {
           defaultMessage:
             'First time using Auditbeat? See the [Quick Start]({guideLinkUrl}).\n\
- 1. Download the Auditbeat Windows zip file from the [Download]({auditbeatLinkUrl}) page.\n\
+ 1. Download the Auditbeat Windows zip file from [Download]({auditbeatLinkUrl}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the `{directoryName}` directory to `Auditbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \

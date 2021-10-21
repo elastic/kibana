@@ -29,7 +29,7 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.activemqLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the ActiveMQ instances with Filebeat.',
+      defaultMessage: 'Collect and parse logs from ActiveMQ instances with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.activemqLogs.longDescription', {
       defaultMessage: 'Collect ActiveMQ logs with Filebeat. \

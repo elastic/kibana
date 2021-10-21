@@ -29,12 +29,12 @@ export function oktaLogsSpecProvider(context: TutorialContext): TutorialSchema {
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.oktaLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the Okta API with Filebeat.',
+      defaultMessage: 'Collect and parse logs from Okta API with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.oktaLogs.longDescription', {
       defaultMessage:
-        'The Okta module collects events from the [Okta API](https://developer.okta.com/docs/reference/). \
-        Specifically this supports reading from the [Okta System Log API](https://developer.okta.com/docs/reference/api/system-log/). \
+        'The Okta module collects events from [Okta API](https://developer.okta.com/docs/reference/). \
+        Specifically this supports reading from [Okta System Log API](https://developer.okta.com/docs/reference/api/system-log/). \
         [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-okta.html',

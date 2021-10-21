@@ -28,11 +28,11 @@ export function mysqlMetricsSpecProvider(context: TutorialContext): TutorialSche
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.mysqlMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the MySQL servers with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from MySQL servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mysqlMetrics.longDescription', {
       defaultMessage:
-        'The `mysql` Metricbeat module fetches internal metrics from the MySQL server. \
+        'The `mysql` Metricbeat module fetches internal metrics from MySQL server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mysql.html',

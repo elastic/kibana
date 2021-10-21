@@ -29,7 +29,7 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.etcdMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the Etcd servers with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from Etcd servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.etcdMetrics.longDescription', {
       defaultMessage:

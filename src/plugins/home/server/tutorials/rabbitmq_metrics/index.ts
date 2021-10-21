@@ -28,11 +28,11 @@ export function rabbitmqMetricsSpecProvider(context: TutorialContext): TutorialS
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.rabbitmqMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the RabbitMQ servers with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from RabbitMQ servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.rabbitmqMetrics.longDescription', {
       defaultMessage:
-        'The `rabbitmq` Metricbeat module fetches internal metrics from the RabbitMQ server. \
+        'The `rabbitmq` Metricbeat module fetches internal metrics from RabbitMQ server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-rabbitmq.html',

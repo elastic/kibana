@@ -29,7 +29,7 @@ export function apacheLogsSpecProvider(context: TutorialContext): TutorialSchema
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.apacheLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the Apache HTTP servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from Apache HTTP servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.apacheLogs.longDescription', {
       defaultMessage:

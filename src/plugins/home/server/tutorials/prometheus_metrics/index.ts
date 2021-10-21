@@ -29,7 +29,7 @@ export function prometheusMetricsSpecProvider(context: TutorialContext): Tutoria
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.prometheusMetrics.shortDescription', {
-      defaultMessage: 'Collect metrics from the Prometheus exporters with Metricbeat.',
+      defaultMessage: 'Collect metrics from Prometheus exporters with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.prometheusMetrics.longDescription', {
       defaultMessage:

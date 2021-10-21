@@ -29,7 +29,7 @@ export function memcachedMetricsSpecProvider(context: TutorialContext): Tutorial
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.memcachedMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the Memcached servers with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from Memcached servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.memcachedMetrics.longDescription', {
       defaultMessage:

@@ -28,7 +28,7 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.stanMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from the STAN servers with Metricbeat.',
+      defaultMessage: 'Collect monitoring metrics from STAN servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.stanMetrics.longDescription', {
       defaultMessage:

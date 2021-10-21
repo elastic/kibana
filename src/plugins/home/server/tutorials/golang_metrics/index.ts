@@ -29,7 +29,7 @@ export function golangMetricsSpecProvider(context: TutorialContext): TutorialSch
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.golangMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the Golang applications with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from Golang applications with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.golangMetrics.longDescription', {
       defaultMessage:

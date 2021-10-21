@@ -29,7 +29,7 @@ export function o365LogsSpecProvider(context: TutorialContext): TutorialSchema {
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.o365Logs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the Office 365 with Filebeat.',
+      defaultMessage: 'Collect and parse logs from Office 365 with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.o365Logs.longDescription', {
       defaultMessage:

@@ -29,7 +29,7 @@ export function couchbaseMetricsSpecProvider(context: TutorialContext): Tutorial
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.couchbaseMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the Couchbase databases with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from Couchbase databases with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.couchbaseMetrics.longDescription', {
       defaultMessage:

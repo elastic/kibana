@@ -29,7 +29,7 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.corednsLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the CoreDNS servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from CoreDNS servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.corednsLogs.longDescription', {
       defaultMessage:

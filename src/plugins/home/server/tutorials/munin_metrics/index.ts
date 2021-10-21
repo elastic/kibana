@@ -30,7 +30,7 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.muninMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the Munin servers with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from Munin servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.muninMetrics.longDescription', {
       defaultMessage:

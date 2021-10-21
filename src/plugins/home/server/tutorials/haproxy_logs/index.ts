@@ -29,7 +29,7 @@ export function haproxyLogsSpecProvider(context: TutorialContext): TutorialSchem
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.haproxyLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the HAProxy servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from HAProxy servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.haproxyLogs.longDescription', {
       defaultMessage:

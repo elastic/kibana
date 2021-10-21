@@ -29,7 +29,7 @@ export function elasticsearchMetricsSpecProvider(context: TutorialContext): Tuto
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.elasticsearchMetrics.shortDescription', {
-      defaultMessage: 'Collect metrics from the Elasticsearch clusters with Metricbeat.',
+      defaultMessage: 'Collect metrics from Elasticsearch clusters with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.elasticsearchMetrics.longDescription', {
       defaultMessage:

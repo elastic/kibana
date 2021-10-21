@@ -29,7 +29,7 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.zeekLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the Zeek network security with Filebeat.',
+      defaultMessage: 'Collect and parse logs from Zeek network security with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.zeekLogs.longDescription', {
       defaultMessage:

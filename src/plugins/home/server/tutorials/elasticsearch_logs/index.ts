@@ -30,7 +30,7 @@ export function elasticsearchLogsSpecProvider(context: TutorialContext): Tutoria
     category: TutorialsCategory.LOGGING,
     isBeta: true,
     shortDescription: i18n.translate('home.tutorials.elasticsearchLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the Elasticsearch clusters with Filebeat.',
+      defaultMessage: 'Collect and parse logs from Elasticsearch clusters with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.elasticsearchLogs.longDescription', {
       defaultMessage:

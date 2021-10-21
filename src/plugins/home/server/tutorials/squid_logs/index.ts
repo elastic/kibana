@@ -29,7 +29,7 @@ export function squidLogsSpecProvider(context: TutorialContext): TutorialSchema 
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.squidLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the Squid servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from Squid servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.squidLogs.longDescription', {
       defaultMessage:

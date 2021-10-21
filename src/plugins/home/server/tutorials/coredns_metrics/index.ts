@@ -28,7 +28,7 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.corednsMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from the CoreDNS servers with Metricbeat.',
+      defaultMessage: 'Collect monitoring metrics from CoreDNS servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.corednsMetrics.longDescription', {
       defaultMessage:

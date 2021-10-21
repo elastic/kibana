@@ -29,12 +29,12 @@ export function redisLogsSpecProvider(context: TutorialContext): TutorialSchema 
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.redisLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the Redis servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from Redis servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.redisLogs.longDescription', {
       defaultMessage:
         'The `redis` Filebeat module parses error and slow logs created by Redis. \
-For Redis to write error logs, make sure the `logfile` option, from the \
+For Redis to write error logs, make sure the `logfile` option, from \
 Redis configuration file, is set to `redis-server.log`. \
 The slow logs are read directly from Redis via the `SLOWLOG` command. \
 For Redis to record slow logs, make sure the `slowlog-log-slower-than` \

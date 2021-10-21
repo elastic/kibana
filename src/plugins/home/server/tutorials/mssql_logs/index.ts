@@ -29,7 +29,7 @@ export function mssqlLogsSpecProvider(context: TutorialContext): TutorialSchema 
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.mssqlLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the MSSQL servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from MSSQL servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mssqlLogs.longDescription', {
       defaultMessage:

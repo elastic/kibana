@@ -29,7 +29,7 @@ export function mysqlLogsSpecProvider(context: TutorialContext): TutorialSchema 
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.mysqlLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from the MySQL servers with Filebeat.',
+      defaultMessage: 'Collect and parse logs from MySQL servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mysqlLogs.longDescription', {
       defaultMessage:

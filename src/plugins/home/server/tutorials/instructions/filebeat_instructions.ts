@@ -80,7 +80,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
       textPre: i18n.translate('home.tutorials.common.filebeatInstructions.install.windowsTextPre', {
         defaultMessage:
           'First time using Filebeat? See the [Quick Start]({guideLinkUrl}).\n\
- 1. Download the Filebeat Windows zip file from the [Download]({filebeatLinkUrl}) page.\n\
+ 1. Download the Filebeat Windows zip file from [Download]({filebeatLinkUrl}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the `{directoryName}` directory to `Filebeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
@@ -400,7 +400,7 @@ export function filebeatStatusCheck(moduleName: string) {
       defaultMessage: 'Module status',
     }),
     text: i18n.translate('home.tutorials.common.filebeatStatusCheck.text', {
-      defaultMessage: 'Check that data is received from the Filebeat `{moduleName}` module',
+      defaultMessage: 'Check that data is received from Filebeat `{moduleName}` module',
       values: { moduleName },
     }),
     btnLabel: i18n.translate('home.tutorials.common.filebeatStatusCheck.buttonLabel', {

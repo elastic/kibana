@@ -28,7 +28,7 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.consulMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from the Consul servers with Metricbeat.',
+      defaultMessage: 'Collect monitoring metrics from Consul servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.consulMetrics.longDescription', {
       defaultMessage:

@@ -30,7 +30,7 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.iisLogs.shortDescription', {
       defaultMessage:
-        'Collect and parse access and error logs from the IIS HTTP servers with Filebeat.',
+        'Collect and parse access and error logs from IIS HTTP servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.iisLogs.longDescription', {
       defaultMessage:

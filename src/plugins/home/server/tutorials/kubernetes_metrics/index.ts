@@ -28,11 +28,11 @@ export function kubernetesMetricsSpecProvider(context: TutorialContext): Tutoria
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kubernetesMetrics.shortDescription', {
-      defaultMessage: 'Collect metrics from the Kubernetes installations with Metricbeat.',
+      defaultMessage: 'Collect metrics from Kubernetes installations with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kubernetesMetrics.longDescription', {
       defaultMessage:
-        'The `kubernetes` Metricbeat module fetches metrics from the Kubernetes APIs. \
+        'The `kubernetes` Metricbeat module fetches metrics from Kubernetes APIs. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kubernetes.html',

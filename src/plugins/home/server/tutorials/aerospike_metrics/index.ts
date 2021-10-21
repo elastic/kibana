@@ -29,7 +29,7 @@ export function aerospikeMetricsSpecProvider(context: TutorialContext): Tutorial
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.aerospikeMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from the Aerospike servers with Metricbeat.',
+      defaultMessage: 'Collect internal metrics from Aerospike servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.aerospikeMetrics.longDescription', {
       defaultMessage:
