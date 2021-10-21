@@ -9,8 +9,6 @@
 import createCache from '@emotion/cache';
 import { cache } from '@emotion/css';
 import { serializeStyles } from '@emotion/serialize';
-import { IUiSettingsClient } from 'kibana/public';
-import { TRUNCATE_MAX_HEIGHT } from '../../../common';
 
 const TRUNCATE_GRADIENT_HEIGHT = 15;
 const globalThemeCache = createCache({ key: 'truncation' });
@@ -36,8 +34,7 @@ const flushThemedGlobals = () => {
   globalThemeCache.registered = {};
 };
 
-export const injectTruncateStyles = (uiSettings: IUiSettingsClient) => {
-  const maxHeight = uiSettings.get(TRUNCATE_MAX_HEIGHT);
+export const injectTruncateStyles = (maxHeight: number) => {
   if (maxHeight === 0) {
     flushThemedGlobals();
     return;

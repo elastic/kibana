@@ -64,6 +64,7 @@ import { ViewSavedSearchAction } from './application/embeddable/view_saved_searc
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 import { FieldFormatsStart } from '../../field_formats/public';
 import { injectTruncateStyles } from './application/helpers/truncate_styles';
+import { TRUNCATE_MAX_HEIGHT } from '../common';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -341,7 +342,7 @@ export class DiscoverPlugin
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
-        injectTruncateStyles(getServices().uiSettings);
+        injectTruncateStyles(getServices().uiSettings.get(TRUNCATE_MAX_HEIGHT));
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
         const unlistenParentHistory = params.history.listen(() => {
