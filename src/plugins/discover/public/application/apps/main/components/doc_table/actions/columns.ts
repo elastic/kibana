@@ -102,8 +102,14 @@ export function getStateColumnActions({
     setAppState({ columns });
   }
 
-  function onSetColumns(columns: string[]) {
-    setAppState({ columns });
+  function onSetColumns(columns: string[], hideTimeColumn: boolean) {
+    // The next line should gone when classic table will be removed
+    const actualColumns =
+      !hideTimeColumn && indexPattern.timeFieldName && indexPattern.timeFieldName === columns[0]
+        ? columns.slice(1)
+        : columns;
+
+    setAppState({ columns: actualColumns });
   }
   return {
     onAddColumn,
