@@ -22,7 +22,7 @@ import {
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { clearCache } from '../../../services/rest/callApi';
-import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
+import * as useDynamicDataViewHooks from '../../../hooks/use_dynamic_data_view';
 import { SessionStorageMock } from '../../../services/__mocks__/SessionStorageMock';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import * as hook from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
@@ -85,9 +85,9 @@ describe('ServiceInventory', () => {
     });
 
     jest
-      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPatternFetcher')
+      .spyOn(useDynamicDataViewHooks, 'useDynamicDataViewFetcher')
       .mockReturnValue({
-        indexPattern: undefined,
+        dataView: undefined,
         status: FETCH_STATUS.SUCCESS,
       });
   });
