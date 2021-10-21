@@ -352,8 +352,8 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
         error={[
           ...(createIndexPattern && destinationIndexPatternTitleExists
             ? [
-                i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternExistsError', {
-                  defaultMessage: 'An index pattern with this title already exists.',
+                i18n.translate('xpack.ml.dataframe.analytics.create.dataViewExistsError', {
+                  defaultMessage: 'A data view with this title already exists.',
                 }),
               ]
             : []),
@@ -361,10 +361,10 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
             ? [
                 <EuiText size="xs" color="warning">
                   {i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.shouldCreateIndexPatternMessage',
+                    'xpack.ml.dataframe.analytics.create.shouldCreateDataViewMessage',
                     {
                       defaultMessage:
-                        'You may not be able to view job results if an index pattern is not created for the destination index.',
+                        'You may not be able to view job results if a data view is not created for the destination index.',
                     }
                   )}
                 </EuiText>,
@@ -375,8 +375,8 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
         <EuiSwitch
           disabled={isJobCreated}
           name="mlDataFrameAnalyticsCreateIndexPattern"
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.createIndexPatternLabel', {
-            defaultMessage: 'Create index pattern',
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.createDataViewLabel', {
+            defaultMessage: 'Create data view',
           })}
           checked={createIndexPattern === true}
           onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}

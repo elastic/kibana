@@ -94,7 +94,7 @@ describe('CurationsRouter', () => {
       expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalledTimes(1);
     });
 
-    it('skips loading curation settings when log retention is enabled', () => {
+    it('skips loading curation settings when log retention is disabled', () => {
       setMockValues({
         ...MOCK_VALUES,
         logRetention: {
