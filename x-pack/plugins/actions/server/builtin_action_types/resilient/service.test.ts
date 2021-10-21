@@ -8,13 +8,12 @@
 import axios from 'axios';
 
 import { createExternalService, getValueTextContent, formatUpdateRequest } from './service';
-import * as utils from '../lib/axios_utils';
+import { request, createAxiosResponse } from '../lib/axios_utils';
 import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { incidentTypes, resilientFields, severity } from './mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
-import { createAxiosResponse } from '../swimlane/mocks';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -28,7 +27,7 @@ jest.mock('../lib/axios_utils', () => {
 });
 
 axios.create = jest.fn(() => axios);
-const requestMock = utils.request as jest.Mock;
+const requestMock = request as jest.Mock;
 const now = Date.now;
 const TIMESTAMP = 1589391874472;
 const configurationUtilities = actionsConfigMock.create();
@@ -264,7 +263,7 @@ describe('IBM Resilient service', () => {
       );
 
       await expect(service.getIncident('1')).rejects.toThrow(
-        `[Action][IBM Resilient]: Unable to get incident with id 1. Error: Response must be a valid JSON.`
+        '[Action][IBM Resilient]: Unable to get incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
   });
@@ -361,7 +360,7 @@ describe('IBM Resilient service', () => {
       );
 
       await expect(service.createIncident(incident)).rejects.toThrow(
-        `[Action][IBM Resilient]: Unable to create incident. Error: Response must be a valid JSON.`
+        '[Action][IBM Resilient]: Unable to create incident. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
 
@@ -369,7 +368,7 @@ describe('IBM Resilient service', () => {
       requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
 
       await expect(service.createIncident(incident)).rejects.toThrow(
-        `[Action][IBM Resilient]: Unable to create incident. Error: Response is missing expected fields.`
+        '[Action][IBM Resilient]: Unable to create incident. Error: Response is missing at least one of the expected fields: id,create_date.'
       );
     });
   });
@@ -475,12 +474,29 @@ describe('IBM Resilient service', () => {
     });
 
     test('it should throw if the request is not a JSON', async () => {
+      // get incident request
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            name: 'title',
+            description: {
+              format: 'html',
+              content: 'description',
+            },
+            incident_type_ids: [1001, 16, 12],
+            severity_code: 6,
+          },
+        })
+      );
+
+      // update incident request
       requestMock.mockImplementation(() =>
         createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
       );
 
       await expect(service.updateIncident(req)).rejects.toThrow(
-        `[Action][IBM Resilient]: Unable to update incident with id 1. Error: [Action][IBM Resilient]: Unable to get incident with id 1. Error: Response must be a valid JSON.`
+        '[Action][IBM Resilient]: Unable to update incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json'
       );
     });
   });
@@ -556,7 +572,7 @@ describe('IBM Resilient service', () => {
       );
 
       await expect(service.createComment(req)).rejects.toThrow(
-        `[Action][IBM Resilient]: Unable to create comment at incident with id 1. Error: Response must be a valid JSON.`
+        '[Action][IBM Resilient]: Unable to create comment at incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
   });
@@ -595,7 +611,7 @@ describe('IBM Resilient service', () => {
       );
 
       await expect(service.getIncidentTypes()).rejects.toThrow(
-        `[Action][IBM Resilient]: Unable to get incident types. Error: Response must be a valid JSON.`
+        '[Action][IBM Resilient]: Unable to get incident types. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
   });
@@ -644,7 +660,7 @@ describe('IBM Resilient service', () => {
       );
 
       await expect(service.getSeverity()).rejects.toThrow(
-        `[Action][IBM Resilient]: Unable to get severity. Error: Response must be a valid JSON.`
+        '[Action][IBM Resilient]: Unable to get severity. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
   });
@@ -691,7 +707,7 @@ describe('IBM Resilient service', () => {
       );
 
       await expect(service.getFields()).rejects.toThrow(
-        `[Action][IBM Resilient]: Unable to get fields. Error: Response must be a valid JSON.`
+        '[Action][IBM Resilient]: Unable to get fields. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
   });

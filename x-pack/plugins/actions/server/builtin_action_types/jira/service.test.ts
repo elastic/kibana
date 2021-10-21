@@ -8,12 +8,11 @@
 import axios from 'axios';
 
 import { createExternalService } from './service';
-import * as utils from '../lib/axios_utils';
+import { request, createAxiosResponse } from '../lib/axios_utils';
 import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
-import { createAxiosResponse } from '../swimlane/mocks';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
@@ -30,7 +29,7 @@ jest.mock('../lib/axios_utils', () => {
 });
 
 axios.create = jest.fn(() => axios);
-const requestMock = utils.request as jest.Mock;
+const requestMock = request as jest.Mock;
 const configurationUtilities = actionsConfigMock.create();
 
 const issueTypesResponse = createAxiosResponse({
@@ -264,7 +263,7 @@ describe('Jira service', () => {
       );
 
       await expect(service.getIncident('1')).rejects.toThrow(
-        '[Action][Jira]: Unable to get incident with id 1. Error: Response must be a valid JSON Reason: unknown'
+        '[Action][Jira]: Unable to get incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json Reason: unknown: errorResponse was null'
       );
     });
 
@@ -272,7 +271,7 @@ describe('Jira service', () => {
       requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
 
       await expect(service.getIncident('1')).rejects.toThrow(
-        '[Action][Jira]: Unable to get incident with id 1. Error: Response is missing expected fields Reason: unknown'
+        '[Action][Jira]: Unable to get incident with id 1. Error: Response is missing at least one of the expected fields: id,key Reason: unknown: errorResponse was null'
       );
     });
   });
@@ -496,7 +495,7 @@ describe('Jira service', () => {
       );
 
       await expect(service.createIncident(incident)).rejects.toThrow(
-        '[Action][Jira]: Unable to create incident. Error: Response must be a valid JSON. Reason: unknown'
+        '[Action][Jira]: Unable to create incident. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
     });
 
@@ -504,7 +503,7 @@ describe('Jira service', () => {
       requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
 
       await expect(service.createIncident(incident)).rejects.toThrow(
-        '[Action][Jira]: Unable to create incident. Error: Response is missing expected fields. Reason: unknown'
+        '[Action][Jira]: Unable to create incident. Error: Response is missing at least one of the expected fields: id. Reason: unknown: errorResponse was null'
       );
     });
   });
@@ -594,7 +593,7 @@ describe('Jira service', () => {
       );
 
       await expect(service.updateIncident(incident)).rejects.toThrow(
-        '[Action][Jira]: Unable to update incident with id 1. Error: Response must be a valid JSON. Reason: unknown'
+        '[Action][Jira]: Unable to update incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
     });
   });
@@ -668,7 +667,7 @@ describe('Jira service', () => {
       );
 
       await expect(service.createComment(commentReq)).rejects.toThrow(
-        '[Action][Jira]: Unable to create comment at incident with id 1. Error: Response must be a valid JSON. Reason: unknown'
+        '[Action][Jira]: Unable to create comment at incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
     });
 
@@ -676,7 +675,7 @@ describe('Jira service', () => {
       requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
 
       await expect(service.createComment(commentReq)).rejects.toThrow(
-        '[Action][Jira]: Unable to create comment at incident with id 1. Error: Response is missing expected fields. Reason: unknown'
+        '[Action][Jira]: Unable to create comment at incident with id 1. Error: Response is missing at least one of the expected fields: id,created. Reason: unknown: errorResponse was null'
       );
     });
   });
@@ -727,7 +726,7 @@ describe('Jira service', () => {
       });
 
       await expect(service.getCapabilities()).rejects.toThrow(
-        '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: unknown'
+        '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: unknown: errorResponse.errors was null'
       );
     });
 
@@ -737,7 +736,7 @@ describe('Jira service', () => {
       );
 
       await expect(service.getCapabilities()).rejects.toThrow(
-        '[Action][Jira]: Unable to get capabilities. Error: Response must be a valid JSON. Reason: unknown'
+        '[Action][Jira]: Unable to get capabilities. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
     });
 
@@ -745,7 +744,7 @@ describe('Jira service', () => {
       requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
 
       await expect(service.getCapabilities()).rejects.toThrow(
-        '[Action][Jira]: Unable to get capabilities. Error: Response is missing expected fields. Reason: unknown'
+        '[Action][Jira]: Unable to get capabilities. Error: Response is missing at least one of the expected fields: capabilities. Reason: unknown: errorResponse was null'
       );
     });
   });
@@ -809,7 +808,7 @@ describe('Jira service', () => {
         );
 
         await expect(service.getIssueTypes()).rejects.toThrow(
-          '[Action][Jira]: Unable to get issue types. Error: Response must be a valid JSON. Reason: unknown'
+          '[Action][Jira]: Unable to get issue types. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
         );
       });
     });
@@ -883,7 +882,7 @@ describe('Jira service', () => {
         );
 
         await expect(service.getIssueTypes()).rejects.toThrow(
-          '[Action][Jira]: Unable to get issue types. Error: Response must be a valid JSON. Reason: unknown'
+          '[Action][Jira]: Unable to get issue types. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
         );
       });
     });
@@ -958,7 +957,7 @@ describe('Jira service', () => {
         );
 
         await expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
-          '[Action][Jira]: Unable to get fields. Error: Response must be a valid JSON. Reason: unknown'
+          '[Action][Jira]: Unable to get fields. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
         );
       });
     });
@@ -1071,7 +1070,7 @@ describe('Jira service', () => {
         );
 
         await expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
-          '[Action][Jira]: Unable to get fields. Error: Response must be a valid JSON. Reason: unknown'
+          '[Action][Jira]: Unable to get fields. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
         );
       });
     });
@@ -1135,7 +1134,7 @@ describe('Jira service', () => {
       );
 
       await expect(service.getIssues('Test title')).rejects.toThrow(
-        '[Action][Jira]: Unable to get issues. Error: Response must be a valid JSON. Reason: unknown'
+        '[Action][Jira]: Unable to get issues. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
     });
   });
@@ -1194,7 +1193,7 @@ describe('Jira service', () => {
       );
 
       await expect(service.getIssue('Test title')).rejects.toThrow(
-        '[Action][Jira]: Unable to get issue with id Test title. Error: Response must be a valid JSON. Reason: unknown'
+        '[Action][Jira]: Unable to get issue with id Test title. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
     });
   });

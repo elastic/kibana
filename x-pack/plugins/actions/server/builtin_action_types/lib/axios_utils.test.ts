@@ -16,6 +16,7 @@ import {
   patch,
   getErrorMessage,
   throwIfRequestIsNotValid,
+  createAxiosResponse,
 } from './axios_utils';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
@@ -300,10 +301,10 @@ describe('getErrorMessage', () => {
 });
 
 describe('throwIfRequestIsNotValid', () => {
-  const res = {
+  const res = createAxiosResponse({
     headers: { ['content-type']: 'application/json' },
     data: { incident: { id: '1' } },
-  } as AxiosResponse;
+  });
 
   test('it does NOT throw if the request is valid', () => {
     expect(() => throwIfRequestIsNotValid({ res })).not.toThrow();
@@ -314,7 +315,9 @@ describe('throwIfRequestIsNotValid', () => {
       throwIfRequestIsNotValid({
         res: { ...res, headers: { ['content-type']: 'text/html' } },
       })
-    ).toThrow();
+    ).toThrow(
+      'Unsupported content type: text/html in GET https://example.com. Supported content types: application/json'
+    );
   });
 
   test('it does throw if the content-type is defined', () => {
@@ -322,7 +325,9 @@ describe('throwIfRequestIsNotValid', () => {
       throwIfRequestIsNotValid({
         res: { ...res, headers: {} },
       })
-    ).toThrow();
+    ).toThrow(
+      'Unsupported content type: undefined in GET https://example.com. Supported content types: application/json'
+    );
   });
 
   test('it does throw if the data is not an object or array', () => {
@@ -330,7 +335,7 @@ describe('throwIfRequestIsNotValid', () => {
       throwIfRequestIsNotValid({
         res: { ...res, data: 'string' },
       })
-    ).toThrow();
+    ).toThrow('Response is not a valid JSON');
   });
 
   test('it does NOT throw if the data is an array', () => {
@@ -352,7 +357,7 @@ describe('throwIfRequestIsNotValid', () => {
   test('it does throw if the required attribute is not in the response', () => {
     expect(() =>
       throwIfRequestIsNotValid({ res, requiredAttributesToBeInTheResponse: ['not-exist'] })
-    ).toThrow();
+    ).toThrow('Response is missing at least one of the expected fields: not-exist');
   });
 
   test('it does NOT throw if the required attribute is not in the response and the data are an array', () => {

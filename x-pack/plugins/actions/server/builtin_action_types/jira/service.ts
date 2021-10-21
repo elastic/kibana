@@ -113,13 +113,13 @@ export const createExternalService = (
 
   const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
     if (errorResponse == null) {
-      return 'unknown';
+      return 'unknown: errorResponse was null';
     }
 
     const { errorMessages, errors } = errorResponse;
 
     if (errors == null) {
-      return 'unknown';
+      return 'unknown: errorResponse.errors was null';
     }
 
     if (Array.isArray(errorMessages) && errorMessages.length > 0) {

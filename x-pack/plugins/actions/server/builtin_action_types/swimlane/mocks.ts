@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AxiosResponse } from 'axios';
 import { ExecutorSubActionPushParams, ExternalService, PushToServiceApiParams } from './types';
 
 export const applicationFields = [
@@ -121,14 +120,5 @@ const executorParams: ExecutorSubActionPushParams = {
 const apiParams: PushToServiceApiParams = {
   ...executorParams,
 };
-
-export const createAxiosResponse = (res: Partial<AxiosResponse>): AxiosResponse => ({
-  data: {},
-  status: 200,
-  statusText: 'OK',
-  headers: { ['content-type']: 'application/json' },
-  config: {},
-  ...res,
-});
 
 export { externalServiceMock, executorParams, apiParams };
