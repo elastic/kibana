@@ -24,13 +24,13 @@ export function azureLogsSpecProvider(context: TutorialContext): TutorialSchema 
   return {
     id: 'azureLogs',
     name: i18n.translate('home.tutorials.azureLogs.nameTitle', {
-      defaultMessage: 'Azure logs',
+      defaultMessage: 'Azure Logs',
     }),
     moduleName,
     isBeta: true,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.azureLogs.shortDescription', {
-      defaultMessage: 'Collects Azure activity and audit related logs.',
+      defaultMessage: 'Collect and parse logs from Azure with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.azureLogs.longDescription', {
       defaultMessage:
