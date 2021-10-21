@@ -104,10 +104,13 @@ export default ({ getService }: FtrProviderContext): void => {
             alertId: string;
           };
           references: [{}];
-        }>({
-          index: '.kibana',
-          id: 'siem-detection-engine-rule-status:d62d2980-27c4-11ec-92b0-f7b47106bb35',
-        });
+        }>(
+          {
+            index: '.kibana',
+            id: 'siem-detection-engine-rule-status:d62d2980-27c4-11ec-92b0-f7b47106bb35',
+          },
+          { meta: true }
+        );
         expect(response.statusCode).to.eql(200);
 
         // references exist and are expected values
@@ -128,10 +131,13 @@ export default ({ getService }: FtrProviderContext): void => {
       it('migrates legacy siem-detection-engine-rule-status and retains other attributes as the same attributes as before', async () => {
         const response = await es.get<{
           'siem-detection-engine-rule-status': IRuleStatusSOAttributes;
-        }>({
-          index: '.kibana',
-          id: 'siem-detection-engine-rule-status:d62d2980-27c4-11ec-92b0-f7b47106bb35',
-        });
+        }>(
+          {
+            index: '.kibana',
+            id: 'siem-detection-engine-rule-status:d62d2980-27c4-11ec-92b0-f7b47106bb35',
+          },
+          { meta: true }
+        );
         expect(response.statusCode).to.eql(200);
 
         expect(response.body._source?.['siem-detection-engine-rule-status']).to.eql({
