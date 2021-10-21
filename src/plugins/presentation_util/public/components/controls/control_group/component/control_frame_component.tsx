@@ -88,7 +88,7 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
     </div>
   );
 
-  const embeddableParentClassNames = classNames('controlFrame--control', {
+  const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
     'controlFrame--oneLine': controlStyle === 'oneLine',
   });
@@ -110,10 +110,7 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
     >
       {embeddable && (
         <div
-          className={classNames('controlFrame__control', {
-            'controlFrame--twoLine': controlStyle === 'twoLine',
-            'controlFrame--oneLine': controlStyle === 'oneLine',
-          })}
+          className={embeddableParentClassNames}
           id={`controlFrame--${embeddableId}`}
           ref={embeddableRoot}
         />

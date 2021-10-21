@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './utils';
-export * from './test_helpers';
-export * from '../controls';
+export * from './control_group/types';
+export * from './control_types/options_list/types';

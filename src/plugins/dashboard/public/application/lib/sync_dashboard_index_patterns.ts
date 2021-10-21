@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { merge, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { Observable, pipe } from 'rxjs';
+import { Observable, pipe, combineLatest } from 'rxjs';
 import { distinctUntilChanged, switchMap, filter, mapTo, map } from 'rxjs/operators';
 
 import { DashboardContainer } from '..';
@@ -31,10 +31,6 @@ export const syncDashboardIndexPatterns = ({
     map((container: DashboardContainer): IndexPattern[] | undefined => {
       let panelIndexPatterns: IndexPattern[] = [];
 
-      if (container.controlGroup) {
-        panelIndexPatterns.push(...(container.controlGroup.getOutput().dataViews ?? []));
-      }
-
       Object.values(container.getChildIds()).forEach((id) => {
         const embeddableInstance = container.getChild(id);
         if (isErrorEmbeddable(embeddableInstance)) return;
@@ -54,6 +50,9 @@ export const syncDashboardIndexPatterns = ({
         Object.values(container.getOutput().embeddableLoaded).some((value) => value === false)
       ) {
         return;
+      }
+      if (container.controlGroup) {
+        panelIndexPatterns.push(...(container.controlGroup.getOutput().dataViews ?? []));
       }
       return panelIndexPatterns;
     }),
@@ -82,7 +81,16 @@ export const syncDashboardIndexPatterns = ({
     })
   );
 
-  return merge(dashboardContainer.getOutput$(), dashboardContainer.controlGroup?.getOutput$())
+  if (dashboardContainer.controlGroup) {
+    return combineLatest([
+      dashboardContainer.getOutput$(),
+      dashboardContainer.controlGroup.getOutput$(),
+    ])
+      .pipe(mapTo(dashboardContainer), updateIndexPatternsOperator)
+      .subscribe();
+  }
+  return dashboardContainer
+    .getOutput$()
     .pipe(mapTo(dashboardContainer), updateIndexPatternsOperator)
     .subscribe();
 };

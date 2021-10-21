@@ -104,6 +104,7 @@ export const ControlGroup = () => {
   return (
     <EuiPanel
       borderRadius="m"
+      paddingSize="s"
       className={classNames('controlsWrapper', {
         'controlsWrapper--empty': emptyState,
         'controlsWrapper--twoLine': controlStyle === 'twoLine',

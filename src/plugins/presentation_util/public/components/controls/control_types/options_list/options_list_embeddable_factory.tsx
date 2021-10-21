@@ -7,23 +7,26 @@
  */
 
 import React from 'react';
-import { EmbeddableFactoryDefinition, IContainer } from '../../../../../../embeddable/public';
+
 import {
   ControlEditorProps,
   GetControlEditorComponentProps,
   IEditableControlFactory,
 } from '../../types';
 import { OptionsListEditor } from './options_list_editor';
+import { OptionsListEmbeddable } from './options_list_embeddable';
+import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
+import { EmbeddableFactoryDefinition, IContainer } from '../../../../../../embeddable/public';
 import {
-  OPTIONS_LIST_CONTROL,
-  OptionsListEmbeddable,
-  OptionsListEmbeddableInput,
-} from './options_list_embeddable';
+  createOptionsListExtract,
+  createOptionsListInject,
+} from '../../../../../common/controls/control_types/options_list/options_list_persistable_state';
 
 export class OptionsListEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory
 {
   public type = OPTIONS_LIST_CONTROL;
+  public canCreateNew = () => false;
 
   constructor() {}
 
@@ -47,4 +50,7 @@ export class OptionsListEmbeddableFactory
   public isEditable = () => Promise.resolve(false);
 
   public getDisplayName = () => 'Options List Control';
+
+  public inject = createOptionsListInject();
+  public extract = createOptionsListExtract();
 }

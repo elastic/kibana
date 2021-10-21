@@ -21,15 +21,20 @@ import {
   take,
 } from 'rxjs/operators';
 
+import {
+  ControlGroupInput,
+  ControlGroupOutput,
+  ControlPanelState,
+  CONTROL_GROUP_TYPE,
+} from '../types';
 import { pluginServices } from '../../../../services';
 import { DataView } from '../../../../../../data_views/public';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { Container, EmbeddableFactory } from '../../../../../../embeddable/public';
-import { ControlGroupInput, ControlGroupOutput, ControlPanelState } from '../types';
-import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_WIDTH } from '../control_group_constants';
 import { ReduxEmbeddableWrapper } from '../../../redux_embeddables/redux_embeddable_wrapper';
+import { DEFAULT_CONTROL_WIDTH } from '../editor/editor_constants';
 
 export class ControlGroupContainer extends Container<
   ControlInput,
@@ -82,8 +87,8 @@ export class ControlGroupContainer extends Container<
 
     this.subscriptions.add(
       concat(
-        this.getOutput$().pipe(anyChildChangePipe, take(1)), // the first time filters are built, don't debounce so that initial filters are built immediately
-        this.getOutput$().pipe(anyChildChangePipe, debounceTime(10))
+        merge(this.getOutput$(), this.getOutput$().pipe(anyChildChangePipe)).pipe(take(1)), // the first time filters are built, don't debounce so that initial filters are built immediately
+        merge(this.getOutput$(), this.getOutput$().pipe(anyChildChangePipe)).pipe(debounceTime(10))
       ).subscribe(this.recalculateOutput)
     );
   }

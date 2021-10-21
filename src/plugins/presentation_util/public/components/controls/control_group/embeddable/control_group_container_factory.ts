@@ -21,10 +21,14 @@ import {
   EmbeddableFactoryDefinition,
   ErrorEmbeddable,
 } from '../../../../../../embeddable/public';
-import { ControlGroupInput } from '../types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { CONTROL_GROUP_TYPE } from '../control_group_constants';
+import { ControlGroupInput, CONTROL_GROUP_TYPE } from '../types';
 import { ControlGroupContainer } from './control_group_container';
+import { EmbeddablePersistableStateService } from '../../../../../../embeddable/common';
+import {
+  createControlGroupExtract,
+  createControlGroupInject,
+} from '../../../../../common/controls/control_group/control_group_persistable_state';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   ControlGroupInput,
@@ -36,6 +40,8 @@ export class ControlGroupContainerFactory
 {
   public readonly isContainerType = true;
   public readonly type = CONTROL_GROUP_TYPE;
+
+  constructor(private persistableStateService: EmbeddablePersistableStateService) {}
 
   public isEditable = async () => false;
 
@@ -60,4 +66,7 @@ export class ControlGroupContainerFactory
   ): Promise<ControlGroupContainer | ErrorEmbeddable> => {
     return new ControlGroupContainer(initialInput, parent);
   };
+
+  public inject = createControlGroupInject(this.persistableStateService);
+  public extract = createControlGroupExtract(this.persistableStateService);
 }

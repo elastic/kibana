@@ -20,10 +20,11 @@ import {
   ReduxEmbeddableWrapperProps,
 } from './types';
 import {
+  IContainer,
   IEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
-  IContainer,
+  isErrorEmbeddable,
 } from '../../../../embeddable/public';
 import { getManagedEmbeddablesStore } from './generic_embeddable_store';
 import { ReduxEmbeddableContext, useReduxEmbeddableContext } from './redux_embeddable_context';
@@ -170,25 +171,31 @@ const ReduxEmbeddableSync = <InputType extends EmbeddableInput = EmbeddableInput
   const dispatch = useEmbeddableDispatch();
   const currentState = useEmbeddableSelector((state) => state);
   const stateRef = useRef(currentState);
+  const destroyedRef = useRef(false);
 
   useEffect(() => {
     // When Embeddable Input changes, push differences to redux.
     const inputSubscription = embeddable
       .getInput$()
       .pipe(debounceTime(0)) // debounce input changes to ensure that when many updates are made in one render the latest wins out
-      .subscribe(() => {
-        const differences = diffInput(getExplicitInput<InputType>(embeddable), stateRef.current);
-        if (differences && Object.keys(differences).length > 0) {
-          if (stateContainsFilters(differences)) {
-            differences.filters = cleanFiltersForSerialize(differences.filters);
+      .subscribe(
+        () => {
+          const differences = diffInput(getExplicitInput<InputType>(embeddable), stateRef.current);
+          if (differences && Object.keys(differences).length > 0) {
+            if (stateContainsFilters(differences)) {
+              differences.filters = cleanFiltersForSerialize(differences.filters);
+            }
+            dispatch(updateEmbeddableReduxState(differences));
           }
-          dispatch(updateEmbeddableReduxState(differences));
-        }
-      });
+        },
+        undefined,
+        () => (destroyedRef.current = true) // when input observer is complete, embeddable is destroyed
+      );
     return () => inputSubscription.unsubscribe();
   }, [diffInput, dispatch, embeddable, updateEmbeddableReduxState]);
 
   useEffect(() => {
+    if (isErrorEmbeddable(embeddable) || destroyedRef.current) return;
     // When redux state changes, push differences to Embeddable Input.
     stateRef.current = currentState;
     const differences = diffInput(currentState, getExplicitInput<InputType>(embeddable));

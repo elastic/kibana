@@ -6,35 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Filter, Query } from '@kbn/es-query';
-import {
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '../../../../embeddable/public';
-import { TimeRange } from '../../../../data/public';
+import { Filter } from '@kbn/es-query';
 import { DataView } from '../../../../data_views/public';
+import { ControlInput } from '../../../common/controls/types';
+import { EmbeddableFactory, EmbeddableOutput, IEmbeddable } from '../../../../embeddable/public';
 
-export type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
-export type ControlStyle = 'twoLine' | 'oneLine';
-
-/**
- * Generic control embeddable input and output
- */
-export interface ParentIgnoreSettings {
-  ignoreFilters?: boolean;
-  ignoreQuery?: boolean;
-  ignoreTimerange?: boolean;
-}
-
-export type ControlInput = EmbeddableInput & {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  controlStyle?: ControlStyle;
-  ignoreParentSettings?: ParentIgnoreSettings;
-};
 export interface CommonControlOutput {
   filters?: Filter[];
   dataViews?: DataView[];
@@ -69,3 +45,8 @@ export type ControlEditorComponent = (props: ControlEditorProps) => JSX.Element;
 export interface ControlEditorProps {
   setValidState: (valid: boolean) => void;
 }
+
+/**
+ * Re-export control types from common
+ */
+export * from '../../../common/controls/types';
