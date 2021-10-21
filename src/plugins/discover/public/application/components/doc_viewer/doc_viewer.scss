@@ -42,9 +42,8 @@
     }
   }
 }
-
-.kbnDocViewer__tableFieldNameCell,
-.kbnDocViewer__tableActionsCell {
+.kbnDocViewer__tableActionsCell,
+.kbnDocViewer__tableFieldNameCell {
   align-items: flex-start;
   padding: $euiSizeXS;
 }
