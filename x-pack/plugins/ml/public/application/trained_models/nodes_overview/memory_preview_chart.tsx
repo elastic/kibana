@@ -91,6 +91,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
       x: 0,
       y:
         memoryOverview.machine_memory.total -
+        memoryOverview.machine_memory.jvm -
         memoryOverview.trained_models.total -
         memoryOverview.dfa_training.total -
         memoryOverview.anomaly_detection.total,

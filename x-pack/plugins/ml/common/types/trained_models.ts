@@ -170,7 +170,7 @@ export interface NodeDeploymentStatsResponse {
     machine_memory: {
       /** Total machine memory in bytes */
       total: number;
-      jvm?: number;
+      jvm: number;
     };
     /** Open anomaly detection jobs + hardcoded overhead */
     anomaly_detection: {
