@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const screenshot = getService('screenshots');
 
-  describe('lens datatable', () => {
+  describe.only('lens datatable', () => {
     it('should able to sort a table by a column', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
