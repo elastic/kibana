@@ -34,6 +34,7 @@ export const kibanaConfigWriter = new KibanaConfigWriter(getConfigPath(), logger
 export const elasticsearch = new ElasticsearchService(logger).setup({
   connectionCheckInterval: duration(Infinity),
   elasticsearch: {
+    // @ts-expect-error TODO make sure Client is assignable to KibanaClient, see src/core/server/elasticsearch/client/cluster_client.ts
     createClient: (type, config) => {
       const defaults = configSchema.validate({});
       return new ClusterClient(
