@@ -25,6 +25,7 @@ export const getProcessList = async (
               [timefield]: {
                 gte: to - 60 * 1000, // 1 minute
                 lte: to,
+                format: 'epoch_millis',
               },
             },
           },
