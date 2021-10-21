@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
-  farequoteIndexPatternTestData as farequoteDataViewTestData,
+  farequoteDataViewTestData,
   farequoteKQLSearchTestData,
   farequoteLuceneSearchTestData,
   sampleLogTestData,

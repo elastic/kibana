@@ -8,7 +8,7 @@
 import { TestData } from './types';
 import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 
-export const farequoteIndexPatternTestData: TestData = {
+export const farequoteDataViewTestData: TestData = {
   suiteTitle: 'farequote index pattern',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'ft_farequote',
