@@ -8,6 +8,7 @@
 import '../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../../__mocks__/react_router';
+
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
@@ -27,6 +28,7 @@ import { CurationLogic } from './curation_logic';
 
 import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, OrganicDocuments } from './documents';
+import { History } from './history';
 
 describe('AutomatedCuration', () => {
   const values = {
@@ -39,6 +41,7 @@ describe('AutomatedCuration', () => {
       suggestion: {
         status: 'applied',
       },
+      queries: ['foo'],
     },
     activeQuery: 'query A',
     isAutomated: true,
@@ -46,6 +49,7 @@ describe('AutomatedCuration', () => {
 
   const actions = {
     convertToManual: jest.fn(),
+    onSelectPageTab: jest.fn(),
   };
 
   beforeEach(() => {
@@ -59,22 +63,41 @@ describe('AutomatedCuration', () => {
     const wrapper = shallow(<AutomatedCuration />);
 
     expect(wrapper.is(AppSearchPageTemplate));
+  });
+
+  it('includes set of tabs in the page header', () => {
+    const wrapper = shallow(<AutomatedCuration />);
+
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    tabs.at(0).simulate('click');
+    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(1, 'promoted');
+
+    expect(tabs.at(1).prop('disabled')).toBe(true);
+
+    tabs.at(2).simulate('click');
+    expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(2, 'history');
+  });
+
+  it('renders promoted and organic documents when the promoted tab is selected', () => {
+    setMockValues({ ...values, selectedPageTab: 'promoted' });
+    const wrapper = shallow(<AutomatedCuration />);
+    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
+
+    expect(tabs.at(0).prop('isSelected')).toEqual(true);
+
     expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
     expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
   });
 
-  it('includes a static tab group', () => {
+  it('renders curation history when the history tab is selected', () => {
+    setMockValues({ ...values, selectedPageTab: 'history' });
     const wrapper = shallow(<AutomatedCuration />);
     const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
 
-    expect(tabs).toHaveLength(2);
+    expect(tabs.at(2).prop('isSelected')).toEqual(true);
 
-    expect(tabs.at(0).prop('onClick')).toBeUndefined();
-    expect(tabs.at(0).prop('isSelected')).toBe(true);
-
-    expect(tabs.at(1).prop('onClick')).toBeUndefined();
-    expect(tabs.at(1).prop('isSelected')).toBe(false);
-    expect(tabs.at(1).prop('disabled')).toBe(true);
+    expect(wrapper.find(History)).toHaveLength(1);
   });
 
   it('initializes CurationLogic with a curationId prop from URL param', () => {
