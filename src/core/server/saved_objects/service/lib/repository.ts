@@ -2077,7 +2077,6 @@ export class SavedObjectsRepository {
       defaultIndex: this._index,
       typeRegistry: this._registry,
       kibanaVersion: this._migrator.kibanaVersion,
-      migV2Enabled: this._migrator.soMigrationsConfig.enableV2,
     });
   }
 
