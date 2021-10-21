@@ -13098,8 +13098,6 @@
     "xpack.infra.logSourceConfiguration.childFormElementErrorMessage": "1つ以上のフォームフィールドが無効な状態です。",
     "xpack.infra.logSourceConfiguration.emptyColumnListErrorMessage": "列リストは未入力のままにできません。",
     "xpack.infra.logSourceConfiguration.emptyFieldErrorMessage": "フィールド'{fieldName}'は未入力のままにできません。",
-    "xpack.infra.logSourceConfiguration.indexNameReferenceDeprecationDescription": "ログソースを構成する目的で、Elasticsearchインデックスを直接参照するのは推奨されません。ログソースはKibanaインデックスパターンと統合し、使用されているインデックスを構成します。",
-    "xpack.infra.logSourceConfiguration.indexNameReferenceDeprecationTitle": "廃止予定の構成オプション",
     "xpack.infra.logSourceConfiguration.indexPatternManagementLinkText": "インデックスパターン管理画面",
     "xpack.infra.logSourceConfiguration.indexPatternSectionTitle": "インデックスパターン",
     "xpack.infra.logSourceConfiguration.indexPatternSelectorPlaceholder": "インデックスパターンを選択",
