@@ -133,6 +133,11 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       elasticsearch: { cluster: [], indices: [], run_as: [] },
       kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['default'] }],
     },
+    {
+      name: 'ft_all_space_ml_none',
+      elasticsearch: { cluster: [], indices: [], run_as: [] },
+      kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['*'] }],
+    },
   ];
 
   const users = [
@@ -171,7 +176,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       full_name: 'ML Viewer',
       password: 'mlv001',
       roles: [
-        'ft_default_space_ml_none',
+        'ft_all_space_ml_none',
         'machine_learning_user',
         'ft_ml_source_readonly',
         'ft_ml_dest_readonly',
