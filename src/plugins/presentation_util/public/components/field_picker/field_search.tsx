@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import './field_search.scss';
-
-import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFieldSearch,
@@ -16,42 +14,23 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiPopoverFooter,
-  EuiPopoverTitle,
   EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiSelect,
-  EuiSwitch,
-  EuiSwitchEvent,
-  EuiForm,
-  EuiFormRow,
-  EuiButtonGroup,
   EuiOutsideClickDetector,
   EuiFilterButton,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldIcon, FieldButton } from '../../../../kibana_react/public';
-
-export type FieldOnlyDataType = 'document' | 'ip' | 'histogram' | 'geo_point' | 'geo_shape';
-export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
-
-export interface State {
-  searchable: string;
-  aggregatable: string;
-  type: string;
-  missing: boolean;
-  [index: string]: string | boolean;
-}
+import { FieldIcon } from '../../../../kibana_react/public';
 
 export interface Props {
   onSearchChange: (value: string) => void;
   searchValue?: string;
 
-  onFieldTypesChange: (value: DataType[]) => void;
-  fieldTypesValue: DataType[];
+  onFieldTypesChange: (value: string[]) => void;
+  fieldTypesValue: string[];
 
-  availableFieldTypes: DataType[];
+  availableFieldTypes: string[];
 }
 
 export function FieldSearch({
@@ -61,23 +40,11 @@ export function FieldSearch({
   fieldTypesValue,
   availableFieldTypes,
 }: Props) {
-  const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
+  const searchPlaceholder = i18n.translate('presentationUtil.fieldSearch.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
 
-  const typeLabel = i18n.translate('discover.fieldChooser.filter.typeLabel', {
-    defaultMessage: 'Type',
-  });
-
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-
-  const filterBtnAriaLabel = isPopoverOpen
-    ? i18n.translate('discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
-        defaultMessage: 'Hide field filter settings',
-      })
-    : i18n.translate('discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
-        defaultMessage: 'Show field filter settings',
-      });
 
   const handleFilterButtonClicked = () => {
     setPopoverOpen(!isPopoverOpen);
@@ -85,7 +52,6 @@ export function FieldSearch({
 
   const buttonContent = (
     <EuiFilterButton
-      aria-label={filterBtnAriaLabel}
       data-test-subj="toggleFieldFilterButton"
       iconType="arrowDown"
       isSelected={fieldTypesValue.length > 0}
@@ -95,7 +61,7 @@ export function FieldSearch({
       onClick={handleFilterButtonClicked}
     >
       <FormattedMessage
-        id="discover.fieldChooser.fieldFilterButtonLabel"
+        id="presentationUtil.fieldSearch.fieldFilterButtonLabel"
         defaultMessage="Filter by type"
       />
     </EuiFilterButton>
@@ -117,9 +83,8 @@ export function FieldSearch({
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
       <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
-        <EuiFilterGroup className="dscFieldSearch__filterWrapper">
+        <EuiFilterGroup>
           <EuiPopover
-            id="dataPanelTypeFilter"
             panelClassName="euiFilterGroup__popoverPanel"
             panelPaddingSize="none"
             anchorPosition="rightUp"
@@ -132,10 +97,8 @@ export function FieldSearch({
           >
             <EuiContextMenuPanel
               watchedItemProps={['icon', 'disabled']}
-              data-test-subj="lnsIndexPatternTypeFilterOptions"
-              items={(availableFieldTypes as DataType[]).map((type) => (
+              items={(availableFieldTypes as string[]).map((type) => (
                 <EuiContextMenuItem
-                  className="lnsInnerIndexPatternDataPanel__filterType"
                   key={type}
                   icon={fieldTypesValue.includes(type) ? 'check' : 'empty'}
                   data-test-subj={`typeFilter-${type}`}
@@ -147,21 +110,13 @@ export function FieldSearch({
                     }
                   }}
                 >
-                  <span className="lnsInnerIndexPatternDataPanel__filterTypeInner">
+                  <span>
                     <FieldIcon type={type} label={type} />
                     {type}
                   </span>
                 </EuiContextMenuItem>
               ))}
             />
-
-            {/* <EuiPopoverTitle paddingSize="s">
-              {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
-                defaultMessage: 'Filter by type',
-              })}
-            </EuiPopoverTitle>
-            {selectionPanel}
-            {footer()} */}
           </EuiPopover>
         </EuiFilterGroup>
       </EuiOutsideClickDetector>

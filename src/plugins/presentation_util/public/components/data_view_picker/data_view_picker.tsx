@@ -9,36 +9,31 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
-// import { trackUiEvent } from '../lens_ui_telemetry';
-// import { ToolbarButton, ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
+import { DataView } from '../../../../data_views/common';
+
 import { ToolbarButton, ToolbarButtonProps } from '../../../../kibana_react/public';
 
-export interface IndexPatternRef {
-  id: string;
-  title: string;
-}
-
-export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
+export type DataViewTriggerProps = ToolbarButtonProps & {
   label: string;
   title?: string;
 };
 
-export function IndexPatternPicker({
-  indexPatternRefs,
-  indexPatternId,
+export function DataViewPicker({
+  dataViews,
+  selectedDataViewId,
   onChangeIndexPattern,
   trigger,
   selectableProps,
 }: {
-  trigger: ChangeIndexPatternTriggerProps;
-  indexPatternRefs: IndexPatternRef[];
+  dataViews: DataView[];
+  selectedDataViewId?: string;
+  trigger: DataViewTriggerProps;
   onChangeIndexPattern: (newId: string) => void;
-  indexPatternId?: string;
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
-  const isMissingCurrent = !indexPatternRefs.some(({ id }) => id === indexPatternId);
+  const isMissingCurrent = !dataViews.some(({ id }) => id === selectedDataViewId);
 
   // be careful to only add color with a value, otherwise it will fallbacks to "primary"
   const colorProp = isMissingCurrent
@@ -65,7 +60,6 @@ export function IndexPatternPicker({
   return (
     <>
       <EuiPopover
-        panelClassName="lnsChangeIndexPatternPopover"
         button={createTrigger()}
         isOpen={isPopoverOpen}
         closePopover={() => setPopoverIsOpen(false)}
@@ -75,7 +69,7 @@ export function IndexPatternPicker({
       >
         <div>
           <EuiPopoverTitle>
-            {i18n.translate('xpack.lens.indexPattern.changeDataViewTitle', {
+            {i18n.translate('presentationUtil.dataViewPicker.changeDataViewTitle', {
               defaultMessage: 'Data view',
             })}
           </EuiPopoverTitle>
@@ -88,17 +82,16 @@ export function IndexPatternPicker({
             {...selectableProps}
             searchable
             singleSelection="always"
-            options={indexPatternRefs.map(({ title, id }) => ({
+            options={dataViews.map(({ title, id }) => ({
               key: id,
               label: title,
               value: id,
-              checked: id === indexPatternId ? 'on' : undefined,
+              checked: id === selectedDataViewId ? 'on' : undefined,
             }))}
             onChange={(choices) => {
               const choice = choices.find(({ checked }) => checked) as unknown as {
                 value: string;
               };
-              // trackUiEvent('indexpattern_changed');
               onChangeIndexPattern(choice.value);
               setPopoverIsOpen(false);
             }}

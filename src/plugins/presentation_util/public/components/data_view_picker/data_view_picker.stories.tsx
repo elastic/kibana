@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-
-import { FieldPicker } from './field_picker';
+import React, { useState } from 'react';
+import { action } from '@storybook/addon-actions';
 
 import { DataView, DataViewField, IIndexPatternFieldList } from '../../../../data_views/common';
+
+import { StorybookParams } from '../../services/storybook';
+import { DataViewPicker } from './data_view_picker';
 
 // TODO: we probably should remove this once the PR is merged that has better data views for stories
 const flightFieldNames: string[] = [
@@ -64,26 +66,30 @@ const storybookFlightsDataView: DataView = {
 } as unknown as DataView;
 
 export default {
-  component: FieldPicker,
-  title: 'Field Picker',
+  component: DataViewPicker,
+  title: 'Data View Picker',
+  argTypes: {},
 };
 
-export const FieldPickerWithDataView = () => {
-  return <FieldPicker dataView={storybookFlightsDataView} />;
-};
+export function Example({}: {} & StorybookParams) {
+  const dataViews = [storybookFlightsDataView];
 
-export const FieldPickerWithFilter = () => {
+  const [dataView, setDataView] = useState<DataView | undefined>(undefined);
+
+  const onChange = (newId: string) => {
+    const newIndexPattern = dataViews.find((ip) => ip.id === newId);
+
+    setDataView(newIndexPattern);
+  };
+
+  const triggerLabel = dataView?.title || 'Choose Data View';
+
   return (
-    <FieldPicker
-      dataView={storybookFlightsDataView}
-      filterPredicate={(f: DataViewField) => {
-        // Only show fields with "Dest" in the title
-        return f.name.includes('Dest');
-      }}
+    <DataViewPicker
+      trigger={{ label: triggerLabel, title: triggerLabel }}
+      dataViews={[storybookFlightsDataView]}
+      selectedDataViewId={dataView?.id}
+      onChangeIndexPattern={onChange}
     />
   );
-};
-
-export const FieldPickerWithoutIndexPattern = () => {
-  return <FieldPicker dataView={null} />;
-};
+}

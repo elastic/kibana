@@ -6,62 +6,44 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
-import { sortBy, filter, uniq } from 'lodash';
-import {
-  EuiFieldSearch,
-  EuiFilterGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiPanel,
-  EuiTitle,
-  EuiText,
-  // EuiPopover,
-  // EuiPopoverFooter,
-  // EuiPopoverTitle,
-  // EuiSelect,
-  // EuiSwitch,
-  // EuiSwitchEvent,
-  // EuiForm,
-  // EuiFormRow,
-  // EuiButtonGroup,
-  // EuiOutsideClickDetector,
-  // EuiFilterButton,
-  // EuiSpacer,
-} from '@elastic/eui';
-import { IndexPatternField, IndexPattern } from '../../../../data/public';
+import React, { useState } from 'react';
+import { sortBy, uniq } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { DataView, DataViewField } from '../../../../data_views/common';
 import { FieldIcon, FieldButton } from '../../../../kibana_react/public';
-// import { i18n } from '@kbn/i18n';
-import { FieldSearch, DataType } from './field_search';
+
+import { FieldSearch } from './field_search';
 
 import './field_picker.scss';
 
 export interface Props {
-  indexPattern: IndexPattern | null;
+  dataView: DataView | null;
+  filterPredicate?: (f: DataViewField) => boolean;
 }
 
-// interface State {
-//   selectedField: IndexPatternField;
-// }
-
-export const FieldPicker = ({ indexPattern }: Props) => {
+export const FieldPicker = ({ dataView, filterPredicate }: Props) => {
   const [nameFilter, setNameFilter] = useState<string>('');
-  const [typesFilter, setTypesFilter] = useState<DataType[]>([]);
-  const [selectedField, setSelectedField] = useState<IndexPatternField | null>(null);
-  const fields = indexPattern
+  const [typesFilter, setTypesFilter] = useState<string[]>([]);
+  const [selectedField, setSelectedField] = useState<DataViewField | null>(null);
+
+  // Retrieve, filter, and sort fields from data view
+  const fields = dataView
     ? sortBy(
-        indexPattern.fields.filter(
-          (f) =>
-            f.name.includes(nameFilter) &&
-            (typesFilter.length === 0 || typesFilter.includes(f.type as DataType))
-        ),
+        dataView.fields
+          .filter(
+            (f) =>
+              f.name.includes(nameFilter) &&
+              (typesFilter.length === 0 || typesFilter.includes(f.type as string))
+          )
+          .filter((f) => (filterPredicate ? filterPredicate(f) : true)),
         ['name']
       )
     : [];
 
-  const uniqueTypes = indexPattern ? uniq(indexPattern.fields.map((f) => f.type as DataType)) : [];
+  const uniqueTypes = dataView ? uniq(dataView.fields.map((f) => f.type as string)) : [];
 
   return (
     <EuiFlexGroup
@@ -69,7 +51,7 @@ export const FieldPicker = ({ indexPattern }: Props) => {
       alignItems="stretch"
       gutterSize="s"
       className={`presFieldPicker__container ${
-        !indexPattern && 'presFieldPicker__container--disabled'
+        !dataView && 'presFieldPicker__container--disabled'
       }`}
     >
       <EuiFlexItem grow={false}>
@@ -105,7 +87,7 @@ export const FieldPicker = ({ indexPattern }: Props) => {
               })}
             </EuiFlexGroup>
           )}
-          {!indexPattern && (
+          {!dataView && (
             <EuiFlexGroup
               direction="column"
               gutterSize="none"
@@ -113,11 +95,16 @@ export const FieldPicker = ({ indexPattern }: Props) => {
               justifyContent="center"
             >
               <EuiFlexItem>
-                <EuiText color="subdued">No index pattern selected</EuiText>
+                <EuiText color="subdued">
+                  <FormattedMessage
+                    id="presentationUtil.fieldPicker.noDataViewLabel"
+                    defaultMessage="No data view selected"
+                  />
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          {indexPattern && fields.length === 0 && (
+          {dataView && fields.length === 0 && (
             <EuiFlexGroup
               direction="column"
               gutterSize="none"
@@ -125,7 +112,12 @@ export const FieldPicker = ({ indexPattern }: Props) => {
               justifyContent="center"
             >
               <EuiFlexItem>
-                <EuiText color="subdued">No matching fields</EuiText>
+                <EuiText color="subdued">
+                  <FormattedMessage
+                    id="presentationUtil.fieldPicker.noFieldsLabel"
+                    defaultMessage="No matching fields"
+                  />
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
@@ -134,7 +126,12 @@ export const FieldPicker = ({ indexPattern }: Props) => {
       {selectedField && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h4>Selected field:</h4>
+            <h4>
+              <FormattedMessage
+                id="presentationUtil.fieldPicker.selectedFieldLabel"
+                defaultMessage="Selected Field"
+              />
+            </h4>
           </EuiTitle>
           <div>
             <FieldButton
