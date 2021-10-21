@@ -48,14 +48,16 @@ export const plugin = (initContext: PluginInitializerContext) => new AlertingPlu
 export const config: PluginConfigDescriptor<AlertsConfigType> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck'),
+    renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.interval',
-      'xpack.alerting.invalidateApiKeysTask.interval'
+      'xpack.alerting.invalidateApiKeysTask.interval',
+      { level: 'warning' }
     ),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.removalDelay',
-      'xpack.alerting.invalidateApiKeysTask.removalDelay'
+      'xpack.alerting.invalidateApiKeysTask.removalDelay',
+      { level: 'warning' }
     ),
   ],
 };
