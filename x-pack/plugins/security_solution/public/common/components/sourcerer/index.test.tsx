@@ -33,14 +33,6 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  return {
-    ...actual,
-    EuiToolTip: jest.fn(),
-  };
-});
-
 const mockOptions = [
   { label: 'apm-*-transaction*', value: 'apm-*-transaction*' },
   { label: 'auditbeat-*', value: 'auditbeat-*' },
@@ -52,27 +44,11 @@ const mockOptions = [
   { label: 'winlogbeat-*', value: 'winlogbeat-*' },
 ];
 
-const mockTooltip = ({
-  tooltipContent,
-  children,
-}: {
-  tooltipContent: string;
-  children: React.ReactElement;
-}) => (
-  <div data-test-subj="timeline-sourcerer-tooltip">
-    <span>{tooltipContent}</span>
-    {children}
-  </div>
-);
-
 const defaultProps = {
   scope: sourcererModel.SourcererScopeName.default,
 };
-describe('Sourcerer component', () => {
-  beforeAll(() => {
-    (EuiToolTip as unknown as jest.Mock).mockImplementation(mockTooltip);
-  });
 
+describe('Sourcerer component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
