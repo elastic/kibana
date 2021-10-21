@@ -9,7 +9,6 @@
 export { DocumentMigrator } from './document_migrator';
 export { IndexMigrator } from './index_migrator';
 export { buildActiveMappings } from './build_active_mappings';
-export type { CallCluster } from './call_cluster';
 export type { LogFn, SavedObjectsMigrationLogger } from './migration_logger';
 export type { MigrationResult, MigrationStatus } from './migration_coordinator';
 export { createMigrationEsClient } from './migration_es_client';
