@@ -56,13 +56,15 @@ export const setSignalsStatusRoute = (
         return siemResponse.error({ statusCode: 404 });
       }
 
-      const isTelemetryOptedIn = await sender.isTelemetryOptedIn();
-      if (isTelemetryOptedIn) {
+      const clusterId = sender.getClusterID();
+      const [isTelemetryOptedIn, username] = await Promise.all([
+        sender.isTelemetryOptedIn(),
+        security?.authc.getCurrentUser(request)?.username,
+      ]);
+      if (isTelemetryOptedIn && clusterId) {
         // Sometimes the ids are in the query not passed in the request?
         const toSendAlertIds = get(query, 'bool.filter.terms._id') || signalIds;
         // Get Context for Insights Payloads
-        const clusterId = await sender.getClusterID();
-        const username = await security?.authc.getCurrentUser(request)?.username;
         const insightsService = new InsightsService(clusterId);
         const sessionId = insightsService.getSessionIDfromKibanaRequest(request);
         if (username && toSendAlertIds && sessionId && status) {

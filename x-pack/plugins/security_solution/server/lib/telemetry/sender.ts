@@ -67,12 +67,8 @@ export class TelemetryEventsSender {
     }
   }
 
-  public async getClusterID(): Promise<string> {
-    if (!this.receiver) {
-      throw Error("Couldn't get cluster id due to receiver not being set.");
-    }
-    const clusterInfo = await this.receiver.fetchClusterInfo();
-    return clusterInfo.cluster_uuid;
+  public getClusterID(): string | undefined {
+    return this.receiver?.getClusterInfo()?.cluster_uuid;
   }
 
   public start(
@@ -157,9 +153,10 @@ export class TelemetryEventsSender {
         return;
       }
 
-      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
+      const clusterInfo = this.receiver?.getClusterInfo();
+
+      const [telemetryUrl, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl('alerts-endpoint'),
-        this.receiver?.fetchClusterInfo(),
         this.receiver?.fetchLicenseInfo(),
       ]);
 
