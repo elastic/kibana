@@ -29,11 +29,11 @@ export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSch
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.oracleMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Oracle servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from Oracle servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.oracleMetrics.longDescription', {
       defaultMessage:
-        'The `{moduleName}` Metricbeat module fetches internal metrics from a Oracle server. \
+        'The `{moduleName}` Metricbeat module fetches metrics from a Oracle server. \
 [Learn more]({learnMoreLink}).',
       values: {
         moduleName,

@@ -30,11 +30,11 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.muninMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Munin servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from Munin servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.muninMetrics.longDescription', {
       defaultMessage:
-        'The `munin` Metricbeat module fetches internal metrics from Munin. \
+        'The `munin` Metricbeat module fetches metrics from Munin. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-munin.html',

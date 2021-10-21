@@ -28,11 +28,11 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.vsphereMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from vSphere with Metricbeat.',
+      defaultMessage: 'Collect metrics from vSphere with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.vsphereMetrics.longDescription', {
       defaultMessage:
-        'The `vsphere` Metricbeat module fetches internal metrics from a vSphere cluster. \
+        'The `vsphere` Metricbeat module fetches metrics from a vSphere cluster. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-vsphere.html',

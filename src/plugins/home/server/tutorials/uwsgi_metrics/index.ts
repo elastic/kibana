@@ -28,11 +28,11 @@ export function uwsgiMetricsSpecProvider(context: TutorialContext): TutorialSche
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.uwsgiMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from uWSGI servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from uWSGI servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.uwsgiMetrics.longDescription', {
       defaultMessage:
-        'The `uwsgi` Metricbeat module fetches internal metrics from uWSGI server. \
+        'The `uwsgi` Metricbeat module fetches metrics from uWSGI server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-uwsgi.html',

@@ -30,11 +30,11 @@ export function zookeeperMetricsSpecProvider(context: TutorialContext): Tutorial
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.zookeeperMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Zookeeper servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from Zookeeper servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.zookeeperMetrics.longDescription', {
       defaultMessage:
-        'The `{moduleName}` Metricbeat module fetches internal metrics from a Zookeeper server. \
+        'The `{moduleName}` Metricbeat module fetches metrics from a Zookeeper server. \
 [Learn more]({learnMoreLink}).',
       values: {
         moduleName,

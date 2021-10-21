@@ -29,11 +29,11 @@ export function aerospikeMetricsSpecProvider(context: TutorialContext): Tutorial
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.aerospikeMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Aerospike servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from Aerospike servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.aerospikeMetrics.longDescription', {
       defaultMessage:
-        'The `aerospike` Metricbeat module fetches internal metrics from Aerospike. \
+        'The `aerospike` Metricbeat module fetches metrics from Aerospike. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-aerospike.html',

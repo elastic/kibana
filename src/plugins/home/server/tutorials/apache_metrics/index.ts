@@ -32,7 +32,7 @@ export function apacheMetricsSpecProvider(context: TutorialContext): TutorialSch
     }),
     longDescription: i18n.translate('home.tutorials.apacheMetrics.longDescription', {
       defaultMessage:
-        'The `apache` Metricbeat module fetches internal metrics from Apache 2 HTTP server. \
+        'The `apache` Metricbeat module fetches metrics from Apache 2 HTTP server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-apache.html',

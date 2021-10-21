@@ -29,11 +29,11 @@ export function logstashMetricsSpecProvider(context: TutorialContext): TutorialS
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.logstashMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Logstash servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from Logstash servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.logstashMetrics.longDescription', {
       defaultMessage:
-        'The `{moduleName}` Metricbeat module fetches internal metrics from a Logstash server. \
+        'The `{moduleName}` Metricbeat module fetches metrics from a Logstash server. \
 [Learn more]({learnMoreLink}).',
       values: {
         moduleName,

@@ -29,11 +29,11 @@ export function cephMetricsSpecProvider(context: TutorialContext): TutorialSchem
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.cephMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Ceph servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from Ceph servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.cephMetrics.longDescription', {
       defaultMessage:
-        'The `ceph` Metricbeat module fetches internal metrics from Ceph. \
+        'The `ceph` Metricbeat module fetches metrics from Ceph. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-ceph.html',

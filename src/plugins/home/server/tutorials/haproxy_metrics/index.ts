@@ -29,11 +29,11 @@ export function haproxyMetricsSpecProvider(context: TutorialContext): TutorialSc
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.haproxyMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from HAProxy servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from HAProxy servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.haproxyMetrics.longDescription', {
       defaultMessage:
-        'The `haproxy` Metricbeat module fetches internal metrics from HAProxy. \
+        'The `haproxy` Metricbeat module fetches metrics from HAProxy. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-haproxy.html',

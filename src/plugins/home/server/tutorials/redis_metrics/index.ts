@@ -28,11 +28,11 @@ export function redisMetricsSpecProvider(context: TutorialContext): TutorialSche
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.redisMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Redis servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from Redis servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.redisMetrics.longDescription', {
       defaultMessage:
-        'The `redis` Metricbeat module fetches internal metrics from Redis server. \
+        'The `redis` Metricbeat module fetches metrics from Redis server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-redis.html',

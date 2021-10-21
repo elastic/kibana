@@ -29,11 +29,11 @@ export function golangMetricsSpecProvider(context: TutorialContext): TutorialSch
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.golangMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Golang applications with Metricbeat.',
+      defaultMessage: 'Collect metrics from Golang applications with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.golangMetrics.longDescription', {
       defaultMessage:
-        'The `{moduleName}` Metricbeat module fetches internal metrics from a Golang app. \
+        'The `{moduleName}` Metricbeat module fetches metrics from a Golang app. \
 [Learn more]({learnMoreLink}).',
       values: {
         moduleName,

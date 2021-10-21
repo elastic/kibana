@@ -29,11 +29,11 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
     category: TutorialsCategory.METRICS,
     isBeta: false,
     shortDescription: i18n.translate('home.tutorials.phpFpmMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from PHP-FPM with Metricbeat.',
+      defaultMessage: 'Collect metrics from PHP-FPM with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.phpFpmMetrics.longDescription', {
       defaultMessage:
-        'The `php_fpm` Metricbeat module fetches internal metrics from PHP-FPM server. \
+        'The `php_fpm` Metricbeat module fetches metrics from PHP-FPM server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html',

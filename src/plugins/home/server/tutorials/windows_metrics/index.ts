@@ -29,11 +29,11 @@ export function windowsMetricsSpecProvider(context: TutorialContext): TutorialSc
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.windowsMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Windows with Metricbeat.',
+      defaultMessage: 'Collect metrics from Windows with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.windowsMetrics.longDescription', {
       defaultMessage:
-        'The `windows` Metricbeat module fetches internal metrics from Windows. \
+        'The `windows` Metricbeat module fetches metrics from Windows. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-windows.html',

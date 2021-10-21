@@ -29,11 +29,11 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.etcdMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Etcd servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from Etcd servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.etcdMetrics.longDescription', {
       defaultMessage:
-        'The `etcd` Metricbeat module fetches internal metrics from Etcd. \
+        'The `etcd` Metricbeat module fetches metrics from Etcd. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-etcd.html',

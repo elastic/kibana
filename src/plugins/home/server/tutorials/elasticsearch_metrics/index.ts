@@ -33,7 +33,7 @@ export function elasticsearchMetricsSpecProvider(context: TutorialContext): Tuto
     }),
     longDescription: i18n.translate('home.tutorials.elasticsearchMetrics.longDescription', {
       defaultMessage:
-        'The `elasticsearch` Metricbeat module fetches internal metrics from Elasticsearch. \
+        'The `elasticsearch` Metricbeat module fetches metrics from Elasticsearch. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-elasticsearch.html',

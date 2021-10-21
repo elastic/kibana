@@ -29,11 +29,11 @@ export function memcachedMetricsSpecProvider(context: TutorialContext): Tutorial
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.memcachedMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Memcached servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from Memcached servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.memcachedMetrics.longDescription', {
       defaultMessage:
-        'The `memcached` Metricbeat module fetches internal metrics from Memcached. \
+        'The `memcached` Metricbeat module fetches metrics from Memcached. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-memcached.html',

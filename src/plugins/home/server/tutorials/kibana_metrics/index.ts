@@ -29,11 +29,11 @@ export function kibanaMetricsSpecProvider(context: TutorialContext): TutorialSch
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kibanaMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Kibana with Metricbeat.',
+      defaultMessage: 'Collect metrics from Kibana with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kibanaMetrics.longDescription', {
       defaultMessage:
-        'The `kibana` Metricbeat module fetches internal metrics from Kibana. \
+        'The `kibana` Metricbeat module fetches metrics from Kibana. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kibana.html',

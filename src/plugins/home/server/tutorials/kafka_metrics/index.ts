@@ -29,11 +29,11 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kafkaMetrics.shortDescription', {
-      defaultMessage: 'Collect internal metrics from Kafka servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from Kafka servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kafkaMetrics.longDescription', {
       defaultMessage:
-        'The `kafka` Metricbeat module fetches internal metrics from Kafka. \
+        'The `kafka` Metricbeat module fetches metrics from Kafka. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kafka.html',
