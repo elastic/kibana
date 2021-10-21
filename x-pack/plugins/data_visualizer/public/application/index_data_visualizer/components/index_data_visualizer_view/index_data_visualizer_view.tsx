@@ -15,6 +15,7 @@ import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiPanel,
+  EuiProgress,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -245,6 +246,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     metricsStats,
     timefilter,
     setLastRefresh,
+    progress,
   } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
 
   useEffect(() => {
@@ -489,6 +491,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     metricsStats={metricsStats}
                   />
                   <EuiSpacer size={'m'} />
+                  <EuiProgress value={progress} max={100} size={'xs'} />
                   <DataVisualizerTable<FieldVisConfig>
                     items={configs}
                     pageState={dataVisualizerListState}

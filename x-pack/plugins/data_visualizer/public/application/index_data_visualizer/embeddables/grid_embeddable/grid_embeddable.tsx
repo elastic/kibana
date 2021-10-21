@@ -10,7 +10,7 @@ import { CoreStart } from 'kibana/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiEmptyPrompt, EuiProgress, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -130,18 +130,15 @@ export const EmbeddableWrapper = ({
     );
   }
   return (
-    <div>
-      <EuiProgress value={progress} max={100} size={'xs'} />
-      <DataVisualizerTable<FieldVisConfig>
-        items={configs}
-        pageState={dataVisualizerListState}
-        updatePageState={onTableChange}
-        getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
-        extendedColumns={extendedColumns}
-        showPreviewByDefault={input?.showPreviewByDefault}
-        onChange={onOutputChange}
-      />
-    </div>
+    <DataVisualizerTable<FieldVisConfig>
+      items={configs}
+      pageState={dataVisualizerListState}
+      updatePageState={onTableChange}
+      getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
+      extendedColumns={extendedColumns}
+      showPreviewByDefault={input?.showPreviewByDefault}
+      onChange={onOutputChange}
+    />
   );
 };
 
