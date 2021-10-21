@@ -10,13 +10,18 @@ import { IndexPattern, IndexPatternsContract } from '../../../../data/common';
 
 export const useIndexPattern = (indexPatterns: IndexPatternsContract, indexPatternId: string) => {
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
+  const [error, setError] = useState();
 
   useEffect(() => {
     async function loadIndexPattern() {
-      const ip = await indexPatterns.get(indexPatternId);
-      setIndexPattern(ip);
+      try {
+        const item = await indexPatterns.get(indexPatternId);
+        setIndexPattern(item);
+      } catch (e) {
+        setError(e);
+      }
     }
     loadIndexPattern();
-  });
-  return indexPattern;
+  }, [indexPatternId, indexPatterns]);
+  return { indexPattern, error };
 };

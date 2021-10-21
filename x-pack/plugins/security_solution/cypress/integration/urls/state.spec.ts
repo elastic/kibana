@@ -250,8 +250,8 @@ describe('url state', () => {
 
     cy.wait('@timeline').then(({ response }) => {
       closeTimeline();
-      cy.wrap(response!.statusCode).should('eql', 200);
-      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
+      cy.wrap(response?.statusCode).should('eql', 200);
+      const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
       cy.visit('/app/home');
       cy.visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');

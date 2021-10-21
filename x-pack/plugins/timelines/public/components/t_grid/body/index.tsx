@@ -75,6 +75,7 @@ import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { useDataGridHeightHack } from './height_hack';
 import { Filter } from '../../../../../../../src/plugins/data/public';
+import { REMOVE_COLUMN } from './column_headers/translations';
 
 const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
@@ -145,6 +146,9 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
+const FIELDS_WITHOUT_CELL_ACTIONS = ['@timestamp', 'signal.rule.risk_score', 'signal.reason'];
+const hasCellActions = (columnId?: string) =>
+  columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
 const transformControlColumns = ({
   actionColumnsWidth,
   columnHeaders,
@@ -494,7 +498,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               showFullScreenSelector: false,
             }
           : {
-              showColumnSelector: { allowHide: true, allowReorder: true },
+              showColumnSelector: { allowHide: false, allowReorder: true },
               showSortSelector: true,
               showFullScreenSelector: true,
             }),
@@ -556,13 +560,32 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [columnHeaders, dispatch, id, loadPage]
     );
 
-    const [visibleColumns, setVisibleColumns] = useState(() =>
-      columnHeaders.map(({ id: cid }) => cid)
-    ); // initializes to the full set of columns
+    const visibleColumns = useMemo(() => columnHeaders.map(({ id: cid }) => cid), [columnHeaders]); // the full set of columns
 
-    useEffect(() => {
-      setVisibleColumns(columnHeaders.map(({ id: cid }) => cid));
-    }, [columnHeaders]);
+    const onColumnResize = useCallback(
+      ({ columnId, width }: { columnId: string; width: number }) => {
+        dispatch(
+          tGridActions.updateColumnWidth({
+            columnId,
+            id,
+            width,
+          })
+        );
+      },
+      [dispatch, id]
+    );
+
+    const onSetVisibleColumns = useCallback(
+      (newVisibleColumns: string[]) => {
+        dispatch(
+          tGridActions.updateColumnOrder({
+            columnIds: newVisibleColumns,
+            id,
+          })
+        );
+      },
+      [dispatch, id]
+    );
 
     const setEventsLoading = useCallback<SetEventsLoading>(
       ({ eventIds, isLoading: loading }) => {
@@ -636,7 +659,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       setEventsDeleted,
       hasAlertsCrudPermissions,
     ]);
-
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
         columnHeaders.map((header) => {
@@ -644,18 +666,37 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             tGridCellAction({
               browserFields,
               data: data.map((row) => row.data),
-              globalFilters: filters,
+              ecsData: data.map((row) => row.ecs),
+              header: columnHeaders.find((h) => h.id === header.id),
               pageSize,
               timelineId: id,
             });
 
           return {
             ...header,
-            cellActions:
-              header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction),
+            actions: {
+              ...header.actions,
+              additional: [
+                {
+                  iconType: 'cross',
+                  label: REMOVE_COLUMN,
+                  onClick: () => {
+                    dispatch(tGridActions.removeColumn({ id, columnId: header.id }));
+                  },
+                  size: 'xs',
+                },
+              ],
+            },
+            ...(hasCellActions(header.id)
+              ? {
+                  cellActions:
+                    header.tGridCellActions?.map(buildAction) ??
+                    defaultCellActions?.map(buildAction),
+                }
+              : {}),
           };
         }),
-      [browserFields, columnHeaders, data, defaultCellActions, id, pageSize, filters]
+      [columnHeaders, defaultCellActions, browserFields, data, pageSize, id, dispatch]
     );
 
     const renderTGridCellValue = useMemo(() => {
@@ -663,9 +704,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         columnId,
         rowIndex,
         setCellProps,
+        isDetails,
       }): React.ReactElement | null => {
         const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-
         const rowData = pageRowIndex < data.length ? data[pageRowIndex].data : null;
         const header = columnHeaders.find((h) => h.id === columnId);
         const eventId = pageRowIndex < data.length ? data[pageRowIndex]._id : null;
@@ -687,34 +728,36 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         }
 
         return renderCellValue({
+          browserFields,
           columnId: header.id,
-          eventId,
           data: rowData,
+          ecsData: ecs,
+          eventId,
+          globalFilters: filters,
           header,
+          isDetails,
           isDraggable: false,
           isExpandable: true,
           isExpanded: false,
-          isDetails: false,
           linkValues: getOr([], header.linkField ?? '', ecs),
           rowIndex,
-          setCellProps,
-          timelineId: tabType != null ? `${id}-${tabType}` : id,
-          ecsData: ecs,
-          browserFields,
           rowRenderers,
+          setCellProps,
+          timelineId: id,
+          truncate: isDetails ? false : true,
         }) as React.ReactElement;
       };
       return Cell;
     }, [
+      browserFields,
       columnHeaders,
       data,
+      filters,
       id,
-      renderCellValue,
-      tabType,
-      theme,
-      browserFields,
-      rowRenderers,
       pageSize,
+      renderCellValue,
+      rowRenderers,
+      theme,
     ]);
 
     const onChangeItemsPerPage = useCallback(
@@ -751,7 +794,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 data-test-subj="body-data-grid"
                 aria-label={i18n.TGRID_BODY_ARIA_LABEL}
                 columns={columnsWithCellActions}
-                columnVisibility={{ visibleColumns, setVisibleColumns }}
+                columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
                 gridStyle={gridStyle}
                 leadingControlColumns={leadingTGridControlColumns}
                 trailingControlColumns={trailingTGridControlColumns}
@@ -759,6 +802,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 rowCount={totalItems}
                 renderCellValue={renderTGridCellValue}
                 sorting={{ columns: sortingColumns, onSort }}
+                onColumnResize={onColumnResize}
                 pagination={{
                   pageIndex: activePage,
                   pageSize,

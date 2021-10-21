@@ -66,14 +66,21 @@ export default function ({ getService }) {
       expect(metadataFeature.type).to.be(3);
       expect(metadataFeature.extent).to.be(4096);
       expect(metadataFeature.id).to.be(undefined);
+      const fieldMeta = JSON.parse(metadataFeature.properties.fieldMeta);
+      delete metadataFeature.properties.fieldMeta;
       expect(metadataFeature.properties).to.eql({
         __kbn_feature_count__: 2,
         __kbn_is_tile_complete__: true,
         __kbn_metadata_feature__: true,
         __kbn_vector_shape_type_counts__: '{"POINT":2,"LINE":0,"POLYGON":0}',
-        fieldMeta:
-          '{"machine.os.raw":{"categories":{"categories":[{"key":"ios","count":1},{"count":1}]}},"bytes":{"range":{"min":9252,"max":9583,"delta":331},"categories":{"categories":[{"key":9252,"count":1},{"key":9583,"count":1}]}}}',
       });
+      expect(fieldMeta.bytes.range).to.eql({
+        min: 9252,
+        max: 9583,
+        delta: 331,
+      });
+      expect(fieldMeta.bytes.categories.categories.length).to.be(2);
+      expect(fieldMeta['machine.os.raw'].categories.categories.length).to.be(2);
       expect(metadataFeature.loadGeometry()).to.eql([
         [
           { x: 0, y: 4096 },

@@ -58,8 +58,7 @@ describe('getIsUsingTransactionEvents', () => {
 
   describe('with config xpack.apm.searchAggregatedTransactions: never', () => {
     const config = {
-      'xpack.apm.searchAggregatedTransactions':
-        SearchAggregatedTransactionSetting.never,
+      searchAggregatedTransactions: SearchAggregatedTransactionSetting.never,
     };
 
     it('should be false', async () => {
@@ -81,8 +80,7 @@ describe('getIsUsingTransactionEvents', () => {
 
   describe('with config xpack.apm.searchAggregatedTransactions: always', () => {
     const config = {
-      'xpack.apm.searchAggregatedTransactions':
-        SearchAggregatedTransactionSetting.always,
+      searchAggregatedTransactions: SearchAggregatedTransactionSetting.always,
     };
     it('should be false when kuery is empty', async () => {
       mock = await inspectSearchParams(
@@ -164,8 +162,7 @@ describe('getIsUsingTransactionEvents', () => {
 
   describe('with config xpack.apm.searchAggregatedTransactions: auto', () => {
     const config = {
-      'xpack.apm.searchAggregatedTransactions':
-        SearchAggregatedTransactionSetting.auto,
+      searchAggregatedTransactions: SearchAggregatedTransactionSetting.auto,
     };
 
     it('should query for data once if metrics data found', async () => {

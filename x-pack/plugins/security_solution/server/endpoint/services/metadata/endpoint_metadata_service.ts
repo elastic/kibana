@@ -171,6 +171,7 @@ export class EndpointMetadataService {
       // Get Agent Policy and Endpoint Package Policy
       if (fleetAgent) {
         try {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           fleetAgentPolicy = await this.getFleetAgentPolicy(fleetAgent.policy_id!);
           endpointPackagePolicy = fleetAgentPolicy.package_policies.find(
             (policy) => policy.package?.name === 'endpoint'
@@ -183,7 +184,8 @@ export class EndpointMetadataService {
       return {
         metadata: endpointMetadata,
         host_status: fleetAgent
-          ? fleetAgentStatusToEndpointHostStatus(fleetAgent.status!)
+          ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            fleetAgentStatusToEndpointHostStatus(fleetAgent.status!)
           : DEFAULT_ENDPOINT_HOST_STATUS,
         policy_info: {
           agent: {
