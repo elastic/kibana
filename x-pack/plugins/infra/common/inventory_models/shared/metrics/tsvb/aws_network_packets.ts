@@ -8,10 +8,7 @@
 import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-export const awsNetworkPackets: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern
-): TSVBMetricModel => ({
+export const awsNetworkPackets: TSVBMetricModelCreator = (indexPattern): TSVBMetricModel => ({
   id: 'awsNetworkPackets',
   requires: ['aws.ec2'],
   index_pattern: indexPattern,

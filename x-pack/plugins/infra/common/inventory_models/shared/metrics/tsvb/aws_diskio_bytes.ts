@@ -8,10 +8,7 @@
 import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-export const awsDiskioBytes: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern
-): TSVBMetricModel => ({
+export const awsDiskioBytes: TSVBMetricModelCreator = (indexPattern): TSVBMetricModel => ({
   id: 'awsDiskioBytes',
   requires: ['aws.ec2'],
   index_pattern: indexPattern,

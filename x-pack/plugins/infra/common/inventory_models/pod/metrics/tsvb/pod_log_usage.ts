@@ -8,11 +8,7 @@
 import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-export const podLogUsage: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern,
-  interval
-): TSVBMetricModel => ({
+export const podLogUsage: TSVBMetricModelCreator = (indexPattern, interval): TSVBMetricModel => ({
   id: 'podLogUsage',
   requires: ['kubernetes.pod'],
   index_pattern: indexPattern,

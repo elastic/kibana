@@ -8,11 +8,7 @@
 import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-export const nginxHits: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern,
-  interval
-): TSVBMetricModel => ({
+export const nginxHits: TSVBMetricModelCreator = (indexPattern, interval): TSVBMetricModel => ({
   id: 'nginxHits',
   requires: ['nginx.access'],
   index_pattern: indexPattern,
