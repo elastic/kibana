@@ -28,6 +28,10 @@ export const OptionsListStrings = {
       i18n.translate('presentationUtil.inputControls.optionsList.editor.fieldTitle', {
         defaultMessage: 'Field',
       }),
+    getAllowMultiselectTitle: () =>
+      i18n.translate('presentationUtil.inputControls.optionsList.editor.allowMultiselectTitle', {
+        defaultMessage: 'Allow multiple selections in dropdown',
+      }),
   },
   popover: {
     getLoadingMessage: () =>
@@ -37,6 +41,22 @@ export const OptionsListStrings = {
     getEmptyMessage: () =>
       i18n.translate('presentationUtil.inputControls.optionsList.popover.empty', {
         defaultMessage: 'No filters found',
+      }),
+    getSelectionsEmptyMessage: () =>
+      i18n.translate('presentationUtil.inputControls.optionsList.popover.selectionsEmpty', {
+        defaultMessage: 'You have no selections',
+      }),
+    getAllOptionsButtonTitle: () =>
+      i18n.translate('presentationUtil.inputControls.optionsList.popover.allOptionsTitle', {
+        defaultMessage: 'Show all options',
+      }),
+    getSelectedOptionsButtonTitle: () =>
+      i18n.translate('presentationUtil.inputControls.optionsList.popover.selectedOptionsTitle', {
+        defaultMessage: 'Show only selected options',
+      }),
+    getClearAllSelectionsButtonTitle: () =>
+      i18n.translate('presentationUtil.inputControls.optionsList.popover.clearAllSelectionsTitle', {
+        defaultMessage: 'Clear selections',
       }),
   },
 };
