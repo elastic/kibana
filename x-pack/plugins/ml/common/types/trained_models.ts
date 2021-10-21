@@ -95,6 +95,7 @@ export interface TrainedModelConfigResponse {
     model_aliases?: string[];
   } & Record<string, unknown>;
   model_id: string;
+  model_type: 'tree_ensemble' | 'pytorch' | 'lang_ident';
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;

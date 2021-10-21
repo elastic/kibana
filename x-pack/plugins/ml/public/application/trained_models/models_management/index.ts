@@ -12,4 +12,5 @@ export const ModelsTableToConfigMapping = {
   description: 'description',
   createdAt: 'create_time',
   type: 'type',
+  modelType: 'model_type',
 } as const;

@@ -132,6 +132,7 @@ export const ModelsList: FC = () => {
           ...(typeof model.inference_config === 'object'
             ? {
                 type: [
+                  model.model_type,
                   ...Object.keys(model.inference_config),
                   ...(isBuiltInModel(model) ? [BUILT_IN_MODEL_TYPE] : []),
                 ],
@@ -219,6 +220,7 @@ export const ModelsList: FC = () => {
       if (type) {
         acc.add(type);
       }
+      acc.add(item.model_type);
       return acc;
     }, new Set<string>());
     return [...result].map((v) => ({
@@ -336,6 +338,32 @@ export const ModelsList: FC = () => {
       },
     },
     {
+      name: i18n.translate('xpack.ml.inference.modelsList.startModelAllocationActionLabel', {
+        defaultMessage: 'Start allocation',
+      }),
+      description: i18n.translate('xpack.ml.inference.modelsList.startModelAllocationActionLabel', {
+        defaultMessage: 'Start allocation',
+      }),
+      icon: 'download',
+      type: 'icon',
+      isPrimary: true,
+      available: (item) => item.model_type === 'pytorch',
+      onClick: async (item) => {},
+    },
+    {
+      name: i18n.translate('xpack.ml.inference.modelsList.stopModelAllocationActionLabel', {
+        defaultMessage: 'Stop allocation',
+      }),
+      description: i18n.translate('xpack.ml.inference.modelsList.stopModelAllocationActionLabel', {
+        defaultMessage: 'Stop allocation',
+      }),
+      icon: 'stop',
+      type: 'icon',
+      isPrimary: true,
+      available: (item) => item.model_type === 'pytorch',
+      onClick: async (item) => {},
+    },
+    {
       name: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
         defaultMessage: 'Delete model',
       }),
@@ -398,7 +426,7 @@ export const ModelsList: FC = () => {
         defaultMessage: 'ID',
       }),
       sortable: true,
-      truncateText: true,
+      truncateText: false,
       'data-test-subj': 'mlModelsTableColumnId',
     },
     {
@@ -408,7 +436,7 @@ export const ModelsList: FC = () => {
         defaultMessage: 'Description',
       }),
       sortable: false,
-      truncateText: true,
+      truncateText: false,
       'data-test-subj': 'mlModelsTableColumnDescription',
     },
     {
