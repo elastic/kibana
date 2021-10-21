@@ -286,7 +286,7 @@ describe('Sourcerer component', () => {
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
     expect(checkOptionsAndSelections(wrapper, patternList.slice(0, 2))).toEqual({
       // should show every option except fakebeat-*
@@ -480,7 +480,7 @@ describe('Sourcerer component', () => {
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxToggleListButton"]`).first().simulate('click');
     expect(wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).at(6).text()).toEqual(
       mockGlobalState.sourcerer.signalIndexName
