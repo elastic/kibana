@@ -126,10 +126,12 @@ export async function getAgentsByKuery(
     index: AGENTS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
-    sort: `${sortField}:${sortOrder}`,
     track_total_hits: true,
     ignore_unavailable: true,
-    body,
+    body: {
+      ...body,
+      sort: [{ [sortField]: { order: sortOrder } }],
+    },
   });
 
   let agents = res.body.hits.hits.map(searchHitToAgent);
@@ -219,6 +221,7 @@ export function isAgentDocument(
 }
 
 export type ESAgentDocumentResult = estypes.MgetHit<FleetServerAgent>;
+
 export async function getAgentDocuments(
   esClient: ElasticsearchClient,
   agentIds: string[]

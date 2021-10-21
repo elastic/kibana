@@ -42,10 +42,12 @@ export async function listEnrollmentApiKeys(
     index: ENROLLMENT_API_KEYS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
-    sort: 'created_at:desc',
     track_total_hits: true,
     ignore_unavailable: true,
-    body: query ? { query } : undefined,
+    body: {
+      sort: [{ created_at: { order: 'desc' } }],
+      ...(query ? { query } : {}),
+    },
   });
 
   // @ts-expect-error @elastic/elasticsearch _source is optional
