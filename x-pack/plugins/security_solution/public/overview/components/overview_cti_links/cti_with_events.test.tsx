@@ -44,7 +44,7 @@ describe('CtiWithEvents', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiWithEvents {...mockCtiWithEventsProps} />
+            <CtiWithEvents {...mockCtiWithEventsProps} someIntegrationsIsDisabled={true} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>

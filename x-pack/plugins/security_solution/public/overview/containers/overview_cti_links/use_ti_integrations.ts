@@ -15,11 +15,15 @@ interface Integration {
   status: string;
 }
 
+interface TIIntegrationStatus {
+  someIntegrationsIsInstalled: boolean;
+  someIntegrationsIsDisabled: boolean;
+}
+
 export const useTIIntegrations = () => {
-  const [TIIntegrationsStatus, setTIIntegrationsStatus] = useState({
-    someIntegrationsInstalled: undefined,
-    someIntegrationIsDisabled: undefined,
-  });
+  const [TIIntegrationsStatus, setTIIntegrationsStatus] = useState<TIIntegrationStatus | null>(
+    null
+  );
 
   useEffect(() => {
     const getPackages = async () => {
@@ -34,16 +38,16 @@ export const useTIIntegrations = () => {
           integration.id.startsWith(TI_INTEGRATION_PREFIX)
         );
 
-        const someIntegrationsInstalled = tiIntegrations.some(
+        const someIntegrationsIsInstalled = tiIntegrations.some(
           (integration: Integration) => integration.status === installationStatuses.Installed
         );
-        const someIntegrationIsDisabled = tiIntegrations.some(
+        const someIntegrationsIsDisabled = tiIntegrations.some(
           (integration: Integration) => integration.status !== installationStatuses.Installed
         );
 
         setTIIntegrationsStatus({
-          someIntegrationsInstalled,
-          someIntegrationIsDisabled,
+          someIntegrationsIsInstalled,
+          someIntegrationsIsDisabled,
         });
       } catch (e) {
         //

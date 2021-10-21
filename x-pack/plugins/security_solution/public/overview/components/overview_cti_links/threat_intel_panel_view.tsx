@@ -43,7 +43,7 @@ export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
   listItems,
   splitPanel,
   totalCount = 0,
-  someIntegrationIsDisabled,
+  someIntegrationsIsDisabled,
 }) => {
   const integrationsLink = useIntegrationsPageLink();
 
@@ -55,7 +55,7 @@ export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
         infoPanel: useMemo(
           () => (
             <>
-              {someIntegrationIsDisabled ? (
+              {someIntegrationsIsDisabled ? (
                 <InnerLinkPanel
                   dataTestSubj="cti-inner-panel-info"
                   color={'warning'}
@@ -70,7 +70,7 @@ export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
               ) : null}
             </>
           ),
-          [someIntegrationIsDisabled, integrationsLink]
+          [someIntegrationsIsDisabled, integrationsLink]
         ),
         inspectQueryId: isInspectEnabled ? CTIEventCountQueryId : undefined,
         listItems,
