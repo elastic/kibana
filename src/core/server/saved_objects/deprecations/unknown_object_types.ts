@@ -12,13 +12,11 @@ import type { DeprecationsDetails } from '../../deprecations';
 import { IScopedClusterClient } from '../../elasticsearch';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsRawDocSource } from '../serialization';
-import type { SavedObjectConfig } from '../saved_objects_config';
 import { getIndexForType } from '../service/lib';
 
 interface UnknownTypesDeprecationOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   esClient: IScopedClusterClient;
-  savedObjectsConfig: SavedObjectConfig;
   kibanaIndex: string;
   kibanaVersion: string;
 }
@@ -31,11 +29,9 @@ const getTargetIndices = ({
   typeRegistry,
   kibanaVersion,
   kibanaIndex,
-  savedObjectsConfig,
 }: {
   types: string[];
   typeRegistry: ISavedObjectTypeRegistry;
-  savedObjectsConfig: SavedObjectConfig;
   kibanaIndex: string;
   kibanaVersion: string;
 }) => {
@@ -45,7 +41,6 @@ const getTargetIndices = ({
         getIndexForType({
           type,
           typeRegistry,
-          migV2Enabled: savedObjectsConfig.migration.enableV2,
           kibanaVersion,
           defaultIndex: kibanaIndex,
         })
@@ -68,7 +63,6 @@ const getUnknownSavedObjects = async ({
   typeRegistry,
   esClient,
   kibanaIndex,
-  savedObjectsConfig,
   kibanaVersion,
 }: UnknownTypesDeprecationOptions) => {
   const knownTypes = getKnownTypes(typeRegistry);
@@ -77,7 +71,6 @@ const getUnknownSavedObjects = async ({
     typeRegistry,
     kibanaIndex,
     kibanaVersion,
-    savedObjectsConfig,
   });
   const query = getUnknownTypesQuery(knownTypes);
 
@@ -139,7 +132,6 @@ export const getUnknownTypesDeprecations = async (
 interface DeleteUnknownTypesOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   esClient: IScopedClusterClient;
-  savedObjectsConfig: SavedObjectConfig;
   kibanaIndex: string;
   kibanaVersion: string;
 }
@@ -147,7 +139,6 @@ interface DeleteUnknownTypesOptions {
 export const deleteUnknownTypeObjects = async ({
   esClient,
   typeRegistry,
-  savedObjectsConfig,
   kibanaIndex,
   kibanaVersion,
 }: DeleteUnknownTypesOptions) => {
@@ -157,7 +148,6 @@ export const deleteUnknownTypeObjects = async ({
     typeRegistry,
     kibanaIndex,
     kibanaVersion,
-    savedObjectsConfig,
   });
   const query = getUnknownTypesQuery(knownTypes);
 

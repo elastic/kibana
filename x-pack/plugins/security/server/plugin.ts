@@ -26,9 +26,8 @@ import type {
 import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import type { SecurityLicense } from '../common/licensing';
+import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
-import type { AuthenticatedUser, PrivilegeDeprecationsService } from '../common/model';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuditServiceSetup } from './audit';
@@ -42,7 +41,7 @@ import type { AuthorizationServiceSetup, AuthorizationServiceSetupInternal } fro
 import { AuthorizationService } from './authorization';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
-import { getPrivilegeDeprecationsService } from './deprecations';
+import { getPrivilegeDeprecationsService, registerKibanaUserRoleDeprecation } from './deprecations';
 import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
 import { SecurityFeatureUsageService } from './feature_usage';
@@ -286,6 +285,8 @@ export class SecurityPlugin
       getSpacesService: () => spaces?.spacesService,
     });
 
+    this.registerDeprecations(core, license);
+
     defineRoutes({
       router: core.http.createRouter(),
       basePath: core.http.basePath,
@@ -409,5 +410,15 @@ export class SecurityPlugin
     this.auditService.stop();
     this.authorizationService.stop();
     this.sessionManagementService.stop();
+  }
+
+  private registerDeprecations(core: CoreSetup, license: SecurityLicense) {
+    const logger = this.logger.get('deprecations');
+    registerKibanaUserRoleDeprecation({
+      deprecationsService: core.deprecations,
+      license,
+      logger,
+      packageInfo: this.initializerContext.env.packageInfo,
+    });
   }
 }

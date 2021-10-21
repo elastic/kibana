@@ -19,7 +19,7 @@ import { PluginStartContract as AlertingStart } from '../../alerting/server';
 import { SecurityPluginSetup } from '../../security/server';
 
 import { RuleRegistryPluginConfig } from './config';
-import { RuleDataPluginService } from './rule_data_plugin_service';
+import { IRuleDataService, RuleDataService } from './rule_data_plugin_service';
 import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
 import { AlertsClient } from './alert_data_client/alerts_client';
 import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
@@ -34,7 +34,7 @@ export interface RuleRegistryPluginStartDependencies {
 }
 
 export interface RuleRegistryPluginSetupContract {
-  ruleDataService: RuleDataPluginService;
+  ruleDataService: IRuleDataService;
 }
 
 export interface RuleRegistryPluginStartContract {
@@ -55,7 +55,7 @@ export class RuleRegistryPlugin
   private readonly logger: Logger;
   private readonly kibanaVersion: string;
   private readonly alertsClientFactory: AlertsClientFactory;
-  private ruleDataService: RuleDataPluginService | null;
+  private ruleDataService: IRuleDataService | null;
   private security: SecurityPluginSetup | undefined;
 
   constructor(initContext: PluginInitializerContext) {
@@ -81,7 +81,7 @@ export class RuleRegistryPlugin
 
     this.security = plugins.security;
 
-    this.ruleDataService = new RuleDataPluginService({
+    this.ruleDataService = new RuleDataService({
       logger,
       kibanaVersion,
       isWriteEnabled: this.config.write.enabled,

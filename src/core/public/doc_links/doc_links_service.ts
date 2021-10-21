@@ -357,6 +357,7 @@ export class DocLinksService {
           clusterPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-cluster`,
           elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
           elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}configuring-stack-security.html`,
+          elasticsearchEnableApiKeys: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
           indicesPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-indices`,
           kibanaTLS: `${ELASTICSEARCH_DOCS}security-basic-setup.html#encrypt-internode-communication`,
           kibanaPrivileges: `${KIBANA_DOCS}kibana-privileges.html`,
@@ -477,9 +478,10 @@ export class DocLinksService {
           settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
-          elasticAgent: `${FLEET_DOCS}elastic-agent-installation-configuration.html`,
+          elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
           datastreams: `${FLEET_DOCS}data-streams.html`,
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
+          installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
@@ -714,6 +716,7 @@ export interface DocLinksStart {
       clusterPrivileges: string;
       elasticsearchSettings: string;
       elasticsearchEnableSecurity: string;
+      elasticsearchEnableApiKeys: string;
       indicesPrivileges: string;
       kibanaTLS: string;
       kibanaPrivileges: string;
@@ -740,6 +743,7 @@ export interface DocLinksStart {
       elasticAgent: string;
       datastreams: string;
       datastreamsNamingScheme: string;
+      installElasticAgent: string;
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
       learnMoreBlog: string;

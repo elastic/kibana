@@ -76,6 +76,8 @@ export const getTopNavLinks = ({
       defaultMessage: 'Save Search',
     }),
     testId: 'discoverSaveButton',
+    iconType: 'save',
+    emphasize: true,
     run: () => onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state }),
   };
 
@@ -153,9 +155,9 @@ export const getTopNavLinks = ({
   return [
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
-    ...(services.capabilities.discover.save ? [saveSearch] : []),
     openSearch,
     shareSearch,
     inspectSearch,
+    ...(services.capabilities.discover.save ? [saveSearch] : []),
   ];
 };
