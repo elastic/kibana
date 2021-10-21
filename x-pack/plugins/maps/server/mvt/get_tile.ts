@@ -8,7 +8,6 @@
 import _ from 'lodash';
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-import { DEFAULT_MAX_RESULT_WINDOW } from '../../common/constants';
 
 function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
@@ -38,7 +37,6 @@ export async function getEsTile({
     let fields = _.uniq(requestBody.docvalue_fields.concat(requestBody.stored_fields));
     fields = fields.filter((f) => f !== geometryFieldName);
     const body = {
-      size: DEFAULT_MAX_RESULT_WINDOW,
       grid_precision: 0, // no aggs
       exact_bounds: true,
       extent: 4096, // full resolution,
