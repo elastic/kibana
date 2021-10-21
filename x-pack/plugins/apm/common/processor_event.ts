@@ -25,7 +25,7 @@ export const processorEventRt = t.union([
  * Processor events that are searchable in the UI via the query bar.
  *
  * Some client-sideroutes will define 1 or more processor events that
- * will be used to fetch the dynamic index pattern for the query bar.
+ * will be used to fetch the dynamic data view for the query bar.
  */
 
 export type UIProcessorEvent =
