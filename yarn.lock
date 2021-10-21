@@ -2554,10 +2554,10 @@
     history "^4.9.0"
     qs "^6.7.0"
 
-"@elastic/synthetics@^1.0.0-beta.12":
-  version "1.0.0-beta.13"
-  resolved "https://registry.yarnpkg.com/@elastic/synthetics/-/synthetics-1.0.0-beta.13.tgz#84b3353b6bfff5623613016d8ed3d47e48ed17ea"
-  integrity sha512-CXpdfq/E6sVwDU6aGkH9mvcBPimQvR3/2QfBS5U4J58145m7YRPhJzaPJqXVApKomYcE/yzN49zOTIDsMcdOkg==
+"@elastic/synthetics@^1.0.0-beta.16":
+  version "1.0.0-beta.16"
+  resolved "https://registry.yarnpkg.com/@elastic/synthetics/-/synthetics-1.0.0-beta.16.tgz#3d670cf29019e2be356592f2a7871594a3b0ce68"
+  integrity sha512-Ke8MO1lbddZjncPuY2IzZ1qKwePVD1hn9JtSUMv+7zJmczasrqcDKS2QCeFdt12kvFNe/IE60PStwfc9AD7j9w==
   dependencies:
     commander "^7.0.0"
     deepmerge "^4.2.2"
