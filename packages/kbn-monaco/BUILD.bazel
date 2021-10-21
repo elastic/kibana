@@ -36,12 +36,14 @@ RUNTIME_DEPS = [
   "@npm//monaco-editor",
   "@npm//raw-loader",
   "@npm//regenerator-runtime",
+  "@npm//rxjs",
 ]
 
 TYPES_DEPS = [
   "//packages/kbn-i18n",
   "@npm//antlr4ts",
   "@npm//monaco-editor",
+  "@npm//rxjs",
   "@npm//@types/jest",
   "@npm//@types/node",
 ]
