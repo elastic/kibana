@@ -42,6 +42,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.ruleRegistry.write.enabled=true',
       ],
     },
+    uiSettings: {
+      defaults: {
+        'dateFormat:tz': 'UTC',
+      },
+    },
     testFiles: [resolve(__dirname, './apps/observability')],
     junit: {
       ...xpackFunctionalConfig.get('junit'),
