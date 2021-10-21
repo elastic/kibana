@@ -96,7 +96,6 @@ function createRoot() {
     {
       migrations: {
         skip: false,
-        enableV2: true,
       },
       logging: {
         appenders: {
