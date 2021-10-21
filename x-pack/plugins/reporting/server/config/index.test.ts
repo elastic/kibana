@@ -40,7 +40,7 @@ describe('deprecations', () => {
     const { messages } = applyReportingDeprecations({ roles: { enabled: true } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Use Kibana application privileges to grant reporting privileges. Using  \\"xpack.reporting.roles.allow\\" to grant reporting privileges prevents users from using API Keys to create reports. The \\"xpack.reporting.roles.enabled\\" setting will default to false in a future release.",
+        "Use Kibana application privileges to grant reporting privileges. Using  \\"xpack.reporting.roles.allow\\" to grant reporting privileges is deprecated. The \\"xpack.reporting.roles.enabled\\" setting will default to false in a future release.",
       ]
     `);
   });

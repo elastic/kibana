@@ -52,11 +52,13 @@ describe('POST /diagnose/browser', () => {
       () => ({ usesUiCapabilities: () => false })
     );
 
-    const mockSetupDeps = createMockPluginSetup({
-      router: httpSetup.createRouter(''),
-    });
-
-    core = await createMockReportingCore(config, mockSetupDeps);
+    core = await createMockReportingCore(
+      config,
+      createMockPluginSetup({
+        router: httpSetup.createRouter(''),
+        security: null,
+      })
+    );
 
     mockedSpawn.mockImplementation(() => ({
       removeAllListeners: jest.fn(),
