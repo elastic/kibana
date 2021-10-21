@@ -37,6 +37,7 @@ exports[`Table should render normally 1`] = `
       Object {
         "actions": Array [
           Object {
+            "available": [Function],
             "description": "Edit this field",
             "icon": "pencil",
             "name": "Edit",
@@ -44,6 +45,7 @@ exports[`Table should render normally 1`] = `
             "type": "icon",
           },
           Object {
+            "available": [Function],
             "color": "danger",
             "description": "Delete this field",
             "icon": "trash",
@@ -60,8 +62,15 @@ exports[`Table should render normally 1`] = `
   items={
     Array [
       Object {
-        "lang": "Elastic",
+        "isUserEditable": true,
+        "lang": "painless",
         "name": "1",
+        "script": "",
+      },
+      Object {
+        "isUserEditable": false,
+        "lang": "painless",
+        "name": "2",
         "script": "",
       },
     ]
