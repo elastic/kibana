@@ -9,8 +9,7 @@ import { format } from 'util';
 
 import chalk from 'chalk';
 
-// TODO use the actual ansiEscapes module
-import { ansiEscapes } from './ansi';
+import { ansiEscapes } from './lib/ansi';
 
 import { LogLevel, parseLogLevel, ParsedLogLevel } from './log_levels';
 import { Writer } from './writer';
@@ -95,9 +94,7 @@ export class ToolingLogTextWriter implements Writer {
     function replace(
       ...args: [Uint8Array | string, BufferEncoding, (err?: Error) => void]
     ): boolean {
-      // @ts-ignore - Remove when using ansiEscapes module
       origWrite.call(process.stdout, ansiEscapes.eraseLine);
-      // @ts-ignore - Remove when using ansiEscapes module
       origWrite.call(process.stdout, ansiEscapes.cursorLeft);
       origWrite.apply(process.stdout, args);
       return origWrite.call(process.stdout, 'status ' + Math.random());
