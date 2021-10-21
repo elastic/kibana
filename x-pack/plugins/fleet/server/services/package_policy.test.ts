@@ -128,6 +128,12 @@ jest.mock('./agent_policy', () => {
   };
 });
 
+jest.mock('./epm/packages/cleanup', () => {
+  return {
+    removeOldAssets: jest.fn(),
+  };
+});
+
 const mockedFetchInfo = fetchInfo as jest.Mock<ReturnType<typeof fetchInfo>>;
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
