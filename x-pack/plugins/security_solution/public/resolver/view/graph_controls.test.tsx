@@ -269,7 +269,12 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
             .testSubject('resolver:graph-controls:node-legend:description')
             .map((description) => description.text())
         )
-      ).toYieldEqualTo(['Running Process', 'Terminated Process', 'Loading Process', 'Error']);
+      ).toYieldEqualTo([
+        'Running Process',
+        'Terminated Process',
+        'Loading Process',
+        'Error Process',
+      ]);
     });
   });
 

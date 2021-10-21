@@ -38,6 +38,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
       ],
     },
+    uiSettings: {
+      defaults: {
+        'dateFormat:tz': 'UTC',
+      },
+    },
     testFiles: [resolve(__dirname, './apps/observability')],
     junit: {
       ...xpackFunctionalConfig.get('junit'),
