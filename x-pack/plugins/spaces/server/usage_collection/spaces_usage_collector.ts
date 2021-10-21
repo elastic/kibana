@@ -30,7 +30,7 @@ interface SpacesAggregationResponse {
 
 /**
  *
- * @param {CallCluster} callCluster
+ * @param {ElasticsearchClient} esClient
  * @param {string} kibanaIndex
  * @param {PluginsSetup['features']} features
  * @param {boolean} spacesAvailable
