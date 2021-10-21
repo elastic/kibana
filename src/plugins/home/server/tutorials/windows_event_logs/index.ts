@@ -23,13 +23,13 @@ export function windowsEventLogsSpecProvider(context: TutorialContext): Tutorial
   return {
     id: 'windowsEventLogs',
     name: i18n.translate('home.tutorials.windowsEventLogs.nameTitle', {
-      defaultMessage: 'Windows Event Log',
+      defaultMessage: 'Windows Event Logs',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.windowsEventLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs from Windows Event Log with WinLogBeat.',
+      defaultMessage: 'Collect and parse logs from Windows Event Logs with WinLogBeat.',
     }),
     longDescription: i18n.translate('home.tutorials.windowsEventLogs.longDescription', {
       defaultMessage:
