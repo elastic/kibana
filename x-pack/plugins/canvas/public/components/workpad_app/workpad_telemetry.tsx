@@ -65,13 +65,15 @@ export const withUnconnectedElementsLoadedTelemetry = <P extends {}>(
   function ElementsLoadedTelemetry(props: P & ElementsLoadedTelemetryProps) {
     const { workpad } = props;
 
-    const [currentWorkpadId, setWorkpadId] = useState<string | undefined>(workpad.id);
+    const [currentWorkpadId, setWorkpadId] = useState<string | undefined>(undefined);
     const [hasReported, setHasReported] = useState(false);
     const telemetryElementCounts = useSelector(
       (state: State) => getElementCounts(state),
       shallowEqual
     );
+
     const telemetryResolvedArgs = useSelector((state: State) => getArgs(state), deepEqual);
+
     const resolvedArgsAreForWorkpad = areAllElementsInResolvedArgs(workpad, telemetryResolvedArgs);
     const { error, pending } = telemetryElementCounts;
     const resolved = resolvedArgsAreForWorkpad && pending === 0;
@@ -84,7 +86,7 @@ export const withUnconnectedElementsLoadedTelemetry = <P extends {}>(
         );
 
         setWorkpadId(workpad.id);
-        setHasReported(!workpadElementCount || resolved);
+        setHasReported(workpadElementCount === 0 || resolved);
       } else if (!hasReported && resolved) {
         if (error > 0) {
           trackMetric(METRIC_TYPE.LOADED, [WorkpadLoadedMetric, WorkpadLoadedWithErrorsMetric]);
