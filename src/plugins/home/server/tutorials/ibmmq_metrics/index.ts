@@ -28,11 +28,11 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.ibmmqMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from IBM MQ instances with Metricbeat.',
+      defaultMessage: 'Collect metrics from IBM MQ instances with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.ibmmqMetrics.longDescription', {
       defaultMessage:
-        'The `ibmmq` Metricbeat module fetches monitoring metrics from IBM MQ instances \
+        'The `ibmmq` Metricbeat module fetches metrics from IBM MQ instances \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-ibmmq.html',

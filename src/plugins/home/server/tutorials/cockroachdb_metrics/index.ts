@@ -28,11 +28,11 @@ export function cockroachdbMetricsSpecProvider(context: TutorialContext): Tutori
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.cockroachdbMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from CockroachDB servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from CockroachDB servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.cockroachdbMetrics.longDescription', {
       defaultMessage:
-        'The `cockroachdb` Metricbeat module fetches monitoring metrics from CockroachDB. \
+        'The `cockroachdb` Metricbeat module fetches metrics from CockroachDB. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-cockroachdb.html',

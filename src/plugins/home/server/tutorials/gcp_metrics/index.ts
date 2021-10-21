@@ -28,11 +28,11 @@ export function gcpMetricsSpecProvider(context: TutorialContext): TutorialSchema
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.gcpMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from Google Cloud Platform with Metricbeat.',
+      defaultMessage: 'Collect metrics from Google Cloud Platform with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.gcpMetrics.longDescription', {
       defaultMessage:
-        'The `gcp` Metricbeat module fetches monitoring metrics from Google Cloud Platform using Stackdriver Monitoring API. \
+        'The `gcp` Metricbeat module fetches metrics from Google Cloud Platform using Stackdriver Monitoring API. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-gcp.html',

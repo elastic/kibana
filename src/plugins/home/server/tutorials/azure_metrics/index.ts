@@ -29,7 +29,7 @@ export function azureMetricsSpecProvider(context: TutorialContext): TutorialSche
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.azureMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from Azure with Metricbeat.',
+      defaultMessage: 'Collect metrics from Azure with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.azureMetrics.longDescription', {
       defaultMessage:

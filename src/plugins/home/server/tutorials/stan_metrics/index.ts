@@ -28,11 +28,11 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.stanMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from STAN servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from STAN servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.stanMetrics.longDescription', {
       defaultMessage:
-        'The `stan` Metricbeat module fetches monitoring metrics from STAN. \
+        'The `stan` Metricbeat module fetches metrics from STAN. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-stan.html',

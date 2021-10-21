@@ -28,11 +28,11 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.activemqMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from ActiveMQ instances with Metricbeat.',
+      defaultMessage: 'Collect metrics from ActiveMQ instances with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.activemqMetrics.longDescription', {
       defaultMessage:
-        'The `activemq` Metricbeat module fetches monitoring metrics from ActiveMQ instances \
+        'The `activemq` Metricbeat module fetches metrics from ActiveMQ instances \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-activemq.html',

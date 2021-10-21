@@ -28,11 +28,11 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.corednsMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from CoreDNS servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from CoreDNS servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.corednsMetrics.longDescription', {
       defaultMessage:
-        'The `coredns` Metricbeat module fetches monitoring metrics from CoreDNS. \
+        'The `coredns` Metricbeat module fetches metrics from CoreDNS. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-coredns.html',

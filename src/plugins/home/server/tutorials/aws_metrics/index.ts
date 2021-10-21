@@ -29,11 +29,11 @@ export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.awsMetrics.shortDescription', {
       defaultMessage:
-        'Collect monitoring metrics for EC2 instances from AWS APIs and Cloudwatch with Metricbeat.',
+        'Collect metrics for EC2 instances from AWS APIs and Cloudwatch with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.awsMetrics.longDescription', {
       defaultMessage:
-        'The `aws` Metricbeat module fetches monitoring metrics from AWS APIs and Cloudwatch. \
+        'The `aws` Metricbeat module fetches metrics from AWS APIs and Cloudwatch. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-aws.html',

@@ -28,11 +28,11 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.consulMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from Consul servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from Consul servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.consulMetrics.longDescription', {
       defaultMessage:
-        'The `consul` Metricbeat module fetches monitoring metrics from Consul. \
+        'The `consul` Metricbeat module fetches metrics from Consul. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-consul.html',

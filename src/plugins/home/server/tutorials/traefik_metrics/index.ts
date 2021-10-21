@@ -25,11 +25,11 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.traefikMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from Traefik with Metricbeat.',
+      defaultMessage: 'Collect metrics from Traefik with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.traefikMetrics.longDescription', {
       defaultMessage:
-        'The `traefik` Metricbeat module fetches monitoring metrics from Traefik. \
+        'The `traefik` Metricbeat module fetches metrics from Traefik. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-traefik.html',

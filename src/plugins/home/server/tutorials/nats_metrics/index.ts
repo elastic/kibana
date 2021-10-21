@@ -28,11 +28,11 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.natsMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from NATS servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from NATS servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.natsMetrics.longDescription', {
       defaultMessage:
-        'The `nats` Metricbeat module fetches monitoring metrics from Nats. \
+        'The `nats` Metricbeat module fetches metrics from Nats. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-nats.html',

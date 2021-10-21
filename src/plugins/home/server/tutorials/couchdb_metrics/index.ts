@@ -28,11 +28,11 @@ export function couchdbMetricsSpecProvider(context: TutorialContext): TutorialSc
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.couchdbMetrics.shortDescription', {
-      defaultMessage: 'Collect monitoring metrics from CouchDB servers with Metricbeat.',
+      defaultMessage: 'Collect metrics from CouchDB servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.couchdbMetrics.longDescription', {
       defaultMessage:
-        'The `couchdb` Metricbeat module fetches monitoring metrics from CouchDB. \
+        'The `couchdb` Metricbeat module fetches metrics from CouchDB. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-couchdb.html',
