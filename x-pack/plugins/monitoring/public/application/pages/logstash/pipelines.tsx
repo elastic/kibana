@@ -76,7 +76,6 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
     if (cluster) {
       generateBreadcrumbs(cluster.cluster_name, {
         inLogstash: true,
-        page: 'pipeline',
       });
     }
   }, [cluster, data, generateBreadcrumbs]);
