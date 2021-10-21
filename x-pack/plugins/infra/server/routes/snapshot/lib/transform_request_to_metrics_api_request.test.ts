@@ -75,7 +75,7 @@ const snapshotRequest: SnapshotRequest = {
 
 const metricsApiRequest = {
   indexPattern: 'metrics-*,metricbeat-*',
-  timerange: { field: '@timestamp', from: 1605705900000, to: 1605706200000, interval: '60s' },
+  timerange: { from: 1605705900000, to: 1605706200000, interval: '60s' },
   metrics: [
     {
       id: 'cpu',
