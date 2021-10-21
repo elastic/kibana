@@ -30,10 +30,16 @@ export type ConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('ui_metric.enabled', 'usageCollection.uiCounters.enabled'),
-    renameFromRoot('ui_metric.debug', 'usageCollection.uiCounters.debug'),
-    renameFromRoot('usageCollection.uiMetric.enabled', 'usageCollection.uiCounters.enabled'),
-    renameFromRoot('usageCollection.uiMetric.debug', 'usageCollection.uiCounters.debug'),
+    renameFromRoot('ui_metric.enabled', 'usageCollection.uiCounters.enabled', {
+      level: 'critical',
+    }),
+    renameFromRoot('ui_metric.debug', 'usageCollection.uiCounters.debug', { level: 'critical' }),
+    renameFromRoot('usageCollection.uiMetric.enabled', 'usageCollection.uiCounters.enabled', {
+      level: 'critical',
+    }),
+    renameFromRoot('usageCollection.uiMetric.debug', 'usageCollection.uiCounters.debug', {
+      level: 'critical',
+    }),
   ],
   exposeToBrowser: {
     uiCounters: true,
