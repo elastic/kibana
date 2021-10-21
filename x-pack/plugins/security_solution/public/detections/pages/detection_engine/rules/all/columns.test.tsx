@@ -79,33 +79,32 @@ describe('AllRulesTable Columns', () => {
     });
   });
 
-  describe('getColumns', () => {
-    test('should not have truncated text options for column items', () => {
-      const columns = getColumns({
-        dispatch,
-        dispatchToaster,
-        history,
-        formatUrl,
-        navigateToApp,
-        reFetchRules,
-        refetchPrePackagedRulesStatus,
-        hasMlPermissions: false,
-        hasPermissions: false,
-        loadingRuleIds: [],
-        hasReadActionsPrivileges: false,
-      });
-
-      columns.forEach((column) => {
-        expect(column).not.toHaveProperty('truncateText');
-      });
+  describe('Columns', () => {
+    const rulesColumns = getColumns({
+      dispatch,
+      dispatchToaster,
+      history,
+      formatUrl,
+      navigateToApp,
+      reFetchRules,
+      refetchPrePackagedRulesStatus,
+      hasMlPermissions: false,
+      hasPermissions: false,
+      loadingRuleIds: [],
+      hasReadActionsPrivileges: false,
     });
-  });
 
-  describe('getMonitoringColumns', () => {
-    test('should not have truncated text options for column items', () => {
-      const docsLinksStartMock = { links: { siem: { troubleshootGaps: 'mock' } } } as DocLinksStart;
-      const columns = getMonitoringColumns(navigateToApp, formatUrl, docsLinksStartMock);
+    const docsLinksStartMock = { links: { siem: { troubleshootGaps: 'mock' } } } as DocLinksStart;
+    const ruleMonitoringColumns = getMonitoringColumns(
+      navigateToApp,
+      formatUrl,
+      docsLinksStartMock
+    );
 
+    test.each([
+      ['Rules', rulesColumns],
+      ['Rule Monitoring', ruleMonitoringColumns],
+    ])('table "%s" should not have truncated text options for column items', (_, columns) => {
       columns.forEach((column) => {
         expect(column).not.toHaveProperty('truncateText');
       });
