@@ -24,7 +24,10 @@ import {
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { getHostMetaData } from '../../../../../endpoint/routes/metadata/handlers';
 import { EndpointAppContext } from '../../../../../endpoint/types';
-import { fleetAgentStatusToEndpointHostStatus } from '../../../../../endpoint/utils';
+import {
+  catchAndWrapError,
+  fleetAgentStatusToEndpointHostStatus,
+} from '../../../../../endpoint/utils';
 import { getPendingActionCounts } from '../../../../../endpoint/services';
 
 export const HOST_FIELDS = [
@@ -207,7 +210,10 @@ export const getHostEndpoint = async (
       ? [undefined, {}]
       : await Promise.all([
           // Get Agent Status
-          agentService.getAgentStatusById(esClient.asCurrentUser, fleetAgentId),
+          agentService
+            .getAgentStatusById(esClient.asCurrentUser, fleetAgentId)
+            .catch(catchAndWrapError),
+
           // Get a list of pending actions (if any)
           getPendingActionCounts(
             esClient.asCurrentUser,
