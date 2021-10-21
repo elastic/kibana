@@ -7,6 +7,9 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 if [[ "${BUILDKITE_PARALLEL_JOB:-}" == 0 ]]; then
+  export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716asajkdhasjdbhasdsa.cloudfunctions.net/kibana-ci-proxy-cache"
+  export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716asajkdhasjdbhasdsa.cloudfunctions.net/kibana-ci-proxy-cache"
+  export RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716asajkdhasjdbhasdsa.cloudfunctions.net/kibana-ci-proxy-cache"
   export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184718as7hd89a7dhas98d6.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
 fi
 
