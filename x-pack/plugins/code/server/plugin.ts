@@ -27,11 +27,11 @@ export class CodePlugin implements Plugin {
             level: 'critical',
             deprecationType: 'feature',
             title: i18n.translate('xpack.code.deprecations.removed.title', {
-              defaultMessage: 'The experimental app "Code" has been removed from Kibana',
+              defaultMessage: 'The experimental plugin "Code" has been removed from Kibana',
             }),
             message: i18n.translate('xpack.code.deprecations.removed.message', {
               defaultMessage:
-                'The experimental app "Code" has been removed from Kibana. The associated configuration ' +
+                'The experimental plugin "Code" has been removed from Kibana. The associated configuration ' +
                 'properties need to be removed from the Kibana configuration file.',
             }),
             requireRestart: true,
