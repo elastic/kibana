@@ -11,7 +11,11 @@ import {
   ENABLE_NEW_SN_SIR_CONNECTOR,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../actions/server/constants/connectors';
-import { IErrorObject } from '../../../../../public/types';
+import {
+  ActionConnector,
+  IErrorObject,
+  UserConfiguredActionConnector,
+} from '../../../../../public/types';
 import { AppInfo, Choice, RESTApiError, ServiceNowActionConnector } from './types';
 
 export const DEFAULT_CORRELATION_ID = '{{rule.id}}:{{alert.id}}';
@@ -42,4 +46,23 @@ export const isLegacyConnector = (connector: ServiceNowActionConnector) => {
   }
 
   return connector.config.isLegacy;
+};
+
+// TODO: we don't need both of these functions
+export const isDeprecatedConnector = (connector: ActionConnector): boolean => {
+  // TODO: Remove ENABLE_* portion when the applications are certified
+  if (!ENABLE_NEW_SN_ITSM_CONNECTOR && connector.actionTypeId === '.servicenow') {
+    return true;
+  }
+
+  if (!ENABLE_NEW_SN_SIR_CONNECTOR && connector.actionTypeId === '.servicenow-sir') {
+    return true;
+  }
+
+  // TODO: add a type guard
+  const unsafeConfig = (
+    connector as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
+  ).config;
+
+  return !!unsafeConfig?.isLegacy;
 };

@@ -134,6 +134,9 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
     >
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+  actionConnectorDropdownComponent?: React.LazyExoticComponent<
+    ComponentType<{ actionConnector: ActionConnector }>
+  >;
 }
 
 export interface GenericValidationResult<T> {

@@ -9,14 +9,22 @@ import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ActionConnector, ActionTypeIndex, AlertAction } from '../../../types';
-import { deprecatedMessage, getValidConnectors, isDeprecatedConnector } from '../common/connectors';
-import { DeprecatedConnectorIcon } from './deprecated_connector';
+import { ActionConnector, ActionTypeIndex, ActionTypeModel, AlertAction } from '../../../types';
+import { getValidConnectors } from '../common/connectors';
+
+// TODO: move this to a better location
+export const preconfiguredMessage = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
+  {
+    defaultMessage: '(preconfigured)',
+  }
+);
 
 export interface DropdownProps {
   actionItem: AlertAction;
   accordionIndex: number;
   actionTypesIndex: ActionTypeIndex;
+  actionTypeRegistered: ActionTypeModel;
   connectors: ActionConnector[];
   onConnectorSelected: (id: string) => void;
 }
@@ -27,6 +35,7 @@ function ConnectorsDropdownComponent({
   actionItem,
   accordionIndex,
   actionTypesIndex,
+  actionTypeRegistered,
   connectors,
   onConnectorSelected,
 }: DropdownProps) {
@@ -40,7 +49,10 @@ function ConnectorsDropdownComponent({
     [actionItem.id, validConnectors]
   );
 
-  const options = useMemo(() => createConnectorOptions(validConnectors), [validConnectors]);
+  const options = useMemo(
+    () => createConnectorOptions(validConnectors, actionTypeRegistered),
+    [validConnectors, actionTypeRegistered]
+  );
 
   const onChange = useCallback((id: string) => onConnectorSelected(id), [onConnectorSelected]);
 
@@ -69,18 +81,27 @@ const getValueOfSelectedConnector = (
   return actionItemId;
 };
 
-const createConnectorOptions = (connectors: ActionConnector[]) =>
+const createConnectorOptions = (
+  connectors: ActionConnector[],
+  actionTypeRegistered: ActionTypeModel
+) =>
   connectors.map((connector) => {
     const title = getTitle(connector);
+
+    const ConnectorRow = () =>
+      actionTypeRegistered.actionConnectorDropdownComponent != null ? (
+        <actionTypeRegistered.actionConnectorDropdownComponent actionConnector={connector} />
+      ) : (
+        <EuiFlexItem grow={false}>
+          <span>{title}</span>
+        </EuiFlexItem>
+      );
 
     return {
       value: connector.id,
       inputDisplay: (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <span>{title}</span>
-          </EuiFlexItem>
-          <DeprecatedConnectorIcon connector={connector} />
+          <ConnectorRow />
         </EuiFlexGroup>
       ),
       'data-test-subj': `dropdown-connector-${connector.id}`,
@@ -94,19 +115,8 @@ const getTitle = (connector: ActionConnector) => {
     title += ` ${preconfiguredMessage}`;
   }
 
-  if (isDeprecatedConnector(connector)) {
-    title += ` ${deprecatedMessage}`;
-  }
-
   return title;
 };
-
-const preconfiguredMessage = i18n.translate(
-  'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
-  {
-    defaultMessage: '(preconfigured)',
-  }
-);
 
 const incidentManagemSystem = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.incidentManagementSystemLabel',

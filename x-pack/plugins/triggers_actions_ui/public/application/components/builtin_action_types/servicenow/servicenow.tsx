@@ -138,6 +138,7 @@ export function getServiceNowITSMActionType(): ActionTypeModel<
       return validationResult;
     },
     actionParamsFields: lazy(() => import('./servicenow_itsm_params')),
+    actionConnectorDropdownComponent: lazy(() => import('./servicenow_dropdown_row')),
   };
 }
 
@@ -174,6 +175,7 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
       return validationResult;
     },
     actionParamsFields: lazy(() => import('./servicenow_sir_params')),
+    actionConnectorDropdownComponent: lazy(() => import('./servicenow_dropdown_row')),
   };
 }
 

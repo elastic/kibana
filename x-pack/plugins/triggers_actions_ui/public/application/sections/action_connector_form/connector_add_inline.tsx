@@ -131,6 +131,7 @@ export const AddConnectorInline = ({
             actionItem={actionItem}
             accordionIndex={index}
             actionTypesIndex={actionTypesIndex}
+            actionTypeRegistered={actionTypeRegistered}
             connectors={connectors}
             onConnectorSelected={onSelectConnector}
           />

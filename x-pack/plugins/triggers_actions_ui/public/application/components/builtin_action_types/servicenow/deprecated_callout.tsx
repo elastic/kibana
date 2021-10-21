@@ -10,14 +10,35 @@ import { EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+// TODO: add in a link to documentation?
 interface Props {
-  onMigrate: () => void;
+  onMigrate?: () => void;
 }
 
 const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
+  const update =
+    onMigrate != null ? (
+      <EuiLink onClick={onMigrate} data-test-subj="update-connector-btn">
+        {i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutMigrate',
+          {
+            defaultMessage: 'Update this connector,',
+          }
+        )}
+      </EuiLink>
+    ) : (
+      <span>
+        {i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutMigrate',
+          {
+            defaultMessage: 'Update this connector,',
+          }
+        )}
+      </span>
+    );
+
   return (
     <>
-      <EuiSpacer size="s" />
       <EuiCallOut
         size="m"
         iconType="alert"
@@ -34,16 +55,7 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
           defaultMessage="{update} {create} "
           id="xpack.triggersActionsUI.components.builtinActionTypes.servicenow.appInstallationInfo"
           values={{
-            update: (
-              <EuiLink onClick={onMigrate} data-test-subj="update-connector-btn">
-                {i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutMigrate',
-                  {
-                    defaultMessage: 'Update this connector,',
-                  }
-                )}
-              </EuiLink>
-            ),
+            update,
             create: (
               <span>
                 {i18n.translate(

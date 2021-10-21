@@ -254,6 +254,7 @@ export const ActionTypeForm = ({
               actionItem={actionItem}
               accordionIndex={index}
               actionTypesIndex={actionTypesIndex}
+              actionTypeRegistered={actionTypeRegistered}
               connectors={connectors}
               onConnectorSelected={onConnectorSelected}
             />

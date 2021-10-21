@@ -26,6 +26,7 @@ import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
 import { ServiceNowSIRActionParams, Fields, Choice, ServiceNowActionConnector } from './types';
 import { choicesToEuiOptions, isLegacyConnector, DEFAULT_CORRELATION_ID } from './helpers';
+import { DeprecatedCallout } from './deprecated_callout';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -151,6 +152,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
 
   return (
     <>
+      {isDeprecatedConnector && <DeprecatedCallout />}
       <EuiTitle size="s">
         <h3>{i18n.SECURITY_INCIDENT}</h3>
       </EuiTitle>

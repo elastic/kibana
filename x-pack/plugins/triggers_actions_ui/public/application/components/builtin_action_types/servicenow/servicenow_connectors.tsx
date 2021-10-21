@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { EuiSpacer } from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '../../../../types';
 
 import * as i18n from './translations';
@@ -20,6 +21,9 @@ import { InstallationCallout } from './installation_callout';
 import { UpdateConnector } from './update_connector';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
+
+// eslint-disable-next-line import/no-default-export
+export { ServiceNowConnectorFields as default };
 
 const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowActionConnector>> =
   ({
@@ -139,7 +143,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
           />
         )}
         {!isOldConnector && <InstallationCallout />}
-        {isOldConnector && <DeprecatedCallout onMigrate={onMigrateClick} />}
+        {isOldConnector && <SpacedDeprecatedCallout onMigrate={onMigrateClick} />}
         <Credentials
           action={action}
           errors={errors}
@@ -155,5 +159,9 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     );
   };
 
-// eslint-disable-next-line import/no-default-export
-export { ServiceNowConnectorFields as default };
+const SpacedDeprecatedCallout = ({ onMigrate }: { onMigrate: () => void }) => (
+  <>
+    <EuiSpacer size="s" />
+    <DeprecatedCallout onMigrate={onMigrate} />
+  </>
+);
