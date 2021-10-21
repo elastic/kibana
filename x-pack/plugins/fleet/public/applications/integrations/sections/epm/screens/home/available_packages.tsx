@@ -8,7 +8,18 @@
 import React, { memo, useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
-import { EuiHorizontalRule, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiHorizontalRule,
+  EuiFlexItem,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiCard,
+  EuiIcon,
+} from '@elastic/eui';
+
+import { useStartServices } from '../../../../hooks';
+import { TrackApplicationView } from '../../../../../../../../../../src/plugins/usage_collection/public';
 
 import { pagePathGetters } from '../../../../constants';
 import {
@@ -79,7 +90,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
             const allCategories = [...topCategories, ...categories];
             return {
               ...restOfPackage,
-              id: `${restOfPackage}-${name}`,
+              id: `${restOfPackage.id}-${name}`,
               integration: name,
               title,
               description,
@@ -97,6 +108,9 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 export const AvailablePackages: React.FC = memo(() => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
   useBreadcrumbs('integrations_all');
+
+  const { http } = useStartServices();
+  const addBasePath = http.basePath.prepend;
 
   const { selectedCategory, searchParam } = getParams(
     useParams<CategoryParams>(),
@@ -181,7 +195,7 @@ export const AvailablePackages: React.FC = memo(() => {
   let controls = [
     <EuiFlexItem grow={false}>
       <EuiHorizontalRule margin="m" />
-      <IntegrationPreference initialType={preference} onChange={setPreference} />,
+      <IntegrationPreference initialType={preference} onChange={setPreference} />
     </EuiFlexItem>,
   ];
 
@@ -210,8 +224,62 @@ export const AvailablePackages: React.FC = memo(() => {
     return c.categories.includes(selectedCategory);
   });
 
+  // TODO: Remove this hard coded list of integrations with a suggestion service
+  const featuredList = (
+    <>
+      <EuiFlexGrid columns={3}>
+        <EuiFlexItem>
+          <TrackApplicationView viewId="integration-card:epr:endpoint:featured">
+            <EuiCard
+              icon={<EuiIcon type="logoSecurity" size="xxl" />}
+              href={addBasePath('/app/integrations/detail/endpoint/')}
+              title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
+                defaultMessage: 'Endpoint Security',
+              })}
+              description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
+                defaultMessage:
+                  'Protect your hosts with threat prevention, detection, and deep security data visibility.',
+              })}
+            />
+          </TrackApplicationView>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <TrackApplicationView viewId="integration-card:epr:apm:featured">
+            <EuiCard
+              title={i18n.translate('xpack.fleet.featuredObsTitle', {
+                defaultMessage: 'Elastic APM',
+              })}
+              description={i18n.translate('xpack.fleet.featuredObsDesc', {
+                defaultMessage:
+                  'Monitor, detect and diagnose complex performance issues from your application.',
+              })}
+              href={addBasePath('/app/integrations/detail/apm')}
+              icon={<EuiIcon type="logoObservability" size="xxl" />}
+            />
+          </TrackApplicationView>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <TrackApplicationView viewId="integration-card:epr:app_search_web_crawler:featured">
+            <EuiCard
+              icon={<EuiIcon type="logoAppSearch" size="xxl" />}
+              href={addBasePath('/app/enterprise_search/app_search')}
+              title={i18n.translate('xpack.fleet.featuredSearchTitle', {
+                defaultMessage: 'Web site crawler',
+              })}
+              description={i18n.translate('xpack.fleet.featuredSearchDesc', {
+                defaultMessage: 'Add search to your website with the App Search web crawler.',
+              })}
+            />
+          </TrackApplicationView>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiSpacer size="xl" />
+    </>
+  );
+
   return (
     <PackageListGrid
+      featuredList={featuredList}
       isLoading={isLoadingAllPackages}
       controls={controls}
       initialSearch={searchParam}

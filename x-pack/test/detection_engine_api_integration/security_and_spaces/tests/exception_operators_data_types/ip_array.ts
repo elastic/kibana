@@ -30,7 +30,6 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
 
   describe('Rule exception operators for data type ip', () => {
     before(async () => {
@@ -49,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
-      await deleteAllExceptions(es);
+      await deleteAllExceptions(supertest);
       await deleteListsIndex(supertest);
     });
 
@@ -151,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips).to.eql([[]]);
+        expect(ips.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
       });
 
       it('should filter a CIDR range of "127.0.0.1/30"', async () => {
@@ -167,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
+        await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([
@@ -190,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
+        await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[], ['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
@@ -346,7 +345,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips).to.eql([[]]);
+        expect(ips.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
       });
     });
 
@@ -407,7 +406,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips).to.eql([[]]);
+        expect(ips.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
       });
     });
 
@@ -486,8 +485,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(ips).to.eql([[], ['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
       });
 
-      // FLAKY https://github.com/elastic/kibana/issues/89052
-      it.skip('will return 1 result if we have a list that includes all ips', async () => {
+      it('will return 1 result if we have a list that includes all ips', async () => {
         await importFile(
           supertest,
           'ip',
@@ -511,7 +509,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips).to.eql([[]]);
+        expect(ips.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
       });
 
       it('will return 2 results if we have a list which contains the CIDR ranges of "127.0.0.1/32, 127.0.0.2/31, 127.0.0.4/30"', async () => {
@@ -545,7 +543,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
+        await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[], ['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
@@ -576,7 +574,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
+        await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[], ['127.0.0.8', '127.0.0.9', '127.0.0.10']]);

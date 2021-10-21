@@ -46,7 +46,7 @@ const link = (
 const title = (
   <FormattedMessage
     id="xpack.fleet.epm.integrationPreference.title"
-    defaultMessage="When an integration is available for {link}, show:"
+    defaultMessage="If an integration is available for {link}, show:"
     values={{ link }}
   />
 );
@@ -54,7 +54,7 @@ const title = (
 const recommendedTooltip = (
   <FormattedMessage
     id="xpack.fleet.epm.integrationPreference.recommendedTooltip"
-    defaultMessage="Generally available (GA) integrations are recommended over beta and experimental."
+    defaultMessage="We recommend Elastic Agent integrations when they are generally available."
   />
 );
 
@@ -115,6 +115,7 @@ export const IntegrationPreference = ({ initialType, onChange }: Props) => {
           name="preference"
         />
       </EuiForm>
+      <EuiSpacer size="m" />
     </EuiPanel>
   );
 };
