@@ -64,8 +64,16 @@ export async function getTotalCountAggregations(
         alert_action_count: {
           type: 'long',
           script: {
-            source:
-              "def alert = params._source['alert']; if (alert != null) { def actions = alert.actions; if (actions != null) { emit(actions.length); } else { emit(0); }}",
+            source: `
+              def alert = params._source['alert']; 
+              if (alert != null) { 
+                def actions = alert.actions; 
+                if (actions != null) { 
+                  emit(actions.length); 
+                } else { 
+                  emit(0); 
+                }
+              }`,
           },
         },
         alert_interval: {
