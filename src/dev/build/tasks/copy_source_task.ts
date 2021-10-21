@@ -26,7 +26,7 @@ export const CopySource: Task = {
         '!src/test_utils/**',
         '!src/fixtures/**',
         '!src/cli/repl/**',
-        '!src/cli/dev.js',
+        '!src/cli*/dev.js',
         '!src/functional_test_runner/**',
         '!src/dev/**',
         '!**/jest.config.js',

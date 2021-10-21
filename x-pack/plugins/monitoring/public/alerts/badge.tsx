@@ -73,7 +73,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const groupByType = GROUP_BY_NODE;
   const panels = showByNode
     ? getAlertPanelsByNode(PANEL_TITLE, alerts, stateFilter)
-    : getAlertPanelsByCategory(PANEL_TITLE, inSetupMode, alerts, stateFilter);
+    : getAlertPanelsByCategory(PANEL_TITLE, !!inSetupMode, alerts, stateFilter);
   if (panels.length && !inSetupMode && panels[0].items) {
     panels[0].items.push(
       ...[

@@ -273,7 +273,7 @@ export const useIndexFields = (
 
                 if (newSignalsIndex != null) {
                   // if new signal index name is set, there wasn't one before so we need to update detections specifically
-                  // technically, we need to update all scopes as there xare can be new fields in signals index
+                  // technically, we need to update all scopes as there can be new fields in signals index
                   // once fields are moved to sourcerer.kibanaDataViews we only need to do this for detections scope
                   // TODO: Steph/sourcerer https://github.com/elastic/security-team/issues/1730 to be done before 7.16 feature freeze
                   dispatch(

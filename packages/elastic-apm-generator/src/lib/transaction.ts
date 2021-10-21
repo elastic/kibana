@@ -6,20 +6,46 @@
  * Side Public License, v 1.
  */
 
+import { ApmError } from './apm_error';
 import { BaseSpan } from './base_span';
 import { Fields } from './entity';
-import { generateEventId } from './utils/generate_id';
+import { generateShortId } from './utils/generate_id';
 
 export class Transaction extends BaseSpan {
   private _sampled: boolean = true;
+  private readonly _errors: ApmError[] = [];
 
   constructor(fields: Fields) {
     super({
       ...fields,
       'processor.event': 'transaction',
-      'transaction.id': generateEventId(),
+      'transaction.id': generateShortId(),
       'transaction.sampled': true,
     });
+  }
+
+  parent(span: BaseSpan) {
+    super.parent(span);
+
+    this._errors.forEach((error) => {
+      error.fields['trace.id'] = this.fields['trace.id'];
+      error.fields['transaction.id'] = this.fields['transaction.id'];
+      error.fields['transaction.type'] = this.fields['transaction.type'];
+    });
+
+    return this;
+  }
+
+  errors(...errors: ApmError[]) {
+    errors.forEach((error) => {
+      error.fields['trace.id'] = this.fields['trace.id'];
+      error.fields['transaction.id'] = this.fields['transaction.id'];
+      error.fields['transaction.type'] = this.fields['transaction.type'];
+    });
+
+    this._errors.push(...errors);
+
+    return this;
   }
 
   duration(duration: number) {
@@ -35,11 +61,13 @@ export class Transaction extends BaseSpan {
   serialize() {
     const [transaction, ...spans] = super.serialize();
 
+    const errors = this._errors.flatMap((error) => error.serialize());
+
     const events = [transaction];
     if (this._sampled) {
       events.push(...spans);
     }
 
-    return events;
+    return events.concat(errors);
   }
 }

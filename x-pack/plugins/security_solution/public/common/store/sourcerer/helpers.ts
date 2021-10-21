@@ -18,9 +18,6 @@ export interface Args {
   state: SourcererModel;
 }
 
-export const isSignalIndex = (index: string, signalIndex: string | null): boolean =>
-  index === signalIndex;
-
 export const getScopePatternListSelection = (
   theDataView: KibanaDataView | undefined,
   sourcererScope: SourcererScopeName,
@@ -35,7 +32,7 @@ export const getScopePatternListSelection = (
   // when our SIEM data view is set, here are the defaults
   switch (sourcererScope) {
     case SourcererScopeName.default:
-      return patternList.filter((index) => !isSignalIndex(index, signalIndexName)).sort();
+      return patternList.filter((index) => index !== signalIndexName).sort();
     case SourcererScopeName.detections:
       // set to signalIndexName whether or not it exists yet in the patternList
       return (signalIndexName != null ? [signalIndexName] : []).sort();
@@ -44,7 +41,7 @@ export const getScopePatternListSelection = (
         signalIndexName != null
           ? [
               // remove signalIndexName in case its already in there and add it whether or not it exists yet in the patternList
-              ...patternList.filter((index) => !isSignalIndex(index, signalIndexName)),
+              ...patternList.filter((index) => index !== signalIndexName),
               signalIndexName,
             ]
           : patternList
@@ -57,18 +54,46 @@ export const validateSelectedPatterns = (
   payload: SelectedDataViewPayload
 ): Partial<SourcererScopeById> => {
   const { id, eventType, ...rest } = payload;
-  const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
-  const selectedPatterns =
-    rest.selectedPatterns != null && dataView != null
-      ? [...new Set(rest.selectedPatterns)].filter(
-          (pattern) => dataView.patternList.includes(pattern) || state.signalIndexName == null // this is a hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
+  let dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
+  // dedupe because these could come from a silly url or pre 8.0 timeline
+  const dedupePatterns = [...new Set(rest.selectedPatterns)];
+  let selectedPatterns =
+    dataView != null
+      ? dedupePatterns.filter(
+          (pattern) =>
+            // Typescript is being mean and telling me dataView could be undefined here
+            // so redoing the dataView != null check
+            (dataView != null && dataView.patternList.includes(pattern)) ||
+            // this is a hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
+            state.signalIndexName == null
         )
-      : [];
+      : // 7.16 -> 8.0 this will get hit because dataView == null
+        dedupePatterns;
+  if (selectedPatterns.length > 0 && dataView == null) {
+    // we have index patterns, but not a data view id
+    // find out if we have these index patterns in the defaultDataView
+    const areAllPatternsInDefault = selectedPatterns.every(
+      (pattern) => state.defaultDataView.title.indexOf(pattern) > -1
+    );
+    if (areAllPatternsInDefault) {
+      dataView = state.defaultDataView;
+      selectedPatterns = selectedPatterns.filter(
+        (pattern) => dataView != null && dataView.patternList.includes(pattern)
+      );
+    }
+  }
+
+  // TO DO: If dataView is still undefined here, create temporary dataView
+  // and prompt user to go create this dataView
+  // currently UI will take the undefined dataView and default to defaultDataView anyways
+  // this is a "strategically merged" bug ;)
+  // https://github.com/elastic/security-team/issues/1921
 
   return {
     [id]: {
       ...state.sourcererScopes[id],
       ...rest,
+      selectedDataViewId: dataView?.id ?? null,
       selectedPatterns,
       ...(isEmpty(selectedPatterns) && dataView?.id != null
         ? id === SourcererScopeName.timeline
@@ -99,16 +124,14 @@ export const defaultDataViewByEventType = ({
     };
   } else if (eventType === 'raw') {
     return {
-      selectedPatterns: patternList
-        .filter((index) => !isSignalIndex(index, signalIndexName))
-        .sort(),
+      selectedPatterns: patternList.filter((index) => index !== signalIndexName).sort(),
       selectedDataViewId: id,
     };
   }
   return {
     selectedPatterns: [
       // remove signalIndexName in case its already in there and add it whether or not it exists yet in the patternList
-      ...patternList.filter((index) => !isSignalIndex(index, signalIndexName)),
+      ...patternList.filter((index) => index !== signalIndexName),
       signalIndexName,
     ].sort(),
     selectedDataViewId: id,
