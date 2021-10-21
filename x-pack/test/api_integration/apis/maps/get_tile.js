@@ -8,10 +8,6 @@
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import expect from '@kbn/expect';
-import {
-  MVT_HITS_SOURCE_LAYER_NAME,
-  MVT_META_SOURCE_LAYER_NAME,
-} from '../../../../plugins/maps/common/constants';
 
 function findFeature(layer, callbackFn) {
   for (let i = 0; i < layer.length; i++) {
@@ -32,15 +28,14 @@ export default function ({ getService }) {
           `/api/maps/mvt/getTile/2/1/1.pbf\
 ?geometryFieldName=geo.coordinates\
 &index=logstash-*\
-&requestBody=(_source:!f,docvalue_fields:!(bytes,geo.coordinates,machine.os.raw),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10000,stored_fields:!(bytes,geo.coordinates,machine.os.raw))\
-&geoFieldType=geo_point`
+&requestBody=(_source:!f,docvalue_fields:!(bytes,geo.coordinates,machine.os.raw),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10000,stored_fields:!(bytes,geo.coordinates,machine.os.raw))`
         )
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
-      const layer = jsonTile.layers[MVT_HITS_SOURCE_LAYER_NAME];
+      const layer = jsonTile.layers.hits;
       expect(layer.length).to.be(2); // 2 docs
 
       // Verify ES document
@@ -61,7 +56,7 @@ export default function ({ getService }) {
       expect(feature.loadGeometry()).to.eql([[{ x: 44, y: 2382 }]]);
 
       // Verify metadata feature
-      const metaDataLayer = jsonTile.layers[MVT_META_SOURCE_LAYER_NAME];
+      const metaDataLayer = jsonTile.layers.meta;
       const metadataFeature = metaDataLayer.feature(0);
       expect(metadataFeature).not.to.be(undefined);
       expect(metadataFeature.type).to.be(3);

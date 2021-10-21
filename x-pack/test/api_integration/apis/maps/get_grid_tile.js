@@ -8,10 +8,6 @@
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import expect from '@kbn/expect';
-import {
-  MVT_AGGS_SOURCE_LAYER_NAME,
-  MVT_META_SOURCE_LAYER_NAME,
-} from '../../../../plugins/maps/common/constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -24,8 +20,7 @@ export default function ({ getService }) {
 ?geometryFieldName=geo.coordinates\
 &index=logstash-*\
 &requestBody=(_source:(excludes:!()),aggs:(gridSplit:(aggs:(avg_of_bytes:(avg:(field:bytes)),gridCentroid:(geo_centroid:(field:geo.coordinates))),geotile_grid:(bounds:!n,field:geo.coordinates,precision:!n,shard_size:65535,size:65535))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
-&requestType=point\
-&geoFieldType=geo_point`
+&requestType=point`
         )
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
@@ -34,7 +29,7 @@ export default function ({ getService }) {
       const jsonTile = new VectorTile(new Protobuf(resp.body));
 
       // Cluster feature
-      const layer = jsonTile.layers[MVT_AGGS_SOURCE_LAYER_NAME];
+      const layer = jsonTile.layers.aggs;
       expect(layer.length).to.be(1);
       const clusterFeature = layer.feature(0);
       expect(clusterFeature.type).to.be(1);
@@ -44,7 +39,7 @@ export default function ({ getService }) {
       expect(clusterFeature.loadGeometry()).to.eql([[{ x: 87, y: 667 }]]);
 
       // Metadata feature
-      const metaDataLayer = jsonTile.layers[MVT_META_SOURCE_LAYER_NAME];
+      const metaDataLayer = jsonTile.layers.meta;
       expect(metaDataLayer.length).to.be(1);
       const metadataFeature = metaDataLayer.feature(0);
       expect(metadataFeature.type).to.be(3);
@@ -82,15 +77,14 @@ export default function ({ getService }) {
 ?geometryFieldName=geo.coordinates\
 &index=logstash-*\
 &requestBody=(_source:(excludes:!()),aggs:(gridSplit:(aggs:(avg_of_bytes:(avg:(field:bytes)),gridCentroid:(geo_centroid:(field:geo.coordinates))),geotile_grid:(bounds:!n,field:geo.coordinates,precision:!n,shard_size:65535,size:65535))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
-&requestType=grid\
-&geoFieldType=geo_point`
+&requestType=grid`
         )
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
-      const layer = jsonTile.layers[MVT_AGGS_SOURCE_LAYER_NAME];
+      const layer = jsonTile.layers.aggs;
       expect(layer.length).to.be(1);
 
       const gridFeature = layer.feature(0);
@@ -109,7 +103,7 @@ export default function ({ getService }) {
       ]);
 
       // Metadata feature
-      const metaDataLayer = jsonTile.layers[MVT_META_SOURCE_LAYER_NAME];
+      const metaDataLayer = jsonTile.layers.meta;
       expect(metaDataLayer.length).to.be(1);
       const metadataFeature = metaDataLayer.feature(0);
       expect(metadataFeature.type).to.be(3);
