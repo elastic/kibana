@@ -13,7 +13,6 @@ import { LinkPanel } from './link_panel';
 
 describe('LinkPanel', () => {
   const defaultProps = {
-    button: <EuiButton data-test-subj="_test_button_" />,
     columns: [
       { name: 'title', field: 'title', sortable: true },
       {
@@ -41,7 +40,6 @@ describe('LinkPanel', () => {
 
     expect(screen.getByTestId('_custom_test_subj_')).toBeInTheDocument();
     expect(screen.getByRole('table')).toBeInTheDocument();
-    expect(screen.getByTestId('_test_button_')).toBeInTheDocument();
     expect(screen.getByTestId('_split_panel_')).toBeInTheDocument();
     expect(screen.getByTestId('_subtitle_')).toBeInTheDocument();
   });

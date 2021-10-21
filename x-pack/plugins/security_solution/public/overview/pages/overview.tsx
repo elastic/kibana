@@ -79,7 +79,7 @@ const OverviewComponent = () => {
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
   const hasSomeThreatIntelData = useIsThreatIntelModuleEnabled();
-  const { someIntegrationsInstalled, someIntegrationIsDisabled } = useTIIntegrations();
+  const tiIntegrationStatus = useTIIntegrations();
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
@@ -155,15 +155,21 @@ const OverviewComponent = () => {
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup direction="row">
                       <EuiFlexItem grow={1}>
-                        <ThreatIntelLinkPanel
-                          hasSomeThreatIntelData={hasSomeThreatIntelData}
-                          someIntegrationsInstalled={someIntegrationsInstalled}
-                          someIntegrationIsDisabled={someIntegrationIsDisabled}
-                          deleteQuery={deleteQuery}
-                          from={from}
-                          setQuery={setQuery}
-                          to={to}
-                        />
+                        {tiIntegrationStatus && (
+                          <ThreatIntelLinkPanel
+                            hasSomeThreatIntelData={hasSomeThreatIntelData}
+                            someIntegrationsIsInstalled={
+                              tiIntegrationStatus.someIntegrationsIsInstalled
+                            }
+                            someIntegrationsIsDisabled={
+                              tiIntegrationStatus.someIntegrationsIsDisabled
+                            }
+                            deleteQuery={deleteQuery}
+                            from={from}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                        )}
                       </EuiFlexItem>
                       <EuiFlexItem grow={1}>
                         {riskyHostsEnabled && (

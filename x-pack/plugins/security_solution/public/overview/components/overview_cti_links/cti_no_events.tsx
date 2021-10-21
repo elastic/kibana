@@ -24,11 +24,11 @@ const warning = (
 export const CtiNoEventsComponent = ({
   to,
   from,
-  someIntegrationIsDisabled,
+  someIntegrationsIsDisabled,
 }: {
   to: string;
   from: string;
-  someIntegrationIsDisabled: boolean;
+  someIntegrationsIsDisabled: boolean;
 }) => {
   const { buttonHref, listItems, isPluginDisabled } = useCtiDashboardLinks(
     emptyEventCountsByDataset,
@@ -42,7 +42,7 @@ export const CtiNoEventsComponent = ({
       listItems={listItems}
       splitPanel={warning}
       isPluginDisabled={isPluginDisabled}
-      someIntegrationIsDisabled={someIntegrationIsDisabled}
+      someIntegrationsIsDisabled={someIntegrationsIsDisabled}
     />
   );
 };
