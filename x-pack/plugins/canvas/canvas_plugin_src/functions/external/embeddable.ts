@@ -120,7 +120,9 @@ export function embeddableFunctionFactory({
 
       inject(state, references) {
         const input = decode(state.config[0] as string);
-        const savedObjectReference = references.find((ref) => ref.name === 'embeddable.id');
+        const savedObjectReference = references.find(
+          (ref) => ref.name === 'embeddable.savedObjectId'
+        );
 
         // injects saved object id for by-references embeddable
         if (savedObjectReference) {
