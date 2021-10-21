@@ -40,7 +40,7 @@ import {
   LensAppState,
   LensState,
 } from '../state_management';
-import { getPreloadedState } from '../state_management/lens_slice';
+import { getPreloadedState, setState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
 
 export async function getLensServices(
@@ -205,7 +205,7 @@ export async function mountApp(
       if (!initialContext) {
         data.query.filterManager.setAppFilters([]);
       }
-
+      lensStore.dispatch(setState(emptyState));
       lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
 
       return (

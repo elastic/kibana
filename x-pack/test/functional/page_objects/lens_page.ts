@@ -247,6 +247,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async waitForMissingDataViewWarning() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`missing-refs-failure`);
+      });
+    },
+
+    async waitForMissingDataViewWarningDisappear() {
+      await retry.try(async () => {
+        await testSubjects.missingOrFail(`missing-refs-failure`);
+      });
+    },
+
     async waitForEmptyWorkspace() {
       await retry.try(async () => {
         await testSubjects.existOrFail(`empty-workspace`);
@@ -688,7 +700,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async switchFirstLayerIndexPattern(name: string) {
       await testSubjects.click('lns_layerIndexPatternLabel');
-      await find.clickByCssSelector(`[title="${name}"]`);
+      await find.clickByCssSelector(`.lnsChangeIndexPatternPopover [title="${name}"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
