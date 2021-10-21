@@ -8,7 +8,7 @@
 
 import { format as formatUrl } from 'url';
 import fs from 'fs';
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -23,6 +23,7 @@ export function ElasticsearchProvider({ getService }: FtrProviderContext): Clien
     return new Client({
       nodes: [formatUrl(config.get('servers.elasticsearch'))],
       requestTimeout: config.get('timeouts.esRequestTimeout'),
+      Connection: HttpConnection,
     });
   } else {
     return new Client({
@@ -31,6 +32,7 @@ export function ElasticsearchProvider({ getService }: FtrProviderContext): Clien
       },
       nodes: [formatUrl(config.get('servers.elasticsearch'))],
       requestTimeout: config.get('timeouts.esRequestTimeout'),
+      Connection: HttpConnection,
     });
   }
 }

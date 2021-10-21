@@ -6,7 +6,7 @@
  */
 
 import supertest from 'supertest';
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { format as formatUrl } from 'url';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -29,6 +29,7 @@ export function getEsClientForAPIKey({ getService }: FtrProviderContext, esApiKe
       apiKey: esApiKey,
     },
     requestTimeout: config.get('timeouts.esRequestTimeout'),
+    Connection: HttpConnection,
   });
 }
 

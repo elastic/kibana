@@ -11,7 +11,7 @@ import { format } from 'url';
 import del from 'del';
 // @ts-expect-error in js
 import { Cluster } from '@kbn/es';
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/dev-utils';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
@@ -282,6 +282,7 @@ export function createTestEsCluster<
     getClient(): Client {
       return new Client({
         node: this.getHostUrls()[0],
+        Connection: HttpConnection,
       });
     }
 
