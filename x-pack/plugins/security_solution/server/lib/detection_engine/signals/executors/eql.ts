@@ -7,7 +7,6 @@
 
 import type { TransportResult } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
-import { SavedObject } from 'src/core/types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Logger } from 'src/core/server';
 import {
@@ -20,11 +19,9 @@ import { hasLargeValueItem } from '../../../../../common/detection_engine/utils'
 import { isOutdated } from '../../migrations/helpers';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../../routes/index/get_signals_template';
-import { EqlRuleParams } from '../../schemas/rule_schemas';
 import { getInputIndex } from '../get_input_output_index';
 
 import {
-  AlertAttributes,
   BulkCreate,
   WrapHits,
   WrapSequences,
@@ -36,9 +33,10 @@ import {
 import { createSearchAfterReturnType, makeFloatString } from '../utils';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForEqlAlert } from '../reason_formatters';
+import { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
 
 export const eqlExecutor = async ({
-  rule,
+  completeRule,
   tuple,
   exceptionItems,
   experimentalFeatures,
@@ -50,7 +48,7 @@ export const eqlExecutor = async ({
   wrapHits,
   wrapSequences,
 }: {
-  rule: SavedObject<AlertAttributes<EqlRuleParams>>;
+  completeRule: CompleteRule<EqlRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
   experimentalFeatures: ExperimentalFeatures;
@@ -63,7 +61,9 @@ export const eqlExecutor = async ({
   wrapSequences: WrapSequences;
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   const result = createSearchAfterReturnType();
-  const ruleParams = rule.attributes.params;
+
+  const ruleParams = completeRule.ruleParams;
+
   if (hasLargeValueItem(exceptionItems)) {
     result.warningMessages.push(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'

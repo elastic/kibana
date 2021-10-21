@@ -12,7 +12,10 @@ import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { ESFilter } from '../../../../../../../../src/core/types/elasticsearch';
 import { PersistableFilter } from '../../../../../../lens/common';
 
-export function useFilterValues({ field, series, baseFilters }: FilterProps, query?: string) {
+export function useFilterValues(
+  { field, series, baseFilters, label }: FilterProps,
+  query?: string
+) {
   const { indexPatterns } = useAppIndexPatternContext(series.dataType);
 
   const queryFilters: ESFilter[] = [];
@@ -28,6 +31,7 @@ export function useFilterValues({ field, series, baseFilters }: FilterProps, que
 
   return useValuesList({
     query,
+    label,
     sourceField: field,
     time: series.time,
     keepHistory: true,

@@ -138,7 +138,7 @@ image::images/dashboard_sampleDataAddFilter_7.15.0.png[The [eCommerce] Revenue D
 [[quick-start-whats-next]]
 == What's next?
 
-*Add your own data.* Ready to add your own data? Go to {fleet-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack] to learn how to ingest your data, or go to <<connect-to-elasticsearch,Add data to {kib}>> and learn about all the other ways you can add data.
+*Add your own data.* Ready to add your own data? Go to {observability-guide}/ingest-logs-metrics-uptime.html[Ingest logs, metrics, and uptime data with {agent}], or go to <<connect-to-elasticsearch,Add data to {kib}>> and learn about all the other ways you can add data.
 
 *Explore your own data in Discover.* Ready to learn more about exploring your data in *Discover*? Go to <<discover, Discover>>.
 
