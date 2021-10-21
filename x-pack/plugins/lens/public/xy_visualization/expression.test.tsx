@@ -1485,6 +1485,16 @@ describe('xy_expression', () => {
       expect(wrapper.find(Settings).first().prop('onElementClick')).toBeUndefined();
     });
 
+    test('legendAction is not triggering event on non-interactive mode', () => {
+      const { args, data } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <XYChart {...defaultProps} data={data} args={args} interactive={false} />
+      );
+
+      expect(wrapper.find(Settings).first().prop('legendAction')).toBeUndefined();
+    });
+
     test('it renders stacked bar', () => {
       const { data, args } = sampleArgs();
       const component = shallow(

@@ -265,7 +265,7 @@ export class HeadlessChromiumDriver {
     }
 
     // @ts-ignore
-    // FIXME: use `await page.target().createCDPSession();`
+    // FIXME: retrieve the client in open() and  pass in the client
     const client = this.page._client;
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
@@ -372,7 +372,6 @@ export class HeadlessChromiumDriver {
 
     await client.send('Debugger.enable');
     await client.send('Debugger.pause');
-    // @ts-ignore
     const targetId = target._targetId;
     const wsEndpoint = this.page.browser().wsEndpoint();
     const { port } = parseUrl(wsEndpoint);
