@@ -18,6 +18,7 @@ interface IPolicyConfigContext {
   isZipUrlTLSEnabled?: boolean;
   defaultIsTLSEnabled?: boolean;
   defaultIsZipUrlTLSEnabled?: boolean;
+  isEditable?: boolean;
 }
 
 interface IPolicyConfigContextProvider {
@@ -25,6 +26,7 @@ interface IPolicyConfigContextProvider {
   defaultMonitorType?: DataStream;
   defaultIsTLSEnabled?: boolean;
   defaultIsZipUrlTLSEnabled?: boolean;
+  isEditable?: boolean;
 }
 
 export const initialValue = DataStream.HTTP;
@@ -45,6 +47,7 @@ const defaultContext: IPolicyConfigContext = {
   defaultMonitorType: initialValue, // immutable,
   defaultIsTLSEnabled: false,
   defaultIsZipUrlTLSEnabled: false,
+  isEditable: false,
 };
 
 export const PolicyConfigContext = createContext(defaultContext);
@@ -54,6 +57,7 @@ export const PolicyConfigContextProvider = ({
   defaultMonitorType = initialValue,
   defaultIsTLSEnabled = false,
   defaultIsZipUrlTLSEnabled = false,
+  isEditable = false,
 }: IPolicyConfigContextProvider) => {
   const [monitorType, setMonitorType] = useState<DataStream>(defaultMonitorType);
   const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(defaultIsTLSEnabled);
@@ -70,6 +74,7 @@ export const PolicyConfigContextProvider = ({
       setIsZipUrlTLSEnabled,
       defaultIsTLSEnabled,
       defaultIsZipUrlTLSEnabled,
+      isEditable,
     };
   }, [
     monitorType,
@@ -78,6 +83,7 @@ export const PolicyConfigContextProvider = ({
     isZipUrlTLSEnabled,
     defaultIsTLSEnabled,
     defaultIsZipUrlTLSEnabled,
+    isEditable,
   ]);
 
   return <PolicyConfigContext.Provider value={value} children={children} />;
