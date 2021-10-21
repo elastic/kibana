@@ -114,14 +114,14 @@ export function createSavedDashboardClass(
         },
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
-        id: typeof arg === 'string' ? arg : arg.id,
+        id: typeof arg === 'object' ? arg.id : arg,
 
         // default values that will get assigned if the doc is new
         defaults,
       });
 
-      const id: string = typeof arg === 'string' ? arg : arg.id;
-      const useResolve = typeof arg === 'string' ? false : arg.useResolve;
+      const id: string = typeof arg === 'object' ? arg.id : arg;
+      const useResolve = typeof arg === 'object' ? arg.useResolve : false;
 
       this.getFullPath = () => `/app/dashboards#${createDashboardEditUrl(this.aliasId || this.id)}`;
 
