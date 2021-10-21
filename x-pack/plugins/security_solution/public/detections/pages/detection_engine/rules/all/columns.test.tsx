@@ -110,13 +110,10 @@ describe('AllRulesTable Columns', () => {
     test.each([
       ['Rules', rulesColumns],
       ['Rule Monitoring', ruleMonitoringColumns],
-    ])(
-      'table "%s" should not have truncated text options for column items',
-      (_, columns: RulesColumns[] | RulesStatusesColumns[]) => {
-        columns.forEach((column: RulesColumns | RulesStatusesColumns) => {
-          expect(column).not.toHaveProperty('truncateText');
-        });
-      }
-    );
+    ])('table "%s" should not have truncated text options for column items', (_, columns) => {
+      columns.forEach((column: RulesColumns | RulesStatusesColumns) => {
+        expect(column).not.toHaveProperty('truncateText');
+      });
+    });
   });
 });
