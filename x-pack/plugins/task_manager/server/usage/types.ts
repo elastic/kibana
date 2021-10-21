@@ -30,4 +30,5 @@ export interface TaskManagerUsage {
       p99: number;
     };
   };
+  failed_tasks: number;
 }
