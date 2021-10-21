@@ -8,7 +8,9 @@
 
 import uuid from 'uuid';
 import { Filter } from '@kbn/es-query';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import { SavedObjectReference } from '../../../../core/types';
+import { MigrateFunctionsObject } from '../../../kibana_utils/common';
 
 export const extract = (filters: Filter[]) => {
   const references: SavedObjectReference[] = [];
@@ -16,7 +18,7 @@ export const extract = (filters: Filter[]) => {
     if (filter.meta?.index) {
       const id = uuid();
       references.push({
-        type: 'index_pattern',
+        type: DATA_VIEW_SAVED_OBJECT_TYPE,
         name: id,
         id: filter.meta.index,
       });
@@ -54,6 +56,10 @@ export const telemetry = (filters: Filter[], collector: unknown) => {
   return {};
 };
 
-export const getAllMigrations = () => {
+export const migrateToLatest = (filters: Filter[], version: string) => {
+  return filters;
+};
+
+export const getAllMigrations = (): MigrateFunctionsObject => {
   return {};
 };
