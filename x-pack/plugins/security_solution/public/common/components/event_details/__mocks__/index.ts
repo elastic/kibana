@@ -332,6 +332,7 @@ export const mockAlertDetailsData = [
     originalValue: 'administrator',
   },
   { category: 'user', field: 'user.id', values: ['S-1-0-0'], originalValue: 'S-1-0-0' },
+  // TODO: The `parents` field no longer exists... use `ancestors` and `depth`
   {
     category: 'kibana',
     field: 'kibana.alert.parents',
@@ -525,18 +526,21 @@ export const mockAlertDetailsData = [
   },
   { category: 'kibana', field: 'kibana.alert.rule.exceptions_list', values: [], originalValue: [] },
   { category: 'kibana', field: 'kibana.alert.depth', values: [1], originalValue: 1 },
+  // TODO: The `parent` no longer exists. Use `ancestors` and `depth`
   {
     category: 'kibana',
     field: 'kibana.alert.parent.id',
     values: ['688MAHYB7WTwW_Glsi_d'],
     originalValue: '688MAHYB7WTwW_Glsi_d',
   },
+  // TODO: The `parent` no longer exists. Use `ancestors` and `depth`
   {
     category: 'kibana',
     field: 'kibana.alert.parent.type',
     values: ['event'],
     originalValue: 'event',
   },
+  // TODO: The `parent` no longer exists. Use `ancestors` and `depth`
   {
     category: 'kibana',
     field: 'kibana.alert.parent.index',

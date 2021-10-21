@@ -53,8 +53,9 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAl
     SUPPORT_INCIDENTS_ACTION_TYPES.includes(action.actionTypeId)
   );
 
-export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
-  doc.attributes.alertTypeId === 'siem.signals'; // deprecated in 7.16
+// Deprecated in 8.0
+export const isLegacySecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
+  doc.attributes.alertTypeId === 'siem.signals';
 
 /**
  * Returns true if the alert type is that of "siem.notifications" which is a legacy notification system that was deprecated in 7.16.0
@@ -97,19 +98,19 @@ export function getMigrations(
 
   const migrationSecurityRules713 = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isLegacySecuritySolutionRule(doc),
     pipeMigrations(removeNullsFromSecurityRules)
   );
 
   const migrationSecurityRules714 = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isLegacySecuritySolutionRule(doc),
     pipeMigrations(removeNullAuthorFromSecurityRules)
   );
 
   const migrationSecurityRules715 = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isLegacySecuritySolutionRule(doc),
     pipeMigrations(addExceptionListsToReferences)
   );
 
@@ -653,7 +654,7 @@ function addRACRuleTypes(
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ): SavedObjectUnsanitizedDoc<RawAlert> {
   const ruleType = doc.attributes.params.type;
-  return isSecuritySolutionRule(doc) && isRuleType(ruleType)
+  return isLegacySecuritySolutionRule(doc) && isRuleType(ruleType)
     ? {
         ...doc,
         attributes: {

@@ -48,6 +48,7 @@ export const bulkCreateFactory =
     const response = await alertWithPersistence(
       wrappedDocs.map((doc) => ({
         id: doc._id,
+        // `fields` should have already been merged into `doc._source`
         fields: doc._source,
       })),
       refreshForBulkCreate

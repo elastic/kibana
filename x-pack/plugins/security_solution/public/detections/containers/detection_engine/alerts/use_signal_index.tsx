@@ -51,12 +51,10 @@ export const useSignalIndex = (): ReturnSignalIndex => {
         setLoading(true);
         const signal = await getSignalIndex({ signal: abortCtrl.signal });
 
-        const signalIndices = signal.name;
-
         if (isSubscribed && signal != null) {
           setSignalIndex({
             signalIndexExists: true,
-            signalIndexName: signalIndices,
+            signalIndexName: signal.name,
             signalIndexMappingOutdated: signal.index_mapping_outdated,
             createDeSignalIndex: createIndex,
           });

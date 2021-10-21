@@ -97,7 +97,6 @@ export const eqlExecutor = async ({
     version,
     index: ruleParams.index,
   });
-  logger.info(`INDEX: ${inputIndex}`);
 
   const request = buildEqlSearchRequest(
     ruleParams.query,

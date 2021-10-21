@@ -40,6 +40,7 @@ export const replaceSignalsIndexAlias = async ({
       ],
     },
   });
+  // TODO: space-aware?
   await esClient.indices.updateAliases({
     body: {
       actions: [
