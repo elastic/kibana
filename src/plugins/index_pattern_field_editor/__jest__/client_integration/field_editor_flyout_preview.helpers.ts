@@ -21,12 +21,12 @@ import {
   spyIndexPatternGetAllFields,
   spySearchQuery,
   spySearchQueryResponse,
+  TestDoc,
 } from './helpers';
 
 const defaultProps: Props = {
   onSave: () => {},
   onCancel: () => {},
-  runtimeFieldValidator: () => Promise.resolve(null),
   isSavingField: false,
 };
 
@@ -37,12 +37,6 @@ const defaultProps: Props = {
 export const setIndexPatternFields = (fields: Array<{ name: string; displayName: string }>) => {
   spyIndexPatternGetAllFields.mockReturnValue(fields);
 };
-
-export interface TestDoc {
-  title: string;
-  subTitle: string;
-  description: string;
-}
 
 export const getSearchCallMeta = () => {
   const totalCalls = spySearchQuery.mock.calls.length;

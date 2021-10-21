@@ -12,12 +12,10 @@ import { Context } from '../../public/components/field_editor_context';
 import { FieldEditor, Props } from '../../public/components/field_editor/field_editor';
 import { WithFieldEditorDependencies, getCommonActions } from './helpers';
 
+export { waitForUpdates, waitForDocumentsAndPreviewUpdate } from './helpers';
+
 export const defaultProps: Props = {
   onChange: jest.fn(),
-  syntaxError: {
-    error: null,
-    clear: () => {},
-  },
 };
 
 export type FieldEditorTestBed = TestBed & { actions: ReturnType<typeof getCommonActions> };

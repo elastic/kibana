@@ -16,6 +16,13 @@ export {
   spyIndexPatternGetAllFields,
   fieldFormatsOptions,
   indexPatternNameForTest,
+  setSearchResponseLatency,
 } from './setup_environment';
 
-export { getCommonActions } from './common_actions';
+export {
+  getCommonActions,
+  waitForUpdates,
+  waitForDocumentsAndPreviewUpdate,
+} from './common_actions';
+
+export { mockDocuments, EsDoc, TestDoc } from './mocks';
