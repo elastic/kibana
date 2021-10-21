@@ -24,7 +24,7 @@ describe('FullTimeRangeSelector', () => {
   const indexPattern = {
     id: '0844fc70-5ab5-11e9-935e-836737467b0f',
     fields: [],
-    title: 'test-index-pattern',
+    title: 'test-data-view',
     timeFieldName: '@timestamp',
   } as unknown as DataView;
 
