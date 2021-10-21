@@ -40,7 +40,7 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
 import { loadIndexSettings } from './util/load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
@@ -239,9 +239,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         value: sourceTitle,
       },
       {
-        label: i18n.translate('xpack.maps.source.esSearch.indexPatternLabel', {
-          defaultMessage: `Index pattern`,
-        }),
+        label: getDataViewLabel(),
         value: indexPatternName,
       },
       {
@@ -781,14 +779,14 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     if (indexList.length === 0) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSearch.indexZeroLengthEditError', {
-          defaultMessage: `Your index pattern doesn't point to any indices.`,
+          defaultMessage: `Your data view doesn't point to any indices.`,
         })
       );
     }
     if (indexList.length > 1) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSearch.indexOverOneLengthEditError', {
-          defaultMessage: `Your index pattern points to multiple indices. Only one index is allowed per index pattern.`,
+          defaultMessage: `Your data view points to multiple indices. Only one index is allowed per data view.`,
         })
       );
     }

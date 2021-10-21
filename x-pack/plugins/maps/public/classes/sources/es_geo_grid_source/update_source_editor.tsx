@@ -8,9 +8,9 @@
 import React, { Fragment, Component } from 'react';
 
 import uuid from 'uuid/v4';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
+import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { AGG_TYPE, GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
@@ -59,12 +59,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
     } catch (err) {
       if (this._isMounted) {
         this.setState({
-          loadError: i18n.translate('xpack.maps.source.esGrid.noIndexPatternErrorMessage', {
-            defaultMessage: `Unable to find Index pattern {id}`,
-            values: {
-              id: this.props.indexPatternId,
-            },
-          }),
+          loadError: getDataViewNotFoundMessage(this.props.indexPatternId),
         });
       }
       return;

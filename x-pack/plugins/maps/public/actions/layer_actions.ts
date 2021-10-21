@@ -41,7 +41,7 @@ import {
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
 import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
+import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   Attribution,
   JoinDescriptor,
@@ -218,7 +218,7 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
     }
 
     if (!makeVisible) {
-      dispatch(cleanTooltipStateForLayer(layer));
+      dispatch(updateTooltipStateForLayer(layer));
     }
 
     dispatch({
@@ -526,7 +526,7 @@ function removeLayerFromLayerList(layerId: string) {
     layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
-    dispatch(cleanTooltipStateForLayer(layerGettingRemoved));
+    dispatch(updateTooltipStateForLayer(layerGettingRemoved));
     layerGettingRemoved.destroy();
     dispatch({
       type: REMOVE_LAYER,

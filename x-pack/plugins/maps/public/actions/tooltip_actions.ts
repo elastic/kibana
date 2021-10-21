@@ -10,7 +10,8 @@ import { Dispatch } from 'redux';
 import { Feature } from 'geojson';
 import { getOpenTooltips } from '../selectors/map_selectors';
 import { SET_OPEN_TOOLTIPS } from './map_action_constants';
-import { TooltipState } from '../../common/descriptor_types';
+import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../common/constants';
+import { TooltipFeature, TooltipState } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer, getFeatureId, isVectorLayer } from '../classes/layers/vector_layer';
@@ -63,32 +64,41 @@ export function openOnHoverTooltip(tooltipState: TooltipState) {
   };
 }
 
-export function cleanTooltipStateForLayer(layer: ILayer, layerFeatures: Feature[] = []) {
+export function updateTooltipStateForLayer(layer: ILayer, layerFeatures: Feature[] = []) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
     if (!isVectorLayer(layer)) {
       return;
     }
 
-    let featuresRemoved = false;
     const openTooltips = getOpenTooltips(getState())
       .map((tooltipState) => {
-        const nextFeatures = tooltipState.features.filter((tooltipFeature) => {
+        const nextFeatures: TooltipFeature[] = [];
+        tooltipState.features.forEach((tooltipFeature) => {
           if (tooltipFeature.layerId !== layer.getId()) {
             // feature from another layer, keep it
-            return true;
+            nextFeatures.push(tooltipFeature);
           }
 
-          // Keep feature if it is still in layer
-          return layerFeatures.some((layerFeature) => {
+          const updatedFeature = layerFeatures.find((layerFeature) => {
+            const isVisible =
+              layerFeature.properties![FEATURE_VISIBLE_PROPERTY_NAME] !== undefined
+                ? layerFeature.properties![FEATURE_VISIBLE_PROPERTY_NAME]
+                : true;
             return (
+              isVisible &&
               getFeatureId(layerFeature, (layer as IVectorLayer).getSource()) === tooltipFeature.id
             );
           });
-        });
 
-        if (tooltipState.features.length !== nextFeatures.length) {
-          featuresRemoved = true;
-        }
+          if (updatedFeature) {
+            nextFeatures.push({
+              ...tooltipFeature,
+              mbProperties: {
+                ...updatedFeature.properties,
+              },
+            });
+          }
+        });
 
         return { ...tooltipState, features: nextFeatures };
       })
@@ -96,11 +106,9 @@ export function cleanTooltipStateForLayer(layer: ILayer, layerFeatures: Feature[
         return tooltipState.features.length > 0;
       });
 
-    if (featuresRemoved) {
-      dispatch({
-        type: SET_OPEN_TOOLTIPS,
-        openTooltips,
-      });
-    }
+    dispatch({
+      type: SET_OPEN_TOOLTIPS,
+      openTooltips,
+    });
   };
 }

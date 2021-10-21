@@ -27,7 +27,7 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
@@ -125,9 +125,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         value: this._descriptor.requestType === RENDER_AS.HEATMAP ? heatmapTitle : clustersTitle,
       },
       {
-        label: i18n.translate('xpack.maps.source.esGrid.indexPatternLabel', {
-          defaultMessage: 'Index pattern',
-        }),
+        label: getDataViewLabel(),
         value: indexPatternName,
       },
       {
