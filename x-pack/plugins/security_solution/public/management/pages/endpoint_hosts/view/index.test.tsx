@@ -703,8 +703,8 @@ describe('when on the endpoint list page', () => {
 
     it('should show the flyout and footer', async () => {
       const renderResult = await renderAndWaitForData();
-      await expect(renderResult.findByTestId('endpointDetailsFlyout')).not.toBeNull();
-      await expect(renderResult.queryByTestId('endpointDetailsFlyoutFooter')).not.toBeNull();
+      expect(renderResult.getByTestId('endpointDetailsFlyout')).not.toBeNull();
+      expect(renderResult.getByTestId('endpointDetailsFlyoutFooter')).not.toBeNull();
     });
 
     it('should display policy name value as a link', async () => {
@@ -738,15 +738,6 @@ describe('when on the endpoint list page', () => {
       );
     });
 
-    it('should display policy status value as a link', async () => {
-      const renderResult = await renderAndWaitForData();
-      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
-      expect(policyStatusLink).not.toBeNull();
-      expect(policyStatusLink.getAttribute('href')).toEqual(
-        `${APP_PATH}${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=policy_response`
-      );
-    });
-
     it('should update the URL when policy status link is clicked', async () => {
       const renderResult = await renderAndWaitForData();
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
@@ -763,10 +754,8 @@ describe('when on the endpoint list page', () => {
     it('should display Success overall policy status', async () => {
       const renderResult = await renderAndWaitForData();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
+      expect(renderResult.getByTestId('policyStatusValue-success')).toBeTruthy();
       expect(policyStatusBadge.textContent).toEqual('Success');
-      expect(policyStatusBadge.getAttribute('style')).toMatch(
-        /background-color\: rgb\(109\, 204\, 177\)\;/
-      );
     });
 
     it('should display Warning overall policy status', async () => {
@@ -774,9 +763,7 @@ describe('when on the endpoint list page', () => {
       const renderResult = await renderAndWaitForData();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusBadge.textContent).toEqual('Warning');
-      expect(policyStatusBadge.getAttribute('style')).toMatch(
-        /background-color\: rgb\(241\, 216\, 111\)\;/
-      );
+      expect(renderResult.getByTestId('policyStatusValue-warning')).toBeTruthy();
     });
 
     it('should display Failed overall policy status', async () => {
@@ -784,9 +771,7 @@ describe('when on the endpoint list page', () => {
       const renderResult = await renderAndWaitForData();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusBadge.textContent).toEqual('Failed');
-      expect(policyStatusBadge.getAttribute('style')).toMatch(
-        /background-color\: rgb\(255\, 126\, 98\)\;/
-      );
+      expect(renderResult.getByTestId('policyStatusValue-failure')).toBeTruthy();
     });
 
     it('should display Unknown overall policy status', async () => {
@@ -794,9 +779,7 @@ describe('when on the endpoint list page', () => {
       const renderResult = await renderAndWaitForData();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusBadge.textContent).toEqual('Unknown');
-      expect(policyStatusBadge.getAttribute('style')).toMatch(
-        /background-color\: rgb\(211\, 218\, 230\)\;/
-      );
+      expect(renderResult.getByTestId('policyStatusValue-')).toBeTruthy();
     });
 
     it('should show the Take Action button', async () => {

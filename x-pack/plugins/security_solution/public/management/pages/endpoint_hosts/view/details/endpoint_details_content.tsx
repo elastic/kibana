@@ -141,7 +141,10 @@ export const EndpointDetailsContent = memo(
             defaultMessage: 'Policy Status',
           }),
           description: (
-            <EuiHealth color={POLICY_STATUS_TO_BADGE_COLOR[policyStatus] || 'default'}>
+            <EuiHealth
+              data-test-subj={`policyStatusValue-${policyStatus}`}
+              color={POLICY_STATUS_TO_BADGE_COLOR[policyStatus] || 'default'}
+            >
               <EuiLink onClick={policyStatusClickHandler} data-test-subj="policyStatusValue">
                 <EuiText size="m">
                   <FormattedMessage
