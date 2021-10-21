@@ -8,7 +8,7 @@
 import { uniq } from 'lodash';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
-export function getApmIndexPatternTitle(apmIndicesConfig: ApmIndicesConfig) {
+export function getApmDataViewTitle(apmIndicesConfig: ApmIndicesConfig) {
   return uniq([
     apmIndicesConfig.transaction,
     apmIndicesConfig.span,

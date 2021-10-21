@@ -21,6 +21,7 @@ import { EditControlButton } from '../editor/edit_control';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
 import { ControlGroupStrings } from '../control_group_strings';
+import { pluginServices } from '../../../../services';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -35,6 +36,10 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
     containerActions: { untilEmbeddableLoaded, removeEmbeddable },
   } = useReduxContainerContext<ControlGroupInput>();
   const { controlStyle } = useEmbeddableSelector((state) => state);
+
+  // Presentation Services Context
+  const { overlays } = pluginServices.getHooks();
+  const { openConfirm } = overlays.useService();
 
   const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId });
 
@@ -52,9 +57,9 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
 
   const floatingActions = (
     <div
-      className={classNames('controlFrame--floatingActions', {
-        'controlFrame--floatingActions-twoLine': usingTwoLineLayout,
-        'controlFrame--floatingActions-oneLine': !usingTwoLineLayout,
+      className={classNames('controlFrameFloatingActions', {
+        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
+        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
     >
       <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
@@ -63,7 +68,18 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
       <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
         <EuiButtonIcon
           aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
-          onClick={() => removeEmbeddable(embeddableId)}
+          onClick={() =>
+            openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
+              confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
+              cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
+              title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
+              buttonColor: 'danger',
+            }).then((confirmed) => {
+              if (confirmed) {
+                removeEmbeddable(embeddableId);
+              }
+            })
+          }
           iconType="cross"
           color="danger"
         />
@@ -73,13 +89,13 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
 
   const form = (
     <EuiFormControlLayout
-      className={'controlFrame--formControlLayout'}
+      className={'controlFrame__formControlLayout'}
       fullWidth
       prepend={
         <>
           {customPrepend ?? null}
           {usingTwoLineLayout ? undefined : (
-            <EuiFormLabel className="controlFrame--formControlLayout__label" htmlFor={embeddableId}>
+            <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
               {title}
             </EuiFormLabel>
           )}
@@ -87,7 +103,7 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
       }
     >
       <div
-        className={classNames('controlFrame--control', {
+        className={classNames('controlFrame__control', {
           'controlFrame--twoLine': controlStyle === 'twoLine',
           'controlFrame--oneLine': controlStyle === 'oneLine',
         })}
