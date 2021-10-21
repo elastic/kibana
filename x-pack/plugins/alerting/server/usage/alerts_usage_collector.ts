@@ -91,6 +91,7 @@ export function createAlertsUsageCollector(
           },
           count_active_by_type: {},
           count_by_type: {},
+          count_rules_namespaces: 0,
         };
       }
     },
@@ -115,6 +116,7 @@ export function createAlertsUsageCollector(
       },
       count_active_by_type: byTypeSchema,
       count_by_type: byTypeSchema,
+      count_rules_namespaces: { type: 'long' },
     },
   });
 }
