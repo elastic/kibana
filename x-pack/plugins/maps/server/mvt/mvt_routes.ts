@@ -16,7 +16,6 @@ import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
   MVT_GETGRIDTILE_API_PATH,
-  ES_GEO_FIELD_TYPE,
   RENDER_AS,
 } from '../../common/constants';
 import { getEsTile } from './get_tile';
