@@ -226,13 +226,13 @@ export class ScalingForm extends Component<Props, State> {
             <EuiToolTip
               position="left"
               content={i18n.translate('xpack.maps.source.esSearch.mvtDescription', {
-                defaultMessage: 'Use vector tiles for faster display of large datasets.',
+                defaultMessage: 'Use Elasticsearch vector tiles for faster display of large datasets.',
               })}
             >
               <EuiRadio
                 id={SCALING_TYPES.MVT}
                 label={i18n.translate('xpack.maps.source.esSearch.useMVTVectorTiles', {
-                  defaultMessage: 'Use vector tiles',
+                  defaultMessage: 'Use Elasticsearch vector tiles',
                 })}
                 checked={this.props.scalingType === SCALING_TYPES.MVT}
                 onChange={() => this._onScalingTypeSelect(SCALING_TYPES.MVT)}
