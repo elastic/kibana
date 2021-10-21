@@ -60,6 +60,8 @@ export const getTimeseriesVisRenderer: (deps: {
       fetchIndexPattern(model.index_pattern, indexPatterns),
     ]).then(([palettesService, { indexPattern }]) => {
       servicesLoaded = true;
+      
+      unmountComponentAtNode(domNode);
 
       render(
         <I18nProvider>
