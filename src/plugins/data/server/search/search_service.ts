@@ -66,6 +66,8 @@ import {
   numericalRangeFunction,
   queryFilterFunction,
   rangeFilterFunction,
+  removeFilterFunction,
+  selectFilterFunction,
   rangeFunction,
   SearchSourceDependencies,
   searchSourceRequiredUiSettings,
@@ -205,6 +207,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(existsFilterFunction);
     expressions.registerFunction(queryFilterFunction);
     expressions.registerFunction(rangeFilterFunction);
+    expressions.registerFunction(removeFilterFunction);
+    expressions.registerFunction(selectFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
     expressions.registerType(esRawResponse);
