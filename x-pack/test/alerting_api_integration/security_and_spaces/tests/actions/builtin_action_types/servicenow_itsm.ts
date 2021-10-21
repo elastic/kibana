@@ -91,7 +91,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             connector_type_id: '.servicenow',
             config: {
               apiUrl: serviceNowSimulatorURL,
-              isLegacy: false,
+              usesTableApi: false,
             },
             secrets: mockServiceNow.secrets,
           })

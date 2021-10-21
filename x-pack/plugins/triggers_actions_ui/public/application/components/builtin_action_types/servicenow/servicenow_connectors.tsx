@@ -36,7 +36,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
       http,
       notifications: { toasts },
     } = useKibana().services;
-    const { apiUrl, isLegacy } = action.config;
+    const { apiUrl, usesTableApi } = action.config;
     const { username, password } = action.secrets;
     const requiresNewApplication = !isDeprecatedConnector(action);
 
@@ -125,14 +125,14 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
     ]);
 
     /**
-     * Defaults the isLegacy attribute to false
-     * if it is not defined. The isLegacy attribute
+     * Defaults the usesTableApi attribute to false
+     * if it is not defined. The usesTableApi attribute
      * will be undefined only at the creation of
      * the connector.
      */
     useEffect(() => {
-      if (isLegacy == null) {
-        editActionConfig('isLegacy', false);
+      if (usesTableApi == null) {
+        editActionConfig('usesTableApi', false);
       }
     });
 

@@ -171,7 +171,7 @@ describe('ConnectorsDropdown', () => {
           "value": "servicenow-sir",
         },
         Object {
-          "data-test-subj": "dropdown-connector-servicenow-uses-old-api",
+          "data-test-subj": "dropdown-connector-servicenow-uses-table-api",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
             gutterSize="s"

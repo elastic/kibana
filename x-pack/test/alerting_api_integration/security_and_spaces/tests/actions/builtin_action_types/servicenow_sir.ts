@@ -95,7 +95,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             connector_type_id: '.servicenow-sir',
             config: {
               apiUrl: serviceNowSimulatorURL,
-              isLegacy: false,
+              usesTableApi: false,
             },
             secrets: mockServiceNow.secrets,
           })
