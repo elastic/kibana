@@ -14,10 +14,9 @@ describe('field type utils', () => {
       const keys = Object.keys(JOB_FIELD_TYPES);
       const receivedLabels: Record<string, string | null> = {};
       const testStorage = jobTypeLabels;
-      keys.forEach((constant) => {
-        receivedLabels[constant] = getJobTypeLabel(
-          JOB_FIELD_TYPES[constant as keyof typeof JOB_FIELD_TYPES]
-        );
+      keys.forEach((key) => {
+        const constant = key as keyof typeof JOB_FIELD_TYPES;
+        receivedLabels[JOB_FIELD_TYPES[constant]] = getJobTypeLabel(JOB_FIELD_TYPES[constant]);
       });
 
       expect(receivedLabels).toEqual(testStorage);
