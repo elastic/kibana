@@ -18,7 +18,6 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
         await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
         });
-        // await testSubjects.click('addSampleDataSetflights');
         await PageObjects.home.addSampleDataSet('flights');
       });
 
@@ -26,7 +25,6 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
         await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
         });
-        // await testSubjects.click('removeSampleDataSetflights');
         await PageObjects.home.removeSampleDataSet('flights');
         await kibanaServer.savedObjects.clean({
           types: ['search', 'index-pattern', 'visualization', 'dashboard'],

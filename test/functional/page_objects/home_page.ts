@@ -32,7 +32,6 @@ export class HomePageObject extends FtrService {
     const sampleDataCardInnerHTML = await sampleDataCard.getAttribute('innerHTML');
     this.log.debug(sampleDataCardInnerHTML);
     return sampleDataCardInnerHTML.includes('removeSampleDataSet');
-    // return !(await this.testSubjects.exists(`addSampleDataSet${id}`));
   }
 
   async isWelcomeInterstitialDisplayed() {
