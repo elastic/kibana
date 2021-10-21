@@ -10,6 +10,8 @@ import type { SavedObjectMigrationFn } from 'kibana/server';
 import type { Installation } from '../../../common';
 import { AUTO_UPDATE_PACKAGES, DEFAULT_PACKAGES } from '../../../common';
 
+import { migratePackagePolicyToV7160 as SecSolMigratePackagePolicyToV7160 } from './security_solution';
+
 export const migrateInstallationToV7160: SavedObjectMigrationFn<Installation, Installation> = (
   installationDoc,
   migrationContext
@@ -25,4 +27,18 @@ export const migrateInstallationToV7160: SavedObjectMigrationFn<Installation, In
   }
 
   return updatedInstallationDoc;
+};
+
+export const migratePackagePolicyToV7160: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
+  packagePolicyDoc,
+  migrationContext
+) => {
+  let updatedPackagePolicyDoc = packagePolicyDoc;
+
+  // Endpoint specific migrations
+  if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
+    updatedPackagePolicyDoc = SecSolMigratePackagePolicyToV7160(packagePolicyDoc, migrationContext);
+  }
+
+  return updatedPackagePolicyDoc;
 };
