@@ -31,7 +31,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
-import { useIndexPattern } from './use_index_pattern';
+import { useDataView } from './use_data_view';
 import { environmentQuery } from './queries';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_url_params';
@@ -52,7 +52,7 @@ const RUM_DATA_FILTERS = [
 ];
 
 function LocalUIFilters() {
-  const { indexPatternTitle, indexPattern } = useIndexPattern();
+  const { dataViewTitle, dataView } = useDataView();
 
   const {
     filters = [],
@@ -108,7 +108,7 @@ function LocalUIFilters() {
               <FieldValueSuggestions
                 key={filterName}
                 sourceField={uxFiltersByName[filterName].fieldName}
-                indexPatternTitle={indexPatternTitle}
+                indexPatternTitle={dataViewTitle}
                 label={uxFiltersByName[filterName].title}
                 asCombobox={false}
                 selectedValue={
@@ -144,7 +144,7 @@ function LocalUIFilters() {
         }}
         clearValues={clearValues}
         invertFilter={invertFilter}
-        indexPattern={indexPattern}
+        indexPattern={dataView}
       />
     </>
   );

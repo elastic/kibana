@@ -116,7 +116,7 @@ export function createSearchItems(
   }
 
   if (!isIndexPattern(indexPattern)) {
-    throw new Error('Index Pattern is not defined.');
+    throw new Error('Data view is not defined.');
   }
 
   return {

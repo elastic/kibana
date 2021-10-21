@@ -123,7 +123,7 @@ export class CategorizationJobCreator extends JobCreator {
 
     this._ccsVersionFailure = this._checkCcsFailure(examples, overallValidStatus, validationChecks);
     if (this._ccsVersionFailure === true) {
-      // if the index pattern contains a cross-cluster search, one of the clusters may
+      // if the data view contains a cross-cluster search, one of the clusters may
       // be on a version which doesn't support the fields API (e.g. 6.8)
       // and so the categorization examples endpoint will fail
       // if this is the case, we need to allow the user to progress in the wizard.
