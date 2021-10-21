@@ -31,6 +31,8 @@ import {
   LabelOverflowConstraint,
   DisplayValueStyle,
   RecursivePartial,
+  AxisStyle,
+  GridLineStyle,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import type {
@@ -323,15 +325,15 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => layer.splitAccessor);
 
-  const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
+  const isTimeViz = Boolean(data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time'));
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
     filteredLayers,
     data,
     minInterval,
-    Boolean(isTimeViz),
-    Boolean(isHistogramViz)
+    isTimeViz,
+    isHistogramViz
   );
 
   const yAxesMap = {
@@ -558,7 +560,72 @@ export function XYChart({
     floatingColumns: legend?.floatingColumns ?? 1,
   } as LegendPositionConfig;
 
-  console.log(`LEGACY_TIME_AXIS (Lens): ${useLegacyTimeAxis}`); // eslint-disable-line
+  // todo be moved in the chart plugin
+  const shouldUseNewTimeAxis = isTimeViz && !useLegacyTimeAxis && !shouldRotate;
+
+  const gridLineStyle: RecursivePartial<GridLineStyle> = shouldUseNewTimeAxis
+    ? {
+        visible: gridlinesVisibilitySettings?.x,
+        strokeWidth: 0.1,
+        stroke: darkMode ? 'white' : 'black',
+      }
+    : {
+        visible: gridlinesVisibilitySettings?.x,
+        strokeWidth: 2,
+      };
+  const xAxisStyle: RecursivePartial<AxisStyle> = shouldUseNewTimeAxis
+    ? {
+        tickLabel: {
+          visible: tickLabelsVisibilitySettings?.x,
+          rotation: labelsOrientation?.x,
+          fontSize: 11,
+          padding:
+            referenceLinePaddings.bottom != null ? { inner: referenceLinePaddings.bottom } : 0,
+          alignment: {
+            vertical: Position.Bottom,
+            horizontal: Position.Left,
+          },
+          offset: {
+            x: 1.5,
+            y: 0,
+          },
+        },
+        axisLine: {
+          stroke: darkMode ? 'lightgray' : 'darkgray',
+          strokeWidth: 1,
+        },
+        tickLine: {
+          size: 12,
+          strokeWidth: 0.15,
+          stroke: darkMode ? 'white' : 'black',
+          padding: -10,
+          visible: true,
+        },
+        axisTitle: {
+          visible: axisTitlesVisibilitySettings.x,
+          padding:
+            !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
+              ? { inner: referenceLinePaddings.bottom }
+              : undefined,
+        },
+      }
+    : {
+        tickLabel: {
+          visible: tickLabelsVisibilitySettings?.x,
+          rotation: labelsOrientation?.x,
+          padding:
+            referenceLinePaddings.bottom != null
+              ? { inner: referenceLinePaddings.bottom }
+              : undefined,
+        },
+        axisTitle: {
+          visible: axisTitlesVisibilitySettings.x,
+          padding:
+            !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
+              ? { inner: referenceLinePaddings.bottom }
+              : undefined,
+        },
+      };
 
   return (
     <Chart ref={chartRef}>
@@ -600,7 +667,7 @@ export function XYChart({
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
         }}
-        allowBrushingLastHistogramBucket={Boolean(isTimeViz)}
+        allowBrushingLastHistogramBin={isTimeViz}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
         onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
@@ -619,29 +686,11 @@ export function XYChart({
         id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
-        gridLine={{
-          visible: gridlinesVisibilitySettings?.x,
-          strokeWidth: 2,
-        }}
+        gridLine={gridLineStyle}
         hide={filteredLayers[0].hide || !filteredLayers[0].xAccessor}
         tickFormat={(d) => safeXAccessorLabelRenderer(d)}
-        style={{
-          tickLabel: {
-            visible: tickLabelsVisibilitySettings?.x,
-            rotation: labelsOrientation?.x,
-            padding:
-              referenceLinePaddings.bottom != null
-                ? { inner: referenceLinePaddings.bottom }
-                : undefined,
-          },
-          axisTitle: {
-            visible: axisTitlesVisibilitySettings.x,
-            padding:
-              !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
-                ? { inner: referenceLinePaddings.bottom }
-                : undefined,
-          },
-        }}
+        style={xAxisStyle}
+        timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
       />
 
       {yAxesConfiguration.map((axis) => {
