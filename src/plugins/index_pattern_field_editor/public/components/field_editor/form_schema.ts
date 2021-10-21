@@ -7,11 +7,71 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { fieldValidators } from '../../shared_imports';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { PainlessLang } from '@kbn/monaco';
 
+import { fieldValidators, FieldConfig, RuntimeType, ValidationFunc } from '../../shared_imports';
+import type { Context } from '../preview';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 
+type CancelablePromise = Promise<any> & { cancel?(): void };
+
 const { emptyField, numberGreaterThanField } = fieldValidators;
+
+// Validate the painless **syntax** (no need to make an HTTP request)
+const painlessSyntaxValidator: ValidationFunc = () => {
+  let isValidatingSub: Subscription;
+  const promise: CancelablePromise = new Promise((resolve) => {
+    isValidatingSub = PainlessLang.validation$()
+      .pipe(
+        first(({ isValidating }) => {
+          return isValidating === false;
+        })
+      )
+      .subscribe(({ errors }) => {
+        const editorHasSyntaxErrors = errors.length > 0;
+
+        if (editorHasSyntaxErrors) {
+          return resolve({
+            message: i18n.translate(
+              'indexPatternFieldEditor.editor.form.scriptEditorValidationMessage',
+              {
+                defaultMessage: 'Invalid Painless syntax.',
+              }
+            ),
+          });
+        }
+
+        resolve(undefined);
+      });
+  });
+
+  promise.cancel = () => {
+    if (isValidatingSub) {
+      isValidatingSub.unsubscribe();
+    }
+  };
+
+  return promise;
+};
+
+// Validate the painless **script**
+const painlessScriptValidator: ValidationFunc = async ({ customData: { provider } }) => {
+  const previewError = (await provider()) as Context['error'];
+
+  if (previewError && previewError.code === 'PAINLESS_SCRIPT_ERROR') {
+    return {
+      message: i18n.translate(
+        'indexPatternFieldEditor.editor.form.scriptEditorPainlessValidationMessage',
+        {
+          defaultMessage: 'Invalid Painless script.',
+        }
+      ),
+    };
+  }
+};
 
 export const schema = {
   name: {
@@ -36,7 +96,8 @@ export const schema = {
       defaultMessage: 'Type',
     }),
     defaultValue: [RUNTIME_FIELD_OPTIONS[0]],
-  },
+    fieldsToValidateOnChange: ['script.source'],
+  } as FieldConfig<Array<EuiComboBoxOptionOption<RuntimeType>>>,
   script: {
     source: {
       label: i18n.translate('indexPatternFieldEditor.editor.form.defineFieldLabel', {
@@ -52,6 +113,14 @@ export const schema = {
               }
             )
           ),
+        },
+        {
+          validator: painlessSyntaxValidator,
+          isAsync: true,
+        },
+        {
+          validator: painlessScriptValidator,
+          isAsync: true,
         },
       ],
     },

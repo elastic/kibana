@@ -42,7 +42,6 @@ import {
   ScriptField,
   FormatField,
   PopularityField,
-  ScriptSyntaxError,
 } from './form_fields';
 import { FormRow } from './form_row';
 import { AdvancedParametersSection } from './advanced_parameters_section';
@@ -70,7 +69,6 @@ export interface Props {
   onChange?: (state: FieldEditorFormState) => void;
   /** Handler to receive update on the form "isModified" state */
   onFormModifiedChange?: (isModified: boolean) => void;
-  syntaxError: ScriptSyntaxError;
 }
 
 const geti18nTexts = (): {
@@ -150,7 +148,7 @@ const formSerializer = (field: FieldFormInternal): Field => {
   };
 };
 
-const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxError }: Props) => {
+const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
   const { links, namesNotAllowed, existingConcreteFields, fieldTypeToProcess } =
     useFieldEditorContext();
   const {
@@ -164,7 +162,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
     serializer: formSerializer,
   });
   const { submit, isValid: isFormValid, isSubmitted, getFields } = form;
-  const { clear: clearSyntaxError } = syntaxError;
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const i18nTexts = geti18nTexts();
@@ -198,12 +195,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
       onChange({ isValid: isFormValid, isSubmitted, submit });
     }
   }, [onChange, isFormValid, isSubmitted, submit]);
-
-  useEffect(() => {
-    // Whenever the field "type" changes we clear any possible painless syntax
-    // error as it is possibly stale.
-    clearSyntaxError();
-  }, [updatedType, clearSyntaxError]);
 
   useEffect(() => {
     updatePreviewParams({
@@ -296,11 +287,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
           data-test-subj="valueRow"
           withDividerRule
         >
-          <ScriptField
-            existingConcreteFields={existingConcreteFields}
-            links={links}
-            syntaxError={syntaxError}
-          />
+          <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
         </FormRow>
       )}
 

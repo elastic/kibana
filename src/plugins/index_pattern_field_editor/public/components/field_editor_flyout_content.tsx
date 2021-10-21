@@ -20,8 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import type { Field, EsRuntimeField } from '../types';
-import { RuntimeFieldPainlessError } from '../lib';
+import type { Field } from '../types';
 import { euiFlyoutClassname } from '../constants';
 import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
@@ -55,8 +54,6 @@ export interface Props {
    * Handler for the "cancel" footer button
    */
   onCancel: () => void;
-  /** Handler to validate the script  */
-  runtimeFieldValidator: (field: EsRuntimeField) => Promise<RuntimeFieldPainlessError | null>;
   /** Optional field to process */
   field?: Field;
   isSavingField: boolean;
@@ -70,7 +67,6 @@ const FieldEditorFlyoutContentComponent = ({
   field,
   onSave,
   onCancel,
-  runtimeFieldValidator,
   isSavingField,
   onMounted,
 }: Props) => {
@@ -88,26 +84,11 @@ const FieldEditorFlyoutContentComponent = ({
       : async () => ({ isValid: false, data: {} as Field }),
   });
 
-  const [painlessSyntaxError, setPainlessSyntaxError] = useState<RuntimeFieldPainlessError | null>(
-    null
-  );
-
-  const [isValidating, setIsValidating] = useState(false);
   const [modalVisibility, setModalVisibility] = useState(defaultModalVisibility);
   const [isFormModified, setIsFormModified] = useState(false);
 
   const { submit, isValid: isFormValid, isSubmitted } = formState;
-  const hasErrors = isFormValid === false || painlessSyntaxError !== null;
-
-  const clearSyntaxError = useCallback(() => setPainlessSyntaxError(null), []);
-
-  const syntaxError = useMemo(
-    () => ({
-      error: painlessSyntaxError,
-      clear: clearSyntaxError,
-    }),
-    [painlessSyntaxError, clearSyntaxError]
-  );
+  const hasErrors = isFormValid === false;
 
   const canCloseValidator = useCallback(() => {
     if (isFormModified) {
@@ -125,21 +106,9 @@ const FieldEditorFlyoutContentComponent = ({
     const typeChange = field?.type !== data.type;
 
     if (isValid) {
-      if (data.script) {
-        setIsValidating(true);
 
-        const error = await runtimeFieldValidator({
-          type: data.type,
-          script: data.script,
-        });
-
-        setIsValidating(false);
-        setPainlessSyntaxError(error);
-
-        if (error) {
           return;
         }
-      }
 
       if (isEditingExistingField && (nameChange || typeChange)) {
         setModalVisibility({
@@ -150,7 +119,7 @@ const FieldEditorFlyoutContentComponent = ({
         onSave(data);
       }
     }
-  }, [onSave, submit, runtimeFieldValidator, field, isEditingExistingField]);
+  }, [onSave, submit, field, isEditingExistingField]);
 
   const onClickCancel = useCallback(() => {
     const canClose = canCloseValidator();
@@ -253,7 +222,6 @@ const FieldEditorFlyoutContentComponent = ({
               field={field}
               onChange={setFormState}
               onFormModifiedChange={setIsFormModified}
-              syntaxError={syntaxError}
             />
           </FlyoutPanels.Content>
 
