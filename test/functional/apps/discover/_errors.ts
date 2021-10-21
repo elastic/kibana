@@ -24,7 +24,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
-      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
+      // await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/invalid_scripted_field');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     describe('invalid scripted field error', () => {

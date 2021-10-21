@@ -371,7 +371,8 @@ export class DiscoverPageObject extends FtrService {
   public async clickFieldListItemAdd(field: string) {
     // a filter check may make sense here, but it should be properly handled to make
     // it work with the _score and _source fields as well
-    if (await this.isFieldSelected(field)) {
+    const fieldIsSelected = await this.isFieldSelected(field);
+    if (fieldIsSelected) {
       return;
     }
     await this.clickFieldListItemToggle(field);
@@ -388,7 +389,8 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async isFieldSelected(field: string) {
-    if (!(await this.testSubjects.exists('fieldList-selected'))) {
+    const fieldExists = await this.testSubjects.exists('fieldList-selected');
+    if (!fieldExists) {
       return false;
     }
     const selectedList = await this.testSubjects.find('fieldList-selected');

@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return actualCount === expectedCount;
         });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(26);
+        expect(Math.ceil(newDurationHours)).to.be(26);
 
         await retry.waitFor('doc table containing the documents of the brushed range', async () => {
           const rowData = await PageObjects.discover.getDocTableField(1);
