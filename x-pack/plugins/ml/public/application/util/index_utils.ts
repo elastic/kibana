@@ -96,7 +96,7 @@ export function getIndexPatternById(id: string): Promise<DataView> {
       return indexPatternsContract.create({});
     }
   } else {
-    throw new Error('Index patterns are not initialized!');
+    throw new Error('Data views are not initialized!');
   }
 }
 
@@ -114,11 +114,11 @@ export function timeBasedIndexCheck(indexPattern: DataView, showNotification = f
     if (showNotification) {
       const toastNotifications = getToastNotifications();
       toastNotifications.addWarning({
-        title: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationTitle', {
-          defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
-          values: { indexPatternTitle: indexPattern.title },
+        title: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationTitle', {
+          defaultMessage: 'The data view {dataViewName} is not based on a time series',
+          values: { dataViewName: indexPattern.title },
         }),
-        text: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationDescription', {
+        text: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationDescription', {
           defaultMessage: 'Anomaly detection only runs over time-based indices',
         }),
       });
@@ -130,9 +130,9 @@ export function timeBasedIndexCheck(indexPattern: DataView, showNotification = f
 }
 
 /**
- * Returns true if the index pattern contains a :
+ * Returns true if the data view name contains a :
  * which means it is cross-cluster
  */
-export function isCcsIndexPattern(indexPatternTitle: string) {
-  return indexPatternTitle.includes(':');
+export function isCcsIndexPattern(dataViewName: string) {
+  return dataViewName.includes(':');
 }
