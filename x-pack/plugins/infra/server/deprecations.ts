@@ -149,7 +149,7 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
     }),
   };
 
-export const configDeprecations: ConfigDeprecationProvider = () => [
+export const configDeprecations: ConfigDeprecationProvider = ({ deprecate }) => [
   ...Object.keys(FIELD_DEPRECATION_FACTORIES).map(
     (key): ConfigDeprecation =>
       (completeConfig, rootPath, addDeprecation) => {
@@ -186,6 +186,8 @@ export const configDeprecations: ConfigDeprecationProvider = () => [
         return completeConfig;
       }
   ),
+  deprecate('sources.default.logAlias', '8.0.0'),
+  deprecate('sources.default.metricAlias', '8.0.0'),
 ];
 
 export const getInfraDeprecationsFactory =
