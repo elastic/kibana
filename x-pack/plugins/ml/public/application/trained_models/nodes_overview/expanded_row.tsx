@@ -27,7 +27,12 @@ interface ExpandedRowProps {
 }
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
-  const { allocated_models: allocatedModels, attributes, ...details } = item;
+  const {
+    allocated_models: allocatedModels,
+    attributes,
+    memory_overview: memoryOverview,
+    ...details
+  } = item;
 
   return (
     <>

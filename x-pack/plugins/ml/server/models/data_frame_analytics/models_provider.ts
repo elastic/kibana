@@ -82,7 +82,7 @@ export function modelsProvider(
 
       const {
         body: { nodes: clusterNodes },
-      } = await client.asCurrentUser.nodes.info();
+      } = await client.asCurrentUser.nodes.stats();
 
       const mlNodes = Object.entries(clusterNodes).filter(([id, node]) =>
         node.roles.includes('ml')
@@ -91,6 +91,7 @@ export function modelsProvider(
       const adMemoryReport = await memoryOverviewService.getAnomalyDetectionMemoryOverview();
       const dfaMemoryReport = await memoryOverviewService.getDFAMemoryOverview();
 
+      // @ts-ignore
       const nodeDeploymentStatsResponses: NodeDeploymentStatsResponse[] = mlNodes.map(
         ([nodeId, node]) => {
           const nodeFields = pick(node, NODE_FIELDS);
@@ -134,7 +135,8 @@ export function modelsProvider(
             allocated_models: allocatedModels,
             memory_overview: {
               machine_memory: {
-                total: Number(node.attributes['ml.machine_memory']),
+                // @ts-ignore
+                total: Number(node.os?.mem.adjusted_total_in_bytes ?? node.os?.mem.total_in_bytes),
                 jvm: Number(node.attributes['ml.max_jvm_size']),
               },
               anomaly_detection: {
