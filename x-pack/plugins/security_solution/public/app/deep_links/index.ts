@@ -354,7 +354,7 @@ export function getDeepLinks(
 
   /**
    * Recursive DFS function to filter deepLinks by permissions (licence and capabilities).
-   * Checks "end" deepLinks with no children first, the other parent deepLinks will be included if 
+   * Checks "end" deepLinks with no children first, the other parent deepLinks will be included if
    * they still have children deepLinks after filtering
    */
   const filterDeepLinks = (deepLinks: AppDeepLink[]): AppDeepLink[] => {
@@ -388,7 +388,7 @@ export function getDeepLinks(
         if (deepLink.id === SecurityPageName.ueba) {
           return enableExperimental.uebaEnabled;
         }
-        if (!isEmpty(deepLink.deepLinks)) { 
+        if (!isEmpty(deepLink.deepLinks)) {
           return true;
         }
         return capabilities == null || capabilities[SERVER_APP_ID]?.show === true;

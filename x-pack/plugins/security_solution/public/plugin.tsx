@@ -36,6 +36,7 @@ import { KibanaServices } from './common/lib/kibana/services';
 import { SOLUTION_NAME } from './common/translations';
 
 import {
+  APP_ID,
   APP_UI_ID,
   OVERVIEW_PATH,
   APP_OVERVIEW_PATH,
@@ -104,7 +105,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
-        id: APP_UI_ID,
+        id: APP_ID,
         title: SOLUTION_NAME,
         description: i18n.translate('xpack.securitySolution.featureCatalogueDescription', {
           defaultMessage:
