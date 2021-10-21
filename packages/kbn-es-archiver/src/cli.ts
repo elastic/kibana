@@ -19,7 +19,7 @@ import Fs from 'fs';
 
 import { RunWithCommands, createFlagError, CA_CERT_PATH } from '@kbn/dev-utils';
 import { readConfigFile, KbnClient } from '@kbn/test';
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 
 import { EsArchiver } from './es_archiver';
 
@@ -107,6 +107,7 @@ export function runCli() {
       const client = new Client({
         node: esUrl,
         tls: esCa ? { ca: esCa } : undefined,
+        Connection: HttpConnection,
       });
       addCleanupTask(() => client.close());
 

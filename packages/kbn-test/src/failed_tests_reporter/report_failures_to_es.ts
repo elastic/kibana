@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { createFailError, ToolingLog } from '@kbn/dev-utils';
 
 import { TestFailure } from './get_failures';
@@ -34,6 +34,7 @@ export async function reportFailuresToEs(log: ToolingLog, failures: TestFailure[
       username: process.env.TEST_FAILURES_ES_USERNAME,
       password: process.env.TEST_FAILURES_ES_PASSWORD,
     },
+    Connection: HttpConnection,
   });
 
   const body = failures.flatMap((failure) => [
