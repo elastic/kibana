@@ -13,7 +13,7 @@ import {
   ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { Logger, SavedObject } from '../../../../../../../../src/core/server';
+import { Logger } from '../../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -33,15 +33,14 @@ import type {
   SignalSource,
   SignalSearchResponse,
   ThresholdSignalHistory,
-  AlertAttributes,
   BulkCreate,
   WrapHits,
 } from '../types';
-import { ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 
 interface BulkCreateThresholdSignalsParams {
   someResult: SignalSearchResponse;
-  ruleSO: SavedObject<AlertAttributes<ThresholdRuleParams>>;
+  completeRule: CompleteRule<ThresholdRuleParams>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
   logger: Logger;
@@ -228,7 +227,7 @@ export const transformThresholdResultsToEcs = (
 export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
 ): Promise<GenericBulkCreateResponse<{}>> => {
-  const ruleParams = params.ruleSO.attributes.params;
+  const ruleParams = params.completeRule.ruleParams;
   const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,
