@@ -20,9 +20,8 @@ export class StdoutPatcher {
   constructor(stdout: Stdout) {
     this.stdout = stdout;
     this.originalWrite = this.stdout.write;
-
-    // prevent the same object to be patched twice
     if (!patched.includes(stdout)) {
+      patched.push(stdout);
       this.stdout.write = this.customStdoutWrite.bind(this) as StdoutWriter;
     }
   }
@@ -35,5 +34,12 @@ export class StdoutPatcher {
     this.originalWrite.call(this.stdout, ansiEscapes.cursorLeft);
     this.originalWrite.apply(this.stdout, [buffer, ...args]);
     return this.originalWrite.call(this.stdout, 'now with classes =>> ' + Math.random());
+  }
+
+  unpatch() {
+    if (this.stdout.write !== this.originalWrite) {
+      this.stdout.write = this.originalWrite;
+      patched.splice(patched.indexOf(this.stdout), 1);
+    }
   }
 }
