@@ -190,7 +190,7 @@ export function DiscoverHistogram({
             tooltip={tooltipProps}
             theme={chartTheme}
             baseTheme={chartBaseTheme}
-            allowBrushingLastHistogramBucket={true}
+            allowBrushingLastHistogramBin={true}
           />
           <Axis
             id="discover-histogram-left-axis"
