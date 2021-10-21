@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
     ],
   };
 
-  describe('Metric Threshold Alerts Executor', () => {
+  describe('FOO Metric Threshold Alerts Executor', () => {
     describe('with 10K plus docs', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
@@ -104,8 +104,8 @@ export default function ({ getService }: FtrProviderContext) {
             metricAlias: 'filebeat-*',
           };
           const timeFrame = { end: DATES.ten_thousand_plus.max };
-          // @ts-expect-error es FTR service is a Client, not a KibanaClient
-          const results = await evaluateAlert(esClient, params, config, [], timeFrame);
+          const kbnClient = convertToKibanaClient(esClient);
+          const results = await evaluateAlert(kbnClient, params, config, [], timeFrame);
           expect(results).to.eql([
             {
               '*': {
@@ -146,8 +146,8 @@ export default function ({ getService }: FtrProviderContext) {
             metricAlias: 'filebeat-*',
           };
           const timeFrame = { end: DATES.ten_thousand_plus.max };
-          // @ts-expect-error es FTR service is a Client, not a KibanaClient
-          const results = await evaluateAlert(esClient, params, config, [], timeFrame);
+          const kbnClient = convertToKibanaClient(esClient);
+          const results = await evaluateAlert(kbnClient, params, config, [], timeFrame);
           expect(results).to.eql([
             {
               web: {
