@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import TestPage from '../components/TestPage';
+import { TestPage } from '../components/TestPage';
 
-const Routes = () => {
+export const Routes = () => {
   /**
    * Dummy function to render the title, shows an example of setting the chrome's
    * breadcrumbs
@@ -21,6 +21,4 @@ const Routes = () => {
       <Route path={'/path_2'} component={TestPage} />
     </Switch>
   );
-}
-
-export default Routes;
+};

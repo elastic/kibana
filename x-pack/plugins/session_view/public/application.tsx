@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
@@ -17,38 +17,33 @@ import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/publ
 import { EuiThemeProvider } from '../../../../src/plugins/kibana_react/common';
 
 import type { SessionViewConfigType } from './types';
-import Application from './components/Application';
+import { Application } from './components/Application';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface DependencyServices {}
 
 interface RenderAppProps {
-  coreStart: CoreStart
-  depsServices: DependencyServices
-  appMountParams: AppMountParameters
-  version: string
-  config: SessionViewConfigType
+  coreStart: CoreStart;
+  depsServices: DependencyServices;
+  appMountParams: AppMountParameters;
+  version: string;
+  config: SessionViewConfigType;
 }
 
 // Initializing react-query
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 export const renderApp = (props: RenderAppProps) => {
-  const {
-    coreStart,
-    depsServices,
-    appMountParams,
-    version,
-    config,
-  } = props;
-  
+  const { coreStart, depsServices, appMountParams, version, config } = props;
+
   const { element, history } = appMountParams;
 
   const renderSessionViewApp = () => {
     const services = {
       ...coreStart,
       ...depsServices,
-      version
-    }
+      version,
+    };
 
     return (
       <KibanaContextProvider services={services}>
@@ -65,16 +60,13 @@ export const renderApp = (props: RenderAppProps) => {
           </EuiErrorBoundary>
         </Router>
       </KibanaContextProvider>
-    )
-  }
+    );
+  };
 
   // Mount the application
-  ReactDOM.render(
-    renderSessionViewApp(),
-    element
-  );
+  ReactDOM.render(renderSessionViewApp(), element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
-  }
-}
+  };
+};

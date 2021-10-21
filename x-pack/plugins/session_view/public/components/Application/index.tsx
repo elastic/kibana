@@ -8,22 +8,24 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { Link } from 'react-router-dom';
-import Routes from '../../routes';
 import { css, jsx } from '@emotion/react';
+import { Routes } from '../../routes';
 
 /**
  * Top level application component
  */
 const listItemCss = `
   margin-right: 30px;
-`
+`;
 
 const Links = () => {
   return (
-    <ul css={css`
-      padding: 20px;
-      display: flex;
-    `}>
+    <ul
+      css={css`
+        padding: 20px;
+        display: flex;
+      `}
+    >
       <li css={listItemCss}>
         <Link to="/">Home</Link>
       </li>
@@ -34,20 +36,20 @@ const Links = () => {
         <Link to="/path_2">Path 2</Link>
       </li>
     </ul>
-  )
+  );
 };
 
-const Application = () => {
+export const Application = () => {
   const { euiTheme } = useEuiTheme();
   return (
-    <div css={css`
-      height: 100%;
-      background: ${euiTheme.colors.emptyShade};
-    `}>
+    <div
+      css={css`
+        height: 100%;
+        background: ${euiTheme.colors.emptyShade};
+      `}
+    >
       <Links />
       <Routes />
     </div>
   );
-}
-
-export default Application;
+};
