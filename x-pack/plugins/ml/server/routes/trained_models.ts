@@ -215,4 +215,68 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       }
     })
   );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {delete} /api/ml/trained_models/:modelId/deployment/_start Start trained model deployment
+   * @apiName StartTrainedModelDeployment
+   * @apiDescription Starts trained model deployment.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/{modelId}/deployment/_start',
+      validate: {
+        params: modelIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const { body } = await mlClient.startTrainedModelDeployment({
+          model_id: modelId,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {delete} /api/ml/trained_models/:modelId/deployment/_stop Stop trained model deployment
+   * @apiName StopTrainedModelDeployment
+   * @apiDescription Stops trained model deployment.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/{modelId}/deployment/_stop',
+      validate: {
+        params: modelIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const { body } = await mlClient.stopTrainedModelDeployment({
+          model_id: modelId,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
 }

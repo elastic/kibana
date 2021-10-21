@@ -386,6 +386,18 @@ export function getMlClient(
         path: `/_ml/trained_models/${p[0]?.model_id ?? '*'}/deployment/_stats`,
       });
     },
+    async startTrainedModelDeployment(...p: Parameters<MlClient['getTrainedModelsStats']>) {
+      return client.asCurrentUser.transport.request({
+        method: 'POST',
+        path: `/_ml/trained_models/${p[0].model_id}/deployment/_start`,
+      });
+    },
+    async stopTrainedModelDeployment(...p: Parameters<MlClient['getTrainedModelsStats']>) {
+      return client.asCurrentUser.transport.request({
+        method: 'POST',
+        path: `/_ml/trained_models/${p[0].model_id}/deployment/_stop`,
+      });
+    },
     async info(...p: Parameters<MlClient['info']>) {
       return mlClient.info(...p);
     },

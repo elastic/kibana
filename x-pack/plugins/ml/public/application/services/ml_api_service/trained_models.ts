@@ -139,6 +139,20 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         method: 'GET',
       });
     },
+
+    startModelAllocation(modelId: string) {
+      return httpService.http<any>({
+        path: `${apiBasePath}/trained_models/${modelId}/deployment/_start`,
+        method: 'POST',
+      });
+    },
+
+    stopModelAllocation(modelId: string) {
+      return httpService.http<any>({
+        path: `${apiBasePath}/trained_models/${modelId}/deployment/_stop`,
+        method: 'POST',
+      });
+    },
   };
 }
 

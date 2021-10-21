@@ -348,7 +348,28 @@ export const ModelsList: FC = () => {
       type: 'icon',
       isPrimary: true,
       available: (item) => item.model_type === 'pytorch',
-      onClick: async (item) => {},
+      onClick: async (item) => {
+        try {
+          await trainedModelsApiService.startModelAllocation(item.model_id);
+          toasts.addSuccess(
+            i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
+              defaultMessage: 'Deployment for "{modelId}" has been started successfully.',
+              values: {
+                modelId: item.model_id,
+              },
+            })
+          );
+        } catch (e) {
+          toasts.addError(new Error(e.body?.message), {
+            title: i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
+              defaultMessage: 'Failed to start "{modelId}"',
+              values: {
+                modelId: item.model_id,
+              },
+            }),
+          });
+        }
+      },
     },
     {
       name: i18n.translate('xpack.ml.inference.modelsList.stopModelAllocationActionLabel', {
@@ -361,7 +382,28 @@ export const ModelsList: FC = () => {
       type: 'icon',
       isPrimary: true,
       available: (item) => item.model_type === 'pytorch',
-      onClick: async (item) => {},
+      onClick: async (item) => {
+        try {
+          await trainedModelsApiService.stopModelAllocation(item.model_id);
+          toasts.addSuccess(
+            i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
+              defaultMessage: 'Deployment for "{modelId}" has been stopped successfully.',
+              values: {
+                modelId: item.model_id,
+              },
+            })
+          );
+        } catch (e) {
+          toasts.addError(new Error(e.body?.message), {
+            title: i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
+              defaultMessage: 'Failed to stop "{modelId}"',
+              values: {
+                modelId: item.model_id,
+              },
+            }),
+          });
+        }
+      },
     },
     {
       name: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
