@@ -69,11 +69,11 @@ export function TableHeaderColumn({
   const curColSort = sortOrder.find((pair) => pair[0] === name);
   const curColSortDir = (curColSort && curColSort[1]) || '';
 
-  const primaryTimeAriaLabel = i18n.translate(
+  const timeAriaLabel = i18n.translate(
     'discover.docTable.tableHeader.timeFieldIconTooltipAriaLabel',
     { defaultMessage: 'Primary time field.' }
   );
-  const primaryTimeTooltip = i18n.translate('discover.docTable.tableHeader.timeFieldIconTooltip', {
+  const timeTooltip = i18n.translate('discover.docTable.tableHeader.timeFieldIconTooltip', {
     defaultMessage: 'This field represents the time that events occurred.',
   });
 
@@ -200,9 +200,8 @@ export function TableHeaderColumn({
           <EuiIconTip
             key="time-icon"
             type="clock"
-            color="primary"
-            aria-label={primaryTimeAriaLabel}
-            content={primaryTimeTooltip}
+            aria-label={timeAriaLabel}
+            content={timeTooltip}
           />
         )}
         {buttons
