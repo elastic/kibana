@@ -37,7 +37,6 @@ export const createMockTelemetryReceiver = (
 ): jest.Mocked<TelemetryReceiver> => {
   return {
     start: jest.fn(),
-    fetchClusterInfo: jest.fn(),
     fetchLicenseInfo: jest.fn(),
     copyLicenseFields: jest.fn(),
     fetchFleetAgents: jest.fn(),

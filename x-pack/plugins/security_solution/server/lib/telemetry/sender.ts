@@ -203,10 +203,10 @@ export class TelemetryEventsSender {
    * @param toSend telemetry events
    */
   public async sendOnDemand(channel: string, toSend: unknown[]) {
+    const clusterInfo = this.receiver?.getClusterInfo();
     try {
-      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
+      const [telemetryUrl, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl(channel),
-        this.receiver?.fetchClusterInfo(),
         this.receiver?.fetchLicenseInfo(),
       ]);
 
