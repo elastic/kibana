@@ -14,9 +14,9 @@ async function asyncForEach<T>(array: T[], callback: (item: T, index: number) =>
   }
 }
 
-const ACTIVE_ALERTS_CELL_COUNT = 48;
-const RECOVERED_ALERTS_CELL_COUNT = 24;
-const TOTAL_ALERTS_CELL_COUNT = 72;
+const ACTIVE_ALERTS_CELL_COUNT = 78;
+const RECOVERED_ALERTS_CELL_COUNT = 120;
+const TOTAL_ALERTS_CELL_COUNT = 198;
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -30,14 +30,33 @@ export default ({ getService }: FtrProviderContext) => {
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await observability.alerts.common.navigateToTimeWithData();
+      const setup = async () => {
+        await observability.alerts.common.setKibanaTimeZoneToUTC();
+        await observability.alerts.common.navigateToTimeWithData();
+      };
+      await setup();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
+    describe('With no data', () => {
+      it('Shows the no data screen', async () => {
+        await observability.alerts.common.getNoDataPageOrFail();
+      });
+    });
+
     describe('Alerts table', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await observability.alerts.common.navigateToTimeWithData();
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
       it('Renders the table', async () => {
         await observability.alerts.common.getTableOrFail();
       });
@@ -120,7 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
               const titleText = await (
                 await observability.alerts.common.getAlertsFlyoutTitle()
               ).getVisibleText();
-              expect(titleText).to.contain('Log threshold');
+              expect(titleText).to.contain('APM Failed Transaction Rate (one)');
             });
           });
 
@@ -140,11 +159,11 @@ export default ({ getService }: FtrProviderContext) => {
             ];
             const expectedDescriptions = [
               'Active',
-              'Sep 2, 2021 @ 12:54:09.674',
-              '15 minutes',
-              '100.25',
-              '1957',
-              'Log threshold',
+              'Oct 19, 2021 @ 15:00:41.555',
+              '20 minutes',
+              '5',
+              '30.73',
+              'Failed transaction rate threshold',
             ];
 
             await asyncForEach(flyoutTitles, async (title, index) => {

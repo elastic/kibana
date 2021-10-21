@@ -30,7 +30,6 @@ import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
 describe('ManualCuration', () => {
   const values = {
-    dataLoading: false,
     queries: ['query A', 'query B'],
     isFlyoutOpen: false,
     selectedPageTab: 'promoted',
