@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import querystring from 'querystring';
 import { chunk } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
@@ -27,6 +26,7 @@ export function ObservabilityAlertsCommonProvider({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const flyoutService = getService('flyout');
   const pageObjects = getPageObjects(['common']);
@@ -37,7 +37,8 @@ export function ObservabilityAlertsCommonProvider({
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
       'observability',
       '/alerts',
-      `?${querystring.stringify(DATE_WITH_DATA)}`
+      `?_a=(rangeFrom:'${DATE_WITH_DATA.rangeFrom}',rangeTo:'${DATE_WITH_DATA.rangeTo}')`,
+      { ensureCurrentUrl: false }
     );
   };
 
@@ -180,6 +181,26 @@ export function ObservabilityAlertsCommonProvider({
     await buttonGroupButton.click();
   };
 
+  const getWorkflowStatusFilterValue = async () => {
+    const selectedWorkflowStatusButton = await find.byClassName('euiButtonGroupButton-isSelected');
+    return await selectedWorkflowStatusButton.getVisibleText();
+  };
+
+  // Date picker
+  const getTimeRange = async () => {
+    const isAbsoluteRange = await testSubjects.exists('superDatePickerstartDatePopoverButton');
+
+    if (isAbsoluteRange) {
+      const startButton = await testSubjects.find('superDatePickerstartDatePopoverButton');
+      const endButton = await testSubjects.find('superDatePickerendDatePopoverButton');
+      return `${await startButton.getVisibleText()} - ${await endButton.getVisibleText()}`;
+    }
+
+    const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
+    const buttonText = await datePickerButton.getVisibleText();
+    return buttonText.substring(0, buttonText.indexOf('\n'));
+  };
+
   return {
     getQueryBar,
     clearQueryBar,
@@ -202,8 +223,10 @@ export function ObservabilityAlertsCommonProvider({
     openAlertsFlyout,
     setWorkflowStatusForRow,
     setWorkflowStatusFilter,
+    getWorkflowStatusFilterValue,
     submitQuery,
     typeInQueryBar,
     openActionsMenuForRow,
+    getTimeRange,
   };
 }

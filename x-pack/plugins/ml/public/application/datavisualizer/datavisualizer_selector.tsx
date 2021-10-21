@@ -141,13 +141,13 @@ export const DatavisualizerSelector: FC = () => {
                 icon={<EuiIcon size="xxl" type="dataVisualizer" />}
                 title={
                   <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.selectIndexPatternTitle"
-                    defaultMessage="Select an index pattern"
+                    id="xpack.ml.datavisualizer.selector.selectDataViewTitle"
+                    defaultMessage="Select a data view"
                   />
                 }
                 description={
                   <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.selectIndexPatternDescription"
+                    id="xpack.ml.datavisualizer.selector.selectDataViewDescription"
                     defaultMessage="Visualize the data in an existing Elasticsearch index."
                   />
                 }
@@ -158,8 +158,8 @@ export const DatavisualizerSelector: FC = () => {
                     data-test-subj="mlDataVisualizerSelectIndexButton"
                   >
                     <FormattedMessage
-                      id="xpack.ml.datavisualizer.selector.selectIndexButtonLabel"
-                      defaultMessage="Select index pattern"
+                      id="xpack.ml.datavisualizer.selector.selectDataViewButtonLabel"
+                      defaultMessage="Select data view"
                     />
                   </EuiButton>
                 }

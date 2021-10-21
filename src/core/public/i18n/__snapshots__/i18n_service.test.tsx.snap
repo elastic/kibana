@@ -175,6 +175,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiRefreshInterval.legend": "Refresh every",
           "euiRefreshInterval.start": "Start",
           "euiRefreshInterval.stop": "Stop",
+          "euiRelativeTab.dateInputError": "Must be a valid range",
           "euiRelativeTab.fullDescription": [Function],
           "euiRelativeTab.numberInputError": "Must be >= 0",
           "euiRelativeTab.numberInputLabel": "Time span amount",
