@@ -22,7 +22,7 @@ export function registerSampleDatasetWithIntegration(
       defaultMessage: 'Sample Data',
     }),
     description: i18n.translate('home.sampleData.customIntegrationsDescription', {
-      defaultMessage: 'Explore data in Kibana with these "one click" data sets.',
+      defaultMessage: 'Explore data in Kibana with these one-click data sets.',
     }),
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial_directory/sampleData`,
     isBeta: false,
