@@ -26,6 +26,7 @@ import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { FetchStatus } from '../../../../types';
 import { DataDocuments$ } from '../../services/use_saved_search';
 import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
+import { VIEW_MODE } from '../view_mode_toggle';
 
 const mockServices = {
   history: () => ({
@@ -103,6 +104,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     state: {},
     trackUiMetric: jest.fn(),
     onEditRuntimeField: jest.fn(),
+    viewMode: VIEW_MODE.DOCUMENT_LEVEL,
   };
 }
 

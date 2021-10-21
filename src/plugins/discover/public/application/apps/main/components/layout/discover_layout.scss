@@ -4,6 +4,10 @@ discover-app {
   flex-grow: 1;
 }
 
+.dscAppWrapper {
+  overflow-y: hidden;
+}
+
 .dscPage {
   @include euiBreakpoint('m', 'l', 'xl') {
     @include kibanaFullBodyHeight();

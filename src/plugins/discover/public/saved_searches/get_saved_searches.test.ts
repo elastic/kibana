@@ -101,6 +101,7 @@ describe('getSavedSearch', () => {
         ],
         "description": "description",
         "grid": Object {},
+        "hideAggregatedPreview": undefined,
         "hideChart": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
         "searchSource": Object {
@@ -138,6 +139,7 @@ describe('getSavedSearch', () => {
           ],
         ],
         "title": "test1",
+        "viewMode": undefined,
       }
     `);
   });

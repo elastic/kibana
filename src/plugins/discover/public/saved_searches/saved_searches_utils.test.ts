@@ -54,6 +54,7 @@ describe('saved_searches_utils', () => {
           ],
           "description": "foo",
           "grid": Object {},
+          "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
           "searchSource": SearchSource {
@@ -74,6 +75,7 @@ describe('saved_searches_utils', () => {
           "sharingSavedObjectProps": Object {},
           "sort": Array [],
           "title": "saved search",
+          "viewMode": undefined,
         }
       `);
     });
@@ -122,6 +124,7 @@ describe('saved_searches_utils', () => {
           ],
           "description": "description",
           "grid": Object {},
+          "hideAggregatedPreview": undefined,
           "hideChart": true,
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
@@ -133,6 +136,7 @@ describe('saved_searches_utils', () => {
             ],
           ],
           "title": "title",
+          "viewMode": undefined,
         }
       `);
     });

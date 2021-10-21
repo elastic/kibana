@@ -22,6 +22,7 @@ import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar'
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../../__mocks__/services';
 import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
+import { VIEW_MODE } from '../view_mode_toggle';
 
 jest.mock('../../../../../kibana_services', () => ({
   getServices: () => mockDiscoverServices,
@@ -65,6 +66,7 @@ function getCompProps(): DiscoverSidebarProps {
     setFieldFilter: jest.fn(),
     onEditRuntimeField: jest.fn(),
     editField: jest.fn(),
+    viewMode: VIEW_MODE.DOCUMENT_LEVEL,
   };
 }
 
