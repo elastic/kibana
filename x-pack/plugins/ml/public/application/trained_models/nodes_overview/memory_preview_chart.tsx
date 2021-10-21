@@ -6,10 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
-import { Chart, Settings, BarSeries, ScaleType, Axis, Position } from '@elastic/charts';
+import React, { FC, useMemo } from 'react';
+import {
+  Chart,
+  Settings,
+  BarSeries,
+  ScaleType,
+  Axis,
+  Position,
+  SeriesColorAccessor,
+} from '@elastic/charts';
+import { euiPaletteGray } from '@elastic/eui';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
+import { useCurrentEuiTheme } from '../../components/color_range_legend';
 
 interface MemoryPreviewChartProps {
   memoryOverview: NodeDeploymentStatsResponse['memory_overview'];
@@ -18,27 +28,64 @@ interface MemoryPreviewChartProps {
 export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview }) => {
   const bytesFormatter = useFieldFormatter('bytes');
 
+  const { euiTheme } = useCurrentEuiTheme();
+
+  const groups = useMemo(
+    () => ({
+      jvm: {
+        name: i18n.translate('xpack.ml.trainedModels.nodesList.jvmHeapSIze', {
+          defaultMessage: 'JVM Heap Size',
+        }),
+        colour: euiTheme.euiColorVis1,
+      },
+      trained_models: {
+        name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsMemoryUsage', {
+          defaultMessage: 'Trained models',
+        }),
+        colour: euiTheme.euiColorVis2,
+      },
+      anomaly_detection: {
+        name: i18n.translate('xpack.ml.trainedModels.nodesList.adMemoryUsage', {
+          defaultMessage: 'Anomaly detection jobs',
+        }),
+        colour: euiTheme.euiColorVis6,
+      },
+      dfa_training: {
+        name: i18n.translate('xpack.ml.trainedModels.nodesList.dfaMemoryUsage', {
+          defaultMessage: 'Data frame analytics jobs',
+        }),
+        colour: euiTheme.euiColorVis4,
+      },
+      available: {
+        name: i18n.translate('xpack.ml.trainedModels.nodesList.availableMemory', {
+          defaultMessage: 'Estimated available memory',
+        }),
+        colour: euiPaletteGray(5)[0],
+      },
+    }),
+    []
+  );
+
   const chartData = [
     {
       x: 0,
-      y: memoryOverview.anomaly_detection.total,
-      g: i18n.translate('xpack.ml.trainedModels.nodesList.adMemoryUsage', {
-        defaultMessage: 'Anomaly detection jobs',
-      }),
-    },
-    {
-      x: 0,
-      y: memoryOverview.dfa_training.total,
-      g: i18n.translate('xpack.ml.trainedModels.nodesList.dfaMemoryUsage', {
-        defaultMessage: 'Data frame analytics jobs',
-      }),
+      y: memoryOverview.machine_memory.jvm,
+      g: groups.jvm.name,
     },
     {
       x: 0,
       y: memoryOverview.trained_models.total,
-      g: i18n.translate('xpack.ml.trainedModels.nodesList.modelsMemoryUsage', {
-        defaultMessage: 'Trained models',
-      }),
+      g: groups.trained_models.name,
+    },
+    {
+      x: 0,
+      y: memoryOverview.anomaly_detection.total,
+      g: groups.anomaly_detection.name,
+    },
+    {
+      x: 0,
+      y: memoryOverview.dfa_training.total,
+      g: groups.dfa_training.name,
     },
     {
       x: 0,
@@ -47,11 +94,15 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         memoryOverview.trained_models.total -
         memoryOverview.dfa_training.total -
         memoryOverview.anomaly_detection.total,
-      g: i18n.translate('xpack.ml.trainedModels.nodesList.availableMemory', {
-        defaultMessage: 'Estimated available memory',
-      }),
+      g: groups.available.name,
     },
   ];
+
+  const barSeriesColorAccessor: SeriesColorAccessor = ({ specId, yAccessor, splitAccessors }) => {
+    const group = splitAccessors.get('g');
+
+    return Object.values(groups).find((v) => v.name === group)!.colour;
+  };
 
   return (
     <Chart size={['100%', 50]}>
@@ -81,6 +132,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         splitSeriesAccessors={['g']}
         stackAccessors={['x']}
         data={chartData}
+        color={barSeriesColorAccessor}
       />
     </Chart>
   );
