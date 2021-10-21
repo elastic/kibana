@@ -17,7 +17,6 @@ export default function upgradeAssistantFunctionalTests({
   const security = getService('security');
   const log = getService('log');
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
 
   // Updated for the hiding of the UA UI.
   describe.skip('Upgrade Checkup', function () {
