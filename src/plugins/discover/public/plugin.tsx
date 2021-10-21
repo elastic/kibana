@@ -44,7 +44,6 @@ import {
   setScopedHistory,
   getScopedHistory,
   syncHistoryLocations,
-  getServices,
 } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
