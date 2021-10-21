@@ -29,6 +29,7 @@ import {
   fleetAgentStatusToEndpointHostStatus,
 } from '../../../../../endpoint/utils';
 import { getPendingActionCounts } from '../../../../../endpoint/services';
+import { EndpointError } from '../../../../../endpoint/errors';
 
 export const HOST_FIELDS = [
   '_id',
@@ -187,25 +188,34 @@ export const getHostEndpoint = async (
     endpointContext: EndpointAppContext;
   }
 ): Promise<EndpointFields | null> => {
+  if (!id) {
+    return null;
+  }
+
   const { esClient, endpointContext, savedObjectsClient } = deps;
   const logger = endpointContext.logFactory.get('metadata');
+
   try {
     const agentService = endpointContext.service.getAgentService();
-    if (agentService === undefined) {
+
+    if (!agentService) {
       throw new Error('agentService not available');
     }
+
     const metadataRequestContext = {
       esClient,
       endpointAppContextService: endpointContext.service,
       logger,
       savedObjectsClient,
     };
-    const endpointData =
-      id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
-        ? await getHostMetaData(metadataRequestContext, id)
-        : null;
 
-    const fleetAgentId = endpointData?.elastic.agent.id;
+    const endpointData = await getHostMetaData(metadataRequestContext, id);
+
+    if (!endpointData) {
+      throw new EndpointError(`Unable to retrieve endpoint with id ${id}`);
+    }
+
+    const fleetAgentId = endpointData.elastic.agent.id;
     const [fleetAgentStatus, pendingActions] = !fleetAgentId
       ? [undefined, {}]
       : await Promise.all([
@@ -224,17 +234,15 @@ export const getHostEndpoint = async (
           }),
         ]);
 
-    return endpointData != null && endpointData
-      ? {
-          endpointPolicy: endpointData.Endpoint.policy.applied.name,
-          policyStatus: endpointData.Endpoint.policy.applied.status,
-          sensorVersion: endpointData.agent.version,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          elasticAgentStatus: fleetAgentStatusToEndpointHostStatus(fleetAgentStatus!),
-          isolation: endpointData.Endpoint.state?.isolation ?? false,
-          pendingActions,
-        }
-      : null;
+    return {
+      endpointPolicy: endpointData.Endpoint.policy.applied.name,
+      policyStatus: endpointData.Endpoint.policy.applied.status,
+      sensorVersion: endpointData.agent.version,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      elasticAgentStatus: fleetAgentStatusToEndpointHostStatus(fleetAgentStatus!),
+      isolation: endpointData.Endpoint.state?.isolation ?? false,
+      pendingActions,
+    };
   } catch (err) {
     logger.warn(err);
     return null;
