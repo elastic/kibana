@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SurrDocType } from '../context';
-import { EsHitRecord, EsHitRecordList } from '../../../types';
+import { SurrDocType } from '../services/context';
+import { EsHitRecord, EsHitRecordList } from '../../types';
 
 export type EsQuerySearchAfter = [string | number, string | number];
 

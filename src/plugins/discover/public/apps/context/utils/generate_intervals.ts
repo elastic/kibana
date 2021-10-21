@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SortDirection } from '../../../../../../data/public';
-import { SurrDocType } from '../context';
+import { SortDirection } from '../../../../../data/public';
+import { SurrDocType } from '../services/context';
 
 export type IntervalValue = number | null;
 

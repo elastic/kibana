@@ -20,7 +20,7 @@ import {
   LoadingStatus,
 } from './context_query_state';
 import { AppState } from './context_state';
-import { getFirstSortableField } from './utils/sorting';
+import { getFirstSortableField } from '../utils/sorting';
 import { EsHitRecord } from '../../types';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({

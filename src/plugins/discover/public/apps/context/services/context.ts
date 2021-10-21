@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import { Filter, IndexPattern, ISearchSource } from 'src/plugins/data/public';
-import { reverseSortDir, SortDirection } from './utils/sorting';
-import { convertIsoToMillis, extractNanos } from './utils/date_conversion';
-import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
-import { generateIntervals } from './utils/generate_intervals';
-import { getEsQuerySearchAfter } from './utils/get_es_query_search_after';
-import { getEsQuerySort } from './utils/get_es_query_sort';
+import { reverseSortDir, SortDirection } from '../utils/sorting';
+import { convertIsoToMillis, extractNanos } from '../utils/date_conversion';
+import { fetchHitsInInterval } from '../utils/fetch_hits_in_interval';
+import { generateIntervals } from '../utils/generate_intervals';
+import { getEsQuerySearchAfter } from '../utils/get_es_query_search_after';
+import { getEsQuerySort } from '../utils/get_es_query_sort';
 import { getServices } from '../../../kibana_services';
 import { EsHitRecord, EsHitRecordList } from '../../types';
 

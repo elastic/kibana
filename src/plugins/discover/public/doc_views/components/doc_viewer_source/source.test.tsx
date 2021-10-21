@@ -9,7 +9,7 @@
 import React from 'react';
 import type { IndexPattern } from 'src/plugins/data/common';
 import { mountWithIntl } from '@kbn/test/jest';
-import { SourceViewer } from './source_viewer';
+import { DocViewerSource } from './source';
 import * as hooks from '../../../services/use_es_doc_search';
 import * as useUiSettingHook from 'src/plugins/kibana_react/public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
@@ -46,7 +46,7 @@ describe('Source Viewer component', () => {
     jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [0, null, () => {}]);
 
     const comp = mountWithIntl(
-      <SourceViewer
+      <DocViewerSource
         id={'1'}
         index={'index1'}
         indexPattern={mockIndexPattern}
@@ -63,7 +63,7 @@ describe('Source Viewer component', () => {
     jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [3, null, () => {}]);
 
     const comp = mountWithIntl(
-      <SourceViewer
+      <DocViewerSource
         id={'1'}
         index={'index1'}
         indexPattern={mockIndexPattern}
@@ -102,7 +102,7 @@ describe('Source Viewer component', () => {
       return false;
     });
     const comp = mountWithIntl(
-      <SourceViewer
+      <DocViewerSource
         id={'1'}
         index={'index1'}
         indexPattern={mockIndexPattern}
