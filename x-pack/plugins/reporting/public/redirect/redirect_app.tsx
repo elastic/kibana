@@ -9,14 +9,7 @@ import React, { useEffect, useState } from 'react';
 import type { FunctionComponent } from 'react';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiTitle,
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingElastic,
-} from '@elastic/eui';
+import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import type { ScopedHistory } from 'src/core/public';
 
@@ -37,9 +30,6 @@ interface Props {
 const i18nTexts = {
   errorTitle: i18n.translate('xpack.reporting.redirectApp.errorTitle', {
     defaultMessage: 'Redirect error',
-  }),
-  redirectingTitle: i18n.translate('xpack.reporting.redirectApp.redirectingMessage', {
-    defaultMessage: 'Redirecting...',
   }),
   consoleMessagePrefix: i18n.translate(
     'xpack.reporting.redirectApp.redirectConsoleErrorPrefixLabel',
@@ -91,21 +81,9 @@ export const RedirectApp: FunctionComponent<Props> = ({ share, apiClient }) => {
           {error.stack && <EuiCodeBlock>{error.stack}</EuiCodeBlock>}
         </EuiCallOut>
       ) : (
-        <EuiFlexGroup
-          alignItems="center"
-          responsive={false}
-          justifyContent="center"
-          direction="column"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h1>{i18nTexts.redirectingTitle}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingElastic size="xxl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        // We don't show anything on this page, the share service will handle showing any issues with
+        // using the locator
+        <div />
       )}
     </div>
   );
