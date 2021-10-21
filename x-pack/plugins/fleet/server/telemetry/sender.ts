@@ -137,20 +137,15 @@ export class TelemetryEventsSender {
     }
   }
 
-  // TODO update once kibana uses v3 too https://github.com/elastic/kibana/pull/113525
+  // Forms URLs like:
+  // https://telemetry.elastic.co/v3/send/my-channel-name or
+  // https://telemetry-staging.elastic.co/v3/send/my-channel-name
   private async fetchTelemetryUrl(channel: string): Promise<string> {
     const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
     }
-    return this.getV3UrlFromV2(telemetryUrl.toString(), channel);
-  }
-
-  // Forms URLs like:
-  // https://telemetry.elastic.co/v3/send/my-channel-name or
-  // https://telemetry-staging.elastic.co/v3/send/my-channel-name
-  public getV3UrlFromV2(v2url: string, channel: string): string {
-    const url = new URL(v2url);
+    const url = new URL(telemetryUrl);
     url.pathname = `/v3/send/${channel}`;
     return url.toString();
   }

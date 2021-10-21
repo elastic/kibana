@@ -41,7 +41,9 @@ describe('TelemetryEventsSender', () => {
         getIsOptedIn: jest.fn(async () => true),
       };
       sender['telemetrySetup'] = {
-        getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
+        getTelemetryUrl: jest.fn(
+          async () => new URL('https://telemetry-staging.elastic.co/v3/send/snapshot')
+        ),
       };
 
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }], 'my-channel');
@@ -49,7 +51,11 @@ describe('TelemetryEventsSender', () => {
 
       await sender['sendIfDue']();
 
-      expect(sender['sendEvents']).toBeCalledTimes(1);
+      expect(sender['sendEvents']).toHaveBeenCalledWith(
+        'https://telemetry-staging.elastic.co/v3/send/my-channel',
+        undefined,
+        expect.anything()
+      );
     });
 
     it("shouldn't send when telemetry is disabled", async () => {
@@ -73,7 +79,9 @@ describe('TelemetryEventsSender', () => {
         getIsOptedIn: jest.fn(async () => true),
       };
       sender['telemetrySetup'] = {
-        getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
+        getTelemetryUrl: jest.fn(
+          async () => new URL('https://telemetry.elastic.co/v3/send/snapshot')
+        ),
       };
       sender['receiver'] = {
         start: jest.fn(),
@@ -125,34 +133,5 @@ describe('TelemetryEventsSender', () => {
         headers
       );
     });
-  });
-});
-
-describe('getV3UrlFromV2', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-
-  beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
-  });
-
-  it('should return prod url', () => {
-    const sender = new TelemetryEventsSender(logger);
-    expect(sender.getV3UrlFromV2('https://telemetry.elastic.co/xpack/v2/send', 'my-channel')).toBe(
-      'https://telemetry.elastic.co/v3/send/my-channel'
-    );
-  });
-
-  it('should return staging url', () => {
-    const sender = new TelemetryEventsSender(logger);
-    expect(
-      sender.getV3UrlFromV2('https://telemetry-staging.elastic.co/xpack/v2/send', 'my-channel')
-    ).toBe('https://telemetry-staging.elastic.co/v3/send/my-channel');
-  });
-
-  it('should support ports and auth', () => {
-    const sender = new TelemetryEventsSender(logger);
-    expect(
-      sender.getV3UrlFromV2('http://user:pass@myproxy.local:1337/xpack/v2/send', 'my-channel')
-    ).toBe('http://user:pass@myproxy.local:1337/v3/send/my-channel');
   });
 });
