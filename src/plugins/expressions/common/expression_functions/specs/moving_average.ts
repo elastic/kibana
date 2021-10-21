@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { Datatable } from '../../expression_types';
-import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
 
 export interface MovingAverageArgs {
   by?: string[];
@@ -23,7 +22,7 @@ export type ExpressionFunctionMovingAverage = ExpressionFunctionDefinition<
   'moving_average',
   Datatable,
   MovingAverageArgs,
-  Datatable
+  Promise<Datatable>
 >;
 
 /**
@@ -100,43 +99,8 @@ export const movingAverage: ExpressionFunctionMovingAverage = {
     },
   },
 
-  fn(input, { by, inputColumnId, outputColumnId, outputColumnName, window }) {
-    const resultColumns = buildResultColumns(
-      input,
-      outputColumnId,
-      inputColumnId,
-      outputColumnName
-    );
-
-    if (!resultColumns) {
-      return input;
-    }
-
-    const lastNValuesByBucket: Partial<Record<string, number[]>> = {};
-    return {
-      ...input,
-      columns: resultColumns,
-      rows: input.rows.map((row) => {
-        const newRow = { ...row };
-        const bucketIdentifier = getBucketIdentifier(row, by);
-        const lastNValues = lastNValuesByBucket[bucketIdentifier];
-        const currentValue = newRow[inputColumnId];
-        if (lastNValues != null && currentValue != null) {
-          const sum = lastNValues.reduce((acc, current) => acc + current, 0);
-          newRow[outputColumnId] = sum / lastNValues.length;
-        } else {
-          newRow[outputColumnId] = undefined;
-        }
-
-        if (currentValue != null) {
-          lastNValuesByBucket[bucketIdentifier] = [
-            ...(lastNValues || []),
-            Number(currentValue),
-          ].slice(-window);
-        }
-
-        return newRow;
-      }),
-    };
+  async fn(input, args) {
+    const { movingAverageFn } = await import('./moving_average_fn');
+    return movingAverageFn(input, args);
   },
 };
