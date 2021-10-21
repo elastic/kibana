@@ -33,7 +33,7 @@ export function checkpointLogsSpecProvider(context: TutorialContext): TutorialSc
     }),
     longDescription: i18n.translate('home.tutorials.checkpointLogs.longDescription', {
       defaultMessage:
-        'This is a module for Check Point firewall logs. It supports logs from Log Exporter in the Syslog format. \
+        'This is a module for Check Point firewall logs. It supports logs from the Log Exporter in the Syslog format. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-checkpoint.html',

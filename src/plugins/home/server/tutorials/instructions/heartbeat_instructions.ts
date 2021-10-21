@@ -72,7 +72,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         {
           defaultMessage:
             'First time using Heartbeat? See the [Quick Start]({heartbeatLink}).\n\
- 1. Download the Heartbeat Windows zip file from [Download]({elasticLink}) page.\n\
+ 1. Download the Heartbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Heartbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \

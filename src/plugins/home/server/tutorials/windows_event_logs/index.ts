@@ -33,7 +33,7 @@ export function windowsEventLogsSpecProvider(context: TutorialContext): Tutorial
     }),
     longDescription: i18n.translate('home.tutorials.windowsEventLogs.longDescription', {
       defaultMessage:
-        'Use Winlogbeat to collect the logs from Windows Event Log. \
+        'Use Winlogbeat to collect the logs from Windows Event Logs. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.winlogbeat}/index.html',

@@ -24,7 +24,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
         {
           defaultMessage:
             'First time using Winlogbeat? See the [Quick Start]({winlogbeatLink}).\n\
- 1. Download the Winlogbeat Windows zip file from [Download]({elasticLink}) page.\n\
+ 1. Download the Winlogbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Winlogbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
