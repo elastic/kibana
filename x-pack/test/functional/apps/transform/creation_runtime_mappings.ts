@@ -34,8 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   };
 
-  // FLAKY https://github.com/elastic/kibana/issues/113890
-  describe.skip('creation with runtime mappings', function () {
+  describe('creation with runtime mappings', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -400,7 +399,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
-          await transform.testExecution.logTestStep('displays the create index pattern switch');
+          await transform.testExecution.logTestStep('displays the create data view switch');
           await transform.wizard.assertCreateIndexPatternSwitchExists();
           await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
 
