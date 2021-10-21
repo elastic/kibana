@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { SearchAfterAndBulkCreateParams, WrappedSignalHit, WrapSequences } from './types';
+import { WrappedSignalHit, WrapSequences } from './types';
 import { buildSignalGroupFromSequence } from './build_bulk_body';
 import { ConfigType } from '../../../config';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 
 export const wrapSequencesFactory =
   ({
-    ruleSO,
+    completeRule,
     signalsIndex,
     mergeStrategy,
     ignoreFields,
   }: {
-    ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
+    completeRule: CompleteRule<RuleParams>;
     signalsIndex: string;
     mergeStrategy: ConfigType['alertMergeStrategy'];
     ignoreFields: ConfigType['alertIgnoreFields'];
@@ -27,7 +28,7 @@ export const wrapSequencesFactory =
         ...acc,
         ...buildSignalGroupFromSequence(
           sequence,
-          ruleSO,
+          completeRule,
           signalsIndex,
           mergeStrategy,
           ignoreFields,

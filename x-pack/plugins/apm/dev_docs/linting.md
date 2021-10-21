@@ -1,6 +1,6 @@
-## Linting
+# Linting
 
-_Note: Run the following commands from the root of Kibana._
+_Note: Run the commands from the root of Kibana._
 
 ### Typescript
 
@@ -17,6 +17,5 @@ yarn prettier  "./x-pack/plugins/apm/**/*.{tsx,ts,js}" --write
 ### ESLint
 
 ```
-node scripts/eslint.js x-pack/legacy/plugins/apm
+node scripts/eslint.js x-pack/plugins/apm
 ```
-diff --git a/x-pack/plugins/apm/dev_docs/feature_flags.md b/x-pack/plugins/apm/dev_docs/feature_flags.md

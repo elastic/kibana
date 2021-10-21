@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 import { IndexPatternField, IndexPattern, IndexPatternType } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { getFieldInfo } from '../../utils';
@@ -78,15 +78,21 @@ const fields = [
     displayName: 'Elastic',
     searchable: true,
     esTypes: ['keyword'],
+    isUserEditable: true,
   },
-  { name: 'timestamp', displayName: 'timestamp', esTypes: ['date'] },
-  { name: 'conflictingField', displayName: 'conflictingField', esTypes: ['keyword', 'long'] },
-  { name: 'amount', displayName: 'amount', esTypes: ['long'] },
+  { name: 'timestamp', displayName: 'timestamp', esTypes: ['date'], isUserEditable: true },
+  {
+    name: 'conflictingField',
+    displayName: 'conflictingField',
+    esTypes: ['keyword', 'long'],
+    isUserEditable: true,
+  },
+  { name: 'amount', displayName: 'amount', esTypes: ['long'], isUserEditable: true },
 ].map(mockFieldToIndexPatternField);
 
 describe('IndexedFieldsTable', () => {
   test('should render normally', async () => {
-    const component = shallow(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
       <IndexedFieldsTable
         fields={fields}
         indexPattern={indexPattern}
@@ -97,7 +103,7 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter=""
         fieldFilter=""
       />
-    );
+    ).dive();
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
@@ -106,7 +112,7 @@ describe('IndexedFieldsTable', () => {
   });
 
   test('should filter based on the query bar', async () => {
-    const component = shallow(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
       <IndexedFieldsTable
         fields={fields}
         indexPattern={indexPattern}
@@ -117,7 +123,7 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter=""
         fieldFilter=""
       />
-    );
+    ).dive();
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ fieldFilter: 'Elast' });
@@ -127,7 +133,7 @@ describe('IndexedFieldsTable', () => {
   });
 
   test('should filter based on the type filter', async () => {
-    const component = shallow(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
       <IndexedFieldsTable
         fields={fields}
         indexPattern={indexPattern}
@@ -138,7 +144,7 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter=""
         fieldFilter=""
       />
-    );
+    ).dive();
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ indexedFieldTypeFilter: 'date' });
@@ -149,7 +155,7 @@ describe('IndexedFieldsTable', () => {
 
   describe('IndexedFieldsTable with rollup index pattern', () => {
     test('should render normally', async () => {
-      const component = shallow(
+      const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
         <IndexedFieldsTable
           fields={fields}
           indexPattern={rollupIndexPattern}
@@ -160,7 +166,7 @@ describe('IndexedFieldsTable', () => {
           indexedFieldTypeFilter=""
           fieldFilter=""
         />
-      );
+      ).dive();
 
       await new Promise((resolve) => process.nextTick(resolve));
       component.update();

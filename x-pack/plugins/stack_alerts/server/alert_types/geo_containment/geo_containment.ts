@@ -12,12 +12,13 @@ import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_qu
 import { AlertServices } from '../../../../alerting/server';
 import {
   ActionGroupId,
-  GEO_CONTAINMENT_ID,
   GeoContainmentInstanceState,
   GeoContainmentAlertType,
   GeoContainmentInstanceContext,
   GeoContainmentState,
 } from './alert_type';
+
+import { GEO_CONTAINMENT_ID } from './alert_type';
 
 export type LatestEntityLocation = GeoContainmentInstanceState;
 

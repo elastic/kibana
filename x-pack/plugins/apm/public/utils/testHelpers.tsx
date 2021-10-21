@@ -119,12 +119,12 @@ interface MockSetup {
   config: APMConfig;
   uiFilters: UxUIFilters;
   indices: {
-    sourcemaps: string;
-    errors: string;
+    sourcemap: string;
+    error: string;
     onboarding: string;
-    spans: string;
-    transactions: string;
-    metrics: string;
+    span: string;
+    transaction: string;
+    metric: string;
     apmAgentConfigurationIndex: string;
     apmCustomLinkIndex: string;
   };
@@ -176,16 +176,15 @@ export async function inspectSearchParams(
     ) as APMConfig,
     uiFilters: {},
     indices: {
-      sourcemaps: 'myIndex',
-      errors: 'myIndex',
+      sourcemap: 'myIndex',
+      error: 'myIndex',
       onboarding: 'myIndex',
-      spans: 'myIndex',
-      transactions: 'myIndex',
-      metrics: 'myIndex',
+      span: 'myIndex',
+      transaction: 'myIndex',
+      metric: 'myIndex',
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',
     },
-    dynamicIndexPattern: null as any,
   };
   try {
     response = await fn(mockSetup);

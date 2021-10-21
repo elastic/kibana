@@ -221,3 +221,24 @@ export const getPolicyTrustedAppListError: PolicyDetailsSelector<
     return currentAssignedTrustedAppsState.error;
   }
 });
+
+export const getCurrentTrustedAppsRemoveListState: PolicyDetailsSelector<
+  PolicyArtifactsState['removeList']
+> = (state) => state.artifacts.removeList;
+
+export const getTrustedAppsIsRemoving: PolicyDetailsSelector<boolean> = createSelector(
+  getCurrentTrustedAppsRemoveListState,
+  (removeListState) => isLoadingResourceState(removeListState)
+);
+
+export const getTrustedAppsRemovalError: PolicyDetailsSelector<ServerApiError | undefined> =
+  createSelector(getCurrentTrustedAppsRemoveListState, (removeListState) => {
+    if (isFailedResourceState(removeListState)) {
+      return removeListState.error;
+    }
+  });
+
+export const getTrustedAppsWasRemoveSuccessful: PolicyDetailsSelector<boolean> = createSelector(
+  getCurrentTrustedAppsRemoveListState,
+  (removeListState) => isLoadedResourceState(removeListState)
+);
