@@ -461,4 +461,66 @@ Object {
 }
 `);
   });
+
+  test('getExecutionsTotalCount', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockReturnValueOnce(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          totalExecutions: {
+            byConnectorTypeId: {
+              connectorTypes: {
+                '.slack': 100,
+                '.server-log': 20,
+              },
+            },
+          },
+          failedExecutions: {
+            refs: {
+              byConnectorTypeId: {
+                connectorTypes: {
+                  '.slack': 7,
+                },
+              },
+            },
+          },
+          avgDuration: { value: 10 },
+        },
+      })
+    );
+
+    // for .slack connectors
+    mockEsClient.search.mockReturnValueOnce(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          avgDuration: { value: 10 },
+        },
+      })
+    );
+
+    // for .server-log connectorss
+    mockEsClient.search.mockReturnValueOnce(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          avgDuration: { value: 2 },
+        },
+      })
+    );
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "countByAlertHistoryConnectorType": 0,
+  "countByType": Object {
+    "__server-log": 1,
+    "__slack": 1,
+  },
+  "countTotal": 2,
+}
+`);
+  });
 });
