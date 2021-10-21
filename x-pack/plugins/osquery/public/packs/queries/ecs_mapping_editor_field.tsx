@@ -435,13 +435,13 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
       defaultValue: defaultValue ?? FORM_DEFAULT_VALUE,
     });
 
-    const { submit, reset, validate, __validateFields } = form;
+    const { submit, reset, validate, validateFields } = form;
 
     const [formData] = useFormData({ form });
 
     const handleSubmit = useCallback(async () => {
       validate();
-      __validateFields(['value.field']);
+      validateFields(['value.field']);
       const { data, isValid } = await submit();
 
       if (isValid) {
@@ -451,7 +451,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
         reset();
       }
       return { data, isValid };
-    }, [validate, __validateFields, submit, onAdd, reset]);
+    }, [validate, validateFields, submit, onAdd, reset]);
 
     const handleDeleteClick = useCallback(() => {
       if (defaultValue?.key && onDelete) {
@@ -467,13 +467,13 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
             return { data: {}, isValid: true };
           }
 
-          __validateFields(['value.field']);
+          validateFields(['value.field']);
           const isValid = await validate();
 
           return { data: formData?.key?.length ? { [formData.key]: formData.value } : {}, isValid };
         },
       }),
-      [__validateFields, editForm, formData, validate]
+      [validateFields, editForm, formData, validate]
     );
 
     useEffect(() => {
@@ -486,9 +486,9 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
     useEffect(() => {
       if (defaultValue) {
         validate();
-        __validateFields(['value.field']);
+        validateFields(['value.field']);
       }
-    }, [defaultValue, osquerySchemaOptions, validate, __validateFields]);
+    }, [defaultValue, osquerySchemaOptions, validate, validateFields]);
 
     return (
       <Form form={form}>
