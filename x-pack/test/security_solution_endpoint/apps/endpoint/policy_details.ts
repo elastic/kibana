@@ -555,7 +555,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
         const updatedCheckboxValue = await testSubjects.isSelected('policyWindowsEvent_dns');
 
-        expect(updatedCheckboxValue).to.be(false);
+        await pageObjects.policy.waitForCheckboxSelectionChange('policyWindowsEvent_dns', false);
 
         await (await pageObjects.ingestManagerCreatePackagePolicy.findSaveButton(true)).click();
         await pageObjects.ingestManagerCreatePackagePolicy.waitForSaveSuccessNotification(true);
