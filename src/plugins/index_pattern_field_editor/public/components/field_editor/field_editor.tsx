@@ -153,7 +153,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
-    panel: { setIsVisible: setIsPanelVisible },
   } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -188,7 +187,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   const typeHasChanged = (Boolean(field?.type) && typeField?.isModified) ?? false;
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
-  const isFormatVisible = get(formData, '__meta__.isFormatVisible');
 
   useEffect(() => {
     if (onChange) {
@@ -207,14 +205,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       format: updatedFormat?.id !== undefined ? updatedFormat : null,
     });
   }, [updatedName, updatedType, updatedScript, isValueVisible, updatedFormat, updatePreviewParams]);
-
-  useEffect(() => {
-    if (isValueVisible || isFormatVisible) {
-      setIsPanelVisible(true);
-    } else {
-      setIsPanelVisible(false);
-    }
-  }, [isValueVisible, isFormatVisible, setIsPanelVisible]);
 
   useEffect(() => {
     if (onFormModifiedChange) {
