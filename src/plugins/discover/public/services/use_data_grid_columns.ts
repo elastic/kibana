@@ -18,7 +18,7 @@ import {
   AppState as ContextState,
   GetStateReturn as ContextGetStateReturn,
 } from '../apps/context/services/context_state';
-import { getStateColumnActions } from '../apps/main/components/doc_table/actions/columns';
+import { getStateColumnActions } from '../components/doc_table/actions/columns';
 
 interface UseDataGridColumnsProps {
   capabilities: Capabilities;

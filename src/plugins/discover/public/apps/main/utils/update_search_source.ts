@@ -10,7 +10,7 @@ import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { IndexPattern, ISearchSource } from '../../../../../data/common';
 import type { SortOrder } from '../../../services/saved_searches';
 import { DiscoverServices } from '../../../build_services';
-import { getSortForSearchSource } from '../components/doc_table';
+import { getSortForSearchSource } from '../../../components/doc_table';
 
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting

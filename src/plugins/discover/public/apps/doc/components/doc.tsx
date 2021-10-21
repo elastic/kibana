@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent, EuiPage } from '@elastic/eui';
 import { IndexPattern } from 'src/plugins/data/public';
 import { getServices } from '../../../kibana_services';
-import { DocViewer } from '../../../components/doc_viewer/doc_viewer';
+import { DocViewer } from '../../../doc_views/components/doc_viewer/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../services/use_es_doc_search';
 

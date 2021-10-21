@@ -38,7 +38,7 @@ import { DiscoverServices } from '../../build_services';
 import { getDisplayedColumns } from '../../utils/columns';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '../../../common';
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
-import { SortPairArr } from '../../apps/main/components/doc_table/lib/get_sort';
+import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 
 interface SortObj {

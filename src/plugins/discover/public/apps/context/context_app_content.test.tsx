@@ -18,7 +18,7 @@ import { LoadingStatus } from './services/context_query_state';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { DocTableWrapper } from '../main/components/doc_table/doc_table_wrapper';
+import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
 import { EsHitRecordList } from '../types';
 
 describe('ContextAppContent test', () => {

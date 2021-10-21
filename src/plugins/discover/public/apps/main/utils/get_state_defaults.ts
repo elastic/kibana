@@ -17,7 +17,7 @@ import { SavedSearch } from '../../../services/saved_searches';
 import { DataPublicPluginStart } from '../../../../../data/public';
 
 import { AppState } from '../services/discover_state';
-import { getDefaultSort, getSortArray } from '../components/doc_table';
+import { getDefaultSort, getSortArray } from '../../../components/doc_table';
 import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
 import { Storage } from '../../../../../kibana_utils/public';
 

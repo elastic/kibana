@@ -69,9 +69,11 @@ declare module '../../share/public' {
   }
 }
 
-const DocViewerTable = React.lazy(() => import('./components/doc_viewer_table/table'));
+const DocViewerTable = React.lazy(() => import('./doc_views/components/doc_viewer_table/table'));
 
-const SourceViewer = React.lazy(() => import('./components/source_viewer/source_viewer'));
+const SourceViewer = React.lazy(
+  () => import('./doc_views/components/doc_viewer_source/source_viewer')
+);
 
 /**
  * @public

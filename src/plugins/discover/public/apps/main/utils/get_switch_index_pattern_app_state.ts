@@ -7,7 +7,7 @@
  */
 
 import type { IndexPattern } from 'src/plugins/data/common';
-import { getSortArray, SortPairArr } from '../components/doc_table/lib/get_sort';
+import { getSortArray, SortPairArr } from '../../../components/doc_table/lib/get_sort';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next

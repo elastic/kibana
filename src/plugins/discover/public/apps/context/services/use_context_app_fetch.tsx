@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '../../../../../../../../../../../private/var/tmp/_bazel_matthiaswilhelm/53196d44f2195c21d2850032b5f3f3c2/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-i18n';
+import { i18n } from '@kbn/i18n';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
 import { fetchAnchor } from './anchor';

@@ -37,13 +37,13 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
-import * as columnActions from '../apps/main/components/doc_table/actions/columns';
+import * as columnActions from '../components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../utils/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
-import { DocTableProps } from '../apps/main/components/doc_table/doc_table_wrapper';
-import { getDefaultSort } from '../apps/main/components/doc_table';
-import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
+import { DocTableProps } from '../components/doc_table/doc_table_wrapper';
+import { getDefaultSort } from '../components/doc_table';
+import { SortOrder } from '../components/doc_table/components/table_header/helpers';
 import { updateSearchSource } from './helpers/update_search_source';
 
 export type SearchProps = Partial<DiscoverGridProps> &

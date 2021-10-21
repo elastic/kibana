@@ -30,8 +30,8 @@ import { DataDocumentsMsg, DataDocuments$ } from '../../services/use_saved_searc
 import { DiscoverServices } from '../../../../build_services';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../services/use_data_state';
-import { DocTableInfinite } from '../doc_table/doc_table_infinite';
-import { SortPairArr } from '../doc_table/lib/get_sort';
+import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
+import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);

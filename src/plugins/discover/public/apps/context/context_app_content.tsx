@@ -20,9 +20,9 @@ import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { DiscoverServices } from '../../build_services';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
-import { DocTableContext } from '../main/components/doc_table/doc_table_context';
+import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { EsHitRecordList } from '../types';
-import { SortPairArr } from '../main/components/doc_table/lib/get_sort';
+import { SortPairArr } from '../../components/doc_table/lib/get_sort';
 
 export interface ContextAppContentProps {
   columns: string[];

@@ -24,7 +24,7 @@ import {
   EuiHideFor,
   keys,
 } from '@elastic/eui';
-import { DocViewer } from '../doc_viewer/doc_viewer';
+import { DocViewer } from '../../doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverServices } from '../../build_services';
 import { getContextUrl } from '../../utils/get_context_url';
