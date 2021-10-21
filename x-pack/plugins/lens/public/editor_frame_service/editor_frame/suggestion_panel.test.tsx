@@ -18,7 +18,7 @@ import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
-import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { mountWithProvider } from '../../mocks';
 import { LensAppState, PreviewState, setState, setToggleFullscreen } from '../../state_management';
@@ -290,6 +290,16 @@ describe('suggestion_panel', () => {
       preloadedState: newPreloadedState,
     });
     expect(instance.html()).toEqual(null);
+  });
+
+  it('should hide the selections when the switch is off', async () => {
+    const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />);
+    expect(instance.find(EuiSwitch)).toHaveLength(1);
+    act(() => {
+      instance.find(EuiSwitch).at(0).simulate('change');
+    });
+
+    expect(instance.find('[data-test-subj="lnsSuggestionsPanel"]')).toEqual({});
   });
 
   it('should render preview expression if there is one', () => {

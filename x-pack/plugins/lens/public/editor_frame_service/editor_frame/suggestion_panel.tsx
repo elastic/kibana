@@ -8,8 +8,9 @@
 import './suggestion_panel.scss';
 
 import { camelCase, pick } from 'lodash';
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiIcon,
   EuiTitle,
@@ -19,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiSwitch,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter/common';
@@ -58,6 +60,7 @@ import {
 } from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
+const LOCAL_STORAGE_KEY = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
 
 export interface SuggestionPanelProps {
   datasourceMap: DatasourceMap;
@@ -294,6 +297,12 @@ export function SuggestionPanel({
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 
+  const [hideSuggestions, setHideSuggestions] = useLocalStorage(LOCAL_STORAGE_KEY, false);
+
+  const toggleSuggestions = useCallback(() => {
+    setHideSuggestions(!hideSuggestions);
+  }, [setHideSuggestions, hideSuggestions]);
+
   useEffect(() => {
     // if the staged preview is overwritten by a suggestion,
     // reset the selected index to "current visualization" because
@@ -321,19 +330,35 @@ export function SuggestionPanel({
   }
 
   return (
-    <div className="lnsSuggestionPanel">
-      <EuiFlexGroup alignItems="center">
+    <div>
+      <EuiFlexGroup
+        alignItems="center"
+        className={classNames('lnsSuggestionPanel__wrapper', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          'lnsSuggestionPanel__wrapper--hideSuggestions': hideSuggestions,
+        })}
+      >
         <EuiFlexItem>
-          <EuiTitle className="lnsSuggestionPanel__title" size="xxs">
-            <h3>
-              <FormattedMessage
-                id="xpack.lens.editorFrame.suggestionPanelTitle"
-                defaultMessage="Suggestions"
-              />
-            </h3>
-          </EuiTitle>
+          <EuiSwitch
+            className="lnsSuggestionPanel__switch"
+            compressed
+            label={
+              <EuiTitle size="xxs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.lens.editorFrame.suggestionPanelTitle"
+                    defaultMessage="Suggestions"
+                  />
+                </h3>
+              </EuiTitle>
+            }
+            data-test-subj="lensHideSuggestionSwitch"
+            showLabel={true}
+            checked={!hideSuggestions}
+            onChange={toggleSuggestions}
+          />
         </EuiFlexItem>
-        {existsStagedPreview && (
+        {existsStagedPreview && !hideSuggestions && (
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
@@ -358,7 +383,13 @@ export function SuggestionPanel({
         )}
       </EuiFlexGroup>
 
-      <div className="lnsSuggestionPanel__suggestions">
+      <div
+        className={classNames('lnsSuggestionPanel__suggestions', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          'lnsSuggestionPanel__suggestions--hideSuggestions': hideSuggestions,
+        })}
+        data-test-subj="lnsSuggestionsPanel"
+      >
         {currentVisualization.activeId && (
           <SuggestionPreview
             preview={{
