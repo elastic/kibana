@@ -119,7 +119,7 @@ export async function getTotalCountAggregations(
 
                   if (throttle.chars().allMatch(Character::isDigit)) {
                     // using of regex is not allowed in painless language
-                    int parsed = Integer.parseInt(throttle);
+                    parsed = Integer.parseInt(throttle);
 
                     if (timeChar.equals("s")) {
                       parsed = parsed;
