@@ -45,6 +45,8 @@ import {
   HostedAgentPolicyRestrictionRelatedError,
   IngestManagerError,
   ingestErrorToResponseOptions,
+  PackagePolicyIneligibleForUpgradeError,
+  PackagePolicyValidationError,
 } from '../errors';
 import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -422,7 +424,17 @@ class PackagePolicyService {
       user: options?.user,
     });
 
-    return (await this.get(soClient, id)) as PackagePolicy;
+    const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
+
+    if (packagePolicy.package) {
+      await removeOldAssets({
+        soClient,
+        pkgName: packagePolicy.package.name,
+        currentVersion: packagePolicy.package.version,
+      });
+    }
+
+    return newPolicy;
   }
 
   public async delete(
@@ -528,25 +540,25 @@ class PackagePolicyService {
         pkgName: packagePolicy.package.name,
         pkgVersion: installedPackage?.version ?? '',
       });
+    }
 
-      const isInstalledVersionLessThanOrEqualToPolicyVersion = semverLte(
-        installedPackage?.version ?? '',
-        packagePolicy.package.version
+    const isInstalledVersionLessThanOrEqualToPolicyVersion = semverLte(
+      packageInfo?.version ?? '',
+      packagePolicy.package.version
+    );
+
+    if (isInstalledVersionLessThanOrEqualToPolicyVersion) {
+      throw new PackagePolicyIneligibleForUpgradeError(
+        i18n.translate('xpack.fleet.packagePolicy.ineligibleForUpgradeError', {
+          defaultMessage:
+            "Package policy {id}'s package version {version} of package {name} is up to date with the installed package. Please install the latest version of {name}.",
+          values: {
+            id: packagePolicy.id,
+            name: packagePolicy.package.name,
+            version: packagePolicy.package.version,
+          },
+        })
       );
-
-      if (isInstalledVersionLessThanOrEqualToPolicyVersion) {
-        throw new IngestManagerError(
-          i18n.translate('xpack.fleet.packagePolicy.ineligibleForUpgradeError', {
-            defaultMessage:
-              "Package policy {id}'s package version {version} of package {name} is up to date with the installed package. Please install the latest version of {name}.",
-            values: {
-              id: packagePolicy.id,
-              name: packagePolicy.package.name,
-              version: packagePolicy.package.version,
-            },
-          })
-        );
-      }
     }
 
     return {
@@ -594,12 +606,14 @@ class PackagePolicyService {
           name: packagePolicy.name,
           success: true,
         });
-        await removeOldAssets({
-          soClient,
-          pkgName: packageInfo.name,
-          currentVersion: packageInfo.version,
-        });
       } catch (error) {
+        // We only want to specifically handle validation errors for the new package policy. If a more severe or
+        // general error is thrown elsewhere during the upgrade process, we want to surface that directly in
+        // order to preserve any status code mappings, etc that might be included w/ the particular error type
+        if (!(error instanceof PackagePolicyValidationError)) {
+          throw error;
+        }
+
         result.push({
           id,
           success: false,
@@ -653,6 +667,10 @@ class PackagePolicyService {
         hasErrors,
       };
     } catch (error) {
+      if (!(error instanceof PackagePolicyValidationError)) {
+        throw error;
+      }
+
       return {
         hasErrors: true,
         ...ingestErrorToResponseOptions(error),
@@ -1089,7 +1107,7 @@ export function overridePackageInputs(
         return { ...resultingPackagePolicy, errors: responseFormattedValidationErrors };
       }
 
-      throw new IngestManagerError(
+      throw new PackagePolicyValidationError(
         i18n.translate('xpack.fleet.packagePolicyInvalidError', {
           defaultMessage: 'Package policy is invalid: {errors}',
           values: {
