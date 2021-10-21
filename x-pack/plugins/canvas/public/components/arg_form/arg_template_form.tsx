@@ -45,7 +45,7 @@ export const ArgTemplateForm: React.FunctionComponent<ArgTemplateFormProps> = ({
 }) => {
   const [updatedHandlers, setHandlers] = useState(mergeWithFormHandlers(handlers));
   const [mounted, setMounted] = useState(false);
-  const previousError = usePrevious(error);
+  const prevError = usePrevious(error);
   const prevMounted = usePrevious(mounted);
   const mountedArgumentRef = useRef<UpdatePropsRef>();
 
@@ -73,16 +73,16 @@ export const ArgTemplateForm: React.FunctionComponent<ArgTemplateFormProps> = ({
   }, [handlers]);
 
   useEffect(() => {
-    if (previousError !== error) {
+    if (!prevError && error) {
       updatedHandlers.destroy();
     }
-  }, [previousError, error, updatedHandlers]);
+  }, [prevError, error, updatedHandlers]);
 
   useEffect(() => {
-    if (!error && mounted && !prevMounted) {
+    if ((!error && prevError && mounted) || (mounted && !prevMounted && !error)) {
       renderTemplate(domNodeRef.current);
     }
-  }, [error, mounted, prevMounted, renderTemplate]);
+  }, [error, mounted, prevError, prevMounted, renderTemplate]);
 
   useEffect(() => {
     if (mountedArgumentRef.current) {
@@ -91,10 +91,12 @@ export const ArgTemplateForm: React.FunctionComponent<ArgTemplateFormProps> = ({
   }, [argumentProps]);
 
   if (error) {
+    mountedArgumentRef.current = undefined;
     return renderErrorTemplate();
   }
 
   if (!template) {
+    mountedArgumentRef.current = undefined;
     return null;
   }
 

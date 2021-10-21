@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import deepEqual from 'react-fast-compare';
-import { shallowEqual } from 'react-redux';
+import React from 'react';
 import { FunctionFormComponent as Component } from './function_form_component';
 import { FunctionUnknown } from './function_unknown';
 import { FunctionFormContextPending } from './function_form_context_pending';
@@ -27,7 +25,7 @@ function is(
   return expressionType && expressionType.requiresContext && matchState;
 }
 
-const FunctionFormComponent: React.FunctionComponent<FunctionFormProps> = (props) => {
+export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) => {
   const { expressionType, context } = props;
 
   if (!expressionType) {
@@ -60,13 +58,3 @@ const FunctionFormComponent: React.FunctionComponent<FunctionFormProps> = (props
 
   return <Component {...props} />;
 };
-
-export const FunctionForm = memo(FunctionFormComponent, (prevProps, nextProps) => {
-  const { context: prevContext, expressionType: prevExpressionType, args: prevArgs } = prevProps;
-  const { context, expressionType, args } = nextProps;
-  return (
-    deepEqual(context, prevContext) &&
-    shallowEqual(expressionType, prevExpressionType) &&
-    shallowEqual(args, prevArgs)
-  );
-});

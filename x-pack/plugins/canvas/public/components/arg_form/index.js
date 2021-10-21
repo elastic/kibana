@@ -6,8 +6,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import usePrevious from 'react-use/lib/usePrevious';
-import deepEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { getAssets } from '../../state/selectors/assets';
@@ -21,18 +19,12 @@ export const ArgForm = (props) => {
   const { argTypeInstance, label: labelFromProps, templateProps } = props;
   const [label, setLabel] = useState(getLabel(labelFromProps, argTypeInstance));
   const [resolvedArgValue, setResolvedArgValue] = useState(null);
-  const [renderError, setRenderError] = useState(false);
   const workpad = useSelector(getWorkpadInfo);
   const assets = useSelector(getAssets);
 
-  const prevArgValue = usePrevious(templateProps?.argValue);
-
   useEffect(() => {
-    if (!deepEqual(prevArgValue, templateProps?.argValue)) {
-      setRenderError(false);
-      setResolvedArgValue();
-    }
-  }, [templateProps?.argValue, prevArgValue]);
+    setResolvedArgValue();
+  }, [templateProps?.argValue]);
 
   return (
     <Component
@@ -43,8 +35,6 @@ export const ArgForm = (props) => {
       setLabel={setLabel}
       resolvedArgValue={resolvedArgValue}
       setResolvedArgValue={setResolvedArgValue}
-      renderError={renderError}
-      setRenderError={setRenderError}
     />
   );
 };

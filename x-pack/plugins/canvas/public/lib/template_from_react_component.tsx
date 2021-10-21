@@ -29,6 +29,7 @@ export interface UpdatePropsRef {
 export const templateFromReactComponent = (Component: ComponentType<any>) => {
   const WrappedComponent: ForwardRefRenderFunction<UpdatePropsRef, Props> = (props, ref) => {
     const [updatedProps, setUpdatedProps] = useState<Props>(props);
+
     useImperativeHandle(ref, () => ({
       updateProps: (newProps: Props) => {
         setUpdatedProps(newProps);
