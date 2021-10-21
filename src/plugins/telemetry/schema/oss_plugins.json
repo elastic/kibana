@@ -5018,7 +5018,7 @@
             }
           }
         },
-        "securitySolution": {
+        "securitySolutionUI": {
           "properties": {
             "appId": {
               "type": "keyword",
