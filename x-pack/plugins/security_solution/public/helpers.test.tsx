@@ -13,6 +13,7 @@ import {
   getHostRiskIndex,
   isSubPluginAvailable,
   getSubPluginRoutesByCapabilities,
+  RedirectRoute,
 } from './helpers';
 import { StartedSubPlugins } from './types';
 
@@ -185,5 +186,91 @@ describe('#isSubPluginAvailable', () => {
         [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
       } as unknown as Capabilities)
     ).toBeFalsy();
+  });
+});
+
+describe('RedirectRoute', () => {
+  it('RedirectRoute should redirect to overview page when siem and case privileges are all', () => {
+    const mockCapabilitities = {
+      [SERVER_APP_ID]: { show: true, crud: true },
+      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
+    } as unknown as Capabilities;
+    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
+      <Redirect
+        to="/overview"
+      />
+    `);
+  });
+
+  it('RedirectRoute should redirect to overview page when siem and case privileges are read', () => {
+    const mockCapabilitities = {
+      [SERVER_APP_ID]: { show: true, crud: false },
+      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+    } as unknown as Capabilities;
+    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
+      <Redirect
+        to="/overview"
+      />
+    `);
+  });
+
+  it('RedirectRoute should redirect to overview page when siem and case privileges are off', () => {
+    const mockCapabilitities = {
+      [SERVER_APP_ID]: { show: false, crud: false },
+      [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+    } as unknown as Capabilities;
+    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
+      <Redirect
+        to="/overview"
+      />
+    `);
+  });
+
+  it('RedirectRoute should redirect to overview page when siem privilege is read and case privilege is all', () => {
+    const mockCapabilitities = {
+      [SERVER_APP_ID]: { show: true, crud: false },
+      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
+    } as unknown as Capabilities;
+    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
+      <Redirect
+        to="/overview"
+      />
+    `);
+  });
+
+  it('RedirectRoute should redirect to overview page when siem privilege is read and case privilege is read', () => {
+    const mockCapabilitities = {
+      [SERVER_APP_ID]: { show: true, crud: false },
+      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
+    } as unknown as Capabilities;
+    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
+      <Redirect
+        to="/overview"
+      />
+    `);
+  });
+
+  it('RedirectRoute should redirect to cases page when siem privilege is none and case privilege is read', () => {
+    const mockCapabilitities = {
+      [SERVER_APP_ID]: { show: false, crud: false },
+      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+    } as unknown as Capabilities;
+    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
+      <Redirect
+        to="/cases"
+      />
+    `);
+  });
+
+  it('RedirectRoute should redirect to cases page when siem privilege is none and case privilege is all', () => {
+    const mockCapabilitities = {
+      [SERVER_APP_ID]: { show: false, crud: false },
+      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
+    } as unknown as Capabilities;
+    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
+      <Redirect
+        to="/cases"
+      />
+    `);
   });
 });
