@@ -7,11 +7,7 @@
 
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-import {
-  GEOCENTROID_AGG_NAME,
-  GEOTILE_GRID_AGG_NAME,
-  RENDER_AS,
-} from '../../common/constants';
+import { GEOCENTROID_AGG_NAME, GEOTILE_GRID_AGG_NAME, RENDER_AS } from '../../common/constants';
 
 function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
