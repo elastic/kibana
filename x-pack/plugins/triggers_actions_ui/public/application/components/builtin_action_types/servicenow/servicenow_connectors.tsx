@@ -36,7 +36,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
       http,
       notifications: { toasts },
     } = useKibana().services;
-    const { apiUrl } = action.config;
+    const { apiUrl, isLegacy } = action.config;
     const { username, password } = action.secrets;
     const requiresNewApplication = !isDeprecatedConnector(action);
 
@@ -123,6 +123,18 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowA
       editActionConfig,
       toasts,
     ]);
+
+    /**
+     * Defaults the isLegacy attribute to false
+     * if it is not defined. The isLegacy attribute
+     * will be undefined only at the creation of
+     * the connector.
+     */
+    useEffect(() => {
+      if (isLegacy == null) {
+        editActionConfig('isLegacy', false);
+      }
+    });
 
     return (
       <>

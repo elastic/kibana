@@ -91,6 +91,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             connector_type_id: '.servicenow',
             config: {
               apiUrl: serviceNowSimulatorURL,
+              isLegacy: false,
             },
             secrets: mockServiceNow.secrets,
           })
@@ -125,7 +126,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should set the usesTableApi to false when not provided', async () => {
+      it('should set the usesTableApi to true when not provided', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
@@ -143,7 +144,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
           .get(`/api/actions/connector/${createdAction.id}`)
           .expect(200);
 
-        expect(fetchedAction.config.usesTableApi).to.be(false);
+        expect(fetchedAction.config.usesTableApi).to.be(true);
       });
 
       it('should respond with a 400 Bad Request when creating a servicenow action with no apiUrl', async () => {
@@ -241,10 +242,6 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
               expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
-              expect(resp.body.retry).to.eql(false);
-              expect(resp.body.message).to.be(
-                `error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined.`
-              );
             });
         });
 

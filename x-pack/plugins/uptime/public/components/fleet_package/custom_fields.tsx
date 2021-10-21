@@ -30,13 +30,13 @@ import { BrowserSimpleFields } from './browser/simple_fields';
 import { BrowserAdvancedFields } from './browser/advanced_fields';
 
 interface Props {
-  typeEditable?: boolean;
   validate: Validation;
   dataStreams?: DataStream[];
 }
 
-export const CustomFields = memo<Props>(({ typeEditable = false, validate, dataStreams = [] }) => {
-  const { monitorType, setMonitorType, isTLSEnabled, setIsTLSEnabled } = usePolicyConfigContext();
+export const CustomFields = memo<Props>(({ validate, dataStreams = [] }) => {
+  const { monitorType, setMonitorType, isTLSEnabled, setIsTLSEnabled, isEditable } =
+    usePolicyConfigContext();
 
   const isHTTP = monitorType === DataStream.HTTP;
   const isTCP = monitorType === DataStream.TCP;
@@ -88,7 +88,7 @@ export const CustomFields = memo<Props>(({ typeEditable = false, validate, dataS
       >
         <EuiFlexGroup>
           <EuiFlexItem>
-            {typeEditable && (
+            {!isEditable && (
               <EuiFormRow
                 label={
                   <FormattedMessage
