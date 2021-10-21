@@ -11,7 +11,13 @@ import type { DocLinksStart } from 'src/core/public';
 import { scopedHistoryMock } from 'src/core/public/mocks';
 import '../../../../../common/mock/match_media';
 import { deleteRulesAction, duplicateRulesAction, editRuleAction } from './actions';
-import { getActions, getColumns, getMonitoringColumns } from './columns';
+import {
+  getActions,
+  getColumns,
+  getMonitoringColumns,
+  RulesColumns,
+  RulesStatusesColumns,
+} from './columns';
 import { mockRule } from './__mocks__/mock';
 
 jest.mock('./actions', () => ({
@@ -106,8 +112,8 @@ describe('AllRulesTable Columns', () => {
       ['Rule Monitoring', ruleMonitoringColumns],
     ])(
       'table "%s" should not have truncated text options for column items',
-      (_, columns: ReturnType<typeof getColumns> | ReturnType<typeof getMonitoringColumns>) => {
-        columns.forEach((column) => {
+      (_, columns: RulesColumns[] | RulesStatusesColumns[]) => {
+        columns.forEach((column: RulesColumns | RulesStatusesColumns) => {
           expect(column).not.toHaveProperty('truncateText');
         });
       }
