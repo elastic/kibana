@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -22,6 +23,7 @@ import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   enableInspectEsQueries,
@@ -34,6 +36,7 @@ import {
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../common/search_strategies/constants';
 import { LatencyCorrelation } from '../../../../common/search_strategies/latency_correlations/types';
+import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -53,11 +56,13 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
+import { useTransactionColors } from './use_transaction_colors';
 import { CorrelationsContextPopover } from './context_popover';
 import { OnAddFilter } from './context_popover/top_values';
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
+  const transactionColors = useTransactionColors();
+
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
@@ -98,18 +103,10 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     }
   }, [progress.error, notifications.toasts]);
 
+  const [pinnedSignificantTerm, setPinnedSignificantTerm] =
+    useState<LatencyCorrelation | null>(null);
   const [selectedSignificantTerm, setSelectedSignificantTerm] =
     useState<LatencyCorrelation | null>(null);
-
-  const selectedHistogram = useMemo(
-    () =>
-      response.latencyCorrelations?.find(
-        (h) =>
-          h.fieldName === selectedSignificantTerm?.fieldName &&
-          h.fieldValue === selectedSignificantTerm?.fieldValue
-      ) ?? response.latencyCorrelations?.[0],
-    [response.latencyCorrelations, selectedSignificantTerm]
-  );
 
   const history = useHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
@@ -270,6 +267,25 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     [response.latencyCorrelations, sortField, sortDirection]
   );
 
+  const selectedHistogram = useMemo(() => {
+    if (!histogramTerms) {
+      return;
+    } else if (selectedSignificantTerm) {
+      return histogramTerms?.find(
+        (h) =>
+          h.fieldName === selectedSignificantTerm.fieldName &&
+          h.fieldValue === selectedSignificantTerm.fieldValue
+      );
+    } else if (pinnedSignificantTerm) {
+      return histogramTerms.find(
+        (h) =>
+          h.fieldName === pinnedSignificantTerm.fieldName &&
+          h.fieldValue === pinnedSignificantTerm.fieldValue
+      );
+    }
+    return histogramTerms[0];
+  }, [histogramTerms, pinnedSignificantTerm, selectedSignificantTerm]);
+
   const showCorrelationsTable = progress.isRunning || histogramTerms.length > 0;
   const showCorrelationsEmptyStatePrompt =
     histogramTerms.length < 1 &&
@@ -314,6 +330,31 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           <LatencyCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {selectedHistogram && (
+        <EuiText color="subdued" size="xs">
+          <FormattedMessage
+            id="xpack.apm.transactionDetails.tabs.latencyCorrelationsChartDescription"
+            defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {br}{allTransactions} and {focusTransaction}."
+            values={{
+              br: <br />,
+              allTransactions: (
+                <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
+                  <FormattedMessage
+                    id="xpack.apm.transactionDetails.tabs.latencyCorrelationsChartAllTransactions"
+                    defaultMessage="all transactions"
+                  />
+                </span>
+              ),
+              focusTransaction: (
+                <span style={{ color: transactionColors.FOCUS_TRANSACTION }}>
+                  {selectedHistogram?.fieldName}:{selectedHistogram?.fieldValue}
+                </span>
+              ),
+            }}
+          />
+        </EuiText>
+      )}
 
       <EuiSpacer size="s" />
 
@@ -365,6 +406,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             status={
               progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS
             }
+            setPinnedSignificantTerm={setPinnedSignificantTerm}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             selectedTerm={selectedHistogram}
             onTableChange={onTableChange}
