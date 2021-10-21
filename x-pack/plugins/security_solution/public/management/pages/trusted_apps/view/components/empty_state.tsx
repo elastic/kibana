@@ -31,7 +31,7 @@ export const EmptyState = memo<{
         body={
           <FormattedMessage
             id="xpack.securitySolution.trustedapps.listEmptyState.message"
-            defaultMessage="There are currently no trusted application exceptions"
+            defaultMessage="There are currently no trusted applications on your endpoint."
           />
         }
         actions={
