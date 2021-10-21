@@ -250,7 +250,7 @@ describe('CurationLogic', () => {
     });
 
     describe('onSelectPageTab', () => {
-      it('should set the selected page tab', () => {
+      it('should set the selected page tab and clears flash messages', () => {
         mount({
           selectedPageTab: 'promoted',
         });
@@ -261,6 +261,7 @@ describe('CurationLogic', () => {
           ...DEFAULT_VALUES,
           selectedPageTab: 'hidden',
         });
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
   });
