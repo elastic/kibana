@@ -45,7 +45,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
     cluster_uuid: clusterUuid,
   });
   const [data, setData] = useState({} as any);
-  const [detailVertexId, setDetailVertexId] = useState<string | null>(null);
+  const [detailVertexId, setDetailVertexId] = useState<string | null | undefined>(undefined);
   const { updateTotalItemCount } = useTable('logstash.pipelines');
 
   const title = i18n.translate('xpack.monitoring.logstash.pipeline.routeTitle', {
@@ -126,18 +126,19 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
 
   const timeseriesTooltipXValueFormatter = (xValue: any) => moment(xValue).format(dateFormat);
 
-  const onVertexChange = useCallback(
-    (vertex: any) => {
-      if (!vertex) {
-        setDetailVertexId(null);
-      } else {
-        setDetailVertexId(vertex.id);
-      }
+  const onVertexChange = useCallback((vertex: any) => {
+    if (!vertex) {
+      setDetailVertexId(null);
+    } else {
+      setDetailVertexId(vertex.id);
+    }
+  }, []);
 
+  useEffect(() => {
+    if (detailVertexId !== undefined) {
       getPageData();
-    },
-    [getPageData]
-  );
+    }
+  }, [detailVertexId, getPageData]);
 
   const onChangePipelineHash = useCallback(() => {
     window.location.hash = getSafeForExternalLink(
