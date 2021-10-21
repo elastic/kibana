@@ -144,26 +144,26 @@
         "throttle_time": {
           "properties": {
             "min": {
-              "type": "keyword"
+              "type": "long"
             },
             "avg": {
-              "type": "keyword"
+              "type": "float"
             },
             "max": {
-              "type": "keyword"
+              "type": "long"
             }
           }
         },
         "schedule_time": {
           "properties": {
             "min": {
-              "type": "keyword"
+              "type": "long"
             },
             "avg": {
-              "type": "keyword"
+              "type": "float"
             },
             "max": {
-              "type": "keyword"
+              "type": "long"
             }
           }
         },

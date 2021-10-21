@@ -43,6 +43,7 @@ export async function getTotalCount(
 
   const { body: searchResult } = await esClient.search({
     index: kibanaIndex,
+    size: 0,
     body: {
       query: {
         bool: {
@@ -224,6 +225,7 @@ export async function getInUseTotalCount(
 
   const { body: actionResults } = await esClient.search({
     index: kibanaIndex,
+    size: 0,
     body: {
       query: {
         bool: {
