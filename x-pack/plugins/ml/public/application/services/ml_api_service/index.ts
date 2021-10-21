@@ -484,13 +484,13 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     getVisualizerFieldHistograms({
-      indexPatternTitle,
+      indexPattern,
       query,
       fields,
       samplerShardSize,
       runtimeMappings,
     }: {
-      indexPatternTitle: string;
+      indexPattern: string;
       query: any;
       fields: FieldHistogramRequestConfig[];
       samplerShardSize?: number;
@@ -504,7 +504,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
 
       return httpService.http<any>({
-        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPatternTitle}`,
+        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPattern}`,
         method: 'POST',
         body,
       });
