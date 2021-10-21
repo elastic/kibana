@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-import { DEFAULT_MAX_RESULT_WINDOW, ES_GEO_FIELD_TYPE } from '../../common/constants';
+import { DEFAULT_MAX_RESULT_WINDOW } from '../../common/constants';
 
 function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
@@ -32,7 +32,6 @@ export async function getEsTile({
   context: DataRequestHandlerContext;
   logger: Logger;
   requestBody: any;
-  geoFieldType: ES_GEO_FIELD_TYPE;
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;

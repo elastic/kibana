@@ -844,13 +844,10 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    const geoField = await this._getGeoField();
-
     const urlTemplate = `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
-&requestBody=${risonDsl}\
-&geoFieldType=${geoField.type}`;
+&requestBody=${risonDsl}`;
 
     return {
       refreshTokenParamName: MVT_TOKEN_PARAM_NAME,

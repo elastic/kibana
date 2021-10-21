@@ -44,7 +44,6 @@ export function initMVTRoutes({
           geometryFieldName: schema.string(),
           requestBody: schema.string(),
           index: schema.string(),
-          geoFieldType: schema.string(),
           searchSessionId: schema.maybe(schema.string()),
           token: schema.maybe(schema.string()),
         }),
@@ -74,7 +73,6 @@ export function initMVTRoutes({
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
         requestBody: requestBodyDSL as any,
-        geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
       });
 
       return sendResponse(response, tile);
@@ -95,7 +93,6 @@ export function initMVTRoutes({
           requestBody: schema.string(),
           index: schema.string(),
           requestType: schema.string(),
-          geoFieldType: schema.string(),
           searchSessionId: schema.maybe(schema.string()),
           token: schema.maybe(schema.string()),
         }),
@@ -126,7 +123,6 @@ export function initMVTRoutes({
         index: query.index as string,
         requestBody: requestBodyDSL as any,
         requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
-        geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
       });
 
       return sendResponse(response, tile);

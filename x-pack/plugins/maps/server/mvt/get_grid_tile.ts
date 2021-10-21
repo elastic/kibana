@@ -8,7 +8,6 @@
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import {
-  ES_GEO_FIELD_TYPE,
   GEOCENTROID_AGG_NAME,
   GEOTILE_GRID_AGG_NAME,
   RENDER_AS,
@@ -38,7 +37,6 @@ export async function getEsGridTile({
   logger: Logger;
   requestBody: any;
   requestType: RENDER_AS.GRID | RENDER_AS.POINT;
-  geoFieldType: ES_GEO_FIELD_TYPE;
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;

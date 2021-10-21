@@ -446,13 +446,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    const geoField = await this._getGeoField();
     const urlTemplate = `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &requestBody=${risonDsl}\
-&requestType=${this._descriptor.requestType}\
-&geoFieldType=${geoField.type}`;
+&requestType=${this._descriptor.requestType}`;
 
     return {
       refreshTokenParamName: MVT_TOKEN_PARAM_NAME,
