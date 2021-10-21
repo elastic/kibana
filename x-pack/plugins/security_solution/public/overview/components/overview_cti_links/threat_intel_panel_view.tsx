@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { EuiButton, EuiTableFieldDataColumnType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import { LinkPanel, InnerLinkPanel, LinkPanelListItem } from '../link_panel';
 import { LinkPanelViewProps } from '../link_panel/types';
@@ -17,6 +16,7 @@ import { shortenCountIntoString } from '../../../common/utils/shorten_count_into
 import { Link } from '../link_panel/link';
 import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_cti_event_counts';
 import { LINK_COPY } from '../overview_risky_host_links/translations';
+import { useIntegrationsPageLink } from './use-integrations-page-link';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   { name: 'Name', field: 'title', sortable: true, truncateText: true, width: '100%' },
@@ -39,51 +39,38 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
 ];
 
 export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
-  buttonHref = '',
-  isPluginDisabled,
   isInspectEnabled = true,
   listItems,
   splitPanel,
   totalCount = 0,
+  someIntegrationIsDisabled,
 }) => {
-  const threatIntelDashboardDocLink = `${
-    useKibana().services.docLinks.links.filebeat.base
-  }/load-kibana-dashboards.html`;
+  const integrationsLink = useIntegrationsPageLink();
 
   return (
     <LinkPanel
       {...{
-        button: useMemo(
-          () => (
-            <EuiButton
-              href={buttonHref}
-              isDisabled={!buttonHref}
-              data-test-subj="cti-view-dashboard-button"
-              target="_blank"
-            >
-              {i18n.VIEW_DASHBOARD}
-            </EuiButton>
-          ),
-          [buttonHref]
-        ),
         columns,
         dataTestSubj: 'cti-dashboard-links',
         infoPanel: useMemo(
-          () =>
-            isPluginDisabled ? (
-              <InnerLinkPanel
-                dataTestSubj="cti-inner-panel-info"
-                color={'primary'}
-                title={i18n.INFO_TITLE}
-                body={i18n.INFO_BODY}
-                button={
-                  <EuiButton href={threatIntelDashboardDocLink} target="_blank">
-                    {i18n.INFO_BUTTON}
-                  </EuiButton>
-                }
-              />
-            ) : null,
-          [isPluginDisabled, threatIntelDashboardDocLink]
+          () => (
+            <>
+              {someIntegrationIsDisabled ? (
+                <InnerLinkPanel
+                  dataTestSubj="cti-inner-panel-info"
+                  color={'warning'}
+                  title={i18n.SOME_MODULES_DISABLE_TITLE}
+                  body={i18n.DANGER_BODY}
+                  button={
+                    <EuiButton color="warning" href={integrationsLink} target="_blank">
+                      {i18n.DANGER_BUTTON}
+                    </EuiButton>
+                  }
+                />
+              ) : null}
+            </>
+          ),
+          [someIntegrationIsDisabled, integrationsLink]
         ),
         inspectQueryId: isInspectEnabled ? CTIEventCountQueryId : undefined,
         listItems,
