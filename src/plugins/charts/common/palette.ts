@@ -8,6 +8,7 @@
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { i18n } from '@kbn/i18n';
+import { last } from 'lodash';
 import { paletteIds } from './constants';
 
 export interface CustomPaletteArguments {
@@ -141,21 +142,22 @@ export function palette(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const {
-        color,
-        continuity,
-        reverse,
-        gradient,
-        stop,
-        range,
-        rangeMin = 0,
-        rangeMax = 100,
-      } = args;
+      const { color, continuity, reverse, gradient, stop, range, rangeMin, rangeMax } = args;
       const colors = ([] as string[]).concat(color || defaultCustomColors);
       const stops = ([] as number[]).concat(stop || []);
       if (stops.length > 0 && colors.length !== stops.length) {
         throw Error('When stop is used, each color must have an associated stop value.');
       }
+
+      const calculateRange = (
+        userRange: number | undefined,
+        stopsRange: number | undefined,
+        defaultRange: number
+      ) => (stops.length ? userRange ?? stopsRange ?? defaultRange : defaultRange);
+
+      const rangeMinDefault = 0;
+      const rangeMaxDefault = 100;
+
       return {
         type: 'palette',
         name: 'custom',
@@ -165,8 +167,8 @@ export function palette(): ExpressionFunctionDefinition<
           range: range ?? 'percent',
           gradient,
           continuity,
-          rangeMin,
-          rangeMax,
+          rangeMin: calculateRange(rangeMin, stops[0], rangeMinDefault),
+          rangeMax: calculateRange(rangeMax, last(stops), rangeMaxDefault),
         },
       };
     },
