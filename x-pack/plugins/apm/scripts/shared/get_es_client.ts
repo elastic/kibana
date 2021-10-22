@@ -20,7 +20,8 @@ export function getEsClient({
 }: {
   node: string;
   auth?: ClientOptions['auth'];
-  // TODO ask owners to fix
+  // Should be refactored
+  // The inferred type of 'getEsClient' references an inaccessible 'unique symbol' type. A type annotation is necessary.
 }): any {
   const client = new Client({
     node,

@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
     ],
   };
 
-  describe('FOO Metric Threshold Alerts Executor', () => {
+  describe('Metric Threshold Alerts Executor', () => {
     describe('with 10K plus docs', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
