@@ -179,7 +179,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
     return this.state.currentFields.map((mvtFieldConfig: MVTFieldDescriptor, index: number) => {
       return (
         <Fragment key={index}>
-          <EuiFlexGroup key={index} gutterSize="xs" alignItems="center">
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem>{this._renderFieldNameInput(mvtFieldConfig, index)}</EuiFlexItem>
             <EuiFlexItem>{this._renderFieldTypeDropDown(mvtFieldConfig, index)}</EuiFlexItem>
             <EuiFlexItem grow={false}>{this._renderFieldButtonDelete(index)}</EuiFlexItem>
