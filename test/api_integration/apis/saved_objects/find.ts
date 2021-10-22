@@ -222,6 +222,60 @@ export default function ({ getService }: FtrProviderContext) {
             });
           }));
 
+      // Note: This is a failure validation test for an existing behavior of nested aggregations when referencing
+      // root fields via the `.attributes` namespace. Attribute rewriting logic currently only supports `term` and so
+      // this is intended to help identify the failure when implementing attribute rewriting for `sort`.
+      // Please see https://github.com/elastic/kibana/issues/115153 for more information.
+      it('should return 400 when using a nested aggregation and referencing sort field with .attributes', async () =>
+        await supertest
+          .get(
+            `/s/${SPACE_ID}/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+              JSON.stringify({
+                references: {
+                  nested: {
+                    path: 'visualization.references',
+                  },
+                  aggs: {
+                    alertIds: {
+                      terms: {
+                        field: 'visualization.references.id',
+                        size: 5,
+                      },
+                      aggs: {
+                        rule_status: {
+                          reverse_nested: {},
+                          aggs: {
+                            most_recent_statuses: {
+                              top_hits: {
+                                sort: [
+                                  {
+                                    'visualization.attributes.version': {
+                                      order: 'desc',
+                                    },
+                                  },
+                                ],
+                                size: 5,
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              })
+            )}`
+          )
+          .expect(400)
+          .then((resp) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'all shards failed: search_phase_execution_exception: [query_shard_exception] Reason: No mapping found for [visualization.attributes.version] in order to sort on',
+            });
+          }));
+
       it('should return a 400 when referencing an invalid SO attribute', async () =>
         await supertest
           .get(
