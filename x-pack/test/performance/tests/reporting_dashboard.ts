@@ -16,7 +16,8 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const dashboard = getPageObject('dashboard');
   const reporting = getPageObject('reporting');
 
-  describe('reporting dashbaord', () => {
+  // TODO: unskip when https://github.com/elastic/apm-agent-nodejs/issues/2355 is fixed
+  describe.skip('reporting dashbaord', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/performance/kbn_archives/reporting_dashboard'
