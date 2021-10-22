@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable no-continue */
-
 /* eslint-disable react/display-name */
 
 import React, { memo, useMemo, Fragment, HTMLAttributes } from 'react';
@@ -152,29 +150,27 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
     }> = [];
     for (const [key, value] of Object.entries(event)) {
       // ignore these keys
-      if (key === 'agent' || key === 'ecs' || key === 'process' || key === '@timestamp') {
-        continue;
+      if (!(key === 'agent' || key === 'ecs' || key === 'process' || key === '@timestamp')) {
+        const section = {
+          // Group the fields by their top-level namespace
+          namespace: <GeneratedText>{key}</GeneratedText>,
+          descriptions: deepObjectEntries(value).map(([path, fieldValue]) => {
+            // The field name is the 'namespace' key as well as the rest of the path, joined with '.'
+            const fieldName = [key, ...path].join('.');
+
+            return {
+              title: <GeneratedText>{fieldName}</GeneratedText>,
+              description: (
+                <CopyablePanelField
+                  textToCopy={String(fieldValue)}
+                  content={<GeneratedText>{String(fieldValue)}</GeneratedText>}
+                />
+              ),
+            };
+          }),
+        };
+        returnValue.push(section);
       }
-
-      const section = {
-        // Group the fields by their top-level namespace
-        namespace: <GeneratedText>{key}</GeneratedText>,
-        descriptions: deepObjectEntries(value).map(([path, fieldValue]) => {
-          // The field name is the 'namespace' key as well as the rest of the path, joined with '.'
-          const fieldName = [key, ...path].join('.');
-
-          return {
-            title: <GeneratedText>{fieldName}</GeneratedText>,
-            description: (
-              <CopyablePanelField
-                textToCopy={String(fieldValue)}
-                content={<GeneratedText>{String(fieldValue)}</GeneratedText>}
-              />
-            ),
-          };
-        }),
-      };
-      returnValue.push(section);
     }
     return returnValue;
   }, [event]);

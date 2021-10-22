@@ -1373,71 +1373,72 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     let timestamp = timestampSafeVersion(root) ?? 0;
     while (lineage.length > 0) {
       const currentState = lineage[lineage.length - 1];
-      // If we get to a state node and it has made all the children, move back up a level
+      // If we get to a state node and it hasn't made all the children, add a child and any nodes associated with it
       if (
-        currentState.childrenCreated === currentState.maxChildren ||
-        lineage.length === opts.generations + 1
+        !(
+          currentState.childrenCreated === currentState.maxChildren ||
+          lineage.length === opts.generations + 1
+        )
       ) {
-        lineage.pop();
-        // eslint-disable-next-line no-continue
-        continue;
-      }
-      // Otherwise, add a child and any nodes associated with it
-      currentState.childrenCreated++;
-      timestamp = timestamp + 1000;
-      const currentStateEntityID = entityIDSafeVersion(currentState.event);
-      const ancestry: string[] = [];
-      if (currentStateEntityID) {
-        ancestry.push(currentStateEntityID);
-      }
-      ancestry.push(...(ancestryArray(currentState.event) ?? []));
+        currentState.childrenCreated++;
+        timestamp = timestamp + 1000;
+        const currentStateEntityID = entityIDSafeVersion(currentState.event);
+        const ancestry: string[] = [];
+        if (currentStateEntityID) {
+          ancestry.push(currentStateEntityID);
+        }
+        ancestry.push(...(ancestryArray(currentState.event) ?? []));
 
-      const child = this.generateEvent({
-        timestamp,
-        parentEntityID: currentStateEntityID,
-        ancestry,
-        ancestryArrayLimit: opts.ancestryArraySize,
-        eventsDataStream: opts.eventsDataStream,
-      });
-
-      maxChildren = this.randomN(opts.children + 1);
-      if (opts.alwaysGenMaxChildrenPerNode) {
-        maxChildren = opts.children;
-      }
-      lineage.push({
-        event: child,
-        childrenCreated: 0,
-        maxChildren,
-      });
-      yield child;
-      let processDuration: number = 6 * 3600;
-      if (this.randomN(100) < opts.percentTerminated) {
-        processDuration = this.randomN(1000000); // This lets termination events be up to 1 million seconds after the creation event (~11 days)
-        yield this.generateEvent({
-          timestamp: timestamp + processDuration * 1000,
-          entityID: entityIDSafeVersion(child),
-          parentEntityID: parentEntityIDSafeVersion(child),
-          eventCategory: ['process'],
-          eventType: ['end'],
+        const child = this.generateEvent({
+          timestamp,
+          parentEntityID: currentStateEntityID,
           ancestry,
           ancestryArrayLimit: opts.ancestryArraySize,
           eventsDataStream: opts.eventsDataStream,
         });
-      }
-      if (this.randomN(100) < opts.percentWithRelated) {
-        yield* this.relatedEventsGenerator({
-          node: child,
-          relatedEvents: opts.relatedEvents,
-          processDuration,
-          ordered: opts.relatedEventsOrdered,
-          eventsDataStream: opts.eventsDataStream,
+
+        maxChildren = this.randomN(opts.children + 1);
+        if (opts.alwaysGenMaxChildrenPerNode) {
+          maxChildren = opts.children;
+        }
+        lineage.push({
+          event: child,
+          childrenCreated: 0,
+          maxChildren,
         });
-        yield* this.relatedAlertsGenerator({
-          node: child,
-          relatedAlerts: opts.relatedAlerts,
-          alertCreationTime: processDuration,
-          alertsDataStream: opts.alertsDataStream,
-        });
+        yield child;
+        let processDuration: number = 6 * 3600;
+        if (this.randomN(100) < opts.percentTerminated) {
+          processDuration = this.randomN(1000000); // This lets termination events be up to 1 million seconds after the creation event (~11 days)
+          yield this.generateEvent({
+            timestamp: timestamp + processDuration * 1000,
+            entityID: entityIDSafeVersion(child),
+            parentEntityID: parentEntityIDSafeVersion(child),
+            eventCategory: ['process'],
+            eventType: ['end'],
+            ancestry,
+            ancestryArrayLimit: opts.ancestryArraySize,
+            eventsDataStream: opts.eventsDataStream,
+          });
+        }
+        if (this.randomN(100) < opts.percentWithRelated) {
+          yield* this.relatedEventsGenerator({
+            node: child,
+            relatedEvents: opts.relatedEvents,
+            processDuration,
+            ordered: opts.relatedEventsOrdered,
+            eventsDataStream: opts.eventsDataStream,
+          });
+          yield* this.relatedAlertsGenerator({
+            node: child,
+            relatedAlerts: opts.relatedAlerts,
+            alertCreationTime: processDuration,
+            alertsDataStream: opts.alertsDataStream,
+          });
+        }
+      } else {
+        // Otherwise, move back up a level
+        lineage.pop();
       }
     }
   }

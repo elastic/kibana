@@ -193,118 +193,119 @@ function calculateEdgeLineSegments(
     /**
      * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
      */
-    if (metadata.parent === null) {
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-    const { node, parent, parentWidth } = metadata;
-    const position = positions.get(node);
-    const parentPosition = positions.get(parent);
-    const parentID = nodeModel.nodeID(parent);
-    const nodeID = nodeModel.nodeID(node);
+    if (metadata.parent) {
+      const { node, parent, parentWidth } = metadata;
+      const position = positions.get(node);
+      const parentPosition = positions.get(parent);
+      const parentID = nodeModel.nodeID(parent);
+      const nodeID = nodeModel.nodeID(node);
 
-    if (nodeID === undefined) {
-      throw new Error('tried to graph a Resolver that had a node with without an id');
-    }
-    const edgeLineID = `edge:${parentID ?? 'undefined'}:${nodeID}`;
+      if (nodeID === undefined) {
+        throw new Error('tried to graph a Resolver that had a node with without an id');
+      }
+      const edgeLineID = `edge:${parentID ?? 'undefined'}:${nodeID}`;
 
-    if (position === undefined || parentPosition === undefined) {
+      if (position === undefined || parentPosition === undefined) {
+        /**
+         * All positions have been precalculated, so if any are missing, it's an error. This will never happen.
+         */
+        throw new Error();
+      }
+
+      const parentTime = nodeModel.nodeDataTimestamp(parent);
+      const nodeTime = nodeModel.nodeDataTimestamp(node);
+
+      const timeBetweenParentAndNode =
+        parentTime !== undefined && nodeTime !== undefined
+          ? elapsedTime(parentTime, nodeTime)
+          : undefined;
+
+      const edgeLineMetadata: EdgeLineMetadata = {
+        elapsedTime: timeBetweenParentAndNode,
+        reactKey: edgeLineID,
+      };
+
       /**
-       * All positions have been precalculated, so if any are missing, it's an error. This will never happen.
+       * The point halfway between the parent and child on the y axis, we sometimes have a hard angle here in the edge line
        */
-      throw new Error();
-    }
+      const midwayY = parentPosition[1] + (position[1] - parentPosition[1]) / 2;
 
-    const parentTime = nodeModel.nodeDataTimestamp(parent);
-    const nodeTime = nodeModel.nodeDataTimestamp(node);
-
-    const timeBetweenParentAndNode =
-      parentTime !== undefined && nodeTime !== undefined
-        ? elapsedTime(parentTime, nodeTime)
-        : undefined;
-
-    const edgeLineMetadata: EdgeLineMetadata = {
-      elapsedTime: timeBetweenParentAndNode,
-      reactKey: edgeLineID,
-    };
-
-    /**
-     * The point halfway between the parent and child on the y axis, we sometimes have a hard angle here in the edge line
-     */
-    const midwayY = parentPosition[1] + (position[1] - parentPosition[1]) / 2;
-
-    /**
-     * When drawing edge lines between a parent and children (when there are multiple children) we draw a pitchfork type
-     * design. The 'midway' line, runs along the x axis and joins all the children with a single descendant line from the parent.
-     * See the ascii diagram below. The underscore characters would be the midway line.
-     *
-     *          A
-     *      ____|____
-     *     |         |
-     *     B         C
-     */
-    const lineFromProcessToMidwayLine: EdgeLineSegment = {
-      points: [[position[0], midwayY], position],
-      metadata: edgeLineMetadata,
-    };
-
-    const siblings = indexedProcessTreeModel.children(indexedProcessTree, nodeModel.nodeID(parent));
-    const isFirstChild = node === siblings[0];
-
-    if (metadata.isOnlyChild) {
-      // add a single line segment directly from parent to child. We don't do the 'pitchfork' in this case.
-      edgeLineSegments.push({ points: [parentPosition, position], metadata: edgeLineMetadata });
-    } else if (isFirstChild) {
       /**
-       * If the parent has multiple children, we draw the 'midway' line, and the line from the
-       * parent to the midway line, while handling the first child.
-       *
-       * Consider A the parent, and B the first child. We would draw somemthing like what's in the below diagram. The line from the
-       * midway line to C would be drawn when we handle C.
+       * When drawing edge lines between a parent and children (when there are multiple children) we draw a pitchfork type
+       * design. The 'midway' line, runs along the x axis and joins all the children with a single descendant line from the parent.
+       * See the ascii diagram below. The underscore characters would be the midway line.
        *
        *          A
        *      ____|____
-       *     |
+       *     |         |
        *     B         C
        */
-      const { firstChildWidth, lastChildWidth } = metadata;
-
-      const lineFromParentToMidwayLine: EdgeLineSegment = {
-        points: [parentPosition, [parentPosition[0], midwayY]],
-        metadata: { reactKey: `parentToMid${edgeLineID}` },
+      const lineFromProcessToMidwayLine: EdgeLineSegment = {
+        points: [[position[0], midwayY], position],
+        metadata: edgeLineMetadata,
       };
 
-      const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
-
-      const minX = parentWidth / -2 + firstChildWidth / 2;
-      const maxX = minX + widthOfMidline;
-
-      const midwayLine: EdgeLineSegment = {
-        points: [
-          [
-            // Position line relative to the parent's x component
-            parentPosition[0] + minX,
-            midwayY,
-          ],
-          [
-            // Position line relative to the parent's x component
-            parentPosition[0] + maxX,
-            midwayY,
-          ],
-        ],
-        metadata: { reactKey: `midway${edgeLineID}` },
-      };
-
-      edgeLineSegments.push(
-        /* line from parent to midway line */
-        lineFromParentToMidwayLine,
-        midwayLine,
-        lineFromProcessToMidwayLine
+      const siblings = indexedProcessTreeModel.children(
+        indexedProcessTree,
+        nodeModel.nodeID(parent)
       );
-    } else {
-      // If this isn't the first child, it must have siblings (the first of which drew the midway line and line
-      // from the parent to the midway line
-      edgeLineSegments.push(lineFromProcessToMidwayLine);
+      const isFirstChild = node === siblings[0];
+
+      if (metadata.isOnlyChild) {
+        // add a single line segment directly from parent to child. We don't do the 'pitchfork' in this case.
+        edgeLineSegments.push({ points: [parentPosition, position], metadata: edgeLineMetadata });
+      } else if (isFirstChild) {
+        /**
+         * If the parent has multiple children, we draw the 'midway' line, and the line from the
+         * parent to the midway line, while handling the first child.
+         *
+         * Consider A the parent, and B the first child. We would draw somemthing like what's in the below diagram. The line from the
+         * midway line to C would be drawn when we handle C.
+         *
+         *          A
+         *      ____|____
+         *     |
+         *     B         C
+         */
+        const { firstChildWidth, lastChildWidth } = metadata;
+
+        const lineFromParentToMidwayLine: EdgeLineSegment = {
+          points: [parentPosition, [parentPosition[0], midwayY]],
+          metadata: { reactKey: `parentToMid${edgeLineID}` },
+        };
+
+        const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
+
+        const minX = parentWidth / -2 + firstChildWidth / 2;
+        const maxX = minX + widthOfMidline;
+
+        const midwayLine: EdgeLineSegment = {
+          points: [
+            [
+              // Position line relative to the parent's x component
+              parentPosition[0] + minX,
+              midwayY,
+            ],
+            [
+              // Position line relative to the parent's x component
+              parentPosition[0] + maxX,
+              midwayY,
+            ],
+          ],
+          metadata: { reactKey: `midway${edgeLineID}` },
+        };
+
+        edgeLineSegments.push(
+          /* line from parent to midway line */
+          lineFromParentToMidwayLine,
+          midwayLine,
+          lineFromProcessToMidwayLine
+        );
+      } else {
+        // If this isn't the first child, it must have siblings (the first of which drew the midway line and line
+        // from the parent to the midway line
+        edgeLineSegments.push(lineFromProcessToMidwayLine);
+      }
     }
   }
   return edgeLineSegments;
