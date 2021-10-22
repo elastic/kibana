@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+rm -rf "$KIBANA_BUILD_LOCATION"
+rm -f "$WORKSPACE/kibana-default.tar.gz"
+
 if [[ ! -d "$KIBANA_BUILD_LOCATION/bin" ]]; then
   echo '--- Downloading Distribution and Plugin artifacts'
 
