@@ -84,26 +84,24 @@ const esEvents = toElasticsearchOutput([
 
 Via the CLI, you can upload scenarios, either using a fixed time range or continuously generating data. Some examples are available in in `src/scripts/examples`. Here's an example for live data:
 
-`$ node packages/elastic-apm-generator/src/scripts/run live packages/elastic-apm-generator/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200`
+`$ node packages/elastic-apm-generator/src/scripts/run packages/elastic-apm-generator/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --live`
 
 For a fixed time window:
-`$ node packages/elastic-apm-generator/src/scripts/run fixed packages/elastic-apm-generator/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now`
+`$ node packages/elastic-apm-generator/src/scripts/run packages/elastic-apm-generator/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now`
 
 The script will try to automatically find bootstrapped APM indices. __If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.__
 
-The following options are supported in both commands:
-- `bucketSize`: Size of bucket for which to generate data. Defaults to `15m`.
-- `workers`: Amount of simultaneously connected ES clients. Defaults to `1`.
-- `interval`: The interval at which to index data. Defaults to `10s`.
-- `clean`: Clean APM indices before indexing new data. Defaults to `false`.
-- `target`: Elasticsearch target, including username/password. __Required__.
-- `logLevel`: Log level. Defaults to `info`.
-
-For the `live` command, the following additional options are supported:
-- `lookback`: The lookback window for which data should be generated. Defaults to `15m`.
-
-For the `fixed` command, the following additional options are supported:
-
-- `to`: The end of the time window. Defaults to `now`.
-- `from`: The start of the time window. Defaults to `to - 15m`.
+The following options are supported:
+| Option         | Description                                             | Default      |
+| -------------- | ------------------------------------------------------- | ------------ |
+| `--from`       | The start of the time window.                           | `now - 15m`  |
+| `--to`         | The end of the time window.                             | `now`        |
+| `--live`       | Continously ingest data                                 | `false`      |
+| `--bucketSize` | Size of bucket for which to generate data.              | `15m`        |
+| `--clean`      | Clean APM indices before indexing new data.             | `false`      |
+| `--interval`   | The interval at which to index data.                    | `10s`        |
+| `--logLevel`   | Log level.                                              | `info`       |
+| `--lookback`   | The lookback window for which data should be generated. | `15m`        |
+| `--target`     | Elasticsearch target, including username/password.      | **Required** |
+| `--workers`    | Amount of simultaneously connected ES clients.          | `1`          |
 

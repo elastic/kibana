@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import datemath from '@elastic/datemath';
-import moment from 'moment';
 import yargs from 'yargs/yargs';
 import { cleanWriteTargets } from './utils/clean_write_targets';
 import {
@@ -25,83 +24,8 @@ import { startLiveDataUpload } from './utils/start_live_data_upload';
 
 yargs(process.argv.slice(2))
   .command(
-    'live',
-    'Continuously generate and index data into Elasticsearch',
-    (y) => {
-      return y
-        .positional('file', fileOption)
-        .option('bucketSize', bucketSizeOption)
-        .option('workers', workerOption)
-        .option('interval', intervalOption)
-        .option('clean', cleanOption)
-        .option('target', targetOption)
-        .option('logLevel', logLevelOption)
-        .option('lookback', {
-          description: 'The lookback window for which data should be generated',
-          default: '15m',
-        });
-    },
-    async (argv) => {
-      const {
-        scenario,
-        intervalInMs,
-        bucketSizeInMs,
-        target,
-        workers,
-        clean,
-        logger,
-        writeTargets,
-        client,
-      } = await getCommonResources(argv);
-
-      const lookback = intervalToMs(argv.lookback);
-
-      if (clean) {
-        await cleanWriteTargets({ writeTargets, client });
-      }
-
-      logger.info(
-        `Starting live data generation: ${JSON.stringify({
-          intervalInMs,
-          lookback,
-          bucketSizeInMs,
-          workers,
-          target,
-          writeTargets,
-        })}`
-      );
-
-      const now = moment(new Date().getTime()).startOf('minute').valueOf();
-      const from = now - lookback.valueOf();
-      const to = now;
-
-      startHistoricalDataUpload({
-        from,
-        to,
-        scenario,
-        intervalInMs,
-        bucketSizeInMs,
-        client,
-        workers,
-        writeTargets,
-        logger,
-      });
-
-      startLiveDataUpload({
-        bucketSizeInMs,
-        client,
-        intervalInMs,
-        logger,
-        scenario,
-        start: to,
-        workers,
-        writeTargets,
-      });
-    }
-  )
-  .command(
-    'fixed',
-    'Upload data from a scenario for a fixed time range',
+    '*',
+    'Generate data and index into Elasticsearch',
     (y) => {
       return y
         .positional('file', fileOption)
@@ -116,15 +40,14 @@ yargs(process.argv.slice(2))
         })
         .option('to', {
           description: 'The end of the time window',
-          default: 'now',
-        });
+        })
+        .option('live', {
+          description: 'Generate and index data continuously',
+          boolean: true,
+        })
+        .conflicts('to', 'live');
     },
     async (argv) => {
-      const to = datemath.parse(argv.to)!.valueOf();
-      const from = argv.from
-        ? datemath.parse(String(argv.from))!.valueOf()
-        : to - intervalToMs('15m');
-
       const {
         scenario,
         intervalInMs,
@@ -133,37 +56,62 @@ yargs(process.argv.slice(2))
         workers,
         clean,
         logger,
-        client,
         writeTargets,
+        client,
       } = await getCommonResources(argv);
 
       if (clean) {
-        await cleanWriteTargets({ writeTargets, client });
+        await cleanWriteTargets({ writeTargets, client, logger });
       }
 
+      const to = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
+      const from = argv.from
+        ? datemath.parse(String(argv.from))!.valueOf()
+        : to - intervalToMs('15m');
+
+      const live = argv.live;
+
       logger.info(
-        `Starting historical data generation: ${JSON.stringify({
-          from: new Date(from).toISOString(),
-          to: new Date(to).toISOString(),
-          intervalInMs,
-          bucketSizeInMs,
-          workers,
-          target,
-          writeTargets,
-        })}`
+        `Starting data generation\n: ${JSON.stringify(
+          {
+            intervalInMs,
+            bucketSizeInMs,
+            workers,
+            target,
+            writeTargets,
+            from: new Date(from).toISOString(),
+            to: new Date(to).toISOString(),
+            live,
+          },
+          null,
+          2
+        )}`
       );
 
       startHistoricalDataUpload({
         from,
         to,
+        scenario,
+        intervalInMs,
         bucketSizeInMs,
         client,
-        intervalInMs,
         workers,
         writeTargets,
-        scenario,
         logger,
       });
+
+      if (live) {
+        startLiveDataUpload({
+          bucketSizeInMs,
+          client,
+          intervalInMs,
+          logger,
+          scenario,
+          start: to,
+          workers,
+          writeTargets,
+        });
+      }
     }
   )
   .parse();

@@ -21,13 +21,20 @@ export async function traceData(context: InheritedFtrProviderContext) {
   return {
     index: (events: any[]) => {
       const esEvents = toElasticsearchOutput(
-        [
-          ...events,
-          ...getTransactionMetrics(events),
-          ...getSpanDestinationMetrics(events),
-          ...getBreakdownMetrics(events),
-        ],
-        '7.14.0'
+        {
+          events: [
+            ...events,
+            ...getTransactionMetrics(events),
+            ...getSpanDestinationMetrics(events),
+            ...getBreakdownMetrics(events),
+          ],
+        },
+        {
+          transaction: 'apm-7.14.0-transaction',
+          span: 'apm-7.14.0-span',
+          error: 'apm-7.14.0-error',
+          metric: 'apm-7.14.0-metric',
+        }
       );
 
       const batches = chunk(esEvents, 1000);
