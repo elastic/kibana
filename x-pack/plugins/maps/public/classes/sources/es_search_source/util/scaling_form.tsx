@@ -226,8 +226,7 @@ export class ScalingForm extends Component<Props, State> {
             <EuiToolTip
               position="left"
               content={i18n.translate('xpack.maps.source.esSearch.mvtDescription', {
-                defaultMessage:
-                  'Use vector tiles for faster display of large datasets.',
+                defaultMessage: 'Use vector tiles for faster display of large datasets.',
               })}
             >
               <EuiRadio
