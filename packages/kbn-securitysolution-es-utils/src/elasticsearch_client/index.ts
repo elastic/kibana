@@ -18,5 +18,5 @@ import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
  */
 export type ElasticsearchClient = Omit<
   KibanaClient,
-  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'
+  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'
 >;

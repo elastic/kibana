@@ -67,7 +67,6 @@ export class ElasticsearchService
           config.password !== undefined ||
           config.serviceAccountToken !== undefined,
       },
-      // @ts-expect-error TODO make sure Client is assignable to KibanaClient
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
     };
   }
@@ -82,7 +81,6 @@ export class ElasticsearchService
     this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
-      // @ts-expect-error TODO make sure Client is assignable to KibanaClient
       internalClient: this.client.asInternalUser,
       log: this.log,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
@@ -121,7 +119,6 @@ export class ElasticsearchService
 
       // Ensure inline scripting is enabled on the ES cluster
       const scriptingEnabled = await isInlineScriptingEnabled({
-        // @ts-expect-error TODO make sure Client is assignable to KibanaClient
         client: this.client.asInternalUser,
       });
       if (!scriptingEnabled) {
@@ -134,9 +131,7 @@ export class ElasticsearchService
     }
 
     return {
-      // @ts-expect-error TODO make sure Client is assignable to KibanaClient
       client: this.client!,
-      // @ts-expect-error TODO make sure Client is assignable to KibanaClient
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       legacy: {
         config$: this.config$,

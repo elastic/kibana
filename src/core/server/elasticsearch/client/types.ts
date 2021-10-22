@@ -20,7 +20,7 @@ import type {
  */
 export type ElasticsearchClient = Omit<
   KibanaClient,
-  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'
+  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'
 > & {
   transport: {
     request<TResponse = unknown>(
