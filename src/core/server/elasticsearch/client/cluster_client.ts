@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Logger } from '../../logging';
 import { GetAuthHeaders, Headers, isKibanaRequest, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
@@ -52,9 +52,8 @@ export interface ICustomClusterClient extends IClusterClient {
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
-  // @ts-expect-error TODO make sure Client is assignable to KibanaClient
-  public readonly asInternalUser: Client;
-  private readonly rootScopedClient: Client;
+  public readonly asInternalUser: KibanaClient;
+  private readonly rootScopedClient: KibanaClient;
   private readonly allowListHeaders: string[];
 
   private isClosed = false;
@@ -82,7 +81,6 @@ export class ClusterClient implements ICustomClusterClient {
     const scopedClient = this.rootScopedClient.child({
       headers: scopedHeaders,
     });
-    // @ts-expect-error TODO make sure Client is assignable to KibanaClient
     return new ScopedClusterClient(this.asInternalUser, scopedClient);
   }
 

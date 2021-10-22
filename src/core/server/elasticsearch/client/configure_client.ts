@@ -9,6 +9,7 @@
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
 import { Client, errors, Transport, HttpConnection } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import type {
   TransportRequestParams,
   TransportRequestOptions,
@@ -36,7 +37,7 @@ export const configureClient = (
     scoped?: boolean;
     getExecutionContext?: () => string | undefined;
   }
-): Client => {
+): KibanaClient => {
   const clientOptions = parseClientOptions(config, scoped);
   class KibanaTransport extends Transport {
     request(params: TransportRequestParams, options?: TransportRequestOptions) {
@@ -62,7 +63,7 @@ export const configureClient = (
   });
   addLogging(client, logger.get('query', type));
 
-  return client;
+  return client as KibanaClient;
 };
 
 const convertQueryString = (qs: string | Record<string, any> | undefined): string => {
