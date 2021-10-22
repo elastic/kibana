@@ -319,23 +319,6 @@ describe('collectMultiNamespaceReferences', () => {
       // obj3 is excluded from the results
     ]);
   });
-  it(`handles 404 responses that don't come from Elasticsearch`, async () => {
-    const createEsUnavailableNotFoundError = () => {
-      return SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-    };
-    const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
-    const params = setup([obj1]);
-    client.mget.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        { docs: [] },
-        { statusCode: 404 },
-        {}
-      )
-    );
-    await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrowError(
-      createEsUnavailableNotFoundError()
-    );
-  });
 
   describe('legacy URL aliases', () => {
     it('uses the PointInTimeFinder to search for legacy URL aliases', async () => {
