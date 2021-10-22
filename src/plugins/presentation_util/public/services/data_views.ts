@@ -10,5 +10,6 @@ import { DataViewsPublicPluginStart } from '../../../data_views/public';
 
 export interface PresentationDataViewsService {
   get: DataViewsPublicPluginStart['get'];
+  getDefaultId: DataViewsPublicPluginStart['getDefaultId'];
   getIdsWithTitle: DataViewsPublicPluginStart['getIdsWithTitle'];
 }

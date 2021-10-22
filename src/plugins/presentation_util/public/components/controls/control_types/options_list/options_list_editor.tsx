@@ -8,12 +8,15 @@
 
 import useMount from 'react-use/lib/useMount';
 import React, { useEffect, useState } from 'react';
-import { EuiFormRow, EuiSuperSelect, EuiSuperSelectOption, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 import { ControlEditorProps, GetControlEditorComponentProps } from '../../types';
+import { DataViewListItem, DataView } from '../../../../../../data_views/common';
+import { DataViewPicker } from '../../../data_view_picker/data_view_picker';
 import { OptionsListStrings } from './options_list_strings';
 import { pluginServices } from '../../../../services';
 import { OptionsListEmbeddableInput } from './types';
+import { FieldPicker } from '../../../field_picker/field_picker';
 
 interface OptionsListEditorProps extends ControlEditorProps {
   onChange: GetControlEditorComponentProps<OptionsListEmbeddableInput>['onChange'];
@@ -23,10 +26,9 @@ interface OptionsListEditorProps extends ControlEditorProps {
 interface OptionsListEditorState {
   singleSelect?: boolean;
 
-  dataViewIdSelectOptions: Array<EuiSuperSelectOption<string>>;
-  dataViewId?: string;
+  dataViewListItems: DataViewListItem[];
 
-  fieldNameSelectOptions: Array<EuiSuperSelectOption<string>>;
+  dataView?: DataView;
   fieldName?: string;
 }
 
@@ -34,103 +36,79 @@ export const OptionsListEditor = ({
   onChange,
   initialInput,
   setValidState,
+  setDefaultTitle,
 }: OptionsListEditorProps) => {
   // Presentation Services Context
   const { dataViews } = pluginServices.getHooks();
-  const { getIdsWithTitle, get } = dataViews.useService();
+  const { getIdsWithTitle, getDefaultId, get } = dataViews.useService();
 
   const [state, setState] = useState<OptionsListEditorState>({
-    dataViewId: initialInput?.dataViewId,
     fieldName: initialInput?.fieldName,
     singleSelect: initialInput?.singleSelect,
-    dataViewIdSelectOptions: [],
-    fieldNameSelectOptions: [],
+    dataViewListItems: [],
   });
-
-  const applySelection = ({
-    fieldName,
-    singleSelect,
-    dataViewId,
-  }: {
-    fieldName?: string;
-    singleSelect?: boolean;
-    dataViewId?: string;
-  }) => {
-    const newState = {
-      ...(fieldName ? { fieldName } : {}),
-      ...(dataViewId ? { dataViewId } : {}),
-      ...(singleSelect !== undefined ? { singleSelect } : {}),
-    };
-    /**
-     * apply state and run onChange concurrently. State is copied here rather than by subscribing to embeddable
-     * input so that the same editor component can cover the 'create' use case.
-     */
-
-    setState((currentState) => {
-      return { ...currentState, ...newState };
-    });
-    onChange(newState);
-  };
 
   useMount(() => {
+    let mounted = true;
+    if (state.fieldName) setDefaultTitle(state.fieldName);
     (async () => {
-      const newDataViews = await getIdsWithTitle();
-      const newDataViewSelectOptions = newDataViews.map((dataView) => ({
-        value: dataView.id,
-        inputDisplay: dataView.title,
-      }));
-
-      setState((currentState) => ({
-        ...currentState,
-        dataViewIdSelectOptions: newDataViewSelectOptions,
-      }));
+      const dataViewListItems = await getIdsWithTitle();
+      const initialId = initialInput?.dataViewId ?? (await getDefaultId());
+      let dataView: DataView | undefined;
+      if (initialId) dataView = await get(initialId);
+      if (!mounted) return;
+      setState((s) => ({ ...s, dataView, dataViewListItems }));
     })();
+    return () => {
+      mounted = false;
+    };
   });
 
-  useEffect(() => {
-    (async () => {
-      let newFieldNameSelectOptions: Array<EuiSuperSelectOption<string>> = [];
-      if (state.dataViewId) {
-        const newFields = (await get(state.dataViewId)).fields;
-        newFieldNameSelectOptions = newFields.map((field) => ({
-          value: field.name,
-          inputDisplay: field.displayName ?? field.name,
-        }));
-      }
-      setState((currentState) => ({
-        ...currentState,
-        fieldNameSelectOptions: newFieldNameSelectOptions,
-      }));
-    })();
-  }, [get, state.dataViewId]);
-
   useEffect(
-    () => setValidState(Boolean(state.fieldName) && Boolean(state.dataViewId)),
-    [state.fieldName, setValidState, state.dataViewId]
+    () => setValidState(Boolean(state.fieldName) && Boolean(state.dataView)),
+    [state.fieldName, setValidState, state.dataView]
   );
 
+  const { dataView, fieldName } = state;
   return (
     <>
-      <EuiFormRow label={OptionsListStrings.editor.getIndexPatternTitle()}>
-        <EuiSuperSelect
-          options={state.dataViewIdSelectOptions}
-          onChange={(dataViewId) => applySelection({ dataViewId })}
-          valueOfSelected={state.dataViewId}
+      <EuiFormRow fullWidth label={OptionsListStrings.editor.getIndexPatternTitle()}>
+        <DataViewPicker
+          dataViews={state.dataViewListItems}
+          selectedDataViewId={dataView?.id}
+          onChangeDataViewId={(dataViewId) => {
+            onChange({ dataViewId });
+            get(dataViewId).then((newDataView) =>
+              setState((s) => ({ ...s, dataView: newDataView }))
+            );
+          }}
+          trigger={{
+            label: state.dataView?.title ?? OptionsListStrings.editor.getNoDataViewTitle(),
+          }}
         />
       </EuiFormRow>
-      <EuiFormRow label={OptionsListStrings.editor.getFieldTitle()}>
-        <EuiSuperSelect
-          disabled={!state.dataViewId}
-          options={state.fieldNameSelectOptions}
-          onChange={(fieldName) => applySelection({ fieldName })}
-          valueOfSelected={state.fieldName}
+      <EuiFormRow fullWidth label={OptionsListStrings.editor.getFieldTitle()}>
+        <FieldPicker
+          filterPredicate={(field) =>
+            (field.aggregatable && field.type === 'string') || field.type === 'boolean'
+          }
+          selectedFieldName={fieldName}
+          dataView={dataView}
+          onSelectField={(field) => {
+            setDefaultTitle(field.displayName ?? field.name);
+            onChange({ fieldName: field.name });
+            setState((s) => ({ ...s, fieldName: field.name }));
+          }}
         />
       </EuiFormRow>
-      <EuiFormRow>
+      <EuiFormRow fullWidth>
         <EuiSwitch
           label={OptionsListStrings.editor.getAllowMultiselectTitle()}
           checked={!state.singleSelect}
-          onChange={(e) => applySelection({ singleSelect: !e.target.checked })}
+          onChange={() => {
+            onChange({ singleSelect: !state.singleSelect });
+            setState((s) => ({ ...s, singleSelect: !s.singleSelect }));
+          }}
         />
       </EuiFormRow>
     </>

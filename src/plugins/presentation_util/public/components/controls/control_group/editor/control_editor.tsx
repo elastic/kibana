@@ -14,7 +14,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlyoutHeader,
   EuiButtonGroup,
@@ -43,7 +43,7 @@ interface ManageControlProps {
   onCancel: () => void;
   removeControl?: () => void;
   controlEditorComponent?: ControlEditorComponent;
-  updateTitle: (title: string) => void;
+  updateTitle: (title?: string) => void;
   updateWidth: (newWidth: ControlWidth) => void;
 }
 
@@ -62,9 +62,7 @@ export const ControlEditor = ({
   const [currentWidth, setCurrentWidth] = useState(width);
 
   const [controlEditorValid, setControlEditorValid] = useState(false);
-  const [editorValid, setEditorValid] = useState(false);
-
-  useEffect(() => setEditorValid(Boolean(currentTitle)), [currentTitle]);
+  const [defaultTitle, setDefaultTitle] = useState<string>();
 
   return (
     <>
@@ -79,17 +77,6 @@ export const ControlEditor = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm>
-          <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
-            <EuiFieldText
-              placeholder="Placeholder text"
-              value={currentTitle}
-              onChange={(e) => {
-                updateTitle(e.target.value);
-                setCurrentTitle(e.target.value);
-              }}
-              aria-label="Use aria labels when no actual label is in use"
-            />
-          </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
             <EuiButtonGroup
               color="primary"
@@ -105,7 +92,26 @@ export const ControlEditor = ({
 
           <EuiSpacer size="l" />
           {controlEditorComponent &&
-            controlEditorComponent({ setValidState: setControlEditorValid })}
+            controlEditorComponent({
+              setValidState: setControlEditorValid,
+              setDefaultTitle: (newDefaultTitle) => {
+                if (!currentTitle || currentTitle === defaultTitle) {
+                  setCurrentTitle(newDefaultTitle);
+                  updateTitle(newDefaultTitle);
+                }
+                setDefaultTitle(newDefaultTitle);
+              },
+            })}
+          <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
+            <EuiFieldText
+              placeholder={defaultTitle}
+              value={currentTitle}
+              onChange={(e) => {
+                updateTitle(e.target.value || defaultTitle);
+                setCurrentTitle(e.target.value);
+              }}
+            />
+          </EuiFormRow>
           <EuiSpacer size="l" />
           {removeControl && (
             <EuiButtonEmpty
@@ -141,7 +147,7 @@ export const ControlEditor = ({
               aria-label={`save-${title}`}
               iconType="check"
               color="primary"
-              disabled={!editorValid || !controlEditorValid}
+              disabled={!controlEditorValid}
               onClick={() => {
                 onSave();
               }}

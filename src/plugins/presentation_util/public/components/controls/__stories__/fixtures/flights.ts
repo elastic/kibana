@@ -53,8 +53,11 @@ flightFieldNames.forEach(
     (flightFieldByName[flightFieldName] = {
       name: flightFieldName,
       type: 'string',
+      aggregatable: true,
     } as unknown as DataViewField)
 );
+flightFieldByName.Cancelled = { name: 'Cancelled', type: 'boolean' } as DataViewField;
+flightFieldByName.timestamp = { name: 'timestamp', type: 'date' } as DataViewField;
 
 export const flightFields: DataViewField[] = Object.values(flightFieldByName);
 

@@ -44,6 +44,7 @@ export type ControlEditorComponent = (props: ControlEditorProps) => JSX.Element;
 
 export interface ControlEditorProps {
   setValidState: (valid: boolean) => void;
+  setDefaultTitle: (defaultTitle: string) => void;
 }
 
 /**

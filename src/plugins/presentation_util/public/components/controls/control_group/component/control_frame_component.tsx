@@ -128,7 +128,14 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
   return (
     <>
       {embeddable && enableActions && floatingActions}
-      <EuiFormRow fullWidth label={usingTwoLineLayout ? title : undefined}>
+      <EuiFormRow
+        fullWidth
+        label={
+          usingTwoLineLayout
+            ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
+            : undefined
+        }
+      >
         {form}
       </EuiFormRow>
     </>

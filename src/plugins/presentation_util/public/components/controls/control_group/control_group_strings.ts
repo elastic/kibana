@@ -25,6 +25,10 @@ export const ControlGroupStrings = {
           defaultMessage: 'Add control',
         }
       ),
+    getTwoLineLoadingTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.emptyState.twoLineLoadingTitle', {
+        defaultMessage: '...',
+      }),
   },
   manageControl: {
     getFlyoutCreateTitle: () =>

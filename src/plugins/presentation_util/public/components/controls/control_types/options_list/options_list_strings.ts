@@ -24,6 +24,10 @@ export const OptionsListStrings = {
       i18n.translate('presentationUtil.controls.optionsList.editor.indexPatternTitle', {
         defaultMessage: 'Index pattern',
       }),
+    getNoDataViewTitle: () =>
+      i18n.translate('presentationUtil.controls.optionsList.editor.noDataViewTitle', {
+        defaultMessage: 'Select data view',
+      }),
     getFieldTitle: () =>
       i18n.translate('presentationUtil.controls.optionsList.editor.fieldTitle', {
         defaultMessage: 'Field',

@@ -38,8 +38,9 @@ export class OptionsListEmbeddableFactory
     onChange,
     initialInput,
   }: GetControlEditorComponentProps<OptionsListEmbeddableInput>) => {
-    return ({ setValidState }: ControlEditorProps) => (
+    return ({ setValidState, setDefaultTitle }: ControlEditorProps) => (
       <OptionsListEditor
+        setDefaultTitle={setDefaultTitle}
         setValidState={setValidState}
         initialInput={initialInput}
         onChange={onChange}

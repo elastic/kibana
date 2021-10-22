@@ -86,10 +86,7 @@ export class EditPanelAction implements Action<ActionContext> {
       if (this.stateTransfer && appTarget.state) {
         await this.stateTransfer.navigateToEditor(appTarget.app, {
           path: appTarget.path,
-          state: {
-            ...appTarget.state,
-            originatingPath: context.embeddable.getRoot().getOutput().editPath,
-          },
+          state: appTarget.state,
         });
       } else {
         await this.application.navigateToApp(appTarget.app, { path: appTarget.path });
