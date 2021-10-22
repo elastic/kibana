@@ -7,10 +7,16 @@
 
 import { zip, take } from 'lodash';
 import { htmlIdGenerator } from '@elastic/eui';
+import { ColorPalette } from '../../../../common/lib';
 import { ColorStop } from '../types';
 import { Palette, PaletteColorStops } from './types';
 
 const id = htmlIdGenerator();
+
+export const getOverridenPaletteOptions = (): Pick<ColorPalette, 'range' | 'continuity'> => ({
+  range: 'number',
+  continuity: 'below',
+});
 
 export const createColorStop = (stop: number = 0, color: string = '') => ({
   stop,
@@ -32,7 +38,7 @@ export const mergeColorStopsWithPalette =
       },
       { colors: [], stops: [] }
     );
-    return { ...palette, ...stopsWithColors };
+    return { ...palette, ...stopsWithColors, ...getOverridenPaletteOptions() };
   };
 
 export const updateColorStop =

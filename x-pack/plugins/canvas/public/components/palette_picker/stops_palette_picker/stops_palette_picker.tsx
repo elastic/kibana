@@ -8,6 +8,7 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import { flowRight, identity } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { ColorStop, CustomColorPalette, StopsPalettePickerProps } from '../types';
 import { PalettePicker } from '../palette_picker';
 import { StopColorPicker } from './stop_color_picker';
@@ -19,6 +20,7 @@ import {
   deleteColorStop,
   updateColorStop,
   addNewColorStop,
+  getOverridenPaletteOptions,
 } from './utils';
 import { ColorPalette } from '../../../../common/lib/palettes';
 
@@ -27,7 +29,6 @@ const MIN_STOPS = 2;
 
 export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
   const { palette, onChange } = props;
-
   const stops = useMemo(
     () => (!palette?.stops || !palette.stops.length ? defaultStops : palette.stops),
     [palette?.stops]
@@ -37,6 +38,25 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
     () => reduceColorsByStopsSize(palette?.colors, stops.length),
     [palette?.colors, stops.length]
   );
+
+  const onChangePalette = useCallback(
+    (newPalette: ColorPalette | CustomColorPalette | null) => {
+      if (newPalette) {
+        const newColors = reduceColorsByStopsSize(newPalette?.colors, stops.length);
+        props.onChange?.({
+          ...newPalette,
+          colors: newColors,
+          stops,
+          ...getOverridenPaletteOptions(),
+        });
+      }
+    },
+    [props, stops]
+  );
+
+  useEffectOnce(() => {
+    onChangePalette(palette);
+  });
 
   const paletteColorStops = useMemo(
     () => transformPaletteToColorStops({ stops, colors }),
@@ -51,16 +71,6 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
         fn
       ),
     [onChange, palette]
-  );
-
-  const onChangePalette = useCallback(
-    (newPalette: ColorPalette | CustomColorPalette | null) => {
-      if (newPalette) {
-        const newColors = reduceColorsByStopsSize(newPalette?.colors, stops.length);
-        props.onChange?.({ ...newPalette, colors: newColors, stops });
-      }
-    },
-    [props, stops]
   );
 
   const deleteColorStopAndApply = useCallback(

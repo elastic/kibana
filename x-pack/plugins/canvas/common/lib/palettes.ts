@@ -25,6 +25,8 @@ export interface ColorPalette<AdditionalPaletteID extends string = PaletteID> {
   colors: string[];
   gradient: boolean;
   stops?: number[];
+  range?: 'number' | 'percent';
+  continuity?: 'above' | 'below' | 'all' | 'none';
 }
 
 // This function allows one to create a strongly-typed palette for inclusion in

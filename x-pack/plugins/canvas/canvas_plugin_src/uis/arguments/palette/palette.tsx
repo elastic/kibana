@@ -37,6 +37,15 @@ export const PaletteArgInput: FC<Props> = ({
   typeInstance,
 }) => {
   const handleChange = (palette: ColorPalette | CustomColorPalette): void => {
+    let colorStopsPaletteConfig = {};
+    if (palette.stops?.length) {
+      colorStopsPaletteConfig = {
+        stop: palette.stops,
+        ...(palette.range ? { range: [palette.range] } : {}),
+        ...(palette.continuity ? { continuity: [palette.continuity] } : {}),
+      };
+    }
+
     const astObj: ExpressionAstExpression = {
       type: 'expression',
       chain: [
@@ -46,7 +55,7 @@ export const PaletteArgInput: FC<Props> = ({
           arguments: {
             _: palette.colors,
             gradient: [palette.gradient],
-            ...(palette.stops?.length ? { stop: palette.stops } : {}),
+            ...colorStopsPaletteConfig,
           },
         },
       ],
