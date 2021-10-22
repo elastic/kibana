@@ -26,8 +26,6 @@ export default function ({ getService }) {
         .responseType('blob')
         .expect(200);
 
-        //(avg_of_bytes:(avg:(field:bytes)))
-
       const jsonTile = new VectorTile(new Protobuf(resp.body));
 
       // Cluster feature
