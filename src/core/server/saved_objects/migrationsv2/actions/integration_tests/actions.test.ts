@@ -61,7 +61,7 @@ describe.skip('migration actions', () => {
 
   beforeAll(async () => {
     esServer = await startES();
-    client = esServer.es.getClient();
+    client = esServer.es.getKibanaEsClient();
 
     // Create test fixture data:
     await createIndex({

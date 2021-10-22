@@ -25,7 +25,6 @@ import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
 import { savedObjectsRepositoryMock } from './repository.mock';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { ISavedObjectsRepository } from './repository';
-import { SavedObjectsErrorHelpers } from './errors';
 
 const SPACES = ['default', 'another-space'];
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };

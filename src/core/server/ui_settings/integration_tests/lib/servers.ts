@@ -55,7 +55,7 @@ export function getServices() {
     return services;
   }
 
-  const esClient = esServer.es.getClient();
+  const esClient = esServer.es.getKibanaEsClient();
 
   const savedObjectsClient = kbn.coreStart.savedObjects.getScopedClient(
     httpServerMock.createKibanaRequest()

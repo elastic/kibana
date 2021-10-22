@@ -12,9 +12,11 @@ import del from 'del';
 // @ts-expect-error in js
 import { Cluster } from '@kbn/es';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import type { ToolingLog } from '@kbn/dev-utils';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
+import { convertToKibanaClient } from './client_to_kibana_client';
 
 import { KIBANA_ROOT } from '../';
 
@@ -51,6 +53,7 @@ export interface ICluster {
   stop: () => Promise<void>;
   cleanup: () => Promise<void>;
   getClient: () => Client;
+  getKibanaEsClient: () => KibanaClient;
   getHostUrls: () => string[];
 }
 
@@ -284,6 +287,13 @@ export function createTestEsCluster<
         node: this.getHostUrls()[0],
         Connection: HttpConnection,
       });
+    }
+
+    /**
+     * Returns an ES Client to the configured cluster
+     */
+    getKibanaEsClient(): KibanaClient {
+      return convertToKibanaClient(this.getClient());
     }
 
     getUrl() {
