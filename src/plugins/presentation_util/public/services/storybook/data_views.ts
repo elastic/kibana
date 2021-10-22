@@ -8,20 +8,21 @@
 
 import { PluginServiceFactory } from '../create';
 import { PresentationDataViewsService } from '../data_views';
-import { storybookFlightsDataView } from './fixtures/flights';
 import { DataViewsPublicPluginStart } from '../../../../data_views/public';
+import { DataView } from '../../../../data_views/common';
 
 export type DataViewsServiceFactory = PluginServiceFactory<PresentationDataViewsService>;
+
+let currentDataView: DataView;
+export const injectStorybookDataView = (dataView: DataView) => (currentDataView = dataView);
+
 export const dataViewsServiceFactory: DataViewsServiceFactory = () => ({
   get: (() =>
     new Promise((r) =>
-      setTimeout(() => r(storybookFlightsDataView), 100)
+      setTimeout(() => r(currentDataView), 100)
     ) as unknown) as DataViewsPublicPluginStart['get'],
   getIdsWithTitle: (() =>
     new Promise((r) =>
-      setTimeout(
-        () => r([{ id: storybookFlightsDataView.id, title: storybookFlightsDataView.title }]),
-        100
-      )
+      setTimeout(() => r([{ id: currentDataView.id, title: currentDataView.title }]), 100)
     ) as unknown) as DataViewsPublicPluginStart['getIdsWithTitle'],
 });

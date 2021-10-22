@@ -14,7 +14,6 @@ import {
   IEditableControlFactory,
 } from '../../types';
 import { OptionsListEditor } from './options_list_editor';
-import { OptionsListEmbeddable } from './options_list_embeddable';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
 import { EmbeddableFactoryDefinition, IContainer } from '../../../../../../embeddable/public';
 import {
@@ -30,7 +29,8 @@ export class OptionsListEmbeddableFactory
 
   constructor() {}
 
-  public create(initialInput: OptionsListEmbeddableInput, parent?: IContainer) {
+  public async create(initialInput: OptionsListEmbeddableInput, parent?: IContainer) {
+    const { OptionsListEmbeddable } = await import('./options_list_embeddable');
     return Promise.resolve(new OptionsListEmbeddable(initialInput, {}, parent));
   }
 

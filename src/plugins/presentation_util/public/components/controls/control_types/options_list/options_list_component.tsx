@@ -92,7 +92,6 @@ export const OptionsListComponent = ({
       })}
       onClick={() => setIsPopoverOpen((openState) => !openState)}
       isSelected={isPopoverOpen}
-      numFilters={availableOptions?.length ?? 0} // Remove this once https://github.com/elastic/eui/pull/5268 is in an EUI release
       numActiveFilters={selectedOptionsCount}
       hasActiveFilters={(selectedOptionsCount ?? 0) > 0}
     >

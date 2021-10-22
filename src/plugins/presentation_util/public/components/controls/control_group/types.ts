@@ -6,16 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CommonControlOutput, ControlInput } from '../types';
-import { Container, ContainerOutput } from '../../../../../embeddable/public';
-import { ControlGroupInput } from '../../../../common/controls/control_group/types';
+import { CommonControlOutput } from '../types';
+import { ContainerOutput } from '../../../../../embeddable/public';
 
 export type ControlGroupOutput = ContainerOutput & CommonControlOutput;
-
-export type ControlGroupContainerEmbeddable = Container<
-  ControlInput,
-  ControlGroupInput,
-  ControlGroupOutput
->;
 
 export * from '../../../../common/controls/control_group/types';

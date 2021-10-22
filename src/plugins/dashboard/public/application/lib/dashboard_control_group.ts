@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
@@ -15,12 +14,9 @@ import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 import {
   ControlGroupContainer,
   ControlGroupInput,
-  ControlGroupOutput,
-  CONTROL_GROUP_TYPE,
   ControlStyle,
 } from '../../../../presentation_util/public';
 import { DashboardContainer } from '..';
-import { EmbeddableStart, isErrorEmbeddable } from '../../services/embeddable';
 import { DashboardContainerInput, DashboardSavedObject } from '../..';
 import { DashboardState } from '../../types';
 
@@ -29,6 +25,15 @@ export interface DashboardControlGroupInput {
   panels: ControlGroupInput['panels'];
   controlStyle: ControlGroupInput['controlStyle'];
 }
+
+interface DiffChecks {
+  [key: string]: (a?: unknown, b?: unknown) => boolean;
+}
+
+const distinctUntilDiffCheck = <T extends {}>(a: T, b: T, diffChecks: DiffChecks) =>
+  !(Object.keys(diffChecks) as Array<keyof T>)
+    .map((key) => deepEqual(a[key], b[key]))
+    .includes(false);
 
 type DashboardControlGroupCommonKeys = keyof Pick<
   DashboardContainerInput | ControlGroupInput,
@@ -40,25 +45,14 @@ export const getDefaultDashboardControlGroupInput = () => ({
   panels: {},
 });
 
-export const createAndSyncDashboardControlGroup = async ({
+export const syncDashboardControlGroup = async ({
+  controlGroup,
   dashboardContainer,
-  getEmbeddableFactory,
 }: {
+  controlGroup: ControlGroupContainer;
   dashboardContainer: DashboardContainer;
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
 }) => {
   const subscriptions = new Subscription();
-  const controlsGroupFactory = getEmbeddableFactory<
-    ControlGroupInput,
-    ControlGroupOutput,
-    ControlGroupContainer
-  >(CONTROL_GROUP_TYPE);
-  const controlGroup = await controlsGroupFactory?.create({
-    ...getDefaultDashboardControlGroupInput(),
-    ...(dashboardContainer.getInput().controlGroupInput ?? {}),
-    id: uuid.v4(),
-  });
-  if (!controlGroup || isErrorEmbeddable(controlGroup)) return;
 
   const isControlGroupInputEqual = () =>
     controlGroupInputIsEqual(
@@ -67,23 +61,34 @@ export const createAndSyncDashboardControlGroup = async ({
     );
 
   // Because dashboard container stores control group state, certain control group changes need to be passed up dashboard container
+  const controlGroupDiff: DiffChecks = {
+    panels: deepEqual,
+    controlStyle: deepEqual,
+  };
+
   subscriptions.add(
-    controlGroup.getInput$().subscribe(() => {
-      const { panels, controlStyle } = controlGroup.getInput();
-      if (!isControlGroupInputEqual()) {
-        dashboardContainer.updateInput({ controlGroupInput: { panels, controlStyle } });
-      }
-    })
+    controlGroup
+      .getInput$()
+      .pipe(
+        distinctUntilChanged((a, b) =>
+          distinctUntilDiffCheck<ControlGroupInput>(a, b, controlGroupDiff)
+        )
+      )
+      .subscribe(() => {
+        const { panels, controlStyle } = controlGroup.getInput();
+        if (!isControlGroupInputEqual()) {
+          dashboardContainer.updateInput({ controlGroupInput: { panels, controlStyle } });
+        }
+      })
   );
 
-  const refetchDiffMethods: {
-    [key: string]: (a?: unknown, b?: unknown) => boolean;
-  } = {
+  const dashboardRefetchDiff: DiffChecks = {
     filters: (a, b) =>
       compareFilters((a as Filter[]) ?? [], (b as Filter[]) ?? [], COMPARE_ALL_OPTIONS),
     lastReloadRequestTime: deepEqual,
     timeRange: deepEqual,
     query: deepEqual,
+    viewMode: deepEqual,
   };
 
   // pass down any pieces of input needed to refetch or force refetch data for the controls
@@ -91,18 +96,15 @@ export const createAndSyncDashboardControlGroup = async ({
     dashboardContainer
       .getInput$()
       .pipe(
-        distinctUntilChanged(
-          (a, b) =>
-            !(Object.keys(refetchDiffMethods) as DashboardControlGroupCommonKeys[])
-              .map((key) => deepEqual(a[key], b[key]))
-              .includes(false)
+        distinctUntilChanged((a, b) =>
+          distinctUntilDiffCheck<DashboardContainerInput>(a, b, dashboardRefetchDiff)
         )
       )
       .subscribe(() => {
         const newInput: { [key: string]: unknown } = {};
-        (Object.keys(refetchDiffMethods) as DashboardControlGroupCommonKeys[]).forEach((key) => {
+        (Object.keys(dashboardRefetchDiff) as DashboardControlGroupCommonKeys[]).forEach((key) => {
           if (
-            !refetchDiffMethods[key]?.(
+            !dashboardRefetchDiff[key]?.(
               dashboardContainer.getInput()[key],
               controlGroup.getInput()[key]
             )
@@ -139,7 +141,7 @@ export const createAndSyncDashboardControlGroup = async ({
       .subscribe(() => dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() }))
   );
 
-  return { onDestroyControlGroup: () => subscriptions.unsubscribe(), controlGroup };
+  return { onDestroyControlGroup: () => subscriptions.unsubscribe() };
 };
 
 export const controlGroupInputIsEqual = (

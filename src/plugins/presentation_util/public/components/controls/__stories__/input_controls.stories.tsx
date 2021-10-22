@@ -14,10 +14,13 @@ import uuid from 'uuid';
 import { decorators } from './decorators';
 import { ControlsPanels } from '../control_group/types';
 import { ViewMode } from '../../../../../embeddable/public';
+import { getFlightOptionsAsync, storybookFlightsDataView } from './fixtures/flights';
 import { pluginServices, registry } from '../../../services/storybook';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../../..';
-import { embeddablePluginMock } from '../../../../../embeddable/public/mocks';
+import { replaceValueSuggestionMethod } from '../../../services/storybook/data';
+import { injectStorybookDataView } from '../../../services/storybook/data_views';
 import { populateStorybookControlFactories } from './storybook_control_factories';
+import { EmbeddablePersistableStateService } from '../../../../../embeddable/common';
 import { ControlGroupContainerFactory } from '../control_group/embeddable/control_group_container_factory';
 
 export default {
@@ -28,6 +31,9 @@ export default {
 
 type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
 type EmbeddableType = UnwrapPromise<ReturnType<ControlGroupContainerFactory['create']>>;
+
+injectStorybookDataView(storybookFlightsDataView);
+replaceValueSuggestionMethod(getFlightOptionsAsync);
 
 const ControlGroupStoryComponent: FC<{
   panels?: ControlsPanels;
@@ -52,7 +58,9 @@ const ControlGroupStoryComponent: FC<{
 
   useEffectOnce(() => {
     (async () => {
-      const factory = new ControlGroupContainerFactory(embeddablePluginMock.createStartContract());
+      const factory = new ControlGroupContainerFactory(
+        {} as unknown as EmbeddablePersistableStateService
+      );
       const controlGroupContainerEmbeddable = await factory.create({
         controlStyle: 'oneLine',
         panels: panels ?? {},

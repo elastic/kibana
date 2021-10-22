@@ -7,13 +7,19 @@
  */
 
 import { DataPublicPluginStart } from '../../../../data/public';
-import { PluginServiceFactory } from '../create';
+import { DataViewField } from '../../../../data_views/common';
 import { PresentationDataService } from '../data';
-import { getFlightOptionsAsync } from './fixtures/flights';
+import { PluginServiceFactory } from '../create';
+
+let valueSuggestionMethod = ({ field, query }: { field: DataViewField; query: string }) =>
+  Promise.resolve(['storybook', 'default', 'values']);
+export const replaceValueSuggestionMethod = (
+  newMethod: ({ field, query }: { field: DataViewField; query: string }) => Promise<string[]>
+) => (valueSuggestionMethod = newMethod);
 
 export type DataServiceFactory = PluginServiceFactory<PresentationDataService>;
 export const dataServiceFactory: DataServiceFactory = () => ({
   autocomplete: {
-    getValueSuggestions: getFlightOptionsAsync,
+    getValueSuggestions: valueSuggestionMethod,
   } as unknown as DataPublicPluginStart['autocomplete'],
 });

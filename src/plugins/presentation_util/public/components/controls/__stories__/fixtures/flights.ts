@@ -11,9 +11,8 @@ import { flights } from '../fixtures/flights_data';
 import {
   DataView,
   DataViewField,
-  IndexPatternField,
   IIndexPatternFieldList,
-} from '../../../../../data_views/common';
+} from '../../../../../../data_views/common';
 
 export type Flight = typeof flights[number];
 export type FlightField = keyof Flight;
@@ -76,10 +75,5 @@ export const getFlightSearchOptions = (field: string, search?: string): string[]
   return options;
 };
 
-export const getFlightOptionsAsync = ({
-  field,
-  query,
-}: {
-  field: IndexPatternField;
-  query: string;
-}) => new Promise((r) => setTimeout(() => r(getFlightSearchOptions(field.name, query)), 120));
+export const getFlightOptionsAsync = ({ field, query }: { field: DataViewField; query: string }) =>
+  new Promise<string[]>((r) => setTimeout(() => r(getFlightSearchOptions(field.name, query)), 120));

@@ -200,6 +200,9 @@ const ReduxEmbeddableSync = <InputType extends EmbeddableInput = EmbeddableInput
     stateRef.current = currentState;
     const differences = diffInput(currentState, getExplicitInput<InputType>(embeddable));
     if (differences && Object.keys(differences).length > 0) {
+      if (stateContainsFilters(differences)) {
+        differences.filters = cleanFiltersForSerialize(differences.filters);
+      }
       embeddable.updateInput(differences);
     }
   }, [currentState, diffInput, embeddable]);

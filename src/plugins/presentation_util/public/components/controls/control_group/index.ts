@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { ControlGroupContainer } from './embeddable/control_group_container';
+export { ControlGroupInput, ControlGroupOutput } from './types';
+export type { ControlGroupContainer } from './embeddable/control_group_container';
 export { ControlGroupContainerFactory } from './embeddable/control_group_container_factory';
-export { ControlGroupContainerEmbeddable, ControlGroupInput, ControlGroupOutput } from './types';

@@ -25,6 +25,8 @@ import {
   EmbeddableStart,
   EmbeddableOutput,
   EmbeddableFactory,
+  ErrorEmbeddable,
+  isErrorEmbeddable,
 } from '../../services/embeddable';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
@@ -41,7 +43,7 @@ import { PresentationUtilPluginStart } from '../../services/presentation_util';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import {
   combineDashboardFiltersWithControlGroupFilters,
-  createAndSyncDashboardControlGroup,
+  syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
 import { ControlGroupContainer } from '../../../../presentation_util/public';
 
@@ -94,8 +96,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   private onDestroyControlGroup?: () => void;
+  private controlGroup?: ControlGroupContainer;
 
-  public controlGroup?: ControlGroupContainer;
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
   };
@@ -103,7 +105,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   constructor(
     initialInput: DashboardContainerInput,
     private readonly services: DashboardContainerServices,
-    parent?: Container
+    parent?: Container,
+    controlGroup?: ControlGroupContainer | ErrorEmbeddable
   ) {
     super(
       {
@@ -116,14 +119,15 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     );
 
     if (
+      controlGroup &&
+      !isErrorEmbeddable(controlGroup) &&
       services.presentationUtil.labsService.isProjectEnabled('labs:dashboard:dashboardControls')
     ) {
-      const { getEmbeddableFactory } = this.services.embeddable;
-      createAndSyncDashboardControlGroup({ dashboardContainer: this, getEmbeddableFactory }).then(
+      this.controlGroup = controlGroup;
+      syncDashboardControlGroup({ dashboardContainer: this, controlGroup: this.controlGroup }).then(
         (result) => {
           if (!result) return;
-          const { controlGroup, onDestroyControlGroup } = result;
-          this.controlGroup = controlGroup;
+          const { onDestroyControlGroup } = result;
           this.onDestroyControlGroup = onDestroyControlGroup;
         }
       );
