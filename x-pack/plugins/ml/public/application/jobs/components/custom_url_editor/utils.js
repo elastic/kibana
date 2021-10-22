@@ -36,7 +36,7 @@ export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
     urlType = URL_TYPE.KIBANA_DISCOVER;
   }
 
-  // For the Discover option, set the default index pattern to that
+  // For the Discover option, set the default data view to that
   // which matches the indices configured in the job datafeed.
   const datafeedConfig = job.datafeed_config;
   if (

@@ -18,7 +18,7 @@ verify_no_git_changes() {
   RED='\033[0;31m'
   C_RESET='\033[0m' # Reset color
 
-  GIT_CHANGES="$(git ls-files --modified)"
+  GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
   if [ "$GIT_CHANGES" ]; then
     echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
     echo -e "$GIT_CHANGES\n"
