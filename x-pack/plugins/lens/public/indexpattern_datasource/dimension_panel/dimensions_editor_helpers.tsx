@@ -217,7 +217,7 @@ export function getErrorMessage(
   }
   if (fieldInvalid) {
     return i18n.translate('xpack.lens.indexPattern.invalidFieldLabel', {
-      defaultMessage: 'Invalid field. Check your index pattern or pick another field.',
+      defaultMessage: 'Invalid field. Check your data view or pick another field.',
     });
   }
 }
