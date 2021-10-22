@@ -24,10 +24,28 @@ interface Props {
   onChange: (colorStop: ColorStop) => void;
 }
 
+interface ValidationResult {
+  color: boolean;
+  stop: boolean;
+}
+
+const isValidColorStop = (colorStop: ColorStop): ValidationResult & { valid: boolean } => {
+  const valid = !isNaN(colorStop.stop);
+  return {
+    valid,
+    stop: valid,
+    color: true,
+  };
+};
+
 export const StopColorPicker: FC<Props> = (props) => {
   const { stop, color, onDelete, onChange, removable = true } = props;
 
   const [colorStop, setColorStop] = useState<ColorStop>({ stop: stop ?? 0, color: color ?? '' });
+  const [areValidFields, setAreValidFields] = useState<ValidationResult>({
+    stop: true,
+    color: true,
+  });
 
   const onChangeInput = (updatedColorStop: ColorStop) => {
     setColorStop(updatedColorStop);
@@ -35,15 +53,28 @@ export const StopColorPicker: FC<Props> = (props) => {
 
   const [, cancel] = useDebounce(
     () => {
-      if (color === colorStop.color && stop === colorStop.stop) return;
+      if (color === colorStop.color && stop === colorStop.stop) {
+        return;
+      }
+
+      const { valid, ...validationResult } = isValidColorStop(colorStop);
+      if (!valid) {
+        setAreValidFields(validationResult);
+        return;
+      }
+
       onChange(colorStop);
     },
-    200,
+    150,
     [colorStop]
   );
 
   useEffect(() => {
-    setColorStop({ stop: stop ?? 0, color: color ?? '' });
+    const newColorStop = { stop: stop ?? 0, color: color ?? '' };
+    setColorStop(newColorStop);
+
+    const { valid, ...validationResult } = isValidColorStop(newColorStop);
+    setAreValidFields(validationResult);
   }, [color, stop]);
 
   useEffect(() => {
@@ -63,6 +94,7 @@ export const StopColorPicker: FC<Props> = (props) => {
             onChange={({ target: { valueAsNumber } }) =>
               onChangeInput({ ...colorStop, stop: valueAsNumber })
             }
+            isInvalid={!areValidFields.stop}
           />
         </EuiFlexItem>
 
@@ -75,6 +107,7 @@ export const StopColorPicker: FC<Props> = (props) => {
             onChange={(newColor) => {
               onChangeInput({ ...colorStop, color: newColor });
             }}
+            isInvalid={!areValidFields.color}
           />
         </EuiFlexItem>
 
