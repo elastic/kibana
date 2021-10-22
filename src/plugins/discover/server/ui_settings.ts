@@ -27,6 +27,7 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
   TRUNCATE_MAX_HEIGHT,
+  SHOW_FIELD_STATISTICS,
 } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
@@ -173,6 +174,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       name: 'discover:useLegacyDataGrid',
     },
   },
+
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
       defaultMessage: 'Modify columns when changing data views',
@@ -201,6 +203,24 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
+  },
+  [SHOW_FIELD_STATISTICS]: {
+    name: i18n.translate('discover.advancedSettings.discover.showFieldStatistics', {
+      defaultMessage: 'Show field statistics',
+    }),
+    description: i18n.translate(
+      'discover.advancedSettings.discover.showFieldStatisticsDescription',
+      {
+        defaultMessage: `Enable "Field statistics" table in Discover.`,
+      }
+    ),
+    value: false,
+    category: ['discover'],
+    schema: schema.boolean(),
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:showFieldStatistics',
+    },
   },
   [SHOW_MULTIFIELDS]: {
     name: i18n.translate('discover.advancedSettings.discover.showMultifields', {

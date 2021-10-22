@@ -24,12 +24,12 @@ export function f5LogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'f5Logs',
     name: i18n.translate('home.tutorials.f5Logs.nameTitle', {
-      defaultMessage: 'F5 logs',
+      defaultMessage: 'F5 Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.f5Logs.shortDescription', {
-      defaultMessage: 'Collect F5 Big-IP Access Policy Manager logs over syslog or from a file.',
+      defaultMessage: 'Collect and parse logs from F5 Big-IP Access Policy Manager with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.f5Logs.longDescription', {
       defaultMessage:
