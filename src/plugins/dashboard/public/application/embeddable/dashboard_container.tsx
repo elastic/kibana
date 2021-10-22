@@ -96,7 +96,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   private onDestroyControlGroup?: () => void;
-  private controlGroup?: ControlGroupContainer;
+  public controlGroup?: ControlGroupContainer;
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
