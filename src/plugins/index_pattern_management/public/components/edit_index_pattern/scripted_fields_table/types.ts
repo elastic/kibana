@@ -11,4 +11,5 @@ export interface ScriptedFieldItem {
   name: string;
   lang: estypes.ScriptLanguage;
   script: string;
+  isUserEditable?: boolean;
 }
