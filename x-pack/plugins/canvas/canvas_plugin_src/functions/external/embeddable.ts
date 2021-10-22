@@ -14,7 +14,7 @@ import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { decode, encode } from '../../../common/lib/embeddable_dataurl';
 import { InitializeArguments } from '.';
 
-interface Arguments {
+export interface Arguments {
   config: string;
   type: string;
 }

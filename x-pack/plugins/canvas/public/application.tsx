@@ -111,7 +111,6 @@ export const initializeCanvas = async (
     prependBasePath: coreStart.http.basePath.prepend,
     types: setupPlugins.expressions.getTypes(),
     paletteService: await setupPlugins.charts.palettes.getPalettes(),
-    embeddablesService: startPlugins.embeddable,
   });
 
   for (const fn of canvasFunctions) {
