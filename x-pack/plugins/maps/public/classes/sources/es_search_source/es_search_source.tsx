@@ -569,11 +569,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return this._tooltipFields.length > 0;
   }
 
-  async _loadTooltipProperties(
-    docId: string | number,
-    esIndex: string,
-    indexPattern: IndexPattern
-  ) {
+  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: IndexPattern) {
     if (this._tooltipFields.length === 0) {
       return {};
     }
@@ -594,7 +590,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const query = {
       language: 'kuery',
-      query: esIndex ? `_id:"${docId}" and _index:"${esIndex}"` : `_id:"${docId}"`, // todo: pending _index support on mvt
+      query: `_id:"${docId}" and _index:"${index}"`,
     };
 
     searchSource.setField('query', query);
