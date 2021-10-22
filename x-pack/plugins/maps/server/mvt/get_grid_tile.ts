@@ -7,7 +7,7 @@
 
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-import { GEOCENTROID_AGG_NAME, GEOTILE_GRID_AGG_NAME, RENDER_AS } from '../../common/constants';
+import { RENDER_AS } from '../../common/constants';
 
 function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
@@ -36,18 +36,6 @@ export async function getEsGridTile({
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
-
-    const aggs: Record<string, unknown> = {};
-
-    for (const key in requestBody.aggs[GEOTILE_GRID_AGG_NAME].aggs) {
-      if (requestBody.aggs[GEOTILE_GRID_AGG_NAME].aggs.hasOwnProperty(key)) {
-        if (key !== GEOCENTROID_AGG_NAME) {
-          aggs[key] = requestBody.aggs[GEOTILE_GRID_AGG_NAME].aggs[key];
-        }
-      }
-    }
-
-    const fields = requestBody.fields;
     const body = {
       size: 0, // no hits
       grid_precision: 7,
@@ -55,8 +43,8 @@ export async function getEsGridTile({
       extent: 4096, // full resolution,
       query: requestBody.query,
       grid_type: requestType === RENDER_AS.GRID ? 'grid' : 'centroid',
-      aggs,
-      fields,
+      aggs: requestBody.aggs,
+      fields: requestBody.fields,
       runtime_mappings: requestBody.runtime_mappings,
     };
     const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({

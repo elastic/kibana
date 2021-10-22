@@ -306,8 +306,8 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   _addNonCompositeAggsToSearchSource(
     searchSource: ISearchSource,
     indexPattern: IndexPattern,
-    precision: number | null,
-    bufferedExtent?: MapExtent | null
+    precision: number,
+    bufferedExtent?: MapExtent
   ) {
     searchSource.setField('aggs', {
       [GEOTILE_GRID_AGG_NAME]: {
@@ -428,14 +428,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   ): Promise<ITiledSingleLayerMvtParams> {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
-
-    this._addNonCompositeAggsToSearchSource(
-      searchSource,
-      indexPattern,
-      null, // needs to be set server-side
-      null // needs to be stripped server-side
-    );
-
+    searchSource.setField('aggs', this.getValueAggsDsl(indexPattern));
     const dsl = searchSource.getSearchRequestBody();
 
     const risonDsl = rison.encode(dsl);
