@@ -88,7 +88,7 @@ interface OwnProps {
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
   filters?: Filter[];
-  filterQuery: string;
+  filterQuery?: string;
   filterStatus?: AlertStatus;
   id: string;
   indexNames: string[];
