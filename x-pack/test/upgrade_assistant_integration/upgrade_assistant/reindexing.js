@@ -207,7 +207,7 @@ export default function ({ getService }) {
         await assertQueueState(undefined, 0);
 
         // Check that the closed index is still closed after reindexing
-        const { body: resolvedIndices } = await es.indices.resolveIndex({
+        const resolvedIndices = await es.indices.resolveIndex({
           name: nameOfIndexThatShouldBeClosed,
         });
 
