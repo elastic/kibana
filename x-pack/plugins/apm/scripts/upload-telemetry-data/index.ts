@@ -85,9 +85,8 @@ async function uploadData() {
         apmCustomLinkIndex: '.apm-custom-links',
         apmAgentConfigurationIndex: '.apm-agent-configuration',
       },
-      // TODO ask owners to fix
       search: (body) => {
-        return client.search(body);
+        return client.search(body) as Promise<any>;
       },
       indicesStats: (body) => {
         return client.indices.stats(body);
