@@ -101,7 +101,7 @@ export function telemetryTaskRunner(
         const esClient = await getEsClient();
         return Promise.all([
           getTotalCount(esClient, kibanaIndex, preconfiguredActions),
-          getInUseTotalCount(esClient, kibanaIndex),
+          getInUseTotalCount(esClient, kibanaIndex, undefined, preconfiguredActions),
           getExecutionsTotalCount(esClient, eventLogIndex),
         ])
           .then(([totalAggegations, totalInUse, totalExecutions]) => {
@@ -113,6 +113,8 @@ export function telemetryTaskRunner(
                 count_active_total: totalInUse.countTotal,
                 count_active_by_type: totalInUse.countByType,
                 count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
+                count_active_email_connectors_by_service_type: totalInUse.countEmailByService,
+                count_actions_namespaces: totalInUse.countNamespaces,
                 count_actions_executions: totalExecutions.countTotal,
                 count_actions_executions_by_type: totalExecutions.countByType,
                 count_actions_executions_failed: totalExecutions.countFailed,

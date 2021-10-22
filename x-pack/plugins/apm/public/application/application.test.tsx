@@ -18,8 +18,8 @@ import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { ApmPluginStartDeps } from '../plugin';
 
-jest.mock('../services/rest/index_pattern', () => ({
-  createStaticIndexPattern: () => Promise.resolve(undefined),
+jest.mock('../services/rest/data_view', () => ({
+  createStaticDataView: () => Promise.resolve(undefined),
 }));
 
 describe('renderApp', () => {

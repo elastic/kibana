@@ -357,6 +357,7 @@ export class DocLinksService {
           clusterPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-cluster`,
           elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
           elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}configuring-stack-security.html`,
+          elasticsearchEnableApiKeys: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
           indicesPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-indices`,
           kibanaTLS: `${ELASTICSEARCH_DOCS}security-basic-setup.html#encrypt-internode-communication`,
           kibanaPrivileges: `${KIBANA_DOCS}kibana-privileges.html`,
@@ -498,7 +499,7 @@ export class DocLinksService {
           netGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
           perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/${DOC_LINK_VERSION}/index.html`,
           phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/index.html`,
-          pythonGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
+          pythonGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/python-api/${DOC_LINK_VERSION}/index.html`,
           rubyOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/ruby_client.html`,
           rustGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/index.html`,
         },
@@ -715,6 +716,7 @@ export interface DocLinksStart {
       clusterPrivileges: string;
       elasticsearchSettings: string;
       elasticsearchEnableSecurity: string;
+      elasticsearchEnableApiKeys: string;
       indicesPrivileges: string;
       kibanaTLS: string;
       kibanaPrivileges: string;

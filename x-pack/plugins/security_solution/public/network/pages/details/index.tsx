@@ -302,8 +302,6 @@ const NetworkDetailsComponent: React.FC = () => {
         </>
       ) : (
         <SecuritySolutionPageWrapper>
-          <HeaderPage border title={ip} />
-
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}

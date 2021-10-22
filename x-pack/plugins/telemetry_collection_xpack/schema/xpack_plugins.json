@@ -11,15 +11,6 @@
         "count_total": {
           "type": "long"
         },
-        "count_active_total": {
-          "type": "long"
-        },
-        "count_active_alert_history_connectors": {
-          "type": "long",
-          "_meta": {
-            "description": "The total number of preconfigured alert history connectors used by rules."
-          }
-        },
         "count_actions_executions": {
           "type": "long"
         },
@@ -146,6 +137,15 @@
             }
           }
         },
+        "count_active_total": {
+          "type": "long"
+        },
+        "count_active_alert_history_connectors": {
+          "type": "long",
+          "_meta": {
+            "description": "The total number of preconfigured alert history connectors used by rules."
+          }
+        },
         "count_active_by_type": {
           "properties": {
             "DYNAMIC_KEY": {
@@ -228,8 +228,36 @@
               "type": "long"
             }
           }
+        },
+        "count_active_email_connectors_by_service_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "exchange_server": {
+              "type": "long"
+            },
+            "gmail": {
+              "type": "long"
+            },
+            "outlook365": {
+              "type": "long"
+            },
+            "elastic_cloud": {
+              "type": "long"
+            },
+            "other": {
+              "type": "long"
+            },
+            "ses": {
+              "type": "long"
+            }
+          }
+        },
+        "count_actions_namespaces": {
+          "type": "long"
+          }
         }
-      }
     },
     "alerts": {
       "properties": {
@@ -872,26 +900,26 @@
         "throttle_time": {
           "properties": {
             "min": {
-              "type": "keyword"
+              "type": "long"
             },
             "avg": {
-              "type": "keyword"
+              "type": "float"
             },
             "max": {
-              "type": "keyword"
+              "type": "long"
             }
           }
         },
         "schedule_time": {
           "properties": {
             "min": {
-              "type": "keyword"
+              "type": "long"
             },
             "avg": {
-              "type": "keyword"
+              "type": "float"
             },
             "max": {
-              "type": "keyword"
+              "type": "long"
             }
           }
         },
@@ -1077,6 +1105,9 @@
               "type": "long"
             }
           }
+        },
+        "count_rules_namespaces": {
+          "type": "long"
         }
       }
     },
@@ -8033,6 +8064,9 @@
           "items": {
             "type": "keyword"
           }
+        },
+        "failed_tasks": {
+          "type": "long"
         }
       }
     },

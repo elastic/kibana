@@ -103,6 +103,7 @@ export function telemetryTaskRunner(
                 count_active_by_type: totalInUse.countByType,
                 count_active_total: totalInUse.countTotal,
                 count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
+                count_rules_namespaces: totalInUse.countNamespaces,
                 count_rules_executions: totalExecutions.countTotal,
                 count_rules_executions_by_type: totalExecutions.countByType,
                 count_rules_executions_failured: totalExecutions.countTotalFailures,
