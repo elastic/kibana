@@ -62,5 +62,15 @@ export const addNewColorStop = (palette: Palette) => (colorStops: ColorStop[]) =
   ];
 };
 
-export const reduceColorsByStopsSize = (colors: string[] = [], stopsSize: number) =>
-  take(colors, stopsSize);
+export const reduceColorsByStopsSize = (colors: string[] = [], stopsSize: number) => {
+  const reducedColors = take(colors, stopsSize);
+  const colorsLength = reducedColors.length;
+  if (colorsLength === stopsSize) {
+    return reducedColors;
+  }
+
+  return [
+    ...reducedColors,
+    ...Array(stopsSize - colorsLength).fill(reducedColors[colorsLength - 1] ?? ''),
+  ];
+};

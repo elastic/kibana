@@ -8,7 +8,7 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import { flowRight, identity } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { ColorStop, StopsPalettePickerProps } from '../types';
+import { ColorStop, CustomColorPalette, StopsPalettePickerProps } from '../types';
 import { PalettePicker } from '../palette_picker';
 import { StopColorPicker } from './stop_color_picker';
 import { Palette } from './types';
@@ -20,8 +20,10 @@ import {
   updateColorStop,
   addNewColorStop,
 } from './utils';
+import { ColorPalette } from '../../../../common/lib/palettes';
 
 const defaultStops = [0, 1];
+const MIN_STOPS = 2;
 
 export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
   const { palette, onChange } = props;
@@ -51,6 +53,16 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
     [onChange, palette]
   );
 
+  const onChangePalette = useCallback(
+    (newPalette: ColorPalette | CustomColorPalette | null) => {
+      if (newPalette) {
+        const newColors = reduceColorsByStopsSize(newPalette?.colors, stops.length);
+        props.onChange?.({ ...newPalette, colors: newColors, stops });
+      }
+    },
+    [props, stops]
+  );
+
   const deleteColorStopAndApply = useCallback(
     (index: number) => updatePalette(deleteColorStop(index))(paletteColorStops),
     [paletteColorStops, updatePalette]
@@ -71,6 +83,7 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
     <StopColorPicker
       {...rest}
       key={index}
+      removable={index >= MIN_STOPS}
       onDelete={() => deleteColorStopAndApply(index)}
       onChange={(cp: ColorStop) => updateColorStopAndApply(index, cp)}
     />
@@ -83,7 +96,7 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
           <PalettePicker
             additionalPalettes={palette?.id === 'custom' ? [palette] : []}
             palette={props.palette ?? undefined}
-            onChange={props.onChange}
+            onChange={onChangePalette}
             clearable={false}
           />
         </EuiFlexItem>

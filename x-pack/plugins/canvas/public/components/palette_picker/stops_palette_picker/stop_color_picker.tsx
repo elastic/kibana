@@ -17,6 +17,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { ColorStop } from '../types';
 
 interface Props {
+  removable?: boolean;
   stop?: number;
   color?: string;
   onDelete: () => void;
@@ -24,7 +25,8 @@ interface Props {
 }
 
 export const StopColorPicker: FC<Props> = (props) => {
-  const { stop, color, onDelete, onChange } = props;
+  const { stop, color, onDelete, onChange, removable = true } = props;
+
   const [colorStop, setColorStop] = useState<ColorStop>({ stop: stop ?? 0, color: color ?? '' });
 
   const onChangeInput = (updatedColorStop: ColorStop) => {
@@ -33,13 +35,16 @@ export const StopColorPicker: FC<Props> = (props) => {
 
   const [, cancel] = useDebounce(
     () => {
-      if (stop !== colorStop.stop || color !== colorStop.color) {
-        onChange(colorStop);
-      }
+      if (color === colorStop.color && stop === colorStop.stop) return;
+      onChange(colorStop);
     },
     200,
-    [colorStop, stop, color]
+    [colorStop]
   );
+
+  useEffect(() => {
+    setColorStop({ stop: stop ?? 0, color: color ?? '' });
+  }, [color, stop]);
 
   useEffect(() => {
     return () => {
@@ -79,6 +84,7 @@ export const StopColorPicker: FC<Props> = (props) => {
             color="danger"
             title={'Delete'}
             onClick={onDelete}
+            isDisabled={!removable}
             aria-label="212"
           />
         </EuiFlexItem>
