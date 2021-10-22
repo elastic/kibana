@@ -28,7 +28,6 @@ import {
 } from './internal_utils';
 import { DEFAULT_REFRESH_SETTING } from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 
 /**
  * An object that should have its spaces updated.
@@ -188,16 +187,6 @@ export async function updateObjectsSpaces({
       )
     : undefined;
 
-  // fail fast if we can't verify a 404 response is from Elasticsearch
-  if (
-    bulkGetResponse &&
-    isNotFoundFromUnsupportedServer({
-      statusCode: bulkGetResponse.statusCode,
-      headers: bulkGetResponse.headers,
-    })
-  ) {
-    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-  }
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;
   const bulkOperationParams: estypes.BulkOperationContainer[] = [];
