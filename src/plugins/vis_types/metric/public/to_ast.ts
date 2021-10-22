@@ -85,6 +85,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     const palette = buildExpressionFunction('palette', {
       ...stopsWithColors,
       range: 'number',
+      continuity: 'none',
     });
 
     metricVis.addArgument('palette', buildExpression([palette]));
