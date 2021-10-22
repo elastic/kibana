@@ -2379,12 +2379,12 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.29":
-  version "8.0.0-canary.29"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.29.tgz#4dd249418c899935f58411683820bff0f53fcd58"
-  integrity sha512-51stxLdblxhEiVSFjhQE5iQ2LAKbHkJqS42byW7niDXdsjbEfNHG3XLaaX6tq8fUGT+z5AqO8h7Kr3HcRo9Dfw==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.30":
+  version "8.0.0-canary.30"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.30.tgz#9c7c915516e05e56d4275e057e0960eab186318e"
+  integrity sha512-cFXDiycUNjmGms5f5cEBTxPuu4GtzV9W/hkJ6wmUn8Yf7P7TfbCK9VuQKjst+G05Nu0Wm4s5602Z4DaUjl+XjA==
   dependencies:
-    "@elastic/transport" "^0.0.11"
+    "@elastic/transport" "^0.0.12"
     tslib "^2.3.0"
 
 "@elastic/ems-client@7.16.0":
@@ -2571,10 +2571,10 @@
     ts-node "^10.2.1"
     typescript "^4.3.5"
 
-"@elastic/transport@^0.0.11":
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-0.0.11.tgz#192f36fe11a83a09d107a589add9046d81fc9bb9"
-  integrity sha512-5Rla02jyeMQ556XCfeds/gwNwZ84U8afLAqP7pMliQnTRu0EBUVCGH6j1cMdXk2kkpM51usNIxYFmB6IoBWMEw==
+"@elastic/transport@^0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-0.0.12.tgz#406580c22ee1f414af08e41fd05bffd04f9afbf6"
+  integrity sha512-YX1X9CLcrW1yUgXsuwtdrgalQcTxzATbjlsYLqj+mW4FgCrtyK2F1+crUcPza/wp5qOSv1lREz0PgMapHzKOCQ==
   dependencies:
     debug "^4.3.2"
     hpagent "^0.1.2"
