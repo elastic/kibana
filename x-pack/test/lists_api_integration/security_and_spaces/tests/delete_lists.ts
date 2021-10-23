@@ -33,7 +33,6 @@ import { DETECTION_TYPE, LIST_ID } from '../../../../plugins/lists/common/consta
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   describe('delete_lists', () => {
     describe('deleting lists', () => {
@@ -117,7 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('deleting lists referenced in exceptions', () => {
         afterEach(async () => {
-          await deleteAllExceptions(es);
+          await deleteAllExceptions(supertest);
         });
 
         it('should return an error when deleting a list referenced within an exception list item', async () => {
