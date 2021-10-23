@@ -20,7 +20,8 @@ async function removeLogFile() {
   await fs.unlink(logFilePath).catch(() => void 0);
 }
 
-describe('migration v2', () => {
+// skipped until https://github.com/elastic/elasticsearch/issues/79684 is fixed in Elasticsearch
+describe.skip('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
