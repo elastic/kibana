@@ -28,7 +28,7 @@ import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { ChartWrapper } from '../ChartWrapper';
 import { I18LABELS } from '../translations';
@@ -43,7 +43,7 @@ interface Props {
 
 export function PageViewsChart({ data, loading }: Props) {
   const history = useHistory();
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
 
   const { start, end } = urlParams;
   const diffInDays = moment(new Date(end as string)).diff(

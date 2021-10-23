@@ -12,7 +12,7 @@ import {
   createExploratoryViewUrl,
   HeaderMenuPortal,
 } from '../../../../../../observability/public';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AppMountParameters } from '../../../../../../../../src/core/public';
 import { InspectorHeaderLink } from '../../../shared/apm_header_action_menu/inspector_header_link';
@@ -38,7 +38,7 @@ export function UXActionMenu({
   const {
     services: { http },
   } = useKibana();
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { rangeTo, rangeFrom, serviceName } = urlParams;
 
   const uxExploratoryViewLink = createExploratoryViewUrl(

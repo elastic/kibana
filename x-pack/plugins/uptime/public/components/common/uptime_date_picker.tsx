@@ -7,7 +7,7 @@
 
 import React, { useContext, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { useUrlParams } from '../../hooks';
+import { useLegacyUrlParams } from '../../hooks';
 import { CLIENT_DEFAULTS } from '../../../common/constants';
 import {
   UptimeRefreshContext,
@@ -28,7 +28,7 @@ const isUptimeDefaultDateRange = (dateRangeStart: string, dateRangeEnd: string) 
 };
 
 export const UptimeDatePicker = () => {
-  const [getUrlParams, updateUrl] = useUrlParams();
+  const [getUrlParams, updateUrl] = useLegacyUrlParams();
   const { commonlyUsedRanges } = useContext(UptimeSettingsContext);
   const { refreshApp } = useContext(UptimeRefreshContext);
 

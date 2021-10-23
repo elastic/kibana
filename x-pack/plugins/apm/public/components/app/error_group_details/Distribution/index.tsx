@@ -30,7 +30,7 @@ import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_ann
 import { ChartContainer } from '../../../shared/charts/chart_container';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { LazyAlertsFlyout } from '../../../../../../observability/public';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 
@@ -64,7 +64,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const currentPeriod = getCoordinatedBuckets(distribution.currentPeriod);
   const previousPeriod = getCoordinatedBuckets(distribution.previousPeriod);
 
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { comparisonEnabled } = urlParams;
 
   const timeseries = [

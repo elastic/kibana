@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useUrlParams, UpdateUrlParams } from '../../../hooks';
+import { useLegacyUrlParams, UpdateUrlParams } from '../../../hooks';
 
 interface PopoverButtonProps {
   setIsOpen: (isOpen: boolean) => any;
@@ -75,7 +75,7 @@ export const MonitorListPageSizeSelect: React.FC<MonitorListPageSizeSelectProps>
   size,
   setSize,
 }) => {
-  const [, setUrlParams] = useUrlParams();
+  const [, setUrlParams] = useLegacyUrlParams();
 
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, size.toString());

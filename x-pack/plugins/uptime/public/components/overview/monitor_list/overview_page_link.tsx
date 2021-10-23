@@ -9,7 +9,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { useUrlParams } from '../../../hooks';
+import { useLegacyUrlParams } from '../../../hooks';
 
 const OverviewPageLinkButtonIcon = styled(EuiButtonIcon)`
   margin-top: 12px;
@@ -26,7 +26,7 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
   direction,
   pagination,
 }) => {
-  const [, updateUrlParams] = useUrlParams();
+  const [, updateUrlParams] = useLegacyUrlParams();
   const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
 
   const ariaLabel =

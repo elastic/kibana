@@ -15,13 +15,13 @@ import {
 } from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import { getPercentileLabel } from '../UXMetrics/translations';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { Metrics } from './Metrics';
 
 export function ClientMetrics() {
   const {
     urlParams: { percentile },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   return (
     <EuiPanel hasBorder={true}>

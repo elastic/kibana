@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { isEqual, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { I18LABELS } from '../../translations';
 import { formatToSec } from '../../UXMetrics/KeyUXMetrics';
 import { getPercentileLabel } from '../../UXMetrics/translations';
@@ -93,7 +93,7 @@ export function URLSearch({
   const {
     uxUiFilters: { transactionUrl, transactionUrlExcluded },
     urlParams,
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const { searchTerm, percentile } = urlParams;
 

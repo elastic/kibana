@@ -52,7 +52,7 @@ const {
 
 `useApmParams` will strip query parameters for which there is no validation. The route path should match exactly, but you can also use wildcards: `useApmParams('/*)`. In that case, the return type will be a union type of all possible matching routes.
 
-Previously we used `useUrlParams` for path and query parameters, which we are trying to get away from. When possible, any usage of `useUrlParams` should be replaced by `useApmParams` or other custom hooks that use `useApmParams` internally.
+Previously we used `useLegacyUrlParams` for path and query parameters, which we are trying to get away from. When possible, any usage of `useLegacyUrlParams` should be replaced by `useApmParams` or other custom hooks that use `useApmParams` internally.
 
 ## Linking
 

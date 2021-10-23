@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useUrlParams } from './use_url_params';
+import { useLegacyUrlParams } from './use_url_params';
 
 export const parseFiltersMap = (currentFilters: string): Map<string, string[]> => {
   try {
@@ -52,7 +52,7 @@ export const useFilterUpdate = (
   notValues: string[],
   shouldUpdateUrl: boolean = true
 ) => {
-  const [getUrlParams, updateUrl] = useUrlParams();
+  const [getUrlParams, updateUrl] = useLegacyUrlParams();
 
   const { filters, excludedFilters } = getUrlParams();
 

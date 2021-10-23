@@ -31,7 +31,7 @@ import {
   useSorting,
   useLink,
   useConfig,
-  useUrlParams,
+  useLegacyUrlParams,
   useBreadcrumbs,
 } from '../../../hooks';
 import { AgentPolicySummaryLine, SearchBar } from '../../../components';
@@ -48,7 +48,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   } = useConfig();
 
   // Table and search states
-  const { urlParams, toUrlParams } = useUrlParams();
+  const { urlParams, toUrlParams } = useLegacyUrlParams();
   const [search, setSearch] = useState<string>(
     Array.isArray(urlParams.kuery)
       ? urlParams.kuery[urlParams.kuery.length - 1]

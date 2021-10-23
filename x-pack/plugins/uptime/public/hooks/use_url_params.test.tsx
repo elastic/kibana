@@ -7,7 +7,7 @@
 
 import DateMath from '@elastic/datemath';
 import React, { useState, Fragment } from 'react';
-import { useUrlParams, UptimeUrlParamsHook } from './use_url_params';
+import { useLegacyUrlParams, UptimeUrlParamsHook } from './use_url_params';
 import { UptimeRefreshContext } from '../contexts';
 import { mountWithRouter, MountWithReduxProvider } from '../lib';
 import { createMemoryHistory } from 'history';
@@ -17,7 +17,7 @@ interface MockUrlParamsComponentProps {
   updateParams?: { [key: string]: any };
 }
 
-const UseUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponentProps) => {
+const UseLegacyUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponentProps) => {
   const [params, setParams] = useState({});
   const [getUrlParams, updateUrlParams] = hook();
   const queryParams = getUrlParams();
@@ -39,7 +39,7 @@ const UseUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponen
   );
 };
 
-describe('useUrlParams', () => {
+describe('useLegacyUrlParams', () => {
   let dateMathSpy: any;
   const MOCK_DATE_VALUE = 20;
 
@@ -55,7 +55,7 @@ describe('useUrlParams', () => {
     const component = mountWithRouter(
       <MountWithReduxProvider>
         <UptimeRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
-          <UseUrlParamsTestComponent hook={useUrlParams} />
+          <UseLegacyUrlParamsTestComponent hook={useLegacyUrlParams} />
         </UptimeRefreshContext.Provider>
       </MountWithReduxProvider>,
       history
@@ -78,7 +78,7 @@ describe('useUrlParams', () => {
             refreshApp: jest.fn(),
           }}
         >
-          <UseUrlParamsTestComponent hook={useUrlParams} />
+          <UseLegacyUrlParamsTestComponent hook={useLegacyUrlParams} />
         </UptimeRefreshContext.Provider>
       </MountWithReduxProvider>
     );
@@ -104,7 +104,10 @@ describe('useUrlParams', () => {
             refreshApp: jest.fn(),
           }}
         >
-          <UseUrlParamsTestComponent hook={useUrlParams} updateParams={{ pagination: '' }} />
+          <UseLegacyUrlParamsTestComponent
+            hook={useLegacyUrlParams}
+            updateParams={{ pagination: '' }}
+          />
         </UptimeRefreshContext.Provider>
       </MountWithReduxProvider>,
       history

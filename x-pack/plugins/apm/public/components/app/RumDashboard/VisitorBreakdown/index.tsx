@@ -10,10 +10,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { VisitorBreakdownChart } from '../Charts/VisitorBreakdownChart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 export function VisitorBreakdown() {
-  const { urlParams, uxUiFilters } = useUrlParams();
+  const { urlParams, uxUiFilters } = useLegacyUrlParams();
 
   const { start, end, searchTerm } = urlParams;
 

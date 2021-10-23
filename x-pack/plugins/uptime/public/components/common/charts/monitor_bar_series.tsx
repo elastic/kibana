@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { HistogramPoint } from '../../../../common/runtime_types';
 import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
-import { useUrlParams } from '../../../hooks';
+import { useLegacyUrlParams } from '../../../hooks';
 import { UptimeThemeContext } from '../../../contexts';
 import { getDateRangeFromChartElement } from './utils';
 
@@ -47,7 +47,7 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
     colors: { danger },
     chartTheme,
   } = useContext(UptimeThemeContext);
-  const [getUrlParams, updateUrlParams] = useUrlParams();
+  const [getUrlParams, updateUrlParams] = useLegacyUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
 
   const onBrushEnd: BrushEndListener = ({ x }) => {

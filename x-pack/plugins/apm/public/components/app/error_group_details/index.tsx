@@ -20,7 +20,7 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
@@ -94,7 +94,7 @@ function ErrorGroupHeader({
 }
 
 export function ErrorGroupDetails() {
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
 
   const { serviceName } = useApmServiceContext();
 

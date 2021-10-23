@@ -13,7 +13,7 @@ import {
   useGetUrlParams,
   useIndexPattern,
   useUpdateKueryString,
-  useUrlParams,
+  useLegacyUrlParams,
 } from '../../../hooks';
 import { setEsKueryString } from '../../../state/actions';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -72,7 +72,7 @@ export const useQueryBar = (): UseQueryBarUtils => {
 
   const indexPattern = useIndexPattern();
 
-  const [, updateUrlParams] = useUrlParams();
+  const [, updateUrlParams] = useLegacyUrlParams();
 
   const [esFilters, error] = useUpdateKueryString(
     indexPattern,
