@@ -21,7 +21,7 @@ export class Interval {
       throw new Error('Failed to parse interval');
     }
     const timestamps: number[] = [];
-    while (now <= this.to) {
+    while (now < this.to) {
       timestamps.push(...new Array<number>(rate).fill(now));
       now = moment(now)
         .add(Number(args[1]), args[2] as any)

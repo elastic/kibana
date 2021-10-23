@@ -26,7 +26,7 @@ describe('breakdown metrics', () => {
 
     const start = new Date('2021-01-01T00:00:00.000Z').getTime();
 
-    const range = timerange(start, start + INTERVALS * 30 * 1000 - 1);
+    const range = timerange(start, start + INTERVALS * 30 * 1000);
 
     events = getBreakdownMetrics([
       ...range

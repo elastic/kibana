@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires*/
-require('@babel/register')({
-  extensions: ['.ts', '.js'],
-  presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
-});
-
-require('./es.ts');
+module.exports = {
+  rules: {
+    'import/no-default-export': 'off',
+  },
+};
