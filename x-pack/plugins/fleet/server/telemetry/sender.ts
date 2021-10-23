@@ -153,10 +153,14 @@ export class TelemetryEventsSender {
     clusterUuid: string | undefined,
     clusterVersionNumber: string | undefined
   ) {
+    // using ndjson so that each line will be wrapped in json envelope on server side
+    // see https://github.com/elastic/infra/blob/master/docs/telemetry/telemetry-next-dataflow.md#json-envelope
+    const ndjson = this.transformDataToNdjson(events);
+
     try {
-      const resp = await axios.post(telemetryUrl, events, {
+      const resp = await axios.post(telemetryUrl, ndjson, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-ndjson',
           'X-Elastic-Cluster-ID': clusterUuid,
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.16.0',
         },
@@ -168,4 +172,13 @@ export class TelemetryEventsSender {
       );
     }
   }
+
+  private transformDataToNdjson = (data: unknown[]): string => {
+    if (data.length !== 0) {
+      const dataString = data.map((dataItem) => JSON.stringify(dataItem)).join('\n');
+      return `${dataString}\n`;
+    } else {
+      return '';
+    }
+  };
 }

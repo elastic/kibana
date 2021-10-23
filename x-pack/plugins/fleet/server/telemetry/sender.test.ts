@@ -114,22 +114,19 @@ describe('TelemetryEventsSender', () => {
       expect(sender['queuesPerChannel']['my-channel2']['getEvents']).toBeCalledTimes(1);
       const headers = {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-ndjson',
           'X-Elastic-Cluster-ID': '1',
           'X-Elastic-Stack-Version': '8.0.0',
         },
       };
       expect(axios.post).toHaveBeenCalledWith(
         'https://telemetry.elastic.co/v3/send/my-channel',
-        [
-          { cluster_name: 'name', cluster_uuid: '1', 'event.kind': '1' },
-          { cluster_name: 'name', cluster_uuid: '1', 'event.kind': '2' },
-        ],
+        '{"event.kind":"1","cluster_uuid":"1","cluster_name":"name"}\n{"event.kind":"2","cluster_uuid":"1","cluster_name":"name"}\n',
         headers
       );
       expect(axios.post).toHaveBeenCalledWith(
         'https://telemetry.elastic.co/v3/send/my-channel2',
-        [{ cluster_name: 'name', cluster_uuid: '1', 'event.kind': '3' }],
+        '{"event.kind":"3","cluster_uuid":"1","cluster_name":"name"}\n',
         headers
       );
     });
