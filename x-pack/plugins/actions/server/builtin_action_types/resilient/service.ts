@@ -24,7 +24,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { getErrorMessage, request, throwIfRequestIsNotValid } from '../lib/axios_utils';
+import { getErrorMessage, request, throwIfResponseIsNotValid } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VIEW_INCIDENT_URL = `#incidents`;
@@ -134,7 +134,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
       });
 
@@ -186,7 +186,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
         requiredAttributesToBeInTheResponse: ['id', 'create_date'],
       });
@@ -221,7 +221,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
       });
 
@@ -258,7 +258,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
       });
 
@@ -287,7 +287,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
       });
 
@@ -313,7 +313,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
       });
 
@@ -338,7 +338,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
       });
 

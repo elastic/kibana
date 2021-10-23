@@ -78,7 +78,7 @@ export const getErrorMessage = (connector: string, msg: string) => {
   return `[Action][${connector}]: ${msg}`;
 };
 
-export const throwIfRequestIsNotValid = ({
+export const throwIfResponseIsNotValid = ({
   res,
   requiredAttributesToBeInTheResponse = [],
 }: {
@@ -110,19 +110,27 @@ export const throwIfRequestIsNotValid = ({
     throw new Error('Response is not a valid JSON');
   }
 
-  /**
-   * Check for required attributes only if provided and
-   * data is an object and not an array
-   */
-  if (requiredAttributesToBeInTheResponse.length > 0 && !Array.isArray(data)) {
+  if (requiredAttributesToBeInTheResponse.length > 0) {
+    const requiredAttributesError = new Error(
+      `Response is missing at least one of the expected fields: ${requiredAttributesToBeInTheResponse.join(
+        ','
+      )}`
+    );
+
+    /**
+     * If the response is an array and requiredAttributesToBeInTheResponse
+     * are not empty then we thrown an error assuming that the consumer
+     * expects an object response and not an array.
+     */
+
+    if (Array.isArray(data)) {
+      throw requiredAttributesError;
+    }
+
     requiredAttributesToBeInTheResponse.forEach((attr) => {
       // Check only for undefined as null is a valid value
       if (data[attr] === undefined) {
-        throw new Error(
-          `Response is missing at least one of the expected fields: ${requiredAttributesToBeInTheResponse.join(
-            ','
-          )}`
-        );
+        throw requiredAttributesError;
       }
     });
   }

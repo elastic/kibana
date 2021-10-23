@@ -27,7 +27,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { request, getErrorMessage, throwIfRequestIsNotValid } from '../lib/axios_utils';
+import { request, getErrorMessage, throwIfResponseIsNotValid } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VERSION = '2';
@@ -181,7 +181,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
         requiredAttributesToBeInTheResponse: ['id', 'key'],
       });
@@ -235,7 +235,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
         requiredAttributesToBeInTheResponse: ['id'],
       });
@@ -281,7 +281,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
       });
 
@@ -319,7 +319,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
         requiredAttributesToBeInTheResponse: ['id', 'created'],
       });
@@ -351,7 +351,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
         requiredAttributesToBeInTheResponse: ['capabilities'],
       });
@@ -382,7 +382,7 @@ export const createExternalService = (
           configurationUtilities,
         });
 
-        throwIfRequestIsNotValid({
+        throwIfResponseIsNotValid({
           res,
         });
 
@@ -397,7 +397,7 @@ export const createExternalService = (
           configurationUtilities,
         });
 
-        throwIfRequestIsNotValid({
+        throwIfResponseIsNotValid({
           res,
         });
 
@@ -429,7 +429,7 @@ export const createExternalService = (
           configurationUtilities,
         });
 
-        throwIfRequestIsNotValid({
+        throwIfResponseIsNotValid({
           res,
         });
 
@@ -444,7 +444,7 @@ export const createExternalService = (
           configurationUtilities,
         });
 
-        throwIfRequestIsNotValid({
+        throwIfResponseIsNotValid({
           res,
         });
 
@@ -507,7 +507,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
       });
 
@@ -535,7 +535,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfRequestIsNotValid({
+      throwIfResponseIsNotValid({
         res,
       });
 
