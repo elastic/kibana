@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -251,6 +252,11 @@ export interface DiscoverFieldProps {
    * @param fieldName name of the field to delete
    */
   onDeleteField?: (fieldName: string) => void;
+
+  /**
+   * Optionally show or hide field stats in the popover
+   */
+  showFieldStats?: boolean;
 }
 
 function DiscoverFieldComponent({
@@ -266,6 +272,7 @@ function DiscoverFieldComponent({
   multiFields,
   onEditField,
   onDeleteField,
+  showFieldStats,
 }: DiscoverFieldProps) {
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -362,15 +369,27 @@ function DiscoverFieldComponent({
     const details = getDetails(field);
     return (
       <>
-        <DiscoverFieldDetails
-          indexPattern={indexPattern}
-          field={field}
-          details={details}
-          onAddFilter={onAddFilter}
-        />
+        {showFieldStats && (
+          <>
+            <EuiTitle size="xxxs">
+              <h5>
+                {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+                  defaultMessage: 'Top 5 values',
+                })}
+              </h5>
+            </EuiTitle>
+            <DiscoverFieldDetails
+              indexPattern={indexPattern}
+              field={field}
+              details={details}
+              onAddFilter={onAddFilter}
+            />
+          </>
+        )}
+
         {multiFields && (
           <>
-            <EuiSpacer size="m" />
+            {showFieldStats && <EuiSpacer size="m" />}
             <MultiFields
               multiFields={multiFields}
               alwaysShowActionButton={alwaysShowActionButton}
@@ -378,6 +397,7 @@ function DiscoverFieldComponent({
             />
           </>
         )}
+        {(showFieldStats || multiFields) && <EuiHorizontalRule margin="m" />}
         <DiscoverFieldVisualize
           field={field}
           indexPattern={indexPattern}
@@ -388,7 +408,6 @@ function DiscoverFieldComponent({
       </>
     );
   };
-
   return (
     <EuiPopover
       display="block"
@@ -418,13 +437,6 @@ function DiscoverFieldComponent({
       panelClassName="dscSidebarItem__fieldPopoverPanel"
     >
       {popoverTitle}
-      <EuiTitle size="xxxs">
-        <h5>
-          {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-            defaultMessage: 'Top 5 values',
-          })}
-        </h5>
-      </EuiTitle>
       {infoIsOpen && renderPopover()}
     </EuiPopover>
   );
