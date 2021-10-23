@@ -415,7 +415,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       ).toBeTruthy();
     });
 
-    test('should set the isLegacy to false when creating a connector', async () => {
+    test('should set the usesTableApi to false when creating a connector', async () => {
       const newConnector = { ...usesTableApiConnector, config: {}, secrets: {} };
       const editActionConfig = jest.fn();
 
@@ -432,7 +432,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
         />
       );
 
-      expect(editActionConfig).toHaveBeenCalledWith('isLegacy', false);
+      expect(editActionConfig).toHaveBeenCalledWith('usesTableApi', false);
     });
 
     test('it should set the legacy attribute if it is not undefined', async () => {
