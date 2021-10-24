@@ -95,7 +95,7 @@ export const bulkOverwriteTransformedDocuments =
         // that another instance already updated these documents
         const errors: estypes.ErrorCause[] = (res.body.items ?? [])
           .filter((item) => item.index?.error)
-          .map((item) => item.index!.error! as estypes.ErrorCause)
+          .map((item) => item.index!.error!)
           .filter(({ type }) => type !== 'version_conflict_engine_exception');
 
         if (errors.length === 0) {
