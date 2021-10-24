@@ -11,8 +11,6 @@ import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
 import type { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 import type { PluginSetupContract as AlertingSetup } from '../../../alerting/public';
-import { PLUGIN_ID } from '../../common/constants/app';
-import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
 import { validateLookbackInterval, validateTopNBucket } from './validators';
 import { registerJobsHealthAlertingRule } from './jobs_health_rule';
 
@@ -139,22 +137,4 @@ export function registerMlAlerts(
   });
 
   registerJobsHealthAlertingRule(triggersActionsUi, alerting);
-
-  if (alerting) {
-    registerNavigation(alerting);
-  }
-}
-
-export function registerNavigation(alerting: AlertingSetup) {
-  alerting.registerNavigation(PLUGIN_ID, ML_ALERT_TYPES.ANOMALY_DETECTION, (alert) => {
-    const alertParams = alert.params as MlAnomalyDetectionAlertParams;
-    const jobIds = [
-      ...new Set([
-        ...(alertParams.jobSelection.jobIds ?? []),
-        ...(alertParams.jobSelection.groupIds ?? []),
-      ]),
-    ];
-
-    return formatExplorerUrl('', { jobIds });
-  });
 }

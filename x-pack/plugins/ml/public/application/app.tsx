@@ -27,6 +27,7 @@ import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import { registerNavigation } from '../alerting/register_navigation';
 export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'indexPatternManagement'> &
   MlStartDependencies;
 
@@ -90,6 +91,10 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   const I18nContext = coreStart.i18n.Context;
   const ApplicationUsageTrackingProvider =
     deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+
+  if (deps.alerting) {
+    registerNavigation(deps.alerting);
+  }
 
   return (
     /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl

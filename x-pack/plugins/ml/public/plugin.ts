@@ -98,6 +98,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const kibanaVersion = this.initializerContext.env.packageInfo.version;
         const { renderApp } = await import('./application/app');
+
         return renderApp(
           coreStart,
           {
@@ -114,6 +115,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             uiActions: pluginsStart.uiActions,
             kibanaVersion,
             triggersActionsUi: pluginsStart.triggersActionsUi,
+            alerting: pluginsSetup.alerting,
             dataVisualizer: pluginsStart.dataVisualizer,
             usageCollection: pluginsSetup.usageCollection,
           },
