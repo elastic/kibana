@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import {  EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { TestProviders } from '../../../common/mock';
 import { LinkPanel } from './link_panel';
 
