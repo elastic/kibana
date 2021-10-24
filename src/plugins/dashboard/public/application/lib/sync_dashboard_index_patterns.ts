@@ -38,6 +38,9 @@ export const syncDashboardIndexPatterns = ({
         if (!embeddableIndexPatterns) return;
         panelIndexPatterns.push(...embeddableIndexPatterns);
       });
+      if (container.controlGroup) {
+        panelIndexPatterns.push(...(container.controlGroup.getOutput().dataViews ?? []));
+      }
       panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
 
       /**
@@ -50,9 +53,6 @@ export const syncDashboardIndexPatterns = ({
         Object.values(container.getOutput().embeddableLoaded).some((value) => value === false)
       ) {
         return;
-      }
-      if (container.controlGroup) {
-        panelIndexPatterns.push(...(container.controlGroup.getOutput().dataViews ?? []));
       }
       return panelIndexPatterns;
     }),
