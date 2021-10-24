@@ -10,7 +10,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { Filter, Query } from '../../services/data';
 import { ViewMode } from '../../services/embeddable';
-import { DashboardControlGroupInput } from '../lib/dashboard_control_group';
+import type { DashboardControlGroupInput } from '../lib/dashboard_control_group';
 import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
 
 export const dashboardStateSlice = createSlice({

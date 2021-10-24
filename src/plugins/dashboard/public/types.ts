@@ -33,11 +33,11 @@ import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
 import { DataPublicPluginStart, IndexPatternsContract } from './services/data';
 import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
-import { DashboardContainer, DashboardSavedObject } from '.';
+import type { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
-import { DashboardControlGroupInput } from './application/lib/dashboard_control_group';
+import type { DashboardControlGroupInput } from './application/lib/dashboard_control_group';
 
 export { SavedDashboardPanel };
 

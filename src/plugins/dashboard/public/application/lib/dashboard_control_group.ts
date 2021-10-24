@@ -8,17 +8,14 @@
 
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter } from '@kbn/es-query';
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
-import {
-  ControlGroupContainer,
-  ControlGroupInput,
-  ControlStyle,
-} from '../../../../presentation_util/public';
+
 import { DashboardContainer } from '..';
-import { DashboardContainerInput, DashboardSavedObject } from '../..';
 import { DashboardState } from '../../types';
+import { getDefaultDashboardControlGroupInput } from '../../dashboard_constants';
+import { DashboardContainerInput, DashboardSavedObject } from '../..';
+import { ControlGroupContainer, ControlGroupInput } from '../../../../presentation_util/public';
 
 // only part of the control group input should be stored in dashboard state. The rest is passed down from the dashboard.
 export interface DashboardControlGroupInput {
@@ -39,11 +36,6 @@ type DashboardControlGroupCommonKeys = keyof Pick<
   DashboardContainerInput | ControlGroupInput,
   'filters' | 'lastReloadRequestTime' | 'timeRange' | 'query'
 >;
-
-export const getDefaultDashboardControlGroupInput = () => ({
-  controlStyle: 'oneLine' as ControlStyle,
-  panels: {},
-});
 
 export const syncDashboardControlGroup = async ({
   controlGroup,

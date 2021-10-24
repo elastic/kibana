@@ -12,7 +12,7 @@ import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common
 import uuid from 'uuid';
 import { DashboardContainerInput } from '../..';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
-import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
+import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import {
   Container,
   ErrorEmbeddable,
@@ -30,7 +30,7 @@ import {
   ControlGroupOutput,
   CONTROL_GROUP_TYPE,
 } from '../../../../presentation_util/public';
-import { getDefaultDashboardControlGroupInput } from '../lib/dashboard_control_group';
+import { getDefaultDashboardControlGroupInput } from '../../dashboard_constants';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -86,8 +86,11 @@ export class DashboardContainerFactoryDefinition
       viewMode: initialInput.viewMode,
       id: uuid.v4(),
     });
+    const { DashboardContainer: DashboardContainerEmbeddable } = await import(
+      './dashboard_container'
+    );
 
-    return new DashboardContainer(initialInput, services, parent, controlGroup);
+    return new DashboardContainerEmbeddable(initialInput, services, parent, controlGroup);
   };
 
   public inject = createInject(this.persistableStateService);

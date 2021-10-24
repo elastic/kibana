@@ -90,6 +90,7 @@ export abstract class Container<
         },
       },
     };
+
     this.updateInput(panels as Partial<TContainerInput>);
   }
 
