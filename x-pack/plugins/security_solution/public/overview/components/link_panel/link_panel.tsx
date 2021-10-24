@@ -59,6 +59,7 @@ const sortAndChunkItems = (
 };
 
 const LinkPanelComponent = ({
+  button,
   columns,
   dataTestSubj,
   defaultSortField,
@@ -70,6 +71,7 @@ const LinkPanelComponent = ({
   splitPanel,
   subtitle,
 }: {
+  button?: React.ReactNode;
   columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>>;
   dataTestSubj: string;
   defaultSortField?: string;
@@ -127,7 +129,9 @@ const LinkPanelComponent = ({
         <EuiFlexItem grow={1}>
           <InspectButtonContainer>
             <EuiPanel hasBorder>
-              <HeaderSection id={inspectQueryId} subtitle={subtitle} title={panelTitle} />
+              <HeaderSection id={inspectQueryId} subtitle={subtitle} title={panelTitle}>
+                <>{button}</>
+              </HeaderSection>
               {splitPanel}
               {infoPanel}
               {chunkedItems.length > 0 && (

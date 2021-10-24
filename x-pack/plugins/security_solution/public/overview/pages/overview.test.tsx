@@ -24,6 +24,7 @@ import {
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
 import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
+import { useTIIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
 import { useCtiEventCounts } from '../containers/overview_cti_links/use_cti_event_counts';
 import {
   mockCtiEventCountsResponse,
@@ -85,6 +86,10 @@ useCTIEventCountsMock.mockReturnValue(mockCtiEventCountsResponse);
 jest.mock('../containers/overview_cti_links/use_is_threat_intel_module_enabled');
 const useIsThreatIntelModuleEnabledMock = useIsThreatIntelModuleEnabled as jest.Mock;
 useIsThreatIntelModuleEnabledMock.mockReturnValue(true);
+
+jest.mock('../containers/overview_cti_links/use_ti_integrations');
+const useTIIntegrationsMock = useTIIntegrations as jest.Mock;
+useTIIntegrationsMock.mockReturnValue({});
 
 jest.mock('../containers/overview_risky_host_links/use_hosts_risk_score');
 const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;

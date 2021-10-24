@@ -13,8 +13,10 @@ import { CtiWithEvents } from './cti_with_events';
 
 export type CtiEnabledModuleProps = Omit<
   ThreatIntelLinkPanelProps,
-  'hasSomeThreatIntelData' | 'someIntegrationsIsInstalled'
->;
+  'hasSomeThreatIntelData' | 'someIntegrationsIsInstalled' | 'someIntegrationsIsDisabled'
+> & {
+  someIntegrationsIsDisabled: boolean;
+};
 
 export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props) => {
   const { eventCountsByDataset, totalCount } = useCtiEventCounts(props);
