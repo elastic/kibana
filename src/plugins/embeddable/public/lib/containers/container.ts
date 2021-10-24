@@ -90,7 +90,6 @@ export abstract class Container<
         },
       },
     };
-
     this.updateInput(panels as Partial<TContainerInput>);
   }
 
@@ -247,6 +246,7 @@ export abstract class Container<
         [panelState.explicitInput.id]: panelState,
       },
     } as Partial<TContainerInput>);
+
     return await this.untilEmbeddableLoaded<TEmbeddable>(panelState.explicitInput.id);
   }
 
