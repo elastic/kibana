@@ -16,12 +16,12 @@ export type ThreatIntelLinkPanelProps = Pick<
   'from' | 'to' | 'deleteQuery' | 'setQuery'
 > & {
   hasSomeThreatIntelData: boolean | undefined;
-  someIntegrationsIsInstalled: boolean;
-  someIntegrationsIsDisabled: boolean;
+  someIntegrationsIsInstalled: boolean | undefined;
+  someIntegrationsIsDisabled: boolean | undefined;
 };
 
 const ThreatIntelLinkPanelComponent: React.FC<ThreatIntelLinkPanelProps> = (props) => {
-  const { hasSomeThreatIntelData, someIntegrationsIsInstalled } = props;
+  const { hasSomeThreatIntelData, someIntegrationsIsInstalled, someIntegrationsIsDisabled } = props;
   if (hasSomeThreatIntelData === undefined) {
     return null;
   }
@@ -29,7 +29,10 @@ const ThreatIntelLinkPanelComponent: React.FC<ThreatIntelLinkPanelProps> = (prop
   const isThreatIntelModuleEnabled = hasSomeThreatIntelData || someIntegrationsIsInstalled;
   return isThreatIntelModuleEnabled ? (
     <div data-test-subj="cti-enabled-module">
-      <CtiEnabledModule {...props} />
+      <CtiEnabledModule
+        {...props}
+        someIntegrationsIsDisabled={Boolean(someIntegrationsIsDisabled)}
+      />
     </div>
   ) : (
     <div data-test-subj="cti-disabled-module">

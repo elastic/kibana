@@ -16,8 +16,8 @@ interface Integration {
 }
 
 interface TIIntegrationStatus {
-  someIntegrationsIsInstalled: boolean;
-  someIntegrationsIsDisabled: boolean;
+  someIntegrationsIsInstalled: boolean | undefined;
+  someIntegrationsIsDisabled: boolean | undefined;
 }
 
 export const useTIIntegrations = () => {
@@ -50,7 +50,10 @@ export const useTIIntegrations = () => {
           someIntegrationsIsDisabled,
         });
       } catch (e) {
-        //
+        setTIIntegrationsStatus({
+          someIntegrationsIsInstalled: undefined,
+          someIntegrationsIsDisabled: undefined,
+        });
       }
     };
 
