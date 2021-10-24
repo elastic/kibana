@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiText,
+  EuiPopover,
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiLink,
+  EuiToolTip,
+} from '@elastic/eui';
 import moment from 'moment-timezone';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
@@ -15,6 +23,7 @@ import { PackagePolicy } from '../../../fleet/common';
 import { useRouterNavigate } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
+import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
 
 const UpdatedBy = styled.span`
   white-space: nowrap;
@@ -32,10 +41,44 @@ const renderName = (_: unknown, item: { id: string; attributes: { name: string }
   <ScheduledQueryName id={item.id} name={item.attributes.name} />
 );
 
+const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: string[] }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onButtonClick = useCallback(
+    () => setIsPopoverOpen((currentIsPopoverOpen) => !currentIsPopoverOpen),
+    []
+  );
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+
+  const button = useMemo(
+    () => (
+      <EuiButtonEmpty onClick={onButtonClick}>
+        <>{agentPolicyIds?.length ?? 0}</>
+      </EuiButtonEmpty>
+    ),
+    [agentPolicyIds?.length, onButtonClick]
+  );
+
+  return (
+    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover} initialFocus={false}>
+      <EuiText size="s">
+        {agentPolicyIds?.map((policyId) => (
+          <div key={policyId}>
+            <AgentsPolicyLink policyId={policyId} />
+          </div>
+        ))}
+      </EuiText>
+    </EuiPopover>
+  );
+};
+
 const PacksTableComponent = () => {
   const { data } = usePacks({});
 
-  const renderAgentPolicy = useCallback((policyIds) => <>{policyIds?.length ?? 0}</>, []);
+  const renderAgentPolicy = useCallback(
+    (agentPolicyIds) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
+    []
+  );
 
   const renderQueries = useCallback(
     (queries) => <>{(queries && Object.keys(queries).length) ?? 0}</>,

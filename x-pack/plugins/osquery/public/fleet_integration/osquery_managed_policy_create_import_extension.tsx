@@ -15,7 +15,7 @@ import {
   EuiLink,
   EuiAccordion,
 } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { produce } from 'immer';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -35,7 +35,16 @@ import {
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
 import { DisabledCallout } from './disabled_callout';
-import { Form, useForm, Field, getUseField, FIELD_TYPES, fieldValidators } from '../shared_imports';
+import { ConfigUploader } from './config_uploader';
+import {
+  Form,
+  useForm,
+  useFormData,
+  Field,
+  getUseField,
+  FIELD_TYPES,
+  fieldValidators,
+} from '../shared_imports';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -67,6 +76,16 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     defaultValue: {
       config: JSON.stringify(get(newPolicy, 'inputs[0].config.osquery.value', {}), null, 2),
     },
+    serializer: (formData) => {
+      let config;
+      try {
+        // @ts-expect-error update types
+        config = JSON.parse(formData.config);
+      } catch (e) {
+        config = {};
+      }
+      return { config };
+    },
     schema: {
       config: {
         label: i18n.translate('xpack.osquery.fleetIntegration.osqueryConfig.configFieldLabel', {
@@ -87,30 +106,52 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     },
   });
 
-  const { isValid, getFormData } = configForm;
+  const [{ config }] = useFormData({ form: configForm, watch: 'config' });
+  const { isValid, setFieldValue } = configForm;
 
   const agentsLinkHref = useMemo(() => {
     if (!policy?.policy_id) return '#';
 
     return getUrlForApp(PLUGIN_ID, {
-      path:
-        `#` +
-        pagePathGetters.policy_details({ policyId: policy?.policy_id })[1] +
-        '?openEnrollmentFlyout=true',
+      path: pagePathGetters.policy_details({ policyId: policy?.policy_id })[1],
     });
   }, [getUrlForApp, policy?.policy_id]);
+
+  const handleConfigUpload = useCallback(
+    (newConfig) => {
+      let currentPacks = {};
+      try {
+        currentPacks = JSON.parse(config)?.packs;
+        // eslint-disable-next-line no-empty
+      } catch (e) {}
+
+      if (newConfig) {
+        setFieldValue(
+          'config',
+          JSON.stringify(
+            {
+              ...newConfig,
+              ...(currentPacks ? { packs: currentPacks } : {}),
+            },
+            null,
+            2
+          )
+        );
+      }
+    },
+    [config, setFieldValue]
+  );
 
   useDebounce(
     () => {
       // if undefined it means that config was not modified
       if (isValid === undefined) return;
-      const configData = getFormData().config;
 
       const updatedPolicy = produce(newPolicy, (draft) => {
-        if (isEmpty(configData)) {
+        if (isEmpty(config)) {
           unset(draft, 'inputs[0].config');
         } else {
-          set(draft, 'inputs[0].config.osquery.value', configData);
+          set(draft, 'inputs[0].config.osquery.value', config);
         }
         return draft;
       });
@@ -118,7 +159,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       onChange({ isValid: !!isValid, updatedPolicy: isValid ? updatedPolicy : newPolicy });
     },
     500,
-    [isValid]
+    [isValid, config]
   );
 
   useEffect(() => {
@@ -220,11 +261,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         </>
       ) : null}
 
-      <NavigationButtons
-        isDisabled={!editMode}
-        integrationPolicyId={policy?.id}
-        agentPolicyId={policy?.policy_id}
-      />
+      <NavigationButtons isDisabled={!editMode} agentPolicyId={policy?.policy_id} />
       <EuiSpacer size="xxl" />
       <StyledEuiAccordion
         id="advanced"
@@ -238,6 +275,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         <EuiSpacer size="xs" />
         <Form form={configForm}>
           <CommonUseField path="config" />
+          <ConfigUploader onChange={handleConfigUpload} />
         </Form>
       </StyledEuiAccordion>
     </>

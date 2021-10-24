@@ -93,6 +93,7 @@ const StyledFieldSpan = styled.span`
 // align the icon to the inputs
 const StyledButtonWrapper = styled.div`
   margin-top: 11px;
+  width: 24px;
 `;
 
 const ECSFieldWrapper = styled(EuiFlexItem)`
@@ -477,11 +478,18 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
     );
 
     useEffect(() => {
+      if (onAdd && !deepEqual(formData, currentFormData.current)) {
+        currentFormData.current = formData;
+        handleSubmit();
+      }
+    }, [handleSubmit, formData, onAdd]);
+
+    useEffect(() => {
       if (onChange && !deepEqual(formData, currentFormData.current)) {
         currentFormData.current = formData;
         onChange(formData);
       }
-    }, [defaultValue, formData, onChange]);
+    }, [defaultValue, formData, handleDeleteClick, onChange]);
 
     useEffect(() => {
       if (defaultValue) {
@@ -526,7 +534,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
               {!isDisabled && (
                 <EuiFlexItem grow={false}>
                   <StyledButtonWrapper>
-                    {defaultValue ? (
+                    {defaultValue && (
                       <EuiButtonIcon
                         aria-label={i18n.translate(
                           'xpack.osquery.pack.queryFlyoutForm.deleteECSMappingRowButtonAriaLabel',
@@ -537,18 +545,6 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
                         iconType="trash"
                         color="danger"
                         onClick={handleDeleteClick}
-                      />
-                    ) : (
-                      <EuiButtonIcon
-                        aria-label={i18n.translate(
-                          'xpack.osquery.pack.queryFlyoutForm.addECSMappingRowButtonAriaLabel',
-                          {
-                            defaultMessage: 'Add ECS mapping row',
-                          }
-                        )}
-                        iconType="plus"
-                        color="primary"
-                        onClick={handleSubmit}
                       />
                     )}
                   </StyledButtonWrapper>
