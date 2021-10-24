@@ -53,6 +53,7 @@ interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
   openInspector: () => void;
+  openScheduler: () => void;
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   hasUnappliedChanges: boolean;
@@ -78,6 +79,7 @@ export const getTopNavConfig = (
     hasUnsavedChanges,
     setHasUnsavedChanges,
     openInspector,
+    openScheduler,
     originatingApp,
     setOriginatingApp,
     hasUnappliedChanges,
@@ -338,6 +340,27 @@ export const getTopNavConfig = (
       },
       // disable the Share button if no action specified
       disableButton: !share || !!embeddableId,
+    },
+    {
+      id: 'scheduler',
+      label: i18n.translate('visualize.topNavMenu.openSchedulerButtonLabel', {
+        defaultMessage: 'schedule',
+      }),
+      description: i18n.translate('visualize.topNavMenu.openSchedulerButtonAriaLabel', {
+        defaultMessage: 'Open Scheduler for visualization',
+      }),
+      testId: 'openSchedulerButton',
+      disableButton() {
+        return !embeddableHandler.hasInspector || !embeddableHandler.hasInspector();
+      },
+      run: openScheduler,
+      tooltip() {
+        if (!embeddableHandler.hasInspector || !embeddableHandler.hasInspector()) {
+          return i18n.translate('visualize.topNavMenu.openSchedulerDisabledButtonTooltip', {
+            defaultMessage: `This visualization doesn't support any schedulers.`,
+          });
+        }
+      },
     },
     ...(originatingApp
       ? [

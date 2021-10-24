@@ -74,14 +74,11 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
         aria-label={ariaLabel}
       />
     ) : (
-      <EuiIcon
-        type="logoElastic"
-        size="l"
-        data-test-subj={testSubj}
-        className="chrHeaderLogo__cluster"
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
-          defaultMessage: 'Elastic Logo',
-        })}
+      <img
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFMAAABSCAMAAAAfMBiXAAAANlBMVEUAAAA3qlw6rF06r1wolFpCt15Ct15Ct146r1xBtl4smVoum1o8r1wii1pCt14plVo8r1w0pVyunFxrAAAADXRSTlMAGXM07Nfxs1iTxZ9MTe3hXAAAAadJREFUWMOtlgtuwzAMQ+VPfnZlb/e/7IK2QDNwiRaZPMADrb4QFXoeiU2MU+cCwza3XpnEtLTWuhKJ69T29F5oj45Tm58tNZAeve28V0vNHHeW9k5XTs04tSMyU9yZj0hNDHeOLfcQ3PlEn1kH3Tnmq7+Yo+5gS42j7mBL9bsDSH2net1ppy111B1sqWXUHWypweHOdUvNN90BFrbUcNcds6VmhzsGUpPDHQOpDncs5MPhjoFUhzsWMt7eHcy3/o7DHaOlVoc7Rks13PEgi9MdfPgn4codV0vNhjsOpAZjdxzI7HIHkdfrsc0OpClSiss8gFxPPYqTE6nXH+V2ze1/IqO9cMjFlve3OKzLZLfE9bD3c5kA6ayJOuDDcT183K4nCe5/m6fILN6sOlwTk4drYuIJMw0wgyES8fHrELPwa0o11sOTNF4TY6wH60eS0VRjPTgHDTIc/CzHk/k1pbJr4t4lYQREYh905TAL1OQeNAopUJN60EpjFn5NibAehMBnyTtoFmIKv6ZEfk0JsB6sgwo3BdaDc1AhJ8B6UA4q9JTKZ/7z5T/2xG2LklAswgAAAABJRU5ErkJggg=="
+        alt="logo"
+        width="24"
+        height="24"
       />
     );
 

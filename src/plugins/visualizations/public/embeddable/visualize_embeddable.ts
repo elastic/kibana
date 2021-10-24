@@ -42,6 +42,7 @@ import { SavedObjectAttributes } from '../../../../core/types';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
+import { createBrowserHistory } from 'history';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -187,6 +188,53 @@ export class VisualizeEmbeddable
         i18n.translate('visualizations.embeddable.inspectorTitle', {
           defaultMessage: 'Inspector',
         }),
+    });
+  };
+
+  public getColumns = (aggs: string | any[] | undefined) => {
+    if (!aggs) return [];
+    let columns = [];
+    for (let i = 0; i < aggs.length; i++) {
+      let key = aggs[i].id.toString();
+      let name = aggs[i].params?.customLabel;
+      if (!name) {
+        name = aggs[6].params?.field?.spec?.name || '-';
+      }
+      let type = aggs[6].params?.field?.spec?.type;
+      if (!type) {
+        type = 'string';
+      }
+      let obj = {
+        key,
+        name,
+        type,
+      };
+      columns.push(obj);
+    }
+    return columns;
+  };
+
+  public openScheduler = () => {
+    if (!this.handler) return;
+
+    const adapters = this.handler.inspect();
+    if (!adapters) return;
+    const history = createBrowserHistory({ forceRefresh: true });
+
+    const title = this.getTitle();
+    const columns = JSON.stringify(this.getColumns(this.vis?.data?.aggs?.aggs));
+    const request = JSON.stringify(adapters.requests?.getRequests()[0].json);
+    const href = window.location.href;
+    const id = href.split('#')[1].split('/')[2].split('?')[0];
+    const index = this.vis.data.indexPattern?.title;
+
+    localStorage.setItem('index', index ? index : '');
+    localStorage.setItem('id', id);
+    localStorage.setItem('title', title);
+    localStorage.setItem('request', request);
+    localStorage.setItem('columns', columns);
+    history.push({
+      pathname: '/app/scheduledReports/create',
     });
   };
 
