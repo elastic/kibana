@@ -46,9 +46,7 @@ export async function getServiceAgent({
     apm: {
       events: [
         ProcessorEvent.error,
-        getProcessorEventForTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.metric,
       ],
     },

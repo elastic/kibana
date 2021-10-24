@@ -91,9 +91,7 @@ export async function getServiceInstanceMetadataDetails({
           size: 1,
           query: {
             bool: {
-              filter: filter.concat(
-                getDocumentTypeFilterForTransactions(true)
-              ),
+              filter: filter.concat(getDocumentTypeFilterForTransactions(true)),
             },
           },
         },

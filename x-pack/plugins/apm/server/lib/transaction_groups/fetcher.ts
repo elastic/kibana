@@ -75,11 +75,7 @@ function getRequest(topTraceOptions: TopTraceOptions) {
 
   return {
     apm: {
-      events: [
-        getProcessorEventForTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,

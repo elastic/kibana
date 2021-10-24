@@ -71,9 +71,7 @@ export async function getErrorRate({
     },
     ...transactionNamefilter,
     ...transactionTypefilter,
-    ...getDocumentTypeFilterForTransactions(
-      searchAggregatedTransactions
-    ),
+    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
@@ -83,11 +81,7 @@ export async function getErrorRate({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,

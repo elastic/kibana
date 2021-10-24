@@ -43,9 +43,7 @@ export async function getTransactionsPerMinute({
     {
       apm: {
         events: [
-          getProcessorEventForTransactions(
-            searchAggregatedTransactions
-          ),
+          getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
       body: {

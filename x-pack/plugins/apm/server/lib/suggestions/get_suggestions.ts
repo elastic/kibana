@@ -27,9 +27,7 @@ export async function getSuggestions({
   const response = await apmEventClient.termsEnum('get_suggestions', {
     apm: {
       events: [
-        getProcessorEventForTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],

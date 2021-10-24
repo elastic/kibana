@@ -51,9 +51,7 @@ export async function getEnvironments({
   const params = {
     apm: {
       events: [
-        getProcessorEventForTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.metric,
         ProcessorEvent.error,
       ],

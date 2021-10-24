@@ -68,9 +68,7 @@ export async function getServiceTransactionGroups({
     {
       apm: {
         events: [
-          getProcessorEventForTransactions(
-            searchAggregatedTransactions
-          ),
+          getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
       body: {

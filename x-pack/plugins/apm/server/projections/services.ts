@@ -27,9 +27,7 @@ export function getServicesProjection({
   return {
     apm: {
       events: [
-        getProcessorEventForTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.metric as const,
         ProcessorEvent.error as const,
       ],

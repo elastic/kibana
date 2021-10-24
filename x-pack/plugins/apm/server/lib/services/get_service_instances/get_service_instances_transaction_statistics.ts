@@ -109,15 +109,11 @@ export async function getServiceInstancesTransactionStatistics<
       filter: [
         { term: { [SERVICE_NAME]: serviceName } },
         { term: { [TRANSACTION_TYPE]: transactionType } },
-        ...getDocumentTypeFilterForTransactions(
-          searchAggregatedTransactions
-        ),
+        ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
-        ...getDocumentTypeFilterForTransactions(
-          searchAggregatedTransactions
-        ),
+        ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
         ...(isComparisonSearch && serviceNodeIds
           ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
           : []),
@@ -154,9 +150,7 @@ export async function getServiceInstancesTransactionStatistics<
     {
       apm: {
         events: [
-          getProcessorEventForTransactions(
-            searchAggregatedTransactions
-          ),
+          getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
       body: { size: 0, query, aggs },

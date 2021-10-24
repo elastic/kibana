@@ -13,9 +13,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
-import {
-  getSearchAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../../helpers/aggregated_transactions';
 import {
   getDocumentTypeFilterForTransactions,
   getTransactionDurationFieldForTransactions,
@@ -54,17 +52,14 @@ export async function getTransactionDurationChartPreview({
           : []),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
-        ...getDocumentTypeFilterForTransactions(
-          searchAggregatedTransactions
-        ),
+        ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
       ] as QueryDslQueryContainer[],
     },
   };
 
-  const transactionDurationField =
-    getTransactionDurationFieldForTransactions(
-      searchAggregatedTransactions
-    );
+  const transactionDurationField = getTransactionDurationFieldForTransactions(
+    searchAggregatedTransactions
+  );
 
   const aggs = {
     timeseries: {
@@ -92,11 +87,7 @@ export async function getTransactionDurationChartPreview({
   };
   const params = {
     apm: {
-      events: [
-        getProcessorEventForTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: { size: 0, query, aggs },
   };

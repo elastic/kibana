@@ -39,9 +39,7 @@ export async function getDerivedServiceAnnotations({
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    ...getDocumentTypeFilterForTransactions(
-      searchAggregatedTransactions
-    ),
+    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...environmentQuery(environment),
   ];
 
@@ -50,9 +48,7 @@ export async function getDerivedServiceAnnotations({
       await apmEventClient.search('get_derived_service_annotations', {
         apm: {
           events: [
-            getProcessorEventForTransactions(
-              searchAggregatedTransactions
-            ),
+            getProcessorEventForTransactions(searchAggregatedTransactions),
           ],
         },
         body: {
@@ -83,9 +79,7 @@ export async function getDerivedServiceAnnotations({
         {
           apm: {
             events: [
-              getProcessorEventForTransactions(
-                searchAggregatedTransactions
-              ),
+              getProcessorEventForTransactions(searchAggregatedTransactions),
             ],
           },
           body: {

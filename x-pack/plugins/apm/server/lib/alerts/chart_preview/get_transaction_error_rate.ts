@@ -12,9 +12,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
-import {
-  getSearchAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../../helpers/aggregated_transactions';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
@@ -47,11 +45,7 @@ export async function getTransactionErrorRateChartPreview({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,

@@ -27,9 +27,7 @@ export async function getServiceCount({
   const params = {
     apm: {
       events: [
-        getProcessorEventForTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],
