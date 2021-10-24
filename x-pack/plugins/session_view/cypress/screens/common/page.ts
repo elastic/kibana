@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getTestSavedObject } from './test_saved_object';
+export const TEST = '[data-test-subj="sessionViewTestPage"]';

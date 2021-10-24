@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { getTestSavedObject } from './test_saved_object';
+import { GenericFtrProviderContext } from '@kbn/test';
+
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

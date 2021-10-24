@@ -17,7 +17,7 @@ import {
   SessionViewStartPlugins,
 } from './types';
 import { registerRoutes } from './routes';
-import { testSavedObject } from './saved_objects';
+import { getTestSavedObject } from './saved_objects';
 
 export class SessionViewPlugin implements Plugin {
   private logger: Logger;
@@ -39,7 +39,7 @@ export class SessionViewPlugin implements Plugin {
     registerRoutes(router);
 
     // Register saved objects
-    savedObjects.registerType(testSavedObject);
+    savedObjects.registerType(getTestSavedObject());
   }
 
   public start(core: CoreStart, plugins: SessionViewStartPlugins) {

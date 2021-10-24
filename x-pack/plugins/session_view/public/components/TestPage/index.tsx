@@ -75,7 +75,7 @@ export const TestPage = (props: RouteComponentProps) => {
 
   return (
     <EuiPage>
-      <EuiPageContent>
+      <EuiPageContent data-test-subj="sessionViewTestPage">
         <EuiFlexGroup direction="column">
           <EuiFlexItem>current path: {props.match.path}</EuiFlexItem>
           <EuiFlexItem>

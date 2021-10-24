@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getTestSavedObject } from './test_saved_object';
+export const SESSION_VIEW_URL = 'app/sessionView';

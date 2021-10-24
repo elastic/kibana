@@ -1,0 +1,20 @@
+{
+  "baseUrl": "http://localhost:5601",
+  "defaultCommandTimeout": 60000,
+  "execTimeout": 120000,
+  "pageLoadTimeout": 120000,
+  "nodeVersion": "system",
+  "retries": {
+    "runMode": 2
+  },
+  "env": {
+    "username": "elastic",
+    "password": "changeme"
+  },
+  "screenshotsFolder": "../../../target/kibana-session-view/cypress/screenshots",
+  "trashAssetsBeforeRuns": false,
+  "video": false,
+  "videosFolder": "../../../target/kibana-session-view/cypress/videos",
+  "viewportHeight": 900,
+  "viewportWidth": 1440
+}
