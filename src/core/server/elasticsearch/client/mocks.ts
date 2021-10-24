@@ -74,7 +74,7 @@ const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedKeys<Kiba
   };
 
   // `on`, `off`, and `once` are properties without a setter.
-  // We can't `client.on = jest.fn()` because the following error will be thrown:
+  // We can't `client.diagnostic.on = jest.fn()` because the following error will be thrown:
   // TypeError: Cannot set property on of #<Client> which has only a getter
   mockGetter(client.diagnostic, 'on');
   mockGetter(client.diagnostic, 'off');
