@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { service, timerange } from '@elastic/apm-generator';
+import { service, timerange } from '@elastic/synthtrace';
 import expect from '@kbn/expect';
 import { first, last, meanBy } from 'lodash';
 import moment from 'moment';

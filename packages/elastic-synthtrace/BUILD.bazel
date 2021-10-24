@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
-PKG_BASE_NAME = "elastic-apm-generator"
-PKG_REQUIRE_NAME = "@elastic/apm-generator"
+PKG_BASE_NAME = "elastic-synthtrace"
+PKG_REQUIRE_NAME = "@elastic/synthtrace"
 
 SOURCE_FILES = glob(
   [

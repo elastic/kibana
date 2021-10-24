@@ -2302,7 +2302,7 @@
     is-absolute "^1.0.0"
     is-negated-glob "^1.0.0"
 
-"@elastic/apm-generator@link:bazel-bin/packages/elastic-apm-generator":
+"@elastic/synthtrace@link:bazel-bin/packages/elastic-synthtrace":
   version "0.0.0"
   uid ""
 

@@ -10,7 +10,7 @@ import {
   getSpanDestinationMetrics,
   getTransactionMetrics,
   toElasticsearchOutput,
-} from '@elastic/apm-generator';
+} from '@elastic/synthtrace';
 import { chunk } from 'lodash';
 import pLimit from 'p-limit';
 import { inspect } from 'util';
