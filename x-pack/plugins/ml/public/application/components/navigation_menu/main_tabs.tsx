@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useEffect } from 'react';
 
-import { EuiPageHeader } from '@elastic/eui';
+import { EuiPageHeader, EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TabId } from './navigation_menu';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
@@ -20,6 +20,7 @@ export interface Tab {
   id: TabId;
   name: any;
   disabled: boolean;
+  prepend?: JSX.Element;
 }
 
 interface Props {
@@ -56,6 +57,19 @@ function getTabs(disableLinks: boolean): Tab[] {
         defaultMessage: 'Model Management',
       }),
       disabled: disableLinks,
+      prepend: (
+        <EuiBetaBadge
+          label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
+            defaultMessage: 'Experimental',
+          })}
+          size="m"
+          color="hollow"
+          iconType="beaker"
+          tooltipContent={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaTooltipContent', {
+            defaultMessage: "Model Management is a beta feature. We'd love to hear your feedback.",
+          })}
+        />
+      ),
     },
     {
       id: 'datavisualizer',
@@ -186,6 +200,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
           },
           'data-test-subj': testSubject + (id === selectedTabId ? ' selected' : ''),
           isSelected: id === selectedTabId,
+          prepend: tab.prepend,
         };
       })}
     />
