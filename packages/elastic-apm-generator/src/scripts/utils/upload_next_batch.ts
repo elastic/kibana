@@ -14,16 +14,17 @@ import { getScenario } from './get_scenario';
 import { createLogger, LogLevel } from './logger';
 import { uploadEvents } from './upload_events';
 
-const { bucketFrom, bucketTo, file, logLevel, target, writeTargets, clientWorkers, batchSize } = workerData as {
-  bucketFrom: number;
-  bucketTo: number;
-  file: string;
-  logLevel: LogLevel;
-  target: string;
-  writeTargets: ElasticsearchOutputWriteTargets;
-  clientWorkers:number;
-  batchSize:number;
-};
+const { bucketFrom, bucketTo, file, logLevel, target, writeTargets, clientWorkers, batchSize } =
+  workerData as {
+    bucketFrom: number;
+    bucketTo: number;
+    file: string;
+    logLevel: LogLevel;
+    target: string;
+    writeTargets: ElasticsearchOutputWriteTargets;
+    clientWorkers: number;
+    batchSize: number;
+  };
 
 async function uploadNextBatch() {
   if (bucketFrom === bucketTo) {
