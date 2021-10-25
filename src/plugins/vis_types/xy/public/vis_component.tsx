@@ -344,8 +344,6 @@ const VisComponent = (props: VisComponentProps) => {
     ? visData.columns[visParams.dimensions.splitRow[0].accessor]
     : undefined;
 
-  console.log(`LEGACY_TIME_AXIS (vis_type/xy): ${props.useLegacyTimeAxis}`); // eslint-disable-line
-
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
       <LegendToggle
