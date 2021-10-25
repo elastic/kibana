@@ -41,6 +41,7 @@ import {
   ReportInfoFlyout,
 } from './components';
 import { guessAppIconTypeFromObjectType } from './utils';
+import './report_listing.scss';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
@@ -295,12 +296,14 @@ class ReportListingUi extends Component<Props, State> {
         }),
         render: (_type: string, job) => {
           return (
-            <EuiIconTip
-              type={guessAppIconTypeFromObjectType(job.objectType)}
-              size="l"
-              data-test-subj="reportJobType"
-              content={job.objectType}
-            />
+            <div className="kbnReporting__reportListing__typeIcon">
+              <EuiIconTip
+                type={guessAppIconTypeFromObjectType(job.objectType)}
+                size="s"
+                data-test-subj="reportJobType"
+                content={job.objectType}
+              />
+            </div>
           );
         },
         mobileOptions: {
