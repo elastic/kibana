@@ -276,7 +276,8 @@ describe('Dashboard initial state', () => {
   });
 });
 
-describe('Dashboard state sync', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/116043
+describe.skip('Dashboard state sync', () => {
   let defaultDashboardAppStateHookResult: RenderDashboardStateHookReturn;
   const getResult = () => defaultDashboardAppStateHookResult.renderHookResult.result.current;
 
