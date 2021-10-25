@@ -318,12 +318,12 @@ class PackagePolicyService {
     });
 
     return {
-      items: packagePolicies.saved_objects.map((packagePolicySO) => ({
+      items: packagePolicies?.saved_objects.map((packagePolicySO) => ({
         id: packagePolicySO.id,
         version: packagePolicySO.version,
         ...packagePolicySO.attributes,
       })),
-      total: packagePolicies.total,
+      total: packagePolicies?.total,
       page,
       perPage,
     };
@@ -373,7 +373,7 @@ class PackagePolicyService {
     });
 
     // Check that the name does not exist already
-    if (existingPoliciesWithName.items.length > 0) {
+    if ((existingPoliciesWithName?.items || []).length > 0) {
       throw new IngestManagerError('There is already a package with the same name');
     }
 
