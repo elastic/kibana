@@ -444,17 +444,22 @@ class PackagePolicyService {
         currentVersion: packagePolicy.package.version,
       });
 
+      const upgradeMeta: PackagePolicyUpgradeLogMeta = {
+        package_policy_upgrade: {
+          package_name: packagePolicy.package.name,
+          new_version: packagePolicy.package.version,
+          current_version: 'unknown',
+          status: 'success',
+          dryRun: false,
+        },
+      };
+
       appContextService
         .getLogger()
-        .info<PackagePolicyUpgradeLogMeta>(`Package policy successfully upgraded`, {
-          package_policy_upgrade: {
-            package_name: packagePolicy.package.name,
-            new_version: packagePolicy.package.version,
-            current_version: 'unknown',
-            status: 'success',
-            dryRun: false,
-          },
-        });
+        .info<PackagePolicyUpgradeLogMeta>(
+          `Package policy successfully upgraded ${JSON.stringify(upgradeMeta)}`,
+          upgradeMeta
+        );
     }
 
     return newPolicy;
@@ -685,22 +690,23 @@ class PackagePolicyService {
       const hasErrors = 'errors' in updatedPackagePolicy;
 
       if (packagePolicy.package.version !== packageInfo.version) {
+        const upgradeMeta: PackagePolicyUpgradeLogMeta = {
+          package_policy_upgrade: {
+            package_name: packageInfo.name,
+            current_version: packagePolicy.package.version,
+            new_version: packageInfo.version,
+            status: hasErrors ? 'failure' : 'success',
+            error: hasErrors ? updatedPackagePolicy.errors : undefined,
+            dryRun: true,
+          },
+        };
         appContextService
           .getLogger()
           .info<PackagePolicyUpgradeLogMeta>(
             `Package policy upgrade dry run ${
               hasErrors ? 'resulted in errors' : 'ran successfully'
-            }`,
-            {
-              package_policy_upgrade: {
-                package_name: packageInfo.name,
-                current_version: packagePolicy.package.version,
-                new_version: packageInfo.version,
-                status: hasErrors ? 'failure' : 'success',
-                error: hasErrors ? updatedPackagePolicy.errors : undefined,
-                dryRun: true,
-              },
-            }
+            } ${JSON.stringify(upgradeMeta)}`,
+            upgradeMeta
           );
       }
 
