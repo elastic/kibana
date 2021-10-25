@@ -24,7 +24,6 @@ export enum SavedObjectType {
 export type MlTestResourcesi = ProvidedType<typeof MachineLearningTestResourcesProvider>;
 
 export function MachineLearningTestResourcesProvider({ getService }: FtrProviderContext) {
-  const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const supertest = getService('supertest');
