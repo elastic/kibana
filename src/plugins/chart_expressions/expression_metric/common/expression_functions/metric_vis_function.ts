@@ -55,7 +55,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       help: i18n.translate('expressionMetricVis.function.font.help', {
         defaultMessage: 'Font settings.',
       }),
-      default: `{font size=80 align="center"}`,
+      default: `{font size=60 align="center"}`,
     },
     metric: {
       types: ['vis_dimension'],
