@@ -12,8 +12,7 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/116186
-  describe.skip('getGridTile', () => {
+  describe('getGridTile', () => {
     it('should return vector tile containing cluster features', async () => {
       const resp = await supertest
         .get(
@@ -36,7 +35,7 @@ export default function ({ getService }) {
       expect(clusterFeature.type).to.be(1);
       expect(clusterFeature.extent).to.be(4096);
       expect(clusterFeature.id).to.be(undefined);
-      expect(clusterFeature.properties).to.eql({ _count: 1, 'avg_of_bytes.value': 9252 });
+      expect(clusterFeature.properties).to.eql({ _count: 1, _key: '10/258/404', 'avg_of_bytes.value': 9252 });
       expect(clusterFeature.loadGeometry()).to.eql([[{ x: 87, y: 667 }]]);
 
       // Metadata feature
