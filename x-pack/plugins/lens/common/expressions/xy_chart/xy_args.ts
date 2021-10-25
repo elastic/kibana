@@ -12,8 +12,7 @@ import type { LayerArgs } from './layer_config';
 import type { LegendConfigResult } from './legend_config';
 import type { TickLabelsConfigResult } from './tick_labels_config';
 import type { LabelsOrientationConfigResult } from './labels_orientation_config';
-
-export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
+import type { ValueLabelConfig } from '../../types';
 
 export type XYCurveType = 'LINEAR' | 'CURVE_MONOTONE_X';
 
