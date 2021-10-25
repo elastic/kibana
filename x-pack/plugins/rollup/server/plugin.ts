@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
-import {
-  CoreSetup,
-  Plugin,
-  Logger,
-  PluginInitializerContext,
-  SharedGlobalConfig,
-} from 'src/core/server';
+import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
@@ -30,17 +22,15 @@ import { getCapabilitiesForRollupIndices } from '../../../../src/plugins/data/se
 
 export class RollupPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
-  private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private readonly license: License;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.globalConfig$ = initializerContext.config.legacy.globalConfig$;
     this.license = new License();
   }
 
   public setup(
-    { http, uiSettings, getStartServices }: CoreSetup,
+    { http, uiSettings, savedObjects, getStartServices }: CoreSetup,
     { features, licensing, indexManagement, visTypeTimeseries, usageCollection }: Dependencies
   ) {
     this.license.setup(
@@ -101,15 +91,11 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     });
 
     if (usageCollection) {
-      this.globalConfig$
-        .pipe(first())
-        .toPromise()
-        .then((globalConfig) => {
-          registerRollupUsageCollector(usageCollection, globalConfig.kibana.index);
-        })
-        .catch((e: any) => {
-          this.logger.warn(`Registering Rollup collector failed: ${e}`);
-        });
+      try {
+        registerRollupUsageCollector(usageCollection, savedObjects.getKibanaIndex());
+      } catch (e) {
+        this.logger.warn(`Registering Rollup collector failed: ${e}`);
+      }
     }
 
     if (indexManagement && indexManagement.indexDataEnricher) {

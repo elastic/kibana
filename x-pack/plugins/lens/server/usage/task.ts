@@ -6,8 +6,6 @@
  */
 
 import { CoreSetup, Logger, ElasticsearchClient } from 'kibana/server';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import moment from 'moment';
 import {
   RunContext,
@@ -28,10 +26,9 @@ export const TASK_ID = `Lens-${TELEMETRY_TASK_TYPE}`;
 export function initializeLensTelemetry(
   logger: Logger,
   core: CoreSetup,
-  config: Observable<{ kibana: { index: string } }>,
   taskManager: TaskManagerSetupContract
 ) {
-  registerLensTelemetryTask(logger, core, config, taskManager);
+  registerLensTelemetryTask(logger, core, taskManager);
 }
 
 export function scheduleLensTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
@@ -43,14 +40,13 @@ export function scheduleLensTelemetry(logger: Logger, taskManager?: TaskManagerS
 function registerLensTelemetryTask(
   logger: Logger,
   core: CoreSetup,
-  config: Observable<{ kibana: { index: string } }>,
   taskManager: TaskManagerSetupContract
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Lens usage fetch task',
       timeout: '1m',
-      createTaskRunner: telemetryTaskRunner(logger, core, config),
+      createTaskRunner: telemetryTaskRunner(logger, core),
     },
   });
 }
@@ -177,11 +173,7 @@ export async function getDailyEvents(
   };
 }
 
-export function telemetryTaskRunner(
-  logger: Logger,
-  core: CoreSetup,
-  config: Observable<{ kibana: { index: string } }>
-) {
+export function telemetryTaskRunner(logger: Logger, core: CoreSetup) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     const getEsClient = async () => {
@@ -191,7 +183,7 @@ export function telemetryTaskRunner(
 
     return {
       async run() {
-        const kibanaIndex = (await config.pipe(first()).toPromise()).kibana.index;
+        const kibanaIndex = core.savedObjects.getKibanaIndex();
 
         return Promise.all([
           getDailyEvents(kibanaIndex, getEsClient),

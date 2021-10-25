@@ -65,9 +65,6 @@ type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>[
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
-    kibana: {
-      index: '.kibana-tests',
-    },
     elasticsearch: {
       shardTimeout: duration('30s'),
       requestTimeout: duration('30s'),

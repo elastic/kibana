@@ -61,7 +61,8 @@ export class SampleDataRegistry {
     customIntegrations?: CustomIntegrationsPluginSetup
   ) {
     if (usageCollections) {
-      makeSampleDataUsageCollector(usageCollections, this.initContext);
+      const kibanaIndex = core.savedObjects.getKibanaIndex();
+      makeSampleDataUsageCollector(usageCollections, kibanaIndex);
     }
     const usageTracker = usage(
       core.getStartServices().then(([coreStart]) => coreStart.savedObjects),

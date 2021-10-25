@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  loggingSystemMock,
-  pluginInitializerContextConfigMock,
-  elasticsearchServiceMock,
-} from '../../../../../core/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../core/server/mocks';
 import {
   Collector,
   createCollectorFetchContextMock,
@@ -29,7 +25,7 @@ describe('kibana_usage', () => {
     return createUsageCollectionSetupMock().makeUsageCollector(config);
   });
 
-  const legacyConfig$ = pluginInitializerContextConfigMock({}).legacy.globalConfig$;
+  const kibanaIndex = '.kibana-tests';
 
   const getMockFetchClients = (hits?: unknown[]) => {
     const fetchParamsMock = createCollectorFetchContextMock();
@@ -40,7 +36,7 @@ describe('kibana_usage', () => {
     return fetchParamsMock;
   };
 
-  beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, legacyConfig$));
+  beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, kibanaIndex));
   afterAll(() => jest.clearAllTimers());
 
   test('registered collector is set', () => {

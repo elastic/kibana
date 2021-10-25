@@ -16,6 +16,7 @@ import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 import { DocumentMigrator } from '../core/document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
+
 jest.mock('../core/document_migrator', () => {
   return {
     // Create a mock for spying on the constructor
@@ -304,10 +305,7 @@ const mockOptions = () => {
         migrations: {},
       },
     ]),
-    kibanaConfig: {
-      enabled: true,
-      index: '.my-index',
-    } as KibanaMigratorOptions['kibanaConfig'],
+    kibanaIndex: '.my-index',
     soMigrationsConfig: {
       batchSize: 20,
       maxBatchSizeBytes: ByteSizeValue.parse('20mb'),
