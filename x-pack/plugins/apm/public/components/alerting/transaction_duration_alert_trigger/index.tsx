@@ -139,6 +139,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
       data={latencyChartPreview}
       threshold={thresholdMs}
       yTickFormat={yTickFormat}
+      uiSettings={services.uiSettings}
     />
   );
 

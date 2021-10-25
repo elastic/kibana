@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment-timezone';
-import { getDomainTZ, getTimeTicksTZ } from './timezone';
+import { IUiSettingsClient } from '../../../../../../../../src/core/public';
+import { getDomainTZ, getTimeTicksTZ, getTimeZone } from './timezone';
 
 describe('Timezone helper', () => {
   let originalTimezone: moment.MomentZone | null;
@@ -65,6 +66,24 @@ describe('Timezone helper', () => {
         new Date('Tue Jan 28 2020 06:36:00 GMT+0100').valueOf(),
         new Date('Wed Jan 29 2020 08:12:00 GMT+0100').valueOf(),
       ]);
+    });
+  });
+
+  describe('getTimeZone', () => {
+    it('returns local when uiSettings is undefined', () => {
+      expect(getTimeZone()).toEqual('local');
+    });
+
+    it('returns local when uiSettings returns Browser', () => {
+      expect(
+        getTimeZone({ get: () => 'Browser' } as unknown as IUiSettingsClient)
+      ).toEqual('local');
+    });
+    it('returns timezone defined on uiSettings', () => {
+      const timezone = 'America/toronto';
+      expect(
+        getTimeZone({ get: () => timezone } as unknown as IUiSettingsClient)
+      ).toEqual(timezone);
     });
   });
 });

@@ -32,6 +32,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { LazyAlertsFlyout } from '../../../../../../observability/public';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { Coordinate } from '../../../../../typings/timeseries';
+import { getTimeZone } from '../../../shared/charts/helper/timezone';
 
 const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
   ALERT_RULE_TYPE_ID_NON_TYPED;
@@ -58,6 +59,7 @@ interface Props {
 }
 
 export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
+  const { core } = useApmPluginContext();
   const theme = useTheme();
   const currentPeriod = getCoordinatedBuckets(distribution.currentPeriod);
   const previousPeriod = getCoordinatedBuckets(distribution.previousPeriod);
@@ -103,6 +105,8 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
     undefined
   );
 
+  const timeZone = getTimeZone(core.uiSettings);
+
   return (
     <>
       <EuiTitle size="xs">
@@ -138,6 +142,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
           {timeseries.map((serie) => {
             return (
               <BarSeries
+                timeZone={timeZone}
                 key={serie.title}
                 id={serie.title}
                 minBarHeight={2}
