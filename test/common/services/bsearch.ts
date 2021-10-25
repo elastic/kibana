@@ -31,14 +31,14 @@ const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>>
  * x-pack/test/rule_registry/common/lib/authentication/spaces.ts
  * @param spaceId The space id we want to utilize
  */
-export const getSpaceUrlPrefix = (spaceId?: string) => {
+const getSpaceUrlPrefix = (spaceId?: string): string => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
 };
 
 /**
  * Options for the send method
  */
-export interface SendOptions {
+interface SendOptions {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   options: object;
   strategy: string;
