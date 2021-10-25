@@ -25,6 +25,7 @@ import { getFieldStats } from '../search_strategy/requests/get_field_stats';
 import type { FieldStats, FieldStatsError } from '../../../../common/types/field_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_EXAMPLES_DEFAULT } from '../search_strategy/requests/constants';
+import type { ISearchOptions } from '../../../../../../../src/plugins/data/common';
 
 interface FieldStatsParams {
   metricConfigs: FieldRequestConfig[];
@@ -113,7 +114,7 @@ export function useFieldStatsSearchStrategy(
       },
       maxExamples: MAX_EXAMPLES_DEFAULT,
     };
-    const searchOptions = {
+    const searchOptions: ISearchOptions = {
       abortSignal: abortCtrl.current.signal,
       sessionId: searchStrategyParams?.sessionId,
     };

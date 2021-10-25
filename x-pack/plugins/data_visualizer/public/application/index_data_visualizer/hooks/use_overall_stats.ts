@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'r
 import { combineLatest, forkJoin, of, Subscription } from 'rxjs';
 import { mergeMap, switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { ToastsStart } from 'kibana/public';
+import type { ToastsStart } from 'kibana/public';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   checkAggregatableFieldsExistRequest,
@@ -17,14 +17,15 @@ import {
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
-import {
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
+  ISearchOptions,
 } from '../../../../../../../src/plugins/data/common';
-import { OverallStats } from '../types/overall_stats';
+import type { OverallStats } from '../types/overall_stats';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { extractErrorProperties } from '../utils/error_utils';
-import {
+import type {
   DataStatsFetchProgress,
   OverallStatsSearchStrategyParams,
 } from '../../../../common/types/field_stats';
@@ -106,6 +107,10 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       samplerShardSize,
     } = searchStrategyParams;
 
+    const searchOptions: ISearchOptions = {
+      abortSignal: abortCtrl.current.signal,
+      sessionId: searchStrategyParams?.sessionId,
+    };
     const nonAggregatableOverallStats$ =
       nonAggregatableFields.length > 0
         ? combineLatest(
@@ -123,10 +128,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
                       runtimeFieldMap
                     ),
                   },
-                  {
-                    abortSignal: abortCtrl.current.signal,
-                    sessionId: searchStrategyParams?.sessionId,
-                  }
+                  searchOptions
                 )
                 .pipe(
                   switchMap((resp) => {
@@ -156,10 +158,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
                 runtimeFieldMap
               ),
             },
-            {
-              abortSignal: abortCtrl.current.signal,
-              sessionId: searchStrategyParams?.sessionId,
-            }
+            searchOptions
           )
         : of(undefined);
 
@@ -169,10 +168,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             {
               params: getDocumentCountStatsRequest(searchStrategyParams),
             },
-            {
-              abortSignal: abortCtrl.current.signal,
-              sessionId: searchStrategyParams?.sessionId,
-            }
+            searchOptions
           )
         : of(undefined);
     const sub = forkJoin({

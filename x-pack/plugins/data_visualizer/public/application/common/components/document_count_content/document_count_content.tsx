@@ -15,7 +15,6 @@ export interface Props {
   totalCount: number;
 }
 
-// @todo: update document count stats for file based
 export const DocumentCountContent: FC<Props> = ({ documentCountStats, totalCount }) => {
   if (documentCountStats === undefined) {
     return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
