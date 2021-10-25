@@ -398,6 +398,7 @@ export const ModelsList: FC = () => {
       type: 'icon',
       isPrimary: true,
       available: (item) => item.model_type === 'pytorch',
+      enabled: (item) => !isPopulatedObject(item.pipelines),
       onClick: async (item) => {
         try {
           await trainedModelsApiService.stopModelAllocation(item.model_id);
