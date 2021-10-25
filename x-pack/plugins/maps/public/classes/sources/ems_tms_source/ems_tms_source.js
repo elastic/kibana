@@ -43,7 +43,15 @@ export class EMSTMSSource extends AbstractTMSSource {
       type: SOURCE_TYPES.EMS_TMS,
       id: descriptor.id,
       isAutoSelect:
-        typeof descriptor.isAutoSelect !== 'undefined' ? !!descriptor.isAutoSelect : false,
+        typeof descriptor.isAutoSelect !== 'undefined' ? descriptor.isAutoSelect : false,
+      lightModeDefault:
+        typeof descriptor.lightModeDefault !== 'undefined'
+          ? descriptor.lightModeDefault
+          : getEmsTileLayerId().desaturated,
+      darkModeDefault:
+        typeof descriptor.darkModeDefault !== 'undefined'
+          ? descriptor.darkModeDefault
+          : getEmsTileLayerId().dark,
     };
   }
 
@@ -144,12 +152,11 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   getTileLayerId() {
-    if (!this._descriptor.isAutoSelect) {
+    if (!this._descriptor.isAutoSelect && this._descriptor.id) {
       return this._descriptor.id;
     }
 
-    const emsTileLayerId = getEmsTileLayerId();
-    return getIsDarkMode() ? emsTileLayerId.dark : emsTileLayerId.bright;
+    return getIsDarkMode() ? this._descriptor.darkModeDefault : this._descriptor.lightModeDefault;
   }
 
   async getLicensedFeatures() {
