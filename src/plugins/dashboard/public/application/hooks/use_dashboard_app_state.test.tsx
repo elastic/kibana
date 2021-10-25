@@ -207,6 +207,7 @@ describe('Dashboard container lifecycle', () => {
 });
 
 // FLAKY: https://github.com/elastic/kibana/issues/116050
+// FLAKY: https://github.com/elastic/kibana/issues/105018
 describe.skip('Dashboard initial state', () => {
   it('Extracts state from Dashboard Saved Object', async () => {
     const { renderHookResult, embeddableFactoryResult } = renderDashboardAppStateHook({});
