@@ -8,6 +8,7 @@
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSelect, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
@@ -34,6 +35,8 @@ export class UpdateSourceEditor extends Component {
     sortOrder: PropTypes.string.isRequired,
     scalingType: PropTypes.string.isRequired,
     source: PropTypes.object,
+    hasJoins: PropTypes.bool.isRequired,
+    clearJoins: PropTypes.func.isRequired,
   };
 
   state = {
@@ -60,12 +63,7 @@ export class UpdateSourceEditor extends Component {
     } catch (err) {
       if (this._isMounted) {
         this.setState({
-          loadError: i18n.translate('xpack.maps.source.esSearch.loadErrorMessage', {
-            defaultMessage: `Unable to find Index pattern {id}`,
-            values: {
-              id: this.props.indexPatternId,
-            },
-          }),
+          loadError: getDataViewNotFoundMessage(this.props.indexPatternId),
         });
       }
       return;
@@ -209,6 +207,8 @@ export class UpdateSourceEditor extends Component {
           scalingType={this.props.scalingType}
           supportsClustering={this.state.supportsClustering}
           clusteringDisabledReason={this.state.clusteringDisabledReason}
+          hasJoins={this.props.hasJoins}
+          clearJoins={this.props.clearJoins}
         />
       </EuiPanel>
     );

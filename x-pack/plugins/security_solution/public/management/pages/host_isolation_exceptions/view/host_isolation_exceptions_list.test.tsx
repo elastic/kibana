@@ -16,8 +16,7 @@ import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
 import { useLicense } from '../../../../common/hooks/use_license';
 
-jest.mock('../../../../common/components/user_privileges/use_endpoint_privileges');
-
+jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 jest.mock('../service');
 jest.mock('../../../../common/hooks/use_license');
 
@@ -67,11 +66,18 @@ describe('When on the host isolation exceptions page', () => {
         await dataReceived();
         expect(renderResult.getByTestId('hostIsolationExceptionsEmpty')).toBeTruthy();
       });
+
+      it('should not display the search bar', async () => {
+        render();
+        await dataReceived();
+        expect(renderResult.queryByTestId('searchExceptions')).toBeFalsy();
+      });
     });
     describe('And data exists', () => {
       beforeEach(async () => {
         getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
       });
+
       it('should show loading indicator while retrieving data', async () => {
         let releaseApiResponse: (value?: unknown) => void;
 
@@ -86,6 +92,12 @@ describe('When on the host isolation exceptions page', () => {
         releaseApiResponse!();
         await wasReceived;
         expect(renderResult.container.querySelector('.euiProgress')).toBeNull();
+      });
+
+      it('should display the search bar', async () => {
+        render();
+        await dataReceived();
+        expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
       });
 
       it('should show items on the list', async () => {
@@ -113,6 +125,7 @@ describe('When on the host isolation exceptions page', () => {
         ).toEqual(' Server is too far away');
       });
     });
+
     describe('is license platinum plus', () => {
       beforeEach(() => {
         isPlatinumPlusMock.mockReturnValue(true);
@@ -131,6 +144,7 @@ describe('When on the host isolation exceptions page', () => {
         expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
     });
+
     describe('is not license platinum plus', () => {
       beforeEach(() => {
         isPlatinumPlusMock.mockReturnValue(false);

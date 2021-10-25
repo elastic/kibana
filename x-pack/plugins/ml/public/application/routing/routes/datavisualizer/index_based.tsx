@@ -19,10 +19,7 @@ import { IndexDataVisualizerPage as Page } from '../../../datavisualizer/index_b
 import { checkBasicLicense } from '../../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { loadIndexPatterns } from '../../../util/index_utils';
-import { checkMlNodesAvailable } from '../../../ml_nodes_check';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 export const indexBasedRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -44,16 +41,12 @@ export const indexBasedRouteFactory = (
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
-  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
-  );
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context } = useResolver(index, savedSearchId, deps.config, {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
   });
 
   return (

@@ -9,7 +9,6 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
-// @ts-ignore
 import { encode } from 'rison-node';
 import { SimpleSavedObject } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
@@ -29,7 +28,7 @@ import {
   isRisonSerializationRequired,
 } from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { IndexPattern } from '../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../src/plugins/data/common';
 import { ResultLink } from '../common/components/results_links';
 
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
@@ -51,9 +50,7 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
     const history = useHistory();
     const { search: searchString } = useLocation();
 
-    const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern | undefined>(
-      undefined
-    );
+    const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView | undefined>(undefined);
     const [currentSavedSearch, setCurrentSavedSearch] = useState<SimpleSavedObject<unknown> | null>(
       null
     );
@@ -77,8 +74,8 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
                 setCurrentIndexPattern(indexPattern);
               } catch (e) {
                 toasts.addError(e, {
-                  title: i18n.translate('xpack.dataVisualizer.index.indexPatternErrorMessage', {
-                    defaultMessage: 'Error finding index pattern',
+                  title: i18n.translate('xpack.dataVisualizer.index.dataViewErrorMessage', {
+                    defaultMessage: 'Error finding data view',
                   }),
                 });
               }
