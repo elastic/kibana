@@ -918,6 +918,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             className="euiFlexItem eui-yScroll"
           >
             <EuiCollapsibleNavGroup
+              buttonElement="button"
               data-test-subj="collapsibleNavGroup-kibana"
               iconSize="m"
               iconType="logoKibana"
@@ -1239,6 +1240,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              buttonElement="button"
               data-test-subj="collapsibleNavGroup-observability"
               iconSize="m"
               iconType="logoObservability"
@@ -1521,6 +1523,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              buttonElement="button"
               data-test-subj="collapsibleNavGroup-securitySolution"
               iconSize="m"
               iconType="logoSecurity"
@@ -1764,6 +1767,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              buttonElement="button"
               data-test-subj="collapsibleNavGroup-management"
               iconSize="m"
               iconType="managementApp"
