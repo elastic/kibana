@@ -74,7 +74,7 @@ export const HostIsolationExceptionsList = () => {
 
   function handleItemComponentProps(element: ExceptionListItemSchema): ArtifactEntryCardProps {
     const editAction = {
-      icon: 'trash',
+      icon: 'controlsHorizontal',
       onClick: () => {
         navigateCallback({
           show: 'edit',
