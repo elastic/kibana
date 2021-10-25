@@ -33,32 +33,6 @@ const useKibanaServices = () => {
   return { timelines, filterManager };
 };
 
-/** actions common to all cells (e.g. copy to clipboard) */
-const commonCellActions: TGridCellAction[] = [
-  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
-    ({ rowIndex, columnId, Component }) => {
-      const { timelines } = useKibanaServices();
-
-      const value = getMappedNonEcsValue({
-        data: data[getPageRowIndex(rowIndex, pageSize)],
-        fieldName: columnId,
-      });
-
-      return (
-        <>
-          {timelines.getHoverActions().getCopyButton({
-            Component,
-            field: columnId,
-            isHoverAction: false,
-            ownFocus: false,
-            showTooltip: false,
-            value,
-          })}
-        </>
-      );
-    },
-];
-
 /** actions for adding filters to the search bar */
 const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellAction[] => [
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
@@ -77,10 +51,25 @@ const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellA
         />
       );
     },
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    ({ rowIndex, columnId, Component }) => {
+      const value = getMappedNonEcsValue({
+        data: data[getPageRowIndex(rowIndex, pageSize)],
+        fieldName: columnId,
+      });
+
+      return (
+        <FilterForValueButton
+          Component={Component}
+          field={columnId}
+          value={value}
+          addToQuery={addToQuery}
+          exclude={true}
+        />
+      );
+    },
 ];
 
 /** returns the default actions shown in `EuiDataGrid` cells */
-export const getDefaultCellActions = ({ addToQuery }: { addToQuery: (value: string) => void }) => [
-  ...buildFilterCellActions(addToQuery),
-  ...commonCellActions,
-];
+export const getDefaultCellActions = ({ addToQuery }: { addToQuery: (value: string) => void }) =>
+  buildFilterCellActions(addToQuery);

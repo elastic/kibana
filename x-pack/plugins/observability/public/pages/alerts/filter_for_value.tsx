@@ -8,10 +8,17 @@
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-export const filterForValueButtonLabel = i18n.translate(
-  'xpack.observability.hoverActions.filterForValueButtonLabel',
+export const filterInValueButtonLabel = i18n.translate(
+  'xpack.observability.hoverActions.filterInValueButtonLabel',
   {
-    defaultMessage: 'Filter for value',
+    defaultMessage: 'Filter In',
+  }
+);
+
+export const filterOutValueButtonLabel = i18n.translate(
+  'xpack.observability.hoverActions.filterOutValueButtonLabel',
+  {
+    defaultMessage: 'Filter Out',
   }
 );
 
@@ -22,37 +29,43 @@ interface FilterForValueProps {
   field: string;
   value: string[] | string | null | undefined;
   addToQuery: (value: string) => void;
+  exclude?: boolean;
 }
 
 const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
-  ({ Component, field, value, addToQuery }) => {
-    const text = useMemo(() => `${field}${value != null ? `: "${value}"` : ''}`, [field, value]);
+  ({ Component, field, value, addToQuery, exclude = false }) => {
+    const text = useMemo(
+      () => `${exclude ? 'not ' : ''}${field}${value != null ? `: "${value}"` : ''}`,
+      [field, value, exclude]
+    );
     const onClick = useCallback(() => {
       addToQuery(text);
     }, [text, addToQuery]);
+    const label = exclude ? filterOutValueButtonLabel : filterInValueButtonLabel;
+    const iconType = exclude ? 'minusInCircle' : 'plusInCircle';
     const button = useMemo(
       () =>
         Component ? (
           <Component
-            aria-label={filterForValueButtonLabel}
+            aria-label={label}
             data-test-subj="filter-for-value"
-            iconType="plusInCircle"
+            iconType={iconType}
             onClick={onClick}
-            title={filterForValueButtonLabel}
+            title={label}
           >
-            {filterForValueButtonLabel}
+            {label}
           </Component>
         ) : (
           <EuiButtonIcon
-            aria-label={filterForValueButtonLabel}
+            aria-label={label}
             className="timelines__hoverActionButton"
             data-test-subj="filter-for-value"
             iconSize="s"
-            iconType="plusInCircle"
+            iconType={iconType}
             onClick={onClick}
           />
         ),
-      [Component, onClick]
+      [Component, onClick, label, iconType]
     );
     return button;
   }
