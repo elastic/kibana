@@ -14742,7 +14742,6 @@
     "xpack.maps.common.esSpatialRelation.intersectsLabel": "intersects",
     "xpack.maps.common.esSpatialRelation.withinLabel": "之内",
     "xpack.maps.deleteBtnTitle": "删除",
-    "xpack.maps.deprecation.proxyEMS.step2": "本地托管 Elastic Maps Service。",
     "xpack.maps.discover.visualizeFieldLabel": "在 Maps 中可视化",
     "xpack.maps.distanceFilterForm.filterLabelLabel": "筛选标签",
     "xpack.maps.drawFeatureControl.invalidGeometry": "检测到无效的几何形状",

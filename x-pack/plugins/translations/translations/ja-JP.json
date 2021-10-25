@@ -14547,7 +14547,6 @@
     "xpack.maps.common.esSpatialRelation.intersectsLabel": "intersects",
     "xpack.maps.common.esSpatialRelation.withinLabel": "within",
     "xpack.maps.deleteBtnTitle": "削除",
-    "xpack.maps.deprecation.proxyEMS.step2": "Elastic Maps Serviceをローカルでホストします。",
     "xpack.maps.discover.visualizeFieldLabel": "Mapsで可視化",
     "xpack.maps.distanceFilterForm.filterLabelLabel": "ラベルでフィルタリング",
     "xpack.maps.drawFeatureControl.invalidGeometry": "無効なジオメトリが検出されました",
