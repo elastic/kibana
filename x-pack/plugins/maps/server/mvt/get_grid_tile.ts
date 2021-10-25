@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import { RENDER_AS } from '../../common/constants';
 
 function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
 }
 
-export async function getEsTile({
+export async function getEsGridTile({
   logger,
   context,
   index,
@@ -22,6 +22,7 @@ export async function getEsTile({
   y,
   z,
   requestBody = {},
+  requestType = RENDER_AS.POINT,
 }: {
   x: number;
   y: number;
@@ -31,19 +32,20 @@ export async function getEsTile({
   context: DataRequestHandlerContext;
   logger: Logger;
   requestBody: any;
+  requestType: RENDER_AS.GRID | RENDER_AS.POINT;
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
-    let fields = _.uniq(requestBody.docvalue_fields.concat(requestBody.stored_fields));
-    fields = fields.filter((f) => f !== geometryFieldName);
     const body = {
-      grid_precision: 0, // no aggs
-      exact_bounds: true,
+      size: 0, // no hits
+      grid_precision: 7,
+      exact_bounds: false,
       extent: 4096, // full resolution,
       query: requestBody.query,
-      fields,
+      grid_type: requestType === RENDER_AS.GRID ? 'grid' : 'centroid',
+      aggs: requestBody.aggs,
+      fields: requestBody.fields,
       runtime_mappings: requestBody.runtime_mappings,
-      track_total_hits: requestBody.size + 1,
     };
     const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
       method: 'GET',

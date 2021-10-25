@@ -43,6 +43,10 @@ export class CountAggField implements IESAggField {
     return this._source.getAggKey(this._getAggType(), this.getRootName());
   }
 
+  getMbFieldName(): string {
+    return this._source.isMvt() ? '_count' : this.getName();
+  }
+
   getRootName(): string {
     return '';
   }

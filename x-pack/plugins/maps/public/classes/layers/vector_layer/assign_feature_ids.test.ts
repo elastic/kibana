@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { assignFeatureIds } from './assign_feature_ids';
-import { FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
+import { assignFeatureIds, GEOJSON_FEATURE_ID_PROPERTY_NAME } from './assign_feature_ids';
 import { FeatureCollection, Feature, Point } from 'geojson';
 
 const featureId = 'myFeature1';
@@ -34,7 +33,7 @@ test('should provide unique id when feature.id is not provided', () => {
   expect(typeof feature1.id).toBe('number');
   expect(typeof feature2.id).toBe('number');
   // @ts-ignore
-  expect(feature1.id).toBe(feature1.properties[FEATURE_ID_PROPERTY_NAME]);
+  expect(feature1.id).toBe(feature1.properties[GEOJSON_FEATURE_ID_PROPERTY_NAME]);
   expect(feature1.id).not.toBe(feature2.id);
 });
 
@@ -53,9 +52,9 @@ test('should preserve feature id when provided', () => {
   const feature1 = updatedFeatureCollection.features[0];
   expect(typeof feature1.id).toBe('number');
   // @ts-ignore
-  expect(feature1.id).not.toBe(feature1.properties[FEATURE_ID_PROPERTY_NAME]);
+  expect(feature1.id).not.toBe(feature1.properties[GEOJSON_FEATURE_ID_PROPERTY_NAME]);
   // @ts-ignore
-  expect(feature1.properties[FEATURE_ID_PROPERTY_NAME]).toBe(featureId);
+  expect(feature1.properties[GEOJSON_FEATURE_ID_PROPERTY_NAME]).toBe(featureId);
 });
 
 test('should preserve feature id for falsy value', () => {
@@ -73,9 +72,9 @@ test('should preserve feature id for falsy value', () => {
   const feature1 = updatedFeatureCollection.features[0];
   expect(typeof feature1.id).toBe('number');
   // @ts-ignore
-  expect(feature1.id).not.toBe(feature1.properties[FEATURE_ID_PROPERTY_NAME]);
+  expect(feature1.id).not.toBe(feature1.properties[GEOJSON_FEATURE_ID_PROPERTY_NAME]);
   // @ts-ignore
-  expect(feature1.properties[FEATURE_ID_PROPERTY_NAME]).toBe(0);
+  expect(feature1.properties[GEOJSON_FEATURE_ID_PROPERTY_NAME]).toBe(0);
 });
 
 test('should not modify original feature properties', () => {
@@ -94,6 +93,6 @@ test('should not modify original feature properties', () => {
   const updatedFeatureCollection = assignFeatureIds(featureCollection);
   const feature1 = updatedFeatureCollection.features[0];
   // @ts-ignore
-  expect(feature1.properties[FEATURE_ID_PROPERTY_NAME]).toBe(featureId);
-  expect(featureProperties).not.toHaveProperty(FEATURE_ID_PROPERTY_NAME);
+  expect(feature1.properties[GEOJSON_FEATURE_ID_PROPERTY_NAME]).toBe(featureId);
+  expect(featureProperties).not.toHaveProperty(GEOJSON_FEATURE_ID_PROPERTY_NAME);
 });

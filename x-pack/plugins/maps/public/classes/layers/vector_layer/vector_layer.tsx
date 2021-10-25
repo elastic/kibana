@@ -21,20 +21,16 @@ import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
   AGG_TYPE,
-  FEATURE_ID_PROPERTY_NAME,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
-  KBN_METADATA_FEATURE,
   LAYER_TYPE,
   FIELD_ORIGIN,
-  KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
   SOURCE_TYPES,
   STYLE_TYPE,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
-  KBN_IS_TILE_COMPLETE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
@@ -46,7 +42,7 @@ import {
 } from '../../util/can_skip_fetch';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 import {
-  getCentroidFilterExpression,
+  getLabelFilterExpression,
   getFillFilterExpression,
   getLineFilterExpression,
   getPointFilterExpression,
@@ -80,6 +76,7 @@ import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './u
 import { JoinState, performInnerJoins } from './perform_inner_joins';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
+import { getFeatureId } from './assign_feature_ids';
 
 export function isVectorLayer(layer: ILayer) {
   return (layer as IVectorLayer).canShowTooltip !== undefined;
@@ -93,6 +90,12 @@ export interface VectorLayerArguments {
 }
 
 export interface IVectorLayer extends ILayer {
+  /*
+   * IVectorLayer.getMbLayerIds returns a list of mapbox layers assoicated with this layer for identifing features with tooltips.
+   * Must return ILayer.getMbLayerIds or a subset of ILayer.getMbLayerIds.
+   */
+  getMbTooltipLayerIds(): string[];
+
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getJoins(): InnerJoin[];
@@ -118,6 +121,9 @@ export const NO_RESULTS_ICON_AND_TOOLTIPCONTENT = {
   }),
 };
 
+/*
+ * Geojson vector layer
+ */
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static type = LAYER_TYPE.VECTOR;
 
@@ -589,6 +595,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         timeFilters: nextMeta.timeFilters,
         searchSessionId: dataFilters.searchSessionId,
       });
+
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
@@ -774,6 +781,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   _getSourceFeatureCollection() {
+    if (this.getSource().isMvt()) {
+      return null;
+    }
     const sourceDataRequest = this.getSourceDataRequest();
     return sourceDataRequest ? (sourceDataRequest.getData() as FeatureCollection) : null;
   }
@@ -946,7 +956,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
-    const tooManyFeaturesLayerId = this._getMbTooManyFeaturesLayerId();
 
     const hasJoins = this.hasJoins();
     if (!mbMap.getLayer(fillLayerId)) {
@@ -973,29 +982,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       }
       mbMap.addLayer(mbLayer);
     }
-    if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
-      const mbLayer: MbLayer = {
-        id: tooManyFeaturesLayerId,
-        type: 'fill',
-        source: sourceId,
-        paint: {},
-      };
-      if (mvtSourceLayer) {
-        mbLayer['source-layer'] = mvtSourceLayer;
-      }
-      mbMap.addLayer(mbLayer);
-      mbMap.setFilter(tooManyFeaturesLayerId, [
-        'all',
-        ['==', ['get', KBN_METADATA_FEATURE], true],
-        ['==', ['get', KBN_IS_TILE_COMPLETE], false],
-      ]);
-      mbMap.setPaintProperty(
-        tooManyFeaturesLayerId,
-        'fill-pattern',
-        KBN_TOO_MANY_FEATURES_IMAGE_ID
-      );
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'fill-opacity', this.getAlpha());
-    }
 
     this.getCurrentStyle().setMBPaintProperties({
       alpha: this.getAlpha(),
@@ -1017,21 +1003,18 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     if (!_.isEqual(lineFilterExpr, mbMap.getFilter(lineLayerId))) {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
-
-    this.syncVisibilityWithMb(mbMap, tooManyFeaturesLayerId);
-    mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
-  _setMbCentroidProperties(
+  _setMbLabelProperties(
     mbMap: MbMap,
     mvtSourceLayer?: string,
     timesliceMaskConfig?: TimesliceMaskConfig
   ) {
-    const centroidLayerId = this._getMbCentroidLayerId();
-    const centroidLayer = mbMap.getLayer(centroidLayerId);
-    if (!centroidLayer) {
+    const labelLayerId = this._getMbLabelLayerId();
+    const labelLayer = mbMap.getLayer(labelLayerId);
+    if (!labelLayer) {
       const mbLayer: MbLayer = {
-        id: centroidLayerId,
+        id: labelLayerId,
         type: 'symbol',
         source: this.getId(),
       };
@@ -1041,27 +1024,32 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.addLayer(mbLayer);
     }
 
-    const filterExpr = getCentroidFilterExpression(this.hasJoins(), timesliceMaskConfig);
-    if (!_.isEqual(filterExpr, mbMap.getFilter(centroidLayerId))) {
-      mbMap.setFilter(centroidLayerId, filterExpr);
+    const isSourceGeoJson = !this.getSource().isMvt();
+    const filterExpr = getLabelFilterExpression(
+      this.hasJoins(),
+      isSourceGeoJson,
+      timesliceMaskConfig
+    );
+    if (!_.isEqual(filterExpr, mbMap.getFilter(labelLayerId))) {
+      mbMap.setFilter(labelLayerId, filterExpr);
     }
 
     this.getCurrentStyle().setMBPropertiesForLabelText({
       alpha: this.getAlpha(),
       mbMap,
-      textLayerId: centroidLayerId,
+      textLayerId: labelLayerId,
     });
 
-    this.syncVisibilityWithMb(mbMap, centroidLayerId);
-    mbMap.setLayerZoomRange(centroidLayerId, this.getMinZoom(), this.getMaxZoom());
+    this.syncVisibilityWithMb(mbMap, labelLayerId);
+    mbMap.setLayerZoomRange(labelLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   _syncStylePropertiesWithMb(mbMap: MbMap, timeslice?: Timeslice) {
     const timesliceMaskConfig = this._getTimesliceMaskConfig(timeslice);
     this._setMbPointsProperties(mbMap, undefined, timesliceMaskConfig);
     this._setMbLinePolygonProperties(mbMap, undefined, timesliceMaskConfig);
-    // centroid layers added after polygon layers to ensure they are on top of polygon layers
-    this._setMbCentroidProperties(mbMap, undefined, timesliceMaskConfig);
+    // label layers added after geometry layers to ensure they are on top
+    this._setMbLabelProperties(mbMap, undefined, timesliceMaskConfig);
   }
 
   _getTimesliceMaskConfig(timeslice?: Timeslice): TimesliceMaskConfig | undefined {
@@ -1092,8 +1080,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.makeMbLayerId('text');
   }
 
-  _getMbCentroidLayerId() {
-    return this.makeMbLayerId('centroid');
+  // _getMbTextLayerId is labels for Points and MultiPoints
+  // _getMbLabelLayerId is labels for not Points and MultiPoints
+  // _getMbLabelLayerId used to be called _getMbCentroidLayerId
+  // TODO merge textLayer and labelLayer into single layer
+  _getMbLabelLayerId() {
+    return this.makeMbLayerId('label');
   }
 
   _getMbSymbolLayerId() {
@@ -1108,20 +1100,19 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.makeMbLayerId('fill');
   }
 
-  _getMbTooManyFeaturesLayerId() {
-    return this.makeMbLayerId('toomanyfeatures');
-  }
-
-  getMbLayerIds() {
+  getMbTooltipLayerIds() {
     return [
       this._getMbPointLayerId(),
       this._getMbTextLayerId(),
-      this._getMbCentroidLayerId(),
+      this._getMbLabelLayerId(),
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
       this._getMbPolygonLayerId(),
-      this._getMbTooManyFeaturesLayerId(),
     ];
+  }
+
+  getMbLayerIds() {
+    return this.getMbTooltipLayerIds();
   }
 
   ownsMbLayerId(mbLayerId: string) {
@@ -1170,7 +1161,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const targetFeature = featureCollection.features.find((feature) => {
-      return feature.properties?.[FEATURE_ID_PROPERTY_NAME] === id;
+      return getFeatureId(feature, this.getSource()) === id;
     });
     return targetFeature ? targetFeature : null;
   }

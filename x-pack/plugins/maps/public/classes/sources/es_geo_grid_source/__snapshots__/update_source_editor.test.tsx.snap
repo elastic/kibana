@@ -19,9 +19,9 @@ exports[`source editor geo_grid_source default vector layer config should allow 
     />
     <MetricsEditor
       allowMultipleMetrics={true}
-      fields={null}
+      fields={Array []}
+      key="12345"
       metrics={Array []}
-      metricsFilter={null}
       onChange={[Function]}
     />
   </EuiPanel>
@@ -45,6 +45,7 @@ exports[`source editor geo_grid_source default vector layer config should allow 
     />
     <ResolutionEditor
       includeSuperFine={true}
+      metrics={Array []}
       onChange={[Function]}
       resolution="COARSE"
     />
@@ -79,7 +80,8 @@ exports[`source editor geo_grid_source should put limitations based on heatmap-r
     />
     <MetricsEditor
       allowMultipleMetrics={false}
-      fields={null}
+      fields={Array []}
+      key="12345"
       metrics={Array []}
       metricsFilter={[Function]}
       onChange={[Function]}
@@ -105,6 +107,7 @@ exports[`source editor geo_grid_source should put limitations based on heatmap-r
     />
     <ResolutionEditor
       includeSuperFine={false}
+      metrics={Array []}
       onChange={[Function]}
       resolution="COARSE"
     />

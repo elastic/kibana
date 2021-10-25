@@ -25,7 +25,6 @@ import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_palettes';
 
 import {
   LABEL_BORDER_SIZES,
-  LAYER_TYPE,
   STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
@@ -258,18 +257,7 @@ export class VectorStyleEditor extends Component<Props, State> {
     );
   }
 
-  _renderLabelProperties(isPoints: boolean) {
-    if (
-      !isPoints &&
-      this.props.layer.getType() === LAYER_TYPE.TILED_VECTOR &&
-      !this.props.layer.getSource().isESSource()
-    ) {
-      // This handles and edge-case
-      // 3rd party lines and polygons from mvt sources cannot be labeled, because they do not have label-centroid geometries inside the tile.
-      // These label-centroids are only added for ES-sources
-      return;
-    }
-
+  _renderLabelProperties() {
     const hasLabel = this._hasLabel();
     const hasLabelBorder = this._hasLabelBorder();
     return (
@@ -468,7 +456,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         />
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties(true)}
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }
@@ -482,7 +470,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         {this._renderLineWidth()}
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties(false)}
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }
@@ -499,7 +487,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         {this._renderLineWidth()}
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties(false)}
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }

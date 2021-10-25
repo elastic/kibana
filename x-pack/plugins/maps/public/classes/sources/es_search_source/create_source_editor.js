@@ -155,6 +155,8 @@ export class CreateSourceEditor extends Component {
                 )
               : null
           }
+          hasJoins={false}
+          clearJoins={() => {}}
         />
       </Fragment>
     );

@@ -95,8 +95,8 @@ describe('visiblity', () => {
   });
 });
 
-describe('icon', () => {
-  it('should use no data icon', async () => {
+describe('getCustomIconAndTooltipContent', () => {
+  it('Layers with non-elasticsearch sources should display icon', async () => {
     const layer: TiledVectorLayer = createLayer({}, {});
 
     const iconAndTooltipContent = layer.getCustomIconAndTooltipContent();
