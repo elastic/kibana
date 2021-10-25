@@ -75,7 +75,9 @@ export class TiledVectorLayer extends VectorLayer {
       return feature.id;
     }
 
-    return this.getSource().getType() === SOURCE_TYPES.ES_SEARCH ? '_id' : '_key';
+    return this.getSource().getType() === SOURCE_TYPES.ES_SEARCH 
+      ? feature.properties?._id
+      : feature.properties?._key;
   }
 
   _getMetaFromTiles(): TileMetaFeature[] {
