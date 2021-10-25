@@ -62,7 +62,37 @@ export default ({ getService }: FtrProviderContext) => {
       await getDatafeedById('non-existing-datafeed', 404);
     });
 
-    it('should return empty list with non-existing job wildcard', async () => {
+    it('should return datafeed with datafeed id from correct space', async () => {
+      const body = await getDatafeedById(datafeedIdSpace1, 200, idSpace1);
+
+      expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
+      expect(body.datafeeds.length).to.eql(
+        1,
+        `response datafeeds list should contain correct datafeed (got ${JSON.stringify(body.jobs)})`
+      );
+    });
+
+    it('should return datafeed with datafeed wildcard from correct space', async () => {
+      const body = await getDatafeedById(datafeedIdWildcardSpace1, 200, idSpace1);
+
+      expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
+      expect(body.datafeeds.length).to.eql(
+        1,
+        `response datafeeds list should contain correct datafeed (got ${JSON.stringify(body.jobs)})`
+      );
+    });
+
+    it('should return all datafeeds when not specifying id', async () => {
+      const body = await getDatafeedById(undefined, 200, idSpace1);
+
+      expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
+      expect(body.datafeeds.length).to.eql(
+        1,
+        `response datafeeds list should contain correct datafeed (got ${JSON.stringify(body.jobs)})`
+      );
+    });
+
+    it('should return empty list with non-existing datafeed wildcard', async () => {
       const body = await getDatafeedById('non-existing-datafeed*', 200);
 
       expect(body.count).to.eql(0, `response count should be 0 (got ${body.count})`);

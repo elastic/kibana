@@ -21,9 +21,15 @@ export default ({ getService }: FtrProviderContext) => {
   const idSpace1 = 'space1';
   const idSpace2 = 'space2';
 
-  async function getDatafeedById(datafeedId: string, expectedStatusCode: number, space?: string) {
+  async function getDatafeedById(
+    datafeedId: string | undefined,
+    expectedStatusCode: number,
+    space?: string
+  ) {
     const { body } = await supertest
-      .get(`${space ? `/s/${space}` : ''}/api/ml/datafeeds/${datafeedId}/_stats`)
+      .get(
+        `${space ? `/s/${space}` : ''}/api/ml/datafeeds${datafeedId ? `/${datafeedId}` : ''}/_stats`
+      )
       .auth(
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
@@ -70,6 +76,16 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return datafeed stats with datafeed wildcard from correct space', async () => {
       const body = await getDatafeedById(datafeedIdWildcardSpace1, 200, idSpace1);
+
+      expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
+      expect(body.datafeeds.length).to.eql(
+        1,
+        `response datafeeds list should contain correct datafeed (got ${JSON.stringify(body.jobs)})`
+      );
+    });
+
+    it('should return all datafeed stats when not specifying id', async () => {
+      const body = await getDatafeedById(undefined, 200, idSpace1);
 
       expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
       expect(body.datafeeds.length).to.eql(
