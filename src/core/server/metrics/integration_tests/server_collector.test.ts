@@ -20,6 +20,7 @@ import { setTimeout as setTimeoutPromise } from 'timers/promises';
 const requestWaitDelay = 25;
 
 // FLAKY: https://github.com/elastic/kibana/issues/59234
+// FLAKY: https://github.com/elastic/kibana/issues/59235
 describe.skip('ServerMetricsCollector', () => {
   let server: HttpService;
   let collector: ServerMetricsCollector;
