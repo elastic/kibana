@@ -51,11 +51,15 @@ describe('When on the host isolation exceptions add entry form', () => {
         renderResult.getByTestId('hostIsolationExceptions-form-description-input')
       ).toHaveValue('');
     });
-    it('should call onError with true when a wrong ip value is introduced', () => {
-      const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
-      userEvent.type(ipInput, 'not an ip');
-      expect(onError).toHaveBeenCalledWith(true);
-    });
+    it.each(['not an ip', '100', '900.0.0.1', 'x.x.x.x', '10.0.0'])(
+      'should call onError with true when a wrong ip value is introduced. Case: "%s"',
+      (value: string) => {
+        const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
+        userEvent.type(ipInput, value);
+        expect(onError).toHaveBeenCalledWith(true);
+      }
+    );
+
     it('should call onError with false when a correct values are introduced', () => {
       const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
       const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
