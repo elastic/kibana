@@ -499,7 +499,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('Map CSV to pipeline', () => {
       it('should map to a pipeline', async () => {
         const validCsv =
-          'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\\nsrcip,,,,source.address,Copying srcip to source.address';
+          'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcip,,,,source.address,Copying srcip to source.address';
         const { body } = await supertest
           .post(`${API_BASE_PATH}/map`)
           .set('kbn-xsrf', 'xxx')
