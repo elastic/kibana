@@ -509,7 +509,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-          expect(body.processors?.length).to.eql(1);
+        expect(body.processors?.length).to.eql(1);
       });
     });
   });
