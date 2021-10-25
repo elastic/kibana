@@ -69,12 +69,22 @@ interface ParsedObject {
 /**
  * If the object will be created in this many spaces (or "*" all current and future spaces), we use find to fetch all aliases.
  * If the object does not exceed this threshold, we use mget to fetch aliases instead.
- * This threshold is a bit arbitary, but it is intended to optimize so we don't make expensive PIT/find operations unless it is necessary.
+ * This threshold is a bit arbitrary, but it is intended to optimize so we don't make expensive PIT/find operations unless it is necessary.
  */
 const FIND_ALIASES_THRESHOLD = 3;
 
 /**
  * Conducts pre-flight checks before object creation. Consumers should only check eligible objects (multi-namespace types).
+ * For each object that the consumer intends to create, we check for three potential error cases in all applicable spaces:
+ *
+ *  1. 'aliasConflict' - there is already an alias that points to a different object.
+ *  2. 'unresolvableConflict' - this object already exists in a different space and it cannot be overwritten with the given parameters.
+ *  3. 'conflict' - this object already exists (and the given options include `overwrite=false`).
+ *
+ * Objects can be created in 1-N spaces, and for each object+space permutation we need to check if a legacy URL alias exists. This function
+ * attempts to optimize by defining an "alias threshold"; if we need to check for more aliases than that threshold, instead of attempting to
+ * bulk-get each one, we find (search for) them. This is intended to strike an acceptable balance of performance, and is necessary when
+ * creating objects in "*" (all current and future spaces) because we don't want to attempt to enumerate all spaces here.
  *
  * @param objects The objects that the consumer intends to create.
  *
@@ -84,90 +94,25 @@ export async function preflightCheckForCreate(params: PreflightCheckForCreatePar
   const { registry, client, serializer, getIndexForType, createPointInTimeFinder, objects } =
     params;
 
-  // Make a discriminated union based on the spaces the objects should be created in (Left=mget aliases, Right=find aliases)
-  const objectsToGetOrObjectsToFind = objects.map<Either<ParsedObject>>((object) => {
-    const { type, id, overwrite, namespaces } = object;
-    const spaces = new Set(namespaces);
-    const tag =
-      spaces.size > FIND_ALIASES_THRESHOLD || spaces.has(ALL_NAMESPACES_STRING) ? 'Right' : 'Left';
-    return { tag, value: { type, id, overwrite, spaces } };
-  });
+  // Step 1: for each object, check if it is over the potential alias threshold; if so, attempt to search for aliases that may be affected.
+  // The result is a discriminated union: the left side is 'aliasConflict' errors, and the right side is objects/aliases to bulk-get.
+  const aliasConflictsOrObjectsToGet = await optionallyFindAliases(
+    createPointInTimeFinder,
+    objects
+  );
 
-  const objectsToFind = objectsToGetOrObjectsToFind
+  // Step 2: bulk-get all objects and aliases.
+  const objectsAndAliasesToBulkGet = aliasConflictsOrObjectsToGet
     .filter(isRight)
-    .map(({ value: { type, id } }) => ({ type, id }));
-  const aliasMap = await findLegacyUrlAliases(createPointInTimeFinder, objectsToFind);
+    .map(({ value }) => value);
+  const { bulkGetResponse, aliasSpaces } = await bulkGetObjectsAndAliases(
+    client,
+    serializer,
+    getIndexForType,
+    objectsAndAliasesToBulkGet
+  );
 
-  // Make another discriminated union based on the find results (Left=error, Right=mget objects/aliases)
-  const aliasConflictsOrObjectsToGet = objectsToGetOrObjectsToFind.map<
-    Either<
-      ParsedObject & { spacesWithConflictingAliases: string[] },
-      ParsedObject & { checkAliases: boolean }
-    >
-  >((either) => {
-    let checkAliases = true;
-    if (isRight(either)) {
-      const { type, id, spaces } = either.value;
-      const key = getObjectKey({ type, id });
-      const spacesWithMatchingAliases = aliasMap.get(key);
-      if (spacesWithMatchingAliases) {
-        let spacesWithConflictingAliases: string[] = [];
-        if (spaces.has(ALL_NAMESPACES_STRING)) {
-          spacesWithConflictingAliases = [...spacesWithMatchingAliases];
-        } else {
-          spacesWithConflictingAliases = intersection(spaces, spacesWithMatchingAliases);
-        }
-        if (spacesWithConflictingAliases.length) {
-          // we found one or more conflicting aliases, this is an error result
-          return { tag: 'Left', value: { ...either.value, spacesWithConflictingAliases } };
-        }
-      }
-      // we checked for aliases but did not detect any conflicts; make sure we don't check for aliases again during mget
-      checkAliases = false;
-    }
-    return { tag: 'Right', value: { ...either.value, checkAliases } };
-  });
-
-  const objectsToGet = aliasConflictsOrObjectsToGet.filter(isRight);
-  const docsToBulkGet: Array<{ _id: string; _index: string; _source: string[] }> = [];
-  const aliasSpaces: string[] = [];
-  for (const { value } of objectsToGet) {
-    const { type, id, spaces } = value;
-    docsToBulkGet.push({
-      _id: serializer.generateRawId(undefined, type, id),
-      _index: getIndexForType(type),
-      _source: ['type', 'namespaces'],
-    });
-    if (value.checkAliases) {
-      for (const space of spaces) {
-        const rawAliasId = serializer.generateRawLegacyUrlAliasId(space, type, id);
-        docsToBulkGet.push({
-          _id: rawAliasId,
-          _index: getIndexForType(LEGACY_URL_ALIAS_TYPE),
-          _source: [`${LEGACY_URL_ALIAS_TYPE}.disabled`],
-        });
-        aliasSpaces.push(space);
-      }
-    }
-  }
-
-  const bulkGetResponse = docsToBulkGet.length
-    ? await client.mget<SavedObjectsRawDocSource>(
-        { body: { docs: docsToBulkGet } },
-        { ignore: [404] }
-      )
-    : undefined;
-  // exit early if a 404 isn't from elasticsearch
-  if (
-    bulkGetResponse &&
-    isNotFoundFromUnsupportedServer({
-      statusCode: bulkGetResponse.statusCode,
-      headers: bulkGetResponse.headers,
-    })
-  ) {
-    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-  }
-
+  // Step 3: process all of the find and bulk-get results, and return appropriate results to the consumer.
   let getResponseIndex = 0;
   let aliasSpacesIndex = 0;
   const results: PreflightCheckForCreateResult[] = [];
@@ -228,6 +173,104 @@ export async function preflightCheckForCreate(params: PreflightCheckForCreatePar
     }
   }
   return results;
+}
+
+async function optionallyFindAliases(
+  createPointInTimeFinder: CreatePointInTimeFinderFn,
+  objects: PreflightCheckForCreateObject[]
+) {
+  // Make a discriminated union based on the spaces the objects should be created in (Left=mget aliases, Right=find aliases)
+  const objectsToGetOrObjectsToFind = objects.map<Either<ParsedObject>>((object) => {
+    const { type, id, overwrite, namespaces } = object;
+    const spaces = new Set(namespaces);
+    const tag =
+      spaces.size > FIND_ALIASES_THRESHOLD || spaces.has(ALL_NAMESPACES_STRING) ? 'Right' : 'Left';
+    return { tag, value: { type, id, overwrite, spaces } };
+  });
+
+  const objectsToFind = objectsToGetOrObjectsToFind
+    .filter(isRight)
+    .map(({ value: { type, id } }) => ({ type, id }));
+  const aliasMap = await findLegacyUrlAliases(createPointInTimeFinder, objectsToFind);
+
+  // Make another discriminated union based on the find results (Left=error, Right=mget objects/aliases)
+  const result = objectsToGetOrObjectsToFind.map<
+    Either<
+      ParsedObject & { spacesWithConflictingAliases: string[] },
+      ParsedObject & { checkAliases: boolean }
+    >
+  >((either) => {
+    let checkAliases = true;
+    if (isRight(either)) {
+      const { type, id, spaces } = either.value;
+      const key = getObjectKey({ type, id });
+      const spacesWithMatchingAliases = aliasMap.get(key);
+      if (spacesWithMatchingAliases) {
+        let spacesWithConflictingAliases: string[] = [];
+        if (spaces.has(ALL_NAMESPACES_STRING)) {
+          spacesWithConflictingAliases = [...spacesWithMatchingAliases];
+        } else {
+          spacesWithConflictingAliases = intersection(spaces, spacesWithMatchingAliases);
+        }
+        if (spacesWithConflictingAliases.length) {
+          // we found one or more conflicting aliases, this is an error result
+          return { tag: 'Left', value: { ...either.value, spacesWithConflictingAliases } };
+        }
+      }
+      // we checked for aliases but did not detect any conflicts; make sure we don't check for aliases again during mget
+      checkAliases = false;
+    }
+    return { tag: 'Right', value: { ...either.value, checkAliases } };
+  });
+
+  return result;
+}
+
+async function bulkGetObjectsAndAliases(
+  client: RepositoryEsClient,
+  serializer: SavedObjectsSerializer,
+  getIndexForType: (type: string) => string,
+  objectsAndAliasesToBulkGet: Array<ParsedObject & { checkAliases: boolean }>
+) {
+  const docsToBulkGet: Array<{ _id: string; _index: string; _source: string[] }> = [];
+  const aliasSpaces: string[] = [];
+  for (const { type, id, spaces, checkAliases } of objectsAndAliasesToBulkGet) {
+    docsToBulkGet.push({
+      _id: serializer.generateRawId(undefined, type, id), // namespace is intentionally undefined because multi-namespace objects don't have a namespace in their raw ID
+      _index: getIndexForType(type),
+      _source: ['type', 'namespaces'],
+    });
+    if (checkAliases) {
+      for (const space of spaces) {
+        const rawAliasId = serializer.generateRawLegacyUrlAliasId(space, type, id);
+        docsToBulkGet.push({
+          _id: rawAliasId,
+          _index: getIndexForType(LEGACY_URL_ALIAS_TYPE),
+          _source: [`${LEGACY_URL_ALIAS_TYPE}.disabled`],
+        });
+        aliasSpaces.push(space);
+      }
+    }
+  }
+
+  const bulkGetResponse = docsToBulkGet.length
+    ? await client.mget<SavedObjectsRawDocSource>(
+        { body: { docs: docsToBulkGet } },
+        { ignore: [404] }
+      )
+    : undefined;
+  // exit early if a 404 isn't from elasticsearch
+  if (
+    bulkGetResponse &&
+    isNotFoundFromUnsupportedServer({
+      statusCode: bulkGetResponse.statusCode,
+      headers: bulkGetResponse.headers,
+    })
+  ) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+  }
+
+  return { bulkGetResponse, aliasSpaces };
 }
 
 function intersection<T>(a: Set<T>, b: Set<T>) {

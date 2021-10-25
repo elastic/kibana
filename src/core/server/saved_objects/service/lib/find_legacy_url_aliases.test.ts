@@ -17,8 +17,8 @@ import { savedObjectsRepositoryMock } from './repository.mock';
 
 describe('findLegacyUrlAliases', () => {
   let savedObjectsMock: jest.Mocked<ISavedObjectsRepository>;
-  let createPointInTimeFinder: jest.MockedFunction<CreatePointInTimeFinderFn>;
   let pointInTimeFinder: DeeplyMockedKeys<PointInTimeFinder>;
+  let createPointInTimeFinder: jest.MockedFunction<CreatePointInTimeFinderFn>;
 
   beforeEach(() => {
     savedObjectsMock = savedObjectsRepositoryMock.create();
@@ -30,11 +30,8 @@ describe('findLegacyUrlAliases', () => {
       page: 1,
       per_page: 100,
     });
-    createPointInTimeFinder = jest.fn();
-    createPointInTimeFinder.mockImplementation((params) => {
-      pointInTimeFinder = savedObjectsPointInTimeFinderMock.create({ savedObjectsMock })(params);
-      return pointInTimeFinder;
-    });
+    pointInTimeFinder = savedObjectsPointInTimeFinderMock.create({ savedObjectsMock })(); // PIT finder mock uses the actual implementation, but it doesn't need to be created with real params because the SOR is mocked too
+    createPointInTimeFinder = jest.fn().mockReturnValue(pointInTimeFinder);
   });
 
   function mockFindResults(...results: LegacyUrlAlias[]) {
@@ -115,7 +112,7 @@ describe('findLegacyUrlAliases', () => {
   });
 
   it('handles PointInTimeFinder.close errors', async () => {
-    savedObjectsMock.closePointInTime.mockRejectedValue(new Error('Oh no!'));
+    pointInTimeFinder.close.mockRejectedValue(new Error('Oh no!'));
 
     const objects = [obj1, obj2, obj3];
     await expect(() => findLegacyUrlAliases(createPointInTimeFinder, objects)).rejects.toThrow(
