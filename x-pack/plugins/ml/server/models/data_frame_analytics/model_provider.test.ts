@@ -143,6 +143,13 @@ describe('Model service', () => {
               model_size: '255.5mb',
               model_threads: 1,
               state: 'started',
+              node: {
+                average_inference_time_ms: 0,
+                inference_count: 0,
+                routing_state: {
+                  routing_state: 'started',
+                },
+              },
             },
             {
               allocation_status: {
@@ -155,6 +162,13 @@ describe('Model service', () => {
               model_size: '248.8mb',
               model_threads: 1,
               state: 'started',
+              node: {
+                average_inference_time_ms: 0,
+                inference_count: 0,
+                routing_state: {
+                  routing_state: 'started',
+                },
+              },
             },
             {
               allocation_status: {
@@ -167,6 +181,13 @@ describe('Model service', () => {
               model_size: '127.2mb',
               model_threads: 1,
               state: 'started',
+              node: {
+                average_inference_time_ms: 0,
+                inference_count: 0,
+                routing_state: {
+                  routing_state: 'started',
+                },
+              },
             },
             {
               allocation_status: {
@@ -179,6 +200,13 @@ describe('Model service', () => {
               model_size: '95.5mb',
               model_threads: 1,
               state: 'started',
+              node: {
+                average_inference_time_ms: 0,
+                inference_count: 0,
+                routing_state: {
+                  routing_state: 'started',
+                },
+              },
             },
           ],
           attributes: {
@@ -239,6 +267,12 @@ describe('Model service', () => {
               model_size: '255.5mb',
               model_threads: 1,
               state: 'started',
+              node: {
+                routing_state: {
+                  reason: 'The object cannot be set twice!',
+                  routing_state: 'failed',
+                },
+              },
             },
             {
               allocation_status: {
@@ -246,12 +280,17 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
-
               inference_threads: 1,
               model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
               model_size: '248.8mb',
               model_threads: 1,
               state: 'started',
+              node: {
+                routing_state: {
+                  reason: 'The object cannot be set twice!',
+                  routing_state: 'failed',
+                },
+              },
             },
             {
               allocation_status: {
@@ -259,12 +298,17 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
-
               inference_threads: 1,
               model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
               model_size: '127.2mb',
               model_threads: 1,
               state: 'started',
+              node: {
+                routing_state: {
+                  reason: 'The object cannot be set twice!',
+                  routing_state: 'failed',
+                },
+              },
             },
             {
               allocation_status: {
@@ -277,6 +321,12 @@ describe('Model service', () => {
               model_size: '95.5mb',
               model_threads: 1,
               state: 'started',
+              node: {
+                routing_state: {
+                  reason: 'The object cannot be set twice!',
+                  routing_state: 'failed',
+                },
+              },
             },
           ],
           attributes: {
@@ -336,6 +386,13 @@ describe('Model service', () => {
               model_size: '255.5mb',
               model_threads: 1,
               state: 'started',
+              node: {
+                average_inference_time_ms: 0,
+                inference_count: 0,
+                routing_state: {
+                  routing_state: 'started',
+                },
+              },
             },
             {
               allocation_status: {
@@ -343,12 +400,18 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
-
               inference_threads: 1,
               model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
               model_size: '248.8mb',
               model_threads: 1,
               state: 'started',
+              node: {
+                average_inference_time_ms: 0,
+                inference_count: 0,
+                routing_state: {
+                  routing_state: 'started',
+                },
+              },
             },
             {
               allocation_status: {
@@ -356,12 +419,18 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
-
               inference_threads: 1,
               model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
               model_size: '127.2mb',
               model_threads: 1,
               state: 'started',
+              node: {
+                average_inference_time_ms: 0,
+                inference_count: 0,
+                routing_state: {
+                  routing_state: 'started',
+                },
+              },
             },
             {
               allocation_status: {
@@ -369,12 +438,18 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
-
               inference_threads: 1,
               model_id: 'typeform__mobilebert-uncased-mnli',
               model_size: '95.5mb',
               model_threads: 1,
               state: 'started',
+              node: {
+                average_inference_time_ms: 0,
+                inference_count: 0,
+                routing_state: {
+                  routing_state: 'started',
+                },
+              },
             },
           ],
           attributes: {
