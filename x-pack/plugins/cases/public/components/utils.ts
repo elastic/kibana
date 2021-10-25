@@ -78,7 +78,7 @@ export const getConnectorIcon = (
 };
 
 // TODO: Remove when the applications are certified
-export const isDeprecateConnector = (connector?: CaseActionConnector) => {
+export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean => {
   if (connector == null) {
     return true;
   }
@@ -91,5 +91,16 @@ export const isDeprecateConnector = (connector?: CaseActionConnector) => {
     return true;
   }
 
-  return connector.config.usesTableApi;
+  /**
+   * Connector's prior to the Elastic ServiceNow application
+   * use the Table API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_TableAPI)
+   * Connectors after the Elastic ServiceNow application use the
+   * Import Set API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_ImportSetAPI)
+   * A ServiceNow connector is considered deprecated if it uses the Table API.
+   *
+   * All other connectors do not have the usesTableApi config property
+   * so the function will always return false for them.
+   */
+
+  return !!connector.config.usesTableApi;
 };

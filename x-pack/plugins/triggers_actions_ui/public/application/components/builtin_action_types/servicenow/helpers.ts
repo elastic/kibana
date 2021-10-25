@@ -28,7 +28,7 @@ export const isFieldInvalid = (
 ): boolean => error !== undefined && error.length > 0 && field != null;
 
 // TODO: Remove when the applications are certified
-export const isDeprecatedConnector = (connector: ServiceNowActionConnector) => {
+export const isDeprecatedConnector = (connector: ServiceNowActionConnector): boolean => {
   if (connector == null) {
     return true;
   }
@@ -41,5 +41,14 @@ export const isDeprecatedConnector = (connector: ServiceNowActionConnector) => {
     return true;
   }
 
-  return connector.config.usesTableApi;
+  /**
+   * Connectors after the Elastic ServiceNow application use the
+   * Import Set API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_ImportSetAPI)
+   * A ServiceNow connector is considered deprecated if it uses the Table API.
+   *
+   * All other connectors do not have the usesTableApi config property
+   * so the function will always return false for them.
+   */
+
+  return !!connector.config.usesTableApi;
 };
