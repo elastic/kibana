@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiButton, EuiBadge, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EngineLogic } from '../../engine';
@@ -25,17 +25,17 @@ import {
 
 import { getCurationsBreadcrumbs } from '../utils';
 
+import { AutomatedCurationHistory } from './automated_curation_history';
 import { HIDDEN_DOCUMENTS_TITLE, PROMOTED_DOCUMENTS_TITLE } from './constants';
 import { CurationLogic } from './curation_logic';
 import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, OrganicDocuments } from './documents';
-import { History } from './history';
 
 export const AutomatedCuration: React.FC = () => {
   const { curationId } = useParams<{ curationId: string }>();
   const logic = CurationLogic({ curationId });
   const { convertToManual, onSelectPageTab } = useActions(logic);
-  const { activeQuery, dataLoading, queries, curation, selectedPageTab } = useValues(logic);
+  const { activeQuery, queries, curation, selectedPageTab } = useValues(logic);
   const { engineName } = useValues(EngineLogic);
 
   const pageTabs = [
@@ -69,7 +69,7 @@ export const AutomatedCuration: React.FC = () => {
       pageHeader={{
         pageTitle: (
           <>
-            {dataLoading ? <EuiLoadingSpinner size="l" /> : activeQuery}{' '}
+            {activeQuery}{' '}
             <EuiBadge iconType={AutomatedIcon} color="accent">
               {AUTOMATED_LABEL}
             </EuiBadge>
@@ -96,12 +96,11 @@ export const AutomatedCuration: React.FC = () => {
         ],
         tabs: pageTabs,
       }}
-      isLoading={dataLoading}
     >
       {selectedPageTab === 'promoted' && <PromotedDocuments />}
       {selectedPageTab === 'promoted' && <OrganicDocuments />}
       {selectedPageTab === 'history' && (
-        <History query={curation.queries[0]} engineName={engineName} />
+        <AutomatedCurationHistory query={curation.queries[0]} engineName={engineName} />
       )}
     </AppSearchPageTemplate>
   );
