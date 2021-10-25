@@ -42,7 +42,7 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
           bgColor: false,
           labelColor: false,
           subText: '',
-          fontSize: 80,
+          fontSize: 60,
         },
       },
     },
