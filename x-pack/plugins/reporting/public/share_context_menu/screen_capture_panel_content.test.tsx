@@ -85,8 +85,10 @@ test('ScreenCapturePanelContent decorated job params are visible in the POST URL
   const component = mount(
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
+        objectId="test"
         reportType="Analytical App"
         requiresSavedState={false}
+        isDirty={false}
         apiClient={apiClient}
         uiSettings={uiSettings}
         toasts={coreSetup.notifications.toasts}
