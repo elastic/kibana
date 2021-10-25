@@ -68,8 +68,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const afterItemSelection = useCallback(() => {
     setPopover(false);
   }, []);
-  const ruleId = get(0, ecsRowData?.signal?.rule?.id);
-  const ruleName = get(0, ecsRowData?.signal?.rule?.name);
+  const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
+  const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
   const { timelines: timelinesUi } = useKibana().services;
 
   const { addToCaseActionProps, addToCaseActionItems } = useAddToCaseActions({

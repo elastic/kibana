@@ -25,14 +25,14 @@ describe('alerts default_config', () => {
           negate: false,
           disabled: false,
           type: 'phrase',
-          key: 'signal.rule.id',
+          key: 'kibana.alert.rule.uuid',
           params: {
             query: 'rule-id-1',
           },
         },
         query: {
           match_phrase: {
-            'signal.rule.id': 'rule-id-1',
+            'kibana.alert.rule.uuid': 'rule-id-1',
           },
         },
       };
@@ -48,13 +48,13 @@ describe('alerts default_config', () => {
             alias: null,
             disabled: false,
             negate: false,
-            key: 'signal.rule.threat_mapping',
+            key: 'kibana.alert.rule.threat_mapping',
             type: 'exists',
             value: 'exists',
           },
           query: {
             exists: {
-              field: 'signal.rule.threat_mapping',
+              field: 'kibana.alert.rule.threat_mapping',
             },
           },
         };

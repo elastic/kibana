@@ -16,3 +16,8 @@ export interface SignalEcs {
   };
   threshold_result?: unknown;
 }
+
+export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
+  rule?: Exclude<RuleEcs, 'id'> & { uuid: string };
+  workflow_status?: string[];
+};
