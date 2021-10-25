@@ -110,8 +110,7 @@ export function modelsProvider(
           const modelsMemoryUsage = allocatedModels.map((v) => {
             return {
               model_id: v.model_id,
-              // @ts-ignore
-              model_size: v.model_size,
+              model_size: v.model_size_bytes,
             };
           });
 

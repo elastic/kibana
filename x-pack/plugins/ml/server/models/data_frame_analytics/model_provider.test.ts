@@ -140,7 +140,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'distilbert-base-uncased-finetuned-sst-2-english',
-              model_size: 267386880,
+              model_size_bytes: 267386880,
               model_threads: 1,
               state: 'started',
               node: {
@@ -159,7 +159,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
-              model_size: 260947500,
+              model_size_bytes: 260947500,
               model_threads: 1,
               state: 'started',
               node: {
@@ -178,7 +178,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
-              model_size: 133378867,
+              model_size_bytes: 133378867,
               model_threads: 1,
               state: 'started',
               node: {
@@ -197,7 +197,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'typeform__mobilebert-uncased-mnli',
-              model_size: 100139008,
+              model_size_bytes: 100139008,
               model_threads: 1,
               state: 'started',
               node: {
@@ -264,7 +264,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'distilbert-base-uncased-finetuned-sst-2-english',
-              model_size: 267386880,
+              model_size_bytes: 267386880,
               model_threads: 1,
               state: 'started',
               node: {
@@ -282,7 +282,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
-              model_size: 260947500,
+              model_size_bytes: 260947500,
               model_threads: 1,
               state: 'started',
               node: {
@@ -300,7 +300,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
-              model_size: 133378867,
+              model_size_bytes: 133378867,
               model_threads: 1,
               state: 'started',
               node: {
@@ -318,7 +318,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'typeform__mobilebert-uncased-mnli',
-              model_size: 100139008,
+              model_size_bytes: 100139008,
               model_threads: 1,
               state: 'started',
               node: {
@@ -383,7 +383,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'distilbert-base-uncased-finetuned-sst-2-english',
-              model_size: 267386880,
+              model_size_bytes: 267386880,
               model_threads: 1,
               state: 'started',
               node: {
@@ -402,7 +402,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
-              model_size: 260947500,
+              model_size_bytes: 260947500,
               model_threads: 1,
               state: 'started',
               node: {
@@ -421,7 +421,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
-              model_size: 133378867,
+              model_size_bytes: 133378867,
               model_threads: 1,
               state: 'started',
               node: {
@@ -440,7 +440,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'typeform__mobilebert-uncased-mnli',
-              model_size: 100139008,
+              model_size_bytes: 100139008,
               model_threads: 1,
               state: 'started',
               node: {

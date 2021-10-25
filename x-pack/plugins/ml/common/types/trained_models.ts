@@ -122,7 +122,7 @@ export interface InferenceConfigResponse {
 
 export interface TrainedModelDeploymentStatsResponse {
   model_id: string;
-  model_size: string;
+  model_size_bytes: number;
   inference_threads: number;
   model_threads: number;
   state: string;
