@@ -170,7 +170,7 @@ describe('AlertsHistogramPanel', () => {
 
       await waitFor(() => {
         expect(mockGetAlertsHistogramQuery.mock.calls[0]).toEqual([
-          'signal.rule.name',
+          'kibana.alert.rule.name',
           '2020-07-07T08:20:18.966Z',
           '2020-07-08T08:20:18.966Z',
           [
@@ -223,7 +223,7 @@ describe('AlertsHistogramPanel', () => {
 
       await waitFor(() => {
         expect(mockGetAlertsHistogramQuery.mock.calls[1]).toEqual([
-          'signal.rule.name',
+          'kibana.alert.rule.name',
           '2020-07-07T08:20:18.966Z',
           '2020-07-08T08:20:18.966Z',
           [

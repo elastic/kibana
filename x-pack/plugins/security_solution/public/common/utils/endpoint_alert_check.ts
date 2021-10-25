@@ -38,8 +38,8 @@ export const isAlertFromEndpointAlert = ({
     return false;
   }
 
-  const eventModules = getOr([], 'signal.original_event.module', ecsData);
-  const kinds = getOr([], 'signal.original_event.kind', ecsData);
+  const eventModules = getOr([], 'kibana.alert.original_event.module', ecsData);
+  const kinds = getOr([], 'kibana.alert.original_event.kind', ecsData);
 
   return eventModules.includes('endpoint') && kinds.includes('alert');
 };
