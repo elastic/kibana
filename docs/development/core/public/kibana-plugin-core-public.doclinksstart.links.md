@@ -229,7 +229,7 @@ readonly links: {
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
-            customizeIntegrationDataRetention: string;
+            datastreamsILM: string;
             guide: string;
             fleetServer: string;
             fleetServerAddFleetServer: string;
