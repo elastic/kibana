@@ -132,7 +132,7 @@ export function embeddableFunctionFactory({
         } else {
           // injects references for by-value embeddables
           const { type, ...injectedInput } = embeddablePersistableStateService.inject(
-            input,
+            { ...input, type: state.type[0] },
             references
           );
           state.config[0] = encode(injectedInput);
