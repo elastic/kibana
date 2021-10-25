@@ -196,7 +196,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params?.decimals || 0);
 
     const rangeFormatter = data.fieldFormats.deserialize({
-      ...currentColumn.params.parentFormat,
+      ...(currentColumn.params.parentFormat || { id: 'range' }),
       params: {
         ...currentColumn.params.parentFormat?.params,
         ...(numberFormat
