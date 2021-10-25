@@ -218,7 +218,13 @@ class TutorialDirectoryUi extends React.Component {
           pageTitle: (
             <FormattedMessage
               id="home.tutorial.addDataToKibanaTitle"
-              defaultMessage="Alternative ways to add data"
+              defaultMessage="More ways to add data"
+            />
+          ),
+          description: (
+            <FormattedMessage
+              id="home.tutorial.addDataToKibanaDescription"
+              defaultMessage="In addition to adding integrations, you can try our sample data, or upload your own data."
             />
           ),
           tabs,
