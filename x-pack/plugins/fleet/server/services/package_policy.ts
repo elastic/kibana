@@ -359,7 +359,8 @@ class PackagePolicyService {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicy: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser },
+    currentVersion?: string
   ): Promise<PackagePolicy> {
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
@@ -433,6 +434,20 @@ class PackagePolicyService {
         pkgName: packagePolicy.package.name,
         currentVersion: packagePolicy.package.version,
       });
+
+      if (packagePolicy.package.version !== currentVersion) {
+        sendTelemetryEvents(
+          appContextService.getLogger(),
+          appContextService.getTelemetryEventsSender(),
+          {
+            package_name: packagePolicy.package.name,
+            current_version: currentVersion || 'unknown',
+            new_version: packagePolicy.package.version,
+            status: 'success',
+            dryRun: false,
+          }
+        );
+      }
     }
 
     return newPolicy;
@@ -601,25 +616,19 @@ class PackagePolicyService {
         );
         updatePackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
 
-        await this.update(soClient, esClient, id, updatePackagePolicy, options);
+        await this.update(
+          soClient,
+          esClient,
+          id,
+          updatePackagePolicy,
+          options,
+          packagePolicy.package.version
+        );
         result.push({
           id,
           name: packagePolicy.name,
           success: true,
         });
-        
-        if (packagePolicy.package.version !== packageInfo.version) {
-          sendTelemetryEvents(
-            appContextService.getLogger(),
-            appContextService.getTelemetryEventsSender(),
-            {
-              package_name: packageInfo.name,
-              current_version: packagePolicy.package.version,
-              new_version: packageInfo.version,
-              status: 'success',
-            }
-          );
-        }
       } catch (error) {
         // We only want to specifically handle validation errors for the new package policy. If a more severe or
         // general error is thrown elsewhere during the upgrade process, we want to surface that directly in
@@ -676,19 +685,18 @@ class PackagePolicyService {
       const hasErrors = 'errors' in updatedPackagePolicy;
 
       if (packagePolicy.package.version !== packageInfo.version) {
-        if (hasErrors) {
-          sendTelemetryEvents(
-            appContextService.getLogger(),
-            appContextService.getTelemetryEventsSender(),
-            {
-              package_name: packageInfo.name,
-              current_version: packagePolicy.package.version,
-              new_version: packageInfo.version,
-              status: hasErrors ? 'failure' : 'success',
-              error: updatedPackagePolicy.errors,
-            }
-          );
-        }
+        sendTelemetryEvents(
+          appContextService.getLogger(),
+          appContextService.getTelemetryEventsSender(),
+          {
+            package_name: packageInfo.name,
+            current_version: packagePolicy.package.version,
+            new_version: packageInfo.version,
+            status: hasErrors ? 'failure' : 'success',
+            error: hasErrors ? updatedPackagePolicy.errors : undefined,
+            dryRun: true,
+          }
+        );
       }
 
       return {

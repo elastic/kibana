@@ -15,6 +15,7 @@ export interface PackagePolicyUpgradeUsage {
   new_version: string;
   status: 'success' | 'failure';
   error?: UpgradeError[];
+  dryRun?: boolean;
 }
 
 export interface UpgradeError {
@@ -44,7 +45,7 @@ export function sendTelemetryEvents(
               ? makeErrorGeneric(capErrorSize(upgradeUsage.error, MAX_ERROR_SIZE))
               : undefined,
           },
-          id: `${upgradeUsage.package_name}_${upgradeUsage.current_version}_${upgradeUsage.new_version}_${upgradeUsage.status}`,
+          id: `${upgradeUsage.package_name}_${upgradeUsage.current_version}_${upgradeUsage.new_version}_${upgradeUsage.status}_${upgradeUsage.dryRun}`,
         },
       ],
       FLEET_UPGRADES_CHANNEL_NAME

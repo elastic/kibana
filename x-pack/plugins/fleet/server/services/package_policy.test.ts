@@ -134,6 +134,12 @@ jest.mock('./epm/packages/cleanup', () => {
   };
 });
 
+jest.mock('./upgrade_usage', () => {
+  return {
+    sendTelemetryEvents: jest.fn(),
+  };
+});
+
 const mockedFetchInfo = fetchInfo as jest.Mock<ReturnType<typeof fetchInfo>>;
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
@@ -578,6 +584,12 @@ describe('Package policy service', () => {
   });
 
   describe('update', () => {
+    beforeEach(() => {
+      appContextService.start(createAppContextStartContractMock());
+    });
+    afterEach(() => {
+      appContextService.stop();
+    });
     it('should fail to update on version conflict', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       savedObjectsClient.get.mockResolvedValue({
@@ -601,7 +613,8 @@ describe('Package policy service', () => {
           savedObjectsClient,
           elasticsearchClient,
           'the-package-policy-id',
-          createPackagePolicyMock()
+          createPackagePolicyMock(),
+          'current-version'
         )
       ).rejects.toThrow('Saved object [abc/123] conflict');
     });
@@ -721,7 +734,8 @@ describe('Package policy service', () => {
         savedObjectsClient,
         elasticsearchClient,
         'the-package-policy-id',
-        { ...mockPackagePolicy, inputs: inputsUpdate }
+        { ...mockPackagePolicy, inputs: inputsUpdate },
+        'current-version'
       );
 
       const [modifiedInput] = result.inputs;
@@ -844,7 +858,8 @@ describe('Package policy service', () => {
         savedObjectsClient,
         elasticsearchClient,
         'the-package-policy-id',
-        { ...mockPackagePolicy, inputs: inputsUpdate }
+        { ...mockPackagePolicy, inputs: inputsUpdate },
+        'current-version'
       );
 
       const [modifiedInput] = result.inputs;
@@ -903,7 +918,8 @@ describe('Package policy service', () => {
         savedObjectsClient,
         elasticsearchClient,
         'the-package-policy-id',
-        { ...mockPackagePolicy, inputs: [] }
+        { ...mockPackagePolicy, inputs: [] },
+        'current-version'
       );
 
       expect(result.elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
