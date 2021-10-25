@@ -24,12 +24,13 @@ import { getStopsForFixedMode } from '../shared_components';
 import { LayerType, layerTypes } from '../../common';
 import { getDefaultSummaryLabel } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
-
+import { DataTableToolbar } from './components/toolbar';
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
   layerType: LayerType;
   sorting?: SortingState;
+  fitRowToContent?: boolean;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -389,6 +390,7 @@ export const getDatatableVisualization = ({
             }),
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
+            fitRowToContent: [state.fitRowToContent ?? false],
           },
         },
       ],
@@ -397,6 +399,15 @@ export const getDatatableVisualization = ({
 
   getErrorMessages(state) {
     return undefined;
+  },
+
+  renderToolbar(domElement, props) {
+    render(
+      <I18nProvider>
+        <DataTableToolbar {...props} />
+      </I18nProvider>,
+      domElement
+    );
   },
 
   onEditAction(state, event) {

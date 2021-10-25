@@ -22,6 +22,7 @@ export interface DatatableArgs {
   columns: ColumnConfigArg[];
   sortingColumnId: SortingState['columnId'];
   sortingDirection: SortingState['direction'];
+  fitRowToContent?: boolean;
 }
 
 export const getDatatable = (
@@ -57,6 +58,10 @@ export const getDatatable = (
       types: ['string'],
       help: '',
     },
+    fitRowToContent: {
+      types: ['boolean'],
+      help: '',
+    }
   },
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/
