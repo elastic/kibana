@@ -327,6 +327,20 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     [isPopoverOpen, selectedPatterns]
   );
 
+  const buttonWithTooptip = useMemo(() => {
+    return tooltipContent ? (
+      <EuiToolTip
+        position="top"
+        content={tooltipContent}
+        data-test-subj="timeline-sourcerer-tooltip"
+      >
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
+    );
+  }, [button, tooltipContent]);
+
   const ButtonContent = useMemo(
     () => (
       <AdvancedSettings data-test-subj="advanced-settings">
@@ -358,93 +372,90 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
   return (
     <PickEventContainer>
-      <EuiToolTip position="top" content={tooltipContent}>
-        <EuiPopover
-          button={button}
-          closePopover={closePopover}
-          id="popover"
-          isOpen={isPopoverOpen}
-          ownFocus
-          repositionOnScroll
-        >
-          <PopoverContent>
-            <EuiPopoverTitle>
-              <>{i18n.SELECT_INDEX_PATTERNS}</>
-            </EuiPopoverTitle>
-            <EuiSpacer size="s" />
-            <Filter
-              data-test-subj="timeline-sourcerer-radio"
-              options={filterOptions}
-              idSelected={filterEventType}
-              onChange={onChangeFilter}
-              name={i18n.SELECT_INDEX_PATTERNS}
-            />
-            <EuiSpacer size="m" />
-            <EuiAccordion
-              data-test-subj="sourcerer-accordion"
-              id="accordion1"
-              forceState={showAdvanceSettings ? 'open' : 'closed'}
-              buttonContent={ButtonContent}
-              onToggle={setAdvanceSettings}
-            >
-              <>
-                <EuiSpacer size="s" />
-                <EuiSuperSelect
-                  data-test-subj="sourcerer-select"
-                  placeholder={i18n.PICK_INDEX_PATTERNS}
-                  fullWidth
-                  options={dataViewSelectOptions}
-                  valueOfSelected={dataViewId}
-                  onChange={onChangeSuper}
-                />
-                <EuiSpacer size="xs" />
-                <EuiComboBox
-                  data-test-subj="timeline-sourcerer"
-                  fullWidth
-                  onChange={onChangeCombo}
-                  options={selectableOptions}
-                  placeholder={i18n.PICK_INDEX_PATTERNS}
-                  selectedOptions={selectedOptions}
-                />
-              </>
-            </EuiAccordion>
-            {!showAdvanceSettings && (
-              <>
-                <EuiSpacer size="s" />
-                <ConfigHelper size="s" color="subdued">
-                  {i18n.CONFIGURE_INDEX_PATTERNS}
-                </ConfigHelper>
-              </>
-            )}
-            <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <ResetButton
-                  aria-label={i18n.DATA_SOURCES_RESET}
-                  data-test-subj="sourcerer-reset"
-                  flush="left"
-                  onClick={resetDataSources}
-                  title={i18n.DATA_SOURCES_RESET}
-                >
-                  {i18n.DATA_SOURCES_RESET}
-                </ResetButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={handleSaveIndices}
-                  data-test-subj="sourcerer-save"
-                  disabled={isSavingDisabled}
-                  fill
-                  fullWidth
-                  size="s"
-                >
-                  {i18n.SAVE_INDEX_PATTERNS}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </PopoverContent>
-        </EuiPopover>
-      </EuiToolTip>
+      <EuiPopover
+        button={buttonWithTooptip}
+        closePopover={closePopover}
+        id="popover"
+        isOpen={isPopoverOpen}
+        repositionOnScroll
+      >
+        <PopoverContent>
+          <EuiPopoverTitle>
+            <>{i18n.SELECT_INDEX_PATTERNS}</>
+          </EuiPopoverTitle>
+          <EuiSpacer size="s" />
+          <Filter
+            data-test-subj="timeline-sourcerer-radio"
+            options={filterOptions}
+            idSelected={filterEventType}
+            onChange={onChangeFilter}
+            name={i18n.SELECT_INDEX_PATTERNS}
+          />
+          <EuiSpacer size="m" />
+          <EuiAccordion
+            data-test-subj="sourcerer-accordion"
+            id="accordion1"
+            forceState={showAdvanceSettings ? 'open' : 'closed'}
+            buttonContent={ButtonContent}
+            onToggle={setAdvanceSettings}
+          >
+            <>
+              <EuiSpacer size="s" />
+              <EuiSuperSelect
+                data-test-subj="sourcerer-select"
+                placeholder={i18n.PICK_INDEX_PATTERNS}
+                fullWidth
+                options={dataViewSelectOptions}
+                valueOfSelected={dataViewId}
+                onChange={onChangeSuper}
+              />
+              <EuiSpacer size="xs" />
+              <EuiComboBox
+                data-test-subj="timeline-sourcerer"
+                fullWidth
+                onChange={onChangeCombo}
+                options={selectableOptions}
+                placeholder={i18n.PICK_INDEX_PATTERNS}
+                selectedOptions={selectedOptions}
+              />
+            </>
+          </EuiAccordion>
+          {!showAdvanceSettings && (
+            <>
+              <EuiSpacer size="s" />
+              <ConfigHelper size="s" color="subdued">
+                {i18n.CONFIGURE_INDEX_PATTERNS}
+              </ConfigHelper>
+            </>
+          )}
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <ResetButton
+                aria-label={i18n.DATA_SOURCES_RESET}
+                data-test-subj="sourcerer-reset"
+                flush="left"
+                onClick={resetDataSources}
+                title={i18n.DATA_SOURCES_RESET}
+              >
+                {i18n.DATA_SOURCES_RESET}
+              </ResetButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={handleSaveIndices}
+                data-test-subj="sourcerer-save"
+                disabled={isSavingDisabled}
+                fill
+                fullWidth
+                size="s"
+              >
+                {i18n.SAVE_INDEX_PATTERNS}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </PopoverContent>
+      </EuiPopover>
     </PickEventContainer>
   );
 };

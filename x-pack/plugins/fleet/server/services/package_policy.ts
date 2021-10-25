@@ -424,7 +424,17 @@ class PackagePolicyService {
       user: options?.user,
     });
 
-    return (await this.get(soClient, id)) as PackagePolicy;
+    const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
+
+    if (packagePolicy.package) {
+      await removeOldAssets({
+        soClient,
+        pkgName: packagePolicy.package.name,
+        currentVersion: packagePolicy.package.version,
+      });
+    }
+
+    return newPolicy;
   }
 
   public async delete(
@@ -595,11 +605,6 @@ class PackagePolicyService {
           id,
           name: packagePolicy.name,
           success: true,
-        });
-        await removeOldAssets({
-          soClient,
-          pkgName: packageInfo.name,
-          currentVersion: packageInfo.version,
         });
       } catch (error) {
         // We only want to specifically handle validation errors for the new package policy. If a more severe or

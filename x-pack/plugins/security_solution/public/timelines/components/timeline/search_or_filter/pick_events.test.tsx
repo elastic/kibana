@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fireEvent, render } from '@testing-library/react';
+
+import { fireEvent, render, within } from '@testing-library/react';
+import { EuiToolTip } from '@elastic/eui';
+
 import React from 'react';
 import { PickEventType } from './pick_events';
 import {
@@ -19,6 +22,14 @@ import { TimelineEventsType } from '../../../../../common';
 import { createStore } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiToolTip: jest.fn(),
+  };
+});
+
 describe('Pick Events/Timeline Sourcerer', () => {
   const defaultProps = {
     eventType: 'all' as TimelineEventsType,
@@ -31,6 +42,63 @@ describe('Pick Events/Timeline Sourcerer', () => {
     mockSourcererState.signalIndexName,
   ];
   const { storage } = createSecuritySolutionStorageMock();
+
+  // const state = {
+  //   ...mockGlobalState,
+  //   sourcerer: {
+  //     ...mockGlobalState.sourcerer,
+  //     kibanaIndexPatterns: [
+  //       { id: '1234', title: 'auditbeat-*' },
+  //       { id: '9100', title: 'filebeat-*' },
+  //       { id: '9100', title: 'auditbeat-*,filebeat-*' },
+  //       { id: '5678', title: 'auditbeat-*,.siem-signals-default' },
+  //     ],
+  //     configIndexPatterns:
+  //       mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline].selectedPatterns,
+  //     signalIndexName: mockGlobalState.sourcerer.signalIndexName,
+  //     sourcererScopes: {
+  //       ...mockGlobalState.sourcerer.sourcererScopes,
+  //       [SourcererScopeName.timeline]: {
+  //         ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+  //         loading: false,
+  //         selectedPatterns: ['filebeat-*'],
+  //       },
+  //     },
+  //   },
+  // };
+  // const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const state = {
+    ...mockGlobalState,
+    sourcerer: {
+      ...mockGlobalState.sourcerer,
+      sourcererScopes: {
+        ...mockGlobalState.sourcerer.sourcererScopes,
+        [SourcererScopeName.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          loading: false,
+          selectedDataViewId: mockGlobalState.sourcerer.defaultDataView.id,
+          selectedPatterns: ['filebeat-*'],
+        },
+      },
+    },
+  };
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const mockTooltip = ({
+    tooltipContent,
+    children,
+  }: {
+    tooltipContent: string;
+    children: React.ReactElement;
+  }) => (
+    <div data-test-subj="timeline-sourcerer-tooltip">
+      <span>{tooltipContent}</span>
+      {children}
+    </div>
+  );
+
+  beforeAll(() => {
+    (EuiToolTip as unknown as jest.Mock).mockImplementation(mockTooltip);
+  });
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -51,7 +119,7 @@ describe('Pick Events/Timeline Sourcerer', () => {
     expect(optionNodes.length).toBe(1);
   });
   it('Removes duplicate options from options list', () => {
-    const store = createStore(
+    const store2 = createStore(
       {
         ...mockGlobalState,
         sourcerer: {
@@ -86,7 +154,7 @@ describe('Pick Events/Timeline Sourcerer', () => {
       storage
     );
     const wrapper = render(
-      <TestProviders store={store}>
+      <TestProviders store={store2}>
         <PickEventType {...defaultProps} />
       </TestProviders>
     );
@@ -97,22 +165,32 @@ describe('Pick Events/Timeline Sourcerer', () => {
       wrapper.getByTestId('comboBoxOptionsList timeline-sourcerer-optionsList').textContent
     ).toEqual('auditbeat-*');
   });
-  const state = {
-    ...mockGlobalState,
-    sourcerer: {
-      ...mockGlobalState.sourcerer,
-      sourcererScopes: {
-        ...mockGlobalState.sourcerer.sourcererScopes,
-        [SourcererScopeName.timeline]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-          loading: false,
-          selectedDataViewId: mockGlobalState.sourcerer.defaultDataView.id,
-          selectedPatterns: ['filebeat-*'],
-        },
-      },
-    },
-  };
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+  it('renders tooltip', () => {
+    render(
+      <TestProviders>
+        <PickEventType {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect((EuiToolTip as unknown as jest.Mock).mock.calls[0][0].content).toEqual(
+      initialPatterns
+        .filter((p) => p != null)
+        .sort()
+        .join(', ')
+    );
+  });
+
+  it('renders popover button inside tooltip', () => {
+    const wrapper = render(
+      <TestProviders>
+        <PickEventType {...defaultProps} />
+      </TestProviders>
+    );
+    const tooltip = wrapper.getByTestId('timeline-sourcerer-tooltip');
+    expect(within(tooltip).getByTestId('sourcerer-timeline-trigger')).toBeTruthy();
+  });
+
   it('correctly filters options', () => {
     const wrapper = render(
       <TestProviders store={store}>

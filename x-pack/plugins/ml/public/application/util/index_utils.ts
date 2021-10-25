@@ -80,7 +80,7 @@ export async function getIndexPatternAndSavedSearch(savedSearchId: string) {
   return resp;
 }
 
-export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
+export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObject) {
   const search = savedSearch.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
   return JSON.parse(search.searchSourceJSON) as {
     query: Query;

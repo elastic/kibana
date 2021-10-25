@@ -348,6 +348,11 @@ export class DiscoverPlugin
         await depsStart.data.indexPatterns.clearCache();
 
         const { renderApp } = await import('./application');
+
+        // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
+        // due to EUI bug https://github.com/elastic/eui/pull/5152
+        params.element.classList.add('dscAppWrapper');
+
         const unmount = renderApp(params.element);
         return () => {
           unlistenParentHistory();
