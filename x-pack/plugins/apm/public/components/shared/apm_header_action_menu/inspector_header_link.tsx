@@ -13,11 +13,13 @@ import {
   enableInspectEsQueries,
   useInspectorContext,
 } from '../../../../../observability/public';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export function InspectorHeaderLink() {
+  const { inspector } = useApmPluginContext();
   const { inspectorAdapters } = useInspectorContext();
   const {
-    services: { inspector, uiSettings },
+    services: { uiSettings },
   } = useKibana();
   const isInspectorEnabled = uiSettings?.get<boolean>(enableInspectEsQueries);
 

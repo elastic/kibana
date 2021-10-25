@@ -6,7 +6,7 @@
  */
 
 import { composeStories } from '@storybook/testing-react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { Breakpoints } from '../../../../hooks/use_breakpoints';

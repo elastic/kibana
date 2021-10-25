@@ -11,10 +11,10 @@ import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
+import type { ApmPluginContextValue } from '../../../../context/apm_plugin';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { items } from './__fixtures__/service_api_mock_data';
 import { ServiceList } from './';
+import { items } from './__fixtures__/service_api_mock_data';
 
 type Args = ComponentProps<typeof ServiceList>;
 
@@ -40,7 +40,9 @@ const stories: Meta<Args> = {
           <MemoryRouter
             initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}
           >
-            <MockApmPluginContextWrapper value={{ core: coreMock }}>
+            <MockApmPluginContextWrapper
+              value={{ core: coreMock } as unknown as ApmPluginContextValue}
+            >
               <StoryComponent />
             </MockApmPluginContextWrapper>
           </MemoryRouter>

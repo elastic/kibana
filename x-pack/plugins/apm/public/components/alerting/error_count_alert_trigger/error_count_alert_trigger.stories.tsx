@@ -19,7 +19,7 @@ const coreMock = {
   http: { get: async () => ({}) },
   notifications: { toasts: { add: () => {} } },
   uiSettings: { get: () => {} },
-} as unknown as Partial<CoreStart>;
+} as unknown as CoreStart;
 
 const KibanaReactContext = createKibanaReactContext(coreMock);
 
