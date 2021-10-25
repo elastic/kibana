@@ -22,11 +22,11 @@ export type {
   XYLayerConfig,
   LegendConfig,
   SeriesType,
-  ValueLabelConfig,
   YAxisMode,
   XYCurveType,
   YConfig,
 } from '../common/expressions';
+export type { ValueLabelConfig } from '../common/types';
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
 export type {
   IndexPatternPersistedState,

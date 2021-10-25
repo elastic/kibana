@@ -12,7 +12,7 @@ import type { FramePublicAPI } from '../../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { State } from '../../types';
 import { VisualOptionsPopover } from '.';
-import { ToolbarPopover } from '../../../shared_components';
+import { ToolbarPopover, ValueLabelsSettings } from '../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { FillOpacityOption } from './fill_opacity_option';
 import { layerTypes } from '../../../../common';
@@ -73,7 +73,7 @@ describe('Visual options popover', () => {
       />
     );
 
-    expect(component.find(MissingValuesOptions).prop('isValueLabelsEnabled')).toEqual(false);
+    expect(component.find(ValueLabelsSettings).prop('isVisible')).toEqual(false);
     expect(component.find(MissingValuesOptions).prop('isFittingEnabled')).toEqual(false);
   });
 
@@ -196,7 +196,7 @@ describe('Visual options popover', () => {
       />
     );
 
-    expect(component.find(MissingValuesOptions).prop('isValueLabelsEnabled')).toEqual(true);
+    expect(component.find(ValueLabelsSettings).prop('isVisible')).toEqual(true);
   });
 
   it('should hide in the popover the display option for area and line series', () => {
@@ -213,7 +213,7 @@ describe('Visual options popover', () => {
       />
     );
 
-    expect(component.find(MissingValuesOptions).prop('isValueLabelsEnabled')).toEqual(false);
+    expect(component.find(ValueLabelsSettings).prop('isVisible')).toEqual(false);
   });
 
   it('should keep the display option for bar series with multiple layers', () => {
@@ -245,6 +245,6 @@ describe('Visual options popover', () => {
       />
     );
 
-    expect(component.find(MissingValuesOptions).prop('isValueLabelsEnabled')).toEqual(true);
+    expect(component.find(ValueLabelsSettings).prop('isVisible')).toEqual(true);
   });
 });
