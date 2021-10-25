@@ -33,9 +33,9 @@ export const buildTimelineDetailsQuery = (
         };
 
   return {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: indexName,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       docvalue_fields: docValueFields,
       query,
