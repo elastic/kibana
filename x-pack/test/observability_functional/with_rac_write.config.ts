@@ -36,10 +36,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        // TO DO: Remove feature flags once we're good to go
-        '--xpack.observability.unsafe.alertingExperience.enabled=true',
-        '--xpack.observability.unsafe.cases.enabled=true',
-        '--xpack.ruleRegistry.write.enabled=true',
       ],
     },
     testFiles: [resolve(__dirname, './apps/observability')],
