@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
           name: 'ServiceNow Connector',
           config: {
             apiUrl: 'http://some.non.existent.com',
-            isLegacy: false,
+            usesTableApi: false,
           },
           isPreconfigured: false,
           isMissingSecrets: false,
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
           name: 'ServiceNow Connector',
           config: {
             apiUrl: 'http://some.non.existent.com',
-            isLegacy: false,
+            usesTableApi: false,
           },
           isPreconfigured: false,
           isMissingSecrets: false,
