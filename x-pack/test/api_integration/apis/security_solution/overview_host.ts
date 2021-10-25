@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get OverviewHost data', async () => {
-        const overviewHost = await bsearch.send<HostsOverviewStrategyResponse>({
+        const { overviewHost } = await bsearch.send<HostsOverviewStrategyResponse>({
           supertest,
           options: {
             defaultIndex: ['auditbeat-*'],
