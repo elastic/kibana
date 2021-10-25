@@ -12,7 +12,8 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('getGridTile', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/116186
+  describe.skip('getGridTile', () => {
     it('should return vector tile containing cluster features', async () => {
       const resp = await supertest
         .get(
