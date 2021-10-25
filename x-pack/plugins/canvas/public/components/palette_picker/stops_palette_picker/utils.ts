@@ -38,7 +38,7 @@ export const mergeColorStopsWithPalette =
       },
       { colors: [], stops: [] }
     );
-    return { ...palette, ...stopsWithColors, ...getOverridenPaletteOptions() };
+    return { ...palette, ...stopsWithColors };
   };
 
 export const updateColorStop =

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { getType } from '@kbn/interpreter/common';
 import { ExpressionAstArgument, ExpressionAstFunction } from 'src/plugins/expressions';
 import { identifyPalette, ColorPalette, identifyPartialPalette } from '../../../../common/lib';
@@ -54,28 +53,37 @@ export const astToPalette = (
     return null;
   }
 
+  const { _, stop: argStops, gradient: argGradient, ...restArgs } = chain[0].arguments ?? {};
+
   try {
     const colors =
-      chain[0].arguments._?.reduce<string[]>((args, arg) => {
+      _?.reduce<string[]>((args, arg) => {
         return reduceElementsWithType(args, arg, 'string', onError);
       }, []) ?? [];
 
     const stops =
-      chain[0].arguments.stop?.reduce<number[]>((args, arg) => {
+      argStops?.reduce<number[]>((args, arg) => {
         return reduceElementsWithType(args, arg, 'number', onError);
       }, []) ?? [];
 
-    const gradient = !!get(chain[0].arguments.gradient, '[0]');
+    const gradient = !!argGradient?.[0];
     const palette = (stops.length ? identifyPartialPalette : identifyPalette)({ colors, gradient });
+    const restPreparedArgs = Object.keys(restArgs).reduce<
+      Record<string, ExpressionAstArgument | ExpressionAstArgument[]>
+    >((acc, argName) => {
+      acc[argName] = restArgs[argName]?.length > 1 ? restArgs[argName] : restArgs[argName]?.[0];
+      return acc;
+    }, {});
 
     if (palette) {
       return {
         ...palette,
+        ...restPreparedArgs,
         stops,
       };
     }
 
-    return createCustomPalette({ colors, gradient, stops });
+    return createCustomPalette({ colors, gradient, stops, ...restPreparedArgs });
   } catch (e) {
     onError();
   }

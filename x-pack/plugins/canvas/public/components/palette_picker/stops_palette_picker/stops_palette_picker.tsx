@@ -59,7 +59,6 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
           ...newPalette,
           colors: newColors,
           stops,
-          ...getOverridenPaletteOptions(),
         });
       }
     },
@@ -67,7 +66,7 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
   );
 
   useEffectOnce(() => {
-    onChangePalette(palette);
+    onChangePalette({ ...getOverridenPaletteOptions(), ...palette });
   });
 
   const paletteColorStops = useMemo(

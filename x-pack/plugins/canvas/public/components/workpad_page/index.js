@@ -31,7 +31,7 @@ const animationProps = ({ animation, isSelected }) =>
 const mapStateToProps = (state, { isSelected, pageId, isFullscreen }) => ({
   isInteractive: isSelected && !isFullscreen && isWriteable(state) && canUserWrite(state),
   elements: getNodes(state, pageId),
-  pageStyle: getPageById(state, pageId).style,
+  pageStyle: getPageById(state, pageId)?.style,
 });
 
 export const ComposedWorkpadPage = compose(
