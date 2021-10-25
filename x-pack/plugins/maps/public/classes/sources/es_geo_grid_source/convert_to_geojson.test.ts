@@ -7,7 +7,7 @@
 
 // @ts-ignore
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
-import { RENDER_AS } from '../constants';
+import { RENDER_AS } from '../../../../common/constants';
 
 describe('convertCompositeRespToGeoJson', () => {
   const esResponse = {

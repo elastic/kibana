@@ -44,35 +44,6 @@ test('should not create centroid feature for point and multipoint', () => {
   expect(centroidFeatures.length).toBe(0);
 });
 
-test('should not create centroid for the metadata polygon', () => {
-  const polygonFeature: Feature = {
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: [
-        [
-          [35, 10],
-          [45, 45],
-          [15, 40],
-          [10, 20],
-          [35, 10],
-        ],
-      ],
-    },
-    properties: {
-      __kbn_metadata_feature__: true,
-      prop0: 'value0',
-      prop1: 0.0,
-    },
-  };
-  const featureCollection: FeatureCollection = {
-    type: 'FeatureCollection',
-    features: [polygonFeature],
-  };
-  const centroidFeatures = getCentroidFeatures(featureCollection);
-  expect(centroidFeatures.length).toBe(0);
-});
-
 test('should create centroid feature for line (even number of points)', () => {
   const lineFeature: Feature = {
     type: 'Feature',

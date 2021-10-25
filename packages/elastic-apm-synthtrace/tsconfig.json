@@ -7,13 +7,8 @@
     "outDir": "target_types",
     "rootDir": "./src",
     "sourceMap": true,
-    "sourceRoot": "../../../../packages/elastic-apm-generator/src",
-    "types": [
-      "node",
-      "jest"
-    ]
+    "sourceRoot": "../../../../packages/elastic-apm-synthtrace/src",
+    "types": ["node", "jest"]
   },
-  "include": [
-    "./src/**/*.ts"
-  ]
+  "include": ["./src/**/*.ts"]
 }
