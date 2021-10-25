@@ -105,6 +105,13 @@ export const TimestampField = ({
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
         const isDisabled = !optionsAsComboBoxOptions.length;
 
+        if (!value && !isDisabled) {
+          const val = optionsAsComboBoxOptions.filter((el) => el.value === '@timestamp');
+          if (val.length) {
+            setValue(val[0]);
+          }
+        }
+
         return (
           <>
             <EuiFormRow
