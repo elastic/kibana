@@ -45,6 +45,8 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           ...query,
           ...(modelId ? { model_id: modelId } : {}),
         });
+        // model_type is missing
+        // @ts-ignore
         const result = body.trained_model_configs as TrainedModelConfigResponse[];
         try {
           if (withPipelines) {

@@ -13,8 +13,17 @@ type OrigMlClient = ElasticsearchClient['ml'];
 
 export interface MlClient extends OrigMlClient {
   anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
+  // TODO remove when the new elasticsearch-js client is available
   getTrainedModelsDeploymentStats: () => Promise<{
     body: { count: number; deployment_stats: TrainedModelDeploymentStatsResponse[] };
+  }>;
+  // TODO remove when the new elasticsearch-js client is available
+  startTrainedModelDeployment: (options: { model_id: string }) => Promise<{
+    body: { acknowledge: boolean };
+  }>;
+  // TODO remove when the new elasticsearch-js client is available
+  stopTrainedModelDeployment: (options: { model_id: string }) => Promise<{
+    body: { acknowledge: boolean };
   }>;
 }
 

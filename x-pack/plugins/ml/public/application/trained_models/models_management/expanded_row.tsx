@@ -53,7 +53,7 @@ const formatterDictionary: Record<string, (value: any) => JSX.Element | string |
 };
 
 export function formatToListItems(
-  items: Record<string, unknown>
+  items: Record<string, unknown> | object
 ): EuiDescriptionListProps['listItems'] {
   return Object.entries(items)
     .filter(([, value]) => isDefined(value))
@@ -70,7 +70,6 @@ export function formatToListItems(
           typeof value === 'object' ? (
             <EuiCodeBlock
               language="json"
-              fontSize="s"
               fontSize="s"
               paddingSize="s"
               overflowHeight={300}
