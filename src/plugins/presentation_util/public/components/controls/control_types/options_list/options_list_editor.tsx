@@ -55,7 +55,10 @@ export const OptionsListEditor = ({
       const dataViewListItems = await getIdsWithTitle();
       const initialId = initialInput?.dataViewId ?? (await getDefaultId());
       let dataView: DataView | undefined;
-      if (initialId) dataView = await get(initialId);
+      if (initialId) {
+        onChange({ dataViewId: initialId });
+        dataView = await get(initialId);
+      }
       if (!mounted) return;
       setState((s) => ({ ...s, dataView, dataViewListItems }));
     })();
