@@ -42,10 +42,10 @@ export interface PreflightCheckForCreateObject {
   type: string;
   /** The ID of the object. */
   id: string;
-  /** Whether or not the object should be overwritten if it would encounter a regular conflict. */
-  overwrite: boolean;
   /** The namespaces that the consumer intends to create this object in. */
   namespaces: string[];
+  /** Whether or not the object should be overwritten if it would encounter a regular conflict. */
+  overwrite?: boolean;
 }
 
 export interface PreflightCheckForCreateParams {
@@ -190,7 +190,7 @@ async function optionallyFindAliases(
 ) {
   // Make a discriminated union based on the spaces the objects should be created in (Left=mget aliases, Right=find aliases)
   const objectsToGetOrObjectsToFind = objects.map<Either<ParsedObject>>((object) => {
-    const { type, id, overwrite, namespaces } = object;
+    const { type, id, namespaces, overwrite = false } = object;
     const spaces = new Set(namespaces);
     const tag =
       spaces.size > FIND_ALIASES_THRESHOLD || spaces.has(ALL_NAMESPACES_STRING) ? 'Right' : 'Left';

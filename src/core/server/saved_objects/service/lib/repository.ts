@@ -1265,6 +1265,12 @@ export class SavedObjectsRepository {
       ) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
+      if (upsert && preflightResult.checkResult === 'not_found') {
+        // If an upsert would result in the creation of a new object, we need to check for alias conflicts too.
+        // This takes an extra round trip to Elasticsearch, but this won't happen often.
+        // TODO: improve performance by combining these into a single preflight check
+        await this.preflightCheckForUpsertAliasConflict(type, id, namespace);
+      }
     }
 
     const time = getCurrentTime();
@@ -1816,6 +1822,14 @@ export class SavedObjectsRepository {
       if (preflightResult.checkResult === 'found_outside_namespace') {
         throw SavedObjectsErrorHelpers.createConflictError(type, id);
       }
+
+      if (preflightResult.checkResult === 'not_found') {
+        // If an upsert would result in the creation of a new object, we need to check for alias conflicts too.
+        // This takes an extra round trip to Elasticsearch, but this won't happen often.
+        // TODO: improve performance by combining these into a single preflight check
+        await this.preflightCheckForUpsertAliasConflict(type, id, namespace);
+      }
+
       savedObjectNamespaces = preflightResult.savedObjectNamespaces;
     }
 
@@ -2151,6 +2165,29 @@ export class SavedObjectsRepository {
       checkResult: 'not_found',
       savedObjectNamespaces: initialNamespaces ?? getSavedObjectNamespaces(namespace),
     };
+  }
+
+  /**
+   * Pre-flight check to ensure that an upsert which would create a new object does not result in an alias conflict.
+   */
+  private async preflightCheckForUpsertAliasConflict(
+    type: string,
+    id: string,
+    namespace: string | undefined
+  ) {
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+    const [{ error }] = await preflightCheckForCreate({
+      registry: this._registry,
+      client: this.client,
+      serializer: this._serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
+      objects: [{ type, id, namespaces: [namespaceString] }],
+    });
+    if (error?.type === 'aliasConflict') {
+      throw SavedObjectsErrorHelpers.createConflictError(type, id);
+    }
+    // any other error from this check does not matter
   }
 
   /** The `initialNamespaces` field (create, bulkCreate) is used to create an object in an initial set of spaces. */
