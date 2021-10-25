@@ -112,7 +112,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         tooltip={{
           headerFormatter: ({ value }) =>
             i18n.translate('xpack.ml.trainedModels.nodesList.memoryBreakdown', {
-              defaultMessage: 'Memory breakdown',
+              defaultMessage: 'Approximate memory breakdown based on the node info',
             }),
         }}
       />
