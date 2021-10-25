@@ -134,8 +134,9 @@ export async function preflightCheckForCreate(params: PreflightCheckForCreatePar
           const aliasDoc = bulkGetResponse?.body.docs[getResponseIndex++];
           const index = aliasSpacesIndex++; // increment whether the alias was found or not
           if (aliasDoc?.found) {
-            const legacyUrlAlias: LegacyUrlAlias = aliasDoc._source![LEGACY_URL_ALIAS_TYPE];
-            if (!legacyUrlAlias.disabled) {
+            const legacyUrlAlias: LegacyUrlAlias | undefined =
+              aliasDoc._source![LEGACY_URL_ALIAS_TYPE]; // if the 'disabled' field is not present, the source will be empty
+            if (!legacyUrlAlias?.disabled) {
               // the alias was found, so the space we checked in has a conflicting alias
               // in case the space in the alias's raw ID does not match the space in its sourceSpace field, prefer the former
               spacesWithConflictingAliases.push(aliasSpaces[index]);
