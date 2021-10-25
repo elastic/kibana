@@ -11,15 +11,24 @@ import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { items } from './__fixtures__/service_api_mock_data';
 import { ServiceList } from './';
 
 type Args = ComponentProps<typeof ServiceList>;
 
-const KibanaReactContext = createKibanaReactContext({
+const coreMock = {
+  http: {
+    get: async () => {
+      return { fallBackToTransactions: false };
+    },
+  },
   notifications: { toasts: { add: () => {} } },
-} as unknown as Partial<CoreStart>);
+  uiSettings: { get: () => ({}) },
+} as unknown as CoreStart;
+
+const KibanaReactContext = createKibanaReactContext(coreMock);
 
 const stories: Meta<Args> = {
   title: 'app/ServiceInventory/ServiceList',
@@ -31,8 +40,8 @@ const stories: Meta<Args> = {
           <MemoryRouter
             initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}
           >
-            <MockApmPluginContextWrapper>
-              <StoryComponent />;
+            <MockApmPluginContextWrapper value={{ core: coreMock }}>
+              <StoryComponent />
             </MockApmPluginContextWrapper>
           </MemoryRouter>
         </KibanaReactContext.Provider>

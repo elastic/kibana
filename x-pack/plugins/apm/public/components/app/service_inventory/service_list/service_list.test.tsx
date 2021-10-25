@@ -16,12 +16,16 @@ import * as stories from './service_list.stories';
 const { Example, EmptyState, WithHealthWarnings } = composeStories(stories);
 
 describe('ServiceList', () => {
-  it('renders empty state', () => {
-    expect(() => render(<EmptyState />)).not.toThrowError();
+  it('renders empty state', async () => {
+    render(<EmptyState />);
+
+    expect(await screen.findByRole('table')).toBeInTheDocument();
   });
 
-  it('renders with data', () => {
-    expect(() => render(<Example />)).not.toThrowError();
+  it('renders with data', async () => {
+    render(<Example />);
+
+    expect(await screen.findByRole('table')).toBeInTheDocument();
   });
 
   describe('responsive columns', () => {
@@ -177,28 +181,19 @@ describe('ServiceList', () => {
   });
 
   describe('without ML data', () => {
-    it('does not render the health column', () => {
-      const { queryByText } = render(<Example />);
-      const healthHeading = queryByText('Health');
+    it('sorts by throughput', async () => {
+      render(<Example />);
 
-      expect(healthHeading).toBeNull();
-    });
-
-    it.skip('sorts by throughput', async () => {
-      const { findByTitle } = render(<Example />);
-
-      await waitFor(async () => {
-        expect(await findByTitle('Throughput')).toBeInTheDocument();
-      });
+      expect(await screen.findByTitle('Throughput')).toBeInTheDocument();
     });
   });
 
   describe('with ML data', () => {
-    it.skip('renders the health column', () => {
+    it('renders the health column', async () => {
       render(<WithHealthWarnings />);
 
       expect(
-        screen.getByRole('button', { name: /Health/ })
+        await screen.findByRole('button', { name: /Health/ })
       ).toBeInTheDocument();
     });
   });
