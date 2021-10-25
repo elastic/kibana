@@ -13,7 +13,7 @@ import type { Type, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { getDataPath } from '@kbn/utils';
-import type { Logger } from 'src/core/server';
+import type { AppenderConfigType, Logger } from 'src/core/server';
 
 import { config as coreConfig } from '../../../../src/core/server';
 import type { AuthenticationProvider } from '../common/model';
@@ -376,9 +376,9 @@ export function createConfig(
           1;
 
   const auditLoggingEnabled = config.audit.enabled === true;
-  const appender =
+  const appender: AppenderConfigType | undefined =
     config.audit.appender ?? auditLoggingEnabled
-      ? {
+      ? ({
           type: 'rolling-file',
           fileName: path.join(getDataPath(), 'audit.log'),
           layout: {
@@ -392,7 +392,7 @@ export function createConfig(
             type: 'numeric',
             max: 10,
           },
-        }
+        } as AppenderConfigType)
       : undefined;
 
   return {
