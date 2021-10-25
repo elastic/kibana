@@ -44,6 +44,7 @@ export interface TrainedModelStat {
       }
     >;
   };
+  deployment_stats?: TrainedModelDeploymentStatsResponse;
 }
 
 type TreeNode = object;

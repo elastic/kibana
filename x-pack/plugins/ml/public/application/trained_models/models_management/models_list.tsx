@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useState, useCallback, useMemo } from 'react';
+import { groupBy } from 'lodash';
 import {
   EuiInMemoryTable,
   EuiFlexGroup,
@@ -191,16 +192,31 @@ export const ModelsList: FC = () => {
    * Fetches models stats and update the original object
    */
   const fetchModelsStats = useCallback(async (models: ModelItem[]) => {
-    const modelIdsToFetch = models.map((model) => model.model_id);
+    const { true: pytorchModels } = groupBy(models, (m) => m.model_type === 'pytorch');
 
     try {
-      const { trained_model_stats: modelsStatsResponse } =
-        await trainedModelsApiService.getTrainedModelStats(modelIdsToFetch);
+      if (models) {
+        const { trained_model_stats: modelsStatsResponse } =
+          await trainedModelsApiService.getTrainedModelStats(models.map((m) => m.model_id));
 
-      for (const { model_id: id, ...stats } of modelsStatsResponse) {
-        const model = models.find((m) => m.model_id === id);
-        model!.stats = stats;
+        for (const { model_id: id, ...stats } of modelsStatsResponse) {
+          const model = models.find((m) => m.model_id === id);
+          model!.stats = stats;
+        }
       }
+
+      if (pytorchModels) {
+        const { deployment_stats: deploymentStatsResponse } =
+          await trainedModelsApiService.getTrainedModelDeploymentStats(
+            pytorchModels.map((m) => m.model_id)
+          );
+
+        for (const { model_id: id, ...stats } of deploymentStatsResponse) {
+          const model = models.find((m) => m.model_id === id);
+          model!.stats!.deployment_stats = stats;
+        }
+      }
+
       return true;
     } catch (error) {
       toasts.addError(new Error(error.body.message), {

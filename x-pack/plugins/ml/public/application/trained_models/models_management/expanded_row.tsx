@@ -246,6 +246,24 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       content: (
         <>
           <EuiSpacer size={'m'} />
+          {stats.deployment_stats && (
+            <EuiPanel>
+              <EuiTitle size={'xs'}>
+                <h5>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.expandedRow.deploymentStatsTitle"
+                    defaultMessage="Deployment stats"
+                  />
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size={'m'} />
+              <EuiDescriptionList
+                compressed={true}
+                type="column"
+                listItems={formatToListItems(stats.deployment_stats)}
+              />
+            </EuiPanel>
+          )}
           <EuiFlexGrid columns={2}>
             {stats.inference_stats && (
               <EuiFlexItem>

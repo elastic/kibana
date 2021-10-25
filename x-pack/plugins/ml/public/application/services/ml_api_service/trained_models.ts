@@ -121,7 +121,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    getTrainedModelDeploymentStats(modelId?: string) {
+    getTrainedModelDeploymentStats(modelId?: string | string[]) {
       let model = modelId ?? '*';
       if (Array.isArray(modelId)) {
         model = modelId.join(',');
