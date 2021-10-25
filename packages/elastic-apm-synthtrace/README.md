@@ -1,6 +1,6 @@
-# @elastic/synthtrace
+# @elastic/apm-synthtrace
 
-`@elastic/synthtrace` is an experimental tool to generate synthetic APM data. It is intended to be used for development and testing of the Elastic APM app in Kibana.
+`@elastic/apm-synthtrace` is an experimental tool to generate synthetic APM data. It is intended to be used for development and testing of the Elastic APM app in Kibana.
 
 At a high-level, the module works by modeling APM events/metricsets with [a fluent API](https://en.wikipedia.org/wiki/Fluent_interface). The models can then be serialized and converted to Elasticsearch documents. In the future we might support APM Server as an output as well.
 
@@ -25,7 +25,7 @@ This library can currently be used in two ways:
 #### Example
 
 ```ts
-import { service, timerange, toElasticsearchOutput } from '@elastic/synthtrace';
+import { service, timerange, toElasticsearchOutput } from '@elastic/apm-synthtrace';
 
 const instance = service('synth-go', 'production', 'go').instance('instance-a');
 
@@ -72,14 +72,14 @@ const esEvents = toElasticsearchOutput(traceEvents.concat(metricsets));
 
 #### Generating metricsets
 
-`@elastic/synthtrace` can also automatically generate transaction metrics, span destination metrics and transaction breakdown metrics based on the generated trace events. If we expand on the previous example:
+`@elastic/apm-synthtrace` can also automatically generate transaction metrics, span destination metrics and transaction breakdown metrics based on the generated trace events. If we expand on the previous example:
 
 ```ts
 import {
   getTransactionMetrics,
   getSpanDestinationMetrics,
   getBreakdownMetrics,
-} from '@elastic/synthtrace';
+} from '@elastic/apm-synthtrace';
 
 const esEvents = toElasticsearchOutput([
   ...traceEvents,
@@ -93,10 +93,10 @@ const esEvents = toElasticsearchOutput([
 
 Via the CLI, you can upload scenarios, either using a fixed time range or continuously generating data. Some examples are available in in `src/scripts/examples`. Here's an example for live data:
 
-`$ node packages/elastic-synthtrace/src/scripts/run packages/elastic-synthtrace/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --live`
+`$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --live`
 
 For a fixed time window:
-`$ node packages/elastic-synthtrace/src/scripts/run packages/elastic-synthtrace/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now`
+`$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now`
 
 The script will try to automatically find bootstrapped APM indices. **If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.**
 

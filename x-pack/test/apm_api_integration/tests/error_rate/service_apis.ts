@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/synthtrace';
+import { service, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { mean, meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';

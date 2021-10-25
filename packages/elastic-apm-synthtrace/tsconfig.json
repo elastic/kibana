@@ -7,7 +7,7 @@
     "outDir": "target_types",
     "rootDir": "./src",
     "sourceMap": true,
-    "sourceRoot": "../../../../packages/elastic-synthtrace/src",
+    "sourceRoot": "../../../../packages/elastic-apm-synthtrace/src",
     "types": ["node", "jest"]
   },
   "include": ["./src/**/*.ts"]
