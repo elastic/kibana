@@ -162,7 +162,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
 
       <Instructions />
 
-      {hasError && <Error errorTitle={errorInfo.title} errorDetails={errorInfo.message} />}
+      {hasError && <Error error={errorInfo} />}
 
       <EuiSpacer size="xl" />
 
