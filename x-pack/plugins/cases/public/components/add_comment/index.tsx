@@ -41,6 +41,7 @@ const initialCommentValue: AddCommentFormSchema = {
 export interface AddCommentRefObject {
   addQuote: (quote: string) => void;
   setComment: (newComment: string) => void;
+  editor: EuiMarkdownEditorRef | null;
 }
 
 export interface AddCommentProps {
