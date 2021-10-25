@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 
-export function cancelEsRequestOnAbort<T extends any>(
+export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
   request: KibanaRequest,
   controller: AbortController
@@ -16,14 +16,7 @@ export function cancelEsRequestOnAbort<T extends any>(
     controller.abort();
   });
 
-  // using .catch() here means unsubscribe will be called
-  // after it has thrown an error, so we use .then(onSuccess, onFailure)
-  // syntax
-  // @ts-expect-error fix abort
-  promise.then(
-    () => subscription.unsubscribe(),
-    () => subscription.unsubscribe()
-  );
+  promise.finally(() => subscription.unsubscribe());
 
   return promise;
 }
