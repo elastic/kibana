@@ -16,11 +16,6 @@ import { MAJOR_VERSION } from '../../../../../../../common/constants';
 import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 
 const kibanaVersion = new SemVer(MAJOR_VERSION);
-const mockKibanaVersionInfo = {
-  currentMajor: kibanaVersion.major,
-  prevMajor: kibanaVersion.major - 1,
-  nextMajor: kibanaVersion.major + 1,
-};
 
 jest.mock('../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual(
@@ -30,7 +25,6 @@ jest.mock('../../../../../app_context', () => {
   return {
     useAppContext: () => {
       return {
-        kibanaVersionInfo: mockKibanaVersionInfo,
         services: {
           core: {
             docLinks: docLinksServiceMock.createStartContract(),

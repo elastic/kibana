@@ -22,7 +22,7 @@ const kibanaDeprecations: DomainDeprecationDetails[] = [
     title: 'Test deprecation title 1',
     message: 'Test deprecation message 1',
     deprecationType: 'config',
-    configPath: 'path',
+    configPath: 'test',
   },
   {
     correctiveActions: {
