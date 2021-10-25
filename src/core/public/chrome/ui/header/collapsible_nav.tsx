@@ -14,13 +14,12 @@ import {
   EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
-  EuiShowFor,
   EuiCollapsibleNavProps,
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
-import React, { Fragment, useMemo, useRef } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
@@ -73,7 +72,6 @@ interface Props {
   appId$: InternalApplicationStart['currentAppId$'];
   basePath: HttpStart['basePath'];
   id: string;
-  isLocked: boolean;
   isNavOpen: boolean;
   homeHref: string;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
@@ -90,7 +88,6 @@ interface Props {
 export function CollapsibleNav({
   basePath,
   id,
-  isLocked,
   isNavOpen,
   homeHref,
   storage = window.localStorage,
@@ -128,7 +125,6 @@ export function CollapsibleNav({
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
   const customNavLink = useObservable(observables.customNavLink$, undefined);
   const appId = useObservable(observables.appId$, '');
-  const lockRef = useRef<HTMLButtonElement>(null);
   const groupedNavLinks = groupBy(allowedLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
@@ -333,45 +329,6 @@ export function CollapsibleNav({
             </EuiListGroup>
           </EuiCollapsibleNavGroup>
         ))}
-
-        {/* Docking button only for larger screens that can support it*/}
-        <EuiShowFor sizes={'none'}>
-          <EuiCollapsibleNavGroup>
-            <EuiListGroup flush>
-              <EuiListGroupItem
-                data-test-subj="collapsible-nav-lock"
-                buttonRef={lockRef}
-                size="xs"
-                color="subdued"
-                label={
-                  isLocked
-                    ? i18n.translate('core.ui.primaryNavSection.undockLabel', {
-                        defaultMessage: 'Undock navigation',
-                      })
-                    : i18n.translate('core.ui.primaryNavSection.dockLabel', {
-                        defaultMessage: 'Dock navigation',
-                      })
-                }
-                aria-label={
-                  isLocked
-                    ? i18n.translate('core.ui.primaryNavSection.undockAriaLabel', {
-                        defaultMessage: 'Undock primary navigation',
-                      })
-                    : i18n.translate('core.ui.primaryNavSection.dockAriaLabel', {
-                        defaultMessage: 'Dock primary navigation',
-                      })
-                }
-                onClick={() => {
-                  onIsLockedUpdate(!isLocked);
-                  if (lockRef.current) {
-                    lockRef.current.focus();
-                  }
-                }}
-                iconType={isLocked ? 'lock' : 'lockOpen'}
-              />
-            </EuiListGroup>
-          </EuiCollapsibleNavGroup>
-        </EuiShowFor>
       </EuiFlexItem>
       {integrationsLink && (
         <EuiFlexItem grow={false}>

@@ -84,7 +84,6 @@ export function Header({
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
-  const isLocked = useObservable(observables.isLocked$, false);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
@@ -160,7 +159,6 @@ export function Header({
                 <CollapsibleNav
                   appId$={application.currentAppId$}
                   id={navId}
-                  isLocked={isLocked}
                   navLinks$={observables.navLinks$}
                   recentlyAccessed$={observables.recentlyAccessed$}
                   isNavOpen={isNavOpen}
