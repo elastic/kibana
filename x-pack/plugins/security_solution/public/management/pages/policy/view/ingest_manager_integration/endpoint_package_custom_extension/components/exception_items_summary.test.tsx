@@ -20,7 +20,7 @@ const mockTheme = getMockTheme({
 });
 
 const getStatValue = (el: reactTestingLibrary.RenderResult, stat: string) => {
-  return el.getByText(stat)!.nextSibling?.lastChild?.textContent;
+  return el.getByText(stat).nextSibling?.lastChild?.textContent;
 };
 
 describe('Fleet event filters card', () => {

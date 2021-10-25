@@ -99,7 +99,7 @@ describe('Event filter form', () => {
       });
     });
 
-    expect(getState().form.entry!.name).toBe('Exception name');
+    expect(getState().form.entry?.name).toBe('Exception name');
     expect(getState().form.hasNameError).toBeFalsy();
   });
 
@@ -116,7 +116,7 @@ describe('Event filter form', () => {
       });
     });
 
-    expect(getState().form.entry!.name).toBe('');
+    expect(getState().form.entry?.name).toBe('');
     expect(getState().form.hasNameError).toBeTruthy();
   });
 

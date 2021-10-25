@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createSavedSearchesLoader } from '../../../../discover/public';
+import { getSavedSearch } from '../../../../discover/public';
 import type {
   VisualizeInput,
   VisSavedObject,
@@ -21,13 +21,13 @@ import { createVisualizeServicesMock } from './mocks';
 import { VisualizeServices } from '../types';
 import { BehaviorSubject } from 'rxjs';
 
-const mockSavedSearchObj = {};
-const mockGetSavedSearch = jest.fn(() => mockSavedSearchObj);
-
 jest.mock('../../../../discover/public', () => ({
-  createSavedSearchesLoader: jest.fn(() => ({
-    get: mockGetSavedSearch,
-  })),
+  getSavedSearch: jest.fn().mockResolvedValue({
+    id: 'savedSearch',
+    title: 'savedSearchTitle',
+    searchSource: {},
+  }),
+  throwErrorOnSavedSearchUrlConflict: jest.fn(),
 }));
 
 let savedVisMock: VisSavedObject;
@@ -116,9 +116,14 @@ describe('getVisualizationInstance', () => {
     visMock.data.savedSearchId = 'saved_search_id';
     const { savedSearch } = await getVisualizationInstance(mockServices, 'saved_vis_id');
 
-    expect(createSavedSearchesLoader).toHaveBeenCalled();
-    expect(mockGetSavedSearch).toHaveBeenCalledWith(visMock.data.savedSearchId);
-    expect(savedSearch).toBe(mockSavedSearchObj);
+    expect(getSavedSearch).toHaveBeenCalled();
+    expect(savedSearch).toMatchInlineSnapshot(`
+      Object {
+        "id": "savedSearch",
+        "searchSource": Object {},
+        "title": "savedSearchTitle",
+      }
+    `);
   });
 
   test('should subscribe on embeddable handler updates and send toasts on errors', async () => {

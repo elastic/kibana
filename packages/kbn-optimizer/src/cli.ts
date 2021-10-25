@@ -207,7 +207,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
           --no-inspect-workers  when inspecting the parent process, don't inspect the workers
           --limits           path to a limits.yml file to read, defaults to $KBN_OPTIMIZER_LIMITS_PATH or source file
           --validate-limits  validate the limits.yml config to ensure that there are limits defined for every bundle
-          --update-limits    run a build and rewrite the limits file to include the current bundle sizes +5kb
+          --update-limits    run a build and rewrite the limits file to include the current bundle sizes +15kb
         `,
       },
     }
