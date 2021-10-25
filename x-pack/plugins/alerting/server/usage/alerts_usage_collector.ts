@@ -75,14 +75,14 @@ export function createAlertsUsageCollector(
           count_active_total: 0,
           count_disabled_total: 0,
           throttle_time: {
-            min: '0s',
-            avg: '0s',
-            max: '0s',
+            min: 0,
+            avg: 0,
+            max: 0,
           },
           schedule_time: {
-            min: '0s',
-            avg: '0s',
-            max: '0s',
+            min: 0,
+            avg: 0,
+            max: 0,
           },
           connectors_per_alert: {
             min: 0,
@@ -100,14 +100,14 @@ export function createAlertsUsageCollector(
       count_active_total: { type: 'long' },
       count_disabled_total: { type: 'long' },
       throttle_time: {
-        min: { type: 'keyword' },
-        avg: { type: 'keyword' },
-        max: { type: 'keyword' },
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
       },
       schedule_time: {
-        min: { type: 'keyword' },
-        avg: { type: 'keyword' },
-        max: { type: 'keyword' },
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
       },
       connectors_per_alert: {
         min: { type: 'long' },
