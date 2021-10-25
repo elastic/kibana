@@ -272,11 +272,6 @@ describe('config validation', () => {
 });
 
 describe('secrets validation', () => {
-  const config: Record<string, unknown> = {
-    service: 'gmail',
-    from: 'bob@example.com',
-    hasAuth: true,
-  };
   test('secrets validation succeeds when secrets is valid for Basic Auth', () => {
     const secrets: Record<string, unknown> = {
       user: 'bob',
@@ -300,7 +295,7 @@ describe('secrets validation', () => {
     const secrets: Record<string, unknown> = {
       clientSecret: '12345678',
     };
-    expect(validateSecrets(actionType, config, secrets)).toEqual({
+    expect(validateSecrets(actionType, secrets)).toEqual({
       ...secrets,
       user: null,
       password: null,

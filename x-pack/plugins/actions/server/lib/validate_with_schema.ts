@@ -13,7 +13,7 @@ export function validateParams<
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: Params) {
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
   return validateWithSchema(actionType, 'params', value);
 }
 
@@ -22,7 +22,7 @@ export function validateConfig<
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: Config) {
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
   return validateWithSchema(actionType, 'config', value);
 }
 
@@ -31,7 +31,7 @@ export function validateSecrets<
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: Secrets) {
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
   return validateWithSchema(actionType, 'secrets', value);
 }
 
@@ -42,8 +42,8 @@ export function validateConnector<
   ExecutorResultData = void
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
-  config: Config,
-  secrets?: Secrets
+  config: unknown,
+  secrets?: unknown
 ) {
   return validateWithSchema(actionType, 'connector', {
     config,
@@ -61,7 +61,7 @@ function validateWithSchema<
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   key: ValidKeys,
-  value: Config | Secrets | Params | { config: Config; secrets?: Secrets }
+  value: unknown | { config: unknown; secrets?: unknown }
 ): Record<string, unknown> {
   if (actionType.validate) {
     let name;
