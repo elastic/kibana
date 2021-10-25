@@ -6,17 +6,13 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-
 import { DocValueFields } from '../../../../../../common/search_strategy';
-import { getAlertConsumersFilter } from '../utils';
 
 export const buildTimelineDetailsQuery = (
   indexName: string,
   id: string,
   docValueFields: DocValueFields[],
-  authFilter?: JsonObject,
-  alertConsumers?: AlertConsumers[]
+  authFilter?: JsonObject
 ) => {
   const basicFilter = {
     terms: {
@@ -27,7 +23,7 @@ export const buildTimelineDetailsQuery = (
     authFilter != null
       ? {
           bool: {
-            filter: [basicFilter, authFilter, ...getAlertConsumersFilter(alertConsumers)],
+            filter: [basicFilter, authFilter],
           },
         }
       : {

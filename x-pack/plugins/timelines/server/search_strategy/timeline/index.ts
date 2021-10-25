@@ -53,7 +53,6 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
       const securityAuditLogger = security?.audit.asScoped(deps.request);
       const factoryQueryType = request.factoryQueryType;
       const entityType = request.entityType;
-      const alertConsumers = request.alertConsumers;
 
       if (factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
@@ -70,7 +69,6 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
           queryFactory,
           alerting,
           auditLogger: securityAuditLogger,
-          alertConsumers,
         });
       } else {
         return timelineSearchStrategy({ es, request, options, deps, queryFactory });
@@ -128,8 +126,6 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   alertConsumers?: AlertConsumers[];
   auditLogger: AuditLogger | undefined;
 }) => {
-  // Based on what solution alerts you want to see, figures out what corresponding
-  // index to query (ex: siem --> .alerts-security.alerts)
   const indices = request.defaultIndex ?? request.indexType;
   const requestWithAlertsIndices = { ...request, defaultIndex: indices, indexName: indices };
 
@@ -152,7 +148,6 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
       const dsl = queryFactory.buildDsl({
         ...requestWithAlertsIndices,
         authFilter: filter,
-        alertConsumers,
       });
       return es.search({ ...requestWithAlertsIndices, params: dsl }, options, deps);
     }),

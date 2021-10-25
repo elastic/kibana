@@ -26,15 +26,9 @@ import {
 } from '../../../../../../common/utils/field_formatters';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
-  buildDsl: ({ authFilter, alertConsumers, ...options }: TimelineEventsDetailsRequestOptions) => {
+  buildDsl: ({ authFilter, ...options }: TimelineEventsDetailsRequestOptions) => {
     const { indexName, eventId, docValueFields = [] } = options;
-    return buildTimelineDetailsQuery(
-      indexName,
-      eventId,
-      docValueFields,
-      authFilter,
-      alertConsumers
-    );
+    return buildTimelineDetailsQuery(indexName, eventId, docValueFields, authFilter);
   },
   parse: async (
     options: TimelineEventsDetailsRequestOptions,

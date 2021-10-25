@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
@@ -44,7 +43,6 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   docValueFields?: DocValueFields[];
   factoryQueryType?: TimelineFactoryQueryTypes;
   entityType?: EntityType;
-  alertConsumers?: AlertConsumers[];
 }
 
 export interface TimelineRequestSortField<Field = string> extends SortField<Field> {

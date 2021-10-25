@@ -6,7 +6,6 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import type { Ecs } from '../../../../ecs';
@@ -44,5 +43,4 @@ export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsP
   language: 'eql' | 'kuery' | 'lucene';
   excludeEcsData?: boolean;
   authFilter?: JsonObject;
-  alertsConsumers?: AlertConsumers[];
 }

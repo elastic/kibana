@@ -79,9 +79,12 @@ export default ({ getService }: FtrProviderContext) => {
       {
         field: ALERT_INSTANCE_ID,
       },
+      {
+        field: 'event.kind',
+      },
     ],
     factoryQueryType: TimelineEventsQueries.all,
-    fieldRequested: ['@timestamp', 'message', ALERT_RULE_CONSUMER, ALERT_INSTANCE_ID],
+    fieldRequested: ['@timestamp', 'message', ALERT_RULE_CONSUMER, ALERT_INSTANCE_ID, 'event.kind'],
     fields: [],
     filterQuery: {
       bool: {
@@ -161,15 +164,17 @@ export default ({ getService }: FtrProviderContext) => {
           it(`${username} should NOT be able to view alerts from "${featureIds.join(',')}" ${
             space != null ? `in space ${space}` : 'when no space specified'
           }`, async () => {
-            await supertestWithoutAuth
+            const resp = await supertestWithoutAuth
               .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
               .auth(username, password)
               .set('kbn-xsrf', 'true')
               .set('Content-Type', 'application/json')
               .send({ ...body })
-              // TODO - This should be updated to be a 403 once this ticket is resolved
-              // https://github.com/elastic/kibana/issues/106005
-              .expect(500);
+              .expect(200);
+
+            const timeline = resp.body;
+
+            expect(timeline.totalCount).to.be(0);
           });
         });
       }
@@ -207,8 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
       const authorizedInAllSpaces = [superUser, globalRead];
       const unauthorized = [noKibanaPrivileges];
 
-      // TODO: Unskip once security solution starts using alerts RBAC
-      describe.skip('Querying for Security Solution alerts only', () => {
+      describe('Querying for Security Solution alerts only', () => {
         addTests({
           space: SPACE_1,
           featureIds: ['siem'],
@@ -309,8 +313,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // TODO: Unskip once security solution starts using alerts RBAC
-      describe.skip('Querying for multiple solutions', () => {
+      describe('Querying for multiple solutions', () => {
         describe('authorized for both security solution and apm', () => {
           addTests({
             space: SPACE_1,
