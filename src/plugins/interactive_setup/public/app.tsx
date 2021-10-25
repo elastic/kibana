@@ -8,7 +8,7 @@
 
 import './app.scss';
 
-import { EuiCallOut, EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';

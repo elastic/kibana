@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from 'src/core/server';
+import type { IRouter, RequestHandler, RequestHandlerContext } from 'src/core/server';
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
@@ -28,14 +28,12 @@ describe('Status routes', () => {
 
   describe('#status', () => {
     let routeHandler: RequestHandler<any, any, any>;
-    let routeConfig: RouteConfig<any, any, any, any>;
 
     beforeEach(() => {
-      const [statusRouteConfig, statusRouteHandler] = router.get.mock.calls.find(
+      const [, statusRouteHandler] = router.get.mock.calls.find(
         ([{ path }]) => path === '/internal/interactive_setup/status'
       )!;
 
-      routeConfig = statusRouteConfig;
       routeHandler = statusRouteHandler;
     });
 
