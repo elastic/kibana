@@ -44,7 +44,7 @@ function getOptions(
   const filteredIndexPatternFields = param
     ? (param as unknown as FieldParamType)
         .getAvailableFields(aggConfig)
-        // runtimeMappings may already include runtime fields defined by the index pattern
+        // runtimeMappings may already include runtime fields defined by the data view
         .filter((ip) => ip.runtimeField === undefined)
     : [];
 
