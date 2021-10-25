@@ -102,10 +102,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await searchSessions.missingOrFail();
     });
 
-    // SKIPPED - see https://github.com/elastic/kibana/pull/113950
-    // `expect(await toasts.getToastCount()).to.be(0)` fails because of a `Your search session is still running` toast
-    // rest of the test does pass
-    it.skip('relative timerange works', async () => {
+    it('relative timerange works', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.save();
