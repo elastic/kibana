@@ -12,6 +12,11 @@ const yargs = require('yargs');
 const childProcess = require('child_process');
 
 const { argv } = yargs(process.argv.slice(2))
+  .option('kibana-install-dir', {
+    default: '',
+    type: 'string',
+    description: 'Path to the Kibana install directory',
+  })
   .option('server', {
     default: false,
     type: 'boolean',
@@ -30,7 +35,7 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const { server, runner, open } = argv;
+const { server, runner, open, kibanaInstallDir } = argv;
 
 const e2eDir = path.join(__dirname, '../../ftr_e2e');
 
@@ -44,6 +49,6 @@ if (server) {
 const config = open ? './cypress_open.ts' : './cypress_run.ts';
 
 childProcess.execSync(
-  `node ../../../../scripts/${ftrScript} --config ${config}`,
+  `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'`,
   { cwd: e2eDir, stdio: 'inherit' }
 );

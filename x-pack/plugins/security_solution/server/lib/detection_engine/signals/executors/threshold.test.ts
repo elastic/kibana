@@ -13,48 +13,30 @@ import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server
 import { thresholdExecutor } from './threshold';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryListMock } from '../../../../../../lists/common/schemas/types/entry_list.mock';
-import { getThresholdRuleParams } from '../../schemas/rule_schemas.mock';
+import { getThresholdRuleParams, getCompleteRuleMock } from '../../schemas/rule_schemas.mock';
 import { buildRuleMessageFactory } from '../rule_messages';
 import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
+import { ThresholdRuleParams } from '../../schemas/rule_schemas';
 
 describe('threshold_executor', () => {
   const version = '8.0.0';
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
   const params = getThresholdRuleParams();
-  const thresholdSO = {
-    id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-    type: 'alert',
-    version: '1',
-    updated_at: '2020-03-27T22:55:59.577Z',
-    attributes: {
-      actions: [],
-      alertTypeId: 'siem.signals',
-      enabled: true,
-      name: 'rule-name',
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      createdBy: 'sample user',
-      createdAt: '2020-03-27T22:55:59.577Z',
-      updatedBy: 'sample user',
-      schedule: {
-        interval: '5m',
-      },
-      throttle: 'no_actions',
-      params,
-    },
-    references: [],
-  };
+
+  const thresholdCompleteRule = getCompleteRuleMock<ThresholdRuleParams>(params);
+
   const tuple = {
     from: dateMath.parse(params.from)!,
     to: dateMath.parse(params.to)!,
     maxSignals: params.maxSignals,
   };
   const buildRuleMessage = buildRuleMessageFactory({
-    id: thresholdSO.id,
-    ruleId: thresholdSO.attributes.params.ruleId,
-    name: thresholdSO.attributes.name,
-    index: thresholdSO.attributes.params.outputIndex,
+    id: thresholdCompleteRule.alertId,
+    ruleId: thresholdCompleteRule.ruleParams.ruleId,
+    name: thresholdCompleteRule.ruleConfig.name,
+    index: thresholdCompleteRule.ruleParams.outputIndex,
   });
 
   beforeEach(() => {
@@ -69,7 +51,7 @@ describe('threshold_executor', () => {
     it('should set a warning when exception list for threshold rule contains value list exceptions', async () => {
       const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
       const response = await thresholdExecutor({
-        rule: thresholdSO,
+        completeRule: thresholdCompleteRule,
         tuple,
         exceptionItems,
         experimentalFeatures: allowedExperimentalValues,
