@@ -12,8 +12,8 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
-import { getSearchAggregatedTransactions } from '../../helpers/aggregated_transactions';
 import {
+  getSearchAggregatedTransactions,
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../helpers/transactions';
