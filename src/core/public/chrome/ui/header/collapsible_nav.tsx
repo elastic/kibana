@@ -285,7 +285,7 @@ export function CollapsibleNav({
               key={category.id}
               iconType={category.euiIconType}
               iconSize="m"
-              // buttonElement="div"
+              buttonElement={overviewLink ? 'div' : 'button'}
               title={
                 overviewLink ? (
                   <a
