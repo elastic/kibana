@@ -47,6 +47,7 @@ import { asDuration } from '../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import { parseAlert } from '../parse_alert';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
+import { AlertsDisclaimer } from '../alerts_disclaimer';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
@@ -142,10 +143,7 @@ export function AlertsFlyout({
           label={i18n.translate('xpack.observability.alertsExperimentalTitle', {
             defaultMessage: 'Experimental',
           })}
-          tooltipContent={i18n.translate('xpack.observability.alertsExperimentalTooltip', {
-            defaultMessage:
-              'This functionality may change or be removed completely in a future release. We value your feedback as we work to add new capabilities.',
-          })}
+          tooltipContent={<AlertsDisclaimer />}
         />
         <EuiSpacer size="s" />
         <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">

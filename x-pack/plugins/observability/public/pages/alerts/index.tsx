@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +27,7 @@ import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { Provider, alertsPageStateContainer, useAlertsPageStateContainer } from './state_container';
 import './styles.scss';
 import { WorkflowStatusFilter } from './workflow_status_filter';
+import { AlertsDisclaimer } from './alerts_disclaimer';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -187,19 +187,7 @@ function AlertsPage() {
             color="warning"
             iconType="beaker"
           >
-            <FormattedMessage
-              id="xpack.observability.alertsDisclaimerText"
-              defaultMessage="This functionality may change or be removed completely in a future release. We value your {feedback} as we work to add new capabilities. "
-              values={{
-                feedback: (
-                  <EuiLink href={prepend('https://discuss.elastic.co/c/observability/82')}>
-                    {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
-                      defaultMessage: 'feedback',
-                    })}
-                  </EuiLink>
-                ),
-              }}
-            />
+            <AlertsDisclaimer />
           </EuiCallOut>
         </EuiFlexItem>
         <EuiFlexItem>
