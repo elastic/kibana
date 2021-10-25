@@ -110,7 +110,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
-      ).toEqual('Alert');
+      ).toEqual('Alert - Experimental');
     });
 
     it('uses the reason in the annotation details', () => {
@@ -191,7 +191,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
-      ).toEqual('Warning Alert');
+      ).toEqual('Warning Alert - Experimental');
     });
   });
 
@@ -224,7 +224,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
-      ).toEqual('Critical Alert');
+      ).toEqual('Critical Alert - Experimental');
     });
   });
 });

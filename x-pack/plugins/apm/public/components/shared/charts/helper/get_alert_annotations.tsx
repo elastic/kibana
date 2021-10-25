@@ -122,7 +122,7 @@ export function getAlertAnnotations({
     const end = start + parsed[ALERT_DURATION]! / 1000;
     const severityLevel = parsed[ALERT_SEVERITY];
     const color = getAlertColor({ severityLevel, theme });
-    const header = getAlertHeader({ severityLevel });
+    const header = getAlertHeader({ severityLevel }) + ' - Experimental';
     const formatter = getFormatter(parsed[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
