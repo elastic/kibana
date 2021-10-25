@@ -9,7 +9,7 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/elastic-apm-generator'],
+  roots: ['<rootDir>/packages/elastic-apm-synthtrace'],
   setupFiles: [],
   setupFilesAfterEnv: [],
 };
