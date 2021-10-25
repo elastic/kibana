@@ -36,7 +36,7 @@ const sectionsHeader = i18n.translate('indexPatternManagement.dataView.sectionsH
   defaultMessage: 'Data Views',
 });
 
-const IPM_APP_ID = 'indexPatterns';
+const IPM_APP_ID = 'dataViews';
 
 export class IndexPatternManagementPlugin
   implements
@@ -72,6 +72,8 @@ export class IndexPatternManagementPlugin
       id: IPM_APP_ID,
       title: sectionsHeader,
       order: 0,
+      capabilitiesId: 'indexPatterns',
+      redirectFrom: 'kibana/indexPatterns',
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
