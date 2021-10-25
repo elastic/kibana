@@ -613,8 +613,7 @@ describe('Package policy service', () => {
           savedObjectsClient,
           elasticsearchClient,
           'the-package-policy-id',
-          createPackagePolicyMock(),
-          'current-version'
+          createPackagePolicyMock()
         )
       ).rejects.toThrow('Saved object [abc/123] conflict');
     });
@@ -734,8 +733,7 @@ describe('Package policy service', () => {
         savedObjectsClient,
         elasticsearchClient,
         'the-package-policy-id',
-        { ...mockPackagePolicy, inputs: inputsUpdate },
-        'current-version'
+        { ...mockPackagePolicy, inputs: inputsUpdate }
       );
 
       const [modifiedInput] = result.inputs;
@@ -858,8 +856,7 @@ describe('Package policy service', () => {
         savedObjectsClient,
         elasticsearchClient,
         'the-package-policy-id',
-        { ...mockPackagePolicy, inputs: inputsUpdate },
-        'current-version'
+        { ...mockPackagePolicy, inputs: inputsUpdate }
       );
 
       const [modifiedInput] = result.inputs;
@@ -918,8 +915,7 @@ describe('Package policy service', () => {
         savedObjectsClient,
         elasticsearchClient,
         'the-package-policy-id',
-        { ...mockPackagePolicy, inputs: [] },
-        'current-version'
+        { ...mockPackagePolicy, inputs: [] }
       );
 
       expect(result.elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
