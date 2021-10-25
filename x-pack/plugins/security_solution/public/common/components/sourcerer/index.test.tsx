@@ -29,9 +29,22 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
+
+const mockOptions = [
+  { label: 'apm-*-transaction*', value: 'apm-*-transaction*' },
+  { label: 'auditbeat-*', value: 'auditbeat-*' },
+  { label: 'endgame-*', value: 'endgame-*' },
+  { label: 'filebeat-*', value: 'filebeat-*' },
+  { label: 'logs-*', value: 'logs-*' },
+  { label: 'packetbeat-*', value: 'packetbeat-*' },
+  { label: 'traces-apm*', value: 'traces-apm*' },
+  { label: 'winlogbeat-*', value: 'winlogbeat-*' },
+];
+
 const defaultProps = {
   scope: sourcererModel.SourcererScopeName.default,
 };
+
 describe('Sourcerer component', () => {
   const state: State = mockGlobalState;
   const { id, patternList, title } = state.sourcerer.defaultDataView;
@@ -57,6 +70,36 @@ describe('Sourcerer component', () => {
     jest.restoreAllMocks();
   });
 
+  it('renders tooltip', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="sourcerer-tooltip"]').prop('content')).toEqual(
+      mockOptions
+        .map((p) => p.label)
+        .sort()
+        .join(', ')
+    );
+  });
+
+  it('renders popover button inside tooltip', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="sourcerer-tooltip"] [data-test-subj="sourcerer-trigger"]')
+        .exists()
+    ).toBeTruthy();
+  });
+
+  // Using props callback instead of simulating clicks,
+  // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
   it('Mounts with all options selected', () => {
     const wrapper = mount(
       <TestProviders store={store}>
