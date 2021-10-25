@@ -179,7 +179,8 @@ function AlertsPage() {
         <EuiFlexItem>
           <EuiCallOut
             title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
-              defaultMessage: 'Experimental',
+              defaultMessage:
+                'Alert history is currently an experimental feature within observability',
             })}
             color="warning"
             iconType="beaker"
@@ -187,13 +188,16 @@ function AlertsPage() {
             <p>
               {i18n.translate('xpack.observability.alertsDisclaimerText', {
                 defaultMessage:
-                  'This page shows an experimental list of alerts. The data might not be accurate. All alerts are available in the ',
+                  'This functionality may change or be removed completely in a future release. We value your ',
               })}
-              <EuiLink href={prepend('/app/management/insightsAndAlerting/triggersActions/alerts')}>
+              <EuiLink href={prepend('https://discuss.elastic.co/c/observability/82')}>
                 {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
-                  defaultMessage: 'Rules and Connectors settings.',
+                  defaultMessage: 'feedback',
                 })}
               </EuiLink>
+              {i18n.translate('xpack.observability.alertsDisclaimerAfterLinkText', {
+                defaultMessage: ' as we work to add new capabilities.',
+              })}
             </p>
           </EuiCallOut>
         </EuiFlexItem>

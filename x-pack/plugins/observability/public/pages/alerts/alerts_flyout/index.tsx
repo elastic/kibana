@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -137,6 +138,16 @@ export function AlertsFlyout({
   return (
     <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
       <EuiFlyoutHeader>
+        <EuiBetaBadge
+          label={i18n.translate('xpack.observability.alertsExperimentalTitle', {
+            defaultMessage: 'Experimental',
+          })}
+          tooltipContent={i18n.translate('xpack.observability.alertsExperimentalTooltip', {
+            defaultMessage:
+              'This functionality may change or be removed completely in a future release. We value your feedback as we work to add new capabilities.',
+          })}
+        />
+        <EuiSpacer size="s" />
         <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
           <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>
         </EuiTitle>
