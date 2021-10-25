@@ -348,7 +348,7 @@ describe(`UserActionTree`, () => {
       .first()
       .simulate('click');
     await waitFor(() => {
-      expect(setFieldValue).toBeCalledWith('comment', `> ${props.data.description} \n`);
+      expect(setFieldValue).toBeCalledWith('comment', `> ${props.data.description} \n\n`);
     });
   });
 
