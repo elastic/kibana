@@ -32,7 +32,8 @@ export const DeploymentDetails = () => {
     !(
       cname.endsWith('elastic-cloud.com') ||
       cname.endsWith('found.io') ||
-      cname.endsWith('found.no')
+      cname.endsWith('found.no') ||
+      cname.endsWith('foundit.no')
     )
   ) {
     return null;
