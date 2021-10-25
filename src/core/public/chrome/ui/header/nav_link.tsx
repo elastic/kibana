@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiListGroupItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
@@ -25,6 +25,7 @@ interface Props {
   onClick?: Function;
   navigateToUrl: CoreStart['application']['navigateToUrl'];
   externalLink?: boolean;
+  iconProps?: EuiListGroupItemProps['iconProps'];
 }
 
 // TODO #64541
@@ -39,7 +40,8 @@ export function createEuiListItem({
   navigateToUrl,
   dataTestSubj,
   externalLink = false,
-}: Props) {
+  iconProps,
+}: Props): EuiListGroupItemProps {
   const { href, id, title, disabled, euiIconType, icon, tooltip, url } = link;
 
   return {
@@ -65,6 +67,7 @@ export function createEuiListItem({
     'data-test-subj': dataTestSubj,
     ...(basePath && {
       iconType: euiIconType,
+      iconProps,
       icon:
         !euiIconType && icon ? <EuiIcon type={basePath.prepend(`/${icon}`)} size="m" /> : undefined,
     }),
