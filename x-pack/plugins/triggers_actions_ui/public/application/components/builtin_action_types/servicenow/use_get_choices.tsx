@@ -63,7 +63,7 @@ export const useGetChoices = ({
         if (res.status && res.status === 'error') {
           toastNotifications.addDanger({
             title: i18n.CHOICES_API_ERROR,
-            text: `${res.service_message ?? res.message}`,
+            text: `${res.serviceMessage ?? res.message}`,
           });
         } else if (onSuccess) {
           onSuccess(data);

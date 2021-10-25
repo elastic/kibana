@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, IToasts } from 'kibana/public';
 
 import { ActionConnector } from '../../../../types';
-import { IssueTypes } from '../types';
+import { IssueTypes } from './types';
 import { getIssueTypes } from './api';
 import * as i18n from './translations';
 

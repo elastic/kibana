@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionTypeExecutorResult, RewriteResponseCase } from '../../../../../actions/common';
+import { ActionTypeExecutorResult, RewriteResponseCase } from '../../../../actions/common';
 
 export type ConnectorExecutorResult<T> = ReturnType<
   RewriteResponseCase<ActionTypeExecutorResult<T>>

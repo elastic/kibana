@@ -6,7 +6,6 @@
  */
 
 import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
-import { rewriteResponseToCamelCase } from '../../../../common/utils';
 import { getIssueTypes, getFieldsByIssueType, getIssues, getIssue } from './api';
 
 const issueTypesResponse = {
@@ -85,11 +84,21 @@ const issueResponse = {
   status: 'ok' as const,
   connector_id: '1',
   data: issue,
-  service_message: undefined,
 };
 
 const issuesResponse = {
   ...issueResponse,
+  data: [issue],
+};
+
+const camelCasedIssueResponse = {
+  status: 'ok' as const,
+  actionId: '1',
+  data: issue,
+};
+
+const camelCasedIssuesResponse = {
+  ...camelCasedIssueResponse,
   data: [issue],
 };
 
@@ -142,7 +151,7 @@ describe('Jira API', () => {
         title: 'test issue',
       });
 
-      expect(res).toEqual(rewriteResponseToCamelCase(issuesResponse));
+      expect(res).toEqual(camelCasedIssuesResponse);
       expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"issues","subActionParams":{"title":"test issue"}}}',
         signal: abortCtrl.signal,
@@ -161,7 +170,7 @@ describe('Jira API', () => {
         id: 'RJ-107',
       });
 
-      expect(res).toEqual(rewriteResponseToCamelCase(issueResponse));
+      expect(res).toEqual(camelCasedIssueResponse);
       expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"issue","subActionParams":{"id":"RJ-107"}}}',
         signal: abortCtrl.signal,

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from '../../public/components/connectors/rewrite_request_to_camel_case';
 export * from './connectors_api';

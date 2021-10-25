@@ -8,7 +8,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, IToasts } from 'kibana/public';
 import { ActionConnector } from '../../../../types';
-import { Issue } from '../types';
+import { Issue } from './types';
 import { getIssue } from './api';
 import * as i18n from './translations';
 

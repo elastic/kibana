@@ -139,18 +139,3 @@ export interface TeamsSecrets {
 export type TeamsActionConnector = UserConfiguredActionConnector<unknown, TeamsSecrets>;
 
 export type LogoProps = Omit<EuiIconProps, 'type'>;
-
-export type IssueTypes = Array<{ id: string; name: string }>;
-
-export interface Fields {
-  [key: string]: {
-    allowedValues: Array<{ name: string; id: string }> | [];
-    defaultValue: { name: string; id: string } | {};
-  };
-}
-
-export interface Issue {
-  id: string;
-  key: string;
-  title: string;
-}

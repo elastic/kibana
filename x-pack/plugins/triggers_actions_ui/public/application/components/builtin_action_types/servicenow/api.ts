@@ -12,7 +12,7 @@ import { snExternalServiceConfig } from '../../../../../../actions/server/builti
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { API_INFO_ERROR } from './translations';
 import { AppInfo, RESTApiError } from './types';
-import { rewriteResponseToCamelCase } from '../rewrite_response_body';
+import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
 import { ActionTypeExecutorResult } from '../../../../../../actions/common';
 import { Choice } from './types';
 
@@ -27,14 +27,16 @@ export async function getChoices({
   connectorId: string;
   fields: string[];
 }): Promise<ActionTypeExecutorResult<Choice[]>> {
-  return await http
-    .post(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`, {
+  const res = await http.post<ConnectorExecutorResult<Choice[]>>(
+    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
+    {
       body: JSON.stringify({
         params: { subAction: 'getChoices', subActionParams: { fields } },
       }),
       signal,
-    })
-    .then((res) => rewriteResponseToCamelCase(res));
+    }
+  );
+  return rewriteResponseToCamelCase(res);
 }
 
 /**
