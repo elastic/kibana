@@ -578,6 +578,12 @@ describe('Package policy service', () => {
   });
 
   describe('update', () => {
+    beforeEach(() => {
+      appContextService.start(createAppContextStartContractMock());
+    });
+    afterEach(() => {
+      appContextService.stop();
+    });
     it('should fail to update on version conflict', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       savedObjectsClient.get.mockResolvedValue({
