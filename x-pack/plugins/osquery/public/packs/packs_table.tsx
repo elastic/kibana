@@ -60,7 +60,12 @@ const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: string[] }) 
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover} initialFocus={false}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      initialFocus={false}
+    >
       <EuiText size="s">
         {agentPolicyIds?.map((policyId) => (
           <div key={policyId}>
