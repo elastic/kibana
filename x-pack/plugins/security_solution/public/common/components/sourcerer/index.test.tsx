@@ -7,6 +7,9 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
+
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from './index';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
@@ -19,8 +22,6 @@ import {
   TestProviders,
 } from '../../mock';
 import { createStore, State } from '../../store';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { waitFor } from '@testing-library/react';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -46,6 +47,7 @@ const mockOptions = [
 const defaultProps = {
   scope: sourcererModel.SourcererScopeName.default,
 };
+
 describe('Sourcerer component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,6 +59,34 @@ describe('Sourcerer component', () => {
 
   beforeEach(() => {
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  });
+
+  it('renders tooltip', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="sourcerer-tooltip"]').prop('content')).toEqual(
+      mockOptions
+        .map((p) => p.label)
+        .sort()
+        .join(', ')
+    );
+  });
+
+  it('renders popover button inside tooltip', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="sourcerer-tooltip"] [data-test-subj="sourcerer-trigger"]')
+        .exists()
+    ).toBeTruthy();
   });
 
   // Using props callback instead of simulating clicks,
