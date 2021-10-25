@@ -66,8 +66,10 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       </React.Fragment>
     }
     buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
+    buttonElement="button"
     className="visEditorSidebar__section visEditorSidebar__collapsible"
     data-test-subj="toggleYAxisOptions-ValueAxis-1"
+    element="div"
     extraAction={
       <EuiToolTip
         content="Remove Y-axis"
@@ -176,8 +178,10 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       </React.Fragment>
     }
     buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
+    buttonElement="button"
     className="visEditorSidebar__section visEditorSidebar__collapsible"
     data-test-subj="toggleYAxisOptions-ValueAxis-2"
+    element="div"
     extraAction={
       <EuiToolTip
         content="Remove Y-axis"
