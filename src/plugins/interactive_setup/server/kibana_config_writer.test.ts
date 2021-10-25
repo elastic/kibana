@@ -72,11 +72,156 @@ describe('KibanaConfigWriter', () => {
   });
 
   describe('#writeConfig()', () => {
-    it('can successfully write CA certificate and elasticsearch config', async () => {
+    beforeEach(() => {
       mockReadFile.mockResolvedValue(
         '# Default Kibana configuration for docker target\nserver.host: "0.0.0.0"\nserver.shutdownTimeout: "5s"'
       );
+    });
 
+    it('throws if cannot write CA file', async () => {
+      mockWriteFile.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        kibanaConfigWriter.writeConfig({
+          caCert: 'ca-content',
+          host: '',
+          serviceAccountToken: { name: '', value: '' },
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Oh no!]`);
+
+      expect(mockWriteFile).toHaveBeenCalledTimes(1);
+      expect(mockWriteFile).toHaveBeenCalledWith('/data/ca_1234.crt', 'ca-content');
+    });
+
+    it('throws if cannot write config to yaml file', async () => {
+      mockWriteFile.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('Oh no!'));
+
+      await expect(
+        kibanaConfigWriter.writeConfig({
+          caCert: 'ca-content',
+          host: 'some-host',
+          serviceAccountToken: { name: 'some-token', value: 'some-value' },
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Oh no!]`);
+
+      expect(mockWriteFile.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/data/ca_1234.crt",
+            "ca-content",
+          ],
+          Array [
+            "/some/path/kibana.yml",
+            "# Default Kibana configuration for docker target
+        server.host: \\"0.0.0.0\\"
+        server.shutdownTimeout: \\"5s\\"
+
+        # This section was automatically generated during setup.
+        elasticsearch.hosts: [some-host]
+        elasticsearch.serviceAccountToken: some-value
+        elasticsearch.ssl.certificateAuthorities: [/data/ca_1234.crt]
+
+        ",
+          ],
+        ]
+      `);
+    });
+
+    it('throws if cannot read existing config', async () => {
+      mockReadFile.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        kibanaConfigWriter.writeConfig({
+          caCert: 'ca-content',
+          host: 'some-host',
+          serviceAccountToken: { name: 'some-token', value: 'some-value' },
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Oh no!]`);
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+    });
+
+    it('throws if cannot parse existing config', async () => {
+      mockReadFile.mockResolvedValue('foo: bar\nfoo: baz');
+
+      await expect(
+        kibanaConfigWriter.writeConfig({
+          caCert: 'ca-content',
+          host: 'some-host',
+          serviceAccountToken: { name: 'some-token', value: 'some-value' },
+        })
+      ).rejects.toMatchInlineSnapshot(`
+              [YAMLException: duplicated mapping key at line 2, column 1:
+                  foo: baz
+                  ^]
+            `);
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+    });
+
+    it('can successfully write CA certificate and elasticsearch config with credentials', async () => {
+      await expect(
+        kibanaConfigWriter.writeConfig({
+          caCert: 'ca-content',
+          host: 'some-host',
+          username: 'username',
+          password: 'password',
+        })
+      ).resolves.toBeUndefined();
+
+      expect(mockWriteFile.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/data/ca_1234.crt",
+            "ca-content",
+          ],
+          Array [
+            "/some/path/kibana.yml",
+            "# Default Kibana configuration for docker target
+        server.host: \\"0.0.0.0\\"
+        server.shutdownTimeout: \\"5s\\"
+
+        # This section was automatically generated during setup.
+        elasticsearch.hosts: [some-host]
+        elasticsearch.password: password
+        elasticsearch.username: username
+        elasticsearch.ssl.certificateAuthorities: [/data/ca_1234.crt]
+
+        ",
+          ],
+        ]
+      `);
+    });
+
+    it('can successfully write elasticsearch config without CA certificate', async () => {
+      await expect(
+        kibanaConfigWriter.writeConfig({
+          host: 'some-host',
+          username: 'username',
+          password: 'password',
+        })
+      ).resolves.toBeUndefined();
+
+      expect(mockWriteFile.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/some/path/kibana.yml",
+            "# Default Kibana configuration for docker target
+        server.host: \\"0.0.0.0\\"
+        server.shutdownTimeout: \\"5s\\"
+
+        # This section was automatically generated during setup.
+        elasticsearch.hosts: [some-host]
+        elasticsearch.password: password
+        elasticsearch.username: username
+
+        ",
+          ],
+        ]
+      `);
+    });
+
+    it('can successfully write CA certificate and elasticsearch config with service token', async () => {
       await expect(
         kibanaConfigWriter.writeConfig({
           caCert: 'ca-content',
