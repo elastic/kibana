@@ -34,12 +34,6 @@ export const filterExportedCounts = (): Transform => {
   );
 };
 
-export const filterExportedRulesCounts = (): Transform => {
-  return createFilterStream<ImportRulesSchemaDecoded | RulesObjectsExportResultDetails>(
-    (obj) => obj != null && !has('exported_rules_count', obj)
-  );
-};
-
 export const filterExceptions = (): Transform => {
   return createFilterStream<ImportRulesSchemaDecoded | RulesObjectsExportResultDetails>(
     (obj) => obj != null && !has('list_id', obj)

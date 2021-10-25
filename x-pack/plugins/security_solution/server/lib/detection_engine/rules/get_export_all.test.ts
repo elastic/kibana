@@ -103,6 +103,7 @@ describe.each([
     expect(detailsJson).toEqual({
       exported_exception_list_count: 0,
       exported_exception_list_item_count: 0,
+      exported_count: 1,
       exported_rules_count: 1,
       missing_exception_list_item_count: 0,
       missing_exception_list_items: [],
@@ -134,7 +135,7 @@ describe.each([
     expect(exports).toEqual({
       rulesNdjson: '',
       exportDetails:
-        '{"exported_rules_count":0,"missing_rules":[],"missing_rules_count":0,"exported_exception_list_count":0,"exported_exception_list_item_count":0,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}\n',
+        '{"exported_count":0,"exported_rules_count":0,"missing_rules":[],"missing_rules_count":0,"exported_exception_list_count":0,"exported_exception_list_item_count":0,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}\n',
       exceptionLists: '',
     });
   });

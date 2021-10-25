@@ -72,7 +72,11 @@ export const getExportByObjectIds = async (
     exceptionDetails
   );
 
-  return { rulesNdjson, exportDetails, exceptionLists };
+  return {
+    rulesNdjson,
+    exportDetails,
+    exceptionLists,
+  };
 };
 
 export const getRulesFromObjects = async (

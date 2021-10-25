@@ -5,18 +5,26 @@
  * 2.0.
  */
 
+import type { ExportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
+
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 
 export const getExportDetailsNdjson = (
   rules: Array<Partial<RulesSchema>>,
   missingRules: Array<{ rule_id: string }> = [],
-  extraMeta: Record<string, number | string | string[]> = {}
+  exceptionDetails?: ExportExceptionDetails
 ): string => {
   const stringified = JSON.stringify({
+    exported_count:
+      exceptionDetails == null
+        ? rules.length
+        : rules.length +
+          exceptionDetails.exported_exception_list_count +
+          exceptionDetails.exported_exception_list_item_count,
     exported_rules_count: rules.length,
     missing_rules: missingRules,
     missing_rules_count: missingRules.length,
-    ...extraMeta,
+    ...exceptionDetails,
   });
   return `${stringified}\n`;
 };
