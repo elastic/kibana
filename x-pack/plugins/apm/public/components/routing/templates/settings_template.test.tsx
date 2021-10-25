@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import React, { ReactNode } from 'react';
 import { SettingsTemplate } from './settings_template';
@@ -20,54 +20,10 @@ import { composeStories } from '@storybook/testing-react';
 
 const { Example } = composeStories(stories);
 
-const { location } = createMemoryHistory();
-
-// const KibanaReactContext = createKibanaReactContext({
-//   notifications: { toasts: { add: () => {} } },
-//   usageCollection: { reportUiCounter: () => {} },
-//   observability: {
-//     navigation: {
-//       PageTemplate: () => {
-//         return <>hello world</>;
-//       },
-//     },
-//   },
-//   http: {
-//     basePath: {
-//       prepend: (path: string) => `/basepath${path}`,
-//       get: () => `/basepath`,
-//     },
-//   } as HttpStart,
-//   docLinks: {
-//     DOC_LINK_VERSION: '0',
-//     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-//     links: {
-//       apm: {},
-//       observability: { guide: '' },
-//     },
-//   } as unknown as DocLinksStart,
-// } as unknown as Partial<CoreStart>);
-
-// function Wrapper({ children }: { children?: ReactNode }) {
-//   return (
-//     <MemoryRouter>
-//       <KibanaReactContext.Provider>
-//         <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
-//       </KibanaReactContext.Provider>
-//     </MemoryRouter>
-//   );
-// }
-
 describe('Settings', () => {
-  // beforeEach(() => {
-  //   createCallApmApi({} as CoreStart);
-  // });
-  it.skip('renders', () => {
-    // const routerProps = {
-    //   location,
-    // } as unknown as RouteComponentProps<{}>;
-    act(() => {
-      expect(() => render(<Example />)).not.toThrowError();
-    });
+  it('renders', async () => {
+    render(<Example />);
+
+    expect(await screen.findByText('hello world')).toBeInTheDocument();
   });
 });

@@ -15,7 +15,7 @@ import { SettingsTemplate } from './settings_template';
 
 type Args = ComponentProps<typeof SettingsTemplate>;
 
-const KibanaReactContext = createKibanaReactContext({
+const coreMock = {
   notifications: { toasts: { add: () => {} } },
   usageCollection: { reportUiCounter: () => {} },
   observability: {
@@ -30,6 +30,7 @@ const KibanaReactContext = createKibanaReactContext({
       prepend: (path: string) => `/basepath${path}`,
       get: () => `/basepath`,
     },
+    get: async () => ({}),
   } as HttpStart,
   docLinks: {
     DOC_LINK_VERSION: '0',
@@ -39,7 +40,9 @@ const KibanaReactContext = createKibanaReactContext({
       observability: { guide: '' },
     },
   } as unknown as DocLinksStart,
-} as unknown as Partial<CoreStart>);
+} as unknown as Partial<CoreStart>;
+
+const KibanaReactContext = createKibanaReactContext(coreMock);
 
 const stories: Meta<Args> = {
   title: 'routing/templates/SettingsTemplate',
@@ -49,7 +52,7 @@ const stories: Meta<Args> = {
       return (
         <MemoryRouter>
           <KibanaReactContext.Provider>
-            <MockApmPluginContextWrapper>
+            <MockApmPluginContextWrapper value={{ core: coreMock }}>
               <StoryComponent />
             </MockApmPluginContextWrapper>
           </KibanaReactContext.Provider>
