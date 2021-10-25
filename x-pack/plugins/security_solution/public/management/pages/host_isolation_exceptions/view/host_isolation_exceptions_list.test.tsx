@@ -127,19 +127,22 @@ describe('When on the host isolation exceptions page', () => {
     });
 
     describe('is license platinum plus', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         isPlatinumPlusMock.mockReturnValue(true);
+        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
       });
-      it('should show the create flyout when the add button is pressed', () => {
+      it('should show the create flyout when the add button is pressed', async () => {
         render();
+        await dataReceived();
         act(() => {
           userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
         });
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
-      it('should show the create flyout when the show location is create', () => {
+      it('should show the create flyout when the show location is create', async () => {
         history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
         render();
+        await dataReceived();
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
         expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });

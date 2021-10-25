@@ -130,8 +130,14 @@ export const HostIsolationExceptionsList = () => {
           defaultMessage="Host isolation exceptions"
         />
       }
+      subtitle={
+        <FormattedMessage
+          id="xpack.securitySolution.hostIsolationExceptions.list.pageSubTitle"
+          defaultMessage="Add a Host isolation exception to allow isolated host to communicate with specific IPs"
+        />
+      }
       actions={
-        license.isPlatinumPlus() ? (
+        license.isPlatinumPlus() && listItems.length > 0 ? (
           <EuiButton
             fill
             iconType="plusInCircle"
