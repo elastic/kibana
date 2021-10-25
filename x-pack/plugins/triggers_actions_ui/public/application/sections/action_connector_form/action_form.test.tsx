@@ -483,7 +483,7 @@ describe('action_form', () => {
         `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
       );
       actionOption.first().simulate('click');
-      const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}"]`);
+      const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}-0"]`);
       const numConnectors = allActions.filter(
         (action) => action.actionTypeId === actionType.id
       ).length;
@@ -494,35 +494,53 @@ describe('action_form', () => {
         numConnectors - numConnectorsWithMissingSecrets
       );
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "id": "test",
-                  "key": "test",
-                  "label": "Test connector ",
-                },
-                Object {
-                  "id": "test2",
-                  "key": "test2",
-                  "label": "Test connector 2 (preconfigured)",
-                },
-              ]
-            `);
+        Array [
+          Object {
+            "data-test-subj": "dropdown-connector-test",
+            "inputDisplay": <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+            >
+              <ConnectorRow />
+            </EuiFlexGroup>,
+            "value": "test",
+          },
+          Object {
+            "data-test-subj": "dropdown-connector-test2",
+            "inputDisplay": <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+            >
+              <ConnectorRow />
+            </EuiFlexGroup>,
+            "value": "test2",
+          },
+        ]
+      `);
     });
 
     it('renders only preconfigured connectors for the selected preconfigured action type', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
       actionOption.first().simulate('click');
-      const combobox = wrapper.find('[data-test-subj="selectActionConnector-preconfigured"]');
+      const combobox = wrapper.find('[data-test-subj="selectActionConnector-preconfigured-1"]');
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "id": "test3",
-                  "key": "test3",
-                  "label": "Preconfigured Only (preconfigured)",
-                },
-              ]
-            `);
+        Array [
+          Object {
+            "data-test-subj": "dropdown-connector-test3",
+            "inputDisplay": <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+            >
+              <ConnectorRow />
+            </EuiFlexGroup>,
+            "value": "test3",
+          },
+        ]
+      `);
     });
 
     it('does not render "Add connector" button for preconfigured only action type', async () => {

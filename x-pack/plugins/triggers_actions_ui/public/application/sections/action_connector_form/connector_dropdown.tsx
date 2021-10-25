@@ -13,7 +13,7 @@ import { ActionConnector, ActionTypeIndex, ActionTypeModel, AlertAction } from '
 import { getValidConnectors } from '../common/connectors';
 import { preconfiguredMessage } from '../../../common/connectors_dropdown';
 
-export interface DropdownProps {
+interface DropdownProps {
   actionItem: AlertAction;
   accordionIndex: number;
   actionTypesIndex: ActionTypeIndex;
