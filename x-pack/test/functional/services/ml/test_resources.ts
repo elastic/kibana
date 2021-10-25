@@ -188,30 +188,6 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       }
     },
 
-    async restoreAnnotationsIndexState() {
-      // restore the original working state of pointing read/write aliases
-      // to the right annotations index.
-      await es.indices.updateAliases({
-        body: {
-          actions: [
-            { add: { index: '.ml-annotations-6', alias: '.ml-annotations-read', is_hidden: true } },
-            { remove: { index: '.ml-annotations-6-wrong-mapping', alias: '.ml-annotations-read' } },
-            {
-              add: { index: '.ml-annotations-6', alias: '.ml-annotations-write', is_hidden: true },
-            },
-            {
-              remove: { index: '.ml-annotations-6-wrong-mapping', alias: '.ml-annotations-write' },
-            },
-          ],
-        },
-      });
-
-      // deletes the temporary annotations index with wrong mappings
-      await es.indices.delete({
-        index: '.ml-annotations-6-wrong-mapping',
-      });
-    },
-
     async updateSavedSearchRequestBody(body: object, indexPatternTitle: string): Promise<object> {
       const indexPatternId = await this.getIndexPatternId(indexPatternTitle);
       if (indexPatternId === undefined) {
