@@ -60,7 +60,7 @@ import {
 } from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
-const LOCAL_STORAGE_KEY = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
+const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
 
 export interface SuggestionPanelProps {
   datasourceMap: DatasourceMap;
@@ -296,8 +296,11 @@ export function SuggestionPanel({
   }, [ExpressionRendererComponent]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
-
-  const [hideSuggestions, setHideSuggestions] = useLocalStorage(LOCAL_STORAGE_KEY, false);
+  // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
+  const [hideSuggestions, setHideSuggestions] = useLocalStorage(
+    LOCAL_STORAGE_SUGGESTIONS_PANEL,
+    false
+  );
 
   const toggleSuggestions = useCallback(() => {
     setHideSuggestions(!hideSuggestions);
@@ -331,13 +334,7 @@ export function SuggestionPanel({
 
   return (
     <div>
-      <EuiFlexGroup
-        alignItems="center"
-        className={classNames('lnsSuggestionPanel__wrapper', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          'lnsSuggestionPanel__wrapper--hideSuggestions': hideSuggestions,
-        })}
-      >
+      <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem>
           <EuiSwitch
             className="lnsSuggestionPanel__switch"
@@ -390,7 +387,7 @@ export function SuggestionPanel({
         })}
         data-test-subj="lnsSuggestionsPanel"
       >
-        {currentVisualization.activeId && (
+        {currentVisualization.activeId && !hideSuggestions && (
           <SuggestionPreview
             preview={{
               error: currentStateError != null,
@@ -409,29 +406,30 @@ export function SuggestionPanel({
             showTitleAsLabel
           />
         )}
-        {suggestions.map((suggestion, index) => {
-          return (
-            <SuggestionPreview
-              preview={{
-                expression: suggestion.previewExpression,
-                icon: suggestion.previewIcon,
-                title: suggestion.title,
-              }}
-              ExpressionRenderer={AutoRefreshExpressionRenderer}
-              key={index}
-              onSelect={() => {
-                trackUiEvent('suggestion_clicked');
-                if (lastSelectedSuggestion === index) {
-                  rollbackToCurrentVisualization();
-                } else {
-                  setLastSelectedSuggestion(index);
-                  switchToSuggestion(dispatchLens, suggestion);
-                }
-              }}
-              selected={index === lastSelectedSuggestion}
-            />
-          );
-        })}
+        {!hideSuggestions &&
+          suggestions.map((suggestion, index) => {
+            return (
+              <SuggestionPreview
+                preview={{
+                  expression: suggestion.previewExpression,
+                  icon: suggestion.previewIcon,
+                  title: suggestion.title,
+                }}
+                ExpressionRenderer={AutoRefreshExpressionRenderer}
+                key={index}
+                onSelect={() => {
+                  trackUiEvent('suggestion_clicked');
+                  if (lastSelectedSuggestion === index) {
+                    rollbackToCurrentVisualization();
+                  } else {
+                    setLastSelectedSuggestion(index);
+                    switchToSuggestion(dispatchLens, suggestion);
+                  }
+                }}
+                selected={index === lastSelectedSuggestion}
+              />
+            );
+          })}
       </div>
     </div>
   );

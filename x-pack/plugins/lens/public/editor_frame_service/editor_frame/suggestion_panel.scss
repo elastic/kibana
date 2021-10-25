@@ -1,10 +1,6 @@
 @import '../../mixins';
 @import '../../variables';
 
-.lnsSuggestionPanel__wrapper--hideSuggestions {
-  margin-bottom: 0;
-}
-
 .lnsSuggestionPanel__switch {
   align-items: center;
 }
@@ -21,9 +17,10 @@
   padding-left: $euiSizeXS;
   margin-left: -$euiSizeXS;
   padding-bottom: $euiSizeXS;
-  max-height: fit-content;
+  // transitioning suggestions panel properties
+  max-height: 150px;
   opacity: 1;
-  transition: opacity $euiAnimSpeedFast ease-in-out;
+  transition: $euiAnimSpeedFast linear max-height, opacity .5s;
 }
 
 .lnsSuggestionPanel__suggestions--hideSuggestions {
