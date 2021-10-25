@@ -529,10 +529,11 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
     },
     (context, request, response) => {
       const range = path.normalize(request.params.range);
-      return range.startsWith('..')
+      const rootPath = path.resolve(__dirname, 'fonts', 'open_sans');
+      const fontPath = path.resolve(rootPath, `${range}.pbf`);
+      return !fontPath.startsWith(rootPath)
         ? response.notFound()
         : new Promise((resolve) => {
-            const fontPath = path.join(__dirname, 'fonts', 'open_sans', `${range}.pbf`);
             fs.readFile(fontPath, (error, data) => {
               if (error) {
                 resolve(response.notFound());

@@ -34,12 +34,12 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
             should: [
               {
                 term: {
-                  'signal.status': status,
+                  [ALERT_WORKFLOW_STATUS]: status,
                 },
               },
               {
                 term: {
-                  'signal.status': 'in-progress',
+                  [ALERT_WORKFLOW_STATUS]: 'in-progress',
                 },
               },
             ],
@@ -47,7 +47,7 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
         }
       : {
           term: {
-            'signal.status': status,
+            [ALERT_WORKFLOW_STATUS]: status,
           },
         };
 
@@ -58,7 +58,7 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
         negate: false,
         disabled: false,
         type: 'phrase',
-        key: 'signal.status',
+        key: ALERT_WORKFLOW_STATUS,
         params: {
           query: status,
         },
@@ -76,7 +76,7 @@ export const buildAlertStatusesFilter = (statuses: Status[]): Filter[] => {
     bool: {
       should: statuses.map((status) => ({
         term: {
-          'signal.status': status,
+          [ALERT_WORKFLOW_STATUS]: status,
         },
       })),
     },

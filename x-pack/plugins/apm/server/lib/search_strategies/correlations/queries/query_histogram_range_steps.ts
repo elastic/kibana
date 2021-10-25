@@ -17,7 +17,11 @@ import type { SearchServiceFetchParams } from '../../../../../common/search_stra
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
-const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
+export const getHistogramRangeSteps = (
+  min: number,
+  max: number,
+  steps: number
+) => {
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
   const logFn = scaleLog().domain([min, max]).range([1, steps]);
   return [...Array(steps).keys()]
