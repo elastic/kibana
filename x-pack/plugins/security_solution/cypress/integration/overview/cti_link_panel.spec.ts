@@ -12,6 +12,7 @@ import {
   OVERVIEW_CTI_LINKS_INFO_INNER_PANEL,
   OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL,
   OVERVIEW_CTI_TOTAL_EVENT_COUNT,
+  OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON,
 } from '../../screens/overview';
 
 import { loginAndWaitForPage } from '../../tasks/login';
@@ -56,7 +57,36 @@ describe('CTI Link Panel', () => {
       loginAndWaitForPage(OVERVIEW_URL);
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('not.exist');
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should('exist');
+      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON}`).should('exist');
       cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 indicator');
+    });
+  });
+
+  describe('all integrations installed', () => {
+    before(() => {
+      esArchiverLoad('threat_indicator');
+      cy.intercept('GET', '/api/fleet/epm/packages', {
+        response: [
+          {
+            name: 'ti_abusech',
+            title: 'AbuseCH',
+            id: 'ti_abusech',
+            status: 'installed',
+          },
+        ],
+      }).as('fetchIntegrations');
+    });
+
+    after(() => {
+      esArchiverUnload('threat_indicator');
+    });
+
+    it('render cti dashboard without enable integrations button', () => {
+      loginAndWaitForPage(OVERVIEW_URL);
+      cy.wait('@fetchIntegrations');
+      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON}`).should(
+        'not.exist'
+      );
     });
   });
 });
