@@ -65,7 +65,7 @@ const chartStartTime = new Date(alert[ALERT_START]![0] as string).getTime();
 const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] =
   () => () => ({
     link: '/',
-    reason: 'a good reason',
+    reason: 'a good reason. Click to see more details.',
   });
 const selectedAlertId = undefined;
 const setSelectedAlertId = jest.fn();
