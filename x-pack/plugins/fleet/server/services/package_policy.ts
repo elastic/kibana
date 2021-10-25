@@ -432,6 +432,17 @@ class PackagePolicyService {
         pkgName: packagePolicy.package.name,
         currentVersion: packagePolicy.package.version,
       });
+
+      appContextService.getLogger().info(
+        JSON.stringify({
+          package_policy_upgrade: {
+            package_name: packagePolicy.package.name,
+            new_version: packagePolicy.package.version,
+            status: 'success',
+            dryRun: false,
+          },
+        })
+      );
     }
 
     return newPolicy;
@@ -660,6 +671,21 @@ class PackagePolicyService {
       updatedPackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
 
       const hasErrors = 'errors' in updatedPackagePolicy;
+
+      if (packagePolicy.package.version !== packageInfo.version) {
+        appContextService.getLogger().info(
+          JSON.stringify({
+            package_policy_upgrade: {
+              package_name: packageInfo.name,
+              current_version: packagePolicy.package.version,
+              new_version: packageInfo.version,
+              status: hasErrors ? 'failure' : 'success',
+              error: hasErrors ? updatedPackagePolicy.errors : undefined,
+              dryRun: true,
+            },
+          })
+        );
+      }
 
       return {
         name: updatedPackagePolicy.name,
