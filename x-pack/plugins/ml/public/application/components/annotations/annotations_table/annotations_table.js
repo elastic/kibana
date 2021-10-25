@@ -81,7 +81,6 @@ class AnnotationsTableUI extends Component {
     super(props);
     this.state = {
       annotations: [],
-      aggregations: null,
       isLoading: false,
       queryText: `event:(${ANNOTATION_EVENT_USER} or ${ANNOTATION_EVENT_DELAYED_DATA})`,
       searchError: undefined,
@@ -115,18 +114,11 @@ class AnnotationsTableUI extends Component {
           earliestMs: null,
           latestMs: null,
           maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-          fields: [
-            {
-              field: 'event',
-              missing: ANNOTATION_EVENT_USER,
-            },
-          ],
         })
         .toPromise()
         .then((resp) => {
           this.setState((prevState, props) => ({
             annotations: resp.annotations[props.jobs[0].job_id] || [],
-            aggregations: resp.aggregations,
             errorMessage: undefined,
             isLoading: false,
             jobId: props.jobs[0].job_id,
@@ -570,31 +562,30 @@ class AnnotationsTableUI extends Component {
         onMouseLeave: () => this.onMouseLeaveRow(),
       };
     };
+
+    // Build the options to show in the Event type filter.
+    // Do not try and run a search using a terms agg on the event field
+    // because in 7.9 this field was incorrectly mapped as a text rather than keyword.
     let filterOptions = [];
-    const aggregations = this.props.aggregations ?? this.state.aggregations;
-    if (aggregations) {
-      const buckets = aggregations.event.buckets;
-      let foundUser = false;
-      let foundDelayedData = false;
 
-      buckets.forEach((bucket) => {
-        if (bucket.key === ANNOTATION_EVENT_USER) {
-          foundUser = true;
-        }
-        if (bucket.key === ANNOTATION_EVENT_DELAYED_DATA) {
-          foundDelayedData = true;
-        }
-      });
-      const adjustedBuckets = [];
-      if (!foundUser) {
-        adjustedBuckets.push({ key: ANNOTATION_EVENT_USER, doc_count: 0 });
+    // Always display options for user and delayed data types.
+    const countsByEvent = {
+      [ANNOTATION_EVENT_USER]: 0,
+      [ANNOTATION_EVENT_DELAYED_DATA]: 0,
+    };
+    annotations.forEach((annotation) => {
+      // Default to user type for annotations created in early releases which didn't have an event field
+      const event = annotation.event || ANNOTATION_EVENT_USER;
+      if (countsByEvent[event] === undefined) {
+        countsByEvent[event] = 0;
       }
-      if (!foundDelayedData) {
-        adjustedBuckets.push({ key: ANNOTATION_EVENT_DELAYED_DATA, doc_count: 0 });
-      }
+      countsByEvent[event] = ++countsByEvent[event];
+    });
+    filterOptions = Object.keys(countsByEvent).map((eventType) => ({
+      key: eventType,
+      doc_count: countsByEvent[eventType],
+    }));
 
-      filterOptions = [...adjustedBuckets, ...buckets];
-    }
     const filters = [
       {
         type: 'field_value_selection',
