@@ -9,7 +9,7 @@ import React, { useState, useEffect, useCallback, useRef, RefObject } from 'reac
 import usePrevious from 'react-use/lib/usePrevious';
 import { RenderToDom } from '../render_to_dom';
 import { ExpressionFormHandlers } from '../../../common/lib/expression_form_handlers';
-import { UpdatePropsRef } from '../../lib/template_from_react_component';
+import { UpdatePropsRef } from '../../../types/arguments';
 
 interface ArgTemplateFormProps {
   template?: (

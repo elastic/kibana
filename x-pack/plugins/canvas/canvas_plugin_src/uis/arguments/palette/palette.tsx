@@ -12,7 +12,7 @@ import { templateFromReactComponent } from '../../../../public/lib/template_from
 import { ArgumentStrings } from '../../../../i18n';
 import { ColorPalette } from '../../../../common/lib';
 import { astToPalette } from './utils';
-import { getPaletteType } from './palette_types';
+import { ColorPaletteName, getPaletteType } from './palette_types';
 import { CustomColorPalette } from '../../../../public/components/palette_picker';
 
 const { Palette: strings } = ArgumentStrings;
@@ -24,7 +24,7 @@ interface Props {
   argId?: string;
   typeInstance: {
     options?: {
-      type?: string;
+      type?: ColorPaletteName;
     };
   };
 }

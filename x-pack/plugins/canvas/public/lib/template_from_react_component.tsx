@@ -16,18 +16,14 @@ import { unmountComponentAtNode, render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
-import { ArgumentHandlers } from '../../types/arguments';
+import { ArgumentHandlers, UpdatePropsRef } from '../../types/arguments';
 
 export interface Props {
   renderError: Function;
 }
 
-export interface UpdatePropsRef {
-  updateProps: (newProps: Props) => void;
-}
-
 export const templateFromReactComponent = (Component: ComponentType<any>) => {
-  const WrappedComponent: ForwardRefRenderFunction<UpdatePropsRef, Props> = (props, ref) => {
+  const WrappedComponent: ForwardRefRenderFunction<UpdatePropsRef<Props>, Props> = (props, ref) => {
     const [updatedProps, setUpdatedProps] = useState<Props>(props);
 
     useImperativeHandle(ref, () => ({
@@ -64,7 +60,7 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
     domNode: HTMLElement,
     config: Props,
     handlers: ArgumentHandlers,
-    onRef: (ref: UpdatePropsRef | null) => void
+    onRef?: (ref: UpdatePropsRef<Props> | null) => void
   ) => {
     try {
       const el = (
