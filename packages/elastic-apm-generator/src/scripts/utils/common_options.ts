@@ -9,6 +9,7 @@
 const fileOption = {
   describe: 'File that contains the trace scenario',
   demandOption: true,
+  string: true as const,
 };
 
 const intervalOption = {
@@ -18,7 +19,8 @@ const intervalOption = {
 
 const targetOption = {
   describe: 'Elasticsearch target, including username/password',
-  demandOption: true,
+  demandOption: true as const,
+  string: true as const,
 };
 
 const bucketSizeOption = {
@@ -27,8 +29,8 @@ const bucketSizeOption = {
 };
 
 const workerOption = {
-  describe: 'Amount of simultaneously connected ES clients',
-  default: 1,
+  describe: 'Amount of Node.js worker threads',
+  default: 5,
 };
 
 const cleanOption = {
@@ -42,6 +44,16 @@ const logLevelOption = {
   default: 'info',
 };
 
+const clientWorkerOption = {
+  describe: 'Number of concurrently connected ES clients',
+  default: 5,
+};
+
+const batchSizeOption = {
+  describe: 'Number of documents per bulk index request',
+  default: 1000,
+};
+
 export {
   fileOption,
   intervalOption,
@@ -50,4 +62,6 @@ export {
   workerOption,
   cleanOption,
   logLevelOption,
+  clientWorkerOption,
+  batchSizeOption,
 };

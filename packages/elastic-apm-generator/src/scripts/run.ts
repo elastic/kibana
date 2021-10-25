@@ -16,6 +16,8 @@ import {
   targetOption,
   workerOption,
   logLevelOption,
+  clientWorkerOption,
+  batchSizeOption,
 } from './utils/common_options';
 import { intervalToMs } from './utils/interval_to_ms';
 import { getCommonResources } from './utils/get_common_resources';
@@ -31,6 +33,8 @@ yargs(process.argv.slice(2))
         .positional('file', fileOption)
         .option('bucketSize', bucketSizeOption)
         .option('workers', workerOption)
+        .option('clientWorkers', clientWorkerOption)
+        .option('batchSize', batchSizeOption)
         .option('interval', intervalOption)
         .option('clean', cleanOption)
         .option('target', targetOption)
@@ -48,17 +52,15 @@ yargs(process.argv.slice(2))
         .conflicts('to', 'live');
     },
     async (argv) => {
-      const {
-        scenario,
-        intervalInMs,
-        bucketSizeInMs,
-        target,
-        workers,
-        clean,
-        logger,
-        writeTargets,
-        client,
-      } = await getCommonResources(argv);
+      const file = String(argv.file || argv._[0]);
+
+      const { target, workers, clean, clientWorkers, batchSize } = argv;
+
+      const { scenario, intervalInMs, bucketSizeInMs, logger, writeTargets, client, logLevel } =
+        await getCommonResources({
+          ...argv,
+          file,
+        });
 
       if (clean) {
         await cleanWriteTargets({ writeTargets, client, logger });
@@ -91,13 +93,16 @@ yargs(process.argv.slice(2))
       startHistoricalDataUpload({
         from,
         to,
-        scenario,
-        intervalInMs,
+        file,
         bucketSizeInMs,
         client,
         workers,
+        clientWorkers,
+        batchSize,
         writeTargets,
         logger,
+        logLevel,
+        target,
       });
 
       if (live) {
@@ -108,7 +113,8 @@ yargs(process.argv.slice(2))
           logger,
           scenario,
           start: to,
-          workers,
+          clientWorkers,
+          batchSize,
           writeTargets,
         });
       }
