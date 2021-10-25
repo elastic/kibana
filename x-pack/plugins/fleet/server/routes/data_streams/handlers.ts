@@ -15,7 +15,6 @@ import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
-const MAX_BACKING_INDICES_TO_QUERY = 10;
 interface ESDataStreamInfo {
   name: string;
   timestamp_field: {
@@ -137,9 +136,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       const {
         body: { aggregations: dataStreamAggs },
       } = await esClient.search({
-        index: dataStream.indices
-          .map((index) => index.index_name)
-          .slice(0, MAX_BACKING_INDICES_TO_QUERY),
+        index: dataStream.name,
         body: {
           size: 0,
           query: {
