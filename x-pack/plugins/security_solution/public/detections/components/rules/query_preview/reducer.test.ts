@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import * as i18n from './translations';
+import * as i18n from '../rule_preview/translations';
 import { Action, State, queryPreviewReducer } from './reducer';
 import { initialState } from './';
 

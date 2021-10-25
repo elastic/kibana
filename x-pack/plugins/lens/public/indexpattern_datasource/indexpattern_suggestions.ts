@@ -485,7 +485,7 @@ export function getDatasourceSuggestionsFromCurrentState(
             layer.columns[columnId].isBucketed && layer.columns[columnId].dataType === 'date'
         );
         const timeField =
-          indexPattern.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
+          indexPattern?.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
 
         const hasNumericDimension =
           buckets.length === 1 &&
@@ -507,7 +507,9 @@ export function getDatasourceSuggestionsFromCurrentState(
             // suggest current metric over time if there is a default time field
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
           }
-          suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
+          if (indexPattern) {
+            suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
+          }
         } else {
           suggestions.push(...createSimplifiedTableSuggestions(state, layerId));
 

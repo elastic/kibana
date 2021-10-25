@@ -99,8 +99,8 @@ export function getIndexPatternDatasource({
   const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
     core.notifications.toasts.addError(err, {
-      title: i18n.translate('xpack.lens.indexPattern.indexPatternLoadError', {
-        defaultMessage: 'Error loading index pattern',
+      title: i18n.translate('xpack.lens.indexPattern.dataViewLoadError', {
+        defaultMessage: 'Error loading data view',
       }),
     });
 
@@ -271,6 +271,7 @@ export function getIndexPatternDatasource({
 
     isValidColumn: (state: IndexPatternPrivateState, layerId: string, columnId: string) => {
       const layer = state.layers[layerId];
+
       return !isColumnInvalid(layer, columnId, state.indexPatterns[layer.indexPatternId]);
     },
 
@@ -451,21 +452,23 @@ export function getIndexPatternDatasource({
       }
 
       // Forward the indexpattern as well, as it is required by some operationType checks
-      const layerErrors = Object.entries(state.layers).map(([layerId, layer]) =>
-        (
-          getErrorMessages(
-            layer,
-            state.indexPatterns[layer.indexPatternId],
-            state,
-            layerId,
-            core
-          ) ?? []
-        ).map((message) => ({
-          shortMessage: '', // Not displayed currently
-          longMessage: typeof message === 'string' ? message : message.message,
-          fixAction: typeof message === 'object' ? message.fixAction : undefined,
-        }))
-      );
+      const layerErrors = Object.entries(state.layers)
+        .filter(([_, layer]) => !!state.indexPatterns[layer.indexPatternId])
+        .map(([layerId, layer]) =>
+          (
+            getErrorMessages(
+              layer,
+              state.indexPatterns[layer.indexPatternId],
+              state,
+              layerId,
+              core
+            ) ?? []
+          ).map((message) => ({
+            shortMessage: '', // Not displayed currently
+            longMessage: typeof message === 'string' ? message : message.message,
+            fixAction: typeof message === 'object' ? message.fixAction : undefined,
+          }))
+        );
 
       // Single layer case, no need to explain more
       if (layerErrors.length <= 1) {
