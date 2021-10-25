@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+jest.mock('../../../kibana_services', () => {
+  return {
+    getEmsTileLayerId: () => {
+      return {
+        bright: 'road_map',
+        desaturated: 'road_map_desaturated',
+        dark: 'dark_map',
+      };
+    }
+  }
+});
+
 jest.mock('../../../util', () => {
   return {
     getEmsTmsServices: () => {
