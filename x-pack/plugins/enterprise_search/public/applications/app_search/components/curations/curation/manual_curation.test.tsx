@@ -21,20 +21,25 @@ import { getPageTitle, getPageHeaderActions, getPageHeaderTabs } from '../../../
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 import { CurationLogic } from './curation_logic';
 
-import { PromotedDocuments, HiddenDocuments } from './documents';
+import { DeleteCurationButton } from './delete_curation_button';
+import { PromotedDocuments, HiddenDocuments, OrganicDocuments } from './documents';
 import { ManualCuration } from './manual_curation';
+import { ActiveQuerySelect, ManageQueriesModal } from './queries';
 import { AddResultFlyout } from './results';
 import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
 describe('ManualCuration', () => {
   const values = {
-    dataLoading: false,
     queries: ['query A', 'query B'],
     isFlyoutOpen: false,
     selectedPageTab: 'promoted',
+    curation: {
+      promoted: [],
+      hidden: [],
+    },
   };
   const actions = {
-    resetCuration: jest.fn(),
+    deleteCuration: jest.fn(),
     onSelectPageTab: jest.fn(),
   };
 
@@ -68,13 +73,13 @@ describe('ManualCuration', () => {
     expect(actions.onSelectPageTab).toHaveBeenNthCalledWith(2, 'hidden');
   });
 
-  it('contains a suggested documents callout when the selectedPageTab is ', () => {
+  it('contains a suggested documents callout', () => {
     const wrapper = shallow(<ManualCuration />);
 
     expect(wrapper.find(SuggestedDocumentsCallout)).toHaveLength(1);
   });
 
-  it('renders promoted documents when that tab is selected', () => {
+  it('renders promoted and organic documents when the promoted tab is selected', () => {
     setMockValues({ ...values, selectedPageTab: 'promoted' });
     const wrapper = shallow(<ManualCuration />);
     const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
@@ -82,9 +87,10 @@ describe('ManualCuration', () => {
     expect(tabs.at(0).prop('isSelected')).toEqual(true);
 
     expect(wrapper.find(PromotedDocuments)).toHaveLength(1);
+    expect(wrapper.find(OrganicDocuments)).toHaveLength(1);
   });
 
-  it('renders hidden documents when that tab is selected', () => {
+  it('renders hidden documents when the hidden tab is selected', () => {
     setMockValues({ ...values, selectedPageTab: 'hidden' });
     const wrapper = shallow(<ManualCuration />);
     const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
@@ -108,31 +114,26 @@ describe('ManualCuration', () => {
     expect(CurationLogic).toHaveBeenCalledWith({ curationId: 'hello-world' });
   });
 
-  describe('restore defaults button', () => {
-    let restoreDefaultsButton: ShallowWrapper;
-    let confirmSpy: jest.SpyInstance;
+  describe('page header actions', () => {
+    let pageHeaderActions: ShallowWrapper;
 
     beforeAll(() => {
       const wrapper = shallow(<ManualCuration />);
-      restoreDefaultsButton = getPageHeaderActions(wrapper).childAt(0);
-
-      confirmSpy = jest.spyOn(window, 'confirm');
+      pageHeaderActions = getPageHeaderActions(wrapper);
     });
 
-    afterAll(() => {
-      confirmSpy.mockRestore();
+    it('contains a button to manage queries and an active query selector', () => {
+      expect(pageHeaderActions.find(ManageQueriesModal)).toHaveLength(1);
     });
 
-    it('resets the curation upon user confirmation', () => {
-      confirmSpy.mockReturnValueOnce(true);
-      restoreDefaultsButton.simulate('click');
-      expect(actions.resetCuration).toHaveBeenCalled();
+    it('contains a button to delete the curation', () => {
+      expect(pageHeaderActions.find(DeleteCurationButton)).toHaveLength(1);
     });
+  });
 
-    it('does not reset the curation if the user cancels', () => {
-      confirmSpy.mockReturnValueOnce(false);
-      restoreDefaultsButton.simulate('click');
-      expect(actions.resetCuration).not.toHaveBeenCalled();
-    });
+  it('contains an active query selector', () => {
+    const wrapper = shallow(<ManualCuration />);
+
+    expect(wrapper.find(ActiveQuerySelect)).toHaveLength(1);
   });
 });

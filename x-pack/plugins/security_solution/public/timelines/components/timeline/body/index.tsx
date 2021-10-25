@@ -111,7 +111,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
-        setSelected!({
+        setSelected({
           id,
           eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
           isSelected,
@@ -125,7 +125,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const onSelectAll: OnSelectAll = useCallback(
       ({ isSelected }: { isSelected: boolean }) =>
         isSelected
-          ? setSelected!({
+          ? setSelected({
               id,
               eventIds: getEventIdToDataMapping(
                 data,
@@ -135,7 +135,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               isSelected,
               isSelectAllChecked: isSelected,
             })
-          : clearSelected!({ id }),
+          : clearSelected({ id }),
       [setSelected, clearSelected, id, data, queryFields]
     );
 

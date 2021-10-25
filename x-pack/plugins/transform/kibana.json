@@ -17,6 +17,7 @@
   "optionalPlugins": [
     "security",
     "usageCollection",
+    "spaces",
     "alerting"
   ],
   "configPath": ["xpack", "transform"],

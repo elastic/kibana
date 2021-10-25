@@ -44,7 +44,7 @@ export function BackendDetailDependenciesTable() {
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/backends/{backendName}/upstream_services',
+        endpoint: 'GET /internal/apm/backends/{backendName}/upstream_services',
         params: {
           path: {
             backendName,
@@ -74,7 +74,7 @@ export function BackendDetailDependenciesTable() {
             serviceName={location.serviceName}
             agentName={location.agentName}
             query={{
-              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+              comparisonEnabled,
               comparisonType,
               environment,
               kuery,

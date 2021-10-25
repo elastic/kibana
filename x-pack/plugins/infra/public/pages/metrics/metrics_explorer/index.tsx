@@ -8,7 +8,7 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useContext } from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
@@ -25,7 +25,7 @@ import { SavedViewsToolbarControls } from '../../../components/saved_views/toolb
 
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;
-  derivedIndexPattern: IIndexPattern;
+  derivedIndexPattern: DataViewBase;
 }
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {

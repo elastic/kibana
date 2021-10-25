@@ -135,6 +135,7 @@ export const renderApp = (
     urlGenerators: deps.share.urlGenerators,
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
+    dataViews: deps.data.dataViews,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());

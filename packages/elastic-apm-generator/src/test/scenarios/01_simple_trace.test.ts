@@ -18,7 +18,7 @@ describe('simple trace', () => {
 
     const range = timerange(
       new Date('2021-01-01T00:00:00.000Z').getTime(),
-      new Date('2021-01-01T00:15:00.000Z').getTime() - 1
+      new Date('2021-01-01T00:15:00.000Z').getTime()
     );
 
     events = range
@@ -68,6 +68,7 @@ describe('simple trace', () => {
     expect(transaction).toEqual({
       '@timestamp': 1609459200000,
       'agent.name': 'java',
+      'container.id': 'instance-1',
       'event.outcome': 'success',
       'processor.event': 'transaction',
       'processor.name': 'transaction',
@@ -89,6 +90,7 @@ describe('simple trace', () => {
     expect(span).toEqual({
       '@timestamp': 1609459200050,
       'agent.name': 'java',
+      'container.id': 'instance-1',
       'event.outcome': 'success',
       'parent.id': 'e7433020f2745625',
       'processor.event': 'span',

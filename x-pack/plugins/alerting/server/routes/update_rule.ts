@@ -88,6 +88,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialAlert<AlertTypeParams>> = ({
         execution_status: {
           status: executionStatus.status,
           last_execution_date: executionStatus.lastExecutionDate,
+          last_duration: executionStatus.lastDuration,
         },
       }
     : {}),

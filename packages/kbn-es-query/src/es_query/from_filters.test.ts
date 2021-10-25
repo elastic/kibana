@@ -9,11 +9,12 @@
 import { buildQueryFromFilters } from './from_filters';
 import { ExistsFilter, Filter, MatchAllFilter } from '../filters';
 import { fields } from '../filters/stubs';
-import { IndexPatternBase } from './types';
+import { DataViewBase } from './types';
 
 describe('build query', () => {
-  const indexPattern: IndexPatternBase = {
+  const indexPattern: DataViewBase = {
     fields,
+    title: 'dataView',
   };
 
   describe('buildQueryFromFilters', () => {

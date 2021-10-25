@@ -66,12 +66,20 @@ export {
 };
 
 export type ActionTypeIndex = Record<string, ActionType>;
-export type AlertTypeIndex = Map<string, AlertType>;
+export type RuleTypeIndex = Map<string, AlertType>;
 export type ActionTypeRegistryContract<
   ActionConnector = unknown,
   ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
+
+export type ActionConnectorFieldsCallbacks = {
+  beforeActionConnectorSave?: () => Promise<void>;
+  afterActionConnectorSave?: (connector: ActionConnector) => Promise<void>;
+} | null;
+export type ActionConnectorFieldsSetCallbacks = React.Dispatch<
+  React.SetStateAction<ActionConnectorFieldsCallbacks>
+>;
 
 export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
@@ -80,6 +88,8 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   errors: IErrorObject;
   readOnly: boolean;
   consumer?: string;
+  setCallbacks: ActionConnectorFieldsSetCallbacks;
+  isEdit: boolean;
 }
 
 export enum AlertFlyoutCloseReason {
@@ -197,6 +207,9 @@ export interface AlertType<
     | 'minimumLicenseRequired'
     | 'recoveryActionGroup'
     | 'defaultActionGroupId'
+    | 'ruleTaskTimeout'
+    | 'defaultScheduleInterval'
+    | 'minimumScheduleInterval'
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
@@ -209,7 +222,7 @@ export type AlertUpdates = Omit<Alert, 'id' | 'executionStatus'>;
 
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
-  tagsText: string;
+  index: number;
   actionsCount: number;
   isEditable: boolean;
   enabledInLicense: boolean;
@@ -285,6 +298,7 @@ export interface AlertEditProps<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
+  ruleType?: AlertType<string, string>;
 }
 
 export interface AlertAddProps<MetaData = Record<string, any>> {
@@ -299,4 +313,5 @@ export interface AlertAddProps<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
+  ruleTypeIndex?: RuleTypeIndex;
 }

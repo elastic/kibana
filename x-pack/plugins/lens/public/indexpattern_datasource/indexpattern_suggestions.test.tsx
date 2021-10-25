@@ -1206,11 +1206,11 @@ describe('IndexPattern Data Source suggestions', () => {
         const modifiedState: IndexPatternPrivateState = {
           ...initialState,
           layers: {
-            thresholdLayer: {
+            referenceLineLayer: {
               indexPatternId: '1',
-              columnOrder: ['threshold'],
+              columnOrder: ['referenceLine'],
               columns: {
-                threshold: {
+                referenceLine: {
                   dataType: 'number',
                   isBucketed: false,
                   label: 'Static Value: 0',
@@ -1251,10 +1251,10 @@ describe('IndexPattern Data Source suggestions', () => {
             modifiedState,
             '1',
             documentField,
-            (layerId) => layerId !== 'thresholdLayer'
+            (layerId) => layerId !== 'referenceLineLayer'
           )
         );
-        // should ignore the threshold layer
+        // should ignore the referenceLine layer
         expect(suggestions).toContainEqual(
           expect.objectContaining({
             table: expect.objectContaining({
@@ -1704,7 +1704,7 @@ describe('IndexPattern Data Source suggestions', () => {
       );
     });
 
-    it('adds date histogram over default time field for tables without time dimension and a threshold', async () => {
+    it('adds date histogram over default time field for tables without time dimension and a referenceLine', async () => {
       const initialState = testInitialState();
       const state: IndexPatternPrivateState = {
         ...initialState,
@@ -1738,11 +1738,11 @@ describe('IndexPattern Data Source suggestions', () => {
               },
             },
           },
-          threshold: {
+          referenceLine: {
             indexPatternId: '2',
-            columnOrder: ['thresholda'],
+            columnOrder: ['referenceLineA'],
             columns: {
-              thresholda: {
+              referenceLineA: {
                 label: 'My Op',
                 customLabel: true,
                 dataType: 'number',
@@ -1758,7 +1758,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
       expect(
         getSuggestionSubset(
-          getDatasourceSuggestionsFromCurrentState(state, (layerId) => layerId !== 'threshold')
+          getDatasourceSuggestionsFromCurrentState(state, (layerId) => layerId !== 'referenceLine')
         )
       ).toContainEqual(
         expect.objectContaining({

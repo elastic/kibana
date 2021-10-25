@@ -114,7 +114,7 @@ describe('register()', () => {
 
   test('throws if AlertType ruleTaskTimeout is not a valid duration', () => {
     const alertType: AlertType<never, never, never, never, never, 'default'> = {
-      id: 123 as unknown as string,
+      id: '123',
       name: 'Test',
       actionGroups: [
         {
@@ -134,6 +134,59 @@ describe('register()', () => {
     expect(() => registry.register(alertType)).toThrowError(
       new Error(
         `Rule type \"123\" has invalid timeout: string is not a valid duration: 23 milisec.`
+      )
+    );
+  });
+
+  test('throws if defaultScheduleInterval isnt valid', () => {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      executor: jest.fn(),
+      producer: 'alerts',
+      defaultScheduleInterval: 'foobar',
+    };
+    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+
+    expect(() => registry.register(alertType)).toThrowError(
+      new Error(
+        `Rule type \"123\" has invalid default interval: string is not a valid duration: foobar.`
+      )
+    );
+  });
+
+  test('throws if minimumScheduleInterval isnt valid', () => {
+    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      executor: jest.fn(),
+      producer: 'alerts',
+      minimumScheduleInterval: 'foobar',
+    };
+    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+
+    expect(() => registry.register(alertType)).toThrowError(
+      new Error(
+        `Rule type \"123\" has invalid minimum interval: string is not a valid duration: foobar.`
       )
     );
   });
@@ -441,6 +494,7 @@ describe('list()', () => {
       ],
       defaultActionGroupId: 'testActionGroup',
       isExportable: true,
+      ruleTaskTimeout: '20m',
       minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
@@ -465,16 +519,19 @@ describe('list()', () => {
             "state": Array [],
           },
           "defaultActionGroupId": "testActionGroup",
+          "defaultScheduleInterval": undefined,
           "enabledInLicense": false,
           "id": "test",
           "isExportable": true,
           "minimumLicenseRequired": "basic",
+          "minimumScheduleInterval": undefined,
           "name": "Test",
           "producer": "alerts",
           "recoveryActionGroup": Object {
             "id": "recovered",
             "name": "Recovered",
           },
+          "ruleTaskTimeout": "20m",
         },
       }
     `);

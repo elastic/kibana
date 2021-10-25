@@ -136,7 +136,7 @@ grids with less bytes transferred.
 ** **Visibility** to the range [0, 9]
 ** **Opacity** to 100%
 . In **Metrics**:
-** Set **Agregation** to **Count**.
+** Set **Aggregation** to **Count**.
 ** Click **Add metric**.
 ** Set **Aggregation** to **Sum** with **Field** set to **bytes**.
 . In **Layer style**, change **Symbol size**:

@@ -146,7 +146,6 @@ def functionalXpack(Map params = [:]) {
       }
     }
 
-    //temporarily disable apm e2e test since it's breaking due to a version upgrade.
     // whenChanged([
     //   'x-pack/plugins/apm/',
     // ]) {

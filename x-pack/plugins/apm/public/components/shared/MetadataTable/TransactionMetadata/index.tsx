@@ -20,7 +20,7 @@ export function TransactionMetadata({ transaction }: Props) {
   const { data: transactionEvent, status } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        endpoint: 'GET /api/apm/event_metadata/{processorEvent}/{id}',
+        endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
         params: {
           path: {
             processorEvent: ProcessorEvent.transaction,

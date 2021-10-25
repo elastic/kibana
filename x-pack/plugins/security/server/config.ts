@@ -200,6 +200,7 @@ const providersConfigSchema = schema.object(
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
+  showInsecureClusterWarning: schema.boolean({ defaultValue: true }),
   loginHelp: schema.maybe(schema.string()),
   cookieName: schema.string({ defaultValue: 'sid' }),
   encryptionKey: schema.conditional(
@@ -210,7 +211,7 @@ export const ConfigSchema = schema.object({
   ),
   session: schema.object({
     idleTimeout: schema.oneOf([schema.duration(), schema.literal(null)], {
-      defaultValue: schema.duration().validate('1h'),
+      defaultValue: schema.duration().validate('8h'),
     }),
     lifespan: schema.oneOf([schema.duration(), schema.literal(null)], {
       defaultValue: schema.duration().validate('30d'),
@@ -268,7 +269,7 @@ export const ConfigSchema = schema.object({
     http: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       autoSchemesEnabled: schema.boolean({ defaultValue: true }),
-      schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
+      schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey', 'bearer'] }),
     }),
   }),
   audit: schema.object(

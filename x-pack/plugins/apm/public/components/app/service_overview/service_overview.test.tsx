@@ -15,7 +15,7 @@ import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
+import * as useDynamicDataViewHooks from '../../../hooks/use_dynamic_data_view';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import * as useAnnotationsHooks from '../../../context/annotations/use_annotations_context';
 import * as useTransactionBreakdownHooks from '../../shared/charts/transaction_breakdown_chart/use_transaction_breakdown';
@@ -91,29 +91,29 @@ describe('ServiceOverview', () => {
       .spyOn(useAnnotationsHooks, 'useAnnotationsContext')
       .mockReturnValue({ annotations: [] });
     jest
-      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPatternFetcher')
+      .spyOn(useDynamicDataViewHooks, 'useDynamicDataViewFetcher')
       .mockReturnValue({
-        indexPattern: undefined,
+        dataView: undefined,
         status: FETCH_STATUS.SUCCESS,
       });
 
     /* eslint-disable @typescript-eslint/naming-convention */
     const calls = {
-      'GET /api/apm/services/{serviceName}/error_groups/main_statistics': {
+      'GET /internal/apm/services/{serviceName}/error_groups/main_statistics': {
         error_groups: [] as any[],
       },
-      'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics':
+      'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics':
         {
           transactionGroups: [] as any[],
           totalTransactionGroups: 0,
           isAggregationAccurate: true,
         },
-      'GET /api/apm/services/{serviceName}/dependencies': {
+      'GET /internal/apm/services/{serviceName}/dependencies': {
         serviceDependencies: [],
       },
-      'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics':
+      'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics':
         [],
-      'GET /api/apm/services/{serviceName}/transactions/charts/latency': {
+      'GET /internal/apm/services/{serviceName}/transactions/charts/latency': {
         currentPeriod: {
           overallAvgDuration: null,
           latencyTimeseries: [],
@@ -123,26 +123,27 @@ describe('ServiceOverview', () => {
           latencyTimeseries: [],
         },
       },
-      'GET /api/apm/services/{serviceName}/throughput': {
+      'GET /internal/apm/services/{serviceName}/throughput': {
         currentPeriod: [],
         previousPeriod: [],
       },
-      'GET /api/apm/services/{serviceName}/transactions/charts/error_rate': {
-        currentPeriod: {
-          transactionErrorRate: [],
-          noHits: true,
-          average: null,
+      'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate':
+        {
+          currentPeriod: {
+            transactionErrorRate: [],
+            noHits: true,
+            average: null,
+          },
+          previousPeriod: {
+            transactionErrorRate: [],
+            noHits: true,
+            average: null,
+          },
         },
-        previousPeriod: {
-          transactionErrorRate: [],
-          noHits: true,
-          average: null,
-        },
-      },
       'GET /api/apm/services/{serviceName}/annotation/search': {
         annotations: [],
       },
-      'GET /api/apm/fallback_to_transactions': {
+      'GET /internal/apm/fallback_to_transactions': {
         fallbackToTransactions: false,
       },
     };

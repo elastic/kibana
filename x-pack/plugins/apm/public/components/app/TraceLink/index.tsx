@@ -29,7 +29,7 @@ export function TraceLink() {
     (callApmApi) => {
       if (traceId) {
         return callApmApi({
-          endpoint: 'GET /api/apm/traces/{traceId}/root_transaction',
+          endpoint: 'GET /internal/apm/traces/{traceId}/root_transaction',
           params: {
             path: {
               traceId,

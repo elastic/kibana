@@ -26,6 +26,7 @@ import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
+import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -612,12 +613,18 @@ describe('SavedObjectsRepository', () => {
 
       it(`should use default index`, async () => {
         await bulkCreateSuccess([obj1, obj2]);
-        expectClientCallArgsAction([obj1, obj2], { method: 'create', _index: '.kibana-test' });
+        expectClientCallArgsAction([obj1, obj2], {
+          method: 'create',
+          _index: '.kibana-test_8.0.0-testing',
+        });
       });
 
       it(`should use custom index`, async () => {
         await bulkCreateSuccess([obj1, obj2].map((x) => ({ ...x, type: CUSTOM_INDEX_TYPE })));
-        expectClientCallArgsAction([obj1, obj2], { method: 'create', _index: 'custom' });
+        expectClientCallArgsAction([obj1, obj2], {
+          method: 'create',
+          _index: 'custom_8.0.0-testing',
+        });
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
@@ -2091,7 +2098,7 @@ describe('SavedObjectsRepository', () => {
       it(`should use default index`, async () => {
         await createSuccess(type, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({ index: '.kibana-test' }),
+          expect.objectContaining({ index: '.kibana-test_8.0.0-testing' }),
           expect.anything()
         );
       });
@@ -2099,7 +2106,7 @@ describe('SavedObjectsRepository', () => {
       it(`should use custom index`, async () => {
         await createSuccess(CUSTOM_INDEX_TYPE, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({ index: 'custom' }),
+          expect.objectContaining({ index: 'custom_8.0.0-testing' }),
           expect.anything()
         );
       });
@@ -2679,7 +2686,9 @@ describe('SavedObjectsRepository', () => {
       it(`should use all indices for types that are not namespace-agnostic`, async () => {
         await deleteByNamespaceSuccess(namespace);
         expect(client.updateByQuery).toHaveBeenCalledWith(
-          expect.objectContaining({ index: ['.kibana-test', 'custom'] }),
+          expect.objectContaining({
+            index: ['.kibana-test_8.0.0-testing', 'custom_8.0.0-testing'],
+          }),
           expect.anything()
         );
       });
@@ -2714,7 +2723,11 @@ describe('SavedObjectsRepository', () => {
         const allTypes = registry.getAllTypes().map((type) => type.name);
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           namespaces: [namespace],
-          type: allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
+          type: [
+            ...allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
+            LEGACY_URL_ALIAS_TYPE,
+          ],
+          kueryNode: expect.anything(),
         });
       });
     });
@@ -2769,7 +2782,7 @@ describe('SavedObjectsRepository', () => {
         await removeReferencesToSuccess();
         expect(client.updateByQuery).toHaveBeenCalledWith(
           expect.objectContaining({
-            index: ['.kibana-test', 'custom'],
+            index: ['.kibana-test_8.0.0-testing', 'custom_8.0.0-testing'],
           }),
           expect.anything()
         );
@@ -4011,16 +4024,7 @@ describe('SavedObjectsRepository', () => {
     ];
     const originId = 'some-origin-id';
 
-    const updateSuccess = async (type, id, attributes, options, includeOriginId) => {
-      if (registry.isMultiNamespace(type)) {
-        const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace);
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(
-            { ...mockGetResponse },
-            { statusCode: 200 }
-          )
-        );
-      }
+    const mockUpdateResponse = (type, id, options, includeOriginId) => {
       client.update.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           {
@@ -4042,6 +4046,19 @@ describe('SavedObjectsRepository', () => {
           { statusCode: 200 }
         )
       );
+    };
+
+    const updateSuccess = async (type, id, attributes, options, includeOriginId) => {
+      if (registry.isMultiNamespace(type)) {
+        const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace);
+        client.get.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { ...mockGetResponse },
+            { statusCode: 200 }
+          )
+        );
+      }
+      mockUpdateResponse(type, id, options, includeOriginId);
       const result = await savedObjectsRepository.update(type, id, attributes, options);
       expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
       return result;
@@ -4085,7 +4102,7 @@ describe('SavedObjectsRepository', () => {
         await test([]);
       });
 
-      it(`uses the 'upsertAttributes' option when specified`, async () => {
+      it(`uses the 'upsertAttributes' option when specified for a single-namespace type`, async () => {
         await updateSuccess(type, id, attributes, {
           upsert: {
             title: 'foo',
@@ -4103,6 +4120,42 @@ describe('SavedObjectsRepository', () => {
                   description: 'bar',
                 },
               }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`uses the 'upsertAttributes' option when specified for a multi-namespace type that does not exist`, async () => {
+        const options = { upsert: { title: 'foo', description: 'bar' } };
+        mockUpdateResponse(MULTI_NAMESPACE_ISOLATED_TYPE, id, options);
+        await savedObjectsRepository.update(MULTI_NAMESPACE_ISOLATED_TYPE, id, attributes, options);
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:logstash-*`,
+            body: expect.objectContaining({
+              upsert: expect.objectContaining({
+                type: MULTI_NAMESPACE_ISOLATED_TYPE,
+                [MULTI_NAMESPACE_ISOLATED_TYPE]: {
+                  title: 'foo',
+                  description: 'bar',
+                },
+              }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`ignores use the 'upsertAttributes' option when specified for a multi-namespace type that already exists`, async () => {
+        const options = { upsert: { title: 'foo', description: 'bar' } };
+        await updateSuccess(MULTI_NAMESPACE_ISOLATED_TYPE, id, attributes, options);
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:logstash-*`,
+            body: expect.not.objectContaining({
+              upsert: expect.anything(),
             }),
           }),
           expect.anything()

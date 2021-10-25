@@ -124,7 +124,7 @@ export function ServiceMap({
 
       return callApmApi({
         isCachable: false,
-        endpoint: 'GET /api/apm/service-map',
+        endpoint: 'GET /internal/apm/service-map',
         params: {
           query: {
             start,

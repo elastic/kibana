@@ -22,6 +22,9 @@ interface IHTTPSimpleFieldsContextProvider {
 
 export const initialValues: IHTTPSimpleFields = {
   ...commonDefaultValues,
+  [ConfigKeys.METADATA]: {
+    is_tls_enabled: false,
+  },
   [ConfigKeys.URLS]: '',
   [ConfigKeys.MAX_REDIRECTS]: '0',
   [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,

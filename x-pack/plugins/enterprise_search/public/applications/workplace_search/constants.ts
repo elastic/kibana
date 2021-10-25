@@ -253,12 +253,12 @@ export const SOURCE_OBJ_TYPES = {
     defaultMessage: 'Bugs',
   }),
   ISSUES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.issues', {
-    defaultMessage: 'Issues',
+    defaultMessage: 'Issues (including comments)',
   }),
   PULL_REQUESTS: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.objTypes.pullRequests',
     {
-      defaultMessage: 'Pull Requests',
+      defaultMessage: 'Pull Requests (including comments)',
     }
   ),
   REPOSITORY_LIST: i18n.translate(
@@ -287,6 +287,9 @@ export const SOURCE_OBJ_TYPES = {
   }),
   CAMPAIGNS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.campaigns', {
     defaultMessage: 'Campaigns',
+  }),
+  CASES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.cases', {
+    defaultMessage: 'Cases (including feeds and comments)',
   }),
   USERS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.users', {
     defaultMessage: 'Users',

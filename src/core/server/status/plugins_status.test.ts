@@ -73,7 +73,7 @@ describe('PluginStatusService', () => {
       });
       expect(await serviceDegraded.getDerivedStatus$('a').pipe(first()).toPromise()).toEqual({
         level: ServiceStatusLevels.degraded,
-        summary: '[savedObjects]: savedObjects degraded',
+        summary: '1 service is degraded: savedObjects',
         detail: 'See the status page for more information',
         meta: expect.any(Object),
       });
@@ -84,7 +84,7 @@ describe('PluginStatusService', () => {
       });
       expect(await serviceCritical.getDerivedStatus$('a').pipe(first()).toPromise()).toEqual({
         level: ServiceStatusLevels.critical,
-        summary: '[elasticsearch]: elasticsearch critical',
+        summary: '1 service is critical: elasticsearch',
         detail: 'See the status page for more information',
         meta: expect.any(Object),
       });
@@ -95,7 +95,7 @@ describe('PluginStatusService', () => {
       service.set('a', of({ level: ServiceStatusLevels.degraded, summary: 'a is degraded' }));
       expect(await service.getDerivedStatus$('b').pipe(first()).toPromise()).toEqual({
         level: ServiceStatusLevels.degraded,
-        summary: '[2] services are degraded',
+        summary: '2 services are degraded: savedObjects, a',
         detail: 'See the status page for more information',
         meta: expect.any(Object),
       });
@@ -106,7 +106,7 @@ describe('PluginStatusService', () => {
       service.set('a', of({ level: ServiceStatusLevels.unavailable, summary: 'a is not working' }));
       expect(await service.getDerivedStatus$('b').pipe(first()).toPromise()).toEqual({
         level: ServiceStatusLevels.unavailable,
-        summary: '[a]: a is not working',
+        summary: '1 service is unavailable: a',
         detail: 'See the status page for more information',
         meta: expect.any(Object),
       });
@@ -120,7 +120,7 @@ describe('PluginStatusService', () => {
       service.set('a', of({ level: ServiceStatusLevels.unavailable, summary: 'a is not working' }));
       expect(await service.getDerivedStatus$('b').pipe(first()).toPromise()).toEqual({
         level: ServiceStatusLevels.critical,
-        summary: '[elasticsearch]: elasticsearch critical',
+        summary: '1 service is critical: elasticsearch',
         detail: 'See the status page for more information',
         meta: expect.any(Object),
       });
@@ -132,7 +132,7 @@ describe('PluginStatusService', () => {
       service.set('b', of({ level: ServiceStatusLevels.unavailable, summary: 'b is not working' }));
       expect(await service.getDerivedStatus$('c').pipe(first()).toPromise()).toEqual({
         level: ServiceStatusLevels.unavailable,
-        summary: '[b]: b is not working',
+        summary: '1 service is unavailable: b',
         detail: 'See the status page for more information',
         meta: expect.any(Object),
       });
@@ -166,19 +166,19 @@ describe('PluginStatusService', () => {
       expect(await serviceDegraded.getAll$().pipe(first()).toPromise()).toEqual({
         a: {
           level: ServiceStatusLevels.degraded,
-          summary: '[savedObjects]: savedObjects degraded',
+          summary: '1 service is degraded: savedObjects',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
         b: {
           level: ServiceStatusLevels.degraded,
-          summary: '[savedObjects]: savedObjects degraded',
+          summary: '1 service is degraded: savedObjects',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
         c: {
           level: ServiceStatusLevels.degraded,
-          summary: '[savedObjects]: savedObjects degraded',
+          summary: '1 service is degraded: savedObjects',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
@@ -191,19 +191,19 @@ describe('PluginStatusService', () => {
       expect(await serviceCritical.getAll$().pipe(first()).toPromise()).toEqual({
         a: {
           level: ServiceStatusLevels.critical,
-          summary: '[elasticsearch]: elasticsearch critical',
+          summary: '1 service is critical: elasticsearch',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
         b: {
           level: ServiceStatusLevels.critical,
-          summary: '[elasticsearch]: elasticsearch critical',
+          summary: '1 service is critical: elasticsearch',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
         c: {
           level: ServiceStatusLevels.critical,
-          summary: '[elasticsearch]: elasticsearch critical',
+          summary: '1 service is critical: elasticsearch',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
@@ -218,13 +218,13 @@ describe('PluginStatusService', () => {
         a: { level: ServiceStatusLevels.available, summary: 'a status' }, // a is available depsite savedObjects being degraded
         b: {
           level: ServiceStatusLevels.degraded,
-          summary: '[savedObjects]: savedObjects degraded',
+          summary: '1 service is degraded: savedObjects',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
         c: {
           level: ServiceStatusLevels.degraded,
-          summary: '[2] services are degraded',
+          summary: '2 services are degraded: savedObjects, b',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
@@ -298,7 +298,7 @@ describe('PluginStatusService', () => {
         a: { level: ServiceStatusLevels.unavailable, summary: 'Status check timed out after 30s' },
         b: {
           level: ServiceStatusLevels.unavailable,
-          summary: '[a]: Status check timed out after 30s',
+          summary: '1 service is unavailable: a',
           detail: 'See the status page for more information',
           meta: {
             affectedServices: ['a'],
@@ -341,7 +341,7 @@ describe('PluginStatusService', () => {
         a: { level: ServiceStatusLevels.available, summary: 'a status' }, // a is available depsite savedObjects being degraded
         b: {
           level: ServiceStatusLevels.degraded,
-          summary: '[savedObjects]: savedObjects degraded',
+          summary: '1 service is degraded: savedObjects',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
