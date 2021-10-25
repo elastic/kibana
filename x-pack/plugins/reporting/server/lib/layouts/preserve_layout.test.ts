@@ -9,8 +9,8 @@ import { PreserveLayout } from './preserve_layout';
 
 it('preserve layout uses default layout selectors', () => {
   const testPreserveLayout = new PreserveLayout({ width: 16, height: 16 });
-  expect(testPreserveLayout.getCssOverridesPath()).toMatchInlineSnapshot(
-    `"/home/tsullivan/elastic/kibana/x-pack/plugins/reporting/server/lib/layouts/preserve_layout.css"`
+  expect(testPreserveLayout.getCssOverridesPath()).toMatch(
+    `x-pack/plugins/reporting/server/lib/layouts/preserve_layout.css`
   );
   expect(testPreserveLayout.getBrowserViewport()).toMatchInlineSnapshot(`
     Object {
