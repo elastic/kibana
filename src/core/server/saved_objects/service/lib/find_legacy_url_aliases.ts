@@ -18,6 +18,11 @@ import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
  */
 const ALIAS_SEARCH_PER_PAGE = 100;
 
+interface FindLegacyUrlAliasesObject {
+  type: string;
+  id: string;
+}
+
 /**
  * Fetches all legacy URL aliases that match the given objects, returning a map of the matching aliases and what space(s) they exist in.
  *
@@ -25,7 +30,7 @@ const ALIAS_SEARCH_PER_PAGE = 100;
  */
 export async function findLegacyUrlAliases(
   createPointInTimeFinder: CreatePointInTimeFinderFn,
-  objects: Array<{ type: string; id: string }>
+  objects: FindLegacyUrlAliasesObject[]
 ) {
   if (!objects.length) {
     return new Map<string, Set<string>>();

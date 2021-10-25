@@ -81,7 +81,7 @@ const FIND_ALIASES_THRESHOLD = 3;
  *  2. 'unresolvableConflict' - this object already exists in a different space and it cannot be overwritten with the given parameters.
  *  3. 'conflict' - this object already exists (and the given options include `overwrite=false`).
  *
- * Objects can be created in 1-N spaces, and for each object+space permutation we need to check if a legacy URL alias exists. This function
+ * Objects can be created in 1-N spaces, and for each object+space combination we need to check if a legacy URL alias exists. This function
  * attempts to optimize by defining an "alias threshold"; if we need to check for more aliases than that threshold, instead of attempting to
  * bulk-get each one, we find (search for) them. This is intended to strike an acceptable balance of performance, and is necessary when
  * creating objects in "*" (all current and future spaces) because we don't want to attempt to enumerate all spaces here.

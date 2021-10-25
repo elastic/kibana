@@ -10,7 +10,7 @@ import { SavedObject } from '../../../types';
 
 export type SavedObjectComparator = (a: SavedObject, b: SavedObject) => number;
 
-export const getObjKey = (obj: SavedObject) => `${obj.type}|${obj.id}`;
+export const getObjKey = (obj: SavedObject) => `${obj.type}:${obj.id}`;
 
 export const byIdAscComparator: SavedObjectComparator = (a: SavedObject, b: SavedObject) =>
   a.id > b.id ? 1 : -1;

@@ -260,5 +260,8 @@ export function getObjectKey({ type, id }: { type: string; id: string }) {
 export function parseObjectKey(key: string) {
   const type = key.slice(0, key.indexOf(':'));
   const id = key.slice(type.length + 1);
+  if (!type || !id) {
+    throw new Error('Malformed object key (should be "type:id")');
+  }
   return { type, id };
 }

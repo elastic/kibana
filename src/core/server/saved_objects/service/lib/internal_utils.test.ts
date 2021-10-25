@@ -372,4 +372,8 @@ describe('#parseObjectKey', () => {
   it('returns the expected object', () => {
     expect(parseObjectKey('foo:bar')).toEqual({ type: 'foo', id: 'bar' });
   });
+
+  it('throws error when input is malformed', () => {
+    expect(() => parseObjectKey('foobar')).toThrowError('Malformed object key');
+  });
 });

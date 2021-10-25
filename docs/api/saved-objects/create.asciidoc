@@ -64,6 +64,9 @@ used to specify a single space, and the "All spaces" identifier (`'*'`) is not a
 `200`::
     Indicates a successful call.
 
+`409`::
+    Indicates a <<saved-objects-api-create-conflict-errors,conflict error>>.
+
 [[saved-objects-api-create-example]]
 ==== Example
 
