@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
             savedObjectsTagging: ['all', 'read'],
             graph: ['all', 'read'],
             maps: ['all', 'read'],
+            observabilityCases: ['all', 'read'],
             canvas: ['all', 'read'],
             infrastructure: ['all', 'read'],
             logs: ['all', 'read'],
