@@ -36,7 +36,6 @@ export const Page: FC = () => {
   useRefreshAnalyticsList({ isLoading: () => {} });
   const location = useLocation();
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
-  console.log(selectedTabId, '___selectedTabId___');
 
   return (
     <Fragment>
