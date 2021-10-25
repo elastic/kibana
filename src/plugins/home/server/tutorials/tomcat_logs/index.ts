@@ -24,12 +24,12 @@ export function tomcatLogsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'tomcatLogs',
     name: i18n.translate('home.tutorials.tomcatLogs.nameTitle', {
-      defaultMessage: 'Tomcat logs',
+      defaultMessage: 'Tomcat Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.tomcatLogs.shortDescription', {
-      defaultMessage: 'Collect Apache Tomcat logs over syslog or from a file.',
+      defaultMessage: 'Collect and parse logs from Apache Tomcat servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.tomcatLogs.longDescription', {
       defaultMessage:
