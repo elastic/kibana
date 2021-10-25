@@ -16,7 +16,7 @@ const PIPELINE = {
 
 const PIPELINE_CSV = {
   name: 'test_pipeline',
-  file: '', // TODO actual example file
+  file: '', // TODO actual file
 };
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -51,7 +51,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(newPipelineExists).to.be(true);
     });
 
-    // TODO
     it('Creates a pipeline from CSV', async () => {
       await pageObjects.ingestPipelines.createPipelineFromCsv(PIPELINE_CSV);
 

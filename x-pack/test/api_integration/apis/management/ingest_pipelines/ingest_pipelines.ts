@@ -500,7 +500,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should map to a pipeline', async () => {
         const validCsv =
           'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\\nsrcip,,,,source.address,Copying srcip to source.address';
-        await supertest
+        const { body } = await supertest
           .post(`${API_BASE_PATH}/map`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -509,7 +509,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        // TODO body assert
+          expect(body.processors?.length).to.eql(1);
       });
     });
   });
