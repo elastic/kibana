@@ -113,7 +113,7 @@ describe('connector_dropdown', () => {
         <ConnectorsDropdown
           accordionIndex={0}
           actionItem={actionItem}
-          actionTypesIndex={actionTypeIndexDefault}
+          actionTypesIndex={actionTypeIndex}
           actionTypeRegistered={actionType}
           connectors={connectors}
           onConnectorSelected={jest.fn()}

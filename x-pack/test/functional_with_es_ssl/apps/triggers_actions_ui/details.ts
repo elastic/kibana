@@ -369,7 +369,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(false);
         expect(await testSubjects.exists('alertActionAccordion-0')).to.eql(true);
 
-        await comboBox.set('selectActionConnector-.slack-0', 'Slack#xyztest (preconfigured)');
+        expect(await testSubjects.exists('selectActionConnector-.slack-0')).to.eql(true);
+        // click the super selector the reveal the options
+        await testSubjects.click('selectActionConnector-.slack-0');
+        // click the available option (my-slack1 is a preconfigured connector created before this test runs)
+        await testSubjects.click('dropdown-connector-my-slack1');
         expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(true);
       });
 
