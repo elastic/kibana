@@ -13,3 +13,4 @@ export {
   VectorLayerArguments,
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
 } from './vector_layer';
+export { getFeatureId } from './assign_feature_ids';
