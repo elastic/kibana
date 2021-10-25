@@ -148,15 +148,18 @@ export class ActionsClient {
     }
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    let validatedActionTypeConfig;
-    let validatedActionTypeSecrets;
+    let validatedActionTypeConfig = validateConfig(actionType, config);
+    let validatedActionTypeSecrets = validateSecrets(actionType, secrets);
     if (actionType.validate?.connector) {
       const validateActionTypeConnector = validateConnector(actionType, { config, secrets });
-      validatedActionTypeConfig = validateActionTypeConnector.config;
-      validatedActionTypeSecrets = validateActionTypeConnector.secrets;
-    } else {
-      validatedActionTypeConfig = validateConfig(actionType, config);
-      validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+      validatedActionTypeConfig = {
+        ...validatedActionTypeConfig,
+        ...(validateActionTypeConnector.config as Record<string, unknown>),
+      };
+      validatedActionTypeSecrets = {
+        ...validatedActionTypeSecrets,
+        ...(validateActionTypeConnector.secrets as Record<string, unknown>),
+      };
     }
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
@@ -226,15 +229,18 @@ export class ActionsClient {
     const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    let validatedActionTypeConfig;
-    let validatedActionTypeSecrets;
+    let validatedActionTypeConfig = validateConfig(actionType, config);
+    let validatedActionTypeSecrets = validateSecrets(actionType, secrets);
     if (actionType.validate?.connector) {
       const validateActionTypeConnector = validateConnector(actionType, { config, secrets });
-      validatedActionTypeConfig = validateActionTypeConnector.config;
-      validatedActionTypeSecrets = validateActionTypeConnector.secrets;
-    } else {
-      validatedActionTypeConfig = validateConfig(actionType, config);
-      validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+      validatedActionTypeConfig = {
+        ...validatedActionTypeConfig,
+        ...(validateActionTypeConnector.config as Record<string, unknown>),
+      };
+      validatedActionTypeSecrets = {
+        ...validatedActionTypeSecrets,
+        ...(validateActionTypeConnector.secrets as Record<string, unknown>),
+      };
     }
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);

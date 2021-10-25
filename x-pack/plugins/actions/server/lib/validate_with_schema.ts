@@ -47,7 +47,7 @@ export function validateConnector<
 ) {
   return validateWithSchema(actionType, 'connector', {
     config,
-    secrets: secrets ?? ({} as Secrets),
+    secrets,
   });
 }
 
@@ -61,7 +61,7 @@ function validateWithSchema<
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   key: ValidKeys,
-  value: Config | Secrets | Params | { config: Config; secrets: Secrets }
+  value: Config | Secrets | Params | { config: Config; secrets?: Secrets }
 ): Record<string, unknown> {
   if (actionType.validate) {
     let name;

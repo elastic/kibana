@@ -7,7 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
+import {
+  validateParams,
+  validateConfig,
+  validateSecrets,
+  validateConnector,
+} from './validate_with_schema';
 import { ActionType, ExecutorType } from '../types';
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
@@ -47,6 +52,9 @@ test('should validate when there are no individual validators', () => {
 
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(testValue);
+
+  result = validateConnector(actionType, testValue);
+  expect(result).toEqual(testValue);
 });
 
 test('should validate when validators return incoming value', () => {
@@ -73,6 +81,9 @@ test('should validate when validators return incoming value', () => {
   expect(result).toEqual(testValue);
 
   result = validateSecrets(actionType, testValue);
+  expect(result).toEqual(testValue);
+
+  result = validateConnector(actionType, testValue);
   expect(result).toEqual(testValue);
 });
 
@@ -102,6 +113,9 @@ test('should validate when validators return different values', () => {
 
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(returnedValue);
+
+  result = validateConnector(actionType, testValue);
+  expect(result).toEqual(testValue);
 });
 
 test('should throw with expected error when validators fail', () => {
@@ -135,6 +149,10 @@ test('should throw with expected error when validators fail', () => {
   expect(() => validateSecrets(actionType, testValue)).toThrowErrorMatchingInlineSnapshot(
     `"error validating action type secrets: test error"`
   );
+
+  expect(() => validateConnector(actionType, testValue)).toThrowErrorMatchingInlineSnapshot(
+    `"error validating action type secrets: test error"`
+  );
 });
 
 test('should work with @kbn/config-schema', () => {
@@ -148,6 +166,10 @@ test('should work with @kbn/config-schema', () => {
       params: testSchema,
       config: testSchema,
       secrets: testSchema,
+      connector: schema.object({
+        config: testSchema,
+        secrets: testSchema,
+      }),
     },
   };
 
