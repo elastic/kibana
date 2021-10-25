@@ -251,7 +251,7 @@ Refer to the corresponding {es} logs for potential write errors.
 | `failure` | User is not authorized to access an alert.
 
 .2+| `alert_find`
-| `success` | User has accessed alerts.
+| `success` | User has accessed an alert as part of a search operation.
 | `failure` | User is not authorized to access alerts.
 
 3+a|
