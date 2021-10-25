@@ -6,7 +6,7 @@
  */
 
 import type { Meta, Story } from '@storybook/react';
-import type { CoreStart, DocLinksStart, HttpStart } from 'kibana/public';
+import type { CoreStart, DocLinksStart } from 'kibana/public';
 import React, { ComponentProps } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
