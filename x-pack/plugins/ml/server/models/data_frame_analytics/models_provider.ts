@@ -96,9 +96,11 @@ export function modelsProvider(
         ([nodeId, node]) => {
           const nodeFields = pick(node, NODE_FIELDS);
 
-          const allocatedModels = deploymentStats.deployment_stats.filter((v) =>
-            v.nodes.some((n) => Object.keys(n.node)[0] === nodeId)
-          );
+          const allocatedModels = deploymentStats.deployment_stats
+            .filter((v) => v.nodes.some((n) => Object.keys(n.node)[0] === nodeId))
+            .map(({ nodes, ...rest }) => {
+              return rest;
+            });
 
           const modelsMemoryUsage = allocatedModels.map((v) => {
             return {
