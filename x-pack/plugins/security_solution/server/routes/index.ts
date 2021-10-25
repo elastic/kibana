@@ -57,6 +57,7 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
+import { TelemetryEventsSender } from '../lib/telemetry/sender';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
 import { CreateRuleOptions } from '../lib/detection_engine/rule_types/types';
@@ -69,6 +70,7 @@ export const initRoutes = (
   config: ConfigType,
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
+  telemetrySender: TelemetryEventsSender,
   ml: SetupPlugins['ml'],
   ruleDataService: RuleDataPluginService,
   logger: Logger,
@@ -124,7 +126,7 @@ export const initRoutes = (
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
-  setSignalsStatusRoute(router);
+  setSignalsStatusRoute(router, logger, security, telemetrySender);
   querySignalsRoute(router, ruleDataClient);
   getSignalsMigrationStatusRoute(router);
   createSignalsMigrationRoute(router, security);
