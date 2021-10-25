@@ -23,6 +23,10 @@ export class TopTermPercentageField implements IESAggField {
     return this._topTermAggField.getSource();
   }
 
+  getMbFieldName(): string {
+    return this.getName();
+  }
+
   getOrigin(): FIELD_ORIGIN {
     return this._topTermAggField.getOrigin();
   }
