@@ -9,20 +9,27 @@ import './expression.scss';
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { IUiSettingsClient } from 'kibana/public';
 import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions/public';
+import {
+  ColorMode,
+  CustomPaletteState,
+  PaletteOutput,
+} from '../../../../../src/plugins/charts/public';
 import { AutoScale } from './auto_scale';
 import { VisualizationContainer } from '../visualization_container';
-import { EmptyPlaceholder } from '../shared_components';
+import { EmptyPlaceholder, getContrastColor } from '../shared_components';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import type { FormatFactory } from '../../common';
 import type { MetricChartProps } from '../../common/expressions';
 export type { MetricChartProps, MetricState, MetricConfig } from '../../common/expressions';
 
 export const getMetricChartRenderer = (
-  formatFactory: FormatFactory
+  formatFactory: FormatFactory,
+  uiSettings: IUiSettingsClient
 ): ExpressionRenderDefinition<MetricChartProps> => ({
   name: 'lens_metric_chart_renderer',
   displayName: 'Metric chart',
@@ -32,7 +39,7 @@ export const getMetricChartRenderer = (
   render: (domNode: Element, config: MetricChartProps, handlers: IInterpreterRenderHandlers) => {
     ReactDOM.render(
       <I18nProvider>
-        <MetricChart {...config} formatFactory={formatFactory} />
+        <MetricChart {...config} formatFactory={formatFactory} uiSettings={uiSettings} />
       </I18nProvider>,
       domNode,
       () => {
@@ -43,12 +50,42 @@ export const getMetricChartRenderer = (
   },
 });
 
+function getColorStyling(
+  value: number,
+  colorMode: ColorMode,
+  palette: PaletteOutput<CustomPaletteState> | undefined,
+  isDarkTheme: boolean
+) {
+  if (
+    colorMode === ColorMode.None ||
+    !palette?.params ||
+    !palette?.params.stops?.length ||
+    isNaN(value)
+  ) {
+    return {};
+  }
+  const cssProp = colorMode === ColorMode.Background ? 'backgroundColor' : 'color';
+  const colorIndex = Math.max(
+    0,
+    palette.params.stops.findIndex((v) => v > value)
+  );
+  const color = palette.params.colors[colorIndex];
+  const styling = {
+    [cssProp]: color,
+  };
+  if (colorMode === ColorMode.Background && color) {
+    styling.color = getContrastColor(color, isDarkTheme);
+  }
+  return styling;
+}
+
 export function MetricChart({
   data,
   args,
   formatFactory,
-}: MetricChartProps & { formatFactory: FormatFactory }) {
-  const { metricTitle, title, description, accessor, mode } = args;
+  uiSettings,
+}: MetricChartProps & { formatFactory: FormatFactory; uiSettings: IUiSettingsClient }) {
+  const { metricTitle, title, description, accessor, mode, colorMode, palette } = args;
   const firstTable = Object.values(data.tables)[0];
 
   const getEmptyState = () => (
@@ -70,18 +107,20 @@ export function MetricChart({
   if (!column || !row) {
     return getEmptyState();
   }
+  const rawValue = row[accessor] as number | undefined;
 
   // NOTE: Cardinality and Sum never receives "null" as value, but always 0, even for empty dataset.
   // Mind falsy values here as 0!
-  const shouldShowResults = row[accessor] != null;
-  if (!shouldShowResults) {
+  if (rawValue == null) {
     return getEmptyState();
   }
 
   const value =
     column && column.meta?.params
-      ? formatFactory(column.meta?.params).convert(row[accessor])
-      : Number(Number(row[accessor]).toFixed(3)).toString();
+      ? formatFactory(column.meta?.params).convert(rawValue)
+      : Number(Number(rawValue).toFixed(3)).toString();
+
+  const color = getColorStyling(rawValue, colorMode, palette, uiSettings.get('theme:darkMode'));
 
   return (
     <VisualizationContainer
@@ -90,7 +129,10 @@ export function MetricChart({
       className="lnsMetricExpression__container"
     >
       <AutoScale key={value}>
-        <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
+        <div
+          data-test-subj="lns_metric_value"
+          style={{ fontSize: '60pt', fontWeight: 600, ...color }}
+        >
           {value}
         </div>
         {mode === 'full' && (

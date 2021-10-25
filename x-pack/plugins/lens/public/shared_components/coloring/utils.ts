@@ -42,13 +42,13 @@ export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>
   dataBounds: { min: number; max: number }
 ) {
   // make a copy of it as they have to be manipulated later on
-  let displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
+  const displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
     dataBounds,
     defaultPaletteName: activePalette?.name,
   });
 
   if (activePalette?.params?.reverse && activePalette?.params?.name !== CUSTOM_PALETTE) {
-    displayStops = reversePalette(displayStops);
+    return reversePalette(displayStops);
   }
   return displayStops;
 }
@@ -136,14 +136,16 @@ export function getPaletteStops(
     // need to generate the palette from the existing controlStops
     return shiftPalette(activePaletteParams.colorStops, maxValue);
   }
+
+  const steps = activePaletteParams?.steps || defaultPaletteParams.steps;
   // generate a palette from predefined ones and customize the domain
   const colorStopsFromPredefined = palettes
     .get(
       prevPalette || activePaletteParams?.name || defaultPaletteName || defaultPaletteParams.name
     )
-    .getCategoricalColors(defaultPaletteParams.steps, otherParams);
+    .getCategoricalColors(steps, otherParams);
 
-  const newStopsMin = mapFromMinValue ? minValue : interval / defaultPaletteParams.steps;
+  const newStopsMin = mapFromMinValue ? minValue : interval / steps;
 
   const stops = remapStopsByNewInterval(
     colorStopsFromPredefined.map((color, index) => ({ color, stop: index })),

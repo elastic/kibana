@@ -5,18 +5,26 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
+import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
+import { ColorMode } from '../../../../../src/plugins/charts/common';
+import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
-import type { MetricState } from '../../common/expressions';
+import type { MetricConfig, MetricState } from '../../common/expressions';
 import { layerTypes } from '../../common';
+import { CUSTOM_PALETTE } from '../shared_components';
+import { MetricDimensionEditor } from './dimension_editor';
 
 const toExpression = (
+  paletteService: PaletteRegistry,
   state: MetricState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  attributes?: { mode?: 'reduced' | 'full'; title?: string; description?: string }
+  attributes?: Partial<Omit<MetricConfig, keyof MetricState>>
 ): Ast | null => {
   if (!state.accessor) {
     return null;
@@ -24,6 +32,12 @@ const toExpression = (
 
   const [datasource] = Object.values(datasourceLayers);
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
+
+  const paletteParams = {
+    ...state.palette?.params,
+    colors: (state.palette?.params?.stops || []).map(({ color }) => color),
+    stops: (state.palette?.params?.stops || []).map(({ stop }) => stop),
+  };
 
   return {
     type: 'expression',
@@ -34,16 +48,24 @@ const toExpression = (
         arguments: {
           title: [attributes?.title || ''],
           description: [attributes?.description || ''],
-          metricTitle: [(operation && operation.label) || ''],
+          metricTitle: [operation?.label || ''],
           accessor: [state.accessor],
           mode: [attributes?.mode || 'full'],
+          colorMode: [state?.colorMode || ColorMode.None],
+          palette:
+            state?.colorMode !== ColorMode.None
+              ? [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)]
+              : [],
         },
       },
     ],
   };
 };
-
-export const metricVisualization: Visualization<MetricState> = {
+export const getMetricVisualization = ({
+  paletteService,
+}: {
+  paletteService: PaletteRegistry;
+}): Visualization<MetricState> => ({
   id: 'lnsMetric',
 
   visualizationTypes: [
@@ -106,6 +128,7 @@ export const metricVisualization: Visualization<MetricState> = {
           accessors: props.state.accessor ? [{ columnId: props.state.accessor }] : [],
           supportsMoreColumns: !props.state.accessor,
           filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
+          enableDimensionEditor: true,
         },
       ],
     };
@@ -128,9 +151,10 @@ export const metricVisualization: Visualization<MetricState> = {
     }
   },
 
-  toExpression,
+  toExpression: (state, datasourceLayers, attributes) =>
+    toExpression(paletteService, state, datasourceLayers, { ...attributes }),
   toPreviewExpression: (state, datasourceLayers) =>
-    toExpression(state, datasourceLayers, { mode: 'reduced' }),
+    toExpression(paletteService, state, datasourceLayers, { mode: 'reduced' }),
 
   setDimension({ prevState, columnId }) {
     return { ...prevState, accessor: columnId };
@@ -140,8 +164,17 @@ export const metricVisualization: Visualization<MetricState> = {
     return { ...prevState, accessor: undefined };
   },
 
+  renderDimensionEditor(domElement, props) {
+    render(
+      <I18nProvider>
+        <MetricDimensionEditor {...props} paletteService={paletteService} />
+      </I18nProvider>,
+      domElement
+    );
+  },
+
   getErrorMessages(state) {
     // Is it possible to break it?
     return undefined;
   },
-};
+});

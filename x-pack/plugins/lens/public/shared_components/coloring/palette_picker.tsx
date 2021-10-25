@@ -76,7 +76,7 @@ export function PalettePicker({
     )
     .map(({ id, title, getCategoricalColors }) => {
       const colors = getCategoricalColors(
-        DEFAULT_COLOR_STEPS,
+        activePalette?.params?.steps || DEFAULT_COLOR_STEPS,
         id === activePalette?.name ? activePalette?.params : undefined
       );
       return {
