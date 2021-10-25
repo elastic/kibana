@@ -11,8 +11,8 @@ import { WebElementWrapper } from '../../../../../../test/functional/services/li
 
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
-  rangeFrom: '2021-09-01T13:36:22.109Z',
-  rangeTo: '2021-09-03T13:36:22.109Z',
+  rangeFrom: '2021-10-18T13:36:22.109Z',
+  rangeTo: '2021-10-20T13:36:22.109Z',
 };
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
@@ -32,6 +32,7 @@ export function ObservabilityAlertsCommonProvider({
   const pageObjects = getPageObjects(['common']);
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const kibanaServer = getService('kibanaServer');
 
   const navigateToTimeWithData = async () => {
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
@@ -40,6 +41,12 @@ export function ObservabilityAlertsCommonProvider({
       `?_a=(rangeFrom:'${DATE_WITH_DATA.rangeFrom}',rangeTo:'${DATE_WITH_DATA.rangeTo}')`,
       { ensureCurrentUrl: false }
     );
+  };
+
+  const setKibanaTimeZoneToUTC = async () => {
+    await kibanaServer.uiSettings.update({
+      'dateFormat:tz': 'UTC',
+    });
   };
 
   const getTableColumnHeaders = async () => {
@@ -65,6 +72,10 @@ export function ObservabilityAlertsCommonProvider({
 
   const getTableOrFail = async () => {
     return await testSubjects.existOrFail(ALERTS_TABLE_CONTAINER_SELECTOR);
+  };
+
+  const getNoDataPageOrFail = async () => {
+    return await testSubjects.existOrFail('noDataPage');
   };
 
   const getNoDataStateOrFail = async () => {
@@ -214,12 +225,14 @@ export function ObservabilityAlertsCommonProvider({
     getCopyToClipboardButton,
     getFilterForValueButton,
     copyToClipboardButtonExists,
+    getNoDataPageOrFail,
     getNoDataStateOrFail,
     getTableCells,
     getTableCellsInRows,
     getTableColumnHeaders,
     getTableOrFail,
     navigateToTimeWithData,
+    setKibanaTimeZoneToUTC,
     openAlertsFlyout,
     setWorkflowStatusForRow,
     setWorkflowStatusFilter,
