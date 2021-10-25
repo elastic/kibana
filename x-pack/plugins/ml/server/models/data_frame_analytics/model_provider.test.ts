@@ -140,7 +140,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'distilbert-base-uncased-finetuned-sst-2-english',
-              model_size: '255.5mb',
+              model_size: 267386880,
               model_threads: 1,
               state: 'started',
               node: {
@@ -159,7 +159,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
-              model_size: '248.8mb',
+              model_size: 260947500,
               model_threads: 1,
               state: 'started',
               node: {
@@ -178,7 +178,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
-              model_size: '127.2mb',
+              model_size: 133378867,
               model_threads: 1,
               state: 'started',
               node: {
@@ -197,7 +197,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'typeform__mobilebert-uncased-mnli',
-              model_size: '95.5mb',
+              model_size: 100139008,
               model_threads: 1,
               state: 'started',
               node: {
@@ -232,22 +232,22 @@ describe('Model service', () => {
               by_model: [
                 {
                   model_id: 'distilbert-base-uncased-finetuned-sst-2-english',
-                  model_size: 267911168,
+                  model_size: 267386880,
                 },
                 {
                   model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
-                  model_size: 260885709,
+                  model_size: 260947500,
                 },
                 {
                   model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
-                  model_size: 133378868,
+                  model_size: 133378867,
                 },
                 {
                   model_id: 'typeform__mobilebert-uncased-mnli',
                   model_size: 100139008,
                 },
               ],
-              total: 793772033,
+              total: 793309535,
             },
           },
           roles: ['data', 'ingest', 'master', 'ml', 'transform'],
@@ -264,7 +264,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'distilbert-base-uncased-finetuned-sst-2-english',
-              model_size: '255.5mb',
+              model_size: 267386880,
               model_threads: 1,
               state: 'started',
               node: {
@@ -282,7 +282,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
-              model_size: '248.8mb',
+              model_size: 260947500,
               model_threads: 1,
               state: 'started',
               node: {
@@ -300,7 +300,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
-              model_size: '127.2mb',
+              model_size: 133378867,
               model_threads: 1,
               state: 'started',
               node: {
@@ -318,7 +318,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'typeform__mobilebert-uncased-mnli',
-              model_size: '95.5mb',
+              model_size: 100139008,
               model_threads: 1,
               state: 'started',
               node: {
@@ -352,22 +352,22 @@ describe('Model service', () => {
               by_model: [
                 {
                   model_id: 'distilbert-base-uncased-finetuned-sst-2-english',
-                  model_size: 267911168,
+                  model_size: 267386880,
                 },
                 {
                   model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
-                  model_size: 260885709,
+                  model_size: 260947500,
                 },
                 {
                   model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
-                  model_size: 133378868,
+                  model_size: 133378867,
                 },
                 {
                   model_id: 'typeform__mobilebert-uncased-mnli',
                   model_size: 100139008,
                 },
               ],
-              total: 793772033,
+              total: 793309535,
             },
           },
           roles: ['data', 'master', 'ml', 'transform'],
@@ -383,7 +383,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'distilbert-base-uncased-finetuned-sst-2-english',
-              model_size: '255.5mb',
+              model_size: 267386880,
               model_threads: 1,
               state: 'started',
               node: {
@@ -402,7 +402,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
-              model_size: '248.8mb',
+              model_size: 260947500,
               model_threads: 1,
               state: 'started',
               node: {
@@ -421,7 +421,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
-              model_size: '127.2mb',
+              model_size: 133378867,
               model_threads: 1,
               state: 'started',
               node: {
@@ -440,7 +440,7 @@ describe('Model service', () => {
               },
               inference_threads: 1,
               model_id: 'typeform__mobilebert-uncased-mnli',
-              model_size: '95.5mb',
+              model_size: 100139008,
               model_threads: 1,
               state: 'started',
               node: {
@@ -475,22 +475,22 @@ describe('Model service', () => {
               by_model: [
                 {
                   model_id: 'distilbert-base-uncased-finetuned-sst-2-english',
-                  model_size: 267911168,
+                  model_size: 267386880,
                 },
                 {
                   model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
-                  model_size: 260885709,
+                  model_size: 260947500,
                 },
                 {
                   model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
-                  model_size: 133378868,
+                  model_size: 133378867,
                 },
                 {
                   model_id: 'typeform__mobilebert-uncased-mnli',
                   model_size: 100139008,
                 },
               ],
-              total: 793772033,
+              total: 793309535,
             },
           },
           name: 'node1',

@@ -7,7 +7,6 @@
 
 import type { IScopedClusterClient } from 'kibana/server';
 import { sumBy, pick } from 'lodash';
-import numeral from '@elastic/numeral';
 import { NodesInfoNodeInfo } from '@elastic/elasticsearch/api/types';
 import type {
   NodeDeploymentStatsResponse,
@@ -112,7 +111,7 @@ export function modelsProvider(
             return {
               model_id: v.model_id,
               // @ts-ignore
-              model_size: numeral(v.model_size.toUpperCase()).value(),
+              model_size: v.model_size,
             };
           });
 
