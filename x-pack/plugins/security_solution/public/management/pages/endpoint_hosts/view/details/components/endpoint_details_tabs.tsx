@@ -62,7 +62,7 @@ export const EndpointDetailsFlyoutTabs = memo(
     const selectedTab = useMemo(() => tabs.find((tab) => tab.id === show), [tabs, show]);
 
     const renderTabs = tabs.map((tab) => (
-      <EndpointDetailsTab tab={tab} isSelected={tab.id === selectedTab?.id} />
+      <EndpointDetailsTab key={tab.id} tab={tab} isSelected={tab.id === selectedTab?.id} />
     ));
 
     return (
