@@ -362,11 +362,6 @@ When `includeElasticMapsService` is turned off, only tile layer configured by <<
 | `map.emsUrl:`
  | Specifies the URL of a self hosted <<elastic-maps-server,{hosted-ems}>>
 
-| `map.proxyElasticMapsServiceInMaps:`
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
- Set to `true` to proxy all <<maps, Maps application>> Elastic Maps Service
-requests through the {kib} server. *Default: `false`*
-
 | [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon}
  | The map attribution string.
 *Default: `"© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"`*

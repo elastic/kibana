@@ -21,37 +21,6 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
     preserveDrawingBuffer: true,
   },
   schema: configSchema,
-  deprecations: () => [
-    (
-      completeConfig: Record<string, any>,
-      rootPath: string,
-      addDeprecation: AddConfigDeprecation
-    ) => {
-      if (_.get(completeConfig, 'map.proxyElasticMapsServiceInMaps') === undefined) {
-        return completeConfig;
-      }
-      addDeprecation({
-        configPath: 'map.proxyElasticMapsServiceInMaps',
-        documentationUrl:
-          'https://www.elastic.co/guide/en/kibana/current/maps-connect-to-ems.html#elastic-maps-server',
-        message: i18n.translate('xpack.maps.deprecation.proxyEMS.message', {
-          defaultMessage: 'map.proxyElasticMapsServiceInMaps is deprecated and is no longer used',
-        }),
-        correctiveActions: {
-          manualSteps: [
-            i18n.translate('xpack.maps.deprecation.proxyEMS.step1', {
-              defaultMessage:
-                'Remove "map.proxyElasticMapsServiceInMaps" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
-            }),
-            i18n.translate('xpack.maps.deprecation.proxyEMS.step2', {
-              defaultMessage: 'Host Elastic Maps Service locally.',
-            }),
-          ],
-        },
-      });
-      return completeConfig;
-    },
-  ],
 };
 
 export const plugin = (initializerContext: PluginInitializerContext) =>

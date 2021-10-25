@@ -14547,8 +14547,6 @@
     "xpack.maps.common.esSpatialRelation.intersectsLabel": "intersects",
     "xpack.maps.common.esSpatialRelation.withinLabel": "within",
     "xpack.maps.deleteBtnTitle": "削除",
-    "xpack.maps.deprecation.proxyEMS.message": "map.proxyElasticMapsServiceInMapsは廃止予定であり、使用されません",
-    "xpack.maps.deprecation.proxyEMS.step1": "Kibana構成ファイル、CLIフラグ、または環境変数（Dockerのみ）で「map.proxyElasticMapsServiceInMaps」を削除します。",
     "xpack.maps.deprecation.proxyEMS.step2": "Elastic Maps Serviceをローカルでホストします。",
     "xpack.maps.discover.visualizeFieldLabel": "Mapsで可視化",
     "xpack.maps.distanceFilterForm.filterLabelLabel": "ラベルでフィルタリング",
