@@ -53,17 +53,16 @@ export const getThemeSettings = (
       requiresPageReload: true,
       schema: schema.boolean(),
     },
+    /**
+     * Theme is sticking around as there are still a number of places reading it and
+     * we might use it again in the future.
+     */
     'theme:version': {
       name: i18n.translate('core.ui_settings.params.themeVersionTitle', {
         defaultMessage: 'Theme version',
       }),
       value: 'v8' as ThemeVersion,
-      deprecation: {
-        message: i18n.translate('core.ui_settings.params.themeVersionDeprecated', {
-          defaultMessage: 'Theme versioning is no longer necessary.',
-        }),
-        docLinksKey: 'themeVersionSetting',
-      },
+      readonly: true,
       schema: schema.literal('v8'),
     },
   };

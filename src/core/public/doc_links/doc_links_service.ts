@@ -259,7 +259,6 @@ export class DocLinksService {
           indexManagement: `${ELASTICSEARCH_DOCS}index-mgmt.html`,
           kibanaSearchSettings: `${KIBANA_DOCS}advanced-options.html#kibana-search-settings`,
           visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
-          themeVersionSetting: `${KIBANA_DOCS}advanced-options.html#theme-version`,
           timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
           savedObjectsApiList: `${KIBANA_DOCS}saved-objects-api.html#saved-objects-api`,
         },
