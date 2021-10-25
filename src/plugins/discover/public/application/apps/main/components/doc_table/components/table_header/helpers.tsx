@@ -28,7 +28,7 @@ export interface ColumnProps {
 export function getTimeColumn(timeFieldName: string): ColumnProps {
   return {
     name: timeFieldName,
-    displayName: 'Time',
+    displayName: timeFieldName,
     isSortable: true,
     isRemoveable: false,
     colLeftIdx: -1,
