@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { AddConfigDeprecation } from '@kbn/config';
 import { PluginInitializerContext } from 'src/core/server';
 import { PluginConfigDescriptor } from 'kibana/server';
 import { MapsPlugin } from './plugin';
