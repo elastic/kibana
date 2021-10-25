@@ -16,7 +16,7 @@ import { shortenCountIntoString } from '../../../common/utils/shorten_count_into
 import { Link } from '../link_panel/link';
 import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_cti_event_counts';
 import { LINK_COPY } from '../overview_risky_host_links/translations';
-import { useIntegrationsPageLink } from './use-integrations-page-link';
+import { useIntegrationsPageLink } from './use_integrations_page_link';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   { name: 'Name', field: 'title', sortable: true, truncateText: true, width: '100%' },
