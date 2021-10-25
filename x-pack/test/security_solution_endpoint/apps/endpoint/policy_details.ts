@@ -531,6 +531,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // are also dispatched to the embedded endpoint Policy form. Update to the Endpoint Policy
         // form after that should preserve the changes done on the Fleet form
 
+        // Wait for the endpoint form to load and then update the policy description
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
         await pageObjects.ingestManagerCreatePackagePolicy.setPackagePolicyDescription(
           'protect everything'
         );
