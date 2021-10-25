@@ -11,7 +11,7 @@ This section assumes that you've installed Kibana's dependencies by running `yar
 This library can currently be used in two ways:
 
 - Imported as a Node.js module, for instance to be used in Kibana's functional test suite.
-- With a command line interface, to index data based on some example scenarios.
+- With a command line interface, to index data based on a specified scenario.
 
 ### Using the Node.js module
 
@@ -32,7 +32,7 @@ const instance = service('synth-go', 'production', 'go')
   .instance('instance-a');
 
 const from = new Date('2021-01-01T12:00:00.000Z').getTime();
-const to = new Date('2021-01-01T12:00:00.000Z').getTime() - 1;
+const to = new Date('2021-01-01T12:00:00.000Z').getTime();
 
 const traceEvents = timerange(from, to)
   .interval('1m')
@@ -82,12 +82,26 @@ const esEvents = toElasticsearchOutput([
 
 ### CLI
 
-Via the CLI, you can upload examples. The supported examples are listed in `src/lib/es.ts`. A `--target` option that specifies the Elasticsearch URL should be defined when running the `example` command. Here's an example:
+Via the CLI, you can upload scenarios, either using a fixed time range or continuously generating data. Some examples are available in in `src/scripts/examples`. Here's an example for live data:
 
-`$ node packages/elastic-apm-generator/src/scripts/es.js example simple-trace --target=http://admin:changeme@localhost:9200`
+`$ node packages/elastic-apm-generator/src/scripts/run packages/elastic-apm-generator/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --live`
+
+For a fixed time window:
+`$ node packages/elastic-apm-generator/src/scripts/run packages/elastic-apm-generator/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now`
+
+The script will try to automatically find bootstrapped APM indices. __If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.__
 
 The following options are supported:
-- `to`: the end of the time range, in ISO format. By default, the current time will be used.
-- `from`: the start of the time range, in ISO format. By default, `to` minus 15 minutes will be used.
-- `apm-server-version`: the version used in the index names bootstrapped by APM Server, e.g. `7.16.0`. __If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.__
+| Option         | Description                                             | Default      |
+| -------------- | ------------------------------------------------------- | ------------ |
+| `--from`       | The start of the time window.                           | `now - 15m`  |
+| `--to`         | The end of the time window.                             | `now`        |
+| `--live`       | Continously ingest data                                 | `false`      |
+| `--bucketSize` | Size of bucket for which to generate data.              | `15m`        |
+| `--clean`      | Clean APM indices before indexing new data.             | `false`      |
+| `--interval`   | The interval at which to index data.                    | `10s`        |
+| `--logLevel`   | Log level.                                              | `info`       |
+| `--lookback`   | The lookback window for which data should be generated. | `15m`        |
+| `--target`     | Elasticsearch target, including username/password.      | **Required** |
+| `--workers`    | Amount of simultaneously connected ES clients.          | `1`          |
 
