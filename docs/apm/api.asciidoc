@@ -563,9 +563,7 @@ More information on Kibana's API is available in <<api,REST API>>.
 === RUM source map API
 
 IMPORTANT: This endpoint is only compatible with the
-{apm-server-ref}/apm-integration.html[APM integration for Elastic Agent].
-Users with a standalone APM Server should instead use the APM Server
-{apm-server-ref}/sourcemap-api.html[source map upload API].
+{apm-guide-ref}/index.html[APM integration for Elastic Agent].
 
 A source map allows minified files to be mapped back to original source code --
 allowing you to maintain the speed advantage of minified code,
