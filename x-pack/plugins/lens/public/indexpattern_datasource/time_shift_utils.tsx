@@ -150,9 +150,13 @@ export function getStateTimeShiftWarningMessages(
   if (!state) return;
   const warningMessages: React.ReactNode[] = [];
   Object.entries(state.layers).forEach(([layerId, layer]) => {
+    const layerIndexPattern = state.indexPatterns[layer.indexPatternId];
+    if (!layerIndexPattern) {
+      return;
+    }
     const dateHistogramInterval = getDateHistogramInterval(
       layer,
-      state.indexPatterns[layer.indexPatternId],
+      layerIndexPattern,
       activeData,
       layerId
     );
