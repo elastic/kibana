@@ -11,6 +11,7 @@ import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property'
 
 export interface IField {
   getName(): string;
+  getMbFieldName(): string;
   getRootName(): string;
   canValueBeFormatted(): boolean;
   getLabel(): Promise<string>;
@@ -48,6 +49,10 @@ export class AbstractField implements IField {
 
   getName(): string {
     return this._fieldName;
+  }
+
+  getMbFieldName(): string {
+    return this.getName();
   }
 
   getRootName(): string {

@@ -12,7 +12,19 @@ import {
 } from '../../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/engine_logic.mock';
 
+jest.mock('../../curations_logic', () => ({
+  CurationsLogic: {
+    values: {},
+    actions: {
+      loadCurations: jest.fn(),
+    },
+  },
+}));
+
 import { nextTick } from '@kbn/test/jest';
+
+import { CurationsLogic } from '../..';
+import { EngineLogic } from '../../../engine';
 
 import { CurationsSettingsLogic } from './curations_settings_logic';
 
@@ -205,6 +217,10 @@ describe('CurationsSettingsLogic', () => {
           enabled: true,
           mode: 'automatic',
         });
+
+        // data should have been reloaded
+        expect(EngineLogic.actions.initializeEngine).toHaveBeenCalled();
+        expect(CurationsLogic.actions.loadCurations).toHaveBeenCalled();
       });
 
       it('presents any API errors to the user', async () => {
