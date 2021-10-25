@@ -107,6 +107,11 @@ export const getScatterplotMatrixVegaLiteSpec = (
         labelColor: euiTheme.euiTextSubduedColor,
         titleColor: euiTheme.euiTextSubduedColor,
       },
+      legend: {
+        orient: 'right',
+        labelColor: euiTheme.euiTextSubduedColor,
+        titleColor: euiTheme.euiTextSubduedColor,
+      },
     },
     repeat: {
       column: vegaColumns,
