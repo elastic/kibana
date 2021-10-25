@@ -13,8 +13,8 @@ jest.mock('../../../kibana_services', () => {
         desaturated: 'road_map_desaturated',
         dark: 'dark_map',
       };
-    }
-  }
+    },
+  };
 });
 
 jest.mock('../../../util', () => {
