@@ -6,6 +6,8 @@
  */
 
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useRef } from 'react';
@@ -185,20 +187,19 @@ function AlertsPage() {
             color="warning"
             iconType="beaker"
           >
-            <p>
-              {i18n.translate('xpack.observability.alertsDisclaimerText', {
-                defaultMessage:
-                  'This functionality may change or be removed completely in a future release. We value your ',
-              })}
-              <EuiLink href={prepend('https://discuss.elastic.co/c/observability/82')}>
-                {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
-                  defaultMessage: 'feedback',
-                })}
-              </EuiLink>
-              {i18n.translate('xpack.observability.alertsDisclaimerAfterLinkText', {
-                defaultMessage: ' as we work to add new capabilities.',
-              })}
-            </p>
+            <FormattedMessage
+              id="xpack.observability.alertsDisclaimerText"
+              defaultMessage="This functionality may change or be removed completely in a future release. We value your {feedback} as we work to add new capabilities. "
+              values={{
+                feedback: (
+                  <EuiLink href={prepend('https://discuss.elastic.co/c/observability/82')}>
+                    {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
+                      defaultMessage: 'feedback',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
           </EuiCallOut>
         </EuiFlexItem>
         <EuiFlexItem>
