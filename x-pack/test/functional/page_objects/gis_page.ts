@@ -164,6 +164,7 @@ export class GisPageObject extends FtrService {
       await this.testSubjects.click('savedObjectTitle');
     }
     await this.testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async clickSaveAndReturnButton() {

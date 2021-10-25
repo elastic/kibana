@@ -102,7 +102,7 @@ export function getTabs(indexPattern: IndexPattern, fieldFilter: string) {
 }
 
 export function getPath(field: IndexPatternField, indexPattern: IndexPattern) {
-  return `/patterns/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
+  return `/dataView/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
 }
 
 const allTypesDropDown = i18n.translate(
