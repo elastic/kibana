@@ -130,7 +130,6 @@ export default function ({ getService }: FtrProviderContext) {
             spaceId,
             singleRequest,
             responseBodyOverride: expectSavedObjectForbidden([
-              'dashboard',
               'globaltype',
               'isolatedtype',
               'sharedtype',
