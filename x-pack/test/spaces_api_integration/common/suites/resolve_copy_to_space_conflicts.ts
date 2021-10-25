@@ -63,7 +63,7 @@ export function resolveCopyToSpaceConflictsSuite(
   };
   const getDashboardAtSpace = async (spaceId: string): Promise<SavedObject<any>> => {
     return supertestWithAuth
-      .get(`${getUrlPrefix(spaceId)}/api/saved_objects/dashboard/cts_dashboard`)
+      .get(`${getUrlPrefix(spaceId)}/api/saved_objects/dashboard/cts_dashboard_${spaceId}`)
       .then((response: any) => response.body);
   };
 
@@ -124,12 +124,13 @@ export function resolveCopyToSpaceConflictsSuite(
           successCount: 1,
           successResults: [
             {
-              id: 'cts_dashboard',
+              id: `cts_dashboard_${sourceSpaceId}`,
               type: 'dashboard',
               meta: {
                 title: `This is the ${sourceSpaceId} test space CTS dashboard`,
                 icon: 'dashboardApp',
               },
+              destinationId: `cts_dashboard_${destinationSpaceId}`, // this conflicted with another dashboard in the destination space because of a shared originId
               overwrite: true,
             },
           ],
@@ -204,8 +205,11 @@ export function resolveCopyToSpaceConflictsSuite(
           successCount: 0,
           errors: [
             {
-              error: { type: 'conflict' },
-              id: 'cts_dashboard',
+              error: {
+                type: 'conflict',
+                destinationId: `cts_dashboard_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
+              },
+              id: `cts_dashboard_${sourceSpaceId}`,
               type: 'dashboard',
               title: `This is the ${sourceSpaceId} test space CTS dashboard`,
               meta: {
@@ -442,7 +446,7 @@ export function resolveCopyToSpaceConflictsSuite(
             )
           );
 
-          const dashboardObject = { type: 'dashboard', id: 'cts_dashboard' };
+          const dashboardObject = { type: 'dashboard', id: `cts_dashboard_${spaceId}` };
           const visualizationObject = { type: 'visualization', id: `cts_vis_3_${spaceId}` };
           const indexPatternObject = { type: 'index-pattern', id: `cts_ip_1_${spaceId}` };
 
@@ -514,7 +518,15 @@ export function resolveCopyToSpaceConflictsSuite(
                 objects: [dashboardObject],
                 includeReferences: false,
                 createNewCopies: false,
-                retries: { [destination]: [{ ...dashboardObject, overwrite: true }] },
+                retries: {
+                  [destination]: [
+                    {
+                      ...dashboardObject,
+                      destinationId: `cts_dashboard_${destination}`,
+                      overwrite: true,
+                    },
+                  ],
+                },
               })
               .expect(tests.withoutReferencesOverwriting.statusCode)
               .then(tests.withoutReferencesOverwriting.response);
@@ -530,7 +542,15 @@ export function resolveCopyToSpaceConflictsSuite(
                 objects: [dashboardObject],
                 includeReferences: false,
                 createNewCopies: false,
-                retries: { [destination]: [{ ...dashboardObject, overwrite: false }] },
+                retries: {
+                  [destination]: [
+                    {
+                      ...dashboardObject,
+                      destinationId: `cts_dashboard_${destination}`,
+                      overwrite: false,
+                    },
+                  ],
+                },
               })
               .expect(tests.withoutReferencesNotOverwriting.statusCode)
               .then(tests.withoutReferencesNotOverwriting.response);
@@ -546,7 +566,17 @@ export function resolveCopyToSpaceConflictsSuite(
                 objects: [dashboardObject],
                 includeReferences: false,
                 createNewCopies: false,
-                retries: { [destination]: [{ ...dashboardObject, overwrite: true }] },
+                retries: {
+                  [destination]: [
+                    {
+                      ...dashboardObject,
+                      destinationId: `cts_dashboard_${destination}`,
+                      // realistically a retry wouldn't use a destinationId, because it wouldn't have an origin conflict with another
+                      // object in a non-existent space, but for the simplicity of testing we'll use this here
+                      overwrite: true,
+                    },
+                  ],
+                },
               })
               .expect(tests.nonExistentSpace.statusCode)
               .then(tests.nonExistentSpace.response);

@@ -19,7 +19,8 @@ export const createDashboardSavedObjectType = ({
 }): SavedObjectsType => ({
   name: 'dashboard',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'dashboardApp',
     defaultSearchField: 'title',

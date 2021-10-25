@@ -134,6 +134,7 @@
         "uiStateJSON": "{}",
         "version": 1
       },
+      "namespaces": ["default"],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:57:40.826Z"
     },
@@ -205,7 +206,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "space_1:dashboard:space1-dashboard-id",
+    "id": "dashboard:space1-dashboard-id",
     "index": ".kibana",
     "source": {
       "dashboard": {
@@ -228,7 +229,7 @@
         "uiStateJSON": "{}",
         "version": 1
       },
-      "namespace": "space_1",
+      "namespaces": ["space_1"],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:57:40.826Z"
     },
@@ -300,7 +301,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "space_2:dashboard:space2-dashboard-id",
+    "id": "dashboard:space2-dashboard-id",
     "index": ".kibana",
     "source": {
       "dashboard": {
@@ -323,7 +324,7 @@
         "uiStateJSON": "{}",
         "version": 1
       },
-      "namespace": "space_2",
+      "namespaces": ["space_2"],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:57:40.826Z"
     },

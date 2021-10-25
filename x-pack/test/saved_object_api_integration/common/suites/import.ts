@@ -52,7 +52,7 @@ export const TEST_CASES: Record<string, ImportTestCase> = Object.freeze({
     expectedNewId: `${CID}3`,
   }),
   CONFLICT_4_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}4`, expectedNewId: `${CID}4a` }),
-  NEW_SINGLE_NAMESPACE_OBJ: Object.freeze({ type: 'dashboard', id: 'new-dashboard-id' }),
+  NEW_SINGLE_NAMESPACE_OBJ: Object.freeze({ type: 'isolatedtype', id: 'new-isolatedtype-id' }),
   NEW_MULTI_NAMESPACE_OBJ: Object.freeze({ type: 'sharedtype', id: 'new-sharedtype-id' }),
   NEW_NAMESPACE_AGNOSTIC_OBJ: Object.freeze({ type: 'globaltype', id: 'new-globaltype-id' }),
 });
