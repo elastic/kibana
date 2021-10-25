@@ -236,6 +236,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       config,
       plugins.encryptedSavedObjects?.canEncrypt === true,
       plugins.security,
+      this.telemetryEventsSender,
       plugins.ml,
       logger,
       isRuleRegistryEnabled,
