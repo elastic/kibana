@@ -1169,7 +1169,7 @@ describe('xy_expression', () => {
       expect(wrapper.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
     });
 
-    test('allowBrushingLastHistogramBucket is true for date histogram data', () => {
+    test('allowBrushingLastHistogramBin is true for date histogram data', () => {
       const { args } = sampleArgs();
 
       const wrapper = mountWithIntl(
@@ -1182,7 +1182,7 @@ describe('xy_expression', () => {
           }}
         />
       );
-      expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBucket')).toEqual(true);
+      expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBin')).toEqual(true);
     });
 
     test('onElementClick returns correct context data', () => {
@@ -1445,7 +1445,7 @@ describe('xy_expression', () => {
       });
     });
 
-    test('allowBrushingLastHistogramBucket should be fakse for ordinal data', () => {
+    test('allowBrushingLastHistogramBin should be fakse for ordinal data', () => {
       const { args, data } = sampleArgs();
 
       const wrapper = mountWithIntl(
@@ -1472,7 +1472,7 @@ describe('xy_expression', () => {
         />
       );
 
-      expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBucket')).toEqual(false);
+      expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBin')).toEqual(false);
     });
 
     test('onElementClick is not triggering event on non-interactive mode', () => {
