@@ -18,7 +18,7 @@ import { TimelinesPage } from './timelines_page';
 import { PAGE_TITLE } from './translations';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import { GetUrlForApp } from '../../common/components/navigation/types';
-import { APP_ID, TIMELINES_PATH } from '../../../common/constants';
+import { APP_UI_ID, TIMELINES_PATH } from '../../../common/constants';
 import { SecurityPageName } from '../../app/types';
 
 const timelinesPagePath = `${TIMELINES_PATH}/:tabName(${TimelineType.default}|${TimelineType.template})`;
@@ -31,7 +31,7 @@ export const getBreadcrumbs = (
 ): ChromeBreadcrumb[] => [
   {
     text: PAGE_TITLE,
-    href: getUrlForApp(APP_ID, {
+    href: getUrlForApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.timelines,
       path: !isEmpty(search[0]) ? search[0] : '',
     }),

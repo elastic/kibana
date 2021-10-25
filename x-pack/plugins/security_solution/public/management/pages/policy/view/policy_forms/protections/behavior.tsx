@@ -15,7 +15,7 @@ import { ConfigForm } from '../../components/config_form';
 import { RadioButtons } from '../components/radio_buttons';
 import { UserNotification } from '../components/user_notification';
 import { ProtectionSwitch } from '../components/protection_switch';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 import { SecurityPageName } from '../../../../../../app/types';
 
@@ -51,7 +51,7 @@ export const BehaviorProtection = React.memo(() => {
           defaultMessage="View {detectionRulesLink}. Prebuilt rules are tagged “Elastic” on the Detection Rules page."
           values={{
             detectionRulesLink: (
-              <LinkToApp appId={APP_ID} deepLinkId={SecurityPageName.rules}>
+              <LinkToApp appId={APP_UI_ID} deepLinkId={SecurityPageName.rules}>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policy.details.detectionRulesLink"
                   defaultMessage="related detection rules"

@@ -35,7 +35,7 @@ import { SpyRoute } from '../../../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../../../app/types';
 import { getEndpointListPath } from '../../../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/types';
 import { SecuritySolutionPageWrapper } from '../../../../../../common/components/page_wrapper';
 import { PolicyDetailsForm } from '../../policy_details_form';
@@ -65,7 +65,7 @@ export const PolicyFormLayout = React.memo(() => {
 
   const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
-    return routingOnCancelNavigateTo ?? [APP_ID, { path: hostListRouterPath }];
+    return routingOnCancelNavigateTo ?? [APP_UI_ID, { path: hostListRouterPath }];
   }, [hostListRouterPath, routingOnCancelNavigateTo]);
 
   // Handle showing update statuses

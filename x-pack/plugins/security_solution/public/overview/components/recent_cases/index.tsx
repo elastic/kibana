@@ -14,7 +14,7 @@ import {
 } from '../../../common/components/link_to/redirect_to_case';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, APP_UI_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 import { AllCasesNavProps } from '../../../cases/components/all_cases';
 
@@ -33,7 +33,7 @@ const RecentCasesComponent = () => {
       href: formatUrl(getCaseUrl()),
       onClick: async (e) => {
         e?.preventDefault();
-        return navigateToApp(APP_ID, { deepLinkId: SecurityPageName.case });
+        return navigateToApp(APP_UI_ID, { deepLinkId: SecurityPageName.case });
       },
     },
     caseDetailsNavigation: {
@@ -42,7 +42,7 @@ const RecentCasesComponent = () => {
       },
       onClick: async ({ detailName, subCaseId, search }, e) => {
         e?.preventDefault();
-        return navigateToApp(APP_ID, {
+        return navigateToApp(APP_UI_ID, {
           deepLinkId: SecurityPageName.case,
           path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
         });
@@ -52,7 +52,7 @@ const RecentCasesComponent = () => {
       href: formatUrl(getCreateCaseUrl()),
       onClick: async (e) => {
         e?.preventDefault();
-        return navigateToApp(APP_ID, {
+        return navigateToApp(APP_UI_ID, {
           deepLinkId: SecurityPageName.case,
           path: getCreateCaseUrl(),
         });

@@ -14,7 +14,7 @@ import * as i18n from './translations';
 import { TimelineEventsDetailsItem } from '../../../../common';
 import { LinkAnchor } from '../links';
 import { useKibana } from '../../lib/kibana';
-import { APP_ID, SecurityPageName } from '../../../../common/constants';
+import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { EVENT_DETAILS_PLACEHOLDER } from '../../../timelines/components/side_panel/event_details/translations';
 import { getFieldValue } from '../../../detections/components/host_isolation/helpers';
 
@@ -64,7 +64,7 @@ export const ReasonComponent: React.FC<Props> = ({ eventId, data }) => {
           data-test-subj="ruleName"
           onClick={(ev: { preventDefault: () => void }) => {
             ev.preventDefault();
-            navigateToApp(APP_ID, {
+            navigateToApp(APP_UI_ID, {
               deepLinkId: SecurityPageName.rules,
               path: getRuleDetailsUrl(ruleId),
             });

@@ -89,7 +89,7 @@ import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
 import {
-  APP_ID,
+  APP_UI_ID,
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
 } from '../../../../../../common/constants';
@@ -574,7 +574,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const goToEditRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
         path: getEditRuleUrl(ruleId ?? ''),
       });
@@ -683,7 +683,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       needsListsConfiguration
     )
   ) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.alerts,
       path: getDetectionEngineUrl(),
     });

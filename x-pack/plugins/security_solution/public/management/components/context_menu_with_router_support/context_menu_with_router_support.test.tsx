@@ -13,7 +13,7 @@ import {
   ContextMenuWithRouterSupportProps,
 } from './context_menu_with_router_support';
 import { act, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
-import { APP_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 
 describe('When using the ContextMenuWithRouterSupport component', () => {
   let appTestContext: AppContextTestRender;
@@ -42,7 +42,7 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
       },
       {
         children: 'click me 2',
-        navigateAppId: APP_ID,
+        navigateAppId: APP_UI_ID,
         navigateOptions: {
           path: '/one/two/three',
         },
@@ -126,7 +126,7 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
     });
 
     expect(appTestContext.coreStart.application.navigateToApp).toHaveBeenCalledWith(
-      APP_ID,
+      APP_UI_ID,
       expect.objectContaining({ path: '/one/two/three' })
     );
   });
