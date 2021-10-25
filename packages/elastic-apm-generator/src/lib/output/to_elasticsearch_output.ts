@@ -10,7 +10,25 @@ import { set } from 'lodash';
 import { getObserverDefaults } from '../..';
 import { Fields } from '../entity';
 
-export function toElasticsearchOutput(events: Fields[], versionOverride?: string) {
+export interface ElasticsearchOutput {
+  _index: string;
+  _source: unknown;
+}
+
+export interface ElasticsearchOutputWriteTargets {
+  transaction: string;
+  span: string;
+  error: string;
+  metric: string;
+}
+
+export function toElasticsearchOutput({
+  events,
+  writeTargets,
+}: {
+  events: Fields[];
+  writeTargets: ElasticsearchOutputWriteTargets;
+}): ElasticsearchOutput[] {
   return events.map((event) => {
     const values = {
       ...event,
@@ -29,7 +47,7 @@ export function toElasticsearchOutput(events: Fields[], versionOverride?: string
       set(document, key, val);
     }
     return {
-      _index: `apm-${versionOverride || values['observer.version']}-${values['processor.event']}`,
+      _index: writeTargets[event['processor.event'] as keyof ElasticsearchOutputWriteTargets],
       _source: document,
     };
   });
