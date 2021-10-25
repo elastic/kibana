@@ -65,7 +65,7 @@ const chartStartTime = new Date(alert[ALERT_START]![0] as string).getTime();
 const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] =
   () => () => ({
     link: '/',
-    reason: 'a good reason. Click to see more details.',
+    reason: 'a good reason',
   });
 const selectedAlertId = undefined;
 const setSelectedAlertId = jest.fn();
@@ -123,7 +123,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].details
-      ).toEqual('a good reason');
+      ).toEqual('a good reason. Click to see more details.');
     });
 
     describe('with no formatter', () => {
@@ -140,7 +140,7 @@ describe('getAlertAnnotations', () => {
             setSelectedAlertId,
             theme,
           })![0].props.dataValues[0].details
-        ).toEqual(alert[ALERT_RULE_NAME]![0]);
+        ).toEqual(`${alert[ALERT_RULE_NAME]![0]}. Click to see more details.`);
       });
     });
 
