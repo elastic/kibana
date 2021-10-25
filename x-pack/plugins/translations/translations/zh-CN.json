@@ -817,8 +817,6 @@
     "xpack.lens.xyChart.topAxisDisabledHelpText": "此设置仅在启用顶轴时应用。",
     "xpack.lens.xyChart.topAxisLabel": "顶轴",
     "xpack.lens.xyChart.upperBoundLabel": "上边界",
-    "xpack.lens.xyChart.valueLabelsVisibility.auto": "隐藏",
-    "xpack.lens.xyChart.valueLabelsVisibility.inside": "显示",
     "xpack.lens.xyChart.valuesHistogramDisabledHelpText": "不能在直方图上更改此设置。",
     "xpack.lens.xyChart.valuesInLegend.help": "在图例中显示值",
     "xpack.lens.xyChart.valuesPercentageDisabledHelpText": "不能在百分比面积图上更改此设置。",
