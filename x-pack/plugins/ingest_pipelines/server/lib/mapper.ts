@@ -102,6 +102,7 @@ function convertCsvToMapping(rows: Row[], copyFieldAction: FieldCopyAction) {
       // Skip if no destination field and no format field provided since it's possible to reformat a source field by itself
       continue;
     }
+
     const source = row.source_field.trim();
     let destination = row.destination_field && row.destination_field.trim();
     const copyAction = (row.copy_action && row.copy_action.trim()) || copyFieldAction;

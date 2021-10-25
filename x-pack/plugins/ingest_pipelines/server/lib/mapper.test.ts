@@ -13,11 +13,7 @@ describe('mapper', () => {
     it('empty file returns empty mapping', () => {
       expect(() => {
         csvToIngestPipeline('', FieldCopyAction.Copy);
-      }).toThrow(
-        new Error(
-          'Error reading file: The file provided is empty.'
-        )
-      );
+      }).toThrow(new Error('Error reading file: The file provided is empty.'));
     });
 
     it('file parsing error for invalid csv', () => {
