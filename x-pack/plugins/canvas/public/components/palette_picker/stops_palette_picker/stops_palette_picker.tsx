@@ -56,13 +56,14 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
       if (newPalette) {
         const newColors = reduceColorsByStopsSize(newPalette?.colors, stops.length);
         props.onChange?.({
+          ...palette,
           ...newPalette,
           colors: newColors,
           stops,
         });
       }
     },
-    [props, stops]
+    [palette, props, stops]
   );
 
   useEffectOnce(() => {
