@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
-import { CoreStart, DocLinksStart, HttpStart } from 'kibana/public';
+import type { Meta, Story } from '@storybook/react';
+import type { CoreStart, DocLinksStart, HttpStart } from 'kibana/public';
 import React, { ComponentProps } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { SettingsTemplate } from './settings_template';
 
@@ -31,7 +32,7 @@ const coreMock = {
       get: () => `/basepath`,
     },
     get: async () => ({}),
-  } as HttpStart,
+  },
   docLinks: {
     DOC_LINK_VERSION: '0',
     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
@@ -52,7 +53,9 @@ const stories: Meta<Args> = {
       return (
         <MemoryRouter>
           <KibanaReactContext.Provider>
-            <MockApmPluginContextWrapper value={{ core: coreMock }}>
+            <MockApmPluginContextWrapper
+              value={{ core: coreMock } as unknown as ApmPluginContextValue}
+            >
               <StoryComponent />
             </MockApmPluginContextWrapper>
           </KibanaReactContext.Provider>
