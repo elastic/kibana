@@ -70,6 +70,8 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     showLabels: labels?.show ?? false,
   });
 
+  // Pt unit is provided to support the previous view of the metricVis at vis_types editor.
+  // Inter font is defined here to override the default `openSans` font, which comes from the expession.
   metricVis.addArgument(
     'font',
     buildExpression(
