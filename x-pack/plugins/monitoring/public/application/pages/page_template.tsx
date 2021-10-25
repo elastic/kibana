@@ -49,6 +49,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 
   const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
   const [loaded, setLoaded] = useState(false);
+  const [isRequestPending, setIsRequestPending] = useState(false);
   const history = useHistory();
   const [hasError, setHasError] = useState(false);
   const handleRequestError = useRequestErrorHandler();
@@ -62,6 +63,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   );
 
   useEffect(() => {
+    setIsRequestPending(true);
     getPageData?.()
       .then(getPageDataResponseHandler)
       .catch((err: IHttpFetchError) => {
@@ -70,11 +72,20 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
       })
       .finally(() => {
         setLoaded(true);
+        setIsRequestPending(false);
       });
   }, [getPageData, currentTimerange, getPageDataResponseHandler, handleRequestError]);
 
   const onRefresh = () => {
-    getPageData?.().then(getPageDataResponseHandler).catch(handleRequestError);
+    // don't refresh when a request is pending
+    if (isRequestPending) return;
+    setIsRequestPending(true);
+    getPageData?.()
+      .then(getPageDataResponseHandler)
+      .catch(handleRequestError)
+      .finally(() => {
+        setIsRequestPending(false);
+      });
 
     if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       updateSetupModeData();
