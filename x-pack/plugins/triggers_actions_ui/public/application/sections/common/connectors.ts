@@ -5,37 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-import {
-  ENABLE_NEW_SN_ITSM_CONNECTOR,
-  ENABLE_NEW_SN_SIR_CONNECTOR,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../actions/server/constants/connectors';
-import {
-  ActionConnector,
-  ActionTypeIndex,
-  AlertAction,
-  UserConfiguredActionConnector,
-} from '../../../types';
-
-export const isDeprecatedConnector = (connector: ActionConnector): boolean => {
-  // TODO: Remove ENABLE_* portion when the applications are certified
-  if (!ENABLE_NEW_SN_ITSM_CONNECTOR && connector.actionTypeId === '.servicenow') {
-    return true;
-  }
-
-  if (!ENABLE_NEW_SN_SIR_CONNECTOR && connector.actionTypeId === '.servicenow-sir') {
-    return true;
-  }
-
-  // TODO: add a type guard
-  const unsafeConfig = (
-    connector as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
-  ).config;
-
-  return !!unsafeConfig?.isLegacy;
-};
+import { ActionConnector, ActionTypeIndex, AlertAction } from '../../../types';
 
 export const getValidConnectors = (
   connectors: ActionConnector[],
@@ -51,10 +21,3 @@ export const getValidConnectors = (
       (actionType?.enabledInConfig || connector.isPreconfigured)
   );
 };
-
-export const deprecatedMessage = i18n.translate(
-  'xpack.triggersActionsUI.sections.deprecatedTitleMessage',
-  {
-    defaultMessage: '(deprecated)',
-  }
-);

@@ -35,13 +35,8 @@ import {
   ActionVariables,
   ActionTypeRegistryContract,
   REQUIRED_ACTION_VARIABLES,
-  ActionTypeModel,
 } from '../../../types';
-import {
-  checkActionFormActionTypeEnabled,
-  IsDisabledResult,
-  IsEnabledResult,
-} from '../../lib/check_action_type_enabled';
+import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
@@ -293,12 +288,52 @@ export const ActionTypeForm = ({
       buttonContentClassName="actAccordionActionForm__button"
       data-test-subj={`alertActionAccordion-${index}`}
       buttonContent={
-        <AccordionButtonContent
-          actionConnector={actionConnector}
-          actionTypeRegistered={actionTypeRegistered}
-          checkEnabledResult={checkEnabledResult}
-          isOpen={isOpen}
-        />
+        <EuiFlexGroup gutterSize="l" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <div>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      defaultMessage="{actionConnectorName}"
+                      id="xpack.triggersActionsUI.sections.actionTypeForm.existingAlertActionTypeEditTitle"
+                      values={{
+                        actionConnectorName: `${actionConnector.name} ${
+                          actionConnector.isPreconfigured ? preconfiguredMessage : ''
+                        }`,
+                      }}
+                    />
+                  </EuiFlexItem>
+                  {selectedActionGroup && !isOpen && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge>{selectedActionGroup.name}</EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    {checkEnabledResult.isEnabled === false && (
+                      <>
+                        <EuiIconTip
+                          type="alert"
+                          color="danger"
+                          content={i18n.translate(
+                            'xpack.triggersActionsUI.sections.actionTypeForm.actionDisabledTitle',
+                            {
+                              defaultMessage: 'This action is disabled',
+                            }
+                          )}
+                          position="right"
+                        />
+                      </>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       extraAction={
         <EuiButtonIcon
@@ -317,69 +352,6 @@ export const ActionTypeForm = ({
     >
       {accordionContent}
     </EuiAccordion>
-  );
-};
-
-const AccordionButtonContent = ({
-  actionConnector,
-  actionTypeRegistered,
-  checkEnabledResult,
-  isOpen,
-  selectedActionGroup,
-}: {
-  actionTypeRegistered: ActionTypeModel;
-  actionConnector: ActionConnector;
-  checkEnabledResult: IsEnabledResult | IsDisabledResult;
-  isOpen: boolean;
-  selectedActionGroup?: ActionGroupWithMessageVariables;
-}) => {
-  return (
-    <EuiFlexGroup gutterSize="l" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText>
-          <div>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <FormattedMessage
-                  defaultMessage="{actionConnectorName}"
-                  id="xpack.triggersActionsUI.sections.actionTypeForm.existingAlertActionTypeEditTitle"
-                  values={{
-                    actionConnectorName: `${actionConnector.name} ${
-                      actionConnector.isPreconfigured ? preconfiguredMessage : ''
-                    }`,
-                  }}
-                />
-              </EuiFlexItem>
-              {selectedActionGroup && !isOpen && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge>{selectedActionGroup.name}</EuiBadge>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                {checkEnabledResult.isEnabled === false && (
-                  <>
-                    <EuiIconTip
-                      type="alert"
-                      color="danger"
-                      content={i18n.translate(
-                        'xpack.triggersActionsUI.sections.actionTypeForm.actionDisabledTitle',
-                        {
-                          defaultMessage: 'This action is disabled',
-                        }
-                      )}
-                      position="right"
-                    />
-                  </>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 };
 

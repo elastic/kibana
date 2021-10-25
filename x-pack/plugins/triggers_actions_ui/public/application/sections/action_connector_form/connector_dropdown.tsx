@@ -11,14 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ActionConnector, ActionTypeIndex, ActionTypeModel, AlertAction } from '../../../types';
 import { getValidConnectors } from '../common/connectors';
-
-// TODO: move this to a better location
-export const preconfiguredMessage = i18n.translate(
-  'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
-  {
-    defaultMessage: '(preconfigured)',
-  }
-);
+import { preconfiguredMessage } from '../../../common/connectors_dropdown';
 
 export interface DropdownProps {
   actionItem: AlertAction;

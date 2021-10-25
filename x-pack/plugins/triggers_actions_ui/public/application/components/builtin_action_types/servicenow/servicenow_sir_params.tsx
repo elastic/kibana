@@ -24,9 +24,10 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 
 import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
-import { ServiceNowSIRActionParams, Fields, Choice, ServiceNowActionConnector } from './types';
-import { choicesToEuiOptions, isLegacyConnector, DEFAULT_CORRELATION_ID } from './helpers';
+import { ServiceNowSIRActionParams, Fields, Choice } from './types';
+import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from './helpers';
 import { DeprecatedCallout } from './deprecated_callout';
+import { isDeprecatedConnector } from '../../../../common/connectors_dropdown';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -44,9 +45,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
-  const isDeprecatedConnector = isLegacyConnector(
-    actionConnector as unknown as ServiceNowActionConnector
-  );
+  const isDeprecatedActionConnector = isDeprecatedConnector(actionConnector);
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
@@ -152,7 +151,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
 
   return (
     <>
-      {isDeprecatedConnector && <DeprecatedCallout />}
+      {isDeprecatedActionConnector && <DeprecatedCallout />}
       <EuiTitle size="s">
         <h3>{i18n.SECURITY_INCIDENT}</h3>
       </EuiTitle>
@@ -231,7 +230,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!isDeprecatedConnector && (
+      {!isDeprecatedActionConnector && (
         <>
           <EuiFlexGroup>
             <EuiFlexItem>

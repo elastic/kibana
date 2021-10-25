@@ -9,10 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { isDeprecatedConnector } from './helpers';
+import { isDeprecatedConnector } from '../../../../common/connectors_dropdown';
 import { ActionConnector } from '../../../../types';
-// TODO: move this to a better location
-import { preconfiguredMessage } from '../../../sections/action_connector_form/connector_dropdown';
+import { deprecatedMessage, preconfiguredMessage } from '../../../../common/connectors_dropdown';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowSelectableRowComponent as default };
@@ -76,12 +75,5 @@ const deprecatedTooltipContent = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.deprecatedTooltipContent',
   {
     defaultMessage: 'Please update your connector',
-  }
-);
-
-export const deprecatedMessage = i18n.translate(
-  'xpack.triggersActionsUI.sections.deprecatedTitleMessage',
-  {
-    defaultMessage: '(deprecated)',
   }
 );
