@@ -116,7 +116,7 @@ export function createOverviewLink({
       event.preventDefault();
       navigateToUrl(url);
     },
-    'data-test-subj': `collapsibleNavAppLink`,
+    'data-test-subj': `collapsibleNavAppLink-overview`,
   };
 }
 
