@@ -24,7 +24,6 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
     createExpectOverriddenResponseWithoutReferences,
     expectRouteForbiddenResponse,
     createExpectUnauthorizedAtSpaceWithReferencesResult,
-    createExpectReadonlyAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     createMultiNamespaceTestCases,
     NON_EXISTENT_SPACE_ID,
@@ -122,11 +121,11 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
         tests: {
           withReferencesNotOverwriting: {
             statusCode: 200,
-            response: createExpectReadonlyAtSpaceWithReferencesResult(spaceId),
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(spaceId),
           },
           withReferencesOverwriting: {
             statusCode: 200,
-            response: createExpectReadonlyAtSpaceWithReferencesResult(spaceId),
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(spaceId),
           },
           withoutReferencesOverwriting: {
             statusCode: 200,
