@@ -2379,10 +2379,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.33":
-  version "8.0.0-canary.33"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.33.tgz#0acc7aa8237a97f29e9b0114e71319359d6e59b1"
-  integrity sha512-ta1xLULZxWl43mXFYxK7XoMuDBVAqKPqvnbSs1dcz4A68d9mj7ckeUPrZHA3aSMihr2fdb9nBOfrvJvvq9+5EA==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.34":
+  version "8.0.0-canary.34"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.34.tgz#05ba5b561b07e78e9b00a15bfdce4b31a06407c9"
+  integrity sha512-WWEBk3tHKX1C6vBzC1ovyAZIDhDn467H1Plxo6I1VxGdXHNtgqqzuXQc5oXj3bE8lfT3jsqWy0ull21ENCg8ww==
   dependencies:
     "@elastic/transport" "^0.0.15"
     tslib "^2.3.0"
