@@ -303,6 +303,76 @@ describe('secrets validation', () => {
   });
 });
 
+describe('connector validation: secrets with config', () => {
+  test('connector validation succeeds when username/password was populated for hasAuth true', () => {
+    const secrets: Record<string, unknown> = {
+      user: 'bob',
+      password: 'supersecret',
+    };
+    const config: Record<string, unknown> = {
+      hasAuth: true,
+    };
+    expect(validateConnector(actionType, { config, secrets })).toEqual({ ...secrets, clientSecret: null });
+  });
+
+  test('connector validation succeeds when username/password not filled for hasAuth false', () => {
+    const secrets: Record<string, unknown> = {
+      user: null,
+      password: null,
+      clientSecret: null,
+    };
+    const config: Record<string, unknown> = {
+      hasAuth: false,
+    };
+    expect(validateConnector(actionType, { config: {}, secrets: {} })).toEqual(secrets);
+    expect(validateConnector(actionType, { config: {}, secrets: { user: null }})).toEqual(secrets);
+    expect(validateConnector(actionType, { config: {}, secrets:{ password: null }})).toEqual(secrets);
+  });
+
+  test('connector validation fails when username/password was populated for hasAuth true', () => {
+    const secrets: Record<string, unknown> = {
+      password: null,
+      user: null,
+    };
+    const config: Record<string, unknown> = {
+      hasAuth: true,
+    };
+    expect(validateConnector(actionType, { config, secrets })).toEqual({
+      ...secrets,
+      user: null,
+      password: null,
+    });
+  });
+
+  test('connector validation succeeds when service is exchange_server and clientSecret is populated', () => {
+    const secrets: Record<string, unknown> = {
+      clientSecret: '12345678',
+    };
+    const config: Record<string, unknown> = {
+      service: 'exchange_server',
+    };
+    expect(validateConnector(actionType, { config, secrets })).toEqual({
+      ...secrets,
+      user: null,
+      password: null,
+    });
+  });
+
+  test('connector validation fails when service is exchange_server and clientSecret is not populated', () => {
+    const secrets: Record<string, unknown> = {
+      clientSecret: '12345678',
+    };
+    const config: Record<string, unknown> = {
+      service: 'exchange_server',
+    };
+    expect(validateConnector(actionType, { config, secrets })).toEqual({
+      ...secrets,
+      user: null,
+      password: null,
+    });
+  });
+});
+
 describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
     const params: Record<string, unknown> = {
