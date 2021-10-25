@@ -1,0 +1,69 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { Meta, Story } from '@storybook/react';
+import { CoreStart, DocLinksStart, HttpStart } from 'kibana/public';
+import React, { ComponentProps } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { SettingsTemplate } from './settings_template';
+
+type Args = ComponentProps<typeof SettingsTemplate>;
+
+const KibanaReactContext = createKibanaReactContext({
+  notifications: { toasts: { add: () => {} } },
+  usageCollection: { reportUiCounter: () => {} },
+  observability: {
+    navigation: {
+      PageTemplate: () => {
+        return <>hello world</>;
+      },
+    },
+  },
+  http: {
+    basePath: {
+      prepend: (path: string) => `/basepath${path}`,
+      get: () => `/basepath`,
+    },
+  } as HttpStart,
+  docLinks: {
+    DOC_LINK_VERSION: '0',
+    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    links: {
+      apm: {},
+      observability: { guide: '' },
+    },
+  } as unknown as DocLinksStart,
+} as unknown as Partial<CoreStart>);
+
+const stories: Meta<Args> = {
+  title: 'routing/templates/SettingsTemplate',
+  component: SettingsTemplate,
+  decorators: [
+    (StoryComponent) => {
+      return (
+        <MemoryRouter>
+          <KibanaReactContext.Provider>
+            <MockApmPluginContextWrapper>
+              <StoryComponent />
+            </MockApmPluginContextWrapper>
+          </KibanaReactContext.Provider>
+        </MemoryRouter>
+      );
+    },
+  ],
+};
+export default stories;
+
+export const Example: Story<Args> = (args) => {
+  return <SettingsTemplate {...args} />;
+};
+Example.args = {
+  children: <>test</>,
+  selectedTab: 'agent-configurations',
+};
