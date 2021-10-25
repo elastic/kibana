@@ -21,7 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
   const idSpace1 = 'space1';
   const idSpace2 = 'space2';
 
-  async function getDatafeedById(
+  async function getDatafeedStatsById(
     datafeedId: string | undefined,
     expectedStatusCode: number,
     space?: string
@@ -61,11 +61,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should fail with non-existing datafeed', async () => {
-      await getDatafeedById('non-existing-datafeed', 404);
+      await getDatafeedStatsById('non-existing-datafeed', 404);
     });
 
     it('should return datafeed stats with datafeed id from correct space', async () => {
-      const body = await getDatafeedById(datafeedIdSpace1, 200, idSpace1);
+      const body = await getDatafeedStatsById(datafeedIdSpace1, 200, idSpace1);
 
       expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
       expect(body.datafeeds.length).to.eql(
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return datafeed stats with datafeed wildcard from correct space', async () => {
-      const body = await getDatafeedById(datafeedIdWildcardSpace1, 200, idSpace1);
+      const body = await getDatafeedStatsById(datafeedIdWildcardSpace1, 200, idSpace1);
 
       expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
       expect(body.datafeeds.length).to.eql(
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return all datafeed stats when not specifying id', async () => {
-      const body = await getDatafeedById(undefined, 200, idSpace1);
+      const body = await getDatafeedStatsById(undefined, 200, idSpace1);
 
       expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
       expect(body.datafeeds.length).to.eql(
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return empty list with non-existing datafeed wildcard', async () => {
-      const body = await getDatafeedById('non-existing-datafeed*', 200);
+      const body = await getDatafeedStatsById('non-existing-datafeed*', 200);
 
       expect(body.count).to.eql(0, `response count should be 0 (got ${body.count})`);
       expect(body.datafeeds.length).to.eql(
@@ -105,11 +105,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should fail with datafeed from different space', async () => {
-      await getDatafeedById(datafeedIdSpace1, 404, idSpace2);
+      await getDatafeedStatsById(datafeedIdSpace1, 404, idSpace2);
     });
 
     it('should return empty list with datafeed wildcard from different space', async () => {
-      const body = await getDatafeedById(datafeedIdWildcardSpace1, 200, idSpace2);
+      const body = await getDatafeedStatsById(datafeedIdWildcardSpace1, 200, idSpace2);
 
       expect(body.count).to.eql(0, `response count should be 0 (got ${body.count})`);
       expect(body.datafeeds.length).to.eql(
