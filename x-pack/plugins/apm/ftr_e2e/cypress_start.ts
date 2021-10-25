@@ -16,15 +16,10 @@ import { esArchiverLoad, esArchiverUnload } from './cypress/tasks/es_archiver';
 
 export function cypressRunTests(spec?: string) {
   return async ({ getService }: FtrProviderContext) => {
-    try {
-      const result = await cypressStart(getService, cypress.run, spec);
+    const result = await cypressStart(getService, cypress.run, spec);
 
-      if (result && (result.status === 'failed' || result.totalFailed > 0)) {
-        process.exit(1);
-      }
-    } catch (error) {
-      console.error('errors: ', error);
-      process.exit(1);
+    if (result && (result.status === 'failed' || result.totalFailed > 0)) {
+      throw new Error(`APM Cypress tests failed`);
     }
   };
 }
