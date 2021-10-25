@@ -230,6 +230,7 @@ export class FetcherTask {
           method: 'post',
           body: stats,
           headers: {
+            'Content-Type': 'application/json',
             'X-Elastic-Stack-Version': this.currentKibanaVersion,
             'X-Elastic-Cluster-ID': clusterUuid,
             'X-Elastic-Content-Encoding': PAYLOAD_CONTENT_ENCODING,

@@ -129,7 +129,7 @@ function getScaleType(
   return type;
 }
 
-function getScale<S extends XScaleType | YScaleType>(
+export function getScale<S extends XScaleType | YScaleType>(
   scale: Scale,
   params: Aspect['params'],
   format: Aspect['format'],
@@ -139,7 +139,10 @@ function getScale<S extends XScaleType | YScaleType>(
     isCategoryAxis
       ? getScaleType(
           scale,
-          format?.id === 'number' || (format?.params?.id === 'number' && format?.id !== 'range'),
+          format?.id === 'number' ||
+            (format?.params?.id === 'number' &&
+              format?.id !== BUCKET_TYPES.RANGE &&
+              format?.id !== BUCKET_TYPES.TERMS),
           'date' in params,
           'interval' in params
         )

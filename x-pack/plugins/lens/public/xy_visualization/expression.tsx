@@ -671,13 +671,17 @@ export function XYChart({
         xDomain={xDomain}
         onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
         onElementClick={interactive ? clickHandler : undefined}
-        legendAction={getLegendAction(
-          filteredLayers,
-          data.tables,
-          onClickValue,
-          formatFactory,
-          layersAlreadyFormatted
-        )}
+        legendAction={
+          interactive
+            ? getLegendAction(
+                filteredLayers,
+                data.tables,
+                onClickValue,
+                formatFactory,
+                layersAlreadyFormatted
+              )
+            : undefined
+        }
         showLegendExtra={isHistogramViz && valuesInLegend}
       />
 
