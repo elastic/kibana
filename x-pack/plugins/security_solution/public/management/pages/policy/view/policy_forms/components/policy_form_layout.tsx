@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiLoadingSpinner,
   EuiBottomBar,
   EuiSpacer,
@@ -27,7 +26,6 @@ import {
   agentStatusSummary,
   updateStatus,
   isLoading,
-  apiError,
 } from '../../../store/policy_details/selectors';
 
 import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
@@ -58,7 +56,6 @@ export const PolicyFormLayout = React.memo(() => {
   const policyAgentStatusSummary = usePolicyDetailsSelector(agentStatusSummary);
   const policyUpdateStatus = usePolicyDetailsSelector(updateStatus);
   const isPolicyLoading = usePolicyDetailsSelector(isLoading);
-  const policyApiError = usePolicyDetailsSelector(apiError);
 
   // Local state
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
@@ -101,6 +98,7 @@ export const PolicyFormLayout = React.memo(() => {
           title: i18n.translate('xpack.securitySolution.endpoint.policy.details.updateErrorTitle', {
             defaultMessage: 'Failed!',
           }),
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           text: policyUpdateStatus.error!.message,
         });
       }
@@ -136,13 +134,7 @@ export const PolicyFormLayout = React.memo(() => {
   if (!policyItem) {
     return (
       <SecuritySolutionPageWrapper noTimeline>
-        {isPolicyLoading ? (
-          <EuiLoadingSpinner size="xl" />
-        ) : policyApiError ? (
-          <EuiCallOut color="danger" title={policyApiError?.error}>
-            <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
-          </EuiCallOut>
-        ) : null}
+        {isPolicyLoading ? <EuiLoadingSpinner size="xl" /> : null}
         <SpyRoute pageName={SecurityPageName.administration} />
       </SecuritySolutionPageWrapper>
     );

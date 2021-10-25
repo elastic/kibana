@@ -24,11 +24,10 @@ export const tlsFormatters: TLSFormatMap = {
 };
 
 // only add tls settings if they are enabled by the user and isEnabled is true
-export const tlsValueToYamlFormatter = (tlsValue: { value?: string; isEnabled?: boolean } = {}) =>
-  tlsValue.isEnabled && tlsValue.value ? JSON.stringify(tlsValue.value) : null;
+export const tlsValueToYamlFormatter = (tlsValue: string = '') =>
+  tlsValue ? JSON.stringify(tlsValue) : null;
 
-export const tlsValueToStringFormatter = (tlsValue: { value?: string; isEnabled?: boolean } = {}) =>
-  tlsValue.isEnabled && tlsValue.value ? tlsValue.value : null;
+export const tlsValueToStringFormatter = (tlsValue: string = '') => tlsValue || null;
 
-export const tlsArrayToYamlFormatter = (tlsValue: { value?: string[]; isEnabled?: boolean } = {}) =>
-  tlsValue.isEnabled && tlsValue.value?.length ? JSON.stringify(tlsValue.value) : null;
+export const tlsArrayToYamlFormatter = (tlsValue: string[] = []) =>
+  tlsValue.length ? JSON.stringify(tlsValue) : null;

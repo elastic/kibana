@@ -11,12 +11,9 @@ import React from 'react';
 import type { StartServicesAccessor } from 'src/core/public';
 
 import { getCopyToSpaceFlyoutComponent } from '../copy_saved_objects_to_space';
+import { getEmbeddableLegacyUrlConflict, getLegacyUrlConflict } from '../legacy_urls';
 import type { PluginsStart } from '../plugin';
-import {
-  getLegacyUrlConflict,
-  getSavedObjectConflictMessage,
-  getShareToSpaceFlyoutComponent,
-} from '../share_saved_objects_to_space';
+import { getShareToSpaceFlyoutComponent } from '../share_saved_objects_to_space';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import { getSpaceListComponent } from '../space_list';
 import { getSpacesContextProviderWrapper } from '../spaces_context';
@@ -55,8 +52,10 @@ export const getComponents = ({
     getShareToSpaceFlyout: wrapLazy(getShareToSpaceFlyoutComponent, { showLoadingSpinner: false }),
     getCopyToSpaceFlyout: wrapLazy(getCopyToSpaceFlyoutComponent, { showLoadingSpinner: false }),
     getSpaceList: wrapLazy(getSpaceListComponent),
+    getEmbeddableLegacyUrlConflict: wrapLazy(() =>
+      getEmbeddableLegacyUrlConflict({ spacesManager, getStartServices })
+    ),
     getLegacyUrlConflict: wrapLazy(() => getLegacyUrlConflict({ getStartServices })),
     getSpaceAvatar: wrapLazy(getSpaceAvatarComponent),
-    getSavedObjectConflictMessage: wrapLazy(() => getSavedObjectConflictMessage()),
   };
 };

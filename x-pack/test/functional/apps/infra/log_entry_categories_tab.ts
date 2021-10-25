@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
+  const esArchiver = getService('esArchiver');
   const logsUi = getService('logsUi');
   const retry = getService('retry');
 
@@ -17,12 +18,22 @@ export default ({ getService }: FtrProviderContext) => {
     this.tags('includeFirefox');
 
     describe('with a trial license', () => {
-      it('is visible', async () => {
+      it('Shows no data page when indices do not exist', async () => {
+        await logsUi.logEntryCategoriesPage.navigateTo();
+
+        await retry.try(async () => {
+          expect(await logsUi.logEntryCategoriesPage.getNoDataScreen()).to.be.ok();
+        });
+      });
+
+      it('shows setup page when indices exist', async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
         await logsUi.logEntryCategoriesPage.navigateTo();
 
         await retry.try(async () => {
           expect(await logsUi.logEntryCategoriesPage.getSetupScreen()).to.be.ok();
         });
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
       });
     });
   });

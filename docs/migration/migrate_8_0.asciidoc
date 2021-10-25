@@ -17,6 +17,7 @@ See also <<whats-new>> and <<release-notes>>.
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide
 
+// tag::notable-breaking-changes[]
 [float]
 [[breaking_80_index_pattern_changes]]
 === Index pattern changes
@@ -30,12 +31,10 @@ to function as expected. Support for these index patterns has been removed in 8.
 *Impact:* You must migrate your time_based index patterns to a wildcard pattern,
 for example, `logstash-*`.
 
-
 [float]
 [[breaking_80_setting_changes]]
 === Settings changes
 
-// tag::notable-breaking-changes[]
 [float]
 ==== Multitenancy by changing `kibana.index` is no longer supported
 *Details:* `kibana.index`, `xpack.reporting.index` and `xpack.task_manager.index` can no longer be specified. 
@@ -43,10 +42,24 @@ for example, `logstash-*`.
 *Impact:* Users who relied on changing these settings to achieve multitenancy should use *Spaces*, cross-cluster replication, or cross-cluster search instead. To migrate to *Spaces*, users are encouraged to use saved object management to export their saved objects from a tenant into the default tenant in a space. Improvements are planned to improve on this workflow. See https://github.com/elastic/kibana/issues/82020 for more details.   
 
 [float]
+==== Disabling most plugins with the `{plugin_name}.enabled` setting is no longer supported
+*Details:* The ability for most plugins to be disabled using the `{plugin_name}.enabled` config option has been removed.
+
+*Impact:* Some plugins, such as `telemetry`, `newsfeed`, `reporting`, and the various `vis_type` plugins will continue to support this setting, however the rest of the plugins that ship with Kibana will not. By default, any newly created plugins will not support this configuration unless it is explicitly added to the plugin's `configSchema`.
+
+If you are currently using one of these settings in your Kibana config, please remove it before upgrading to 8.0. If you were using these settings to control user access to certain Kibana applications, we recommend leveraging Feature Controls instead.
+
+[float]
 ==== Legacy browsers are now rejected by default
 *Details:* `csp.strict` is now enabled by default, so Kibana will fail to load for older, legacy browsers that do not enforce basic Content Security Policy protections - notably Internet Explorer 11.
 
 *Impact:* To allow Kibana to function for these legacy browsers, set `csp.strict: false`. Since this is about enforcing a security protocol, we *strongly discourage* disabling `csp.strict` unless it is critical that you support Internet Explorer 11.
+
+[float]
+==== Configuring content security policy rules is no longer supported
+*Details:* Configuring `csp.rules` is removed in favor of per-directive specific configuration. Configuring the default `csp.script_src`, `csp.workers_src` and `csp.style_src` values is not required.
+
+*Impact:* Configure per-directive sources instead. See https://github.com/elastic/kibana/pull/102059 for more details.
 
 [float]
 ==== Default logging timezone is now the system's timezone

@@ -5,29 +5,43 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
+import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiLink, EuiCallOut, EuiSwitch } from '@elastic/eui';
+import { EuiCallOut, EuiSwitch } from '@elastic/eui';
 
 import { Synchronization } from './synchronization';
 
 describe('Synchronization', () => {
+  const updateSyncEnabled = jest.fn();
+  const mockvalues = { contentSource: fullContentSources[0] };
+
+  beforeEach(() => {
+    setMockActions({ updateSyncEnabled });
+    setMockValues(mockvalues);
+  });
+
   it('renders when config enabled', () => {
-    setMockValues({ contentSource: { isSyncConfigEnabled: true } });
     const wrapper = shallow(<Synchronization />);
 
-    expect(wrapper.find(EuiLink)).toHaveLength(1);
     expect(wrapper.find(EuiSwitch)).toHaveLength(1);
   });
 
   it('renders when config disabled', () => {
-    setMockValues({ contentSource: { isSyncConfigEnabled: false } });
+    setMockValues({ contentSource: { isSyncConfigEnabled: false, indexing: { enabled: true } } });
     const wrapper = shallow(<Synchronization />);
 
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);
+  });
+
+  it('handles EuiSwitch change event', () => {
+    const wrapper = shallow(<Synchronization />);
+    wrapper.find(EuiSwitch).simulate('change', { target: { checked: true } });
+
+    expect(updateSyncEnabled).toHaveBeenCalled();
   });
 });

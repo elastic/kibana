@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
-
 import { RoleMapping } from '../shared/types';
 
 export * from '../../../common/types/workplace_search';
@@ -132,7 +130,7 @@ interface SourceActivity {
 
 export interface SyncEstimate {
   duration?: string;
-  nextStart: string;
+  nextStart?: string;
   lastRun?: string;
 }
 
@@ -143,9 +141,12 @@ interface SyncIndexItem<T> {
   permissions?: T;
 }
 
-interface IndexingSchedule extends SyncIndexItem<string> {
+export interface IndexingSchedule extends SyncIndexItem<string> {
   estimates: SyncIndexItem<SyncEstimate>;
+  blockedWindows?: BlockedWindow[];
 }
+
+export type TimeUnit = 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years';
 
 export type SyncJobType = 'full' | 'incremental' | 'delete' | 'permissions';
 
@@ -162,9 +163,9 @@ export type DayOfWeek = typeof DAYS_OF_WEEK_VALUES[number];
 
 export interface BlockedWindow {
   jobType: SyncJobType;
-  day: DayOfWeek;
-  start: Moment;
-  end: Moment;
+  day: DayOfWeek | 'all';
+  start: string;
+  end: string;
 }
 
 export interface IndexingConfig {

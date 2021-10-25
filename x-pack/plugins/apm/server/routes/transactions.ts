@@ -31,7 +31,7 @@ import {
 
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics',
+    'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
@@ -85,7 +85,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
 
 const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics',
+    'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
@@ -150,7 +150,8 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
 });
 
 const transactionLatencyChartsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/transactions/charts/latency',
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -227,7 +228,8 @@ const transactionLatencyChartsRoute = createApmServerRoute({
 });
 
 const transactionTraceSamplesRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/transactions/traces/samples',
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -284,7 +286,8 @@ const transactionTraceSamplesRoute = createApmServerRoute({
 });
 
 const transactionChartsBreakdownRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/transaction/charts/breakdown',
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -321,7 +324,7 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
 
 const transactionChartsErrorRateRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',
+    'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
   params: t.type({
     path: t.type({
       serviceName: t.string,

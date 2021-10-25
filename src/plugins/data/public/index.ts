@@ -38,7 +38,13 @@ export const exporters = {
  * Index patterns:
  */
 
-import { isNestedField, isFilterable } from '../common';
+import {
+  isNestedField,
+  isFilterable,
+  isMultiField,
+  getFieldSubtypeNested,
+  getFieldSubtypeMulti,
+} from '../common';
 
 import {
   ILLEGAL_CHARACTERS_KEY,
@@ -46,7 +52,6 @@ import {
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
   validateDataView,
-  flattenHitWrapper,
 } from './data_views';
 
 export type { IndexPatternsService } from './data_views';
@@ -59,8 +64,10 @@ export const indexPatterns = {
   ILLEGAL_CHARACTERS,
   isFilterable,
   isNestedField,
+  isMultiField,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
   validate: validateDataView,
-  flattenHitWrapper,
 };
 
 export {

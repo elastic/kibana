@@ -248,10 +248,22 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       );
     }
 
+    // Get performance information from the browser (non standard property
+    // @ts-expect-error 2339
+    const memory = window.performance.memory;
+    let memoryInfo = {};
+    if (memory) {
+      memoryInfo = {
+        memory_js_heap_size_limit_int: memory.jsHeapSizeLimit,
+        memory_js_heap_size_total_int: memory.totalJSHeapSize,
+        memory_js_heap_size_used_int: memory.usedJSHeapSize,
+      };
+    }
     // Record an event that Kibana was opened so we can easily search for sessions that use Kibana
     fullStory.event('Loaded Kibana', {
       // `str` suffix is required, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
       kibana_version_str: this.initializerContext.env.packageInfo.version,
+      ...memoryInfo,
     });
   }
 }

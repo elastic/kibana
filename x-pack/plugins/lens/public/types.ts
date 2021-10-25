@@ -281,6 +281,10 @@ export interface Datasource<T = unknown, P = unknown> {
    * Checks if the visualization created is time based, for example date histogram
    */
   isTimeBased: (state: T) => boolean;
+  /**
+   * Given the current state layer and a columnId will verify if the column configuration has errors
+   */
+  isValidColumn: (state: T, layerId: string, columnId: string) => boolean;
 }
 
 export interface DatasourceFixAction<T> {
@@ -834,5 +838,5 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
 export interface SharingSavedObjectProps {
   outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
   aliasTargetId?: string;
-  errorJSON?: string;
+  sourceId?: string;
 }

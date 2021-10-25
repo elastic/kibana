@@ -34,11 +34,11 @@ export const QUERY_INPUTS_PLACEHOLDER = i18n.translate(
   { defaultMessage: 'Enter a query' }
 );
 
-export const DELETE_MESSAGE = i18n.translate(
+export const DELETE_CONFIRMATION_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.deleteConfirmation',
   { defaultMessage: 'Are you sure you want to remove this curation?' }
 );
-export const SUCCESS_MESSAGE = i18n.translate(
+export const DELETE_SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.deleteSuccessMessage',
   { defaultMessage: 'Your curation was deleted' }
 );

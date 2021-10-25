@@ -30,13 +30,17 @@ import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../../../common';
 import { groupFields } from './lib/group_fields';
-import { IndexPatternField } from '../../../../../../../data/public';
+import {
+  IndexPatternField,
+  indexPatterns as indexPatternUtils,
+} from '../../../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
+import { VIEW_MODE } from '../view_mode_toggle';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -74,6 +78,10 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
    * hits fetched from ES, displayed in the doc table
    */
   documents?: ElasticSearchHit[];
+  /**
+   * Discover view mode
+   */
+  viewMode: VIEW_MODE;
 }
 
 export function DiscoverSidebarComponent({
@@ -97,6 +105,7 @@ export function DiscoverSidebarComponent({
   setFieldEditorRef,
   closeFlyout,
   editField,
+  viewMode,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
@@ -202,13 +211,16 @@ export function DiscoverSidebarComponent({
     return result;
   }, [fields]);
 
+  const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
+
   const calculateMultiFields = () => {
     if (!useNewFieldsApi || !fields) {
       return undefined;
     }
     const map = new Map<string, Array<{ field: IndexPatternField; isSelected: boolean }>>();
     fields.forEach((field) => {
-      const parent = field.spec?.subType?.multi?.parent;
+      const subTypeMulti = indexPatternUtils.getFieldSubtypeMulti(field);
+      const parent = subTypeMulti?.multi.parent;
       if (!parent) {
         return;
       }
@@ -403,6 +415,7 @@ export function DiscoverSidebarComponent({
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
                                 onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                                showFieldStats={showFieldStats}
                               />
                             </li>
                           );
@@ -462,6 +475,7 @@ export function DiscoverSidebarComponent({
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
                                 onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                                showFieldStats={showFieldStats}
                               />
                             </li>
                           );
@@ -490,6 +504,7 @@ export function DiscoverSidebarComponent({
                             multiFields={multiFields?.get(field.name)}
                             onEditField={canEditIndexPatternField ? editField : undefined}
                             onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                            showFieldStats={showFieldStats}
                           />
                         </li>
                       );

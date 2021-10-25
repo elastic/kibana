@@ -107,7 +107,7 @@ describe('GetCsvReportPanelAction', () => {
       columns: [],
       objectType: 'downloadCsv',
       searchSource: {},
-      title: undefined,
+      title: '',
       version: '7.15.0',
     });
   });
@@ -144,7 +144,7 @@ describe('GetCsvReportPanelAction', () => {
       columns: ['column_a', 'column_b'],
       objectType: 'downloadCsv',
       searchSource: { testData: 'testDataValue' },
-      title: undefined,
+      title: '',
       version: '7.15.0',
     });
   });

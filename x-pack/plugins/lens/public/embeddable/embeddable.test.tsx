@@ -236,7 +236,7 @@ describe('embeddable', () => {
           ...savedVis,
           sharingSavedObjectProps: {
             outcome: 'conflict',
-            errorJSON: '{targetType: "lens", sourceId: "1", targetSpace: "space"}',
+            sourceId: '1',
             aliasTargetId: '2',
           },
         } as ResolvedLensSavedObjectAttributes);

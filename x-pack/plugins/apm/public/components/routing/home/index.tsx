@@ -8,7 +8,9 @@ import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { RedirectTo } from '../redirect_to';
+import { comparisonTypeRt } from '../../../../common/runtime_types/comparison_type_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { BackendDetailOverview } from '../../app/backend_detail_overview';
@@ -63,12 +65,14 @@ export const home = {
         rangeTo: t.string,
         kuery: t.string,
       }),
+      t.partial({
+        refreshPaused: t.union([t.literal('true'), t.literal('false')]),
+        refreshInterval: t.string,
+      }),
     ]),
   }),
   defaults: {
     query: {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
       environment: ENVIRONMENT_ALL.value,
       kuery: '',
     },
@@ -98,8 +102,8 @@ export const home = {
       element: <Outlet />,
       params: t.partial({
         query: t.partial({
-          comparisonEnabled: t.string,
-          comparisonType: t.string,
+          comparisonEnabled: toBooleanRt,
+          comparisonType: comparisonTypeRt,
         }),
       }),
       children: [

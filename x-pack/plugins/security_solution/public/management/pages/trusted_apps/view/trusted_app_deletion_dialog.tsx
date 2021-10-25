@@ -24,13 +24,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import {
-  Immutable,
-  ImmutableObject,
-  PolicyEffectScope,
-  GlobalEffectScope,
-  TrustedApp,
-} from '../../../../../common/endpoint/types';
+import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import { useTrustedAppsSelector } from './hooks';
 import {
@@ -38,14 +32,10 @@ import {
   isDeletionDialogOpen,
   isDeletionInProgress,
 } from '../store/selectors';
+import { isPolicyEffectScope } from '../state/type_guards';
 
 const CANCEL_SUBJ = 'trustedAppDeletionCancel';
 const CONFIRM_SUBJ = 'trustedAppDeletionConfirm';
-const isTrustedAppByPolicy = (
-  trustedApp: ImmutableObject<GlobalEffectScope | PolicyEffectScope>
-): trustedApp is ImmutableObject<PolicyEffectScope> => {
-  return (trustedApp as ImmutableObject<PolicyEffectScope>).policies !== undefined;
-};
 
 const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
   title: (
@@ -67,7 +57,7 @@ const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
       defaultMessage="Deleting this entry will remove it from {count} associated {count, plural, one {policy} other {policies}}."
       values={{
         count:
-          entry && isTrustedAppByPolicy(entry.effectScope)
+          entry && isPolicyEffectScope(entry.effectScope)
             ? entry.effectScope.policies.length
             : 'all',
       }}

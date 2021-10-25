@@ -127,7 +127,7 @@ export function ErrorGroupDetails() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
+          endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}',
           params: {
             path: {
               serviceName,
@@ -146,7 +146,7 @@ export function ErrorGroupDetails() {
     [environment, kuery, serviceName, start, end, groupId]
   );
 
-  const { errorDistributionData } = useErrorGroupDistributionFetcher({
+  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId,
     environment,
@@ -209,6 +209,7 @@ export function ErrorGroupDetails() {
           </Titles>
         )}
         <ErrorDistribution
+          fetchStatus={status}
           distribution={errorDistributionData}
           title={i18n.translate(
             'xpack.apm.errorGroupDetails.occurrencesChartLabel',

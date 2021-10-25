@@ -11,12 +11,13 @@ import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server
 import { eqlExecutor } from './eql';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryListMock } from '../../../../../../lists/common/schemas/types/entry_list.mock';
-import { getEqlRuleParams } from '../../schemas/rule_schemas.mock';
+import { getCompleteRuleMock, getEqlRuleParams } from '../../schemas/rule_schemas.mock';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
+import { EqlRuleParams } from '../../schemas/rule_schemas';
 
 jest.mock('../../routes/index/get_index_version');
 
@@ -26,27 +27,7 @@ describe('eql_executor', () => {
   let alertServices: AlertServicesMock;
   (getIndexVersion as jest.Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
   const params = getEqlRuleParams();
-  const eqlSO = {
-    id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-    type: 'alert',
-    version: '1',
-    updated_at: '2020-03-27T22:55:59.577Z',
-    attributes: {
-      actions: [],
-      enabled: true,
-      name: 'rule-name',
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      createdBy: 'sample user',
-      createdAt: '2020-03-27T22:55:59.577Z',
-      updatedBy: 'sample user',
-      schedule: {
-        interval: '5m',
-      },
-      throttle: 'no_actions',
-      params,
-    },
-    references: [],
-  };
+  const eqlCompleteRule = getCompleteRuleMock<EqlRuleParams>(params);
   const tuple = {
     from: dateMath.parse(params.from)!,
     to: dateMath.parse(params.to)!,
@@ -71,7 +52,7 @@ describe('eql_executor', () => {
     it('should set a warning when exception list for eql rule contains value list exceptions', async () => {
       const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
       const response = await eqlExecutor({
-        rule: eqlSO,
+        completeRule: eqlCompleteRule,
         tuple,
         exceptionItems,
         experimentalFeatures: allowedExperimentalValues,

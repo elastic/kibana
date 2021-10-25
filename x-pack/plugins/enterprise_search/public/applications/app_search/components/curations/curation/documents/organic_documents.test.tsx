@@ -59,13 +59,6 @@ describe('OrganicDocuments', () => {
     expect(titleText).toEqual('Top organic documents for "world"');
   });
 
-  it('shows a title when the curation is manual', () => {
-    setMockValues({ ...values, isAutomated: false });
-    const wrapper = shallow(<OrganicDocuments />);
-
-    expect(wrapper.find(DataPanel).prop('subtitle')).toContain('Promote results');
-  });
-
   it('renders a loading state', () => {
     setMockValues({ ...values, organicDocumentsLoading: true });
     const wrapper = shallow(<OrganicDocuments />);
@@ -74,8 +67,15 @@ describe('OrganicDocuments', () => {
   });
 
   describe('empty state', () => {
-    it('renders', () => {
+    it('renders when organic results is empty', () => {
       setMockValues({ ...values, curation: { organic: [] } });
+      const wrapper = shallow(<OrganicDocuments />);
+
+      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    });
+
+    it('renders when organic results is undefined', () => {
+      setMockValues({ ...values, curation: { organic: undefined } });
       const wrapper = shallow(<OrganicDocuments />);
 
       expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);

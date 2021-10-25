@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PolicyDetailsState } from '../../../types';
+import { PolicyArtifactsState, PolicyDetailsState } from '../../../types';
 import { initialPolicyDetailsState } from '../reducer';
 import {
   getAssignableArtifactsList,
@@ -16,6 +16,12 @@ import {
   getAssignableArtifactsListExist,
   getAssignableArtifactsListExistIsLoading,
   getUpdateArtifacts,
+  doesPolicyTrustedAppsListNeedUpdate,
+  isPolicyTrustedAppListLoading,
+  getPolicyTrustedAppList,
+  getPolicyTrustedAppsListPagination,
+  getTrustedAppsListOfAllPolicies,
+  getTrustedAppsAllPoliciesById,
 } from './trusted_apps_selectors';
 import { getCurrentArtifactsLocation, isOnPolicyTrustedAppsView } from './policy_common_selectors';
 
@@ -27,13 +33,188 @@ import {
   createFailedResourceState,
 } from '../../../../../state';
 import { MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH } from '../../../../../common/constants';
-import { getMockListResponse, getAPIError, getMockCreateResponse } from '../../../test_utils';
+import {
+  getMockListResponse,
+  getAPIError,
+  getMockCreateResponse,
+  getMockPolicyDetailsArtifactListUrlParams,
+  getMockPolicyDetailsArtifactsPageLocationUrlParams,
+} from '../../../test_utils';
+import { getGeneratedPolicyResponse } from '../../../../trusted_apps/store/mocks';
 
 describe('policy trusted apps selectors', () => {
   let initialState: ImmutableObject<PolicyDetailsState>;
 
+  const createArtifactsState = (
+    artifacts: Partial<PolicyArtifactsState> = {}
+  ): ImmutableObject<PolicyDetailsState> => {
+    return {
+      ...initialState,
+      artifacts: {
+        ...initialState.artifacts,
+        ...artifacts,
+      },
+    };
+  };
+
   beforeEach(() => {
     initialState = initialPolicyDetailsState();
+  });
+
+  describe('doesPolicyTrustedAppsListNeedUpdate()', () => {
+    it('should return true if state is not loaded', () => {
+      expect(doesPolicyTrustedAppsListNeedUpdate(initialState)).toBe(true);
+    });
+
+    it('should return true if it is loaded, but URL params were changed', () => {
+      expect(
+        doesPolicyTrustedAppsListNeedUpdate(
+          createArtifactsState({
+            location: getMockPolicyDetailsArtifactsPageLocationUrlParams({ page_index: 4 }),
+            assignedList: createLoadedResourceState({
+              location: getMockPolicyDetailsArtifactListUrlParams(),
+              artifacts: getMockListResponse(),
+            }),
+          })
+        )
+      ).toBe(true);
+    });
+
+    it('should return false if state is loaded adn URL params are the same', () => {
+      expect(
+        doesPolicyTrustedAppsListNeedUpdate(
+          createArtifactsState({
+            location: getMockPolicyDetailsArtifactsPageLocationUrlParams(),
+            assignedList: createLoadedResourceState({
+              location: getMockPolicyDetailsArtifactListUrlParams(),
+              artifacts: getMockListResponse(),
+            }),
+          })
+        )
+      ).toBe(false);
+    });
+  });
+
+  describe('isPolicyTrustedAppListLoading()', () => {
+    it('should return true when loading data', () => {
+      expect(
+        isPolicyTrustedAppListLoading(
+          createArtifactsState({
+            assignedList: createLoadingResourceState(createUninitialisedResourceState()),
+          })
+        )
+      ).toBe(true);
+    });
+
+    it.each([
+      ['uninitialized', createUninitialisedResourceState() as PolicyArtifactsState['assignedList']],
+      ['loaded', createLoadedResourceState({}) as PolicyArtifactsState['assignedList']],
+      ['failed', createFailedResourceState({}) as PolicyArtifactsState['assignedList']],
+    ])('should return false when state is %s', (__, assignedListState) => {
+      expect(
+        isPolicyTrustedAppListLoading(createArtifactsState({ assignedList: assignedListState }))
+      ).toBe(false);
+    });
+  });
+
+  describe('getPolicyTrustedAppList()', () => {
+    it('should return the list of trusted apps', () => {
+      const listResponse = getMockListResponse();
+
+      expect(
+        getPolicyTrustedAppList(
+          createArtifactsState({
+            location: getMockPolicyDetailsArtifactsPageLocationUrlParams(),
+            assignedList: createLoadedResourceState({
+              location: getMockPolicyDetailsArtifactListUrlParams(),
+              artifacts: listResponse,
+            }),
+          })
+        )
+      ).toEqual(listResponse.data);
+    });
+
+    it('should return empty array if no data is loaded', () => {
+      expect(getPolicyTrustedAppList(initialState)).toEqual([]);
+    });
+  });
+
+  describe('getPolicyTrustedAppsListPagination()', () => {
+    it('should return default pagination data even if no api data is available', () => {
+      expect(getPolicyTrustedAppsListPagination(initialState)).toEqual({
+        pageIndex: 0,
+        pageSize: 10,
+        pageSizeOptions: [10, 20, 50],
+        totalItemCount: 0,
+      });
+    });
+
+    it('should return pagination data based on api response data', () => {
+      const listResponse = getMockListResponse();
+
+      listResponse.page = 6;
+      listResponse.per_page = 100;
+      listResponse.total = 1000;
+
+      expect(
+        getPolicyTrustedAppsListPagination(
+          createArtifactsState({
+            location: getMockPolicyDetailsArtifactsPageLocationUrlParams({
+              page_index: 5,
+              page_size: 100,
+            }),
+            assignedList: createLoadedResourceState({
+              location: getMockPolicyDetailsArtifactListUrlParams({
+                page_index: 5,
+                page_size: 100,
+              }),
+              artifacts: listResponse,
+            }),
+          })
+        )
+      ).toEqual({
+        pageIndex: 5,
+        pageSize: 100,
+        pageSizeOptions: [10, 20, 50],
+        totalItemCount: 1000,
+      });
+    });
+  });
+
+  describe('getTrustedAppsListOfAllPolicies()', () => {
+    it('should return the loaded list of policies', () => {
+      const policiesApiResponse = getGeneratedPolicyResponse();
+
+      expect(
+        getTrustedAppsListOfAllPolicies(
+          createArtifactsState({
+            policies: createLoadedResourceState(policiesApiResponse),
+          })
+        )
+      ).toEqual(policiesApiResponse.items);
+    });
+
+    it('should return an empty array of no policy data was loaded yet', () => {
+      expect(getTrustedAppsListOfAllPolicies(initialState)).toEqual([]);
+    });
+  });
+
+  describe('getTrustedAppsAllPoliciesById()', () => {
+    it('should return an empty object if no polices', () => {
+      expect(getTrustedAppsAllPoliciesById(initialState)).toEqual({});
+    });
+
+    it('should return an object with policy id and policy data', () => {
+      const policiesApiResponse = getGeneratedPolicyResponse();
+
+      expect(
+        getTrustedAppsAllPoliciesById(
+          createArtifactsState({
+            policies: createLoadedResourceState(policiesApiResponse),
+          })
+        )
+      ).toEqual({ [policiesApiResponse.items[0].id]: policiesApiResponse.items[0] });
+    });
   });
 
   describe('isOnPolicyTrustedAppsPage()', () => {

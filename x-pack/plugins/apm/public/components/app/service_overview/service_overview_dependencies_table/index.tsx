@@ -59,7 +59,7 @@ export function ServiceOverviewDependenciesTable({
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
+        endpoint: 'GET /internal/apm/services/{serviceName}/dependencies',
         params: {
           path: { serviceName },
           query: { start, end, environment, numBuckets: 20, offset },
@@ -80,7 +80,7 @@ export function ServiceOverviewDependenciesTable({
             type={location.spanType}
             subtype={location.spanSubtype}
             query={{
-              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+              comparisonEnabled,
               comparisonType,
               environment,
               kuery,
@@ -100,7 +100,7 @@ export function ServiceOverviewDependenciesTable({
             serviceName={location.serviceName}
             agentName={location.agentName}
             query={{
-              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+              comparisonEnabled,
               comparisonType,
               environment,
               kuery,

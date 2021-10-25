@@ -35,7 +35,12 @@ exports[`StatusTable renders when statuses is provided 1`] = `
       },
     ]
   }
-  noItemsMessage="No items found"
+  noItemsMessage={
+    <EuiI18n
+      default="No items found"
+      token="euiBasicTable.noItemsMessage"
+    />
+  }
   responsive={true}
   rowProps={[Function]}
   tableLayout="fixed"

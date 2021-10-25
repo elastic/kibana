@@ -10,7 +10,14 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiDragDropContext, EuiDraggable, EuiEmptyPrompt, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiEmptyPrompt,
+  EuiButtonEmpty,
+  EuiBadge,
+  EuiTextColor,
+} from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../../test_helpers';
 import { DataPanel } from '../../../data_panel';
@@ -47,6 +54,14 @@ describe('PromotedDocuments', () => {
     return draggableWrapper.renderProp('children')({}, {}, {});
   };
 
+  it('displays the number of documents in a badge', () => {
+    const wrapper = shallow(<PromotedDocuments />);
+    const Icon = wrapper.prop('iconType');
+    const iconWrapper = shallow(<Icon />);
+
+    expect(iconWrapper.find(EuiBadge).prop('children')).toEqual(4);
+  });
+
   it('renders a list of draggable promoted documents', () => {
     const wrapper = shallow(<PromotedDocuments />);
 
@@ -55,22 +70,6 @@ describe('PromotedDocuments', () => {
     wrapper.find(EuiDraggable).forEach((draggableWrapper) => {
       expect(getDraggableChildren(draggableWrapper).find(CurationResult).exists()).toBe(true);
     });
-  });
-
-  it('informs the user documents can be re-ordered if the curation is manual', () => {
-    setMockValues({ ...values, isAutomated: false });
-    const wrapper = shallow(<PromotedDocuments />);
-    const subtitle = mountWithIntl(wrapper.prop('subtitle'));
-
-    expect(subtitle.text()).toContain('Documents can be re-ordered');
-  });
-
-  it('informs the user the curation is managed if the curation is automated', () => {
-    setMockValues({ ...values, isAutomated: true });
-    const wrapper = shallow(<PromotedDocuments />);
-    const subtitle = mountWithIntl(wrapper.prop('subtitle'));
-
-    expect(subtitle.text()).toContain('managed by App Search');
   });
 
   describe('empty state', () => {
@@ -90,18 +89,12 @@ describe('PromotedDocuments', () => {
     });
   });
 
-  it('hides the panel actions when empty', () => {
-    setMockValues({ ...values, curation: { promoted: [] } });
-    const wrapper = shallow(<PromotedDocuments />);
-
-    expect(wrapper.find(DataPanel).prop('action')).toBe(false);
-  });
-
-  it('hides the panel actions when the curation is automated', () => {
+  it('shows a message when the curation is automated', () => {
     setMockValues({ ...values, isAutomated: true });
     const wrapper = shallow(<PromotedDocuments />);
+    const panelAction = shallow(wrapper.find(DataPanel).prop('action') as React.ReactElement);
 
-    expect(wrapper.find(DataPanel).prop('action')).toBe(false);
+    expect(panelAction.find(EuiTextColor)).toHaveLength(1);
   });
 
   it('renders a loading state', () => {
@@ -134,6 +127,13 @@ describe('PromotedDocuments', () => {
 
       panelActions.find(EuiButtonEmpty).simulate('click');
       expect(actions.clearPromotedIds).toHaveBeenCalled();
+    });
+
+    it('hides the demote all button when there are on promoted results', () => {
+      setMockValues({ ...values, curation: { promoted: [] } });
+      const wrapper = shallow(<PromotedDocuments />);
+
+      expect(wrapper.find(DataPanel).prop('action')).toEqual(false);
     });
 
     describe('dragging', () => {
