@@ -71,6 +71,26 @@ export default ({ getService }: FtrProviderContext) => {
       await runRequest(jobIdSpace1, 404, idSpace2);
     });
 
+    it('should return job with job id from correct space', async () => {
+      const body = await runRequest(jobIdSpace1, 200, idSpace1);
+
+      expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
+      expect(body.jobs.length).to.eql(
+        1,
+        `response jobs list should contain correct job (got ${JSON.stringify(body.jobs)})`
+      );
+    });
+
+    it('should return job with job wildcard from correct space', async () => {
+      const body = await runRequest(jobIdWildcardSpace1, 200, idSpace1);
+
+      expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
+      expect(body.jobs.length).to.eql(
+        1,
+        `response jobs list should contain correct job (got ${JSON.stringify(body.jobs)})`
+      );
+    });
+
     it('should return empty list with job wildcard from different space', async () => {
       const body = await runRequest(jobIdWildcardSpace1, 200, idSpace2);
 
