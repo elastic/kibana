@@ -473,7 +473,6 @@ export class DocLinksService {
         },
         fleet: {
           guide: `${FLEET_DOCS}index.html`,
-          customizeIntegrationDataRetention: `${FLEET_DOCS}customize-data-retention.html`, // TODO: this is a temp URL until we decide the correct one
           fleetServer: `${FLEET_DOCS}fleet-server.html`,
           fleetServerAddFleetServer: `${FLEET_DOCS}fleet-server.html#add-fleet-server`,
           settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
@@ -481,6 +480,7 @@ export class DocLinksService {
           troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
           elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
           datastreams: `${FLEET_DOCS}data-streams.html`,
+          datastreamsILM: `${FLEET_DOCS}data-streams.html#data-streams-ilm`,
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
           installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
@@ -735,7 +735,7 @@ export interface DocLinksStart {
     readonly snapshotRestore: Record<string, string>;
     readonly ingest: Record<string, string>;
     readonly fleet: Readonly<{
-      customizeIntegrationDataRetention: string;
+      datastreamsILM: string;
       guide: string;
       fleetServer: string;
       fleetServerAddFleetServer: string;
