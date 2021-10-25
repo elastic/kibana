@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { FC, useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { ColorStop } from '../types';
@@ -28,6 +29,13 @@ interface ValidationResult {
   color: boolean;
   stop: boolean;
 }
+
+const strings = {
+  getDeleteStopColorLabel: () =>
+    i18n.translate('xpack.canvas.stopsColorPicker.deleteColorStopLabel', {
+      defaultMessage: 'None',
+    }),
+};
 
 const isValidColorStop = (colorStop: ColorStop): ValidationResult & { valid: boolean } => {
   const valid = !isNaN(colorStop.stop);
@@ -115,10 +123,10 @@ export const StopColorPicker: FC<Props> = (props) => {
           <EuiButtonIcon
             iconType="trash"
             color="danger"
-            title={'Delete'}
+            title={strings.getDeleteStopColorLabel()}
             onClick={onDelete}
             isDisabled={!removable}
-            aria-label="212"
+            aria-label={strings.getDeleteStopColorLabel()}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

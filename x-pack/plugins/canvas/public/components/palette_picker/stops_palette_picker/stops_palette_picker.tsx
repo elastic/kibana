@@ -9,6 +9,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { flowRight, identity } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { i18n } from '@kbn/i18n';
 import { ColorStop, CustomColorPalette, StopsPalettePickerProps } from '../types';
 import { PalettePicker } from '../palette_picker';
 import { StopColorPicker } from './stop_color_picker';
@@ -23,6 +24,17 @@ import {
   getOverridenPaletteOptions,
 } from './utils';
 import { ColorPalette } from '../../../../common/lib/palettes';
+
+const strings = {
+  getAddColorStopLabel: () =>
+    i18n.translate('xpack.canvas.stopsPalettePicker.addColorStopLabel', {
+      defaultMessage: 'Add color stop',
+    }),
+  getColorStopsLabel: () =>
+    i18n.translate('xpack.canvas.stopsPalettePicker.colorStopsLabel', {
+      defaultMessage: 'Color stops',
+    }),
+};
 
 const defaultStops = [0, 1];
 const MIN_STOPS = 2;
@@ -110,7 +122,7 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
             clearable={false}
           />
         </EuiFlexItem>
-        <EuiFormRow label="Color stops">
+        <EuiFormRow label={strings.getColorStopsLabel()}>
           <>{stopColorPickers}</>
         </EuiFormRow>
       </EuiFlexGroup>
@@ -119,12 +131,12 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
       <EuiButtonEmpty
         iconType="plusInCircle"
         color="primary"
-        aria-label={'Add color stop'}
+        aria-label={strings.getAddColorStopLabel()}
         size="xs"
         flush="left"
         onClick={addColorStopAndApply}
       >
-        Add color stop
+        {strings.getAddColorStopLabel()}
       </EuiButtonEmpty>
     </>
   );
