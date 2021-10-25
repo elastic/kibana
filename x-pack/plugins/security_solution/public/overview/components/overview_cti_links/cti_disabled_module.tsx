@@ -9,7 +9,7 @@ import React from 'react';
 import * as i18n from './translations';
 import { DisabledLinkPanel } from '../link_panel/disabled_link_panel';
 import { ThreatIntelPanelView } from './threat_intel_panel_view';
-import { useIntegrationsPageLink } from './use-integrations-page-link';
+import { useIntegrationsPageLink } from './use_integrations_page_link';
 
 export const CtiDisabledModuleComponent = () => {
   const integrationsLink = useIntegrationsPageLink();
