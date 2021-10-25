@@ -89,8 +89,8 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       elasticsearch: { cluster: [], indices: [], run_as: [] },
       kibana: [
         {
-          base: [],
-          feature: { ml: ['all'], savedObjectsManagement: ['all'] },
+          base: ['all'],
+          feature: { savedObjectsManagement: ['all'] },
           spaces: ['*'],
         },
       ],
@@ -122,8 +122,8 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       elasticsearch: { cluster: [], indices: [], run_as: [] },
       kibana: [
         {
-          base: [],
-          feature: { ml: ['read'], savedObjectsManagement: ['read'] },
+          base: ['read'],
+          feature: { savedObjectsManagement: ['read'] },
           spaces: ['*'],
         },
       ],
@@ -146,7 +146,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       full_name: 'ML Poweruser',
       password: 'mlp001',
       roles: [
-        'kibana_admin',
+        'ft_all_space_ml_none',
         'machine_learning_admin',
         'ft_ml_source',
         'ft_ml_dest',
