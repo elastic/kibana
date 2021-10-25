@@ -35,7 +35,7 @@ const getAlertsCountTableColumns = (
     {
       field: 'key',
       name: selectedStackByOption,
-      truncateText: true,
+      truncateText: false,
       render: function DraggableStackOptionField(value: string) {
         return (
           <DefaultDraggable
