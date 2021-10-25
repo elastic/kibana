@@ -9,6 +9,9 @@
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { render } from 'react-dom';
+import { EuiLoadingChart } from '@elastic/eui';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IndexPattern,
@@ -300,6 +303,13 @@ export class VisualizeEmbeddable
 
     this.domNode = div;
     super.render(this.domNode);
+
+    render(
+      <div className="visChart__spinner">
+        <EuiLoadingChart mono size="l" />
+      </div>,
+      this.domNode
+    );
 
     const expressions = getExpressions();
     this.handler = new expressions.ExpressionLoader(this.domNode, undefined, {
