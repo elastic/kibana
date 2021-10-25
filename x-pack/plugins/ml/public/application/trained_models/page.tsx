@@ -40,7 +40,7 @@ export const Page: FC = () => {
   return (
     <Fragment>
       <NavigationMenu tabId="trained_models" />
-      <EuiPage data-test-subj="mlPageTrainedModels">
+      <EuiPage data-test-subj="mlPageModelManagement">
         <EuiPageBody>
           <EuiPageHeader>
             <EuiPageHeaderSection>

@@ -179,7 +179,7 @@ export const NodesList: FC = () => {
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <div data-test-subj="mlModelsTableContainer">
+      <div data-test-subj="mlNodesTableContainer">
         <EuiInMemoryTable<NodeItem>
           allowNeutralSort={false}
           columns={columns}

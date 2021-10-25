@@ -101,7 +101,7 @@ const TAB_DATA: Record<TabId, TabData> = {
     }),
   },
   trained_models: {
-    testSubject: 'mlMainTab trainedModels',
+    testSubject: 'mlMainTab modelManagement',
     name: i18n.translate('xpack.ml.trainedModelsTabLabel', {
       defaultMessage: 'Trained Models',
     }),
