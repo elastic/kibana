@@ -357,34 +357,4 @@ describe('Config Deprecations', () => {
       ]
     `);
   });
-
-  it('warns when the security plugin is disabled', () => {
-    const config = {
-      xpack: {
-        security: {
-          enabled: false,
-        },
-      },
-    };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated).toEqual(config);
-    expect(messages).toMatchInlineSnapshot(`
-      Array [
-        "Disabling the security plugin \\"xpack.security.enabled\\" will only be supported by disable security in Elasticsearch.",
-      ]
-    `);
-  });
-
-  it('does not warn when the security plugin is enabled', () => {
-    const config = {
-      xpack: {
-        security: {
-          enabled: true,
-        },
-      },
-    };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated).toEqual(config);
-    expect(messages).toHaveLength(0);
-  });
 });
