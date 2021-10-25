@@ -44,7 +44,7 @@ describe('CtiWithEvents', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiWithEvents {...mockCtiWithEventsProps} someIntegrationsIsDisabled={true} />
+            <CtiWithEvents {...mockCtiWithEventsProps} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>
@@ -53,5 +53,31 @@ describe('CtiWithEvents', () => {
     expect(wrapper.find('[data-test-subj="cti-total-event-count"]').text()).toEqual(
       `Showing: ${mockCtiWithEventsProps.totalCount} indicators`
     );
+  });
+
+  it('renders enable modules button', () => {
+    const wrapper = mount(
+      <Provider store={store}>
+        <I18nProvider>
+          <ThemeProvider theme={mockTheme}>
+            <CtiWithEvents {...mockCtiWithEventsProps} />
+          </ThemeProvider>
+        </I18nProvider>
+      </Provider>
+    );
+    expect(wrapper.exists('[data-test-subj="cti-enable-integrations-button"]')).toEqual(true);
+  });
+
+  it(`don't renders enable modules button if all integrations installed`, () => {
+    const wrapper = mount(
+      <Provider store={store}>
+        <I18nProvider>
+          <ThemeProvider theme={mockTheme}>
+            <CtiWithEvents {...mockCtiWithEventsProps} someIntegrationsIsDisabled={false} />
+          </ThemeProvider>
+        </I18nProvider>
+      </Provider>
+    );
+    expect(wrapper.exists('[data-test-subj="cti-enable-integrations-button"]')).toEqual(false);
   });
 });
