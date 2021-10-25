@@ -87,11 +87,12 @@ export interface AppObservableLibs {
 
 export type InspectResponse = Inspect & { response: string[] };
 
+export const CASES_SUB_PLUGIN_KEY = 'cases';
 export interface SubPlugins {
   alerts: Detections;
   rules: Rules;
   exceptions: Exceptions;
-  cases: Cases;
+  [CASES_SUB_PLUGIN_KEY]: Cases;
   hosts: Hosts;
   network: Network;
   ueba: Ueba;
@@ -105,7 +106,7 @@ export interface StartedSubPlugins {
   alerts: ReturnType<Detections['start']>;
   rules: ReturnType<Rules['start']>;
   exceptions: ReturnType<Exceptions['start']>;
-  cases: ReturnType<Cases['start']>;
+  [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
   hosts: ReturnType<Hosts['start']>;
   network: ReturnType<Network['start']>;
   ueba: ReturnType<Ueba['start']>;
