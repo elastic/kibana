@@ -17,7 +17,6 @@ import {
 } from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 
 jest.mock('../../../common/lib/kibana');
@@ -39,7 +38,7 @@ describe('action_type_form', () => {
     },
   }));
 
-  beforeEach(() => {
+  it('calls "setActionParamsProperty" to set the default value for the empty dedupKey', async () => {
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.pagerduty',
       iconClass: 'test',
@@ -55,101 +54,22 @@ describe('action_type_form', () => {
       actionParamsFields: mockedActionParamsFields,
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
-  });
 
-  describe('deprecated icon', () => {
-    const notDeprecatedConnector = {
-      actionTypeId: '.pagerduty',
-      config: {
-        apiUrl: 'http:\\test',
-      },
-      id: 'test',
-      isPreconfigured: false,
-      name: 'test name',
-      secrets: {},
-    };
-
-    const actionItem = {
-      id: 'test',
-      actionTypeId: '.pagerduty',
-      group: 'recovered',
-      params: {
-        eventAction: 'recovered',
-        dedupKey: undefined,
-        summary: '2323',
-        source: 'source',
-        severity: '1',
-        timestamp: new Date().toISOString(),
-        component: 'test',
-        group: 'group',
-        class: 'test class',
-      },
-    };
-
-    it('renders the deprecated warning icon for deprecated connectors', async () => {
-      const deprecatedConnector = {
-        ...notDeprecatedConnector,
-        config: { ...notDeprecatedConnector.config, isLegacy: true },
-      };
-
-      const wrapper = mountWithIntl(
-        getActionTypeForm({
-          actionConnector: deprecatedConnector,
-          connectors: [deprecatedConnector],
-          actionItem,
-        })
-      );
-
-      // Wait for active space to resolve before requesting the component to update
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      expect(
-        wrapper.find('[data-test-subj="deprecated-connector-icon-test"]').exists()
-      ).toBeTruthy();
-    });
-
-    it('does not render the deprecated warning icon for non-deprecated connectors', async () => {
-      const wrapper = mountWithIntl(
-        getActionTypeForm({
-          actionConnector: notDeprecatedConnector,
-          connectors: [notDeprecatedConnector],
-          actionItem,
-        })
-      );
-
-      // Wait for active space to resolve before requesting the component to update
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      expect(
-        wrapper.find('[data-test-subj="deprecated-connector-icon-test"]').exists()
-      ).toBeFalsy();
-    });
-  });
-
-  it('calls "setActionParamsProperty" to set the default value for the empty dedupKey', async () => {
     const wrapper = mountWithIntl(
-      getActionTypeForm({
-        actionItem: {
-          id: '123',
-          actionTypeId: '.pagerduty',
-          group: 'recovered',
-          params: {
-            eventAction: 'recovered',
-            dedupKey: undefined,
-            summary: '2323',
-            source: 'source',
-            severity: '1',
-            timestamp: new Date().toISOString(),
-            component: 'test',
-            group: 'group',
-            class: 'test class',
-          },
+      getActionTypeForm(1, undefined, {
+        id: '123',
+        actionTypeId: '.pagerduty',
+        group: 'recovered',
+        params: {
+          eventAction: 'recovered',
+          dedupKey: undefined,
+          summary: '2323',
+          source: 'source',
+          severity: '1',
+          timestamp: new Date().toISOString(),
+          component: 'test',
+          group: 'group',
+          class: 'test class',
         },
       })
     );
@@ -168,24 +88,37 @@ describe('action_type_form', () => {
   });
 
   it('does not call "setActionParamsProperty" because dedupKey is not empty', async () => {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.pagerduty',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+        return Promise.resolve({});
+      },
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        const validationResult = { errors: {} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFields,
+    });
+    actionTypeRegistry.get.mockReturnValue(actionType);
+
     const wrapper = mountWithIntl(
-      getActionTypeForm({
-        index: 1,
-        actionItem: {
-          id: '123',
-          actionTypeId: '.pagerduty',
-          group: 'recovered',
-          params: {
-            eventAction: 'recovered',
-            dedupKey: '232323',
-            summary: '2323',
-            source: 'source',
-            severity: '1',
-            timestamp: new Date().toISOString(),
-            component: 'test',
-            group: 'group',
-            class: 'test class',
-          },
+      getActionTypeForm(1, undefined, {
+        id: '123',
+        actionTypeId: '.pagerduty',
+        group: 'recovered',
+        params: {
+          eventAction: 'recovered',
+          dedupKey: '232323',
+          summary: '2323',
+          source: 'source',
+          severity: '1',
+          timestamp: new Date().toISOString(),
+          component: 'test',
+          group: 'group',
+          class: 'test class',
         },
       })
     );
@@ -202,29 +135,18 @@ describe('action_type_form', () => {
   });
 });
 
-function getActionTypeForm({
-  index,
-  actionConnector,
-  actionItem,
-  defaultActionGroupId,
-  connectors,
-  actionTypeIndex,
-  defaultParams,
-  onAddConnector,
-  onDeleteAction,
-  onConnectorSelected,
-}: {
-  index?: number;
-  actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>;
-  actionItem?: AlertAction;
-  defaultActionGroupId?: string;
-  connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>;
-  actionTypeIndex?: Record<string, ActionType>;
-  defaultParams?: DefaultActionParams;
-  onAddConnector?: () => void;
-  onDeleteAction?: () => void;
-  onConnectorSelected?: (id: string) => void;
-}) {
+function getActionTypeForm(
+  index?: number,
+  actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>,
+  actionItem?: AlertAction,
+  defaultActionGroupId?: string,
+  connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>,
+  actionTypeIndex?: Record<string, ActionType>,
+  defaultParams?: DefaultActionParams,
+  onAddConnector?: () => void,
+  onDeleteAction?: () => void,
+  onConnectorSelected?: (id: string) => void
+) {
   const actionConnectorDefault = {
     actionTypeId: '.pagerduty',
     config: {
@@ -291,21 +213,19 @@ function getActionTypeForm({
     eventAction: 'resolve',
   };
   return (
-    <EuiThemeProvider>
-      <ActionTypeForm
-        actionConnector={actionConnector ?? actionConnectorDefault}
-        actionItem={actionItem ?? actionItemDefault}
-        connectors={connectors ?? connectorsDefault}
-        onAddConnector={onAddConnector ?? jest.fn()}
-        onDeleteAction={onDeleteAction ?? jest.fn()}
-        onConnectorSelected={onConnectorSelected ?? jest.fn()}
-        defaultActionGroupId={defaultActionGroupId ?? 'default'}
-        setActionParamsProperty={jest.fn()}
-        index={index ?? 1}
-        actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
-        defaultParams={defaultParams ?? defaultParamsDefault}
-        actionTypeRegistry={actionTypeRegistry}
-      />
-    </EuiThemeProvider>
+    <ActionTypeForm
+      actionConnector={actionConnector ?? actionConnectorDefault}
+      actionItem={actionItem ?? actionItemDefault}
+      connectors={connectors ?? connectorsDefault}
+      onAddConnector={onAddConnector ?? jest.fn()}
+      onDeleteAction={onDeleteAction ?? jest.fn()}
+      onConnectorSelected={onConnectorSelected ?? jest.fn()}
+      defaultActionGroupId={defaultActionGroupId ?? 'default'}
+      setActionParamsProperty={jest.fn()}
+      index={index ?? 1}
+      actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
+      defaultParams={defaultParams ?? defaultParamsDefault}
+      actionTypeRegistry={actionTypeRegistry}
+    />
   );
 }
