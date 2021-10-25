@@ -62,7 +62,12 @@ export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
                   title={i18n.SOME_MODULES_DISABLE_TITLE}
                   body={i18n.DANGER_BODY}
                   button={
-                    <EuiButton color="warning" href={integrationsLink} target="_blank">
+                    <EuiButton
+                      color="warning"
+                      href={integrationsLink}
+                      data-test-subj="cti-enable-integrations-button"
+                      target="_blank"
+                    >
                       {i18n.DANGER_BUTTON}
                     </EuiButton>
                   }
