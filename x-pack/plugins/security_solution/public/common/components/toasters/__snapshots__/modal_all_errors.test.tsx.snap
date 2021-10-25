@@ -22,7 +22,9 @@ exports[`Modal all errors rendering it renders the default all errors modal when
     <EuiAccordion
       arrowDisplay="left"
       buttonContent="Error 1, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt u ..."
+      buttonElement="button"
       data-test-subj="modal-all-errors-accordion"
+      element="div"
       id="accordion1"
       initialIsOpen={true}
       isLoading={false}
