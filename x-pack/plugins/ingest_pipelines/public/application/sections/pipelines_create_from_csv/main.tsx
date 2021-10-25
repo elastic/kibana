@@ -24,11 +24,10 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [pipelineProcessors, setPipelineProcessors] = useState<Processor[]>([]);
-  const [errorTitle, setErrorTitle] = useState<string>('');
-  const [errorDetails, setErrorDetails] = useState<string>('');
+  const [error, setError] = useState<{ title: string; message: string } | null>(null);
   const [file, setFile] = useState<FileList | null>(null);
 
-  const hasError = !!errorTitle || !!errorDetails;
+  const hasError = error !== null;
 
   const { services } = useKibana();
 
@@ -37,9 +36,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
   }, [services]);
 
   const onFilePickerChange = (files: FileList) => {
-    setErrorTitle('');
-    setErrorDetails('');
-
+    setError(null);
     setFile(files);
   };
 
@@ -66,28 +63,24 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
   const processFile = async (csv: File, action: FieldCopyAction) => {
     const maxBytes = services.fileUpload.getMaxBytes();
 
-    if (csv.size <= maxBytes) {
+    if (csv.size === 0) {
+      setError({ title: 'File is empty', message: 'The file provided is empty.' }); 
+    } else if (csv.size > maxBytes) {
+      setError({ title: 'File too large', message: 'File is greater than allowed size of ' + maxBytes + 'bytes.' }); 
+    } else {
       try {
         const fileContents = await services.fileReader.readFile(csv, maxBytes);
-
         await fetchPipelineFromMapping(fileContents, action);
       } catch (e) {
         setIsLoading(false);
         setIsUploaded(false);
-        setErrorTitle(
-          i18n.translate('xpack.ingestPipelines.createFromCsv.processFile.unexpectedErrorTitle', {
-            defaultMessage: 'Something went wrong',
-          })
-        );
-        setErrorDetails(
-          i18n.translate('xpack.ingestPipelines.createFromCsv.processFile.unexpectedError', {
-            defaultMessage: 'Unexpected error',
-          })
-        );
+        setError({ title: i18n.translate('xpack.ingestPipelines.createFromCsv.processFile.unexpectedErrorTitle', {
+          defaultMessage: 'Error reading file',
+        }), 
+        message: i18n.translate('xpack.ingestPipelines.createFromCsv.processFile.unexpectedError', {
+          defaultMessage: 'The file provided could not be read.',
+        }) });
       }
-    } else {
-      setErrorTitle('File too large');
-      setErrorDetails('File is greater than allowed size of ' + maxBytes + 'bytes.');
     }
   };
 
@@ -103,22 +96,17 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
     if (!!error) {
       try {
         const errorParts = error.message.split(':');
-        setErrorTitle(errorParts[0]);
-        setErrorDetails(errorParts[1]);
+        setError({ title: errorParts[0], message: errorParts[1] }); 
       } catch (e) {
-        setErrorTitle(
-          i18n.translate('xpack.ingestPipelines.createFromCsv.fetchPipeline.unexpectedErrorTitle', {
-            defaultMessage: 'Something went wrong',
-          })
-        );
-        setErrorDetails(
-          i18n.translate(
-            'xpack.ingestPipelines.createFromCsv.fetchPipeline.unexpectedErrorDetails',
-            {
-              defaultMessage: 'Unexpected error',
-            }
-          )
-        );
+        setError({ title: i18n.translate('xpack.ingestPipelines.createFromCsv.fetchPipeline.unexpectedErrorTitle', {
+          defaultMessage: 'Something went wrong',
+        }), 
+        message: i18n.translate(
+          'xpack.ingestPipelines.createFromCsv.fetchPipeline.unexpectedErrorDetails',
+          {
+            defaultMessage: 'Unexpected error',
+          }
+        ) });
       }
       setIsLoading(false);
       setIsUploaded(false);
@@ -158,7 +146,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
 
       <Instructions />
 
-      {hasError && <Error errorTitle={errorTitle} errorDetails={errorDetails} />}
+      {hasError && <Error errorTitle={error.title} errorDetails={error.message} />}
 
       <EuiSpacer size="xl" />
 

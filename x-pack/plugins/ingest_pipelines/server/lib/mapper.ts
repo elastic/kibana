@@ -11,7 +11,7 @@ import { FieldCopyAction, Pipeline } from '../../common/types';
 
 const REQUIRED_CSV_HEADERS = ['source_field', 'destination_field'];
 
-const ACCEPTED_FORMAT_ACTIONS = [
+const FORMAT_ACTIONS = [
   'uppercase',
   'lowercase',
   'to_boolean',
@@ -20,27 +20,35 @@ const ACCEPTED_FORMAT_ACTIONS = [
   'to_array',
   'to_string',
   'parse_timestamp',
-];
+] as const;
+
+type FormatAction = typeof FORMAT_ACTIONS[number];
+type TimeStampFormat = 'UNIX' | 'UNIX_MS' | 'ISO8601' | 'TAI64N';
 
 interface Mapping {
   source_field: string;
-  destination_field: string;
-  copy_action?: string;
-  format_action?: string;
-  timestamp_format?: string;
+  destination_field?: string;
+  copy_action?: FieldCopyAction;
+  format_action?: FormatAction;
+  timestamp_format?: TimeStampFormat;
 }
 
-export function mapToIngestPipeline(file: string, copyAction: FieldCopyAction) {
-  if (!file || file.length === 0) {
-    return null;
+interface Row extends Mapping {
+  notes?: string;
+  [key: string]: unknown; // allow unknown columns
+}
+
+export function csvToIngestPipeline(file: string, copyAction: FieldCopyAction) {
+  if (file.trim().length === 0) {
+    throw new Error(
+      i18n.translate('xpack.ingestPipelines.csvToIngestPipeline.error.emptyFileErrors', {
+        defaultMessage: 'Error reading file: file provided is empty.',
+      })
+    );
   }
 
   const fileData = parseAndValidate(file);
   const mapping = convertCsvToMapping(fileData, copyAction);
-
-  if (mapping === null) {
-    return null;
-  }
   return generatePipeline(mapping);
 }
 
@@ -62,10 +70,8 @@ function parseAndValidate(file: string) {
     );
   }
 
-  const includesCheck = (arr: string[], target: string[]) => target.every((v) => arr.includes(v));
-  if (!includesCheck(meta.fields, REQUIRED_CSV_HEADERS)) {
+  if (REQUIRED_CSV_HEADERS.every((header) => meta.fields.includes(header)) === false) {
     const required = REQUIRED_CSV_HEADERS.join(', ');
-
     throw new Error(
       i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.missingHeaders', {
         defaultMessage: 'Required headers are missing: Required {required} missing in CSV',
@@ -77,59 +83,58 @@ function parseAndValidate(file: string) {
   return data;
 }
 
-function convertCsvToMapping(rows: any[], copyFieldAction: FieldCopyAction) {
-  const mapping = new Map();
+function convertCsvToMapping(rows: Row[], copyFieldAction: FieldCopyAction) {
+  const mapping = new Map<string, Mapping>();
 
   if (rows.length < 1) {
-    return null;
+    return mapping;
   }
 
   for (const row of rows) {
-    // Skip rows that don't have a source field
-    if (!row.source_field || !row.source_field.trim()) continue;
-    // Skip if no destination field and no format field provided since it's possible to reformat a source field by itself
+    if (!row.source_field || !row.source_field.trim()) {
+      // Skip rows that don't have a source field
+      continue;
+    }
     if (
       (!row.destination_field || !row.destination_field.trim()) &&
-      (!row.format_field || !row.format_field.trim())
-    )
+      (!row.format_action || !row.format_action.trim())
+    ) {
+      // Skip if no destination field and no format field provided since it's possible to reformat a source field by itself
       continue;
+    }
 
     const source = row.source_field.trim();
-    let destination = (row.destination_field && row.destination_field.trim()) || undefined;
-    const copyAction = (row.copy_action && row.copy_action.trim()) || copyFieldAction;
+    let destination = (row.destination_field && row.destination_field.trim());
+    const copyAction = (row.copy_action && row.copy_action.trim()) ?? copyFieldAction;
     let formatAction = row.format_action && row.format_action.trim();
     let timestampFormat = row.timestamp_format && row.timestamp_format.trim();
 
-    // If @timestamp is the destination and the user does not specify how to format the conversion, convert it to UNIX_MS
-    if (
-      row.destination_field === '@timestamp' &&
-      (!row.timestamp_format || !row.timestamp_format.trim())
-    ) {
+    if (destination === '@timestamp' && !Boolean(timestampFormat)) {
+      // If @timestamp is the destination and the user does not specify how to format the conversion, convert it to UNIX_MS
       formatAction = 'parse_timestamp';
       timestampFormat = 'UNIX_MS';
-    }
-    // If the destination field is empty but a format action is provided, then assume we're formating the source field.
-    else if (!destination && formatAction) {
+    } else if (!destination && formatAction) {
+      // If the destination field is empty but a format action is provided, then assume we're formating the source field.
       destination = source;
     }
 
-    if (formatAction && !ACCEPTED_FORMAT_ACTIONS.includes(formatAction)) {
-      const accepted = ACCEPTED_FORMAT_ACTIONS.join(', ');
+    if (formatAction && !FORMAT_ACTIONS.includes(formatAction as FormatAction)) {
+      const formatActions = FORMAT_ACTIONS.join(', ');
       throw new Error(
-        i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.unacceptedFormatAction', {
-          defaultMessage: 'Unaccepted format action: Acceptable actions {accepted}',
-          values: { accepted },
+        i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.invalidFormatAction', {
+          defaultMessage: 'Invalid format action [{ formatAction }]. The valid actions are {formatActions}',
+          values: { formatAction, formatActions },
         })
       );
     }
 
-    mapping.set(source + '+' + destination, {
+    mapping.set(`${source}+${destination}`, {
       source_field: source,
       destination_field: destination,
-      copy_action: copyAction,
-      format_action: formatAction,
-      timestamp_format: timestampFormat,
-    } as Mapping);
+      copy_action: copyAction as FieldCopyAction,
+      format_action: formatAction as FormatAction,
+      timestamp_format: timestampFormat as TimeStampFormat,
+    });
   }
 
   return mapping;
@@ -238,5 +243,5 @@ function fieldPresencePredicate(field: string) {
 }
 
 function hasSameName(row: Mapping) {
-  return !row.destination_field || row.source_field === row.destination_field;
+  return row.source_field === row.destination_field;
 }

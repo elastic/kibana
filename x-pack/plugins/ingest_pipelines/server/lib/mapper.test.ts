@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { mapToIngestPipeline } from './mapper';
+import { csvToIngestPipeline } from './mapper';
 import { FieldCopyAction } from '../../common/types';
 
 describe('mapper', () => {
   describe('mapToIngestPipeline()', () => {
     it('empty file returns null', () => {
-      expect(mapToIngestPipeline('', FieldCopyAction.Copy)).toBeNull();
+      expect(csvToIngestPipeline('', FieldCopyAction.Copy)).toBeNull();
     });
 
     it('file parsing error for invalid csv', () => {
@@ -21,7 +21,7 @@ describe('mapper', () => {
       fourty two,42`;
 
       expect(() => {
-        mapToIngestPipeline(invalidCsv, FieldCopyAction.Copy);
+        csvToIngestPipeline(invalidCsv, FieldCopyAction.Copy);
       }).toThrow(
         new Error(
           'Error reading file: An unexpected issue occured during the processing of the file'
@@ -33,7 +33,7 @@ describe('mapper', () => {
       const noHeadersCsv = 'srcip,,,,source.address,Copying srcip to source.address';
 
       expect(() => {
-        mapToIngestPipeline(noHeadersCsv, FieldCopyAction.Copy);
+        csvToIngestPipeline(noHeadersCsv, FieldCopyAction.Copy);
       }).toThrow(
         new Error(
           'Required headers are missing: Required source_field, destination_field missing in CSV'
@@ -46,7 +46,7 @@ describe('mapper', () => {
         'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcport,,invalid_action,,source.port,\n';
 
       expect(() => {
-        mapToIngestPipeline(badFormatCsv, FieldCopyAction.Copy);
+        csvToIngestPipeline(badFormatCsv, FieldCopyAction.Copy);
       }).toThrow(
         new Error(
           'Unaccepted format action: Acceptable actions uppercase, lowercase, to_boolean, to_integer, to_float, to_array, to_string, parse_timestamp'
@@ -69,7 +69,7 @@ describe('mapper', () => {
             },
           ],
         };
-        expect(mapToIngestPipeline(duplciateRow, FieldCopyAction.Copy)).toEqual(expectedJson);
+        expect(csvToIngestPipeline(duplciateRow, FieldCopyAction.Copy)).toEqual(expectedJson);
       });
 
       describe('timestamp formatting', () => {
@@ -90,7 +90,7 @@ describe('mapper', () => {
               },
             ],
           };
-          expect(mapToIngestPipeline(defaultTimestamp, FieldCopyAction.Copy)).toEqual(expectedJson);
+          expect(csvToIngestPipeline(defaultTimestamp, FieldCopyAction.Copy)).toEqual(expectedJson);
         });
 
         it('specified handling', () => {
@@ -110,7 +110,7 @@ describe('mapper', () => {
               },
             ],
           };
-          expect(mapToIngestPipeline(timestampSpecifics, FieldCopyAction.Copy)).toEqual(
+          expect(csvToIngestPipeline(timestampSpecifics, FieldCopyAction.Copy)).toEqual(
             expectedJson
           );
         });
@@ -132,7 +132,7 @@ describe('mapper', () => {
               },
             ],
           };
-          expect(mapToIngestPipeline(copyFile, FieldCopyAction.Rename)).toEqual(expectedJson);
+          expect(csvToIngestPipeline(copyFile, FieldCopyAction.Rename)).toEqual(expectedJson);
         });
         it('rename', () => {
           const renameFile =
@@ -157,7 +157,7 @@ describe('mapper', () => {
               },
             ],
           };
-          expect(mapToIngestPipeline(renameFile, FieldCopyAction.Rename)).toEqual(expectedJson);
+          expect(csvToIngestPipeline(renameFile, FieldCopyAction.Rename)).toEqual(expectedJson);
         });
       });
 
@@ -242,7 +242,7 @@ describe('mapper', () => {
             },
           ],
         };
-        expect(mapToIngestPipeline(validCsv, FieldCopyAction.Copy)).toEqual(expectedJson);
+        expect(csvToIngestPipeline(validCsv, FieldCopyAction.Copy)).toEqual(expectedJson);
       });
     });
   });

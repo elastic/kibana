@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { mapToIngestPipeline } from './mapper';
+export { csvToIngestPipeline } from './mapper';

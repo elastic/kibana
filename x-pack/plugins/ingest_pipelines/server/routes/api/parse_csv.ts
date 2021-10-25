@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf, Type } from '@kbn/config-schema';
 
-import { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import { FieldCopyAction } from '../../../common/types';
-import { mapToIngestPipeline } from '../../lib';
+import { csvToIngestPipeline } from '../../lib';
 import { RouteDependencies } from '../../types';
 
-export const registerMapRoute = ({ router }: RouteDependencies): void => {
-  router.post(
+const bodySchema = schema.object({
+  file: schema.string(),
+  copyAction: schema.string() as Type<FieldCopyAction>,
+});
+
+type ReqBody = TypeOf<typeof bodySchema>;
+
+export const registerParseCsvRoute = ({ router }: RouteDependencies): void => {
+  router.post<void, void, ReqBody>(
     {
-      path: `${API_BASE_PATH}/map`,
+      path: `${API_BASE_PATH}/parse_csv`,
       validate: {
-        body: schema.object({
-          file: schema.string(),
-          copyAction: schema.string(),
-        }),
+        body: bodySchema
       },
     },
     async (contxt, req, res) => {
       const { file, copyAction } = req.body;
       try {
-        const result = mapToIngestPipeline(file, copyAction as FieldCopyAction) as Pipeline;
-        return res.ok({ body: JSON.stringify(result) });
+        const result = csvToIngestPipeline(file, copyAction);
+        return res.ok({ body: result });
       } catch (error) {
         return res.badRequest({ body: error.message });
       }
