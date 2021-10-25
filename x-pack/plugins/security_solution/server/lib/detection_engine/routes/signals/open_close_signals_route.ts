@@ -40,7 +40,7 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
       const siemClient = context.securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
       const validationErrors = setSignalStatusValidateTypeDependents(request.body);
-      const spaceId = context.securitySolution.getSpaceId();
+      const spaceId = context.securitySolution?.getSpaceId() ?? 'default';
 
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });

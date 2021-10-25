@@ -263,10 +263,10 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'kibana.rule.building_block_type',
+            key: 'kibana.alert.rule.building_block_type',
             value: 'exists',
           },
-          query: { exists: { field: 'kibana.rule.building_block_type' } },
+          query: { exists: { field: 'kibana.alert.rule.building_block_type' } },
         },
       ];
 

@@ -120,7 +120,7 @@ export const useAddToCase = ({
   const isAlert = useMemo(() => {
     if (event !== undefined) {
       const data = [...event.data];
-      return data.some(({ field }) => field === 'kibana.alert.uuid');
+      return data.some(({ field }) => field === 'kibana.alert.rule.uuid');
     } else {
       return false;
     }

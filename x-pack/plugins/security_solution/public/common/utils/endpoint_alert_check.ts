@@ -19,7 +19,7 @@ export const isAlertFromEndpointEvent = ({
 }: {
   data: TimelineEventsDetailsItem[];
 }): boolean => {
-  const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, data);
+  const isAlert = some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, data);
 
   if (!isAlert) {
     return false;
