@@ -353,6 +353,37 @@ describe('create()', () => {
     );
   });
 
+  test('validates connector: config and secrets', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      validate: {
+        connector: schema.object({
+          config: schema.object({
+            param1: schema.string(),
+          }),
+          secrets: schema.object({
+            param2: schema.string(),
+          }),
+        }),
+      },
+      executor,
+    });
+    await expect(
+      actionsClient.create({
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [param1]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
   test(`throws an error when an action type doesn't exist`, async () => {
     await expect(
       actionsClient.create({
@@ -1513,6 +1544,48 @@ describe('update()', () => {
       validate: {
         config: schema.object({
           param1: schema.string(),
+        }),
+      },
+      executor,
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+      },
+      references: [],
+    });
+    await expect(
+      actionsClient.update({
+        id: 'my-action',
+        action: {
+          name: 'my name',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [param1]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
+  test('validates connector: config and secrets', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      validate: {
+        config: schema.object({
+          param1: schema.string(),
+        }),
+        connector: schema.object({
+          config: schema.object({
+            param1: schema.string(),
+          }),
+          secrets: schema.object({
+            param2: schema.string(),
+          }),
         }),
       },
       executor,
