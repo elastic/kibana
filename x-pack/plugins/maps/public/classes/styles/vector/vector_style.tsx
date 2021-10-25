@@ -866,7 +866,6 @@ export class VectorStyle implements IVectorStyle {
     textLayerId: string;
   }) {
     mbMap.setLayoutProperty(textLayerId, 'icon-allow-overlap', true);
-    mbMap.setLayoutProperty(textLayerId, 'text-allow-overlap', true);
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
     this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
