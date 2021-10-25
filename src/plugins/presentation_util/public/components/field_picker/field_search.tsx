@@ -20,8 +20,8 @@ import {
   EuiFilterButton,
   EuiSpacer,
 } from '@elastic/eui';
+import { FieldIcon } from '@kbn/react-field/field_icon';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldIcon } from '../../../../kibana_react/public';
 
 export interface Props {
   onSearchChange: (value: string) => void;

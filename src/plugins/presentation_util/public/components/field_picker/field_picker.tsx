@@ -10,9 +10,10 @@ import React, { useState } from 'react';
 import { sortBy, uniq } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldButton } from '@kbn/react-field/field_button';
 
 import { DataView, DataViewField } from '../../../../data_views/common';
-import { FieldIcon, FieldButton } from '../../../../kibana_react/public';
 
 import { FieldSearch } from './field_search';
 
