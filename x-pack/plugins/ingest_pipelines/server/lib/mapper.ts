@@ -42,7 +42,7 @@ export function csvToIngestPipeline(file: string, copyAction: FieldCopyAction) {
   if (file.trim().length === 0) {
     throw new Error(
       i18n.translate('xpack.ingestPipelines.csvToIngestPipeline.error.emptyFileErrors', {
-        defaultMessage: 'Error reading file: file provided is empty.',
+        defaultMessage: 'Error reading file: The file provided is empty.',
       })
     );
   }
@@ -65,7 +65,7 @@ function parseAndValidate(file: string) {
     throw new Error(
       i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.parseErrors', {
         defaultMessage:
-          'Error reading file: An unexpected issue occured during the processing of the file',
+          'Error reading file: An unexpected issue has occured during the processing of the file.',
       })
     );
   }
@@ -102,10 +102,9 @@ function convertCsvToMapping(rows: Row[], copyFieldAction: FieldCopyAction) {
       // Skip if no destination field and no format field provided since it's possible to reformat a source field by itself
       continue;
     }
-
     const source = row.source_field.trim();
     let destination = row.destination_field && row.destination_field.trim();
-    const copyAction = (row.copy_action && row.copy_action.trim()) ?? copyFieldAction;
+    const copyAction = (row.copy_action && row.copy_action.trim()) || copyFieldAction;
     let formatAction = row.format_action && row.format_action.trim();
     let timestampFormat = row.timestamp_format && row.timestamp_format.trim();
 

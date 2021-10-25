@@ -9,9 +9,15 @@ import { csvToIngestPipeline } from './mapper';
 import { FieldCopyAction } from '../../common/types';
 
 describe('mapper', () => {
-  describe('mapToIngestPipeline()', () => {
-    it('empty file returns null', () => {
-      expect(csvToIngestPipeline('', FieldCopyAction.Copy)).toBeNull();
+  describe('csvToIngestPipeline()', () => {
+    it('empty file returns empty mapping', () => {
+      expect(() => {
+        csvToIngestPipeline('', FieldCopyAction.Copy);
+      }).toThrow(
+        new Error(
+          'Error reading file: The file provided is empty.'
+        )
+      );
     });
 
     it('file parsing error for invalid csv', () => {
@@ -24,7 +30,7 @@ describe('mapper', () => {
         csvToIngestPipeline(invalidCsv, FieldCopyAction.Copy);
       }).toThrow(
         new Error(
-          'Error reading file: An unexpected issue occured during the processing of the file'
+          'Error reading file: An unexpected issue has occured during the processing of the file.'
         )
       );
     });
@@ -49,7 +55,7 @@ describe('mapper', () => {
         csvToIngestPipeline(badFormatCsv, FieldCopyAction.Copy);
       }).toThrow(
         new Error(
-          'Unaccepted format action: Acceptable actions uppercase, lowercase, to_boolean, to_integer, to_float, to_array, to_string, parse_timestamp'
+          'Invalid format action [invalid_action]. The valid actions are uppercase, lowercase, to_boolean, to_integer, to_float, to_array, to_string, parse_timestamp'
         )
       );
     });
