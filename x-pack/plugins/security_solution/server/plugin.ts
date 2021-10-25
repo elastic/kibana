@@ -107,6 +107,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
+  private kibanaIndex?: string;
 
   constructor(context: PluginInitializerContext) {
     this.pluginContext = context;
@@ -130,6 +131,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const { pluginContext, config, logger, appClientFactory } = this;
     const experimentalFeatures = config.experimentalFeatures;
+    this.kibanaIndex = core.savedObjects.getKibanaIndex();
 
     appClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
@@ -162,7 +164,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initUsageCollectors({
       core,
-      kibanaIndex: config.kibanaIndex,
+      kibanaIndex: core.savedObjects.getKibanaIndex(),
       signalsIndex: config.signalsIndex,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
@@ -411,7 +413,8 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryReceiver.start(
       core,
-      config.kibanaIndex,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.kibanaIndex!,
       this.endpointAppContextService,
       exceptionListClient
     );
