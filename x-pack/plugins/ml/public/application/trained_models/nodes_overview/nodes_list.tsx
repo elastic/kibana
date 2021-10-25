@@ -16,7 +16,6 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
-import { getDefaultModelsListState } from '../models_management';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
@@ -30,12 +29,20 @@ import {
 } from '../../data_frame_analytics/common';
 import { MemoryPreviewChart } from './memory_preview_chart';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
+import { ListingPageUrlState } from '../../../../common/types/common';
 
 export type NodeItem = NodeDeploymentStatsResponse;
 
 export interface NodeItemWithStats extends NodeItem {
   stats: any;
 }
+
+export const getDefaultNodesListState = (): ListingPageUrlState => ({
+  pageIndex: 0,
+  pageSize: 10,
+  sortField: 'name',
+  sortDirection: 'asc',
+});
 
 export const NodesList: FC = () => {
   const trainedModelsApiService = useTrainedModelsApiService();
@@ -47,7 +54,7 @@ export const NodesList: FC = () => {
   );
   const [pageState, updatePageState] = usePageUrlState(
     ML_PAGES.TRAINED_MODELS_NODES,
-    getDefaultModelsListState()
+    getDefaultNodesListState()
   );
 
   const searchQueryText = pageState.queryText ?? '';
@@ -59,12 +66,11 @@ export const NodesList: FC = () => {
     refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
   }, []);
 
-  const toggleDetails = async (item: NodeItem) => {
+  const toggleDetails = (item: NodeItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
-      // await fetchModelsStats([item]);
       itemIdToExpandedRowMapValues[item.id] = <ExpandedRow item={item as NodeItemWithStats} />;
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
