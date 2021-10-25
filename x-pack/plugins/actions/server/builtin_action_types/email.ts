@@ -59,6 +59,59 @@ const ConfigSchemaProps = {
 
 const ConfigSchema = schema.object(ConfigSchemaProps);
 
+function validateConfig(
+  configurationUtilities: ActionsConfigurationUtilities,
+  configObject: ActionTypeConfigType
+): string | void {
+  const config = configObject;
+
+  // If service is set as JSON_TRANSPORT_SERVICE or EXCHANGE, host/port are ignored, when the email is sent.
+  // Note, not currently making these message translated, as will be
+  // emitted alongside messages from @kbn/config-schema, which does not
+  // translate messages.
+  if (config.service === JSON_TRANSPORT_SERVICE) {
+    return;
+  } else if (config.service === AdditionalEmailServices.EXCHANGE) {
+    if (config.clientId == null && config.tenantId == null) {
+      return '[clientId]/[tenantId] is required';
+    }
+
+    if (config.clientId == null) {
+      return '[clientId] is required';
+    }
+
+    if (config.tenantId == null) {
+      return '[tenantId] is required';
+    }
+  } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
+    // If configured `service` requires custom host/port/secure settings, validate that they are set
+    if (config.host == null && config.port == null) {
+      return '[host]/[port] is required';
+    }
+
+    if (config.host == null) {
+      return '[host] is required';
+    }
+
+    if (config.port == null) {
+      return '[port] is required';
+    }
+
+    if (!configurationUtilities.isHostnameAllowed(config.host)) {
+      return `[host] value '${config.host}' is not in the allowedHosts configuration`;
+    }
+  } else {
+    // Check configured `service` against nodemailer list of well known services + any custom ones allowed by Kibana
+    const host = getServiceNameHost(config.service);
+    if (host == null) {
+      return `[service] value '${config.service}' is not valid`;
+    }
+    if (!configurationUtilities.isHostnameAllowed(host)) {
+      return `[service] value '${config.service}' resolves to host '${host}' which is not in the allowedHosts configuration`;
+    }
+  }
+}
+
 // secrets definition
 
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
@@ -114,58 +167,12 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-function validateConnector(
-  configurationUtilities: ActionsConfigurationUtilities,
-  connector: { config: ActionTypeConfigType; secrets: ActionTypeSecretsType }
-): string | void {
+function validateConnector(connector: {
+  config: ActionTypeConfigType;
+  secrets: ActionTypeSecretsType;
+}): string | void {
   const config = connector.config;
   const secrets = connector.secrets;
-
-  // If service is set as JSON_TRANSPORT_SERVICE or EXCHANGE, host/port are ignored, when the email is sent.
-  // Note, not currently making these message translated, as will be
-  // emitted alongside messages from @kbn/config-schema, which does not
-  // translate messages.
-  if (config.service === JSON_TRANSPORT_SERVICE) {
-    return;
-  } else if (config.service === AdditionalEmailServices.EXCHANGE) {
-    if (config.clientId == null && config.tenantId == null) {
-      return '[clientId]/[tenantId] is required';
-    }
-
-    if (config.clientId == null) {
-      return '[clientId] is required';
-    }
-
-    if (config.tenantId == null) {
-      return '[tenantId] is required';
-    }
-  } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
-    // If configured `service` requires custom host/port/secure settings, validate that they are set
-    if (config.host == null && config.port == null) {
-      return '[host]/[port] is required';
-    }
-
-    if (config.host == null) {
-      return '[host] is required';
-    }
-
-    if (config.port == null) {
-      return '[port] is required';
-    }
-
-    if (!configurationUtilities.isHostnameAllowed(config.host)) {
-      return `[host] value '${config.host}' is not in the allowedHosts configuration`;
-    }
-  } else {
-    // Check configured `service` against nodemailer list of well known services + any custom ones allowed by Kibana
-    const host = getServiceNameHost(config.service);
-    if (host == null) {
-      return `[service] value '${config.service}' is not valid`;
-    }
-    if (!configurationUtilities.isHostnameAllowed(host)) {
-      return `[service] value '${config.service}' resolves to host '${host}' which is not in the allowedHosts configuration`;
-    }
-  }
 
   if (config.service === AdditionalEmailServices.EXCHANGE && secrets.clientSecret == null) {
     return '[clientSecret] is required';
@@ -190,13 +197,17 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
       defaultMessage: 'Email',
     }),
     validate: {
+      config: schema.object(ConfigSchemaProps, {
+        validate: curry(validateConfig)(configurationUtilities),
+      }),
+      secrets: SecretsSchema,
       params: ParamsSchema,
       connector: schema.object(
         {
           config: ConfigSchema,
           secrets: SecretsSchema,
         },
-        { validate: curry(validateConnector)(configurationUtilities) }
+        { validate: validateConnector }
       ),
     },
     renderParameterTemplates,

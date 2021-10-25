@@ -92,7 +92,7 @@ interface ValidatorType<Type> {
   validate(value: unknown): Type;
 }
 
-interface ValidatorType1<
+interface ValidatorConnector<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets
 > {
@@ -118,7 +118,7 @@ export interface ActionType<
     params?: ValidatorType<Params>;
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
-    connector?: ValidatorType1<Config, Secrets>;
+    connector?: ValidatorConnector<Config, Secrets>;
   };
   renderParameterTemplates?(
     params: Params,
