@@ -61,7 +61,7 @@ export const getDatatable = (
     fitRowToContent: {
       types: ['boolean'],
       help: '',
-    }
+    },
   },
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/

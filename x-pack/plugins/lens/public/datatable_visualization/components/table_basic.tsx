@@ -264,7 +264,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [firstTableRef, onRowContextMenuClick, columnConfig, hasAtLeastOneRowClickAction]);
 
   const renderCellValue = useMemo(
-    () => createGridCell(formatters, columnConfig, DataContext, props.uiSettings, props.args.fitRowToContent),
+    () =>
+      createGridCell(
+        formatters,
+        columnConfig,
+        DataContext,
+        props.uiSettings,
+        props.args.fitRowToContent
+      ),
     [formatters, columnConfig, props.uiSettings, props.args.fitRowToContent]
   );
 
@@ -351,9 +358,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         <EuiDataGrid
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
-          rowHeightsOptions={props.args.fitRowToContent ? {
-            defaultHeight: 'auto'
-          } : undefined}
+          rowHeightsOptions={
+            props.args.fitRowToContent
+              ? {
+                  defaultHeight: 'auto',
+                }
+              : undefined
+          }
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}

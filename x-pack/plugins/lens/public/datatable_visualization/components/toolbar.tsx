@@ -7,11 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFormRow,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { ToolbarPopover } from '../../shared_components';
 import { VisualizationToolbarProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';

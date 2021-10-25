@@ -19,7 +19,7 @@ export const createGridCell = (
   columnConfig: ColumnConfig,
   DataContext: React.Context<DataContextType>,
   uiSettings: IUiSettingsClient,
-  fitRowToContent?: boolean,
+  fitRowToContent?: boolean
 ) => {
   // Changing theme requires a full reload of the page, so we can cache here
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
