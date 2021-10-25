@@ -341,7 +341,6 @@ kibana_vars=(
     xpack.security.authc.saml.realm
     xpack.security.authc.selector.enabled
     xpack.security.cookieName
-    xpack.security.enabled
     xpack.security.encryptionKey
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
