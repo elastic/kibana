@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../../../services';
@@ -49,15 +50,13 @@ describe('EPM install', () => {
       packageName: pkg.name,
     });
 
-    // @ts-expect-error
-    const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0].body as Record<
-      string,
-      any
-    >;
+    const sentTemplate = (
+      esClient.indices.putIndexTemplate.mock.calls[0][0] as estypes.IndicesPutIndexTemplateRequest
+    ).body;
 
     expect(sentTemplate).toBeDefined();
-    expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixUnset);
-    expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
+    expect(sentTemplate?.priority).toBe(templatePriorityDatasetIsPrefixUnset);
+    expect(sentTemplate?.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
   });
 
   it('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to false', async () => {
@@ -91,15 +90,13 @@ describe('EPM install', () => {
       packageName: pkg.name,
     });
 
-    // @ts-expect-error
-    const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
-      string,
-      any
-    >;
+    const sentTemplate = (
+      esClient.indices.putIndexTemplate.mock.calls[0][0] as estypes.IndicesPutIndexTemplateRequest
+    ).body;
 
     expect(sentTemplate).toBeDefined();
-    expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixFalse);
-    expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixFalse]);
+    expect(sentTemplate?.priority).toBe(templatePriorityDatasetIsPrefixFalse);
+    expect(sentTemplate?.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixFalse]);
   });
 
   it('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to true', async () => {
@@ -132,15 +129,14 @@ describe('EPM install', () => {
       packageVersion: pkg.version,
       packageName: pkg.name,
     });
-    // @ts-expect-error
-    const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
-      string,
-      any
-    >;
+
+    const sentTemplate = (
+      esClient.indices.putIndexTemplate.mock.calls[0][0] as estypes.IndicesPutIndexTemplateRequest
+    ).body;
 
     expect(sentTemplate).toBeDefined();
-    expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixTrue);
-    expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixTrue]);
+    expect(sentTemplate?.priority).toBe(templatePriorityDatasetIsPrefixTrue);
+    expect(sentTemplate?.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixTrue]);
   });
 
   it('tests installPackage remove the aliases property if the property existed', async () => {
@@ -184,20 +180,16 @@ describe('EPM install', () => {
       packageName: pkg.name,
     });
 
-    // @ts-expect-error
-    const removeAliases = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
-      string,
-      any
-    >;
-    expect(removeAliases.template.aliases).not.toBeDefined();
+    const removeAliases = (
+      esClient.indices.putIndexTemplate.mock.calls[0][0] as estypes.IndicesPutIndexTemplateRequest
+    ).body;
+    expect(removeAliases?.template?.aliases).not.toBeDefined();
 
-    // @ts-expect-error
-    const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[1][0]!.body as Record<
-      string,
-      any
-    >;
+    const sentTemplate = (
+      esClient.indices.putIndexTemplate.mock.calls[1][0] as estypes.IndicesPutIndexTemplateRequest
+    ).body;
     expect(sentTemplate).toBeDefined();
-    expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixUnset);
-    expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
+    expect(sentTemplate?.priority).toBe(templatePriorityDatasetIsPrefixUnset);
+    expect(sentTemplate?.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
   });
 });
