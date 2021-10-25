@@ -82,8 +82,18 @@ export function resolveCopyToSpaceConflictsSuite(
       expect(result).to.eql({
         [destination]: {
           success: true,
-          successCount: 1,
+          successCount: 2,
           successResults: [
+            {
+              id: `cts_ip_1_${sourceSpaceId}`,
+              type: 'index-pattern',
+              meta: {
+                title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
+                icon: 'indexPatternApp',
+              },
+              destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
+              overwrite: true,
+            },
             {
               id: `cts_vis_3_${sourceSpaceId}`,
               type: 'visualization',
@@ -147,6 +157,19 @@ export function resolveCopyToSpaceConflictsSuite(
           success: false,
           successCount: 0,
           errors: [
+            {
+              error: {
+                type: 'conflict',
+                destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
+              },
+              id: `cts_ip_1_${sourceSpaceId}`,
+              title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
+              meta: {
+                title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
+                icon: 'indexPatternApp',
+              },
+              type: 'index-pattern',
+            },
             {
               error: {
                 type: 'conflict',
@@ -235,35 +258,7 @@ export function resolveCopyToSpaceConflictsSuite(
             {
               statusCode: 403,
               error: 'Forbidden',
-              message: 'Unable to bulk_get index-pattern',
-            },
-          ],
-        },
-      } as CopyResponse);
-
-      // Query ES to ensure that nothing was copied
-      const [dashboard, visualization] = await getObjectsAtSpace(destination);
-      expect(dashboard.attributes.title).to.eql(
-        `This is the ${destination} test space CTS dashboard`
-      );
-      expect(visualization.attributes.title).to.eql(`CTS vis 3 from ${destination} space`);
-    };
-
-  const createExpectReadonlyAtSpaceWithReferencesResult =
-    (spaceId: string = DEFAULT_SPACE_ID) =>
-    async (resp: TestResponse) => {
-      const destination = getDestinationSpace(spaceId);
-
-      const result = resp.body as CopyResponse;
-      expect(result).to.eql({
-        [destination]: {
-          success: false,
-          successCount: 0,
-          errors: [
-            {
-              statusCode: 403,
-              error: 'Forbidden',
-              message: 'Unable to bulk_create visualization',
+              message: 'Unable to bulk_create index-pattern,visualization',
             },
           ],
         },
@@ -453,6 +448,7 @@ export function resolveCopyToSpaceConflictsSuite(
 
           const dashboardObject = { type: 'dashboard', id: `cts_dashboard_${spaceId}` };
           const visualizationObject = { type: 'visualization', id: `cts_vis_3_${spaceId}` };
+          const indexPatternObject = { type: 'index-pattern', id: `cts_ip_1_${spaceId}` };
 
           it(`should return ${tests.withReferencesNotOverwriting.statusCode} when not overwriting, with references`, async () => {
             const destination = getDestinationSpace(spaceId);
@@ -466,6 +462,11 @@ export function resolveCopyToSpaceConflictsSuite(
                 createNewCopies: false,
                 retries: {
                   [destination]: [
+                    {
+                      ...indexPatternObject,
+                      destinationId: `cts_ip_1_${destination}`,
+                      overwrite: false,
+                    },
                     {
                       ...visualizationObject,
                       destinationId: `cts_vis_3_${destination}`,
@@ -490,6 +491,11 @@ export function resolveCopyToSpaceConflictsSuite(
                 createNewCopies: false,
                 retries: {
                   [destination]: [
+                    {
+                      ...indexPatternObject,
+                      destinationId: `cts_ip_1_${destination}`,
+                      overwrite: true,
+                    },
                     {
                       ...visualizationObject,
                       destinationId: `cts_vis_3_${destination}`,
@@ -619,7 +625,6 @@ export function resolveCopyToSpaceConflictsSuite(
     createExpectNonOverriddenResponseWithReferences,
     createExpectNonOverriddenResponseWithoutReferences,
     createExpectUnauthorizedAtSpaceWithReferencesResult,
-    createExpectReadonlyAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     createMultiNamespaceTestCases,
     originSpaces: ['default', 'space_1'],

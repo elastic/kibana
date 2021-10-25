@@ -187,6 +187,8 @@ export function copyToSpaceTestSuiteFactory(
       const destination = getDestinationWithoutConflicts();
       const result = resp.body as CopyResponse;
 
+      const indexPatternDestinationId = result[destination].successResults![0].destinationId;
+      expect(indexPatternDestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
       const vis1DestinationId = result[destination].successResults![1].destinationId;
       expect(vis1DestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
       const vis2DestinationId = result[destination].successResults![2].destinationId;
@@ -202,12 +204,13 @@ export function copyToSpaceTestSuiteFactory(
           successCount: 5,
           successResults: [
             {
-              id: 'cts_ip_1',
+              id: `cts_ip_1_${spaceId}`,
               type: 'index-pattern',
               meta: {
                 icon: 'indexPatternApp',
                 title: `Copy to Space index pattern 1 from ${spaceId} space`,
               },
+              destinationId: indexPatternDestinationId,
             },
             {
               id: `cts_vis_1_${spaceId}`,
@@ -328,13 +331,14 @@ export function copyToSpaceTestSuiteFactory(
           successCount: 5,
           successResults: [
             {
-              id: 'cts_ip_1',
+              id: `cts_ip_1_${spaceId}`,
               type: 'index-pattern',
               meta: {
                 icon: 'indexPatternApp',
                 title: `Copy to Space index pattern 1 from ${spaceId} space`,
               },
               overwrite: true,
+              destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
             },
             {
               id: `cts_vis_1_${spaceId}`,
@@ -420,8 +424,11 @@ export function copyToSpaceTestSuiteFactory(
           },
         },
         {
-          error: { type: 'conflict' },
-          id: 'cts_ip_1',
+          error: {
+            type: 'conflict',
+            destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
+          },
+          id: `cts_ip_1_${spaceId}`,
           title: `Copy to Space index pattern 1 from ${spaceId} space`,
           type: 'index-pattern',
           meta: {
