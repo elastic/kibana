@@ -157,28 +157,4 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       });
     }
   },
-  (settings, fromPath, addDeprecation) => {
-    if (settings?.xpack?.security?.enabled === false) {
-      addDeprecation({
-        configPath: 'xpack.security.enabled',
-        title: i18n.translate('xpack.security.deprecations.enabledTitle', {
-          defaultMessage: 'Disabling the security plugin "xpack.security.enabled" is deprecated',
-        }),
-        message: i18n.translate('xpack.security.deprecations.enabledMessage', {
-          defaultMessage:
-            'Disabling the security plugin "xpack.security.enabled" will only be supported by disable security in Elasticsearch.',
-        }),
-        correctiveActions: {
-          manualSteps: [
-            i18n.translate('xpack.security.deprecations.enabled.manualStepOneMessage', {
-              defaultMessage: `Remove "xpack.security.enabled" from your Kibana configuration.`,
-            }),
-            i18n.translate('xpack.security.deprecations.enabled.manualStepTwoMessage', {
-              defaultMessage: `To turn off security features, disable them in Elasticsearch instead.`,
-            }),
-          ],
-        },
-      });
-    }
-  },
 ];

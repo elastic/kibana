@@ -198,7 +198,6 @@ const providersConfigSchema = schema.object(
 );
 
 export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
   showInsecureClusterWarning: schema.boolean({ defaultValue: true }),
   loginHelp: schema.maybe(schema.string()),

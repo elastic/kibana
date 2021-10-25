@@ -12,20 +12,6 @@ You do not need to configure any additional settings to use the
 [[general-security-settings]]
 ==== General security settings
 
-[cols="2*<"]
-|===
-| `xpack.security.enabled`
-  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-  By default, {kib} automatically detects whether to enable the
-  {security-features} based on the license and whether {es} {security-features}
-  are enabled. +
-  +
-  Do not set this to `false`; it disables the login form, user and role management
-  screens, and authorization using <<kibana-privileges>>. To disable
-  {security-features} entirely, see
-  {ref}/security-settings.html[{es} security settings].
-|===
-
 [float]
 [[authentication-security-settings]]
 ==== Authentication security settings
