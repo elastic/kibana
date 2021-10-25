@@ -20,7 +20,7 @@ export interface Tab {
   id: TabId;
   name: any;
   disabled: boolean;
-  prepend?: JSX.Element;
+  betaTag?: JSX.Element;
 }
 
 interface Props {
@@ -57,7 +57,7 @@ function getTabs(disableLinks: boolean): Tab[] {
         defaultMessage: 'Model Management',
       }),
       disabled: disableLinks,
-      prepend: (
+      betaTag: (
         <EuiBetaBadge
           label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
             defaultMessage: 'Experimental',
@@ -200,7 +200,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
           },
           'data-test-subj': testSubject + (id === selectedTabId ? ' selected' : ''),
           isSelected: id === selectedTabId,
-          prepend: tab.prepend,
+          append: tab.betaTag,
         };
       })}
     />
