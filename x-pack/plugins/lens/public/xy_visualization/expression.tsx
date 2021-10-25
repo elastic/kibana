@@ -576,8 +576,8 @@ export function XYChart({
   const xAxisStyle: RecursivePartial<AxisStyle> = shouldUseNewTimeAxis
     ? {
         tickLabel: {
-          visible: tickLabelsVisibilitySettings?.x,
-          rotation: labelsOrientation?.x,
+          visible: Boolean(tickLabelsVisibilitySettings?.x),
+          rotation: 0, // rotation is disabled on new time axis
           fontSize: 11,
           padding:
             referenceLinePaddings.bottom != null ? { inner: referenceLinePaddings.bottom } : 0,
@@ -599,7 +599,7 @@ export function XYChart({
           strokeWidth: 0.15,
           stroke: darkMode ? 'white' : 'black',
           padding: -10,
-          visible: true,
+          visible: Boolean(tickLabelsVisibilitySettings?.x),
         },
         axisTitle: {
           visible: axisTitlesVisibilitySettings.x,
@@ -626,7 +626,6 @@ export function XYChart({
               : undefined,
         },
       };
-
   return (
     <Chart ref={chartRef}>
       <Settings
