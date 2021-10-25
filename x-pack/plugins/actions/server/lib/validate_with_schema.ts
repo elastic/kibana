@@ -13,7 +13,7 @@ export function validateParams<
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: Params) {
   return validateWithSchema(actionType, 'params', value);
 }
 
@@ -22,7 +22,7 @@ export function validateConfig<
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: Config) {
   return validateWithSchema(actionType, 'config', value);
 }
 
@@ -31,11 +31,27 @@ export function validateSecrets<
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: Secrets) {
   return validateWithSchema(actionType, 'secrets', value);
 }
 
-type ValidKeys = 'params' | 'config' | 'secrets';
+export function validateConnector<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+>(
+  actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
+  config: Config,
+  secrets?: Secrets
+) {
+  return validateWithSchema(actionType, 'connector', {
+    config,
+    secrets: secrets ?? ({} as Secrets),
+  });
+}
+
+type ValidKeys = 'params' | 'config' | 'secrets' | 'connector';
 
 function validateWithSchema<
   Config extends ActionTypeConfig = ActionTypeConfig,
@@ -45,7 +61,7 @@ function validateWithSchema<
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   key: ValidKeys,
-  value: unknown
+  value: Config | Secrets | Params | { config: Config; secrets: Secrets }
 ): Record<string, unknown> {
   if (actionType.validate) {
     let name;
@@ -68,6 +84,14 @@ function validateWithSchema<
           name = 'action type secrets';
           if (actionType.validate.secrets) {
             return actionType.validate.secrets.validate(value);
+          }
+          break;
+        case 'connector':
+          name = 'action type connector';
+          if (actionType.validate.connector) {
+            return actionType.validate.connector.validate(
+              value as { config: Config; secrets?: Secrets }
+            );
           }
           break;
         default:

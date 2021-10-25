@@ -59,7 +59,7 @@ describe('validateConfig()', () => {
 
   test('should validate and throw error when config is invalid', () => {
     expect(() => {
-      validateConfig(actionType, { shouldNotBeHere: true });
+      validateConfig(actionType, { shouldNotBeHere: true } as Record<string, unknown>);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [shouldNotBeHere]: definition for this key is missing"`
     );

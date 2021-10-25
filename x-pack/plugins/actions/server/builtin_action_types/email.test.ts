@@ -12,7 +12,7 @@ jest.mock('./lib/send_email', () => ({
 import { Logger } from '../../../../../src/core/server';
 
 import { actionsConfigMock } from '../actions_config.mock';
-import { validateConfig, validateSecrets, validateParams } from '../lib';
+import { validateConnector, validateParams } from '../lib';
 import { createActionTypeRegistry } from './index.test';
 import { sendEmail } from './lib/send_email';
 import { actionsMock } from '../mocks';
@@ -58,7 +58,7 @@ describe('config validation', () => {
       from: 'bob@example.com',
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConnector(actionType, config)).toEqual({
       ...config,
       host: null,
       port: null,
@@ -76,7 +76,7 @@ describe('config validation', () => {
       port: 8080,
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConnector(actionType, config)).toEqual({
       ...config,
       service: 'other',
       secure: null,
@@ -94,7 +94,7 @@ describe('config validation', () => {
       port: 8080,
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConnector(actionType, config)).toEqual({
       ...config,
       secure: null,
       clientId: null,
@@ -111,7 +111,7 @@ describe('config validation', () => {
       tenantId: '12345778',
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConnector(actionType, config)).toEqual({
       ...config,
       secure: null,
       host: null,
@@ -126,7 +126,7 @@ describe('config validation', () => {
       from: 'bob@example.com',
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConnector(actionType, config)).toEqual({
       ...config,
       host: null,
       port: null,
@@ -144,35 +144,35 @@ describe('config validation', () => {
 
     // empty object
     expect(() => {
-      validateConfig(actionType, {});
+      validateConnector(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [from]: expected value of type [string] but got [undefined]"`
     );
 
     // no service or host/port
     expect(() => {
-      validateConfig(actionType, baseConfig);
+      validateConnector(actionType, baseConfig);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [host]/[port] is required"`
     );
 
     // host but no port
     expect(() => {
-      validateConfig(actionType, { ...baseConfig, host: 'elastic.co' });
+      validateConnector(actionType, { ...baseConfig, host: 'elastic.co' });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [port] is required"`
     );
 
     // port but no host
     expect(() => {
-      validateConfig(actionType, { ...baseConfig, port: 8080 });
+      validateConnector(actionType, { ...baseConfig, port: 8080 });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [host] is required"`
     );
 
     // invalid service
     expect(() => {
-      validateConfig(actionType, {
+      validateConnector(actionType, {
         ...baseConfig,
         service: 'bad-nodemailer-service',
       });
@@ -182,7 +182,7 @@ describe('config validation', () => {
 
     // invalid exchange_server no clientId and no tenantId
     expect(() => {
-      validateConfig(actionType, {
+      validateConnector(actionType, {
         ...baseConfig,
         service: 'exchange_server',
       });
@@ -192,7 +192,7 @@ describe('config validation', () => {
 
     // invalid exchange_server no clientId
     expect(() => {
-      validateConfig(actionType, {
+      validateConnector(actionType, {
         ...baseConfig,
         service: 'exchange_server',
         tenantId: '342342342',
@@ -203,7 +203,7 @@ describe('config validation', () => {
 
     // invalid exchange_server no tenantId
     expect(() => {
-      validateConfig(actionType, {
+      validateConnector(actionType, {
         ...baseConfig,
         service: 'exchange_server',
         clientId: '12345667',
@@ -248,23 +248,23 @@ describe('config validation', () => {
       port: 42,
     };
 
-    const validatedConfig1 = validateConfig(actionType, allowedHosts1);
+    const validatedConfig1 = validateConnector(actionType, allowedHosts1);
     expect(validatedConfig1.service).toEqual(allowedHosts1.service);
     expect(validatedConfig1.from).toEqual(allowedHosts1.from);
 
-    const validatedConfig2 = validateConfig(actionType, allowedHosts2);
+    const validatedConfig2 = validateConnector(actionType, allowedHosts2);
     expect(validatedConfig2.host).toEqual(allowedHosts2.host);
     expect(validatedConfig2.port).toEqual(allowedHosts2.port);
     expect(validatedConfig2.from).toEqual(allowedHosts2.from);
 
     expect(() => {
-      validateConfig(actionType, notAllowedHosts1);
+      validateConnector(actionType, notAllowedHosts1);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration"`
     );
 
     expect(() => {
-      validateConfig(actionType, notAllowedHosts2);
+      validateConnector(actionType, notAllowedHosts2);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
     );
@@ -272,12 +272,20 @@ describe('config validation', () => {
 });
 
 describe('secrets validation', () => {
+  const config: Record<string, unknown> = {
+    service: 'gmail',
+    from: 'bob@example.com',
+    hasAuth: true,
+  };
   test('secrets validation succeeds when secrets is valid for Basic Auth', () => {
     const secrets: Record<string, unknown> = {
       user: 'bob',
       password: 'supersecret',
     };
-    expect(validateSecrets(actionType, secrets)).toEqual({ ...secrets, clientSecret: null });
+    expect(validateConnector(actionType, config, secrets)).toEqual({
+      ...secrets,
+      clientSecret: null,
+    });
   });
 
   test('secrets validation succeeds when secrets props are null/undefined', () => {
@@ -286,16 +294,16 @@ describe('secrets validation', () => {
       password: null,
       clientSecret: null,
     };
-    expect(validateSecrets(actionType, {})).toEqual(secrets);
-    expect(validateSecrets(actionType, { user: null })).toEqual(secrets);
-    expect(validateSecrets(actionType, { password: null })).toEqual(secrets);
+    expect(validateConnector(actionType, config, {})).toEqual(secrets);
+    expect(validateConnector(actionType, config, { user: null })).toEqual(secrets);
+    expect(validateConnector(actionType, config, { password: null })).toEqual(secrets);
   });
 
   test('secrets validation succeeds when secrets is valid for OAuth 2.0 Client Credentials', () => {
     const secrets: Record<string, unknown> = {
       clientSecret: '12345678',
     };
-    expect(validateSecrets(actionType, secrets)).toEqual({
+    expect(validateConnector(actionType, config, secrets)).toEqual({
       ...secrets,
       user: null,
       password: null,
