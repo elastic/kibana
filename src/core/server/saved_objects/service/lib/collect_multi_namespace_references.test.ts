@@ -17,7 +17,8 @@ import type { ElasticsearchClient } from '../../../elasticsearch';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';
-import type {
+import {
+  ALIAS_SEARCH_PER_PAGE,
   CollectMultiNamespaceReferencesParams,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
@@ -322,7 +323,11 @@ describe('collectMultiNamespaceReferences', () => {
       expectMgetArgs(1, obj1, obj2);
       expectMgetArgs(2, obj3); // obj3 is retrieved in a second cluster call
       expect(mockFindLegacyUrlAliases).toHaveBeenCalledTimes(1);
-      expect(mockFindLegacyUrlAliases).toHaveBeenCalledWith(expect.anything(), [obj1, obj2, obj3]);
+      expect(mockFindLegacyUrlAliases).toHaveBeenCalledWith(
+        expect.anything(),
+        [obj1, obj2, obj3],
+        ALIAS_SEARCH_PER_PAGE
+      );
       expect(result.objects).toEqual([
         {
           ...obj1,
@@ -343,7 +348,11 @@ describe('collectMultiNamespaceReferences', () => {
 
       await collectMultiNamespaceReferences(params);
       expect(mockFindLegacyUrlAliases).toHaveBeenCalledTimes(1);
-      expect(mockFindLegacyUrlAliases).toHaveBeenCalledWith(expect.anything(), [obj1]);
+      expect(mockFindLegacyUrlAliases).toHaveBeenCalledWith(
+        expect.anything(),
+        [obj1],
+        ALIAS_SEARCH_PER_PAGE
+      );
     });
 
     it('handles findLegacyUrlAliases errors', async () => {

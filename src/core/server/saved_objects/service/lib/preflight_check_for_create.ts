@@ -22,6 +22,21 @@ import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
 import type { RepositoryEsClient } from './repository_es_client';
 import { ALL_NAMESPACES_STRING } from './utils';
 
+/**
+ * If the object will be created in this many spaces (or "*" all current and future spaces), we use find to fetch all aliases.
+ * If the object does not exceed this threshold, we use mget to fetch aliases instead.
+ * This threshold is a bit arbitrary, but it is intended to optimize so we don't make expensive PIT/find operations unless it is necessary.
+ */
+const FIND_ALIASES_THRESHOLD = 3;
+
+/**
+ * How many aliases to search for per page. This is 1000 because consumers are relatively important operations and we could potentially be
+ * paging through many thousands of results.
+ *
+ * @internal
+ */
+export const ALIAS_SEARCH_PER_PAGE = 1000;
+
 export interface PreflightCheckForCreateObject {
   /** The type of the object. */
   type: string;
@@ -65,13 +80,6 @@ interface ParsedObject {
   overwrite: boolean;
   spaces: Set<string>;
 }
-
-/**
- * If the object will be created in this many spaces (or "*" all current and future spaces), we use find to fetch all aliases.
- * If the object does not exceed this threshold, we use mget to fetch aliases instead.
- * This threshold is a bit arbitrary, but it is intended to optimize so we don't make expensive PIT/find operations unless it is necessary.
- */
-const FIND_ALIASES_THRESHOLD = 3;
 
 /**
  * Conducts pre-flight checks before object creation. Consumers should only check eligible objects (multi-namespace types).
@@ -192,7 +200,11 @@ async function optionallyFindAliases(
   const objectsToFind = objectsToGetOrObjectsToFind
     .filter(isRight)
     .map(({ value: { type, id } }) => ({ type, id }));
-  const aliasMap = await findLegacyUrlAliases(createPointInTimeFinder, objectsToFind);
+  const aliasMap = await findLegacyUrlAliases(
+    createPointInTimeFinder,
+    objectsToFind,
+    ALIAS_SEARCH_PER_PAGE
+  );
 
   // Make another discriminated union based on the find results (Left=error, Right=mget objects/aliases)
   const result = objectsToGetOrObjectsToFind.map<

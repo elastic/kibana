@@ -28,6 +28,15 @@ import type { RepositoryEsClient } from './repository_es_client';
 const MAX_REFERENCE_GRAPH_DEPTH = 20;
 
 /**
+ * How many aliases to search for per page. This is smaller than the PointInTimeFinder's default of 1000. We specify 100 for the page count
+ * because this is a relatively unimportant operation, and we want to avoid blocking the Elasticsearch thread pool for longer than
+ * necessary.
+ *
+ * @internal
+ */
+export const ALIAS_SEARCH_PER_PAGE = 100;
+
+/**
  * An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the
  * `namespaceType: 'multiple'` or `namespaceType: 'multiple-isolated'` option).
  *
@@ -138,7 +147,11 @@ export async function collectMultiNamespaceReferences(
   const objectsToFindAliasesFor = objectsWithContext
     .filter(({ spaces }) => spaces.length !== 0)
     .map(({ type, id }) => ({ type, id }));
-  const aliasesMap = await findLegacyUrlAliases(createPointInTimeFinder, objectsToFindAliasesFor);
+  const aliasesMap = await findLegacyUrlAliases(
+    createPointInTimeFinder,
+    objectsToFindAliasesFor,
+    ALIAS_SEARCH_PER_PAGE
+  );
   const results = objectsWithContext.map((obj) => {
     const key = getObjectKey(obj);
     const val = aliasesMap.get(key);

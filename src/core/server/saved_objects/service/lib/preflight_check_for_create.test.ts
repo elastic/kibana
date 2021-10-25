@@ -19,7 +19,8 @@ import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
-import type {
+import {
+  ALIAS_SEARCH_PER_PAGE,
   PreflightCheckForCreateObject,
   PreflightCheckForCreateParams,
 } from './preflight_check_for_create';
@@ -90,7 +91,8 @@ describe('preflightCheckForCreate', () => {
   function expectFindArgs(...objects: Array<{ type: string; id: string }>) {
     expect(mockFindLegacyUrlAliases).toHaveBeenCalledWith(
       expect.anything(),
-      objects.map(({ type, id }) => ({ type, id }))
+      objects.map(({ type, id }) => ({ type, id })),
+      ALIAS_SEARCH_PER_PAGE
     );
   }
 

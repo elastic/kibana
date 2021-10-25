@@ -11,13 +11,6 @@ import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { getObjectKey } from './internal_utils';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
 
-/**
- * How many aliases to search for per page. This is smaller than the PointInTimeFinder's default of 1000. We specify 100 for the page count
- * because this is a relatively unimportant operation, and we want to avoid blocking the Elasticsearch thread pool for longer than
- * necessary.
- */
-const ALIAS_SEARCH_PER_PAGE = 100;
-
 interface FindLegacyUrlAliasesObject {
   type: string;
   id: string;
@@ -30,7 +23,8 @@ interface FindLegacyUrlAliasesObject {
  */
 export async function findLegacyUrlAliases(
   createPointInTimeFinder: CreatePointInTimeFinderFn,
-  objects: FindLegacyUrlAliasesObject[]
+  objects: FindLegacyUrlAliasesObject[],
+  perPage?: number
 ) {
   if (!objects.length) {
     return new Map<string, Set<string>>();
@@ -39,7 +33,7 @@ export async function findLegacyUrlAliases(
   const filter = createAliasKueryFilter(objects);
   const finder = createPointInTimeFinder<LegacyUrlAlias>({
     type: LEGACY_URL_ALIAS_TYPE,
-    perPage: ALIAS_SEARCH_PER_PAGE,
+    perPage,
     filter,
   });
   const aliasesMap = new Map<string, Set<string>>();
