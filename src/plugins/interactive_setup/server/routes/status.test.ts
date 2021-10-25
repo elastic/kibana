@@ -19,6 +19,7 @@ describe('Status routes', () => {
   let mockContext: RequestHandlerContext;
   beforeEach(() => {
     mockRouteParams = routeDefinitionParamsMock.create();
+    mockRouteParams.preboot.isSetupOnHold.mockReturnValue(false);
     router = mockRouteParams.router;
 
     mockContext = {} as unknown as RequestHandlerContext;
@@ -46,12 +47,12 @@ describe('Status routes', () => {
                 "options": Object {
                   "body": Object {
                     "connectionStatus": "configured",
-                    "isSetupOnHold": undefined,
+                    "isSetupOnHold": false,
                   },
                 },
                 "payload": Object {
                   "connectionStatus": "configured",
-                  "isSetupOnHold": undefined,
+                  "isSetupOnHold": false,
                 },
                 "status": 200,
               }
