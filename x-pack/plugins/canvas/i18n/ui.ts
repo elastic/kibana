@@ -334,7 +334,7 @@ export const ArgumentStrings = {
         defaultMessage: 'Palette picker with bounds',
       }),
     getHelp: () =>
-      i18n.translate('xpack.canvas.uis.arguments.visDimensionLabel', {
+      i18n.translate('xpack.canvas.uis.arguments.stopsPaletteLabel', {
         defaultMessage: 'Provides colors for the values, based on the bounds.',
       }),
   },
