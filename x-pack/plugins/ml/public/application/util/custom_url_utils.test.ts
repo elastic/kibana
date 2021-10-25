@@ -620,7 +620,9 @@ describe('ML - custom URL utils', () => {
         latest: '2019-02-01T18:59:59.999Z',
       };
 
-      expect(getUrlForRecord(urlWithCustomFilter, testRecords)).toBe('');
+      expect(getUrlForRecord(urlWithCustomFilter, testRecords)).toBe(
+        `discover#/?_g=(time:(from:'2019-02-01T16:00:00.000Z',mode:absolute,to:'2019-02-01T18:59:59.999Z'))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:subSystem.keyword,negate:!f,params:(query:JDBC),type:phrase),query:(match_phrase:(subSystem.keyword:JDBC)))),index:'eap_wls_server_12c*,*:eap_wls_server_12c*',query:(language:kuery,query:'wlscluster.keyword:\"AAL\"'))`
+      );
     });
   });
 
