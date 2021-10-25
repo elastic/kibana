@@ -14,7 +14,7 @@ export const initApm = (
   isDistributable: boolean,
   serviceName: string
 ) => {
-  // TODO: re-enabled when https://github.com/elastic/apm-agent-nodejs/issues/2355 is fixed
+  // TODO: re-enabled when https://github.com/elastic/kibana/issues/116109 is fixed
   return;
 
   const apmConfigLoader = loadConfiguration(argv, rootDir, isDistributable);

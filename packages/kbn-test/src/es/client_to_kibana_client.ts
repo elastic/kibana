@@ -14,6 +14,7 @@ import type {
 } from '@elastic/elasticsearch';
 import { Transport } from '@elastic/elasticsearch';
 
+// remove once https://github.com/elastic/kibana/issues/116095 is addressed
 class KibanaTransport extends Transport {
   request(params: TransportRequestParams, options?: TransportRequestOptions) {
     const opts: TransportRequestOptions = options || {};
