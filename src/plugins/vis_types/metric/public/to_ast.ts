@@ -76,6 +76,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
       `font family="${inter.value}" 
         weight="bold"
         align="center"
+        sizeUnit="pt"
         ${style ? `size=${style.fontSize}` : ''}`
     )
   );
