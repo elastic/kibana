@@ -86,7 +86,7 @@ describe('<PipelinesCreateFromCsv />', () => {
         });
 
         expect(server.requests.length).toBe(totalRequests + 1);
-        expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/map`);
+        expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/parse_csv`);
       });
 
       test('should render an error message if error mapping pipeline', async () => {

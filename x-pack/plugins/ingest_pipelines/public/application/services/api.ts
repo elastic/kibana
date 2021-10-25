@@ -134,7 +134,7 @@ export class ApiService {
 
   public async mapToPipeline(reqBody: { file: string; copyAction: FieldCopyAction }) {
     const result = await this.sendRequest({
-      path: `${API_BASE_PATH}/map`,
+      path: `${API_BASE_PATH}/parse_csv`,
       method: 'post',
       body: JSON.stringify(reqBody),
     });
