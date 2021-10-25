@@ -224,7 +224,7 @@ class TutorialDirectoryUi extends React.Component {
           description: (
             <FormattedMessage
               id="home.tutorial.addDataToKibanaDescription"
-              defaultMessage="In addition to adding {integrationsLink}, you can try our sample data, or upload your own data."
+              defaultMessage="In addition to adding {integrationsLink}, you can try our sample data or upload your own data."
               values={{
                 integrationsLink: (
                   <EuiLink href={this.props.addBasePath(`/app/integrations/browse`)}>
