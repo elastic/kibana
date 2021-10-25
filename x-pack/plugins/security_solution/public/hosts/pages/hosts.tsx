@@ -179,6 +179,7 @@ const HostsComponent = () => {
                   />
                 }
                 title={i18n.PAGE_TITLE}
+                border
               />
 
               <HostsKpiComponent
