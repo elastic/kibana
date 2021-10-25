@@ -24,7 +24,7 @@ export const registerParseCsvRoute = ({ router }: RouteDependencies): void => {
     {
       path: `${API_BASE_PATH}/parse_csv`,
       validate: {
-        body: bodySchema
+        body: bodySchema,
       },
     },
     async (contxt, req, res) => {

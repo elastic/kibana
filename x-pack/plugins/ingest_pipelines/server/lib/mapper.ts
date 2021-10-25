@@ -104,7 +104,7 @@ function convertCsvToMapping(rows: Row[], copyFieldAction: FieldCopyAction) {
     }
 
     const source = row.source_field.trim();
-    let destination = (row.destination_field && row.destination_field.trim());
+    let destination = row.destination_field && row.destination_field.trim();
     const copyAction = (row.copy_action && row.copy_action.trim()) ?? copyFieldAction;
     let formatAction = row.format_action && row.format_action.trim();
     let timestampFormat = row.timestamp_format && row.timestamp_format.trim();
@@ -122,7 +122,8 @@ function convertCsvToMapping(rows: Row[], copyFieldAction: FieldCopyAction) {
       const formatActions = FORMAT_ACTIONS.join(', ');
       throw new Error(
         i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.invalidFormatAction', {
-          defaultMessage: 'Invalid format action [{ formatAction }]. The valid actions are {formatActions}',
+          defaultMessage:
+            'Invalid format action [{ formatAction }]. The valid actions are {formatActions}',
           values: { formatAction, formatActions },
         })
       );
