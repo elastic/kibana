@@ -38,9 +38,8 @@ export function getSwitchIndexPatternAppState(
   return {
     index: nextIndexPattern.id,
     columns,
-    sort:
-      nextIndexPattern.timeFieldName && !nextSort.length
-        ? [[nextIndexPattern.timeFieldName, sortDirection]]
-        : nextSort,
+    sort: nextIndexPattern.timeFieldName
+      ? [[nextIndexPattern.timeFieldName, sortDirection]]
+      : nextSort,
   };
 }
