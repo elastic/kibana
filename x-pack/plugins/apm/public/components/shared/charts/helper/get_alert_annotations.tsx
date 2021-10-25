@@ -133,13 +133,18 @@ export function getAlertAnnotations({
       }) ?? {}),
     };
     const isSelected = uuid === selectedAlertId;
+    const moreDetails = i18n.translate(
+      'xpack.apm.alertAnnotationTooltipMoreDetailsText',
+      { defaultMessage: 'Click to see more details.' }
+    );
+    const details = `${formatted.reason}. ${moreDetails}`;
 
     return [
       <LineAnnotation
         dataValues={[
           {
             dataValue: start,
-            details: formatted.reason,
+            details,
             header,
           },
         ]}
