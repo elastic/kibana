@@ -8,7 +8,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-// @ts-expect-error
 import { ResolutionEditor } from './resolution_editor';
 import { GRID_RESOLUTION } from '../../../../common/constants';
 
@@ -16,6 +15,7 @@ const defaultProps = {
   resolution: GRID_RESOLUTION.COARSE,
   onChange: () => {},
   includeSuperFine: false,
+  metrics: [],
 };
 
 describe('resolution editor', () => {
