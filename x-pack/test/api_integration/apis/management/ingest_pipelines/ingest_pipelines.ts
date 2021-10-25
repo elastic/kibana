@@ -501,7 +501,7 @@ export default function ({ getService }: FtrProviderContext) {
         const validCsv =
           'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcip,,,,source.address,Copying srcip to source.address';
         const { body } = await supertest
-          .post(`${API_BASE_PATH}/map`)
+          .post(`${API_BASE_PATH}/parse_csv`)
           .set('kbn-xsrf', 'xxx')
           .send({
             copyAction: 'copy',
