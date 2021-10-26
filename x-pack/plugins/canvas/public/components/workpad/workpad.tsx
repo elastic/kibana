@@ -59,8 +59,8 @@ export const Workpad: FC<ContainerProps> = (props) => {
     };
   });
 
-  const pageId = propsFromState.pages[propsFromState.selectedPageNumber - 1].id;
-  useIncomingEmbeddable(pageId);
+  const selectedPage = propsFromState.pages[propsFromState.selectedPageNumber - 1];
+  useIncomingEmbeddable(selectedPage);
 
   const fetchAllRenderables = useCallback(() => {
     dispatch(fetchAllRenderablesAction());
