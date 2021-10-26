@@ -114,8 +114,6 @@ export function modelsProvider(
             };
           });
 
-          const trainedModelsTotalMemory = sumBy(modelsMemoryUsage, 'model_size');
-
           const memoryRes = {
             adTotalMemory: sumBy(
               adMemoryReport.filter((ad) => ad.node_id === nodeId),
@@ -125,6 +123,7 @@ export function modelsProvider(
               dfaMemoryReport.filter((dfa) => dfa.node_id === nodeId),
               'model_size'
             ),
+            trainedModelsTotalMemory: sumBy(modelsMemoryUsage, 'model_size'),
           };
 
           for (const key of Object.keys(memoryRes)) {
@@ -156,7 +155,7 @@ export function modelsProvider(
                 total: memoryRes.dfaTotalMemory,
               },
               trained_models: {
-                total: trainedModelsTotalMemory,
+                total: memoryRes.trainedModelsTotalMemory,
                 by_model: modelsMemoryUsage,
               },
             },
