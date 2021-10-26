@@ -23,7 +23,7 @@ export const EventFiltersListEmptyState = memo<{
   isAddDisabled?: boolean;
 }>(({ onAdd, isAddDisabled = false }) => {
   return (
-    <ManagementEmptyStateWraper template="centeredContent">
+    <ManagementEmptyStateWraper>
       <EmptyPrompt
         data-test-subj="eventFiltersEmpty"
         iconType="plusInCircle"

@@ -19,7 +19,7 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
 
 export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ onAdd }) => {
   return (
-    <ManagementEmptyStateWraper template="centeredContent">
+    <ManagementEmptyStateWraper>
       <EmptyPrompt
         data-test-subj="hostIsolationExceptionsEmpty"
         iconType="plusInCircle"
