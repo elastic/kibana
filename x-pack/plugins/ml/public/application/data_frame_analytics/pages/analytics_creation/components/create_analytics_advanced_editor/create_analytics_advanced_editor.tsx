@@ -204,20 +204,17 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
             error={
               createIndexPattern &&
               destinationIndexPatternTitleExists && [
-                i18n.translate(
-                  'xpack.ml.dataframe.analytics.create.indexPatternAlreadyExistsError',
-                  {
-                    defaultMessage: 'An index pattern with this title already exists.',
-                  }
-                ),
+                i18n.translate('xpack.ml.dataframe.analytics.create.dataViewAlreadyExistsError', {
+                  defaultMessage: 'A data view with this title already exists.',
+                }),
               ]
             }
           >
             <EuiSwitch
               disabled={isJobCreated}
               name="mlDataFrameAnalyticsCreateIndexPattern"
-              label={i18n.translate('xpack.ml.dataframe.analytics.create.createIndexPatternLabel', {
-                defaultMessage: 'Create index pattern',
+              label={i18n.translate('xpack.ml.dataframe.analytics.create.createDataViewLabel', {
+                defaultMessage: 'Create data view',
               })}
               checked={createIndexPattern === true}
               onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
