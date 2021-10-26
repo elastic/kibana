@@ -65,28 +65,28 @@ export function deleteTestSuiteFactory(
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 8,
+        doc_count: 7,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
             { key: 'visualization', doc_count: 3 },
-            { key: 'dashboard', doc_count: 2 },
             { key: 'space', doc_count: 2 }, // since space objects are namespace-agnostic, they appear in the "default" agg bucket
+            { key: 'dashboard', doc_count: 1 },
             { key: 'index-pattern', doc_count: 1 },
             // legacy-url-alias objects cannot exist for the default space
           ],
         },
       },
       {
-        doc_count: 7,
+        doc_count: 6,
         key: 'space_1',
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
             { key: 'visualization', doc_count: 3 },
-            { key: 'dashboard', doc_count: 2 },
+            { key: 'dashboard', doc_count: 1 },
             { key: 'index-pattern', doc_count: 1 },
             { key: 'legacy-url-alias', doc_count: 1 }, // alias (1)
           ],
