@@ -577,6 +577,43 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
+    "id": "legacy-url-alias:space_x:resolvetype:alias-match",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "alias-match",
+        "targetNamespace": "space_x",
+        "targetType": "resolvetype",
+        "targetId": "doesnt-matter"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:space_y:resolvetype:alias-match",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "alias-match",
+        "targetNamespace": "space_y",
+        "targetType": "resolvetype",
+        "targetId": "doesnt-matter",
+        "disabled": true
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
     "id": "resolvetype:conflict",
     "source": {
       "type": "resolvetype",

@@ -17,14 +17,14 @@ jest.mock('./find_legacy_url_aliases', () => {
   return { findLegacyUrlAliases: mockFindLegacyUrlAliases };
 });
 
-export const mockRawDocExistsInNamespace = jest.fn() as jest.MockedFunction<
-  typeof InternalUtils['rawDocExistsInNamespace']
+export const mockRawDocExistsInNamespaces = jest.fn() as jest.MockedFunction<
+  typeof InternalUtils['rawDocExistsInNamespaces']
 >;
 
 jest.mock('./internal_utils', () => {
   const actual = jest.requireActual('./internal_utils');
   return {
     ...actual,
-    rawDocExistsInNamespace: mockRawDocExistsInNamespace,
+    rawDocExistsInNamespaces: mockRawDocExistsInNamespaces,
   };
 });

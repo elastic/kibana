@@ -9,6 +9,7 @@
 import type { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import type { internalBulkResolve } from './internal_bulk_resolve';
 import type * as InternalUtils from './internal_utils';
+import type { preflightCheckForCreate } from './preflight_check_for_create';
 import type { updateObjectsSpaces } from './update_objects_spaces';
 
 export const mockCollectMultiNamespaceReferences = jest.fn() as jest.MockedFunction<
@@ -40,6 +41,14 @@ jest.mock('./internal_utils', () => {
     getCurrentTime: mockGetCurrentTime,
   };
 });
+
+export const mockPreflightCheckForCreate = jest.fn() as jest.MockedFunction<
+  typeof preflightCheckForCreate
+>;
+
+jest.mock('./preflight_check_for_create', () => ({
+  preflightCheckForCreate: mockPreflightCheckForCreate,
+}));
 
 export const mockUpdateObjectsSpaces = jest.fn() as jest.MockedFunction<typeof updateObjectsSpaces>;
 
