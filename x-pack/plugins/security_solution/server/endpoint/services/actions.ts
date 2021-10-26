@@ -148,7 +148,7 @@ const getActivityLog = async ({
 };
 
 const hasAckInResponse = (response: EndpointActionResponse): boolean => {
-  return typeof response.action_data.ack !== 'undefined';
+  return response.action_response?.endpoint?.ack ?? false;
 };
 
 // return TRUE if for given action_id/agent_id

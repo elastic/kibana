@@ -64,7 +64,12 @@ export interface LogsEndpointActionResponse {
 export interface EndpointActionData {
   command: ISOLATION_ACTIONS;
   comment?: string;
-  ack?: boolean;
+}
+
+export interface FleetActionResponseData {
+  endpoint?: {
+    ack?: boolean;
+  };
 }
 
 export interface EndpointAction {
@@ -93,6 +98,8 @@ export interface EndpointActionResponse {
   completed_at: string;
   error?: string;
   action_data: EndpointActionData;
+  /* Response data from the Endpoint process -- only present in 7.16+ */
+  action_response?: FleetActionResponseData;
 }
 
 export interface EndpointActivityLogAction {

@@ -66,10 +66,11 @@ export const indexFleetActionsForHost = async (
     const actionResponse = fleetActionGenerator.generateResponse({
       action_id: action.action_id,
       agent_id: agentId,
-      action_data: {
-        ...action.data,
-        // add ack to 4/5th of fleet response
-        ack: fleetActionGenerator.randomFloat() < 0.8 ? true : undefined,
+      action_response: {
+        endpoint: {
+          // add ack to 4/5th of fleet response
+          ack: fleetActionGenerator.randomFloat() < 0.8 ? true : undefined,
+        },
       },
     });
 
