@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { VisTypeDefinition } from 'src/plugins/visualizations/public';
-import { gaugeVisTypeDefinition } from './gauge';
-import { goalVisTypeDefinition } from './goal';
+import { PluginConfigDescriptor } from 'src/core/server';
+import { configSchema, ConfigSchema } from '../config';
+import { VisTypeHeatmapServerPlugin } from './plugin';
 
-export { pieVisTypeDefinition } from './pie';
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  schema: configSchema,
+};
 
-export const visLibVisTypeDefinitions: Array<VisTypeDefinition<any>> = [
-  gaugeVisTypeDefinition,
-  goalVisTypeDefinition,
-];
+export const plugin = () => new VisTypeHeatmapServerPlugin();

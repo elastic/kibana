@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { VisTypeDefinition } from 'src/plugins/visualizations/public';
-import { gaugeVisTypeDefinition } from './gauge';
-import { goalVisTypeDefinition } from './goal';
+import { getHeatmapVisTypeDefinition } from './heatmap';
+import type { HeatmapTypeProps } from '../types';
 
-export { pieVisTypeDefinition } from './pie';
-
-export const visLibVisTypeDefinitions: Array<VisTypeDefinition<any>> = [
-  gaugeVisTypeDefinition,
-  goalVisTypeDefinition,
-];
+export const heatmapVisType = (props: HeatmapTypeProps) => {
+  return getHeatmapVisTypeDefinition(props);
+};

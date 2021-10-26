@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { VisTypeDefinition } from 'src/plugins/visualizations/public';
-import { gaugeVisTypeDefinition } from './gauge';
-import { goalVisTypeDefinition } from './goal';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export { pieVisTypeDefinition } from './pie';
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+});
 
-export const visLibVisTypeDefinitions: Array<VisTypeDefinition<any>> = [
-  gaugeVisTypeDefinition,
-  goalVisTypeDefinition,
-];
+export type ConfigSchema = TypeOf<typeof configSchema>;

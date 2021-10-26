@@ -6,13 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { VisTypeDefinition } from 'src/plugins/visualizations/public';
-import { gaugeVisTypeDefinition } from './gauge';
-import { goalVisTypeDefinition } from './goal';
-
-export { pieVisTypeDefinition } from './pie';
-
-export const visLibVisTypeDefinitions: Array<VisTypeDefinition<any>> = [
-  gaugeVisTypeDefinition,
-  goalVisTypeDefinition,
-];
+export const DEFAULT_PERCENT_DECIMALS = 2;
+export const LEGACY_HEATMAP_CHARTS_LIBRARY = 'visualization:visualize:legacyHeatmapChartsLibrary';
