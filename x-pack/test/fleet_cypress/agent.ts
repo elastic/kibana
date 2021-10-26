@@ -76,7 +76,6 @@ export class AgentManager extends Manager {
     const ipAddress = Object.values(nis)
       .flatMap((x) => x)
       .find((inf: any) => inf.family === 'IPv4' && inf.address !== '127.0.0.1')?.address;
-    this.log.info(nis);
 
     this.log.info(ipAddress);
 
