@@ -61,7 +61,7 @@ describe('features', () => {
       all: [actions.login, actions.version],
       read: [actions.login, actions.version],
       minimal_all: [actions.login, actions.version],
-      minimal_read: [actions.login, actions.version]
+      minimal_read: [actions.login, actions.version],
     });
   });
 
@@ -1738,7 +1738,7 @@ describe('subFeatures', () => {
         actions.ui.get('foo', 'sub-feature-ui'),
       ]);
 
-      expect(actual.features).toHaveProperty(`foo.minimal_read`,[
+      expect(actual.features).toHaveProperty(`foo.minimal_read`, [
         actions.login,
         actions.version,
         actions.ui.get('foo', 'foo'),
