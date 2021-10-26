@@ -128,8 +128,11 @@ export function modelsProvider(
 
           for (const key of Object.keys(memoryRes)) {
             if (memoryRes[key as keyof typeof memoryRes] > 0) {
-              // Every ML native process running on a node has hardcoded memory overhead.
-              // Apply it to the fist non-empty group from the memory breakdown.
+              /**
+               * The amount of memory needed to load the ML native code shared libraries. The assumption is that the first
+               * ML job to run on a given node will do this, and then subsequent ML jobs on the same node will reuse the
+               * same already-loaded code.
+               */
               memoryRes[key as keyof typeof memoryRes] += NATIVE_EXECUTABLE_CODE_OVERHEAD;
               break;
             }
