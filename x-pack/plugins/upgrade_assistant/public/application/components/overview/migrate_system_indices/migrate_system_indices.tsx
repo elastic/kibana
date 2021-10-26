@@ -8,6 +8,7 @@
 import React, { FunctionComponent, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiText,
   EuiButton,
@@ -17,15 +18,31 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCode,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import type { SystemIndicesMigrationFeature } from '../../../../../common/types';
 import type { OverviewStepProps } from '../../types';
 import { useMigrateSystemIndices } from './use_migrate_system_indices';
 
 interface Props {
   setIsComplete: OverviewStepProps['setIsComplete'];
 }
+
+const getFailureCause = (features: SystemIndicesMigrationFeature[]) => {
+  const featureWithError = features.find((feature) => feature.migration_status === 'ERROR');
+
+  if (featureWithError) {
+    const indexWithError = featureWithError.indices.find((index) => index.failure_cause);
+    return {
+      feature: featureWithError?.feature_name,
+      failureCause: indexWithError?.failure_cause?.error.type,
+    };
+  }
+
+  return {};
+};
 
 const i18nTexts = {
   title: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.title', {
@@ -67,6 +84,26 @@ const i18nTexts = {
   loadingError: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.loadingError', {
     defaultMessage: 'Could not retrieve the system indices status',
   }),
+  migrationFailedTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.migrationFailedTitle',
+    {
+      defaultMessage: 'System indices migration failed',
+    }
+  ),
+  migrationFailedBody: (features: SystemIndicesMigrationFeature[]) => {
+    const { feature, failureCause } = getFailureCause(features);
+
+    return (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.overview.systemIndices.migrationFailedBody"
+        defaultMessage="An error ocurred while migrating system indices for {feature}: {failureCause}"
+        values={{
+          feature,
+          failureCause: <EuiCode>{failureCause}</EuiCode>,
+        }}
+      />
+    );
+  },
 };
 
 const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
@@ -133,6 +170,21 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
             }`}
             data-test-subj="startSystemIndicesMigrationCalloutError"
           />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {migrationStatus.data?.migration_status === 'ERROR' && (
+        <>
+          <EuiCallOut
+            size="s"
+            color="danger"
+            iconType="alert"
+            title={i18nTexts.migrationFailedTitle}
+            data-test-subj="migrationFailedCallout"
+          >
+            <p>{i18nTexts.migrationFailedBody(migrationStatus.data?.features)}</p>
+          </EuiCallOut>
           <EuiSpacer size="m" />
         </>
       )}
