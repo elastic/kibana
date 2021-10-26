@@ -16,7 +16,6 @@ const layerList = [
       type: 'EMS_TMS',
       isAutoSelect: true,
       lightModeDefault: 'road_map_desaturated',
-      darkModeDefault: 'dark_map',
     },
     visible: true,
     style: {},

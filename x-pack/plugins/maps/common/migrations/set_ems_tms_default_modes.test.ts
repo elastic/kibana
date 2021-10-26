@@ -17,7 +17,7 @@ describe('setEmsTmsDefaultModes', () => {
     });
   });
 
-  test('Should add lightModeDefault and darkModeDefault to existing EMS_TMS source descriptors', () => {
+  test('Should add lightModeDefault to existing EMS_TMS source descriptors', () => {
     const layerListJSON = JSON.stringify([
       {
         sourceDescriptor: {
@@ -31,13 +31,12 @@ describe('setEmsTmsDefaultModes', () => {
     };
     expect(setEmsTmsDefaultModes({ attributes })).toEqual({
       title: 'my map',
-      layerListJSON:
-        '[{"sourceDescriptor":{"type":"EMS_TMS","lightModeDefault":"road_map","darkModeDefault":"dark_map"}}]',
+      layerListJSON: '[{"sourceDescriptor":{"type":"EMS_TMS","lightModeDefault":"road_map"}}]',
     });
   });
 
-  // test edge case where sample data maps set lightModeDefault and darkModeDefault but still run migration
-  test('Should not change lightModeDefault and darkModeDefault if provided', () => {
+  // test edge case where sample data maps set lightModeDefault but still run migration
+  test('Should not change lightModeDefault if provided', () => {
     const layerListJSON = JSON.stringify([
       {
         sourceDescriptor: {
@@ -53,7 +52,7 @@ describe('setEmsTmsDefaultModes', () => {
     expect(setEmsTmsDefaultModes({ attributes })).toEqual({
       title: 'my map',
       layerListJSON:
-        '[{"sourceDescriptor":{"type":"EMS_TMS","lightModeDefault":"road_map_desaturated","darkModeDefault":"dark_map"}}]',
+        '[{"sourceDescriptor":{"type":"EMS_TMS","lightModeDefault":"road_map_desaturated"}}]',
     });
   });
 });

@@ -48,10 +48,6 @@ export class EMSTMSSource extends AbstractTMSSource {
         typeof descriptor.lightModeDefault !== 'undefined'
           ? descriptor.lightModeDefault
           : getEmsTileLayerId().desaturated,
-      darkModeDefault:
-        typeof descriptor.darkModeDefault !== 'undefined'
-          ? descriptor.darkModeDefault
-          : getEmsTileLayerId().dark,
     };
   }
 
@@ -156,7 +152,7 @@ export class EMSTMSSource extends AbstractTMSSource {
       return this._descriptor.id;
     }
 
-    return getIsDarkMode() ? this._descriptor.darkModeDefault : this._descriptor.lightModeDefault;
+    return getIsDarkMode() ? getEmsTileLayerId().dark : this._descriptor.lightModeDefault;
   }
 
   async getLicensedFeatures() {

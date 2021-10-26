@@ -84,7 +84,6 @@ describe('EMS is enabled', () => {
       minZoom: 0,
       source: undefined,
       sourceDescriptor: {
-        darkModeDefault: 'dark_map',
         isAutoSelect: true,
         lightModeDefault: 'road_map_desaturated',
         type: 'EMS_TMS',

@@ -9,7 +9,7 @@ import { SOURCE_TYPES } from '../constants';
 import { LayerDescriptor, EMSTMSSourceDescriptor } from '../descriptor_types';
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
 
-// LightModeDefault and darkModeDefault added to EMSTMSSourceDescriptor in 8.0.0
+// LightModeDefault added to EMSTMSSourceDescriptor in 8.0.0
 // to avoid changing auto selected light mode tiles for maps created < 8.0.0
 // < 8.0.0 did not specify defaults and used bright for light mode
 // > 8.0.0 changed default light mode from bright to desaturated
@@ -29,9 +29,6 @@ export function setEmsTmsDefaultModes({
       // auto select bright tiles for EMS_TMS layers created before 8.0.0
       if (!sourceDescriptor.lightModeDefault) {
         sourceDescriptor.lightModeDefault = 'road_map';
-      }
-      if (!sourceDescriptor.darkModeDefault) {
-        sourceDescriptor.darkModeDefault = 'dark_map';
       }
     }
   });
