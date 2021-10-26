@@ -25,6 +25,7 @@ import { getTimeframeOptions } from './helpers';
 import { CalloutGroup } from './callout_group';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LoadingHistogram } from './loading_histogram';
+import { FieldValueThreshold } from '../threshold_input';
 
 export interface RulePreviewProps {
   index: string[];
@@ -34,6 +35,7 @@ export interface RulePreviewProps {
   threatIndex: string[];
   threatMapping: ThreatMapping;
   threatQuery: FieldValueQueryBar;
+  threshold?: FieldValueThreshold;
 }
 
 const Select = styled(EuiSelect)`
@@ -52,6 +54,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   threatIndex,
   threatQuery,
   threatMapping,
+  threshold,
 }) => {
   const { spaces } = useKibana().services;
   const [spaceId, setSpaceId] = useState('');
@@ -123,6 +126,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           previewId={previewId}
           addNoiseWarning={addNoiseWarning}
           spaceId={spaceId}
+          threshold={threshold}
         />
       )}
       <CalloutGroup items={errors} isError />

@@ -12,12 +12,14 @@ import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/commo
 import { useKibana } from '../../../../common/lib/kibana';
 import { QUERY_PREVIEW_ERROR } from './translations';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
+import { FieldValueThreshold } from '../threshold_input';
 
 interface PreviewHistogramParams {
   previewId: string | undefined;
   endDate: string;
   startDate: string;
   spaceId: string;
+  threshold?: FieldValueThreshold;
 }
 
 export const usePreviewHistogram = ({
@@ -25,6 +27,7 @@ export const usePreviewHistogram = ({
   startDate,
   endDate,
   spaceId,
+  threshold,
 }: PreviewHistogramParams) => {
   const { uiSettings } = useKibana().services;
 
@@ -52,8 +55,9 @@ export const usePreviewHistogram = ({
       indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
       stackByField: 'event.category',
       startDate,
+      threshold,
     };
-  }, [startDate, endDate, filterQuery, spaceId]);
+  }, [startDate, endDate, filterQuery, spaceId, threshold]);
 
   return useMatrixHistogram(matrixHistogramRequest);
 };

@@ -41,6 +41,7 @@ enum InvocationCount {
   HOUR = 1,
   DAY = 24,
   WEEK = 168,
+  MONTH = 720,
 }
 
 export const previewRulesRoute = async (
@@ -79,9 +80,12 @@ export const previewRulesRoute = async (
 
         let invocationCount = request.body.invocationCount;
         if (
-          ![InvocationCount.HOUR, InvocationCount.DAY, InvocationCount.WEEK].includes(
-            invocationCount
-          )
+          ![
+            InvocationCount.HOUR,
+            InvocationCount.DAY,
+            InvocationCount.WEEK,
+            InvocationCount.MONTH,
+          ].includes(invocationCount)
         ) {
           return response.ok({ body: { errors: ['Invalid invocation count'] } });
         }

@@ -19,6 +19,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { BarChart } from '../../../../common/components/charts/barchart';
 import { usePreviewHistogram } from './use_preview_histogram';
 import { formatDate } from '../../../../common/components/super_date_picker';
+import { FieldValueThreshold } from '../threshold_input';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -32,6 +33,7 @@ interface PreviewHistogramProps {
   previewId: string;
   addNoiseWarning: () => void;
   spaceId: string;
+  threshold?: FieldValueThreshold;
 }
 
 const DEFAULT_HISTOGRAM_HEIGHT = 300;
@@ -41,6 +43,7 @@ export const PreviewHistogram = ({
   previewId,
   addNoiseWarning,
   spaceId,
+  threshold,
 }: PreviewHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
 
@@ -54,6 +57,7 @@ export const PreviewHistogram = ({
     startDate,
     endDate,
     spaceId,
+    threshold,
   });
 
   const previousPreviewId = usePrevious(previewId);

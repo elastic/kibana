@@ -9,7 +9,7 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { CompleteRule, queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
+import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
 
@@ -71,7 +71,7 @@ export const createQueryAlertType = (
         eventsTelemetry: undefined,
         listClient,
         logger,
-        completeRule: completeRule as CompleteRule<QueryRuleParams>,
+        completeRule,
         searchAfterSize,
         services,
         tuple,
