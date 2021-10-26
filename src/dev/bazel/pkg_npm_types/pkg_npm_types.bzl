@@ -12,7 +12,6 @@ load("@build_bazel_rules_nodejs//internal/linker:link_node_modules.bzl", "module
 
 
 #### TODO
-###### refact main build bazel file for packages
 ###### study around completely split types and code trees for all packages (also test if we can symlink pkg npm into /npm_module instead of base folder)
 ###### source maps for api extractor
 
