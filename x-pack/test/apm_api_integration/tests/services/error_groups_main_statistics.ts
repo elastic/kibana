@@ -6,10 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { RecursivePartial } from '../../../../plugins/apm/typings/common';
+import { APIClientRequestParamsOf } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 
 type ErrorGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
@@ -17,31 +18,37 @@ type ErrorGroupsMainStatistics =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
 
-  const archiveName = 'apm_8.0.0';
-  const metadata = archives_metadata[archiveName];
-  const { start, end } = metadata;
+  const serviceName = 'synth-go';
+  const start = new Date('2021-01-01T00:00:00.000Z').getTime();
+  const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
+
+  async function callApi(
+    overrides?: RecursivePartial<
+      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>['params']
+    >
+  ) {
+    return await apmApiClient.readUser({
+      endpoint: `GET /internal/apm/services/{serviceName}/error_groups/main_statistics`,
+      params: {
+        path: { serviceName, ...overrides?.path },
+        query: {
+          start: new Date(start).toISOString(),
+          end: new Date(end).toISOString(),
+          transactionType: 'request',
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+          ...overrides?.query,
+        },
+      },
+    });
+  }
 
   registry.when(
     'Error groups main statistics when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/services/{serviceName}/error_groups/main_statistics`,
-          params: {
-            path: { serviceName: 'opbeans-java' },
-            query: {
-              start,
-              end,
-              transactionType: 'request',
-              environment: 'ENVIRONMENT_ALL',
-              kuery: '',
-            },
-          },
-        });
-
-        expect(response.status).to.be(200);
-
+        const response = await callApi();
         expect(response.status).to.be(200);
         expect(response.body.error_groups).to.empty();
         expect(response.body.is_aggregation_accurate).to.eql(true);
@@ -51,25 +58,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Error groups main statistics when data is loaded',
-    { config: 'basic', archives: [archiveName] },
+    { config: 'basic', archives: ['apm_8.0.0_empty'] },
     () => {
       it('returns the correct data', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/services/{serviceName}/error_groups/main_statistics`,
-          params: {
-            path: { serviceName: 'opbeans-java' },
-            query: {
-              start,
-              end,
-              transactionType: 'request',
-              environment: 'production',
-              kuery: '',
-            },
-          },
-        });
-
+        const response = await callApi();
         expect(response.status).to.be(200);
-
         const errorGroupMainStatistics = response.body as ErrorGroupsMainStatistics;
 
         expect(errorGroupMainStatistics.is_aggregation_accurate).to.eql(true);
