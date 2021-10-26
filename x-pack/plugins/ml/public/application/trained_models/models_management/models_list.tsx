@@ -33,12 +33,7 @@ import {
 } from '../../data_frame_analytics/common';
 import { ModelsTableToConfigMapping } from './index';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
-import {
-  useMlKibana,
-  useMlLocator,
-  useNavigateToPath,
-  useNotifications,
-} from '../../contexts/kibana';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import {
   ModelPipelines,
@@ -55,6 +50,7 @@ import { ExpandedRow } from './expanded_row';
 import { isPopulatedObject } from '../../../../common';
 import { timeFormatter } from '../../../../common/util/date_utils';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -96,7 +92,9 @@ export const ModelsList: FC = () => {
   const canDeleteDataFrameAnalytics = capabilities.ml.canDeleteDataFrameAnalytics as boolean;
 
   const trainedModelsApiService = useTrainedModelsApiService();
-  const { toasts } = useNotifications();
+
+  const { displayErrorToast, displayDangerToast, displaySuccessToast } =
+    useToastNotificationService();
 
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
@@ -160,11 +158,12 @@ export const ModelsList: FC = () => {
         );
       }
     } catch (error) {
-      toasts.addError(new Error(error.body?.message), {
-        title: i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
+      displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
           defaultMessage: 'Models fetch failed',
-        }),
-      });
+        })
+      );
     }
     setIsLoading(false);
     refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
@@ -219,11 +218,12 @@ export const ModelsList: FC = () => {
 
       return true;
     } catch (error) {
-      toasts.addError(new Error(error.body.message), {
-        title: i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
+      displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
           defaultMessage: 'Fetch model stats failed',
-        }),
-      });
+        })
+      );
     }
   }, []);
 
@@ -250,7 +250,7 @@ export const ModelsList: FC = () => {
     if (await fetchModelsStats(models)) {
       setModelsToDelete(models as ModelItemFull[]);
     } else {
-      toasts.addDanger(
+      displayDangerToast(
         i18n.translate('xpack.ml.trainedModels.modelsList.unableToDeleteModelsErrorMessage', {
           defaultMessage: 'Unable to delete models',
         })
@@ -273,7 +273,7 @@ export const ModelsList: FC = () => {
           (model) => !modelsToDelete.some((toDelete) => toDelete.model_id === model.model_id)
         )
       );
-      toasts.addSuccess(
+      displaySuccessToast(
         i18n.translate('xpack.ml.trainedModels.modelsList.successfullyDeletedMessage', {
           defaultMessage:
             '{modelsCount, plural, one {Model {modelsToDeleteIds}} other {# models}} {modelsCount, plural, one {has} other {have}} been successfully deleted',
@@ -284,14 +284,15 @@ export const ModelsList: FC = () => {
         })
       );
     } catch (error) {
-      toasts.addError(new Error(error?.body?.message), {
-        title: i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
+      displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
           defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
           values: {
             modelsCount: modelsToDeleteIds.length,
           },
-        }),
-      });
+        })
+      );
     }
   }
 
@@ -367,7 +368,7 @@ export const ModelsList: FC = () => {
       onClick: async (item) => {
         try {
           await trainedModelsApiService.startModelAllocation(item.model_id);
-          toasts.addSuccess(
+          displaySuccessToast(
             i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
               defaultMessage: 'Deployment for "{modelId}" has been started successfully.',
               values: {
@@ -376,14 +377,15 @@ export const ModelsList: FC = () => {
             })
           );
         } catch (e) {
-          toasts.addError(new Error(e.body?.message), {
-            title: i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
+          displayErrorToast(
+            e,
+            i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
               defaultMessage: 'Failed to start "{modelId}"',
               values: {
                 modelId: item.model_id,
               },
-            }),
-          });
+            })
+          );
         }
       },
     },
@@ -402,7 +404,7 @@ export const ModelsList: FC = () => {
       onClick: async (item) => {
         try {
           await trainedModelsApiService.stopModelAllocation(item.model_id);
-          toasts.addSuccess(
+          displaySuccessToast(
             i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
               defaultMessage: 'Deployment for "{modelId}" has been stopped successfully.',
               values: {
@@ -411,14 +413,15 @@ export const ModelsList: FC = () => {
             })
           );
         } catch (e) {
-          toasts.addError(new Error(e.body?.message), {
-            title: i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
+          displayErrorToast(
+            e,
+            i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
               defaultMessage: 'Failed to stop "{modelId}"',
               values: {
                 modelId: item.model_id,
               },
-            }),
-          });
+            })
+          );
         }
       },
     },
