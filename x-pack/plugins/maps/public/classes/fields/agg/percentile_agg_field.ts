@@ -35,6 +35,11 @@ export class PercentileAggField extends AggField implements IESAggField {
     return true;
   }
 
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API returns meta tiles for aggregation metrics
+    return true;
+  }
+
   canValueBeFormatted(): boolean {
     return true;
   }

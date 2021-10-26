@@ -30,6 +30,15 @@ export class ESDocField extends AbstractField implements IField {
     this._source = source;
   }
 
+  supportsFieldMetaFromEs(): boolean {
+    return true;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API does not return meta tiles for documents
+    return !this.getSource().isMvt();
+  }
+
   canValueBeFormatted(): boolean {
     return true;
   }
@@ -67,15 +76,6 @@ export class ESDocField extends AbstractField implements IField {
     return indexPatternField && indexPatternField.displayName
       ? indexPatternField.displayName
       : super.getLabel();
-  }
-
-  supportsFieldMetaFromEs(): boolean {
-    return true;
-  }
-
-  supportsFieldMetaFromLocalData(): boolean {
-    // Elasticsearch vector tile search API does not return field meta for documents
-    return !this.getSource().isMvt();
   }
 
   async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {

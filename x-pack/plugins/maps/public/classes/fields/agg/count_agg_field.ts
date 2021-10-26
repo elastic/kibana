@@ -25,6 +25,15 @@ export class CountAggField implements IESAggField {
     this._label = label;
   }
 
+  supportsFieldMetaFromEs(): boolean {
+    return false;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API returns meta tiles for aggregation metrics
+    return true;
+  }
+
   _getAggType(): AGG_TYPE {
     return AGG_TYPE.COUNT;
   }
@@ -77,10 +86,6 @@ export class CountAggField implements IESAggField {
     return null;
   }
 
-  supportsFieldMetaFromEs(): boolean {
-    return false;
-  }
-
   getBucketCount() {
     return 0;
   }
@@ -99,10 +104,6 @@ export class CountAggField implements IESAggField {
 
   async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
     return null;
-  }
-
-  supportsFieldMetaFromLocalData(): boolean {
-    return true;
   }
 
   isEqual(field: IESAggField) {

@@ -17,6 +17,15 @@ export class TopTermPercentageField implements IESAggField {
     this._topTermAggField = topTermAggField;
   }
 
+  supportsFieldMetaFromEs(): boolean {
+    return false;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API does not support top term metric
+    return false;
+  }
+
   getSource(): IVectorSource {
     return this._topTermAggField.getSource();
   }
@@ -62,15 +71,6 @@ export class TopTermPercentageField implements IESAggField {
   getBucketCount(): number {
     return 0;
   }
-
-  supportsFieldMetaFromLocalData(): boolean {
-    return !this.getSource().isMvt();
-  }
-
-  supportsFieldMetaFromEs(): boolean {
-    return false;
-  }
-
   async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
     return null;
   }

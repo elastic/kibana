@@ -50,6 +50,14 @@ export class AbstractField implements IField {
     this._origin = origin || FIELD_ORIGIN.SOURCE;
   }
 
+  supportsFieldMetaFromEs(): boolean {
+    throw new Error('must implement AbstractField#supportsFieldMetaFromEs');
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    throw new Error('must implement AbstractField#supportsFieldMetaFromLocalData');
+  }
+
   getName(): string {
     return this._fieldName;
   }
@@ -67,7 +75,7 @@ export class AbstractField implements IField {
   }
 
   getSource(): IVectorSource {
-    throw new Error('must implement Field#getSource');
+    throw new Error('must implement AbstractField#getSource');
   }
 
   isValid(): boolean {
@@ -91,10 +99,6 @@ export class AbstractField implements IField {
     return this._origin;
   }
 
-  supportsFieldMetaFromEs(): boolean {
-    return false;
-  }
-
   async getExtendedStatsFieldMetaRequest(): Promise<unknown> {
     return null;
   }
@@ -105,10 +109,6 @@ export class AbstractField implements IField {
 
   async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
     return null;
-  }
-
-  supportsFieldMetaFromLocalData(): boolean {
-    return true;
   }
 
   isEqual(field: IField) {

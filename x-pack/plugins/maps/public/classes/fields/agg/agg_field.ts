@@ -30,17 +30,22 @@ export class AggField extends CountAggField {
     this._aggType = params.aggType;
   }
 
+  supportsFieldMetaFromEs(): boolean {
+    // count and sum aggregations are not within field bounds so they do not support field meta.
+    return !isMetricCountable(this._getAggType());
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API returns meta tiles for aggregation metrics
+    return true;
+  }
+
   isValid(): boolean {
     return !!this._esDocField;
   }
 
   getMbFieldName(): string {
     return this._source.isMvt() ? this.getName() + '.value' : this.getName();
-  }
-
-  supportsFieldMetaFromEs(): boolean {
-    // count and sum aggregations are not within field bounds so they do not support field meta.
-    return !isMetricCountable(this._getAggType());
   }
 
   canValueBeFormatted(): boolean {
