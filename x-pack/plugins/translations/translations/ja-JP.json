@@ -7157,7 +7157,6 @@
     "xpack.observability.alerts.manageRulesButtonLabel": "ルールの管理",
     "xpack.observability.alerts.searchBarPlaceholder": "kibana.alert.evaluation.threshold > 75",
     "xpack.observability.alertsDisclaimerLinkText": "アラートとアクション",
-    "xpack.observability.alertsDisclaimerText": "このページには実験アラートビューが表示されます。ここに表示されるデータは、アラートを正確に表していない可能性があります。アラートの非実験リストは、スタック管理のアラートとアクション設定にあります。",
     "xpack.observability.alertsDisclaimerTitle": "実験的",
     "xpack.observability.alertsFlyout.actualValueLabel": "実際の値",
     "xpack.observability.alertsFlyout.durationLabel": "期間",

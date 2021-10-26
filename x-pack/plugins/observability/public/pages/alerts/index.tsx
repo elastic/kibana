@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useRef } from 'react';
@@ -26,6 +27,7 @@ import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
 import './styles.scss';
 import { WorkflowStatusFilter } from './workflow_status_filter';
+import { AlertsDisclaimer } from './alerts_disclaimer';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -181,25 +183,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
-              defaultMessage: 'Experimental',
-            })}
-            color="warning"
-            iconType="beaker"
-          >
-            <p>
-              {i18n.translate('xpack.observability.alertsDisclaimerText', {
-                defaultMessage:
-                  'This page shows an experimental list of alerts. The data might not be accurate. All alerts are available in the ',
-              })}
-              <EuiLink href={prepend('/app/management/insightsAndAlerting/triggersActions/alerts')}>
-                {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
-                  defaultMessage: 'Rules and Connectors settings.',
-                })}
-              </EuiLink>
-            </p>
-          </EuiCallOut>
+          <AlertsDisclaimer />
         </EuiFlexItem>
         <EuiFlexItem>
           <AlertsSearchBar
