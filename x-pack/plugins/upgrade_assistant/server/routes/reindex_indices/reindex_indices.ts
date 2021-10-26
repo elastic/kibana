@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
@@ -70,7 +70,7 @@ export function registerReindexIndicesRoutes(
             body: result,
           });
         } catch (error) {
-          if (error instanceof ResponseError) {
+          if (error instanceof errors.ResponseError) {
             return handleEsError({ error, response });
           }
           return mapAnyErrorToKibanaHttpResponse(error);
@@ -122,7 +122,7 @@ export function registerReindexIndicesRoutes(
             },
           });
         } catch (error) {
-          if (error instanceof ResponseError) {
+          if (error instanceof errors.ResponseError) {
             return handleEsError({ error, response });
           }
           return mapAnyErrorToKibanaHttpResponse(error);
@@ -168,7 +168,7 @@ export function registerReindexIndicesRoutes(
 
           return response.ok({ body: { acknowledged: true } });
         } catch (error) {
-          if (error instanceof ResponseError) {
+          if (error instanceof errors.ResponseError) {
             return handleEsError({ error, response });
           }
 
