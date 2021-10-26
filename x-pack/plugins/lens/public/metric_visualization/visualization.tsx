@@ -33,10 +33,15 @@ const toExpression = (
   const [datasource] = Object.values(datasourceLayers);
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
 
+  const isPaletteCustom = Boolean(
+    state.palette?.params && state.palette.params.name === CUSTOM_PALETTE
+  );
+  const stops = state.palette?.params?.stops || [];
+
   const paletteParams = {
     ...state.palette?.params,
-    colors: (state.palette?.params?.stops || []).map(({ color }) => color),
-    stops: (state.palette?.params?.stops || []).map(({ stop }) => stop),
+    colors: stops.map(({ color }) => color),
+    stops: isPaletteCustom ? stops.map(({ stop }) => stop) : [],
   };
 
   return {
@@ -53,7 +58,7 @@ const toExpression = (
           mode: [attributes?.mode || 'full'],
           colorMode: [state?.colorMode || ColorMode.None],
           palette:
-            state?.colorMode !== ColorMode.None
+            state?.colorMode && state?.colorMode !== ColorMode.None
               ? [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)]
               : [],
         },

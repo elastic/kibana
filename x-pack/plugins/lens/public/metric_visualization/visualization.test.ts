@@ -249,22 +249,7 @@ describe('metric_visualization', () => {
                 "mode": Array [
                   "full",
                 ],
-                "palette": Array [
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {
-                          "name": Array [
-                            "mocked",
-                          ],
-                        },
-                        "function": "system_palette",
-                        "type": "function",
-                      },
-                    ],
-                    "type": "expression",
-                  },
-                ],
+                "palette": Array [],
                 "title": Array [
                   "",
                 ],

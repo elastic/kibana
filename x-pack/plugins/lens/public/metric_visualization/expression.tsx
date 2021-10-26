@@ -59,13 +59,20 @@ function getColorStyling(
   if (
     colorMode === ColorMode.None ||
     !palette?.params ||
-    !palette?.params.stops?.length ||
+    !palette?.params.colors?.length ||
     isNaN(value)
   ) {
     return {};
   }
   const cssProp = colorMode === ColorMode.Background ? 'backgroundColor' : 'color';
-  const colorIndex = Math.max(0, palette.params.stops.findIndex((v) => v > value) - 1);
+  // if no stops are defined, just pick the color in the middle
+  const colorIndex = palette.params.stops.length
+    ? Math.max(
+        0,
+        palette.params.stops.findIndex((v) => v > value)
+      )
+    : Math.floor(palette.params.colors.length / 2);
+
   const color = palette.params.colors[colorIndex];
   const styling = {
     [cssProp]: color,

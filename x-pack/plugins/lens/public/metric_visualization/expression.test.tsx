@@ -373,5 +373,64 @@ describe('metric_expression', () => {
       );
       expect(factory).toHaveBeenCalledWith({ id: 'percent', params: { format: '0.000%' } });
     });
+
+    test('it renders the correct color styling for numeric value if coloring config is passed with default palette', () => {
+      const { data, args } = sampleArgs();
+
+      args.colorMode = ColorMode.Background;
+      args.palette.params = {
+        rangeMin: 0,
+        rangeMax: 100,
+        stops: [],
+        gradient: false,
+        range: 'number',
+        colors: ['red', 'yellow', 'green'],
+      };
+
+      const instance = shallow(
+        <MetricChart
+          data={data}
+          args={args}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        />
+      );
+
+      expect(instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')).toEqual(
+        expect.objectContaining({
+          backgroundColor: 'yellow',
+          color: expect.any(String),
+        })
+      );
+    });
+
+    test('it renders the correct color styling for numeric value if coloring config is passed', () => {
+      const { data, args } = sampleArgs();
+
+      args.colorMode = ColorMode.Labels;
+      args.palette.params = {
+        rangeMin: 0,
+        rangeMax: 400,
+        stops: [100, 200, 400],
+        gradient: false,
+        range: 'number',
+        colors: ['red', 'yellow', 'green'],
+      };
+
+      const instance = shallow(
+        <MetricChart
+          data={data}
+          args={args}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        />
+      );
+
+      expect(instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')).toEqual(
+        expect.objectContaining({
+          color: 'red',
+        })
+      );
+    });
   });
 });

@@ -17,17 +17,18 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { ColorMode } from '../../../../../src/plugins/charts/common';
 import type { PaletteRegistry } from '../../../../../src/plugins/charts/public';
-import type { MetricState } from '../../common/expressions';
+import { isNumericFieldForDatatable, MetricState } from '../../common/expressions';
 import {
   applyPaletteParams,
   CustomizablePalette,
   FIXED_PROGRESSION,
-  getColorStops,
   getStopsForFixedMode,
   PalettePanelContainer,
 } from '../shared_components';
 import type { VisualizationDimensionEditorProps } from '../types';
 import { defaultPaletteParams } from './palette_config';
+
+import './dimension_editor.scss';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -39,14 +40,10 @@ export function MetricDimensionEditor(
   const { state, setState, frame, accessor } = props;
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
-  if (!accessor) {
-    return null;
-  }
-
   const currentData = frame.activeData?.[state.layerId];
   const [firstRow] = currentData?.rows || [];
 
-  if (firstRow == null) {
+  if (accessor == null || firstRow == null || !isNumericFieldForDatatable(currentData, accessor)) {
     return null;
   }
   const currentColorMode = state?.colorMode || ColorMode.None;
@@ -54,7 +51,8 @@ export function MetricDimensionEditor(
 
   const currentMinMax = {
     min: Math.min(0, firstRow[accessor] * 2),
-    max: Math.max(0, firstRow[accessor] * 2),
+    // if value is 0, then fallback to 100 as last resort
+    max: Math.max(0, firstRow[accessor] * 2, firstRow[accessor] === 0 ? 100 : 0),
   };
 
   const activePalette = state?.palette || {
@@ -120,7 +118,8 @@ export function MetricDimensionEditor(
                 ...activePalette,
                 params: {
                   ...activePalette.params,
-                  stops: getColorStops(props.paletteService, [], activePalette, currentMinMax),
+                  // just need the colors, the actual stop values will be ignored
+                  stops: displayStops,
                 },
               };
             }
