@@ -42,7 +42,7 @@ import { getToolTipContent, canEditRuleWithActions } from '../../../../../common
 import { PopoverTooltip } from './popover_tooltip';
 import { TagsDisplay } from './tag_display';
 import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
-import { APP_ID, SecurityPageName } from '../../../../../../common/constants';
+import { APP_UI_ID, SecurityPageName } from '../../../../../../common/constants';
 import { DocLinksStart, NavigateToAppOptions } from '../../../../../../../../../src/core/public';
 
 export const getActions = (
@@ -164,7 +164,7 @@ export const getColumns = ({
           data-test-subj="ruleName"
           onClick={(ev: { preventDefault: () => void }) => {
             ev.preventDefault();
-            navigateToApp(APP_ID, {
+            navigateToApp(APP_UI_ID, {
               deepLinkId: SecurityPageName.rules,
               path: getRuleDetailsUrl(item.id),
             });
@@ -321,7 +321,7 @@ export const getMonitoringColumns = (
             data-test-subj="ruleName"
             onClick={(ev: { preventDefault: () => void }) => {
               ev.preventDefault();
-              navigateToApp(APP_ID, {
+              navigateToApp(APP_UI_ID, {
                 deepLinkId: SecurityPageName.rules,
                 path: getRuleDetailsUrl(item.id),
               });

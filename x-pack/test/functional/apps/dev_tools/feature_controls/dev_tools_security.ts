@@ -192,7 +192,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no dev_tools privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/113080
+    describe.skip('no dev_tools privileges', () => {
       before(async () => {
         await security.role.create('no_dev_tools_privileges_role', {
           kibana: [

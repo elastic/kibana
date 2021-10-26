@@ -43,6 +43,7 @@ describe('EngineLogic', () => {
     schema: { test: SchemaType.Text },
     apiTokens: [],
     apiKey: 'some-key',
+    search_relevance_suggestions_active: true,
   };
 
   const DEFAULT_VALUES = {
