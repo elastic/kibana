@@ -73,6 +73,7 @@ export function createTestConfig(config: Config) {
     return {
       testFiles: [require.resolve('../tests')],
       servers,
+      servicesRequiredForTestAnalysis: ['apmFtrConfig', 'registry'],
       services: {
         ...services,
         apmFtrConfig: () => config,
