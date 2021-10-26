@@ -419,7 +419,6 @@ const wsState: any = {
     maxValuesPerDoc: 1,
     minDocCount: 3,
   },
-  indexPatternRefName: 'indexPattern_0',
 };
 
 export function registerLogsSampleData(sampleDataRegistry: SampleDataRegistrySetup) {
@@ -436,16 +435,11 @@ export function registerLogsSampleData(sampleDataRegistry: SampleDataRegistrySet
         numVertices: 27,
         version: 1,
         wsState: JSON.stringify(JSON.stringify(wsState)),
+        legacyIndexPatternRef: 'kibana_sample_data_logs',
       },
-      references: [
-        {
-          name: 'indexPattern_0',
-          type: 'index-pattern',
-          id: 'kibana_sample_data_logs',
-        },
-      ],
+      references: [],
       migrationVersion: {
-        'graph-workspace': '7.0.0',
+        'graph-workspace': '7.11.0',
       },
       updated_at: '2020-01-09T16:40:36.122Z',
     },

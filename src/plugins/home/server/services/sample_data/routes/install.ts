@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
-import type {
-  IRouter,
-  Logger,
-  IScopedClusterClient,
-  SavedObjectsBulkCreateObject,
-} from 'src/core/server';
+import { IRouter, Logger, IScopedClusterClient } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import {
@@ -143,34 +139,33 @@ export function createInstallRoute(
         }
       }
 
-      let createResults;
+      const { getClient, getImporter, typeRegistry } = context.core.savedObjects;
+
+      const includedHiddenTypes = sampleDataset.savedObjects
+        .map((object) => object.type)
+        .filter((supportedType) => typeRegistry.isHidden(supportedType));
+      const client = getClient({ includedHiddenTypes });
+      const importer = getImporter(client);
+
+      const savedObjects = sampleDataset.savedObjects.map(({ version, ...obj }) => obj);
+      const readStream = Readable.from(savedObjects);
+
       try {
-        const { getClient, typeRegistry } = context.core.savedObjects;
-
-        const includedHiddenTypes = sampleDataset.savedObjects
-          .map((object) => object.type)
-          .filter((supportedType) => typeRegistry.isHidden(supportedType));
-
-        const client = getClient({ includedHiddenTypes });
-
-        const savedObjects = sampleDataset.savedObjects as SavedObjectsBulkCreateObject[];
-        createResults = await client.bulkCreate(
-          savedObjects.map(({ version, ...savedObject }) => savedObject),
-          { overwrite: true }
-        );
+        const { errors = [] } = await importer.import({
+          readStream,
+          overwrite: true,
+          createNewCopies: false,
+        });
+        if (errors.length > 0) {
+          const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
+            errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
+          )}`;
+          logger.warn(errMsg);
+          return res.customError({ body: errMsg, statusCode: 500 });
+        }
       } catch (err) {
-        const errMsg = `bulkCreate failed, error: ${err.message}`;
+        const errMsg = `import failed, error: ${err.message}`;
         throw new Error(errMsg);
-      }
-      const errors = createResults.saved_objects.filter((savedObjectCreateResult) => {
-        return Boolean(savedObjectCreateResult.error);
-      });
-      if (errors.length > 0) {
-        const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
-          errors
-        )}`;
-        logger.warn(errMsg);
-        return res.customError({ body: errMsg, statusCode: 403 });
       }
       usageTracker.addInstall(params.id);
 
