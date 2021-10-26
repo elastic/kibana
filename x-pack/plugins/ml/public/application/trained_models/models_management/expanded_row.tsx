@@ -78,7 +78,6 @@ export function formatToListItems(
               {JSON.stringify(value, null, 2)}
             </EuiCodeBlock>
           ) : (
-            // @ts-ignore
             value.toString()
           ),
       };
