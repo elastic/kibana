@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'src/core/server';
 import {
   transformError,

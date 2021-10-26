@@ -2379,15 +2379,13 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.21":
-  version "8.0.0-canary.21"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.21.tgz#6572a547071a17cf511a42fd93738780266a9f89"
-  integrity sha512-J/qRGYkTj+YeEJh5xci9eLlVPrfwSEURK/P+ZZ6ZKymFLz7VQvK1vvha2YJJBjpM3ERnLNDL0y/HTEjYkR3VtQ==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.35":
+  version "8.0.0-canary.35"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.35.tgz#a6023cb83c063cb0a82eac5d0ef1b025d4025c74"
+  integrity sha512-mrMnIDrhZECjIy8sdARsuaRip9xm4xOmi+WtDWpIhmvRNZ3lpw5d9BmEr7+AnduG4HsccCGWY05HrA+iUtRV8w==
   dependencies:
-    debug "^4.3.1"
-    hpagent "^0.1.1"
-    ms "^2.1.3"
-    secure-json-parse "^2.4.0"
+    "@elastic/transport" "^0.0.15"
+    tslib "^2.3.0"
 
 "@elastic/ems-client@7.16.0":
   version "7.16.0"
@@ -2572,6 +2570,18 @@
     source-map-support "^0.5.19"
     ts-node "^10.2.1"
     typescript "^4.3.5"
+
+"@elastic/transport@^0.0.15":
+  version "0.0.15"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-0.0.15.tgz#4f09806035d4959c1e2ab5e395f80927cb0ad821"
+  integrity sha512-V3ROTwKEWLT8X+rntJbZ4wV8sdt7HHSj81yi2Wv0DojQlvYo91Cit8YvdEwZcZHF4z8muIoWJv4G9gyD0MkfHQ==
+  dependencies:
+    debug "^4.3.2"
+    hpagent "^0.1.2"
+    ms "^2.1.3"
+    secure-json-parse "^2.4.0"
+    tslib "^2.3.0"
+    undici "^4.7.0"
 
 "@emotion/babel-plugin-jsx-pragmatic@^0.1.5":
   version "0.1.5"
@@ -16317,10 +16327,10 @@ hpack.js@^2.1.6:
     readable-stream "^2.0.1"
     wbuf "^1.1.0"
 
-hpagent@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/hpagent/-/hpagent-0.1.1.tgz#66f67f16e5c7a8b59a068e40c2658c2c749ad5e2"
-  integrity sha512-IxJWQiY0vmEjetHdoE9HZjD4Cx+mYTr25tR7JCxXaiI3QxW0YqYyM11KyZbHufoa/piWhMb2+D3FGpMgmA2cFQ==
+hpagent@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/hpagent/-/hpagent-0.1.2.tgz#cab39c66d4df2d4377dbd212295d878deb9bdaa9"
+  integrity sha512-ePqFXHtSQWAFXYmj+JtOTHr84iNrII4/QRlAAPPE+zqnKy4xJo7Ie1Y4kC7AdB+LxLxSTTzBMASsEcy0q8YyvQ==
 
 hsl-regex@^1.0.0:
   version "1.0.0"
@@ -28246,6 +28256,11 @@ tslib@^2.0.0, tslib@^2.0.1, tslib@^2.2.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.2.0.tgz#fb2c475977e35e241311ede2693cee1ec6698f5c"
   integrity sha512-gS9GVHRU+RGn5KQM2rllAlR3dU6m7AcpJKdtH8gFvQiC4Otgk98XnmMU+nZenHt/+VhnBPWwgrJsyrdcw6i23w==
 
+tslib@^2.3.0:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.1.tgz#e8a335add5ceae51aa261d32a490158ef042ef01"
+  integrity sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
+
 tslib@~2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.1.0.tgz#da60860f1c2ecaa5703ab7d39bc05b6bf988b97a"
@@ -28533,6 +28548,11 @@ undertaker@^1.2.1:
     object.defaults "^1.0.0"
     object.reduce "^1.0.0"
     undertaker-registry "^1.0.0"
+
+undici@^4.7.0:
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-4.7.0.tgz#3bda286d67bf45d0ab1b94ca6c84e546dcb3b0d4"
+  integrity sha512-O1q+/EIs4g0HnVMH8colei3qODGiYBLpavWYv3kI+JazBBsBIndnZfUqZ2MEfPJ12H9d56yVdwZG1/nV/xcoSQ==
 
 unfetch@^4.1.0:
   version "4.1.0"

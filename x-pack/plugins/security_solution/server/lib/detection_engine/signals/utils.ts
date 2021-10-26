@@ -10,7 +10,8 @@ import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 
 import dateMath from '@elastic/datemath';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportResult } from '@elastic/elasticsearch';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 import { ALERT_UUID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -134,9 +135,9 @@ export const hasTimestampFields = async (args: {
   timestampField: string;
   ruleName: string;
   // any is derived from here
-  // node_modules/@elastic/elasticsearch/api/kibana.d.ts
+  // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timestampFieldCapsResponse: ApiResponse<Record<string, any>, Context>;
+  timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
   ruleStatusClient: IRuleExecutionLogClient;
   ruleId: string;
