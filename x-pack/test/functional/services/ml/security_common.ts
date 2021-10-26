@@ -90,7 +90,6 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       kibana: [
         {
           base: ['all'],
-          feature: { savedObjectsManagement: ['all'] },
           spaces: ['*'],
         },
       ],
@@ -123,7 +122,6 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       kibana: [
         {
           base: ['read'],
-          feature: { savedObjectsManagement: ['read'] },
           spaces: ['*'],
         },
       ],
