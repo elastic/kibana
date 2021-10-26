@@ -79,7 +79,6 @@ export const logEntrySearchStrategyProvider = ({
             resolvedSourceConfiguration$.pipe(
               map(
                 ({ indices, runtimeMappings }): IEsSearchRequest => ({
-                  // @ts-expect-error `Field` is not assignable to `SearchRequest.docvalue_fields`
                   params: createGetLogEntryQuery(indices, params.logEntryId, runtimeMappings),
                 })
               )
