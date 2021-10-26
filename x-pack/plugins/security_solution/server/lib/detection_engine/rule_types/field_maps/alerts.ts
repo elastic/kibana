@@ -38,6 +38,11 @@ export const alertsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  'kibana.alert.building_block_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'kibana.alert.depth': {
     type: 'long',
     array: false,
