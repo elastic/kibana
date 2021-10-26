@@ -33,12 +33,6 @@ export const initElasticsearchHelpers = (getService) => {
 
   const indexStats = (index, metric) => es.indices.stats({ index, metric });
 
-  const freezeIndex = (index) =>
-    es.transport.request({
-      method: 'POST',
-      path: `/${index}/_freeze`,
-    });
-
   const cleanUp = () => deleteAllIndices();
 
   const catTemplate = (name) => es.cat.templates({ name, format: 'json' });
@@ -69,7 +63,6 @@ export const initElasticsearchHelpers = (getService) => {
     createIndex,
     deleteAllIndices,
     catIndex,
-    freezeIndex,
     indexStats,
     cleanUp,
     catTemplate,

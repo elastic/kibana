@@ -17,7 +17,6 @@ export default function ({ getService }) {
     createIndex,
     catIndex,
     indexStats,
-    freezeIndex,
     cleanUp: cleanUpEsResources,
   } = initElasticsearchHelpers(getService);
 
@@ -168,7 +167,8 @@ export default function ({ getService }) {
       it('should unfreeze an index', async () => {
         const index = await createIndex();
 
-        await freezeIndex(index);
+        // Even if the index is already unfrozen, calling the unfreeze api
+        // will have no effect on it and will return a 200.
         await unfreeze(index).expect(200);
         const {
           body: [cat2],
