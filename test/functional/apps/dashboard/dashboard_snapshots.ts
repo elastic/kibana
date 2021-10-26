@@ -28,7 +28,6 @@ export default function ({
       await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-        'visualization:useLegacyTimeAxis': true,
       });
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setScreenshotSize(1000, 500);
