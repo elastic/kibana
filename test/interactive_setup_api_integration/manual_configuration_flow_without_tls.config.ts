@@ -46,7 +46,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           .filter((arg: string) => !arg.startsWith('--elasticsearch.')),
         `--plugin-path=${testEndpointsPlugin}`,
         `--config=${tempKibanaYamlFile}`,
-        '--interactiveSetup.enabled=true',
       ],
       runOptions: {
         ...xPackAPITestsConfig.get('kbnTestServer.runOptions'),
