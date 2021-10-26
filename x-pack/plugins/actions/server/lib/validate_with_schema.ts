@@ -40,15 +40,8 @@ export function validateConnector<
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(
-  actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
-  config: unknown,
-  secrets?: unknown
-) {
-  return validateWithSchema(actionType, 'connector', {
-    config,
-    secrets,
-  });
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
+  return validateWithSchema(actionType, 'connector', value);
 }
 
 type ValidKeys = 'params' | 'config' | 'secrets' | 'connector';

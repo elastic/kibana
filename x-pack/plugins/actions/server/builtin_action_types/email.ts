@@ -116,11 +116,13 @@ function validateConfig(
 
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 
-const SecretsSchema = schema.object({
+const SecretsSchemaProps = {
   user: schema.nullable(schema.string()),
   password: schema.nullable(schema.string()),
   clientSecret: schema.nullable(schema.string()),
-});
+};
+
+const SecretsSchema = schema.object(SecretsSchemaProps);
 
 // params definition
 
@@ -174,8 +176,10 @@ function validateConnector(connector: {
   const config = connector.config;
   const secrets = connector.secrets;
 
-  if (config.service === AdditionalEmailServices.EXCHANGE && secrets.clientSecret == null) {
-    return '[clientSecret] is required';
+  if (config.service === AdditionalEmailServices.EXCHANGE) {
+    if (secrets.clientSecret == null) {
+      return '[clientSecret] is required';
+    }
   } else if (config.hasAuth && (secrets.password == null || secrets.user == null)) {
     if (secrets.user == null) {
       return '[user] is required';
