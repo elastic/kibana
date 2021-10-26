@@ -324,9 +324,9 @@ describe('connector validation: secrets with config', () => {
     const config: Record<string, unknown> = {
       hasAuth: false,
     };
-    expect(validateConnector(actionType, { config: {}, secrets: {} })).toEqual(secrets);
-    expect(validateConnector(actionType, { config: {}, secrets: { user: null }})).toEqual(secrets);
-    expect(validateConnector(actionType, { config: {}, secrets:{ password: null }})).toEqual(secrets);
+    expect(validateConnector(actionType, { config, secrets: {} })).toEqual(secrets);
+    expect(validateConnector(actionType, { config, secrets: { user: null }})).toEqual(secrets);
+    expect(validateConnector(actionType, { config, secrets:{ password: null }})).toEqual(secrets);
   });
 
   test('connector validation fails when username/password was populated for hasAuth true', () => {

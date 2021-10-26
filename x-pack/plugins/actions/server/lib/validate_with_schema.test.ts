@@ -53,8 +53,8 @@ test('should validate when there are no individual validators', () => {
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(testValue);
 
-  result = validateConnector(actionType, testValue);
-  expect(result).toEqual(testValue);
+  result = validateConnector(actionType, { config: testValue } );
+  expect(result).toEqual({ config: testValue, secrets: undefined });
 });
 
 test('should validate when validators return incoming value', () => {
@@ -83,8 +83,8 @@ test('should validate when validators return incoming value', () => {
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(testValue);
 
-  result = validateConnector(actionType, testValue);
-  expect(result).toEqual(testValue);
+  result = validateConnector(actionType, { config: testValue } );
+  expect(result).toEqual({ config: testValue, secrets: undefined });
 });
 
 test('should validate when validators return different values', () => {
@@ -114,8 +114,8 @@ test('should validate when validators return different values', () => {
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(returnedValue);
 
-  result = validateConnector(actionType, testValue);
-  expect(result).toEqual(testValue);
+  result = validateConnector(actionType, { config: testValue, secrets: { user: 'test' } } );
+  expect(result).toEqual({ config: testValue, secrets: { user: 'test' } });
 });
 
 test('should throw with expected error when validators fail', () => {
