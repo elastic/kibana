@@ -15,7 +15,7 @@ import { roundNumber } from '../../utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
-  const traceData = getService('traceData');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -39,21 +39,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         }),
         apmApiClient.readUser({
-          endpoint: `GET /internal/apm/backends/{backendName}/charts/throughput`,
+          endpoint: `GET /internal/apm/backends/charts/throughput`,
           params: {
-            path: { backendName: overrides?.backendName || 'elasticsearch' },
             query: {
               ...commonQuery,
+              backendName: overrides?.backendName || 'elasticsearch',
               kuery: '',
             },
           },
         }),
         apmApiClient.readUser({
-          endpoint: `GET /internal/apm/backends/{backendName}/upstream_services`,
+          endpoint: `GET /internal/apm/backends/upstream_services`,
           params: {
-            path: { backendName: overrides?.backendName || 'elasticsearch' },
             query: {
               ...commonQuery,
+              backendName: overrides?.backendName || 'elasticsearch',
               numBuckets: 20,
               offset: '1d',
               kuery: '',
@@ -101,7 +101,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             'instance-c'
           );
 
-          await traceData.index([
+          await synthtraceEsClient.index([
             ...timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_RATE)
@@ -159,7 +159,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]);
         });
 
-        after(() => traceData.clean());
+        after(() => synthtraceEsClient.clean());
 
         describe('verify top dependencies', () => {
           before(async () => {

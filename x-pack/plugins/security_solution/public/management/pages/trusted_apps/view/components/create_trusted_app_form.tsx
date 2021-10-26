@@ -478,7 +478,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             onChange={handleDomChangeEvents}
             onBlur={handleDomBlurEvents}
             fullWidth
-            required
+            required={wasVisited?.name}
             maxLength={256}
             data-test-subj={getTestId('nameTextField')}
           />
