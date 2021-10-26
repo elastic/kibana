@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -89,7 +90,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           id: alertId,
           ruleId,
           name,
-          index: ruleDataClient.indexName,
+          index: spaceId,
         });
 
         logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
@@ -182,7 +183,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           from: from as string,
           to: to as string,
           interval,
-          maxSignals: DEFAULT_MAX_SIGNALS,
+          maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
           buildRuleMessage,
           startedAt,
         });
@@ -229,7 +230,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             mergeStrategy,
             completeRule,
             spaceId,
-            signalsIndex: '',
           });
 
           const wrapSequences = wrapSequencesFactory({
