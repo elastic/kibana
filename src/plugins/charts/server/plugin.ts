@@ -53,7 +53,8 @@ export class ChartsServerPlugin implements Plugin<object, object> {
         description: i18n.translate(
           'charts.advancedSettings.visualization.useLegacyTimeAxis.description',
           {
-            defaultMessage: 'Enabled legacy time axis for charts in Lens, discover and TSVB',
+            defaultMessage:
+              'Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB',
           }
         ),
         category: ['visualization'],
