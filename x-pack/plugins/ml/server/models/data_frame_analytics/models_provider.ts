@@ -128,6 +128,8 @@ export function modelsProvider(
 
           for (const key of Object.keys(memoryRes)) {
             if (memoryRes[key as keyof typeof memoryRes] > 0) {
+              // Every ML native process running on a node has hardcoded memory overhead.
+              // Apply it to the fist non-empty group from the memory breakdown.
               memoryRes[key as keyof typeof memoryRes] += NATIVE_EXECUTABLE_CODE_OVERHEAD;
               break;
             }

@@ -96,7 +96,7 @@ export const NodesList: FC = () => {
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
-      'data-test-subj': 'mlModelsTableRowDetailsToggle',
+      'data-test-subj': 'mlNodesTableRowDetailsToggle',
     },
     {
       field: 'name',
@@ -105,7 +105,7 @@ export const NodesList: FC = () => {
       }),
       sortable: true,
       truncateText: true,
-      'data-test-subj': 'mlModelsTableColumnId',
+      'data-test-subj': 'mlNodesTableColumnName',
     },
     {
       name: i18n.translate('xpack.ml.trainedModels.nodesList.nodeTotalMemoryHeader', {
@@ -113,7 +113,7 @@ export const NodesList: FC = () => {
       }),
       width: '200px',
       truncateText: true,
-      'data-test-subj': 'mlModelsTableColumnMemory',
+      'data-test-subj': 'mlNodesTableColumnTotalMemory',
       render: (v: NodeItem) => {
         return bytesFormatter(v.attributes['ml.machine_memory']);
       },
@@ -123,7 +123,7 @@ export const NodesList: FC = () => {
         defaultMessage: 'Memory usage',
       }),
       truncateText: true,
-      'data-test-subj': 'mlModelsTableColumnMemory',
+      'data-test-subj': 'mlNodesTableColumnMemoryUsage',
       render: (v: NodeItem) => {
         return <MemoryPreviewChart memoryOverview={v.memory_overview} />;
       },
@@ -192,12 +192,12 @@ export const NodesList: FC = () => {
           loading={isLoading}
           search={search}
           rowProps={(item) => ({
-            'data-test-subj': `mlModelsTableRow row-${item.id}`,
+            'data-test-subj': `mlNodesTableRow row-${item.id}`,
           })}
           pagination={pagination}
           onTableChange={onTableChange}
           sorting={sorting}
-          data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
+          data-test-subj={isLoading ? 'mlNodesTable loading' : 'mlNodesTable loaded'}
         />
       </div>
     </>
