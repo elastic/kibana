@@ -72,6 +72,7 @@ export {
   EmbeddableStateTransfer,
   EmbeddableRenderer,
   useEmbeddableFactory,
+  EmbeddableContainerContext,
 } from './lib';
 
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';

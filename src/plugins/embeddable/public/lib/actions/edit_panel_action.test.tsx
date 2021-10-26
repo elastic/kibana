@@ -33,18 +33,6 @@ class EditableEmbeddable extends Embeddable {
   public reload() {}
 }
 
-let originalLocation: Window['location'];
-const testPath = '#/path/to/current/app';
-
-beforeAll(async () => {
-  originalLocation = window.location;
-  window.location.hash = testPath;
-});
-
-afterAll(async () => {
-  window.location = originalLocation;
-});
-
 test('is compatible when edit url is available, in edit mode and editable', async () => {
   const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
   expect(
@@ -56,7 +44,13 @@ test('is compatible when edit url is available, in edit mode and editable', asyn
 
 test('redirects to app using state transfer with by value mode', async () => {
   applicationMock.currentAppId$ = of('superCoolCurrentApp');
-  const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
+  const testPath = '/test-path';
+  const action = new EditPanelAction(
+    getFactory,
+    applicationMock,
+    stateTransferMock,
+    () => testPath
+  );
   const embeddable = new EditableEmbeddable(
     {
       id: '123',
@@ -86,7 +80,13 @@ test('redirects to app using state transfer with by value mode', async () => {
 
 test('redirects to app using state transfer without by value mode', async () => {
   applicationMock.currentAppId$ = of('superCoolCurrentApp');
-  const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
+  const testPath = '/test-path';
+  const action = new EditPanelAction(
+    getFactory,
+    applicationMock,
+    stateTransferMock,
+    () => testPath
+  );
   const embeddable = new EditableEmbeddable(
     { id: '123', viewMode: ViewMode.EDIT, savedObjectId: '1234' } as SavedObjectEmbeddableInput,
     true
