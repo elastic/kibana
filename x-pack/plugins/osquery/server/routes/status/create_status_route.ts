@@ -17,6 +17,7 @@ import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertPackQueriesToSO } from '../pack/utils';
+import { getInternalSavedObjectsClient } from '../../usage/collector';
 
 export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
@@ -27,18 +28,21 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asInternalUser;
-      const soClient = context.core.savedObjects.client;
+      const internalSavedObjectsClient = await getInternalSavedObjectsClient(
+        osqueryContext.getStartServices
+      );
       const packageService = osqueryContext.service.getPackageService();
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
-      const packageInfo = await osqueryContext.service
-        .getPackageService()
-        ?.getInstallation({ savedObjectsClient: soClient, pkgName: OSQUERY_INTEGRATION_NAME });
+      const packageInfo = await osqueryContext.service.getPackageService()?.getInstallation({
+        savedObjectsClient: internalSavedObjectsClient,
+        pkgName: OSQUERY_INTEGRATION_NAME,
+      });
 
       if (packageInfo?.install_version && satisfies(packageInfo?.install_version, '<0.6.0')) {
         try {
-          const policyPackages = await packagePolicyService?.list(soClient, {
+          const policyPackages = await packagePolicyService?.list(internalSavedObjectsClient, {
             kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
             perPage: 10000,
             page: 1,
@@ -99,7 +103,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
           await packageService?.ensureInstalledPackage({
             esClient,
-            savedObjectsClient: soClient,
+            savedObjectsClient: internalSavedObjectsClient,
             pkgName: OSQUERY_INTEGRATION_NAME,
           });
 
@@ -110,12 +114,15 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                 // @ts-expect-error update types
                 pack.policy_ids.includes(key)
               );
-              await packagePolicyService?.upgrade(soClient, esClient, [value]);
-              const packagePolicy = await packagePolicyService?.get(soClient, value);
+              await packagePolicyService?.upgrade(internalSavedObjectsClient, esClient, [value]);
+              const packagePolicy = await packagePolicyService?.get(
+                internalSavedObjectsClient,
+                value
+              );
 
               if (packagePolicy) {
                 return packagePolicyService?.update(
-                  soClient,
+                  internalSavedObjectsClient,
                   esClient,
                   packagePolicy.id,
                   produce(packagePolicy, (draft) => {
@@ -147,13 +154,13 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
           const agentPolicyIds = uniq(map(policyPackages?.items, 'policy_id'));
           const agentPolicies = mapKeys(
-            await agentPolicyService?.getByIds(soClient, agentPolicyIds),
+            await agentPolicyService?.getByIds(internalSavedObjectsClient, agentPolicyIds),
             'id'
           );
 
           await Promise.all(
             map(migrationObject.packs, async (packObject) => {
-              await soClient.create(
+              await internalSavedObjectsClient.create(
                 packSavedObjectType,
                 {
                   // @ts-expect-error update types
@@ -183,7 +190,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           );
 
           await packagePolicyService?.delete(
-            soClient,
+            internalSavedObjectsClient,
             esClient,
             migrationObject.packagePoliciesToDelete
           );

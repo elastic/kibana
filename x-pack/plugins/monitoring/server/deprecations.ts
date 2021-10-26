@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import { ConfigDeprecationFactory, ConfigDeprecation } from 'kibana/server';
-import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../common/constants';
+import { ConfigDeprecation, ConfigDeprecationFactory } from 'kibana/server';
 
 /**
  * Re-writes deprecated user-defined config settings and logs warnings as a
@@ -46,26 +44,6 @@ export const deprecations = ({
       'monitoring.ui.elasticsearch.logFetchCount'
     ),
     renameFromRoot('xpack.monitoring', 'monitoring'),
-    (config, fromPath, addDeprecation) => {
-      const clusterAlertsEnabled = get(config, 'monitoring.cluster_alerts.enabled', true);
-      const emailNotificationsEnabled =
-        clusterAlertsEnabled &&
-        get(config, 'monitoring.cluster_alerts.email_notifications.enabled', true);
-      const updatedKey = get(config, `monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`);
-      const legacyKey = get(config, `xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`);
-      if (emailNotificationsEnabled && !updatedKey && !legacyKey) {
-        addDeprecation({
-          configPath: `cluster_alerts.email_notifications.enabled`,
-          message: `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 8.0."`,
-          correctiveActions: {
-            manualSteps: [
-              `Add [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] to your kibana configs."`,
-            ],
-          },
-        });
-      }
-      return config;
-    },
     rename('xpack_api_polling_frequency_millis', 'licensing.api_polling_frequency'),
 
     // TODO: Add deprecations for "monitoring.ui.elasticsearch.username: elastic" and "monitoring.ui.elasticsearch.username: kibana".
