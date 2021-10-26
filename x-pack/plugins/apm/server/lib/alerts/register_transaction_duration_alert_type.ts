@@ -41,9 +41,9 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getDurationFormatter } from '../../../common/utils/formatters';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+} from '../helpers/transactions';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
@@ -122,7 +122,7 @@ export function registerTransactionDurationAlertType({
         ? indices.metric
         : indices.transaction;
 
-      const field = getTransactionDurationFieldForAggregatedTransactions(
+      const field = getTransactionDurationFieldForTransactions(
         searchAggregatedTransactions
       );
 
@@ -140,7 +140,7 @@ export function registerTransactionDurationAlertType({
                     },
                   },
                 },
-                ...getDocumentTypeFilterForAggregatedTransactions(
+                ...getDocumentTypeFilterForTransactions(
                   searchAggregatedTransactions
                 ),
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },

@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 import { isActivePlatinumLicense } from '../../common/license_check';
 import { invalidLicenseMessage } from '../../common/service_map';
 import { notifyFeatureUsage } from '../feature';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceMapBackendNodeInfo } from '../lib/service_map/get_service_map_backend_node_info';

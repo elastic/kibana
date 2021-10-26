@@ -11,7 +11,7 @@ import { getTraceItems } from '../lib/traces/get_trace_items';
 import { getTopTransactionGroupList } from '../lib/transaction_groups';
 import { createApmServerRoute } from './create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { getTransaction } from '../lib/transactions/get_transaction';

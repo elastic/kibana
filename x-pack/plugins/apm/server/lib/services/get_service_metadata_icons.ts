@@ -18,7 +18,7 @@ import {
 import { ContainerType } from '../../../common/service_metadata';
 import { rangeQuery } from '../../../../observability/server';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getProcessorEventForTransactions } from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
 
 type ServiceMetadataIconsRaw = Pick<
@@ -63,9 +63,7 @@ export async function getServiceMetadataIcons({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],

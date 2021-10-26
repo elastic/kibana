@@ -15,9 +15,9 @@ import { rangeQuery } from '../../../../observability/server';
 import { Setup } from '../helpers/setup_request';
 import { maybe } from '../../../common/utils/maybe';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 
 export async function getServiceInstanceMetadataDetails({
   serviceName,
@@ -84,16 +84,14 @@ export async function getServiceInstanceMetadataDetails({
       'get_service_instance_metadata_details_application_transaction_metric',
       {
         apm: {
-          events: [getProcessorEventForAggregatedTransactions(true)],
+          events: [getProcessorEventForTransactions(true)],
         },
         body: {
           terminate_after: 1,
           size: 1,
           query: {
             bool: {
-              filter: filter.concat(
-                getDocumentTypeFilterForAggregatedTransactions(true)
-              ),
+              filter: filter.concat(getDocumentTypeFilterForTransactions(true)),
             },
           },
         },

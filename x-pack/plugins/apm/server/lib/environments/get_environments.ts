@@ -12,7 +12,7 @@ import {
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeQuery } from '../../../../observability/server';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getProcessorEventForTransactions } from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
 
 /**
@@ -51,9 +51,7 @@ export async function getEnvironments({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.metric,
         ProcessorEvent.error,
       ],

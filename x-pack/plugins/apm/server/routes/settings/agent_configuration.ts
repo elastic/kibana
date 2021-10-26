@@ -24,7 +24,7 @@ import {
   serviceRt,
   agentConfigurationIntakeRt,
 } from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
 import { syncAgentConfigsToApmPackagePolicies } from '../../lib/fleet/sync_agent_configs_to_apm_package_policies';
 

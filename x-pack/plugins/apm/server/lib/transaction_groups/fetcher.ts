@@ -22,9 +22,9 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { joinByKey } from '../../../common/utils/join_by_key';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
 import { getAverages, getCounts, getSums } from './get_transaction_group_stats';
 
@@ -75,11 +75,7 @@ function getRequest(topTraceOptions: TopTraceOptions) {
 
   return {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -87,7 +83,7 @@ function getRequest(topTraceOptions: TopTraceOptions) {
         bool: {
           filter: [
             ...transactionNameFilter,
-            ...getDocumentTypeFilterForAggregatedTransactions(
+            ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
             ...rangeQuery(start, end),
