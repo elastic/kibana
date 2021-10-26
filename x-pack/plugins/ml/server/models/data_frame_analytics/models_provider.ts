@@ -143,6 +143,7 @@ export function modelsProvider(
             allocated_models: allocatedModels,
             memory_overview: {
               machine_memory: {
+                // TODO remove ts-ignore when elasticsearch client is updated
                 // @ts-ignore
                 total: Number(node.os?.mem.adjusted_total_in_bytes ?? node.os?.mem.total_in_bytes),
                 jvm: Number(node.attributes['ml.max_jvm_size']),
