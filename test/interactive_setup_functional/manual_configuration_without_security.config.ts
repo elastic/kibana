@@ -12,45 +12,53 @@ import { join, resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { getDataPath } from '@kbn/utils';
 
-import { services } from './services';
-
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
-  const testEndpointsPlugin = resolve(__dirname, './fixtures/test_endpoints');
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../interactive_setup_api_integration/fixtures/test_endpoints'
+  );
 
   const tempKibanaYamlFile = join(getDataPath(), `interactive_setup_kibana_${Date.now()}.yml`);
   await fs.writeFile(tempKibanaYamlFile, '');
 
   return {
-    testFiles: [require.resolve('./tests/manual_configuration_flow_without_tls')],
-    servers: xPackAPITestsConfig.get('servers'),
-    services,
+    ...functionalConfig.getAll(),
+
+    testFiles: [require.resolve('./tests/manual_configuration_without_security')],
+
     junit: {
-      reportName: 'Interactive Setup API Integration Tests (Manual configuration flow without TLS)',
+      reportName: 'Interactive Setup Functional Tests (Manual configuration without Security)',
     },
 
+    security: { disableTestUser: true },
+
     esTestCluster: {
-      ...xPackAPITestsConfig.get('esTestCluster'),
+      ...functionalConfig.get('esTestCluster'),
       serverArgs: [
-        ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
-        'xpack.security.enabled=true',
+        ...functionalConfig
+          .get('esTestCluster.serverArgs')
+          .filter((arg: string) => !arg.startsWith('xpack.security.')),
+        'xpack.security.enabled=false',
       ],
     },
 
     kbnTestServer: {
-      ...xPackAPITestsConfig.get('kbnTestServer'),
+      ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
-        ...xPackAPITestsConfig
+        ...functionalConfig
           .get('kbnTestServer.serverArgs')
           .filter((arg: string) => !arg.startsWith('--elasticsearch.')),
         `--plugin-path=${testEndpointsPlugin}`,
         `--config=${tempKibanaYamlFile}`,
       ],
       runOptions: {
-        ...xPackAPITestsConfig.get('kbnTestServer.runOptions'),
+        ...functionalConfig.get('kbnTestServer.runOptions'),
         wait: /Kibana has not been configured/,
       },
     },
+
+    uiSettings: {}, // UI settings can't be set during `preboot` stage
   };
 }
