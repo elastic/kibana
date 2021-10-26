@@ -50,8 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('detects when reporting indices should be migrated due to missing ILM policy', async () => {
       await reportingAPI.makeAllReportingIndicesUnmanaged();
-      // TODO: Remove "any" when no longer through type issue "policy_id" missing
-      await es.ilm.deleteLifecycle({ policy: ILM_POLICY_NAME } as any);
+      await es.ilm.deleteLifecycle({ name: ILM_POLICY_NAME });
 
       await supertest
         .post(`/api/reporting/generate/csv`)
@@ -99,17 +98,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // customize the lifecycle policy
       await es.ilm.putLifecycle({
-        policy: ILM_POLICY_NAME,
+        name: ILM_POLICY_NAME,
         body: customLifecycle,
       });
 
       await reportingAPI.migrateReportingIndices();
 
       const {
-        body: {
-          [ILM_POLICY_NAME]: { policy },
-        },
-      } = await es.ilm.getLifecycle({ policy: ILM_POLICY_NAME });
+        [ILM_POLICY_NAME]: { policy },
+      } = await es.ilm.getLifecycle({ name: ILM_POLICY_NAME });
 
       expect(policy).to.eql(customLifecycle.policy);
     });
