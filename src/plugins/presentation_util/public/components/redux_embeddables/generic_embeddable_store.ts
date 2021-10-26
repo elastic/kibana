@@ -27,10 +27,12 @@ managedEmbeddablesStore.injectReducer = <StateShape>({
   key,
   asyncReducer,
 }: InjectReducerProps<StateShape>) => {
-  managedEmbeddablesStore.asyncReducers[key] = asyncReducer as Reducer<unknown>;
-  managedEmbeddablesStore.replaceReducer(
-    combineReducers({ ...managedEmbeddablesStore.asyncReducers })
-  );
+  if (!managedEmbeddablesStore.asyncReducers[key]) {
+    managedEmbeddablesStore.asyncReducers[key] = asyncReducer as Reducer<unknown>;
+    managedEmbeddablesStore.replaceReducer(
+      combineReducers({ ...managedEmbeddablesStore.asyncReducers })
+    );
+  }
 };
 
 /**

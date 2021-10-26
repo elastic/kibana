@@ -43,6 +43,7 @@ export class ControlGroupContainer extends Container<
 > {
   public readonly type = CONTROL_GROUP_TYPE;
   private subscriptions: Subscription = new Subscription();
+  private domNode?: HTMLElement;
 
   public untilReady = () => {
     const panelsLoading = () =>
@@ -133,9 +134,14 @@ export class ControlGroupContainer extends Container<
   public destroy() {
     super.destroy();
     this.subscriptions.unsubscribe();
+    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 
   public render(dom: HTMLElement) {
+    if (this.domNode) {
+      ReactDOM.unmountComponentAtNode(this.domNode);
+    }
+    this.domNode = dom;
     const PresentationUtilProvider = pluginServices.getContextProvider();
     ReactDOM.render(
       <PresentationUtilProvider>

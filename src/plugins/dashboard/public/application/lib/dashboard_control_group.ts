@@ -133,7 +133,12 @@ export const syncDashboardControlGroup = async ({
       .subscribe(() => dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() }))
   );
 
-  return { onDestroyControlGroup: () => subscriptions.unsubscribe() };
+  return {
+    onDestroyControlGroup: () => {
+      subscriptions.unsubscribe();
+      controlGroup.destroy();
+    },
+  };
 };
 
 export const controlGroupInputIsEqual = (

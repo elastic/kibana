@@ -10,7 +10,7 @@ import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from 'react-
 import { SliceCaseReducers, PayloadAction, createSlice } from '@reduxjs/toolkit';
 import React, { PropsWithChildren, useEffect, useMemo, useRef } from 'react';
 import { Draft } from 'immer/dist/types/types-external';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, finalize } from 'rxjs/operators';
 import { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 
@@ -101,6 +101,12 @@ export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = Embed
   const reduxEmbeddableContext: ReduxEmbeddableContextServices | ReduxContainerContextServices =
     useMemo(() => {
       const key = `${embeddable.type}_${embeddable.id}`;
+      const store = getManagedEmbeddablesStore();
+
+      const initialState = getExplicitInput<InputType>(embeddable);
+      if (stateContainsFilters(initialState)) {
+        initialState.filters = cleanFiltersForSerialize(initialState.filters);
+      }
 
       // A generic reducer used to update redux state when the embeddable input changes
       const updateEmbeddableReduxState = (
@@ -110,21 +116,28 @@ export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = Embed
         return { ...state, ...action.payload };
       };
 
-      const initialState = getExplicitInput<InputType>(embeddable);
-      if (stateContainsFilters(initialState)) {
-        initialState.filters = cleanFiltersForSerialize(initialState.filters);
-      }
+      // A generic reducer used to clear redux state when the embeddable is destroyed
+      const clearEmbeddableReduxState = () => {
+        return undefined;
+      };
+
       const slice = createSlice<InputType, SliceCaseReducers<InputType>>({
         initialState,
         name: key,
-        reducers: { ...reducers, updateEmbeddableReduxState },
+        reducers: { ...reducers, updateEmbeddableReduxState, clearEmbeddableReduxState },
       });
-      const store = getManagedEmbeddablesStore();
 
-      store.injectReducer({
-        key,
-        asyncReducer: slice.reducer,
-      });
+      if (store.asyncReducers[key]) {
+        // if the store already has reducers set up for this embeddable type & id, update the existing state.
+        const updateExistingState = (slice.actions as ReduxEmbeddableContextServices['actions'])
+          .updateEmbeddableReduxState;
+        store.dispatch(updateExistingState(initialState));
+      } else {
+        store.injectReducer({
+          key,
+          asyncReducer: slice.reducer,
+        });
+      }
 
       const useEmbeddableSelector: TypedUseSelectorHook<InputType> = () =>
         useSelector((state: ReturnType<typeof store.getState>) => state[key]);
@@ -165,7 +178,7 @@ const ReduxEmbeddableSync = <InputType extends EmbeddableInput = EmbeddableInput
   const {
     useEmbeddableSelector,
     useEmbeddableDispatch,
-    actions: { updateEmbeddableReduxState },
+    actions: { updateEmbeddableReduxState, clearEmbeddableReduxState },
   } = useReduxEmbeddableContext<InputType>();
 
   const dispatch = useEmbeddableDispatch();
@@ -177,22 +190,25 @@ const ReduxEmbeddableSync = <InputType extends EmbeddableInput = EmbeddableInput
     // When Embeddable Input changes, push differences to redux.
     const inputSubscription = embeddable
       .getInput$()
-      .pipe(debounceTime(0)) // debounce input changes to ensure that when many updates are made in one render the latest wins out
-      .subscribe(
-        () => {
-          const differences = diffInput(getExplicitInput<InputType>(embeddable), stateRef.current);
-          if (differences && Object.keys(differences).length > 0) {
-            if (stateContainsFilters(differences)) {
-              differences.filters = cleanFiltersForSerialize(differences.filters);
-            }
-            dispatch(updateEmbeddableReduxState(differences));
+      .pipe(
+        finalize(() => {
+          // empty redux store, when embeddable is destroyed.
+          destroyedRef.current = true;
+          dispatch(clearEmbeddableReduxState(undefined));
+        }),
+        debounceTime(0)
+      ) // debounce input changes to ensure that when many updates are made in one render the latest wins out
+      .subscribe(() => {
+        const differences = diffInput(getExplicitInput<InputType>(embeddable), stateRef.current);
+        if (differences && Object.keys(differences).length > 0) {
+          if (stateContainsFilters(differences)) {
+            differences.filters = cleanFiltersForSerialize(differences.filters);
           }
-        },
-        undefined,
-        () => (destroyedRef.current = true) // when input observer is complete, embeddable is destroyed
-      );
+          dispatch(updateEmbeddableReduxState(differences));
+        }
+      });
     return () => inputSubscription.unsubscribe();
-  }, [diffInput, dispatch, embeddable, updateEmbeddableReduxState]);
+  }, [diffInput, dispatch, embeddable, updateEmbeddableReduxState, clearEmbeddableReduxState]);
 
   useEffect(() => {
     if (isErrorEmbeddable(embeddable) || destroyedRef.current) return;

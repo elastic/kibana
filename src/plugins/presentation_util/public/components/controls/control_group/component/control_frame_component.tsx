@@ -53,7 +53,9 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
       embeddable.render(embeddableRoot.current);
     }
     const subscription = embeddable?.getInput$().subscribe((newInput) => setTitle(newInput.title));
-    return () => subscription?.unsubscribe();
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, [embeddable, embeddableRoot]);
 
   const floatingActions = (

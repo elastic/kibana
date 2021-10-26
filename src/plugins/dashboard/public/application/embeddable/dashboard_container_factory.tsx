@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
 
-import uuid from 'uuid';
 import { DashboardContainerInput } from '../..';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
@@ -84,7 +83,7 @@ export class DashboardContainerFactoryDefinition
       ...getDefaultDashboardControlGroupInput(),
       ...(initialInput.controlGroupInput ?? {}),
       viewMode: initialInput.viewMode,
-      id: uuid.v4(),
+      id: `control_group_${initialInput.id ?? 'new_dashboard'}`,
     });
     const { DashboardContainer: DashboardContainerEmbeddable } = await import(
       './dashboard_container'
