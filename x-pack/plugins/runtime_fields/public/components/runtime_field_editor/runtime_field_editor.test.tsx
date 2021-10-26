@@ -132,7 +132,7 @@ describe('Runtime field editor', () => {
       const defaultValue: RuntimeField = {
         name: 'myRuntimeField',
         type: 'boolean',
-        script: { source: 'emit("hello"' },
+        script: { source: 'emit("hello")' },
       };
 
       testBed = setup({
