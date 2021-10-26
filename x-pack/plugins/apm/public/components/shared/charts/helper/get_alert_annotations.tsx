@@ -122,7 +122,13 @@ export function getAlertAnnotations({
     const end = start + parsed[ALERT_DURATION]! / 1000;
     const severityLevel = parsed[ALERT_SEVERITY];
     const color = getAlertColor({ severityLevel, theme });
-    const header = getAlertHeader({ severityLevel });
+    const experimentalLabel = i18n.translate(
+      'xpack.apm.alertAnnotationTooltipExperimentalText',
+      { defaultMessage: 'Experimental' }
+    );
+    const header = `${getAlertHeader({
+      severityLevel,
+    })} - ${experimentalLabel}`;
     const formatter = getFormatter(parsed[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
@@ -133,13 +139,18 @@ export function getAlertAnnotations({
       }) ?? {}),
     };
     const isSelected = uuid === selectedAlertId;
+    const moreDetails = i18n.translate(
+      'xpack.apm.alertAnnotationTooltipMoreDetailsText',
+      { defaultMessage: 'Click to see more details.' }
+    );
+    const details = `${formatted.reason}. ${moreDetails}`;
 
     return [
       <LineAnnotation
         dataValues={[
           {
             dataValue: start,
-            details: formatted.reason,
+            details,
             header,
           },
         ]}
