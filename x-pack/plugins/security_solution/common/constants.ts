@@ -12,6 +12,7 @@ import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
 
 export const APP_ID = 'securitySolution';
+export const APP_UI_ID = 'securitySolutionUI';
 export const CASES_FEATURE_ID = 'securitySolutionCases';
 export const SERVER_APP_ID = 'siem';
 export const APP_NAME = 'Security';
