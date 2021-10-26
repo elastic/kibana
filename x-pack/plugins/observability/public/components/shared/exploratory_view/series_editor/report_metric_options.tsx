@@ -14,6 +14,7 @@ import {
   EuiListGroupItem,
   EuiBadge,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -113,19 +114,23 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
           </EuiListGroup>
         </EuiPopover>
       )}
-      {series.selectedMetricField && (
-        <EuiBadge
-          iconType="cross"
-          iconSide="right"
-          iconOnClick={() => onChange(undefined)}
-          iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
-        >
-          {
-            seriesConfig?.metricOptions?.find((option) => option.id === series.selectedMetricField)
-              ?.label
-          }
-        </EuiBadge>
-      )}
+      {series.selectedMetricField &&
+        (indexPattern && !loading ? (
+          <EuiBadge
+            iconType="cross"
+            iconSide="right"
+            iconOnClick={() => onChange(undefined)}
+            iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
+          >
+            {
+              seriesConfig?.metricOptions?.find(
+                (option) => option.id === series.selectedMetricField
+              )?.label
+            }
+          </EuiBadge>
+        ) : (
+          <EuiLoadingSpinner />
+        ))}
     </>
   );
 }
