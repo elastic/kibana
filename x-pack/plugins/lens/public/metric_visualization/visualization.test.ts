@@ -12,6 +12,7 @@ import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { ColorMode } from 'src/plugins/charts/common';
 
 jest.mock('../id_generator');
 
@@ -156,6 +157,41 @@ describe('metric_visualization', () => {
         accessor: undefined,
         layerId: 'l1',
         layerType: layerTypes.DATA,
+        colorMode: ColorMode.None,
+        palette: undefined,
+      });
+    });
+
+    it('removes the palette configuration', () => {
+      expect(
+        metricVisualization.removeDimension({
+          prevState: {
+            accessor: 'a',
+            layerId: 'l1',
+            layerType: layerTypes.DATA,
+            colorMode: ColorMode.Background,
+            palette: {
+              type: 'palette',
+              name: 'status',
+              params: {
+                rangeType: 'number',
+                stops: [
+                  { color: 'blue', stop: 100 },
+                  { color: 'red', stop: 150 },
+                ],
+              },
+            },
+          },
+          layerId: 'l1',
+          columnId: 'a',
+          frame: mockFrame(),
+        })
+      ).toEqual({
+        accessor: undefined,
+        layerId: 'l1',
+        layerType: layerTypes.DATA,
+        colorMode: ColorMode.None,
+        palette: undefined,
       });
     });
   });
@@ -201,6 +237,9 @@ describe('metric_visualization', () => {
                 "accessor": Array [
                   "a",
                 ],
+                "colorMode": Array [
+                  "None",
+                ],
                 "description": Array [
                   "",
                 ],
@@ -209,6 +248,22 @@ describe('metric_visualization', () => {
                 ],
                 "mode": Array [
                   "full",
+                ],
+                "palette": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "name": Array [
+                            "mocked",
+                          ],
+                        },
+                        "function": "system_palette",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
                 ],
                 "title": Array [
                   "",

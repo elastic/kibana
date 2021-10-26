@@ -161,7 +161,7 @@ export const getMetricVisualization = ({
   },
 
   removeDimension({ prevState }) {
-    return { ...prevState, accessor: undefined };
+    return { ...prevState, accessor: undefined, colorMode: ColorMode.None, palette: undefined };
   },
 
   renderDimensionEditor(domElement, props) {
