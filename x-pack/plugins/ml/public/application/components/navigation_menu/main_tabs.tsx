@@ -66,7 +66,8 @@ function getTabs(disableLinks: boolean): Tab[] {
           color="hollow"
           iconType="beaker"
           tooltipContent={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaTooltipContent', {
-            defaultMessage: "Model Management is a beta feature. We'd love to hear your feedback.",
+            defaultMessage:
+              "Model Management is an experimental feature and subject to change. We'd love to hear your feedback.",
           })}
         />
       ),

@@ -34,7 +34,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
     () => ({
       jvm: {
         name: i18n.translate('xpack.ml.trainedModels.nodesList.jvmHeapSIze', {
-          defaultMessage: 'JVM Heap Size',
+          defaultMessage: 'JVM heap size',
         }),
         colour: euiTheme.euiColorVis1,
       },

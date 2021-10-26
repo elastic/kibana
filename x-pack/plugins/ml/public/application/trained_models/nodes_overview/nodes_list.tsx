@@ -136,7 +136,7 @@ export const NodesList: FC = () => {
         show: true,
         value: items.length,
         label: i18n.translate('xpack.ml.trainedModels.nodesList.totalAmountLabel', {
-          defaultMessage: 'Total ML nodes',
+          defaultMessage: 'Total machine learning nodes',
         }),
       },
     };
