@@ -6,16 +6,14 @@
  */
 
 import { composeStories } from '@storybook/testing-react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
-import * as stories from './suggestions_select.stories';
+import * as stories from './backend_link.stories';
 
 const { Example } = composeStories(stories);
 
-describe('SuggestionsSelect', () => {
-  it('renders', async () => {
-    render(<Example />);
-
-    expect(await screen.findByRole('combobox')).toBeInTheDocument();
+describe('BackendLink', () => {
+  it('renders', () => {
+    expect(() => render(<Example />)).not.toThrowError();
   });
 });

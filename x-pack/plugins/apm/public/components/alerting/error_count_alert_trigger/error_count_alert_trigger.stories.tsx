@@ -11,11 +11,17 @@ import { AlertParams, ErrorCountAlertTrigger } from '.';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { createCallApmApi } from '../../../services/rest/createCallApmApi';
+
 import { AlertMetadata } from '../helper';
 
-const KibanaReactContext = createKibanaReactContext({
+const coreMock = {
+  http: { get: async () => ({}) },
   notifications: { toasts: { add: () => {} } },
-} as unknown as Partial<CoreStart>);
+  uiSettings: { get: () => {} },
+} as unknown as CoreStart;
+
+const KibanaReactContext = createKibanaReactContext(coreMock);
 
 interface Args {
   alertParams: AlertParams;
@@ -27,6 +33,8 @@ const stories: Meta<{}> = {
   component: ErrorCountAlertTrigger,
   decorators: [
     (StoryComponent) => {
+      createCallApmApi(coreMock);
+
       return (
         <KibanaReactContext.Provider>
           <div style={{ width: 400 }}>

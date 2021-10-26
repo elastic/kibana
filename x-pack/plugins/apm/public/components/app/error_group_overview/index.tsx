@@ -23,7 +23,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ErrorDistribution } from '../error_group_details/Distribution';
-import { ErrorGroupList } from './List';
+import { ErrorGroupList } from './error_group_list';
 
 export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
