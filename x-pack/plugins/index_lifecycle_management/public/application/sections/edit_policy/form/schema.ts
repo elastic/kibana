@@ -248,12 +248,6 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           { defaultMessage: 'Activate cold phase' }
         ),
       },
-      freezeEnabled: {
-        defaultValue: false,
-        label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
-          defaultMessage: 'Freeze index',
-        }),
-      },
       readonlyEnabled: {
         defaultValue: false,
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
@@ -283,12 +277,6 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.activateFrozenPhaseSwitchLabel',
           { defaultMessage: 'Activate frozen phase' }
         ),
-      },
-      freezeEnabled: {
-        defaultValue: false,
-        label: i18n.translate('xpack.indexLifecycleMgmt.frozePhase.freezeIndexLabel', {
-          defaultMessage: 'Freeze index',
-        }),
       },
       minAgeUnit: {
         defaultValue: 'd',

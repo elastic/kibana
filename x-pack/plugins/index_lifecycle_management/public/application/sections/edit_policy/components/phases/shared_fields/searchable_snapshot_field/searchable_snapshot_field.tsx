@@ -257,7 +257,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
             {
               defaultMessage:
-                'Force merge, shrink, read only, and freeze actions are not allowed when converting data to a fully-mounted index in this phase.',
+                'Force merge, shrink and read only actions are not allowed when converting data to a fully-mounted index in this phase.',
             }
           )}
           data-test-subj="searchableSnapshotFieldsDisabledCallout"
