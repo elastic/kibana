@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiModal,
   EuiModalHeader,
@@ -16,7 +17,6 @@ import {
   EuiButton,
   EuiCallOut,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { ModelItemFull } from './models_list';
 
 interface DeleteModelsModalProps {
