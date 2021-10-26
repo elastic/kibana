@@ -257,7 +257,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(value).to.eql('.es()');
       });
 
-      describe('dynamic suggestions for argument values', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/116033
+      describe.skip('dynamic suggestions for argument values', () => {
         describe('.es()', () => {
           it('should show index pattern suggestions for index argument', async () => {
             await monacoEditor.setCodeEditorValue('');
