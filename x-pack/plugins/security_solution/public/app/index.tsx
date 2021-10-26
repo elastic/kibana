@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, RouteProps, Route, Switch } from 'react-router-dom';
+import { OVERVIEW_PATH } from '../../common/constants';
 
 import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
@@ -25,6 +26,7 @@ export const renderApp = ({
 }: RenderAppProps): (() => void) => {
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+
   render(
     <SecurityApp
       history={history}
@@ -35,9 +37,32 @@ export const renderApp = ({
     >
       <ApplicationUsageTrackingProvider>
         <Switch>
+<<<<<<< HEAD
           {subPluginRoutes.map((route, index) => {
             return <Route key={`route-${index}`} {...route} />;
           })}
+=======
+          {[
+            ...subPlugins.overview.routes,
+            ...subPlugins.alerts.routes,
+            ...subPlugins.rules.routes,
+            ...subPlugins.exceptions.routes,
+            ...subPlugins.hosts.routes,
+            ...subPlugins.network.routes,
+            // will be undefined if enabledExperimental.uebaEnabled === false
+            ...(subPlugins.ueba != null ? subPlugins.ueba.routes : []),
+            ...subPlugins.timelines.routes,
+            ...subPlugins.cases.routes,
+            ...subPlugins.management.routes,
+            ...subPlugins.cloud_posture.routes,
+          ].map((route, index) => (
+            <Route key={`route-${index}`} {...route} />
+          ))}
+
+          <Route path="" exact>
+            <Redirect to={OVERVIEW_PATH} />
+          </Route>
+>>>>>>> initial entry point
           <Route>
             <NotFoundPage />
           </Route>

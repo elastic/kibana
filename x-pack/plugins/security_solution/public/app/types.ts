@@ -35,7 +35,7 @@ import { Immutable } from '../../common/endpoint/types';
 import { AppAction } from '../common/store/actions';
 import { TimelineState } from '../timelines/store/timeline/types';
 
-export { SecurityPageName } from '../../common/constants';
+export { SecurityPageName, CloudPosturePage } from '../../common/constants';
 
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
   initialState: Record<K, T>;

@@ -78,6 +78,13 @@ export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as
 export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'] as const;
 export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"' as const;
 
+export enum CloudPosturePage {
+  rules = 'csp_rules',
+  alerts = 'csp_alerts',
+  findings = 'csp_findings',
+  dashboard = 'csp_dashboard',
+}
+
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
@@ -110,6 +117,7 @@ export enum SecurityPageName {
   trustedApps = 'trusted_apps',
   ueba = 'ueba',
   uncommonProcesses = 'uncommon_processes',
+  cloud_posture = 'cloud_posture',
 }
 
 export const TIMELINES_PATH = '/timelines' as const;

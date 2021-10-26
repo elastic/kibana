@@ -10,6 +10,7 @@ import {
   SecurityNav,
   SecurityNavGroup,
   SecurityNavGroupKey,
+  NavTab,
 } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
@@ -26,8 +27,40 @@ import {
   APP_EVENT_FILTERS_PATH,
   APP_UEBA_PATH,
   SecurityPageName,
+  CloudPosturePage,
   APP_HOST_ISOLATION_EXCEPTIONS_PATH,
 } from '../../../common/constants';
+
+export const cloudPostureNavTabs: Record<CloudPosturePage, NavTab> = {
+  [CloudPosturePage.dashboard]: {
+    id: CloudPosturePage.dashboard,
+    name: 'Dashboard',
+    href: '/csp/dashboard',
+    disabled: false,
+    // urlKey: 'administration',
+  },
+  [CloudPosturePage.rules]: {
+    id: CloudPosturePage.rules,
+    name: 'Rules',
+    href: '/csp/rules',
+    disabled: false,
+    // urlKey: 'administration',
+  },
+  [CloudPosturePage.alerts]: {
+    id: CloudPosturePage.alerts,
+    name: 'Alerts',
+    href: '/csp/alerts',
+    disabled: false,
+    // urlKey: 'administration',
+  },
+  [CloudPosturePage.findings]: {
+    id: CloudPosturePage.findings,
+    name: 'Findings',
+    href: '/csp/findings',
+    disabled: false,
+    // urlKey: 'administration',
+  },
+};
 
 export const navTabs: SecurityNav = {
   [SecurityPageName.overview]: {
