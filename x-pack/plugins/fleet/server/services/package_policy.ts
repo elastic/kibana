@@ -436,6 +436,11 @@ class PackagePolicyService {
       });
 
       if (packagePolicy.package.version !== currentVersion) {
+        appContextService
+          .getLogger()
+          .info(
+            `Package policy upgraded successfully`
+          );
         sendTelemetryEvents(
           appContextService.getLogger(),
           appContextService.getTelemetryEventsSender(),
@@ -685,6 +690,13 @@ class PackagePolicyService {
       const hasErrors = 'errors' in updatedPackagePolicy;
 
       if (packagePolicy.package.version !== packageInfo.version) {
+        appContextService
+          .getLogger()
+          .info(
+            `Package policy upgrade dry run ${
+              hasErrors ? 'resulted in errors' : 'ran successfully'
+            }`
+          );
         sendTelemetryEvents(
           appContextService.getLogger(),
           appContextService.getTelemetryEventsSender(),
