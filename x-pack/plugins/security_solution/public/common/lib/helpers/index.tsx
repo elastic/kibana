@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { castArray, isArray, isUndefined } from 'lodash/fp';
+import { castArray, isUndefined } from 'lodash/fp';
 
-export const encodeIpv6 = (ip: string | string[]) =>
-  isArray(ip) ? ip.map((i) => i.replace(/:/g, '-')) : ip.replace(/:/g, '-');
-export const decodeIpv6 = (ip: string | string[]) =>
-  isArray(ip) ? ip.map((i) => i.replace(/-/g, ':')) : ip.replace(/-/g, ':');
+export const encodeIpv6 = (ip: string) => ip.replace(/:/g, '-');
+export const decodeIpv6 = (ip: string) => ip.replace(/-/g, ':');
 
 export type Many<T> = T | readonly T[];
 export type WrapArrayIfExitts = <T>(value: Many<T>) => T[] | undefined;

@@ -13,20 +13,12 @@ describe('Helpers', () => {
       const encodedIp = encodeIpv6('2001:db8:ffff:ffff:ffff:ffff:ffff:ffff');
       expect(encodedIp).toBe('2001-db8-ffff-ffff-ffff-ffff-ffff-ffff');
     });
-    test('it handles array of ips', () => {
-      const encodedIp = encodeIpv6(['2001:db8:ffff:ffff:ffff:ffff:ffff:ffff']);
-      expect(encodedIp).toStrictEqual(['2001-db8-ffff-ffff-ffff-ffff-ffff-ffff']);
-    });
   });
 
   describe('#decodeIpv6', () => {
     test('if it decodes the provided IPv6 by replacing - with :', () => {
       const decodedIp = decodeIpv6('2001-db8-ffff-ffff-ffff-ffff-ffff-ffff');
       expect(decodedIp).toBe('2001:db8:ffff:ffff:ffff:ffff:ffff:ffff');
-    });
-    test('it handles array of ips', () => {
-      const decodedIp = decodeIpv6(['2001-db8-ffff-ffff-ffff-ffff-ffff-ffff']);
-      expect(decodedIp).toStrictEqual(['2001:db8:ffff:ffff:ffff:ffff:ffff:ffff']);
     });
   });
 
