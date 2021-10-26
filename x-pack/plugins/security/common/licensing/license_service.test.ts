@@ -28,7 +28,6 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
-      allowLegacyAuditLogging: false,
     });
   });
 
@@ -51,7 +50,6 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
-      allowLegacyAuditLogging: false,
     });
   });
 
@@ -73,7 +71,6 @@ describe('license features', function () {
           Object {
             "allowAccessAgreement": false,
             "allowAuditLogging": false,
-            "allowLegacyAuditLogging": false,
             "allowLogin": false,
             "allowRbac": false,
             "allowRoleDocumentLevelSecurity": false,
@@ -95,7 +92,6 @@ describe('license features', function () {
           Object {
             "allowAccessAgreement": true,
             "allowAuditLogging": true,
-            "allowLegacyAuditLogging": true,
             "allowLogin": true,
             "allowRbac": true,
             "allowRoleDocumentLevelSecurity": true,
@@ -134,7 +130,6 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
-      allowLegacyAuditLogging: false,
     });
     expect(getFeatureSpy).toHaveBeenCalledTimes(1);
     expect(getFeatureSpy).toHaveBeenCalledWith('security');
@@ -160,7 +155,6 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
-      allowLegacyAuditLogging: false,
     });
   });
 
@@ -185,7 +179,6 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
-      allowLegacyAuditLogging: true,
     });
   });
 
@@ -210,7 +203,6 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
-      allowLegacyAuditLogging: true,
     });
   });
 
@@ -235,7 +227,6 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
-      allowLegacyAuditLogging: true,
     });
   });
 });

@@ -1789,6 +1789,18 @@ describe('createConfig()', () => {
     ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
   });
 
+  it('rejects enabled when no appender is configured', () => {
+    expect(() =>
+      ConfigSchema.validate({
+        audit: {
+          enabled: true,
+        },
+      })
+    ).toThrow(
+      'xpack.security.audit.appender is required when xpack.security.audit.enabled is set to true.'
+    );
+  });
+
   describe('#getExpirationTimeouts', () => {
     function createMockConfig(config: Record<string, any> = {}) {
       return createConfig(ConfigSchema.validate(config), loggingSystemMock.createLogger(), {
