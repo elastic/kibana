@@ -6,9 +6,6 @@
  */
 
 import { KbnClient } from '@kbn/test';
-import type { ApiResponse } from '@elastic/elasticsearch';
-import { Context } from '@elastic/elasticsearch/lib/Transport';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { ALERT_RULE_RULE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import type { TransportResult } from '@elastic/elasticsearch';

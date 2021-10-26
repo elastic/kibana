@@ -12,7 +12,6 @@ import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportResult } from '@elastic/elasticsearch';
-import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 import { ALERT_UUID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';

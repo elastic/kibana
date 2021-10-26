@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../plugins/security_solution/common/constants';
 import { RAC_ALERTS_BULK_UPDATE_URL } from '../../../../plugins/timelines/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
