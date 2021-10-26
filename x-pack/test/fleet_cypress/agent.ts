@@ -7,10 +7,8 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 import axios, { AxiosRequestConfig } from 'axios';
-import { copyFile } from 'fs/promises';
-import { ChildProcess, execFileSync, spawn } from 'child_process';
+import { ChildProcess, exec, spawn } from 'child_process';
 import { resolve } from 'path';
-import { unlinkSync } from 'fs';
 import { Manager } from './resource_manager';
 
 interface AgentManagerParams {
@@ -47,6 +45,12 @@ export class AgentManager extends Manager {
     return resolve(this.directoryPath, 'elastic-agent');
   }
 
+  private execute(command: string, callback: Function) {
+    exec(command, function (error, stdout, stderr) {
+      callback(stdout);
+    });
+  }
+
   public async setup() {
     this.log.info('Running agent preconfig');
     await axios.post(`${this.params.kibanaUrl}/api/fleet/agents/setup`, {}, this.requestOptions);
@@ -71,26 +75,28 @@ export class AgentManager extends Manager {
     );
     const policy = apiKeys.list[1];
 
-    this.log.info('Enrolling the agent');
-    const args = [
-      'enroll',
-      '--insecure',
-      '-f',
-      // TODO: parse the host/port out of the logs for the fleet server
-      '--url=http://localhost:8220',
-      `--enrollment-token=${policy.api_key}`,
-    ];
-    const agentBinPath = this.getBinaryPath();
-    execFileSync(agentBinPath, args, { stdio: 'inherit' });
-
-    // Copy the config file
-    const configPath = resolve(__dirname, this.directoryPath, 'elastic-agent.yml');
-    this.log.info(this.directoryPath);
-    this.log.info(`Copying agent config from ${configPath}`);
-    await copyFile(configPath, resolve('.', 'elastic-agent.yml'));
-
     this.log.info('Running the agent');
-    this.agentProcess = spawn(agentBinPath, ['run', '-v'], { stdio: 'inherit' });
+    await this.execute(
+      `ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'`,
+      (ipAddress: string) => {
+        ipAddress = ipAddress.trim();
+
+        const args = [
+          'run',
+          '--env',
+          'FLEET_ENROLL=1',
+          '--env',
+          `FLEET_URL=http://${ipAddress}:8220`,
+          '--env',
+          `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
+          '--env',
+          'FLEET_INSECURE=true',
+          'docker.elastic.co/beats/elastic-agent:8.0.0-SNAPSHOT',
+        ];
+
+        this.agentProcess = spawn('docker', args, { stdio: 'inherit' });
+      }
+    );
 
     // Wait til we see the agent is online
     let done = false;
@@ -122,6 +128,6 @@ export class AgentManager extends Manager {
       });
       delete this.agentProcess;
     }
-    unlinkSync(resolve('.', 'elastic-agent.yml'));
+    return;
   }
 }

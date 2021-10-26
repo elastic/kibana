@@ -44,7 +44,8 @@ async function withFleetAgent(
   );
 
   const agentManager = new AgentManager(
-    artifactManager.getArtifactDirectory('elastic-agent'),
+    '',
+    // artifactManager.getArtifactDirectory('elastic-agent'),
     {
       ...esConfig,
       kibanaUrl: Url.format({
@@ -92,7 +93,7 @@ function startFleetAgent(context: FtrProviderContext, cypressCommand: string) {
     {
       artifacts: {
         // TODO take latest version dynamically from https://artifacts-api.elastic.co/v1/versions/
-        'elastic-agent': '8.0.0-SNAPSHOT',
+        // 'elastic-agent': '8.0.0-SNAPSHOT',
         'fleet-server': '8.0.0-SNAPSHOT',
       },
     },
