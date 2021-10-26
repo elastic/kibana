@@ -33,9 +33,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
     });
     after(async () => {
-      // @ts-expect-error @elastic/elasticsearch DeleteSnapshotLifecycleRequest.policy_id is required
-      await esClient.ilm.deleteLifecycle({ policy: policyName });
       await esClient.snapshot.deleteRepository({ repository: repoName });
+      await esClient.ilm.deleteLifecycle({ name: policyName });
     });
 
     it('Loads the app', async () => {

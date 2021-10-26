@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
         verify: false,
       });
-      await esClient.ilm.putLifecycle({ policy: POLICY_NAME, body: POLICY_ALL_PHASES });
+      await esClient.ilm.putLifecycle({ name: POLICY_NAME, body: POLICY_ALL_PHASES });
       await esClient.indices.putIndexTemplate({
         name: indexTemplateName,
         body: {
@@ -91,8 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esClient.snapshot.deleteRepository({
         repository: REPO_NAME,
       });
-      // @ts-expect-error @elastic/elasticsearch DeleteSnapshotLifecycleRequest.policy_id is required
-      await esClient.ilm.deleteLifecycle({ policy: POLICY_NAME });
+      await esClient.ilm.deleteLifecycle({ name: POLICY_NAME });
       await esClient.indices.deleteIndexTemplate({ name: indexTemplateName });
     });
 
