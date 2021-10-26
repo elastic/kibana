@@ -7,7 +7,6 @@
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
-import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
 import { EnvironmentMode } from '@kbn/config';
@@ -680,6 +679,7 @@ export interface DocLinksStart {
             clusterPrivileges: string;
             elasticsearchSettings: string;
             elasticsearchEnableSecurity: string;
+            elasticsearchEnableApiKeys: string;
             indicesPrivileges: string;
             kibanaTLS: string;
             kibanaPrivileges: string;
@@ -697,6 +697,7 @@ export interface DocLinksStart {
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
+            datastreamsILM: string;
             guide: string;
             fleetServer: string;
             fleetServerAddFleetServer: string;
@@ -706,6 +707,7 @@ export interface DocLinksStart {
             elasticAgent: string;
             datastreams: string;
             datastreamsNamingScheme: string;
+            installElasticAgent: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;

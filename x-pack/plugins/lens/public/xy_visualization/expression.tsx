@@ -31,6 +31,7 @@ import {
   LabelOverflowConstraint,
   DisplayValueStyle,
   RecursivePartial,
+  ScaleType,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import type {
@@ -594,18 +595,22 @@ export function XYChart({
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
         }}
-        allowBrushingLastHistogramBucket={Boolean(isTimeViz)}
+        allowBrushingLastHistogramBin={Boolean(isTimeViz)}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
         onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
         onElementClick={interactive ? clickHandler : undefined}
-        legendAction={getLegendAction(
-          filteredLayers,
-          data.tables,
-          onClickValue,
-          formatFactory,
-          layersAlreadyFormatted
-        )}
+        legendAction={
+          interactive
+            ? getLegendAction(
+                filteredLayers,
+                data.tables,
+                onClickValue,
+                formatFactory,
+                layersAlreadyFormatted
+              )
+            : undefined
+        }
         showLegendExtra={isHistogramViz && valuesInLegend}
       />
 
@@ -763,6 +768,8 @@ export function XYChart({
             axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
           );
 
+          const formatter = table?.columns.find((column) => column.id === accessor)?.meta?.params;
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: isStacked ? [xAccessor as string] : [],
@@ -771,7 +778,10 @@ export function XYChart({
             yAccessors: [accessor],
             data: rows,
             xScaleType: xAccessor ? xScaleType : 'ordinal',
-            yScaleType,
+            yScaleType:
+              formatter?.id === 'bytes' && yScaleType === ScaleType.Linear
+                ? ScaleType.LinearBinary
+                : yScaleType,
             color: ({ yAccessor, seriesKeys }) => {
               const overwriteColor = getSeriesColor(layer, accessor);
               if (overwriteColor !== null) {

@@ -11,15 +11,16 @@ export interface AlertsUsage {
   count_disabled_total: number;
   count_by_type: Record<string, number>;
   count_active_by_type: Record<string, number>;
+  count_rules_namespaces: number;
   throttle_time: {
-    min: string;
-    avg: string;
-    max: string;
+    min: number;
+    avg: number;
+    max: number;
   };
   schedule_time: {
-    min: string;
-    avg: string;
-    max: string;
+    min: number;
+    avg: number;
+    max: number;
   };
   connectors_per_alert: {
     min: number;
