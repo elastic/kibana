@@ -477,5 +477,5 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     missing_exception_lists_count: 0,
   };
 
-  return `${JSON.stringify(rule)}${JSON.stringify(details)}\n`;
+  return `${JSON.stringify(rule)}\n${JSON.stringify(details)}\n`;
 };

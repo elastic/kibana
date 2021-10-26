@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(bodySplitAndParsed).to.eql({
           exported_exception_list_count: 0,
           exported_exception_list_item_count: 0,
-          exported_count: 0,
+          exported_count: 1,
           exported_rules_count: 1,
           missing_exception_list_item_count: 0,
           missing_exception_list_items: [],
