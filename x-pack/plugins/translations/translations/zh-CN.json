@@ -19105,8 +19105,6 @@
     "xpack.osquery.breadcrumbs.newSavedQueryPageTitle": "新建",
     "xpack.osquery.breadcrumbs.overviewPageTitle": "概览",
     "xpack.osquery.breadcrumbs.savedQueriesPageTitle": "已保存查询",
-    "xpack.osquery.common.tabBetaBadgeLabel": "公测版",
-    "xpack.osquery.common.tabBetaBadgeTooltipContent": "我们正在开发此功能。将会有更多的功能，某些功能可能有变更。",
     "xpack.osquery.createScheduledQuery.agentPolicyAgentsCountText": "{count, plural, other {# 个代理}}已注册",
     "xpack.osquery.editSavedQuery.deleteSavedQueryButtonLabel": "删除查询",
     "xpack.osquery.editSavedQuery.deleteSuccessToastMessageText": "已成功删除已保存查询",
