@@ -375,31 +375,28 @@ export function createConfig(
         sortedProviders.filter(({ type, name }) => providers[type]?.[name].showInSelector).length >
           1;
 
-  const auditLoggingEnabled = config.audit.enabled === true;
   const appender: AppenderConfigType | undefined =
-    config.audit.appender ?? auditLoggingEnabled
-      ? ({
-          type: 'rolling-file',
-          fileName: path.join(getDataPath(), 'audit.log'),
-          layout: {
-            type: 'json',
-          },
-          policy: {
-            type: 'time-interval',
-            interval: schema.duration().validate('24h'),
-          },
-          strategy: {
-            type: 'numeric',
-            max: 10,
-          },
-        } as AppenderConfigType)
-      : undefined;
-
+    config.audit.appender ??
+    ({
+      type: 'rolling-file',
+      fileName: path.join(getDataPath(), 'audit.log'),
+      layout: {
+        type: 'json',
+      },
+      policy: {
+        type: 'time-interval',
+        interval: schema.duration().validate('24h'),
+      },
+      strategy: {
+        type: 'numeric',
+        max: 10,
+      },
+    } as AppenderConfigType);
   return {
     ...config,
     audit: {
       ...config.audit,
-      appender,
+      ...(config.audit.enabled && appender),
     },
     authc: {
       selector: { ...config.authc.selector, enabled: isLoginSelectorEnabled },
