@@ -8,10 +8,10 @@ import { service, timerange } from '@elastic/apm-synthtrace';
 import type { SynthtraceEsClient } from '../../../common/synthtrace_es_client';
 
 export const config = {
-  GO_PROD_LIST_RATE: 75,
-  GO_PROD_LIST_ERROR_RATE: 25,
-  GO_PROD_ID_RATE: 50,
-  GO_PROD_ID_ERROR_RATE: 50,
+  PROD_LIST_RATE: 75,
+  PROD_LIST_ERROR_RATE: 25,
+  PROD_ID_RATE: 50,
+  PROD_ID_ERROR_RATE: 50,
   ERROR_NAME_1: 'Error test 1',
   ERROR_NAME_2: 'Error test 2',
 };
@@ -33,10 +33,10 @@ export async function generateData({
   const transactionNameProductId = 'GET /api/product/:id';
 
   const {
-    GO_PROD_LIST_RATE,
-    GO_PROD_LIST_ERROR_RATE,
-    GO_PROD_ID_RATE,
-    GO_PROD_ID_ERROR_RATE,
+    PROD_LIST_RATE,
+    PROD_LIST_ERROR_RATE,
+    PROD_ID_RATE,
+    PROD_ID_ERROR_RATE,
     ERROR_NAME_1,
     ERROR_NAME_2,
   } = config;
@@ -44,7 +44,7 @@ export async function generateData({
   await synthtraceEsClient.index([
     ...timerange(start, end)
       .interval('1m')
-      .rate(GO_PROD_LIST_RATE)
+      .rate(PROD_LIST_RATE)
       .flatMap((timestamp) =>
         serviceGoProdInstance
           .transaction(transactionNameProductList)
@@ -55,7 +55,7 @@ export async function generateData({
       ),
     ...timerange(start, end)
       .interval('1m')
-      .rate(GO_PROD_LIST_ERROR_RATE)
+      .rate(PROD_LIST_ERROR_RATE)
       .flatMap((timestamp) =>
         serviceGoProdInstance
           .transaction(transactionNameProductList)
@@ -67,7 +67,7 @@ export async function generateData({
       ),
     ...timerange(start, end)
       .interval('1m')
-      .rate(GO_PROD_ID_RATE)
+      .rate(PROD_ID_RATE)
       .flatMap((timestamp) =>
         serviceGoProdInstance
           .transaction(transactionNameProductId)
@@ -78,7 +78,7 @@ export async function generateData({
       ),
     ...timerange(start, end)
       .interval('1m')
-      .rate(GO_PROD_ID_ERROR_RATE)
+      .rate(PROD_ID_ERROR_RATE)
       .flatMap((timestamp) =>
         serviceGoProdInstance
           .transaction(transactionNameProductId)

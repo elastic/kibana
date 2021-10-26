@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import moment from 'moment';
 import {
@@ -66,8 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: ['apm_8.0.0_empty'] },
     () => {
       describe('when data is loaded', () => {
-        const { GO_PROD_LIST_ERROR_RATE, GO_PROD_ID_ERROR_RATE, ERROR_NAME_1, ERROR_NAME_2 } =
-          config;
+        const { PROD_LIST_ERROR_RATE, PROD_ID_ERROR_RATE, ERROR_NAME_1, ERROR_NAME_2 } = config;
 
         before(async () => {
           await generateData({ serviceName, start, end, synthtraceEsClient });
@@ -82,7 +80,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             errorGroupMainStatistics = response.body;
           });
 
-          it('returns correct number of errors', () => {
+          it('returns correct number of occurrencies', () => {
             expect(errorGroupMainStatistics.error_groups.length).to.equal(2);
             expect(errorGroupMainStatistics.error_groups.map((error) => error.name).sort()).to.eql([
               ERROR_NAME_1,
@@ -95,8 +93,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(
               errorGroupMainStatistics.error_groups.map((error) => error.occurrences).sort()
             ).to.eql([
-              GO_PROD_LIST_ERROR_RATE * numberOfBuckets,
-              GO_PROD_ID_ERROR_RATE * numberOfBuckets,
+              PROD_LIST_ERROR_RATE * numberOfBuckets,
+              PROD_ID_ERROR_RATE * numberOfBuckets,
             ]);
           });
 
