@@ -54,10 +54,12 @@ export const useAllAgents = (
       enabled: !osqueryPoliciesLoading && osqueryPolicies.length > 0,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
-        setErrorToast(error as Error, {
+        // @ts-expect-error update types
+        setErrorToast(error?.body, {
           title: i18n.translate('xpack.osquery.agents.fetchError', {
             defaultMessage: 'Error while fetching agents',
           }),
+          toastMessage: error?.body?.error,
         }),
     }
   );
