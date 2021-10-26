@@ -17,7 +17,7 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
-  describe('Overview Page', function () {
+  describe.skip('Overview Page', function () {
     this.tags('skipFirefox');
 
     before(async () => {
@@ -38,14 +38,14 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
       });
     });
 
-    it.skip('Should render all steps', async () => {
+    it('Should render all steps', async () => {
       testSubjects.exists('backupStep-incomplete');
       testSubjects.exists('fixIssuesStep-incomplete');
       testSubjects.exists('fixLogsStep-incomplete');
       testSubjects.exists('upgradeStep');
     });
 
-    describe.skip('fixLogsStep', () => {
+    describe('fixLogsStep', () => {
       before(async () => {
         // Access to system indices will be deprecated and should generate a deprecation log
         await es.indices.get({ index: '.kibana' });
