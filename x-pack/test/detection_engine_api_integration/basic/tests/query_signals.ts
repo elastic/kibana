@@ -186,13 +186,13 @@ export default ({ getService }: FtrProviderContext) => {
                         filter: [
                           {
                             match_phrase: {
-                              'signal.rule.id': 'c76f1a10-ffb6-11eb-8914-9b237bf6808c',
+                              'kibana.alert.rule.uuid': 'c76f1a10-ffb6-11eb-8914-9b237bf6808c',
                             },
                           },
                           { term: { 'kibana.alert.workflow_status': 'open' } },
                         ],
                         should: [],
-                        must_not: [{ exists: { field: 'signal.rule.building_block_type' } }],
+                        must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
                       },
                     },
                     {

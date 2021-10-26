@@ -127,7 +127,7 @@ Object {
       "path": "signal.rule.author",
       "type": "alias",
     },
-    "kibana.alert.rule.building_block_type": Object {
+    "kibana.alert.building_block_type": Object {
       "path": "signal.rule.building_block_type",
       "type": "alias",
     },
@@ -2410,7 +2410,7 @@ Object {
           "path": "signal.rule.author",
           "type": "alias",
         },
-        "kibana.alert.rule.building_block_type": Object {
+        "kibana.alert.building_block_type": Object {
           "path": "signal.rule.building_block_type",
           "type": "alias",
         },

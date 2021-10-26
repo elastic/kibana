@@ -179,7 +179,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'kibana.alert.rule.note',
   'kibana.alert.rule.threshold',
   'kibana.alert.rule.exceptions_list',
-  'kibana.alert.rule.building_block_type',
+  'kibana.alert.building_block_type',
   'suricata.eve.proto',
   'suricata.eve.flow_id',
   'suricata.eve.alert.signature',

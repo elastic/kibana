@@ -127,10 +127,10 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'kibana.alert.rule.building_block_type',
+            key: 'kibana.alert.building_block_type',
             value: 'exists',
           },
-          query: { exists: { field: 'kibana.alert.rule.building_block_type' } },
+          query: { exists: { field: 'kibana.alert.building_block_type' } },
         },
       ];
 
@@ -163,7 +163,7 @@ export const requiredFieldsForActions = [
   'kibana.alert.workflow_status',
   'kibana.alert.group.id',
   'kibana.alert.original_time',
-  'kibana.alert.rule.building_block_type',
+  'kibana.alert.building_block_type',
   'kibana.alert.rule.filters',
   'kibana.alert.rule.from',
   'kibana.alert.rule.language',
@@ -263,10 +263,10 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'kibana.alert.rule.building_block_type',
+            key: 'kibana.alert.building_block_type',
             value: 'exists',
           },
-          query: { exists: { field: 'kibana.alert.rule.building_block_type' } },
+          query: { exists: { field: 'kibana.alert.building_block_type' } },
         },
       ];
 
