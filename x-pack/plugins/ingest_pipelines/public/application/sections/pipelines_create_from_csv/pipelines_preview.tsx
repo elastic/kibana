@@ -92,7 +92,7 @@ export const PipelinesPreview: FC<Props> = ({
               aria-label={''}
               languageId={XJsonLang.ID}
               value={processorsJson}
-              onChange={(pipelineProcessors) => onUpdate(pipelineProcessors)}
+              onChange={onUpdate}
               fullWidth={true}
               height="400px"
               options={{

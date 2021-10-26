@@ -59,7 +59,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
       name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineFromCsvButtonLabel', {
         defaultMessage: 'Create new pipeline from CSV',
       }),
-      ...reactRouterNavigate(history, '/csvCreate'),
+      ...reactRouterNavigate(history, '/csv_create'),
       'data-test-subj': `createPipelineFromCsv`,
     },
   ];

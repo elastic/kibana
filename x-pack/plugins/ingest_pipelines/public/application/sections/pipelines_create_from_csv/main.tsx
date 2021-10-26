@@ -11,12 +11,13 @@ import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import fileSaver from 'file-saver';
+
+import { FieldCopyAction, Processor } from '../../../../common/types';
+import { useKibana } from '../../../shared_imports';
 import { PipelinesCsvUploader } from './pipelines_csv_uploader';
 import { PipelinesPreview } from './pipelines_preview';
 import { Error } from './error_display';
 import { Instructions } from './instructions';
-import { FieldCopyAction, Processor } from '../../../../common/types';
-import { useKibana } from '../../../shared_imports';
 
 export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps> = ({
   history,
@@ -64,11 +65,34 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
     const maxBytes = services.fileUpload.getMaxBytes();
 
     if (csv.size === 0) {
-      setErrorInfo({ title: 'File is empty', message: 'The file provided is empty.' });
+      setErrorInfo({
+        title: i18n.translate(
+          'xpack.ingestPipelines.createFromCsv.processFile.emptyFileErrorTitle',
+          {
+            defaultMessage: 'File is empty',
+          }
+        ),
+        message: i18n.translate(
+          'xpack.ingestPipelines.createFromCsv.processFile.emptyFileError',
+          {
+            defaultMessage: 'The file provided is empty.',
+          }
+        ),
+      });
     } else if (csv.size > maxBytes) {
       setErrorInfo({
-        title: 'File too large',
-        message: 'File is greater than allowed size of ' + maxBytes + 'bytes.',
+        title: i18n.translate(
+          'xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeErrorTitle',
+          {
+            defaultMessage: 'File too large',
+          }
+        ),
+        message: i18n.translate(
+          'xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeError',
+          {
+            defaultMessage: `File is greater than allowed size of ${maxBytes} bytes.`,
+          }
+        ),
       });
     } else {
       try {
@@ -96,7 +120,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
   };
 
   const fetchPipelineFromMapping = async (fileContents: string, action: FieldCopyAction) => {
-    const { error, data: processors } = await services.api.mapToPipeline({
+    const { error, data: processors } = await services.api.parseCsv({
       file: fileContents,
       copyAction: action,
     });

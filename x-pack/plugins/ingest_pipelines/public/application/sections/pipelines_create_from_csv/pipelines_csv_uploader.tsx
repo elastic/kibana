@@ -32,12 +32,10 @@ interface Props {
 }
 
 function getOptions(actions: FieldCopyAction[]) {
-  const actionOptions = actions.map((action) => ({
+  return actions.map((action) => ({
     id: action,
     label: action,
   }));
-
-  return [...actionOptions];
 }
 
 export const PipelinesCsvUploader: FC<Props> = ({
@@ -62,82 +60,73 @@ export const PipelinesCsvUploader: FC<Props> = ({
   const options = getOptions(actionOptions);
 
   return (
-    <EuiFlexGroup gutterSize="xl">
-      <EuiFlexItem grow={true}>
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.ingestPipelines.createFromCsv.fileUpload.filePickerTitle"
-              defaultMessage="Upload file (up to {maxFileSize})"
-              values={{ maxFileSize }}
-            />
-          }
-        >
-          <EuiFilePicker
-            id="filePicker"
-            data-test-subj="csvFilePicker"
-            initialPromptText={i18n.translate(
-              'xpack.ingestPipelines.createFromCsv.fileUpload.selectOrDragAndDropFileDescription',
-              {
-                defaultMessage: 'Select or drag and drop a CSV file',
-              }
-            )}
-            onChange={onFilePickerChange}
-            accept=".csv"
+    <>
+      <EuiFormRow
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.ingestPipelines.createFromCsv.fileUpload.filePickerTitle"
+            defaultMessage="Upload file (up to {maxFileSize})"
+            values={{ maxFileSize }}
           />
-        </EuiFormRow>
-
-        <EuiSpacer size="l" />
-
-        <EuiFormRow
-          fullWidth
-          label={
-            <p>
-              Default copy action
-              <EuiIconTip
-                type="iInCircle"
-                content={
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.createFromCsv.fileUpload.settingDescription"
-                    defaultMessage="This is the default action for field renames, and will only be utilized if not provided for a field in the uploaded CSV."
-                  />
-                }
-              />
-            </p>
-          }
-        >
-          <EuiRadioGroup
-            options={options}
-            idSelected={action}
-            onChange={(id) => setAction(id as FieldCopyAction)}
-          />
-        </EuiFormRow>
-
-        <EuiSpacer size="l" />
-
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none" direction="row">
-            <EuiFlexItem grow={1}>
-              <EuiButton
-                onClick={() => onFileUpload(action)}
-                isLoading={isLoading}
-                isDisabled={!hasFile || isUploaded || hasError}
-                data-test-subj="processFileButton"
-                fill
-              >
+        }
+      >
+        <EuiFilePicker
+          id="filePicker"
+          data-test-subj="csvFilePicker"
+          initialPromptText={i18n.translate(
+            'xpack.ingestPipelines.createFromCsv.fileUpload.selectOrDragAndDropFileDescription',
+            {
+              defaultMessage: 'Select or drag and drop a CSV file',
+            }
+          )}
+          onChange={onFilePickerChange}
+          accept=".csv"
+        />
+      </EuiFormRow>
+  
+      <EuiSpacer size="l" />
+  
+      <EuiFormRow
+        fullWidth
+        label={
+          <p>
+            Default copy action
+            <EuiIconTip
+              type="iInCircle"
+              content={
                 <FormattedMessage
-                  id="xpack.ingestPipelines.createFromCsv.fileUpload.processButton"
-                  defaultMessage="Process CSV"
+                  id="xpack.ingestPipelines.createFromCsv.fileUpload.settingDescription"
+                  defaultMessage="This is the default action for field renames, and will only be utilized if not provided for a field in the uploaded CSV."
                 />
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={9}>
-              <EuiSpacer size="s" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+              }
+            />
+          </p>
+        }
+      >
+        <EuiRadioGroup
+          options={options}
+          idSelected={action}
+          onChange={(id) => setAction(id as FieldCopyAction)}
+        />
+      </EuiFormRow>
+  
+      <EuiSpacer size="l" />
+  
+      <div>
+        <EuiButton
+          onClick={() => onFileUpload(action)}
+          isLoading={isLoading}
+          isDisabled={!hasFile || isUploaded || hasError}
+          data-test-subj="processFileButton"
+          fill
+        >
+          <FormattedMessage
+            id="xpack.ingestPipelines.createFromCsv.fileUpload.processButton"
+            defaultMessage="Process CSV"
+          />
+        </EuiButton>
+      </div>
+    </>
+  );  
 };

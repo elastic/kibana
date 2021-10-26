@@ -74,7 +74,7 @@ describe('<PipelinesCreateFromCsv />', () => {
 
         testBed.component.update();
 
-        httpRequestsMockHelpers.setMapToPipelineResponse({}, undefined);
+        httpRequestsMockHelpers.setParseCsvResponse({}, undefined);
       });
 
       test('should map pipeline from file upload', async () => {
@@ -101,7 +101,7 @@ describe('<PipelinesCreateFromCsv />', () => {
           message: `${errorTitle}:${errorDetails}`,
         };
 
-        httpRequestsMockHelpers.setMapToPipelineResponse(undefined, { body: error });
+        httpRequestsMockHelpers.setParseCsvResponse(undefined, { body: error });
 
         actions.selectCsvForUpload(mockFile);
         await actions.clickProcessCsv();

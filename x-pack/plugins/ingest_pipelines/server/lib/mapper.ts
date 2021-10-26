@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import Papa from 'papaparse';
-import { FieldCopyAction, Pipeline } from '../../common/types';
+import { FieldCopyAction, Pipeline, Processor } from '../../common/types';
 
 const REQUIRED_CSV_HEADERS = ['source_field', 'destination_field'];
 
@@ -58,9 +58,7 @@ function parseAndValidate(file: string) {
     skipEmptyLines: true,
   };
 
-  const parseOutput = Papa.parse(file, config);
-
-  const { data, errors, meta } = parseOutput;
+  const { data, errors, meta } = Papa.parse(file, config);
   if (errors.length > 0) {
     throw new Error(
       i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.parseErrors', {
@@ -70,12 +68,18 @@ function parseAndValidate(file: string) {
     );
   }
 
-  if (REQUIRED_CSV_HEADERS.every((header) => meta.fields.includes(header)) === false) {
-    const required = REQUIRED_CSV_HEADERS.join(', ');
+  const missingHeaders = REQUIRED_CSV_HEADERS.reduce<string[]>((acc, header) => {
+    if (meta.fields.includes(header)) {
+      return acc;
+    }
+    return [...acc, header];
+  }, []);
+  
+  if (missingHeaders.length > 0) {
     throw new Error(
       i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.missingHeaders', {
-        defaultMessage: 'Required headers are missing: Required {required} missing in CSV',
-        values: { required },
+        defaultMessage: 'Required headers are missing: [{missing}] header missing in CSV',
+        values: { missing: missingHeaders.join(', ') },
       })
     );
   }
@@ -106,8 +110,8 @@ function convertCsvToMapping(rows: Row[], copyFieldAction: FieldCopyAction) {
     const source = row.source_field.trim();
     let destination = row.destination_field && row.destination_field.trim();
     const copyAction = (row.copy_action && row.copy_action.trim()) || copyFieldAction;
-    let formatAction = row.format_action && row.format_action.trim();
-    let timestampFormat = row.timestamp_format && row.timestamp_format.trim();
+    let formatAction = row.format_action && (row.format_action.trim() as FormatAction);
+    let timestampFormat = row.timestamp_format && (row.timestamp_format.trim() as TimeStampFormat);
 
     if (destination === '@timestamp' && !Boolean(timestampFormat)) {
       // If @timestamp is the destination and the user does not specify how to format the conversion, convert it to UNIX_MS
@@ -118,7 +122,7 @@ function convertCsvToMapping(rows: Row[], copyFieldAction: FieldCopyAction) {
       destination = source;
     }
 
-    if (formatAction && !FORMAT_ACTIONS.includes(formatAction as FormatAction)) {
+    if (formatAction && !FORMAT_ACTIONS.includes(formatAction)) {
       const formatActions = FORMAT_ACTIONS.join(', ');
       throw new Error(
         i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.invalidFormatAction', {
@@ -142,20 +146,21 @@ function convertCsvToMapping(rows: Row[], copyFieldAction: FieldCopyAction) {
 }
 
 function generatePipeline(mapping: Map<string, Mapping>) {
-  const processors = [];
+  const processors: Processor[] = [];
   for (const [, row] of mapping) {
     if (hasSameName(row) && !row.format_action) continue;
 
     const source = row.source_field;
+    const dest = row.destination_field;
 
     // Copy/Rename
-    if (row.destination_field && `parse_timestamp` !== row.format_action) {
+    if (dest && `parse_timestamp` !== row.format_action) {
       let processor = {};
       if ('copy' === row.copy_action) {
         processor = {
           set: {
-            field: row.destination_field,
-            value: '{{' + source + '}}',
+            field: dest,
+            value: `{{${source}}}`,
             if: fieldPresencePredicate(source),
           },
         };
@@ -163,7 +168,7 @@ function generatePipeline(mapping: Map<string, Mapping>) {
         processor = {
           rename: {
             field: source,
-            target_field: row.destination_field,
+            target_field: dest,
             ignore_missing: true,
           },
         };
@@ -173,7 +178,7 @@ function generatePipeline(mapping: Map<string, Mapping>) {
 
     if (row.format_action) {
       // Modify the source_field if there's no destination_field (no rename, just a type change)
-      const affectedField = row.destination_field || row.source_field;
+      const affectedField = dest || source;
 
       let type = '';
       if ('to_boolean' === row.format_action) type = 'boolean';
@@ -181,7 +186,7 @@ function generatePipeline(mapping: Map<string, Mapping>) {
       else if ('to_string' === row.format_action) type = 'string';
       else if ('to_float' === row.format_action) type = 'float';
 
-      let processor = {};
+      let processor: Processor | undefined;
 
       if (type) {
         processor = {
@@ -212,15 +217,18 @@ function generatePipeline(mapping: Map<string, Mapping>) {
       } else if ('parse_timestamp' === row.format_action) {
         processor = {
           date: {
-            field: row.source_field,
-            target_field: row.destination_field,
+            field: source,
+            target_field: dest,
             formats: [row.timestamp_format],
             timezone: 'UTC',
             ignore_failure: true,
           },
         };
       }
-      processors.push(processor);
+
+      if (processor) {
+        processors.push(processor!);
+      }
     }
   }
   return { processors } as Pipeline;
@@ -231,16 +239,12 @@ function fieldPresencePredicate(field: string) {
     return "ctx.containsKey('@timestamp')";
   }
 
-  const fieldLevels = field.split('.');
-  if (fieldLevels.length === 1) {
+  const fieldPath = field.split('.');
+  if (fieldPath.length === 1) {
     return `ctx.${field} != null`;
   }
 
-  const nullSafe = fieldLevels
-    .slice(0, -1)
-    .map((f) => `${f}?`)
-    .join('.');
-  return `ctx.${nullSafe}.${fieldLevels.slice(-1)[0]} != null`;
+  return `ctx.${fieldPath.join('?.')} != null`;
 }
 
 function hasSameName(row: Mapping) {

@@ -22,7 +22,7 @@ export const Instructions: FC = () => {
                 values={{
                   templateLink: (
                     <EuiLink
-                      href="https://docs.google.com/spreadsheets/d/1m5JiOTeZtUueW3VOVqS8bFYqNGEEyp0jAsgO12NFkNM/edit#gid=0"
+                      href="https://ela.st/sample-pipeline-mapping"
                       target="_blank"
                     >
                       sample mapping templates

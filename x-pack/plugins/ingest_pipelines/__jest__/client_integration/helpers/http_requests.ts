@@ -52,7 +52,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
-  const setMapToPipelineResponse = (response?: object, error?: any) => {
+  const setParseCsvResponse = (response?: object, error?: any) => {
     const status = error ? error.status || 400 : 200;
     const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
 
@@ -68,7 +68,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setLoadPipelineResponse,
     setDeletePipelineResponse,
     setCreatePipelineResponse,
-    setMapToPipelineResponse,
+    setParseCsvResponse,
   };
 };
 

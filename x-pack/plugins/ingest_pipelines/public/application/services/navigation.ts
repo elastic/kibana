@@ -11,7 +11,7 @@ const EDIT_PATH = 'edit';
 
 const CREATE_PATH = 'create';
 
-const CREATE_FROM_CSV_PATH = 'csvCreate';
+const CREATE_FROM_CSV_PATH = 'csv_create';
 
 const _getEditPath = (name: string, encode = true): string => {
   return `${BASE_PATH}${EDIT_PATH}/${encode ? encodeURIComponent(name) : name}`;

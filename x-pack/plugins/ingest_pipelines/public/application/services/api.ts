@@ -132,7 +132,7 @@ export class ApiService {
     return result;
   }
 
-  public async mapToPipeline(reqBody: { file: string; copyAction: FieldCopyAction }) {
+  public async parseCsv(reqBody: { file: string; copyAction: FieldCopyAction }) {
     const result = await this.sendRequest({
       path: `${API_BASE_PATH}/parse_csv`,
       method: 'post',

@@ -38,7 +38,7 @@ describe('mapper', () => {
         csvToIngestPipeline(noHeadersCsv, FieldCopyAction.Copy);
       }).toThrow(
         new Error(
-          'Required headers are missing: Required source_field, destination_field missing in CSV'
+          'Required headers are missing: [source_field, destination_field] header missing in CSV'
         )
       );
     });
