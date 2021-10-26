@@ -127,6 +127,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     dependentVariable,
     includes,
     jobConfigQuery,
+    jobConfigQueryLanguage,
     jobConfigQueryString,
     jobType,
     modelMemoryLimit,
@@ -150,14 +151,18 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   const [query, setQuery] = useState<Query>({
     query: jobConfigQueryString ?? '',
-    language: SEARCH_QUERY_LANGUAGE.KUERY,
+    language: jobConfigQueryLanguage ?? SEARCH_QUERY_LANGUAGE.KUERY,
   });
 
   const toastNotifications = getToastNotifications();
 
   const setJobConfigQuery: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
     if (update.query) {
-      setFormState({ jobConfigQuery: update.query, jobConfigQueryString: update.queryString });
+      setFormState({
+        jobConfigQuery: update.query,
+        jobConfigQueryLanguage: update.language,
+        jobConfigQueryString: update.queryString,
+      });
     }
     setQuery({ query: update.queryString, language: update.language });
   };
