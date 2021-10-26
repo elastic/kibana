@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  MigrationDeprecationInfoDeprecation,
-  MigrationDeprecationInfoResponse,
-} from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 export enum ReindexStep {
@@ -210,8 +207,8 @@ export interface IndexSettingAction {
   deprecatedSettings: string[];
 }
 export interface EnrichedDeprecationInfo
-  extends Omit<MigrationDeprecationInfoDeprecation, 'level'> {
-  type: keyof MigrationDeprecationInfoResponse;
+  extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
+  type: keyof estypes.MigrationDeprecationsResponse;
   isCritical: boolean;
   index?: string;
   correctiveAction?: ReindexAction | MlAction | IndexSettingAction;

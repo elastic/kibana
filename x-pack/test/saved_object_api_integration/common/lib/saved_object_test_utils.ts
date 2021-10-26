@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { SPACES, ALL_SPACES_ID } from './spaces';
 import { AUTHENTICATION } from './authentication';
@@ -182,11 +182,11 @@ export const expectResponses = {
    * Additional assertions that we use in `import` and `resolve_import_errors` to ensure that
    * newly-created (or overwritten) objects don't have unexpected properties
    */
-  successCreated: async (es: KibanaClient, spaceId: string, type: string, id: string) => {
+  successCreated: async (es: Client, spaceId: string, type: string, id: string) => {
     const isNamespaceUndefined =
       spaceId === SPACES.DEFAULT.spaceId || isNamespaceAgnostic(type) || isMultiNamespace(type);
     const expectedSpacePrefix = isNamespaceUndefined ? '' : `${spaceId}:`;
-    const { body: savedObject } = await es.get<Record<string, any>>({
+    const savedObject = await es.get<Record<string, any>>({
       id: `${expectedSpacePrefix}${type}:${id}`,
       index: '.kibana',
     });

@@ -31,7 +31,15 @@ export const isDeprecatedConnector = (
   }
 
   if (isConnectorWithConfig(connector)) {
-    return !!connector.config.isLegacy;
+    /**
+     * Connectors after the Elastic ServiceNow application use the
+     * Import Set API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_ImportSetAPI)
+     * A ServiceNow connector is considered deprecated if it uses the Table API.
+     *
+     * All other connectors do not have the usesTableApi config property
+     * so the function will always return false for them.
+     */
+    return !!connector.config.usesTableApi;
   }
 
   return false;

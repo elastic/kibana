@@ -198,7 +198,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           actionTypesIndex && actionTypesIndex[item.actionTypeId]
         );
 
-        const showLegacyTooltip = isDeprecatedConnector(item);
+        const showDeprecatedTooltip = isDeprecatedConnector(item);
         const name = getConnectorName(value, item);
 
         const link = (
@@ -223,7 +223,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                 position="right"
               />
             ) : null}
-            {showLegacyTooltip && <ConnectorIconTipWithSpacing />}
+            {showDeprecatedTooltip && <ConnectorIconTipWithSpacing />}
           </>
         );
 
