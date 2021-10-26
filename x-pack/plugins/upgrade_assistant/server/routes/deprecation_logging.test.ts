@@ -45,7 +45,7 @@ describe('deprecation logging API', () => {
           .getSettings as jest.Mock
       ).mockResolvedValue({
         body: {
-          default: {
+          defaults: {
             cluster: { deprecation_indexing: { enabled: 'true' } },
           },
         },
@@ -84,7 +84,7 @@ describe('deprecation logging API', () => {
           .putSettings as jest.Mock
       ).mockResolvedValue({
         body: {
-          default: {
+          defaults: {
             logger: { deprecation: 'WARN' },
             cluster: { deprecation_indexing: { enabled: 'true' } },
           },
