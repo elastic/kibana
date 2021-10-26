@@ -25,4 +25,4 @@ jobs:
           contentid: ${{ github.event.issue.node_id }}
         env:
           PROJECT_ID: "PN_kwDOAGc3Zs0VSg"
-          GITHUB_TOKEN: ${{ secrets.APM_TECH_USER_TOKEN_KIBANA }}
+          GITHUB_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
