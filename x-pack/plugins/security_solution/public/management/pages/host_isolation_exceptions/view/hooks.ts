@@ -48,7 +48,7 @@ export function useCanSeeHostIsolationExceptionsMenu() {
   const http = useHttp();
   const privileges = useEndpointPrivileges();
 
-  const [hasExceptions, setHasExceptions] = useState(privileges.canCreateArtifactsByPolicy);
+  const [hasExceptions, setHasExceptions] = useState(privileges.canIsolateHost);
 
   useEffect(() => {
     async function checkIfHasExceptions() {
@@ -62,10 +62,10 @@ export function useCanSeeHostIsolationExceptionsMenu() {
         setHasExceptions(false);
       }
     }
-    if (!privileges.canCreateArtifactsByPolicy) {
+    if (!privileges.canIsolateHost) {
       checkIfHasExceptions();
     }
-  }, [http, privileges.canCreateArtifactsByPolicy]);
+  }, [http, privileges.canIsolateHost]);
 
   return hasExceptions;
 }

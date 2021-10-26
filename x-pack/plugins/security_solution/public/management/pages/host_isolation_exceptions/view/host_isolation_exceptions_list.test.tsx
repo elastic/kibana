@@ -127,9 +127,9 @@ describe('When on the host isolation exceptions page', () => {
       });
     });
 
-    describe('has canCreateArtifactsByPolicy privileges', () => {
+    describe('has canIsolateHost privileges', () => {
       beforeEach(() => {
-        useEndpointPrivilegesMock.mockReturnValue({ canCreateArtifactsByPolicy: true });
+        useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: true });
       });
 
       it('should show the create flyout when the add button is pressed', () => {
@@ -148,9 +148,9 @@ describe('When on the host isolation exceptions page', () => {
       });
     });
 
-    describe('does not have canCreateArtifactsByPolicy privileges', () => {
+    describe('does not have canIsolateHost privileges', () => {
       beforeEach(() => {
-        useEndpointPrivilegesMock.mockReturnValue({ canCreateArtifactsByPolicy: false });
+        useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
       });
 
       it('should not show the create flyout if the user navigates to the create url', () => {

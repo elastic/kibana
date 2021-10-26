@@ -57,13 +57,13 @@ export const HostIsolationExceptionsList = () => {
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
   const history = useHistory();
   const privileges = useEndpointPrivileges();
-  const showFlyout = privileges.canCreateArtifactsByPolicy && !!location.show;
+  const showFlyout = privileges.canIsolateHost && !!location.show;
 
   useEffect(() => {
-    if (!isLoading && listItems.length === 0 && !privileges.canCreateArtifactsByPolicy) {
+    if (!isLoading && listItems.length === 0 && !privileges.canIsolateHost) {
       history.replace(getEndpointListPath({ name: 'endpointList' }));
     }
-  }, [history, isLoading, listItems.length, privileges.canCreateArtifactsByPolicy]);
+  }, [history, isLoading, listItems.length, privileges.canIsolateHost]);
 
   const handleOnSearch = useCallback(
     (query: string) => {
@@ -98,7 +98,7 @@ export const HostIsolationExceptionsList = () => {
     return {
       item: element,
       'data-test-subj': `hostIsolationExceptionsCard`,
-      actions: privileges.canCreateArtifactsByPolicy ? [editAction, deleteAction] : [deleteAction],
+      actions: privileges.canIsolateHost ? [editAction, deleteAction] : [deleteAction],
     };
   }
 
@@ -131,7 +131,7 @@ export const HostIsolationExceptionsList = () => {
         />
       }
       actions={
-        privileges.canCreateArtifactsByPolicy ? (
+        privileges.canIsolateHost ? (
           <EuiButton
             fill
             iconType="plusInCircle"

@@ -24,7 +24,7 @@ describe('host isolation exceptions hooks', () => {
     });
 
     it('should return true if has the correct privileges', () => {
-      useEndpointPrivilegesMock.mockReturnValue({ canCreateArtifactsByPolicy: true });
+      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: true });
       const { result } = renderHook(() => useCanSeeHostIsolationExceptionsMenu(), {
         wrapper: TestProviders,
       });
@@ -32,7 +32,7 @@ describe('host isolation exceptions hooks', () => {
     });
 
     it('should return false if does not have privileges and there are not existing host isolation items', () => {
-      useEndpointPrivilegesMock.mockReturnValue({ canCreateArtifactsByPolicy: false });
+      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
       getHostIsolationExceptionSummaryMock.mockReturnValueOnce({ total: 0 });
       const { result } = renderHook(() => useCanSeeHostIsolationExceptionsMenu(), {
         wrapper: TestProviders,
@@ -41,7 +41,7 @@ describe('host isolation exceptions hooks', () => {
     });
 
     it('should return true if does not have privileges and there are existing host isolation items', async () => {
-      useEndpointPrivilegesMock.mockReturnValue({ canCreateArtifactsByPolicy: false });
+      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
       getHostIsolationExceptionSummaryMock.mockReturnValueOnce({ total: 11 });
       const { result, waitForNextUpdate } = renderHook(
         () => useCanSeeHostIsolationExceptionsMenu(),
