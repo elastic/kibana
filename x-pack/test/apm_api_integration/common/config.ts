@@ -17,7 +17,7 @@ import { createApmApiClient } from './apm_api_supertest';
 import { RegistryProvider } from './registry';
 import { synthtraceEsClient } from './synthtrace_es_client';
 
-interface Config {
+export interface ApmFtrConfig {
   name: APMFtrConfigName;
   license: 'basic' | 'trial';
   kibanaConfig?: Record<string, string | string[]>;
@@ -58,7 +58,7 @@ async function getApmApiClient(
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-export function createTestConfig(config: Config) {
+export function createTestConfig(config: ApmFtrConfig) {
   const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
