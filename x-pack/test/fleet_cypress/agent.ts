@@ -78,18 +78,19 @@ export class AgentManager extends Manager {
     this.log.info('Running the agent');
 
     let ipAddress: string | undefined;
-    await this.execute('hostname –I', async (result: string) => {
-      ipAddress = result.trim();
-      this.log.info(ipAddress);
+    await this.execute(
+      `ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'`,
+      async (result: string) => {
+        ipAddress = result.trim();
+        this.log.info(ipAddress);
 
-      if (!ipAddress) {
-        // local
-        await this.execute(
-          `ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'`,
-          (res: string) => {
-            ipAddress = res.trim();
+        if (!ipAddress) {
+          await this.execute(`ifconfig`, (res: string) => {
+            this.log.info(res);
 
-            this.log.info(ipAddress);
+            if (!ipAddress) {
+              return;
+            }
 
             const args = [
               'run',
@@ -105,10 +106,10 @@ export class AgentManager extends Manager {
             ];
 
             this.agentProcess = spawn('docker', args, { stdio: 'inherit' });
-          }
-        );
+          });
+        }
       }
-    });
+    );
 
     // Wait til we see the agent is online
     let done = false;
