@@ -73,6 +73,11 @@ export class ESDocField extends AbstractField implements IField {
     return true;
   }
 
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API does not return field meta for documents
+    return !this.getSource().isMvt();
+  }
+
   async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
     const indexPatternField = await this._getIndexPatternField();
 

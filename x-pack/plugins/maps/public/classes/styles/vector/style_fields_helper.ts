@@ -18,7 +18,7 @@ export interface StyleField {
   name: string;
   origin: FIELD_ORIGIN;
   type: string;
-  supportsFieldMetaFromLocalData: boolean;
+  supportsAutoDomain: boolean;
 }
 
 export async function createStyleFieldsHelper(fields: IField[]): Promise<StyleFieldsHelper> {
@@ -28,7 +28,7 @@ export async function createStyleFieldsHelper(fields: IField[]): Promise<StyleFi
       name: field.getName(),
       origin: field.getOrigin(),
       type: await field.getDataType(),
-      supportsFieldMetaFromLocalData: field.supportsFieldMetaFromLocalData(),
+      supportsAutoDomain: field.supportsFieldMetaFromLocalData() || field.supportsFieldMetaFromEs(),
     };
   });
   const styleFields = await Promise.all(promises);
@@ -58,7 +58,7 @@ export class StyleFieldsHelper {
         if (styleField.type === 'number') {
           numberFields.push(styleField);
         }
-        if (styleField.supportsFieldMetaFromLocalData) {
+        if (styleField.supportsAutoDomain) {
           ordinalFields.push(styleField);
         }
       }
