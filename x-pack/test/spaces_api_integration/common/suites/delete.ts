@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -29,11 +29,7 @@ interface DeleteTestDefinition {
   tests: DeleteTests;
 }
 
-export function deleteTestSuiteFactory(
-  es: KibanaClient,
-  esArchiver: any,
-  supertest: SuperTest<any>
-) {
+export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTest<any>) {
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
   };
@@ -43,11 +39,12 @@ export function deleteTestSuiteFactory(
 
     // Query ES to ensure that we deleted everything we expected, and nothing we didn't
     // Grouping first by namespace, then by saved object type
-    const { body: response } = await getAggregatedSpaceData(es, [
+    const response = await getAggregatedSpaceData(es, [
       'visualization',
       'dashboard',
       'space',
       'index-pattern',
+      'legacy-url-alias',
       // TODO: add assertions for config objects -- these assertions were removed because of flaky behavior in #92358, but we should
       // consider adding them again at some point, especially if we convert config objects to `namespaceType: 'multiple-isolated'` in
       // the future.
@@ -56,31 +53,24 @@ export function deleteTestSuiteFactory(
     // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
     const buckets = response.aggregations?.count.buckets;
 
+    // The test fixture contains three legacy URL aliases:
+    // (1) one for "space_1", (2) one for "space_2", and (3) one for "other_space", which is a non-existent space.
+    // Each test deletes "space_2", so the agg buckets should reflect that aliases (1) and (3) still exist afterwards.
+
     // Space 2 deleted, all others should exist
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 8,
+        doc_count: 7,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            {
-              key: 'visualization',
-              doc_count: 3,
-            },
-            {
-              key: 'dashboard',
-              doc_count: 2,
-            },
-            {
-              key: 'space',
-              doc_count: 2,
-            },
-            {
-              key: 'index-pattern',
-              doc_count: 1,
-            },
+            { key: 'visualization', doc_count: 3 },
+            { key: 'space', doc_count: 2 }, // since space objects are namespace-agnostic, they appear in the "default" agg bucket
+            { key: 'dashboard', doc_count: 1 },
+            { key: 'index-pattern', doc_count: 1 },
+            // legacy-url-alias objects cannot exist for the default space
           ],
         },
       },
@@ -91,19 +81,20 @@ export function deleteTestSuiteFactory(
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            {
-              key: 'visualization',
-              doc_count: 3,
-            },
-            {
-              key: 'dashboard',
-              doc_count: 2,
-            },
-            {
-              key: 'index-pattern',
-              doc_count: 1,
-            },
+            { key: 'visualization', doc_count: 3 },
+            { key: 'dashboard', doc_count: 1 },
+            { key: 'index-pattern', doc_count: 1 },
+            { key: 'legacy-url-alias', doc_count: 1 }, // alias (1)
           ],
+        },
+      },
+      {
+        doc_count: 1,
+        key: 'other_space',
+        countByType: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [{ key: 'legacy-url-alias', doc_count: 1 }], // alias (3)
         },
       },
     ];
@@ -113,7 +104,7 @@ export function deleteTestSuiteFactory(
     // There were 15 multi-namespace objects.
     // Since Space 2 was deleted, any multi-namespace objects that existed in that space
     // are updated to remove it, and of those, any that don't exist in any space are deleted.
-    const { body: multiNamespaceResponse } = await es.search<Record<string, any>>({
+    const multiNamespaceResponse = await es.search<Record<string, any>>({
       index: '.kibana',
       size: 20,
       body: { query: { terms: { type: ['sharedtype'] } } },

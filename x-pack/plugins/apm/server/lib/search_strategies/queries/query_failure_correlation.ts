@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'kibana/server';
 import { SearchStrategyParams } from '../../../../common/search_strategies/types';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
@@ -101,10 +101,7 @@ export const fetchFailedTransactionsCorrelationPValues = async (
       esClient,
       params,
       histogramRangeSteps,
-      [
-        { fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure },
-        { fieldName, fieldValue: bucket.key },
-      ]
+      [{ fieldName, fieldValue: bucket.key }]
     );
 
     result.push({

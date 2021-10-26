@@ -171,8 +171,11 @@ describe('TelemetrySender', () => {
       });
 
       it('sends report if due', async () => {
+        const mockClusterUuid = 'mk_uuid';
         const mockTelemetryUrl = 'telemetry_cluster_url';
-        const mockTelemetryPayload = ['hashed_cluster_usage_data1'];
+        const mockTelemetryPayload = [
+          { clusterUuid: mockClusterUuid, stats: 'hashed_cluster_usage_data1' },
+        ];
 
         const telemetryService = mockTelemetryService();
         const telemetrySender = new TelemetrySender(telemetryService);
@@ -184,14 +187,21 @@ describe('TelemetrySender', () => {
 
         expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
         expect(mockFetch).toBeCalledTimes(1);
-        expect(mockFetch).toBeCalledWith(mockTelemetryUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Elastic-Stack-Version': telemetryService.currentKibanaVersion,
-          },
-          body: mockTelemetryPayload[0],
-        });
+        expect(mockFetch.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "telemetry_cluster_url",
+            Object {
+              "body": "hashed_cluster_usage_data1",
+              "headers": Object {
+                "Content-Type": "application/json",
+                "X-Elastic-Cluster-ID": "mk_uuid",
+                "X-Elastic-Content-Encoding": "aes256gcm",
+                "X-Elastic-Stack-Version": "mockKibanaVersion",
+              },
+              "method": "POST",
+            },
+          ]
+        `);
       });
 
       it('sends report separately for every cluster', async () => {

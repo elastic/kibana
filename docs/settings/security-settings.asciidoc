@@ -12,20 +12,6 @@ You do not need to configure any additional settings to use the
 [[general-security-settings]]
 ==== General security settings
 
-[cols="2*<"]
-|===
-| `xpack.security.enabled`
-  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-  By default, {kib} automatically detects whether to enable the
-  {security-features} based on the license and whether {es} {security-features}
-  are enabled. +
-  +
-  Do not set this to `false`; it disables the login form, user and role management
-  screens, and authorization using <<kibana-privileges>>. To disable
-  {security-features} entirely, see
-  {ref}/security-settings.html[{es} security settings].
-|===
-
 [float]
 [[authentication-security-settings]]
 ==== Authentication security settings
@@ -272,7 +258,7 @@ You can configure the following settings in the `kibana.yml` file.
 
 |[[xpack-session-idleTimeout]] `xpack.security.session.idleTimeout` {ess-icon}
   | Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both
-highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 1 hour.
+highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 8 hours.
 
 2+a|
 [TIP]

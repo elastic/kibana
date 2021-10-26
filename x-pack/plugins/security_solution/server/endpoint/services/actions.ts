@@ -6,9 +6,10 @@
  */
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
-import { ApiResponse } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
+import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
   ActivityLog,
@@ -88,8 +89,8 @@ const getActivityLog = async ({
   endDate: string;
   logger: Logger;
 }): Promise<ActivityLogEntry[]> => {
-  let actionsResult: ApiResponse<SearchResponse<unknown>, unknown>;
-  let responsesResult: ApiResponse<SearchResponse<unknown>, unknown>;
+  let actionsResult: TransportResult<estypes.SearchResponse<unknown>, unknown>;
+  let responsesResult: TransportResult<estypes.SearchResponse<unknown>, unknown>;
 
   try {
     // fetch actions with matching agent_id
@@ -125,14 +126,14 @@ const getActivityLog = async ({
   // label record as `action`, `fleetAction`
   const responses = categorizeResponseResults({
     results: responsesResult?.body?.hits?.hits as Array<
-      SearchHit<EndpointActionResponse | LogsEndpointActionResponse>
+      estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>
     >,
   });
 
   // label record as `response`, `fleetResponse`
   const actions = categorizeActionResults({
     results: actionsResult?.body?.hits?.hits as Array<
-      SearchHit<EndpointAction | LogsEndpointAction>
+      estypes.SearchHit<EndpointAction | LogsEndpointAction>
     >,
   });
 
@@ -144,6 +145,41 @@ const getActivityLog = async ({
   const sortedData = getTimeSortedData(uniqueLogData);
 
   return sortedData;
+};
+
+const hasAckInResponse = (response: EndpointActionResponse): boolean => {
+  return typeof response.action_data.ack !== 'undefined';
+};
+
+// return TRUE if for given action_id/agent_id
+// there is no doc in .logs-endpoint.action.response-default
+const hasNoEndpointResponse = ({
+  action,
+  agentId,
+  indexedActionIds,
+}: {
+  action: EndpointAction;
+  agentId: string;
+  indexedActionIds: string[];
+}): boolean => {
+  return action.agents.includes(agentId) && !indexedActionIds.includes(action.action_id);
+};
+
+// return TRUE if for given action_id/agent_id
+// there is no doc in .fleet-actions-results
+const hasNoFleetResponse = ({
+  action,
+  agentId,
+  agentResponses,
+}: {
+  action: EndpointAction;
+  agentId: string;
+  agentResponses: EndpointActionResponse[];
+}): boolean => {
+  return (
+    action.agents.includes(agentId) &&
+    !agentResponses.map((e) => e.action_id).includes(action.action_id)
+  );
 };
 
 export const getPendingActionCounts = async (
@@ -179,21 +215,45 @@ export const getPendingActionCounts = async (
     .catch(catchAndWrapError);
 
   // retrieve any responses to those action IDs from these agents
-  const responses = await fetchActionResponseIds(
+  const responses = await fetchActionResponses(
     esClient,
     metadataService,
     recentActions.map((a) => a.action_id),
     agentIDs
   );
-  const pending: EndpointPendingActions[] = [];
 
+  //
+
+  const pending: EndpointPendingActions[] = [];
   for (const agentId of agentIDs) {
-    const responseIDsFromAgent = responses[agentId];
+    const agentResponses = responses[agentId];
+
+    // get response actionIds for responses with ACKs
+    const ackResponseActionIdList: string[] = agentResponses
+      .filter(hasAckInResponse)
+      .map((response) => response.action_id);
+
+    // actions Ids that are indexed in new response index
+    const indexedActionIds = await hasEndpointResponseDoc({
+      agentId,
+      actionIds: ackResponseActionIdList,
+      esClient,
+    });
+
+    const pendingActions: EndpointAction[] = recentActions.filter((action) => {
+      return ackResponseActionIdList.includes(action.action_id) // if has ack
+        ? hasNoEndpointResponse({ action, agentId, indexedActionIds }) // then find responses in new index
+        : hasNoFleetResponse({
+            // else use the legacy way
+            action,
+            agentId,
+            agentResponses,
+          });
+    });
 
     pending.push({
       agent_id: agentId,
-      pending_actions: recentActions
-        .filter((a) => a.agents.includes(agentId) && !responseIDsFromAgent.includes(a.action_id))
+      pending_actions: pendingActions
         .map((a) => a.data.command)
         .reduce((acc, cur) => {
           if (cur in acc) {
@@ -210,6 +270,43 @@ export const getPendingActionCounts = async (
 };
 
 /**
+ * Returns a boolean for search result
+ *
+ * @param esClient
+ * @param actionIds
+ * @param agentIds
+ */
+const hasEndpointResponseDoc = async ({
+  actionIds,
+  agentId,
+  esClient,
+}: {
+  actionIds: string[];
+  agentId: string;
+  esClient: ElasticsearchClient;
+}): Promise<string[]> => {
+  const response = await esClient
+    .search<LogsEndpointActionResponse>(
+      {
+        index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        body: {
+          query: {
+            bool: {
+              filter: [{ terms: { action_id: actionIds } }, { term: { agent_id: agentId } }],
+            },
+          },
+        },
+      },
+      { ignore: [404] }
+    )
+    .then(
+      (result) => result.body?.hits?.hits?.map((a) => a._source?.EndpointActions.action_id) || []
+    )
+    .catch(catchAndWrapError);
+  return response.filter((action): action is string => action !== undefined);
+};
+
+/**
  * Returns back a map of elastic Agent IDs to array of Action IDs that have received a response.
  *
  * @param esClient
@@ -217,16 +314,19 @@ export const getPendingActionCounts = async (
  * @param actionIds
  * @param agentIds
  */
-const fetchActionResponseIds = async (
+const fetchActionResponses = async (
   esClient: ElasticsearchClient,
   metadataService: EndpointMetadataService,
   actionIds: string[],
   agentIds: string[]
-): Promise<Record<string, string[]>> => {
-  const actionResponsesByAgentId: Record<string, string[]> = agentIds.reduce((acc, agentId) => {
-    acc[agentId] = [];
-    return acc;
-  }, {} as Record<string, string[]>);
+): Promise<Record<string, EndpointActionResponse[]>> => {
+  const actionResponsesByAgentId: Record<string, EndpointActionResponse[]> = agentIds.reduce(
+    (acc, agentId) => {
+      acc[agentId] = [];
+      return acc;
+    },
+    {} as Record<string, EndpointActionResponse[]>
+  );
 
   const actionResponses = await esClient
     .search<EndpointActionResponse>(
@@ -255,7 +355,7 @@ const fetchActionResponseIds = async (
     return actionResponsesByAgentId;
   }
 
-  // Get the latest docs from the metadata datastream for the Elastic Agent IDs in the action responses
+  // Get the latest docs from the metadata data-stream for the Elastic Agent IDs in the action responses
   // This will be used determine if we should withhold the action id from the returned list in cases where
   // the Endpoint might not yet have sent an updated metadata document (which would be representative of
   // the state of the endpoint post-action)
@@ -288,7 +388,7 @@ const fetchActionResponseIds = async (
       enoughTimeHasLapsed ||
       lastEndpointMetadataEventTimestamp > actionCompletedAtTimestamp
     ) {
-      actionResponsesByAgentId[actionResponse.agent_id].push(actionResponse.action_id);
+      actionResponsesByAgentId[actionResponse.agent_id].push(actionResponse);
     }
   }
 

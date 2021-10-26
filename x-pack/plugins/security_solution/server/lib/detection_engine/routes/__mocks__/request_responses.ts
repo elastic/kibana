@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse, SavedObjectsFindResult } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SavedObjectsFindResponse, SavedObjectsFindResult } from 'src/core/server';
+
 import { ActionResult } from '../../../../../../actions/server';
 import { SignalSearchResponse } from '../../signals/types';
 import {
@@ -562,6 +564,28 @@ export const getFindBulkResultStatus = (): FindBulkExecutionLogResponse => ({
   ],
 });
 
+export const getBasicEmptySearchResponse = (): estypes.SearchResponse<unknown> => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: {
+    hits: [],
+    total: { relation: 'eq', value: 0 },
+    max_score: 0,
+  },
+});
+
+export const getBasicNoShardsSearchResponse = (): estypes.SearchResponse<unknown> => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+  hits: {
+    hits: [],
+    total: { relation: 'eq', value: 0 },
+    max_score: 0,
+  },
+});
+
 export const getEmptySignalsResponse = (): SignalSearchResponse => ({
   took: 1,
   timed_out: false,
@@ -588,7 +612,7 @@ export const getEmptyEqlSequencesResponse = (): EqlSearchResponse<unknown> => ({
   timed_out: false,
 });
 
-export const getSuccessfulSignalUpdateResponse = () => ({
+export const getSuccessfulSignalUpdateResponse = (): estypes.UpdateByQueryResponse => ({
   took: 18,
   timed_out: false,
   total: 1,

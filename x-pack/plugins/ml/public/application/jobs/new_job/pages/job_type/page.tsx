@@ -51,19 +51,19 @@ export const Page: FC = () => {
   const indexWarningTitle =
     !isTimeBasedIndex && isSavedSearchSavedObject(currentSavedSearch)
       ? i18n.translate(
-          'xpack.ml.newJob.wizard.jobType.indexPatternFromSavedSearchNotTimeBasedMessage',
+          'xpack.ml.newJob.wizard.jobType.dataViewFromSavedSearchNotTimeBasedMessage',
           {
             defaultMessage:
-              '{savedSearchTitle} uses index pattern {indexPatternTitle} which is not time based',
+              '{savedSearchTitle} uses data view {dataViewName} which is not time based',
             values: {
               savedSearchTitle: currentSavedSearch.attributes.title as string,
-              indexPatternTitle: currentIndexPattern.title,
+              dataViewName: currentIndexPattern.title,
             },
           }
         )
-      : i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternNotTimeBasedMessage', {
-          defaultMessage: 'Index pattern {indexPatternTitle} is not time based',
-          values: { indexPatternTitle: currentIndexPattern.title },
+      : i18n.translate('xpack.ml.newJob.wizard.jobType.dataViewNotTimeBasedMessage', {
+          defaultMessage: 'Data view {dataViewName} is not time based',
+          values: { dataViewName: currentIndexPattern.title },
         });
 
   const pageTitleLabel = isSavedSearchSavedObject(currentSavedSearch)
@@ -71,9 +71,9 @@ export const Page: FC = () => {
         defaultMessage: 'saved search {savedSearchTitle}',
         values: { savedSearchTitle: currentSavedSearch.attributes.title as string },
       })
-    : i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternPageTitleLabel', {
-        defaultMessage: 'index pattern {indexPatternTitle}',
-        values: { indexPatternTitle: currentIndexPattern.title },
+    : i18n.translate('xpack.ml.newJob.wizard.jobType.dataViewPageTitleLabel', {
+        defaultMessage: 'data view {dataViewName}',
+        values: { dataViewName: currentIndexPattern.title },
       });
 
   const recognizerResults = {
@@ -238,7 +238,7 @@ export const Page: FC = () => {
               <EuiLink onClick={onSelectDifferentIndex}>
                 <FormattedMessage
                   id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
-                  defaultMessage="Select a different index"
+                  defaultMessage="Select a different data view or saved search"
                 />
               </EuiLink>
             </EuiCallOut>

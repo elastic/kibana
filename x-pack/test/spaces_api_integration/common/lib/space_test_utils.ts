@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 
 export function getUrlPrefix(spaceId?: string) {
@@ -37,7 +37,7 @@ export function getTestScenariosForSpace(spaceId: string) {
   return [explicitScenario];
 }
 
-export function getAggregatedSpaceData(es: KibanaClient, objectTypes: string[]) {
+export function getAggregatedSpaceData(es: Client, objectTypes: string[]) {
   return es.search({
     index: '.kibana',
     body: {
@@ -50,6 +50,8 @@ export function getAggregatedSpaceData(es: KibanaClient, objectTypes: string[]) 
             emit(doc["namespaces"].value);
           } else if (doc["namespace"].size() > 0) {
             emit(doc["namespace"].value);
+          } else if (doc["legacy-url-alias.targetNamespace"].size() > 0) {
+            emit(doc["legacy-url-alias.targetNamespace"].value);
           }
         `,
         },
