@@ -166,7 +166,7 @@ describe('7.13.0 -> 7.14.0', () => {
   });
 });
 
-describe('7.14.0 -> 7.18.0', () => {
+describe('7.14.0 -> 8.0.0', () => {
   const migration = searchSessionSavedObjectMigrations['8.0.0'];
 
   test('Discover app URL generator migrates to locator', () => {
