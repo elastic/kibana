@@ -14,6 +14,7 @@ jest.mock('./tooltip_popover', () => ({
 import sinon from 'sinon';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
+import { Feature } from 'geojson';
 import type { Map as MbMap, MapMouseEvent, MapboxGeoJSONFeature } from '@kbn/mapbox-gl';
 import { TooltipControl } from './tooltip_control';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
@@ -39,15 +40,8 @@ const mockLayer = {
   getMbTooltipLayerIds: () => {
     return ['foo', 'bar'];
   },
-  getSource: () => {
-    return {
-      isMvt: () => {
-        return false;
-      },
-      isESSource: () => {
-        return false;
-      },
-    };
+  getFeatureId: (feature: Feature) => {
+    return feature.properties?.__kbn__feature_id__;
   },
   getFeatureById: () => {
     return {
