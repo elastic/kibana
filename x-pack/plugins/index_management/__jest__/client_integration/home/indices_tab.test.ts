@@ -159,9 +159,15 @@ describe('<IndexManagementHome />', () => {
 
   describe('index actions', () => {
     const indexName = 'testIndex';
+    const indexMock = createNonDataStreamIndex(indexName);
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        {
+          ...indexMock,
+          isFrozen: true,
+        },
+      ]);
       httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexName] });
 
       testBed = await setup();
@@ -182,6 +188,28 @@ describe('<IndexManagementHome />', () => {
       // After the indices are flushed, we imediately reload them. So we need to expect to see
       // a reload server call also.
       expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
+    });
+
+    test('should be able to unfreeze a frozen index', async () => {
+      const { actions, exists } = testBed;
+
+      httpRequestsMockHelpers.setReloadIndicesResponse([{ ...indexMock, isFrozen: false }]);
+
+      // Open context menu
+      await actions.clickManageContextMenuButton();
+      // Check that the unfreeze action exists for the current index and unfreeze it
+      expect(exists('unfreezeIndexMenuButton')).toBe(true);
+      await actions.clickContextMenuOption('unfreezeIndexMenuButton');
+
+      const requestsCount = server.requests.length;
+      expect(server.requests[requestsCount - 2].url).toBe(`${API_BASE_PATH}/indices/unfreeze`);
+      // After the index is unfrozen, we imediately do a reload. So we need to expect to see
+      // a reload server call also.
+      expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
+      // Open context menu once again, since clicking an action will close it.
+      await actions.clickManageContextMenuButton();
+      // The unfreeze action should not be present anymore
+      expect(exists('unfreezeIndexMenuButton')).toBe(false);
     });
   });
 });

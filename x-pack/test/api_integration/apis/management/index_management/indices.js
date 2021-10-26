@@ -27,7 +27,6 @@ export default function ({ getService }) {
     flushIndex,
     refreshIndex,
     forceMerge,
-    freeze,
     unfreeze,
     list,
     reload,
@@ -164,35 +163,12 @@ export default function ({ getService }) {
       });
     });
 
-    describe('freeze', () => {
-      it('should freeze an index', async () => {
-        const index = await createIndex();
-        // "sth" correspond to search throttling. Frozen indices are normal indices
-        // with search throttling turned on.
-        const {
-          body: [cat1],
-        } = await catIndex(index, 'sth');
-        expect(cat1.sth).to.be('false');
-
-        await freeze(index).expect(200);
-
-        const {
-          body: [cat2],
-        } = await catIndex(index, 'sth');
-        expect(cat2.sth).to.be('true');
-      });
-    });
-
     describe('unfreeze', () => {
       it('should unfreeze an index', async () => {
         const index = await createIndex();
 
-        await freeze(index).expect(200);
-        const {
-          body: [cat1],
-        } = await catIndex(index, 'sth');
-        expect(cat1.sth).to.be('true');
-
+        // Even if the index is already unfrozen, calling the unfreeze api
+        // will have no effect on it and will return a 200.
         await unfreeze(index).expect(200);
         const {
           body: [cat2],
