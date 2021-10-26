@@ -139,20 +139,15 @@ export const configSchema = schema.object({
 export type ConfigSchema = TypeOf<typeof configSchema>;
 
 export type ConfigType = ConfigSchema & {
-  kibanaIndex: string;
   experimentalFeatures: ExperimentalFeatures;
 };
 
 export const createConfig = (context: PluginInitializerContext): ConfigType => {
-  const globalConfig = context.config.legacy.get();
   const pluginConfig = context.config.get<TypeOf<typeof configSchema>>();
-
-  const kibanaIndex = globalConfig.kibana.index;
   const experimentalFeatures = parseExperimentalConfigValue(pluginConfig.enableExperimental);
 
   return {
     ...pluginConfig,
-    kibanaIndex,
     experimentalFeatures,
   };
 };

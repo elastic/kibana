@@ -20,7 +20,8 @@ async function removeLogFile() {
   await fs.unlink(logFilePath).catch(() => void 0);
 }
 
-describe('migration v2', () => {
+// un-skip after https://github.com/elastic/kibana/issues/116111
+describe.skip('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;

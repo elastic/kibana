@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { getIsUsingTransactionEvents } from '../lib/helpers/aggregated_transactions/get_is_using_transaction_events';
+import { getIsUsingTransactionEvents } from '../lib/helpers/transactions/get_is_using_transaction_events';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
