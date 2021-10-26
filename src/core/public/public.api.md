@@ -6,7 +6,6 @@
 
 import { Action } from 'history';
 import Boom from '@hapi/boom';
-import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
 import { EnvironmentMode } from '@kbn/config';

@@ -7,14 +7,13 @@
  */
 
 import type { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import type {
   PluginInitializerContext,
   CoreSetup,
   Plugin,
   ISavedObjectsRepository,
   IUiSettingsClient,
-  SharedGlobalConfig,
   CoreStart,
   SavedObjectsServiceSetup,
   OpsMetrics,
@@ -55,7 +54,6 @@ type SavedObjectsRegisterType = SavedObjectsServiceSetup['registerType'];
 
 export class KibanaUsageCollectionPlugin implements Plugin {
   private readonly logger: Logger;
-  private readonly legacyConfig$: Observable<SharedGlobalConfig>;
   private readonly instanceUuid: string;
   private savedObjectsClient?: ISavedObjectsRepository;
   private uiSettingsClient?: IUiSettingsClient;
@@ -66,7 +64,6 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     this.metric$ = new Subject<OpsMetrics>();
     this.pluginStop$ = new Subject();
     this.instanceUuid = initializerContext.env.instanceUuid;
@@ -123,6 +120,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     pluginStop$: Subject<void>,
     registerType: SavedObjectsRegisterType
   ) {
+    const kibanaIndex = coreSetup.savedObjects.getKibanaIndex();
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
     const getCoreUsageDataService = () => this.coreUsageData!;
@@ -135,8 +133,8 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     registerUsageCountersUsageCollector(usageCollection);
 
     registerOpsStatsCollector(usageCollection, metric$);
-    registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
-    registerSavedObjectsCountUsageCollector(usageCollection, this.legacyConfig$);
+    registerKibanaUsageCollector(usageCollection, kibanaIndex);
+    registerSavedObjectsCountUsageCollector(usageCollection, kibanaIndex);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(

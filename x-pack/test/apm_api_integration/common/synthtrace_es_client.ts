@@ -10,13 +10,13 @@ import {
   getSpanDestinationMetrics,
   getTransactionMetrics,
   toElasticsearchOutput,
-} from '@elastic/apm-generator';
+} from '@elastic/apm-synthtrace';
 import { chunk } from 'lodash';
 import pLimit from 'p-limit';
 import { inspect } from 'util';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
-export async function traceData(context: InheritedFtrProviderContext) {
+export async function synthtraceEsClient(context: InheritedFtrProviderContext) {
   const es = context.getService('es');
   return {
     index: (events: any[]) => {
