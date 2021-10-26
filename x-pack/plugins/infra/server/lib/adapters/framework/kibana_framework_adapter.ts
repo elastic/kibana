@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import {
-  IndicesExistsAlias,
-  IndicesGet,
-  MlGetBuckets,
-} from '@elastic/elasticsearch/api/requestParams';
-import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportRequestParams } from '@elastic/elasticsearch';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import {
   CoreSetup,
@@ -181,7 +176,7 @@ export class KibanaFramework {
       case 'indices.existsAlias':
         apiResult = elasticsearch.client.asCurrentUser.indices.existsAlias({
           ...params,
-        } as IndicesExistsAlias);
+        } as estypes.IndicesExistsAliasRequest);
         break;
       case 'indices.getAlias':
         apiResult = elasticsearch.client.asCurrentUser.indices.getAlias({
@@ -191,7 +186,7 @@ export class KibanaFramework {
       case 'indices.get':
         apiResult = elasticsearch.client.asCurrentUser.indices.get({
           ...params,
-        } as IndicesGet);
+        } as estypes.IndicesGetRequest);
         break;
       case 'transport.request':
         apiResult = elasticsearch.client.asCurrentUser.transport.request({
@@ -201,7 +196,7 @@ export class KibanaFramework {
       case 'ml.getBuckets':
         apiResult = elasticsearch.client.asCurrentUser.ml.getBuckets({
           ...params,
-        } as MlGetBuckets<any>);
+        } as estypes.MlGetBucketsRequest);
         break;
     }
     return apiResult ? (await apiResult).body : undefined;

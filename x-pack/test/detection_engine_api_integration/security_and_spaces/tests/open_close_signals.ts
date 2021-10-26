@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import {

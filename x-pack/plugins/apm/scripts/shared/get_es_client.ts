@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ApiKeyAuth, BasicAuth } from '@elastic/elasticsearch/lib/pool';
+import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import {
   ESSearchResponse,
   ESSearchRequest,
@@ -19,11 +19,13 @@ export function getEsClient({
   auth,
 }: {
   node: string;
-  auth?: BasicAuth | ApiKeyAuth;
-}) {
+  auth?: ClientOptions['auth'];
+  // Should be refactored
+  // The inferred type of 'getEsClient' references an inaccessible 'unique symbol' type. A type annotation is necessary.
+}): any {
   const client = new Client({
     node,
-    ssl: {
+    tls: {
       rejectUnauthorized: false,
     },
     requestTimeout: 120000,
@@ -36,14 +38,11 @@ export function getEsClient({
     TDocument = unknown,
     TSearchRequest extends ESSearchRequest = ESSearchRequest
   >(request: TSearchRequest) {
-    const response = await originalSearch<TDocument>(request);
+    const response = await originalSearch(request);
 
     return {
       ...response,
-      body: response.body as unknown as ESSearchResponse<
-        TDocument,
-        TSearchRequest
-      >,
+      body: response as unknown as ESSearchResponse<TDocument, TSearchRequest>,
     };
   }
 

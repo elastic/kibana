@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import type { UnwrapPromise } from '@kbn/utility-types';
 import { inspect } from 'util';
 
 export class WrappedElasticsearchClientError extends Error {
-  originalError: ElasticsearchClientError;
-  constructor(originalError: ElasticsearchClientError) {
+  originalError: errors.ElasticsearchClientError;
+  constructor(originalError: errors.ElasticsearchClientError) {
     super(originalError.message);
 
     const stack = this.stack;
 
     this.originalError = originalError;
 
-    if (originalError instanceof ResponseError) {
+    if (originalError instanceof errors.ResponseError) {
       // make sure ES response body is visible when logged to the console
       // @ts-expect-error
       this.stack = {

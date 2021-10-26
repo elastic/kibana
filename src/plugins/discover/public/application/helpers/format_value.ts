@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataView, DataViewField, KBN_FIELD_TYPES } from '../../../../data/common';
 import { getServices } from '../../kibana_services';
 

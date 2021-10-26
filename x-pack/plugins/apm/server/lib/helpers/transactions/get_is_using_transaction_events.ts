@@ -83,7 +83,7 @@ async function getHasTransactions({
         },
       },
     },
-    terminateAfter: 1,
+    terminate_after: 1,
   });
 
   return response.hits.total.value > 0;

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  MigrationDeprecationInfoDeprecation,
-  MigrationDeprecationInfoResponse,
-} from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from 'src/core/server';
 import { indexSettingDeprecations } from '../../common/constants';
 import { EnrichedDeprecationInfo, ESUpgradeStatus } from '../../common/types';
@@ -28,8 +25,8 @@ export async function getESUpgradeStatus(
         combinedDeprecations = combinedDeprecations.concat(indices);
       } else {
         const deprecationsByType = deprecations[
-          deprecationType as keyof MigrationDeprecationInfoResponse
-        ] as MigrationDeprecationInfoDeprecation[];
+          deprecationType as keyof estypes.MigrationDeprecationsResponse
+        ] as estypes.MigrationDeprecationsDeprecation[];
 
         const enrichedDeprecationInfo = deprecationsByType.map(
           ({
@@ -46,7 +43,7 @@ export async function getESUpgradeStatus(
               details,
               message,
               url,
-              type: deprecationType as keyof MigrationDeprecationInfoResponse,
+              type: deprecationType as keyof estypes.MigrationDeprecationsResponse,
               isCritical: level === 'critical',
               resolveDuringUpgrade,
               correctiveAction: getCorrectiveAction(message, metadata),
@@ -72,7 +69,7 @@ export async function getESUpgradeStatus(
 
 // Reformats the index deprecations to an array of deprecation warnings extended with an index field.
 const getCombinedIndexInfos = async (
-  deprecations: MigrationDeprecationInfoResponse,
+  deprecations: estypes.MigrationDeprecationsResponse,
   dataClient: IScopedClusterClient
 ) => {
   const indices = Object.keys(deprecations.index_settings).reduce(

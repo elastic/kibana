@@ -8,7 +8,7 @@
 
 import { getIndexForTypeMock } from './unknown_object_types.test.mocks';
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { deleteUnknownTypeObjects, getUnknownTypesDeprecations } from './unknown_object_types';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';

@@ -7,7 +7,6 @@
  */
 
 import type * as InternalUtils from './internal_utils';
-import type { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 
 export const mockGetSavedObjectFromSource = jest.fn() as jest.MockedFunction<
   typeof InternalUtils['getSavedObjectFromSource']
@@ -22,16 +21,5 @@ jest.mock('./internal_utils', () => {
     ...actual,
     getSavedObjectFromSource: mockGetSavedObjectFromSource,
     rawDocExistsInNamespace: mockRawDocExistsInNamespace,
-  };
-});
-
-export const mockIsNotFoundFromUnsupportedServer = jest.fn() as jest.MockedFunction<
-  typeof isNotFoundFromUnsupportedServer
->;
-jest.mock('../../../elasticsearch', () => {
-  const actual = jest.requireActual('../../../elasticsearch');
-  return {
-    ...actual,
-    isNotFoundFromUnsupportedServer: mockIsNotFoundFromUnsupportedServer,
   };
 });

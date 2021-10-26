@@ -10,7 +10,7 @@
 
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
 import type { RuntimeField } from '../types';
 import { DuplicateField } from '../../../kibana_utils/common';

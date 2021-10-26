@@ -117,6 +117,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
       );
 
       const searchResult = await esTestIndexTool.search('action:test.index-record');
+      // @ts-expect-error doesnt handle total: number
       expect(searchResult.body.hits.total.value).equal(
         nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT
       );

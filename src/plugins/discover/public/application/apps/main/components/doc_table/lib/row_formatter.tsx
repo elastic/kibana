@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { Fragment } from 'react';
 import type { IndexPattern } from 'src/plugins/data/common';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../../../../common';

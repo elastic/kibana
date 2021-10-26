@@ -345,12 +345,13 @@ it('uses the scrollId to page all the data', async () => {
   // `scroll` and `clearScroll` must be called with scroll ID in the post body!
   expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledTimes(9);
   expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledWith({
-    body: { scroll: '30s', scroll_id: 'awesome-scroll-hero' },
+    scroll: '30s',
+    scroll_id: 'awesome-scroll-hero',
   });
 
   expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledTimes(1);
   expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledWith({
-    body: { scroll_id: ['awesome-scroll-hero'] },
+    scroll_id: ['awesome-scroll-hero'],
   });
 });
 

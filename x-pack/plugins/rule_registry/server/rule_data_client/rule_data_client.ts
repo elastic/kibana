@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BulkRequest } from '@elastic/elasticsearch/api/types';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Either, isLeft } from 'fp-ts/lib/Either';
 
 import { ElasticsearchClient } from 'kibana/server';
@@ -168,7 +168,7 @@ export class RuleDataClient implements IRuleDataClient {
     const prepareForWritingResult = prepareForWriting();
 
     return {
-      bulk: async (request: BulkRequest) => {
+      bulk: async (request: estypes.BulkRequest) => {
         return prepareForWritingResult
           .then((clusterClient) => {
             const requestWithDefaultParameters = {
@@ -179,7 +179,7 @@ export class RuleDataClient implements IRuleDataClient {
 
             return clusterClient.bulk(requestWithDefaultParameters).then((response) => {
               if (response.body.errors) {
-                const error = new ResponseError(response);
+                const error = new errors.ResponseError(response);
                 throw error;
               }
               return response;

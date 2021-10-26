@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPattern } from '../../../../data/common';
 import { DocProps } from '../apps/doc/components/doc';
 import { ElasticRequestState } from '../apps/doc/types';

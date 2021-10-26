@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/api/types';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_RULE_THRESHOLD_FIELD,

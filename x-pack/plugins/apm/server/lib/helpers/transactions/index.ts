@@ -43,7 +43,7 @@ export async function getHasAggregatedTransactions({
           },
         },
       },
-      terminateAfter: 1,
+      terminate_after: 1,
     }
   );
 

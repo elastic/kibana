@@ -32,7 +32,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         let response: APIReturnType<'GET /api/apm/services/{serviceName}/annotation/search'>;
 
         before(async () => {
-          const { body: indexExists } = await es.indices.exists({ index: indexName });
+          const indexExists = await es.indices.exists({ index: indexName });
           if (indexExists) {
             await es.indices.delete({
               index: indexName,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { extractErrorMessage } from '../../../../common/util/errors';
 
 import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';

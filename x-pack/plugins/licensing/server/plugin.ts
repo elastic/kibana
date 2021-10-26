@@ -10,7 +10,7 @@ import moment from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MaybePromise } from '@kbn/utility-types';
 import { isPromise } from '@kbn/std';
 import {

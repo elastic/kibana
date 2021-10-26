@@ -71,7 +71,7 @@ import {
   tap,
 } from 'rxjs/operators';
 import { defer, EMPTY, from, Observable } from 'rxjs';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';

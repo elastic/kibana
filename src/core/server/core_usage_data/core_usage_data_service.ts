@@ -17,7 +17,7 @@ import {
   AggregationsFiltersAggregate,
   AggregationsFiltersBucketItem,
   SearchTotalHits,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType, InternalHttpServiceSetup } from '../http';

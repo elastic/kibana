@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, IScopedClusterClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   dataVisualizerFieldHistogramsSchema,
   dataVisualizerFieldStatsSchema,

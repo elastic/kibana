@@ -39,9 +39,12 @@ export const getIndexAliases = async ({
   esClient: ElasticsearchClient;
   alias: string;
 }): Promise<IndexAlias[]> => {
-  const response = await esClient.indices.getAlias<AliasesResponse>({
-    name: alias,
-  });
+  const response = await esClient.indices.getAlias<AliasesResponse>(
+    {
+      name: alias,
+    },
+    { meta: true }
+  );
 
   return Object.keys(response.body).map((index) => ({
     alias,

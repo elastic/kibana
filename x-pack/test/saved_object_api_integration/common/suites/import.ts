@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
@@ -72,11 +72,7 @@ const getConflictDest = (id: string) => ({
   updatedAt: '2017-09-21T18:59:16.270Z',
 });
 
-export function importTestSuiteFactory(
-  es: KibanaClient,
-  esArchiver: any,
-  supertest: SuperTest<any>
-) {
+export function importTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody =
     (

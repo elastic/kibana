@@ -42,7 +42,7 @@ export async function getServiceAgent({
   const { apmEventClient } = setup;
 
   const params = {
-    terminateAfter: 1,
+    terminate_after: 1,
     apm: {
       events: [
         ProcessorEvent.error,

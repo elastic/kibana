@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ApiResponse } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
 import { from, of, timer } from 'rxjs';
@@ -193,7 +193,7 @@ export class ElasticsearchService {
           .asCurrentUser.transport.request({
             method: 'GET',
             path: '/_security/enroll/kibana',
-          })) as ApiResponse<{ token: { name: string; value: string }; http_ca: string }>;
+          })) as TransportResult<{ token: { name: string; value: string }; http_ca: string }>;
       } catch (err) {
         // We expect that all hosts belong to exactly same node and any non-connection error for one host would mean
         // that enrollment will fail for any other host and we should bail out.

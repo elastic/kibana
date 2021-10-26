@@ -6,10 +6,9 @@
  */
 
 import { KbnClient } from '@kbn/test';
-import type { ApiResponse } from '@elastic/elasticsearch';
-import { Context } from '@elastic/elasticsearch/lib/Transport';
-import type { estypes } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
 import type {
   ListArray,
@@ -443,24 +442,27 @@ export const deleteAllAlerts = async (
   );
 };
 
-export const downgradeImmutableRule = async (es: KibanaClient, ruleId: string): Promise<void> => {
+export const downgradeImmutableRule = async (es: Client, ruleId: string): Promise<void> => {
   return countDownES(async () => {
-    return es.updateByQuery({
-      index: '.kibana',
-      refresh: true,
-      wait_for_completion: true,
-      body: {
-        script: {
-          lang: 'painless',
-          source: 'ctx._source.alert.params.version--',
-        },
-        query: {
-          term: {
-            'alert.tags': `${INTERNAL_RULE_ID_KEY}:${ruleId}`,
+    return es.updateByQuery(
+      {
+        index: '.kibana',
+        refresh: true,
+        wait_for_completion: true,
+        body: {
+          script: {
+            lang: 'painless',
+            source: 'ctx._source.alert.params.version--',
+          },
+          query: {
+            term: {
+              'alert.tags': `${INTERNAL_RULE_ID_KEY}:${ruleId}`,
+            },
           },
         },
       },
-    });
+      { meta: true }
+    );
   }, 'downgradeImmutableRule');
 };
 
@@ -468,7 +470,7 @@ export const downgradeImmutableRule = async (es: KibanaClient, ruleId: string): 
  * Remove all timelines from the .kibana index
  * @param es The ElasticSearch handle
  */
-export const deleteAllTimelines = async (es: KibanaClient): Promise<void> => {
+export const deleteAllTimelines = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:siem-ui-timeline',
@@ -483,15 +485,18 @@ export const deleteAllTimelines = async (es: KibanaClient): Promise<void> => {
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllRulesStatuses = async (es: KibanaClient): Promise<void> => {
+export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
   return countDownES(async () => {
-    return es.deleteByQuery({
-      index: '.kibana',
-      q: 'type:siem-detection-engine-rule-status',
-      wait_for_completion: true,
-      refresh: true,
-      body: {},
-    });
+    return es.deleteByQuery(
+      {
+        index: '.kibana',
+        q: 'type:siem-detection-engine-rule-status',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
+      },
+      { meta: true }
+    );
   }, 'deleteAllRulesStatuses');
 };
 
@@ -809,7 +814,7 @@ export const waitFor = async (
  * @param timeoutWait Time to wait before trying again (has default)
  */
 export const countDownES = async (
-  esFunction: () => Promise<ApiResponse<Record<string, any>, Context>>,
+  esFunction: () => Promise<TransportResult<Record<string, any>, unknown>>,
   esFunctionName: string,
   retryCount: number = 20,
   timeoutWait = 250
@@ -836,7 +841,7 @@ export const countDownES = async (
  * Useful for tests where we want to ensure that a rule does NOT create alerts, e.g. testing exceptions.
  * @param es The ElasticSearch handle
  */
-export const refreshIndex = async (es: KibanaClient, index?: string) => {
+export const refreshIndex = async (es: Client, index?: string) => {
   await es.indices.refresh({
     index,
   });
@@ -1468,10 +1473,10 @@ export const getIndexNameFromLoad = (loadResponse: Record<string, unknown>): str
  * @param esClient elasticsearch {@link Client}
  * @param index name of the index to query
  */
-export const waitForIndexToPopulate = async (es: KibanaClient, index: string): Promise<void> => {
+export const waitForIndexToPopulate = async (es: Client, index: string): Promise<void> => {
   await waitFor(async () => {
-    const response = await es.count<{ count: number }>({ index });
-    return response.body.count > 0;
+    const response = await es.count({ index });
+    return response.count > 0;
   }, `waitForIndexToPopulate: ${index}`);
 };
 
@@ -1542,7 +1547,7 @@ export const finalizeSignalsMigration = async ({
 
 export const getOpenSignals = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  es: KibanaClient,
+  es: Client,
   rule: FullResponseSchema
 ) => {
   await waitForRuleSuccessOrStatus(supertest, rule.id);

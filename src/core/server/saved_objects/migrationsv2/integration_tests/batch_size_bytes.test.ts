@@ -95,7 +95,7 @@ describe('migration v2', () => {
     // wait a bit for the count to settle.
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    const esClient: ElasticsearchClient = esServer.es.getClient();
+    const esClient: ElasticsearchClient = esServer.es.getKibanaEsClient();
 
     // assert that the docs from the original index have been migrated rather than comparing a doc count after startup
     const originalDocs = await fetchDocuments(esClient, '.kibana_7.14.0_001');

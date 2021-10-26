@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
-import { DeleteResponse, SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import type { TransportResult } from '@elastic/elasticsearch';
+import {
+  DeleteResponse,
+  SearchHit,
+  SearchResponse,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
@@ -18,8 +23,6 @@ import { ReportApiJSON, ReportSource } from '../../../common/types';
 import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
-
-type SearchRequest = Required<Parameters<ElasticsearchClient['search']>>[0];
 
 const defaultSize = 10;
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
@@ -50,7 +53,7 @@ interface JobsQueryFactory {
   count(jobTypes: string[], user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
   getError(id: string): Promise<string>;
-  delete(deleteIndex: string, id: string): Promise<ApiResponse<DeleteResponse>>;
+  delete(deleteIndex: string, id: string): Promise<TransportResult<DeleteResponse>>;
 }
 
 export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory {
@@ -66,7 +69,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       return await callback(client);
     } catch (error) {
-      if (error instanceof ResponseError && [401, 403, 404].includes(error.statusCode)) {
+      if (error instanceof errors.ResponseError && [401, 403, 404].includes(error.statusCode!)) {
         return;
       }
 
@@ -97,7 +100,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       const response = (await execQuery((elasticsearchClient) =>
         elasticsearchClient.search({ body, index: getIndex() })
-      )) as ApiResponse<SearchResponse<ReportSource>>;
+      )) as TransportResult<SearchResponse<ReportSource>>;
 
       return (
         response?.body.hits?.hits.map((report: SearchHit<ReportSource>) => {

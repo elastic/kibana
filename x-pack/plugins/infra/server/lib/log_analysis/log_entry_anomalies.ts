@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { InfraPluginRequestHandlerContext, InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
 import { fetchMlJob, getLogEntryDatasets } from './common';

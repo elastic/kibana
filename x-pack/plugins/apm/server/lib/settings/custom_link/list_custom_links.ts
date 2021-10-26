@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CustomLink,
   CustomLinkES,

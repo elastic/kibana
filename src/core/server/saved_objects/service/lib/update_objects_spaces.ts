@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import intersection from 'lodash/intersection';
 
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -28,7 +28,6 @@ import {
 } from './internal_utils';
 import { DEFAULT_REFRESH_SETTING } from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 
 /**
  * An object that should have its spaces updated.
@@ -188,16 +187,6 @@ export async function updateObjectsSpaces({
       )
     : undefined;
 
-  // fail fast if we can't verify a 404 response is from Elasticsearch
-  if (
-    bulkGetResponse &&
-    isNotFoundFromUnsupportedServer({
-      statusCode: bulkGetResponse.statusCode,
-      headers: bulkGetResponse.headers,
-    })
-  ) {
-    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-  }
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;
   const bulkOperationParams: estypes.BulkOperationContainer[] = [];
@@ -259,7 +248,6 @@ export async function updateObjectsSpaces({
         // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
         bulkOperationParams.push({ update: documentMetadata }, { doc: documentToSave });
       } else {
-        // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
         bulkOperationParams.push({ delete: documentMetadata });
       }
     }

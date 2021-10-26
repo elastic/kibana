@@ -24,7 +24,7 @@ export class IlmPolicyManager {
 
   public async doesIlmPolicyExist(): Promise<boolean> {
     try {
-      await this.client.ilm.getLifecycle({ policy: ILM_POLICY_NAME });
+      await this.client.ilm.getLifecycle({ name: ILM_POLICY_NAME });
       return true;
     } catch (e) {
       if (e.statusCode === 404) {
@@ -39,7 +39,7 @@ export class IlmPolicyManager {
    */
   public async createIlmPolicy(): Promise<void> {
     await this.client.ilm.putLifecycle({
-      policy: ILM_POLICY_NAME,
+      name: ILM_POLICY_NAME,
       body: reportingIlmPolicy,
     });
   }

@@ -6,8 +6,8 @@
  */
 import { URL } from 'url';
 
-import type { ApiResponse } from '@elastic/elasticsearch';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import type { SearchHit, ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
@@ -69,7 +69,7 @@ export interface GenerateEsRequestErrorApiResponseMockProps {
 
 export const generateEsRequestErrorApiResponseMock = (
   { statusCode = 500 }: GenerateEsRequestErrorApiResponseMockProps = { statusCode: 500 }
-): ApiResponse => {
+): TransportResult => {
   return generateEsApiResponseMock(
     {
       _index: '.fleet-artifacts_1',
@@ -127,8 +127,8 @@ export const generateArtifactEsSearchResultHitsMock = (): ESSearchResponse<
 
 export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
   body: TBody,
-  otherProps: Partial<Exclude<ApiResponse, 'body'>> = {}
-): ApiResponse => {
+  otherProps: Partial<Exclude<TransportResult, 'body'>> = {}
+): TransportResult => {
   return elasticsearchServiceMock.createApiResponse({
     body,
     headers: {
@@ -148,8 +148,6 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
         id: 7160,
       },
       name: 'elasticsearch-js',
-      // There are some properties missing below which is not important for this mock
-      // @ts-ignore
       connection: {
         url: new URL('http://localhost:9200/'),
         id: 'http://localhost:9200/',
@@ -158,6 +156,8 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
         resurrectTimeout: 0,
         _openRequests: 0,
         status: 'alive',
+        // There are some properties missing below which is not important for this mock
+        // @ts-expect-error
         roles: {
           master: true,
           data: true,
@@ -182,7 +182,7 @@ export const setEsClientMethodResponseToError = (
 ) => {
   esClientMock[method].mockImplementation(() => {
     return elasticsearchServiceMock.createErrorTransportRequestPromise(
-      new ResponseError(generateEsRequestErrorApiResponseMock(options))
+      new errors.ResponseError(generateEsRequestErrorApiResponseMock(options))
     );
   });
 };

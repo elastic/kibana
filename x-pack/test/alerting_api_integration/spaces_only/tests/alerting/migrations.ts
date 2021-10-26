@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import type { RawAlert, RawAlertAction } from '../../../../../plugins/alerting/server/types';
@@ -181,10 +181,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     it('7.15.0 migrates security_solution alerts with exceptionLists to be saved object references', async () => {
       // NOTE: We hae to use elastic search directly against the ".kibana" index because alerts do not expose the references which we want to test exists
-      const response = await es.get<{ references: [{}] }>({
-        index: '.kibana',
-        id: 'alert:38482620-ef1b-11eb-ad71-7de7959be71c',
-      });
+      const response = await es.get<{ references: [{}] }>(
+        {
+          index: '.kibana',
+          id: 'alert:38482620-ef1b-11eb-ad71-7de7959be71c',
+        },
+        { meta: true }
+      );
       expect(response.statusCode).to.eql(200);
       expect(response.body._source?.references).to.eql([
         {
@@ -201,16 +204,19 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('7.16.0 migrates existing alerts to contain legacyId field', async () => {
-      const searchResult: ApiResponse<estypes.SearchResponse<RawAlert>> = await es.search({
-        index: '.kibana',
-        body: {
-          query: {
-            term: {
-              _id: 'alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e',
+      const searchResult = await es.search<RawAlert>(
+        {
+          index: '.kibana',
+          body: {
+            query: {
+              term: {
+                _id: 'alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e',
+              },
             },
           },
         },
-      });
+        { meta: true }
+      );
       expect(searchResult.statusCode).to.equal(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
@@ -220,16 +226,19 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('7.16.0 migrates existing rules so predefined connectors are not stored in references', async () => {
-      const searchResult: ApiResponse<estypes.SearchResponse<RawAlert>> = await es.search({
-        index: '.kibana',
-        body: {
-          query: {
-            term: {
-              _id: 'alert:9c003b00-00ee-11ec-b067-2524946ba327',
+      const searchResult = await es.search<RawAlert>(
+        {
+          index: '.kibana',
+          body: {
+            query: {
+              term: {
+                _id: 'alert:9c003b00-00ee-11ec-b067-2524946ba327',
+              },
             },
           },
         },
-      });
+        { meta: true }
+      );
       expect(searchResult.statusCode).to.equal(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
@@ -260,10 +269,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     it('7.16.0 migrates security_solution (Legacy) siem.notifications with "ruleAlertId" to be saved object references', async () => {
       // NOTE: We hae to use elastic search directly against the ".kibana" index because alerts do not expose the references which we want to test exists
-      const response = await es.get<{ references: [{}] }>({
-        index: '.kibana',
-        id: 'alert:d7a8c6a1-9394-48df-a634-d5457c35d747',
-      });
+      const response = await es.get<{ references: [{}] }>(
+        {
+          index: '.kibana',
+          id: 'alert:d7a8c6a1-9394-48df-a634-d5457c35d747',
+        },
+        { meta: true }
+      );
       expect(response.statusCode).to.eql(200);
       expect(response.body._source?.references).to.eql([
         {

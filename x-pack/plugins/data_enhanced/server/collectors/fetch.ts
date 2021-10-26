@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from 'kibana/server';
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { SEARCH_SESSION_TYPE } from '../../../../../src/plugins/data/common';

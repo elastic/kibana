@@ -12,7 +12,7 @@ import {
   luceneStringToDsl,
   toElasticsearchQuery,
 } from '@kbn/es-query';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useMlContext } from '../../../../../contexts/ml';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { getQueryFromSavedSearchObject } from '../../../../../util/index_utils';

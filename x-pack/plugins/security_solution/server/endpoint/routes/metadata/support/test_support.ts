@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { METADATA_UNITED_INDEX } from '../../../../../common/endpoint/constants';
 import { HostMetadata, UnitedAgentMetadata } from '../../../../../common/endpoint/types';
 

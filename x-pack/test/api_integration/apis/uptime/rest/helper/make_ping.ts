@@ -7,14 +7,14 @@
 
 import uuid from 'uuid';
 import { merge } from 'lodash';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { makeTls, TlsProps } from './make_tls';
 
 const DEFAULT_INDEX_NAME = 'heartbeat-8-generated-test';
 const DATA_STREAM_INDEX_NAME = 'synthetics-http-default';
 
 export const makePing = async (
-  es: KibanaClient,
+  es: Client,
   monitorId: string,
   fields: { [key: string]: any },
   mogrify: (doc: any) => any,

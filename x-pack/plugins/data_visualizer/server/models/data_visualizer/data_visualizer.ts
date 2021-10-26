@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { each, last } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { JOB_FIELD_TYPES } from '../../../common';
 import type {
   BatchStats,

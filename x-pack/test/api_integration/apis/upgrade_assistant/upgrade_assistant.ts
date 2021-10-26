@@ -89,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Refetch the index and verify settings were updated correctly
         try {
-          const { body: indexSettingsResponse } = await es.indices.getSettings({
+          const indexSettingsResponse = await es.indices.getSettings({
             index: indexName,
           });
 

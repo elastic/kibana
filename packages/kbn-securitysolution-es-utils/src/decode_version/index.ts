@@ -23,8 +23,8 @@ export const decodeVersion = (
       const parsed = JSON.parse(decoded);
       if (Array.isArray(parsed) && Number.isInteger(parsed[0]) && Number.isInteger(parsed[1])) {
         return {
-          ifPrimaryTerm: parsed[1],
-          ifSeqNo: parsed[0],
+          if_primary_term: parsed[1],
+          if_seq_no: parsed[0],
         };
       } else {
         return {};

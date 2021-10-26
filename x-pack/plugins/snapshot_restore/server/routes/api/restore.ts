@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { SnapshotRestore, SnapshotRestoreShardEs } from '../../../common/types';
 import { serializeRestoreSettings } from '../../../common/lib';

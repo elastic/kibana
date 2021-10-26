@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import JSON5 from 'json5';
@@ -114,7 +114,7 @@ describe('migration v2', () => {
       );
     });
 
-    const client: ElasticsearchClient = esServer.es.getClient();
+    const client: ElasticsearchClient = esServer.es.getKibanaEsClient();
     const { body: response } = await client.indices.getSettings({
       index: targetIndex,
     });
@@ -178,7 +178,7 @@ describe('migration v2', () => {
     });
     await root.start();
 
-    const client: ElasticsearchClient = esServer.es.getClient();
+    const client: ElasticsearchClient = esServer.es.getKibanaEsClient();
     const spacesDocsMigrated = await fetchDocs(client, targetIndex, 'space');
     expect(spacesDocsMigrated.map((s) => s.id)).toEqual(
       expect.arrayContaining([

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '../../../logging';
 import type { SavedObjectsFindOptions, SavedObjectsClientContract } from '../../types';
 import type { SavedObjectsFindResponse } from '../';

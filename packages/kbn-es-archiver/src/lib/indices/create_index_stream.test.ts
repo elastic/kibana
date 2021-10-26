@@ -71,6 +71,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
               "ignore": Array [
                 404,
               ],
+              "meta": true,
             },
           ],
         ]

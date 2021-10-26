@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
 import { HostIsolationResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {

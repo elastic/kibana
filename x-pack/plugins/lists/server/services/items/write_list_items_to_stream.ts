@@ -7,7 +7,7 @@
 
 import { PassThrough } from 'stream';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'kibana/server';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';

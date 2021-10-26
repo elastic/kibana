@@ -9,8 +9,8 @@
 import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
-import { estypes } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';
@@ -31,7 +31,7 @@ export function createCreateIndexStream({
   skipExisting = false,
   log,
 }: {
-  client: KibanaClient;
+  client: Client;
   stats: Stats;
   skipExisting?: boolean;
   log: ToolingLog;

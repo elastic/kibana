@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
@@ -92,7 +92,7 @@ const createRequest = (
 });
 
 export function resolveImportErrorsTestSuiteFactory(
-  es: KibanaClient,
+  es: Client,
   esArchiver: any,
   supertest: SuperTest<any>
 ) {

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'kibana/server';
 import { SearchStrategyParams } from '../../../../common/search_strategies/types';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';

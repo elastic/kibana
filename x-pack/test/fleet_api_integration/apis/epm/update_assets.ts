@@ -46,10 +46,12 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackage(pkgUpdateKey);
     });
     it('should have updated the ILM policy', async function () {
-      const resPolicy = await es.transport.request({
-        method: 'GET',
-        path: `/_ilm/policy/all_assets`,
-      });
+      const resPolicy = await es.ilm.getLifecycle(
+        {
+          name: 'all_assets',
+        },
+        { meta: true }
+      );
       expect(resPolicy.body.all_assets.policy).eql({
         phases: {
           hot: {
@@ -65,10 +67,13 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     it('should have updated the index templates', async function () {
-      const resLogsTemplate = await es.transport.request({
-        method: 'GET',
-        path: `/_index_template/${logsTemplateName}`,
-      });
+      const resLogsTemplate = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_index_template/${logsTemplateName}`,
+        },
+        { meta: true }
+      );
       expect(resLogsTemplate.statusCode).equal(200);
       expect(
         resLogsTemplate.body.index_templates[0].index_template.template.mappings.properties
@@ -97,10 +102,13 @@ export default function (providerContext: FtrProviderContext) {
           },
         },
       });
-      const resMetricsTemplate = await es.transport.request({
-        method: 'GET',
-        path: `/_index_template/${metricsTemplateName}`,
-      });
+      const resMetricsTemplate = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_index_template/${metricsTemplateName}`,
+        },
+        { meta: true }
+      );
       expect(resMetricsTemplate.statusCode).equal(200);
       expect(
         resMetricsTemplate.body.index_templates[0].index_template.template.mappings.properties
@@ -128,10 +136,13 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     it('should have installed the new index template', async function () {
-      const resLogsTemplate = await es.transport.request({
-        method: 'GET',
-        path: `/_index_template/${logsTemplateName2}`,
-      });
+      const resLogsTemplate = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_index_template/${logsTemplateName2}`,
+        },
+        { meta: true }
+      );
       expect(resLogsTemplate.statusCode).equal(200);
       expect(
         resLogsTemplate.body.index_templates[0].index_template.template.mappings.properties
@@ -159,62 +170,72 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     it('should have installed the new versionized pipelines', async function () {
-      const res = await es.transport.request({
-        method: 'GET',
-        path: `/_ingest/pipeline/${logsTemplateName}-${pkgUpdateVersion}`,
-      });
+      const res = await es.ingest.getPipeline(
+        {
+          id: `${logsTemplateName}-${pkgUpdateVersion}`,
+        },
+        { meta: true }
+      );
       expect(res.statusCode).equal(200);
-      const resPipeline1 = await es.transport.request({
-        method: 'GET',
-        path: `/_ingest/pipeline/${logsTemplateName}-${pkgUpdateVersion}-pipeline1`,
-      });
+      const resPipeline1 = await es.ingest.getPipeline(
+        {
+          id: `${logsTemplateName}-${pkgUpdateVersion}-pipeline1`,
+        },
+        { meta: true }
+      );
       expect(resPipeline1.statusCode).equal(200);
     });
     it('should have removed the old versionized pipelines', async function () {
-      const res = await es.transport.request(
+      const res = await es.ingest.getPipeline(
         {
-          method: 'GET',
-          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
+          id: `${logsTemplateName}-${pkgVersion}`,
         },
         {
           ignore: [404],
+          meta: true,
         }
       );
       expect(res.statusCode).equal(404);
-      const resPipeline1 = await es.transport.request(
+      const resPipeline1 = await es.ingest.getPipeline(
         {
-          method: 'GET',
-          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
+          id: `${logsTemplateName}-${pkgVersion}-pipeline1`,
         },
         {
           ignore: [404],
+          meta: true,
         }
       );
       expect(resPipeline1.statusCode).equal(404);
-      const resPipeline2 = await es.transport.request(
+      const resPipeline2 = await es.ingest.getPipeline(
         {
-          method: 'GET',
-          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+          id: `${logsTemplateName}-${pkgVersion}-pipeline2`,
         },
         {
           ignore: [404],
+          meta: true,
         }
       );
       expect(resPipeline2.statusCode).equal(404);
     });
     it('should have updated the component templates', async function () {
-      const resMappings = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}@mappings`,
-      });
+      const resMappings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName}@mappings`,
+        },
+        { meta: true }
+      );
       expect(resMappings.statusCode).equal(200);
       expect(resMappings.body.component_templates[0].component_template.template.mappings).eql({
         dynamic: true,
       });
-      const resSettings = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}@settings`,
-      });
+      const resSettings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName}@settings`,
+        },
+        { meta: true }
+      );
       expect(resSettings.statusCode).equal(200);
       expect(resSettings.body.component_templates[0].component_template.template.settings).eql({
         index: {
@@ -230,10 +251,13 @@ export default function (providerContext: FtrProviderContext) {
           },
         },
       });
-      const resUserSettings = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}@custom`,
-      });
+      const resUserSettings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName}@custom`,
+        },
+        { meta: true }
+      );
       expect(resUserSettings.statusCode).equal(200);
       expect(resUserSettings.body).eql({
         component_templates: [

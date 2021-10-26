@@ -505,7 +505,7 @@ const updateExistingDataStream = async ({
   try {
     await esClient.indices.putSettings({
       index: dataStreamName,
-      body: { settings: { default_pipeline: settings.index.default_pipeline } },
+      body: { default_pipeline: settings.index.default_pipeline },
     });
   } catch (err) {
     throw new Error(`could not update index template settings for ${dataStreamName}`);

@@ -117,23 +117,28 @@ describe('setupRequest', () => {
 
       expect(
         mockResources.context.core.elasticsearch.client.asCurrentUser.search
-      ).toHaveBeenCalledWith({
-        index: ['apm-*'],
-        body: {
-          foo: 'bar',
-          query: {
-            bool: {
-              filter: [
-                { terms: { 'processor.event': ['transaction'] } },
-                { range: { 'observer.version_major': { gte: 7 } } },
-              ],
+      ).toHaveBeenCalledWith(
+        {
+          index: ['apm-*'],
+          body: {
+            foo: 'bar',
+            query: {
+              bool: {
+                filter: [
+                  { terms: { 'processor.event': ['transaction'] } },
+                  { range: { 'observer.version_major': { gte: 7 } } },
+                ],
+              },
             },
           },
+          ignore_unavailable: true,
+          ignore_throttled: true,
+          preference: 'any',
         },
-        ignore_unavailable: true,
-        ignore_throttled: true,
-        preference: 'any',
-      });
+        {
+          signal: expect.any(Object),
+        }
+      );
     });
 
     it('calls callWithInternalUser', async () => {
@@ -145,12 +150,17 @@ describe('setupRequest', () => {
       } as any);
       expect(
         mockResources.context.core.elasticsearch.client.asInternalUser.search
-      ).toHaveBeenCalledWith({
-        index: ['apm-*'],
-        body: {
-          foo: 'bar',
+      ).toHaveBeenCalledWith(
+        {
+          index: ['apm-*'],
+          body: {
+            foo: 'bar',
+          },
         },
-      });
+        {
+          signal: expect.any(Object),
+        }
+      );
     });
   });
 

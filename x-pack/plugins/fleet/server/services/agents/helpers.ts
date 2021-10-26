@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { SearchHit } from '../../../../../../src/core/types/elasticsearch';
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';

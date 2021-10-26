@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
