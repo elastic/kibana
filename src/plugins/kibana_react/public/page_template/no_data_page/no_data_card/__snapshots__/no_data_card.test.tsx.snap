@@ -2,7 +2,7 @@
 
 exports[`NoDataCard props button 1`] = `
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned"
 >
   <div
     class="euiCard__content"
@@ -25,31 +25,27 @@ exports[`NoDataCard props button 1`] = `
   <div
     class="euiCard__footer"
   >
-    <div
-      class="eui-textCenter"
+    <button
+      class="euiButton euiButton--primary euiButton--fill"
+      type="button"
     >
-      <button
-        class="euiButton euiButton--primary euiButton--fill"
-        type="button"
+      <span
+        class="euiButtonContent euiButton__content"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="euiButton__text"
         >
-          <span
-            class="euiButton__text"
-          >
-            Button
-          </span>
+          Button
         </span>
-      </button>
-    </div>
+      </span>
+    </button>
   </div>
 </div>
 `;
 
 exports[`NoDataCard props href 1`] = `
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable"
 >
   <div
     class="euiCard__content"
@@ -79,31 +75,27 @@ exports[`NoDataCard props href 1`] = `
   <div
     class="euiCard__footer"
   >
-    <div
-      class="eui-textCenter"
+    <button
+      class="euiButton euiButton--primary euiButton--fill"
+      type="button"
     >
-      <button
-        class="euiButton euiButton--primary euiButton--fill"
-        type="button"
+      <span
+        class="euiButtonContent euiButton__content"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="euiButton__text"
         >
-          <span
-            class="euiButton__text"
-          >
-            Button
-          </span>
+          Button
         </span>
-      </button>
-    </div>
+      </span>
+    </button>
   </div>
 </div>
 `;
 
 exports[`NoDataCard props recommended 1`] = `
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasBetaBadge"
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned euiCard--hasBetaBadge"
 >
   <div
     class="euiCard__content"
@@ -134,19 +126,12 @@ exports[`NoDataCard props recommended 1`] = `
       Recommended
     </span>
   </span>
-  <div
-    class="euiCard__footer"
-  >
-    <div
-      class="eui-textCenter"
-    />
-  </div>
 </div>
 `;
 
 exports[`NoDataCard renders 1`] = `
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned"
 >
   <div
     class="euiCard__content"
@@ -165,13 +150,6 @@ exports[`NoDataCard renders 1`] = `
         Description
       </p>
     </div>
-  </div>
-  <div
-    class="euiCard__footer"
-  >
-    <div
-      class="eui-textCenter"
-    />
   </div>
 </div>
 `;
