@@ -14,6 +14,7 @@ import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 
 import { functions } from './functions/browser';
+import { initFunctions } from './functions/external';
 import { typeFunctions } from './expression_types';
 import { renderFunctions, renderFunctionFactories } from './renderers';
 
@@ -41,6 +42,13 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     plugins.canvas.addRenderers(renderFunctions);
 
     core.getStartServices().then(([coreStart, depsStart]) => {
+      const externalFunctions = initFunctions({
+        embeddablePersistableStateService: {
+          extract: depsStart.embeddable.extract,
+          inject: depsStart.embeddable.inject,
+        },
+      });
+      plugins.canvas.addFunctions(externalFunctions);
       plugins.canvas.addRenderers(
         renderFunctionFactories.map((factory: any) => factory(coreStart, depsStart))
       );
