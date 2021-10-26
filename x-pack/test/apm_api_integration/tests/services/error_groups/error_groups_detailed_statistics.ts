@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import url from 'url';
 import expect from '@kbn/expect';
-import moment from 'moment';
 import { first, last, sumBy } from 'lodash';
-import archives_metadata from '../../../common/fixtures/es_archiver/archives_metadata';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { registry } from '../../../common/registry';
+import moment from 'moment';
+import { isFiniteNumber } from '../../../../../plugins/apm/common/utils/is_finite_number';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
 } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { createApmApiClient } from '../../../common/apm_api_supertest';
-import { getErrorGroupIds } from './get_error_group_ids';
 import { RecursivePartial } from '../../../../../plugins/apm/typings/common';
-import { generateData, config } from './generate_data';
-import { isFiniteNumber } from '../../../../../plugins/apm/common/utils/is_finite_number';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { registry } from '../../../common/registry';
+import { config, generateData } from './generate_data';
+import { getErrorGroupIds } from './get_error_group_ids';
 
 type ErrorGroupsDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
