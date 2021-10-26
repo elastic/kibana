@@ -678,7 +678,7 @@ describe('FeatureTable', () => {
     });
   });
 
-  it('renders with no privileges granted when minimal feature privileges are assigned, and sub-feature privileges are disallowed', () => {
+  it('renders with privileges granted when minimal feature privileges are assigned, and sub-feature privileges are disallowed', () => {
     const role = createRole([
       {
         spaces: ['foo'],
@@ -710,13 +710,13 @@ describe('FeatureTable', () => {
         subFeaturePrivileges: [],
       },
       with_sub_features: {
-        primaryFeaturePrivilege: 'none',
+        primaryFeaturePrivilege: 'all',
         subFeaturePrivileges: [],
       },
     });
   });
 
-  it('renders with no privileges granted when sub feature privileges are assigned, and sub-feature privileges are disallowed', () => {
+  it('renders with privileges granted when sub feature privileges are assigned, and sub-feature privileges are disallowed', () => {
     const role = createRole([
       {
         spaces: ['foo'],
@@ -748,7 +748,7 @@ describe('FeatureTable', () => {
         subFeaturePrivileges: [],
       },
       with_sub_features: {
-        primaryFeaturePrivilege: 'none',
+        primaryFeaturePrivilege: 'read',
         subFeaturePrivileges: [],
       },
     });

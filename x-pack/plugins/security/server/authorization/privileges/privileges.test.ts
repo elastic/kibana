@@ -60,6 +60,8 @@ describe('features', () => {
     expect(actual).toHaveProperty('features.foo-feature', {
       all: [actions.login, actions.version],
       read: [actions.login, actions.version],
+      minimal_all: [actions.login, actions.version],
+      minimal_read: [actions.login, actions.version],
     });
   });
 
@@ -175,6 +177,8 @@ describe('features', () => {
     expect(actual).toHaveProperty('features.foo', {
       all: [...expectedAllPrivileges],
       read: [...expectedReadPrivileges],
+      minimal_all: [...expectedAllPrivileges],
+      minimal_read: [...expectedReadPrivileges],
     });
   });
 
@@ -1627,7 +1631,7 @@ describe('subFeatures', () => {
   });
 
   describe(`when license does not allow sub features`, () => {
-    test(`should augment the primary feature privileges, and should not create minimal or sub-feature privileges`, () => {
+    test(`should augment the primary feature privileges, and should not create sub-feature privileges`, () => {
       const features: KibanaFeature[] = [
         new KibanaFeature({
           id: 'foo',
@@ -1705,7 +1709,11 @@ describe('subFeatures', () => {
         actions.ui.get('foo', 'sub-feature-ui'),
       ]);
 
-      expect(actual.features).not.toHaveProperty(`foo.minimal_all`);
+      expect(actual.features).toHaveProperty(`foo.minimal_all`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
         actions.login,
@@ -1730,7 +1738,11 @@ describe('subFeatures', () => {
         actions.ui.get('foo', 'sub-feature-ui'),
       ]);
 
-      expect(actual.features).not.toHaveProperty(`foo.minimal_read`);
+      expect(actual.features).toHaveProperty(`foo.minimal_read`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
