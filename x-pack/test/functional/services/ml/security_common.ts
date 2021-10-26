@@ -144,6 +144,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
           // such as "View in Lens", "Add to Dashboard", and creating anomaly detection rules. These feature privileges are the minimal ones
           // necessary to satisfy all of those functional tests.
           feature: {
+            discover: ['read'],
             visualize: ['read'],
             dashboard: ['all'],
             actions: ['all'],
