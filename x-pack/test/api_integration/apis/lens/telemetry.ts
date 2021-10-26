@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import { convertToKibanaClient } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -28,9 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
       index: '.kibana',
     });
 
-    const {
-      body: { count },
-    } = await es.count({
+    const { count } = await es.count({
       index: '.kibana',
       q: 'type:lens-ui-telemetry',
     });
@@ -107,8 +106,8 @@ export default ({ getService }: FtrProviderContext) => {
         },
         refresh: 'wait_for',
       });
-
-      const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
+      const kibanaClient = convertToKibanaClient(es);
+      const result = await getDailyEvents('.kibana', () => Promise.resolve(kibanaClient));
 
       expect(result).to.eql({
         byDate: {},
@@ -150,8 +149,8 @@ export default ({ getService }: FtrProviderContext) => {
           getEvent('revert', date1, 'suggestion'),
         ],
       });
-
-      const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
+      const kibanaClient = convertToKibanaClient(es);
+      const result = await getDailyEvents('.kibana', () => Promise.resolve(kibanaClient));
 
       expect(result).to.eql({
         byDate: {
