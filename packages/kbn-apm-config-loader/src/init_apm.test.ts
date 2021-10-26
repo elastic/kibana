@@ -11,7 +11,8 @@ import { mockLoadConfiguration } from './init_apm.test.mocks';
 import { initApm } from './init_apm';
 import apm from 'elastic-apm-node';
 
-describe('initApm', () => {
+// TODO: unskip when https://github.com/elastic/kibana/issues/116109 is fixed
+describe.skip('initApm', () => {
   let apmAddFilterSpy: jest.SpyInstance;
   let apmStartSpy: jest.SpyInstance;
   let getConfig: jest.Mock;
