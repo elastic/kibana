@@ -62,7 +62,7 @@ describe('Add Integration', () => {
   });
 
   function addAndVerifyIntegration() {
-    cy.intercept('GET', '/api/fleet/epm/packages*').as('packages');
+    cy.intercept('GET', '/api/fleet/epm/packages?*').as('packages');
     navigateTo(INTEGRATIONS);
     cy.wait('@packages');
     cy.get('.euiLoadingSpinner').should('not.exist');
@@ -71,7 +71,7 @@ describe('Add Integration', () => {
     cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-');
   }
 
-  it('[Mocked requests] should display Apache integration in the Policies list once installed ', () => {
+  it.skip('[Mocked requests] should display Apache integration in the Policies list once installed ', () => {
     cy.intercept('POST', '/api/fleet/package_policies', {
       fixture: 'integrations/create_integration_response.json',
     });
