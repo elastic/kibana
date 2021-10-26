@@ -4,19 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { service, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
+import moment from 'moment';
+import {
+  APIClientRequestParamsOf,
+  APIReturnType,
+} from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { RecursivePartial } from '../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { RecursivePartial } from '../../../../plugins/apm/typings/common';
-import { APIClientRequestParamsOf } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 
 type ErrorGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -57,60 +61,107 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Error groups main statistics when data is loaded',
+    'Error groups main statistics',
     { config: 'basic', archives: ['apm_8.0.0_empty'] },
     () => {
-      it('returns the correct data', async () => {
-        const response = await callApi();
-        expect(response.status).to.be(200);
-        const errorGroupMainStatistics = response.body as ErrorGroupsMainStatistics;
+      describe('when data is loaded', () => {
+        const GO_PROD_LIST_RATE = 75;
+        const GO_PROD_LIST_ERROR_RATE = 25;
+        const GO_PROD_ID_RATE = 50;
+        const GO_PROD_ID_ERROR_RATE = 50;
+        const ERROR_NAME_1 = 'Error test 1';
+        const ERROR_NAME_2 = 'Error test 2';
+        before(async () => {
+          const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
+            'instance-a'
+          );
 
-        expect(errorGroupMainStatistics.is_aggregation_accurate).to.eql(true);
-        expect(errorGroupMainStatistics.error_groups.length).to.be.greaterThan(0);
+          const transactionNameProductList = 'GET /api/product/list';
+          const transactionNameProductId = 'GET /api/product/:id';
 
-        expectSnapshot(errorGroupMainStatistics.error_groups.map(({ name }) => name))
-          .toMatchInline(`
-          Array [
-            "Response status 404",
-            "No converter found for return value of type: class com.sun.proxy.$Proxy162",
-            "Response status 404",
-            "Broken pipe",
-            "java.io.IOException: Connection reset by peer",
-            "Request method 'POST' not supported",
-            "java.io.IOException: Connection reset by peer",
-            "null",
-          ]
-        `);
+          await synthtraceEsClient.index([
+            ...timerange(start, end)
+              .interval('1m')
+              .rate(GO_PROD_LIST_RATE)
+              .flatMap((timestamp) =>
+                serviceGoProdInstance
+                  .transaction(transactionNameProductList)
+                  .timestamp(timestamp)
+                  .duration(1000)
+                  .success()
+                  .serialize()
+              ),
+            ...timerange(start, end)
+              .interval('1m')
+              .rate(GO_PROD_LIST_ERROR_RATE)
+              .flatMap((timestamp) =>
+                serviceGoProdInstance
+                  .transaction(transactionNameProductList)
+                  .errors(serviceGoProdInstance.error(ERROR_NAME_1, 'foo').timestamp(timestamp))
+                  .duration(1000)
+                  .timestamp(timestamp)
+                  .failure()
+                  .serialize()
+              ),
+            ...timerange(start, end)
+              .interval('1m')
+              .rate(GO_PROD_ID_RATE)
+              .flatMap((timestamp) =>
+                serviceGoProdInstance
+                  .transaction(transactionNameProductId)
+                  .timestamp(timestamp)
+                  .duration(1000)
+                  .success()
+                  .serialize()
+              ),
+            ...timerange(start, end)
+              .interval('1m')
+              .rate(GO_PROD_ID_ERROR_RATE)
+              .flatMap((timestamp) =>
+                serviceGoProdInstance
+                  .transaction(transactionNameProductId)
+                  .errors(serviceGoProdInstance.error(ERROR_NAME_2, 'bar').timestamp(timestamp))
+                  .duration(1000)
+                  .timestamp(timestamp)
+                  .failure()
+                  .serialize()
+              ),
+          ]);
+        });
 
-        const occurences = errorGroupMainStatistics.error_groups.map(
-          ({ occurrences }) => occurrences
-        );
+        after(() => synthtraceEsClient.clean());
 
-        occurences.forEach((occurence) => expect(occurence).to.be.greaterThan(0));
+        describe('returns the correct data', () => {
+          let errorGroupMainStatistics: ErrorGroupsMainStatistics;
+          before(async () => {
+            const response = await callApi();
+            errorGroupMainStatistics = response.body;
+          });
 
-        expectSnapshot(occurences).toMatchInline(`
-          Array [
-            17,
-            12,
-            4,
-            4,
-            3,
-            2,
-            1,
-            1,
-          ]
-        `);
+          it('returns correct number of errors', () => {
+            expect(errorGroupMainStatistics.error_groups.length).to.equal(2);
+            expect(errorGroupMainStatistics.error_groups.map((error) => error.name).sort()).to.eql([
+              ERROR_NAME_1,
+              ERROR_NAME_2,
+            ]);
+          });
 
-        const firstItem = errorGroupMainStatistics.error_groups[0];
+          it('returns correct occurences', () => {
+            const numberOfBuckets = 15;
+            expect(
+              errorGroupMainStatistics.error_groups.map((error) => error.occurrences).sort()
+            ).to.eql([
+              GO_PROD_LIST_ERROR_RATE * numberOfBuckets,
+              GO_PROD_ID_ERROR_RATE * numberOfBuckets,
+            ]);
+          });
 
-        expectSnapshot(firstItem).toMatchInline(`
-          Object {
-            "group_id": "d16d39e7fa133b8943cea035430a7b4e",
-            "lastSeen": 1627975146078,
-            "name": "Response status 404",
-            "occurrences": 17,
-          }
-        `);
+          it('has same last seen value as end date', () => {
+            errorGroupMainStatistics.error_groups.map((error) => {
+              expect(error.lastSeen).to.equal(moment(end).startOf('minute').valueOf());
+            });
+          });
+        });
       });
     }
   );
