@@ -76,7 +76,7 @@ import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './u
 import { JoinState, performInnerJoins } from './perform_inner_joins';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
-import { getFeatureId } from './assign_feature_ids';
+import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './assign_feature_ids';
 
 export function isVectorLayer(layer: ILayer) {
   return (layer as IVectorLayer).canShowTooltip !== undefined;
@@ -102,6 +102,7 @@ export interface IVectorLayer extends ILayer {
   getJoinsDisabledReason(): string | null;
   getValidJoins(): InnerJoin[];
   getSource(): IVectorSource;
+  getFeatureId(feature: Feature): string | number | undefined;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
@@ -1154,6 +1155,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getSource().hasTooltipProperties() || this.getJoins().length > 0;
   }
 
+  getFeatureId(feature: Feature): string | number | undefined {
+    return feature.properties?.[GEOJSON_FEATURE_ID_PROPERTY_NAME];
+  }
+
   getFeatureById(id: string | number) {
     const featureCollection = this._getSourceFeatureCollection();
     if (!featureCollection) {
@@ -1161,7 +1166,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const targetFeature = featureCollection.features.find((feature) => {
-      return getFeatureId(feature, this.getSource()) === id;
+      return this.getFeatureId(feature) === id;
     });
     return targetFeature ? targetFeature : null;
   }
