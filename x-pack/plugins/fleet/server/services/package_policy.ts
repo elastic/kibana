@@ -436,11 +436,7 @@ class PackagePolicyService {
       });
 
       if (packagePolicy.package.version !== currentVersion) {
-        appContextService
-          .getLogger()
-          .info(
-            `Package policy upgraded successfully`
-          );
+        appContextService.getLogger().info(`Package policy upgraded successfully`);
         sendTelemetryEvents(
           appContextService.getLogger(),
           appContextService.getTelemetryEventsSender(),
