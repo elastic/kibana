@@ -27,11 +27,7 @@ import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
-
-export type MlDependencies = Omit<
-  MlSetupDependencies,
-  'share' | 'indexPatternManagement' | 'fieldFormats'
-> &
+export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'indexPatternManagement'> &
   MlStartDependencies;
 
 interface AppProps {
@@ -88,7 +84,6 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     triggersActionsUi: deps.triggersActionsUi,
     dataVisualizer: deps.dataVisualizer,
     usageCollection: deps.usageCollection,
-    fieldFormats: deps.fieldFormats,
     ...coreStart,
   };
 

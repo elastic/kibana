@@ -6,7 +6,8 @@
  */
 
 import React, { FC, useState, useCallback, useMemo } from 'react';
-import { groupBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiInMemoryTable,
   EuiFlexGroup,
@@ -20,37 +21,40 @@ import {
   EuiSearchBarProps,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import { StatsBar, ModelsBarStats } from '../../../../../components/stats_bar';
+import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
+import { ModelsTableToConfigMapping } from './index';
+import { DeleteModelsModal } from './delete_models_modal';
+import {
+  useMlKibana,
+  useMlLocator,
+  useNavigateToPath,
+  useNotifications,
+} from '../../../../../contexts/kibana';
+import { ExpandedRow } from './expanded_row';
+
+import {
+  TrainedModelConfigResponse,
+  ModelPipelines,
+  TrainedModelStat,
+} from '../../../../../../../common/types/trained_models';
 import {
   getAnalysisType,
   REFRESH_ANALYTICS_LIST_STATE,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
-} from '../../data_frame_analytics/common';
-import { ModelsTableToConfigMapping } from './index';
-import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
-import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
-import {
-  ModelPipelines,
-  TrainedModelConfigResponse,
-  TrainedModelStat,
-} from '../../../../common/types/trained_models';
-import { BUILT_IN_MODEL_TAG } from '../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
-import { DeleteModelsModal } from './delete_models_modal';
-import { ML_PAGES } from '../../../../common/constants/locator';
-import { ListingPageUrlState } from '../../../../common/types/common';
-import { usePageUrlState } from '../../util/url_state';
-import { ExpandedRow } from './expanded_row';
-import { isPopulatedObject } from '../../../../common';
-import { timeFormatter } from '../../../../common/util/date_utils';
-import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import { useToastNotificationService } from '../../services/toast_notification_service';
+} from '../../../../common';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import { timeFormatter } from '../../../../../../../common/util/date_utils';
+import { isPopulatedObject } from '../../../../../../../common';
+import { ListingPageUrlState } from '../../../../../../../common/types/common';
+import { usePageUrlState } from '../../../../../util/url_state';
+import { BUILT_IN_MODEL_TAG } from '../../../../../../../common/constants/data_frame_analytics';
+import { useTableSettings } from '../analytics_list/use_table_settings';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -83,7 +87,7 @@ export const ModelsList: FC = () => {
   const urlLocator = useMlLocator()!;
 
   const [pageState, updatePageState] = usePageUrlState(
-    ML_PAGES.TRAINED_MODELS_MANAGE,
+    ML_PAGES.DATA_FRAME_ANALYTICS_MODELS_MANAGE,
     getDefaultModelsListState()
   );
 
@@ -92,9 +96,7 @@ export const ModelsList: FC = () => {
   const canDeleteDataFrameAnalytics = capabilities.ml.canDeleteDataFrameAnalytics as boolean;
 
   const trainedModelsApiService = useTrainedModelsApiService();
-
-  const { displayErrorToast, displayDangerToast, displaySuccessToast } =
-    useToastNotificationService();
+  const { toasts } = useNotifications();
 
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
@@ -131,7 +133,6 @@ export const ModelsList: FC = () => {
           ...(typeof model.inference_config === 'object'
             ? {
                 type: [
-                  model.model_type,
                   ...Object.keys(model.inference_config),
                   ...(isBuiltInModel(model) ? [BUILT_IN_MODEL_TYPE] : []),
                 ],
@@ -158,12 +159,11 @@ export const ModelsList: FC = () => {
         );
       }
     } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
+      toasts.addError(new Error(error.body?.message), {
+        title: i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
           defaultMessage: 'Models fetch failed',
-        })
-      );
+        }),
+      });
     }
     setIsLoading(false);
     refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
@@ -191,39 +191,23 @@ export const ModelsList: FC = () => {
    * Fetches models stats and update the original object
    */
   const fetchModelsStats = useCallback(async (models: ModelItem[]) => {
-    const { true: pytorchModels } = groupBy(models, (m) => m.model_type === 'pytorch');
+    const modelIdsToFetch = models.map((model) => model.model_id);
 
     try {
-      if (models) {
-        const { trained_model_stats: modelsStatsResponse } =
-          await trainedModelsApiService.getTrainedModelStats(models.map((m) => m.model_id));
+      const { trained_model_stats: modelsStatsResponse } =
+        await trainedModelsApiService.getTrainedModelStats(modelIdsToFetch);
 
-        for (const { model_id: id, ...stats } of modelsStatsResponse) {
-          const model = models.find((m) => m.model_id === id);
-          model!.stats = stats;
-        }
+      for (const { model_id: id, ...stats } of modelsStatsResponse) {
+        const model = models.find((m) => m.model_id === id);
+        model!.stats = stats;
       }
-
-      if (pytorchModels) {
-        const { deployment_stats: deploymentStatsResponse } =
-          await trainedModelsApiService.getTrainedModelDeploymentStats(
-            pytorchModels.map((m) => m.model_id)
-          );
-
-        for (const { model_id: id, ...stats } of deploymentStatsResponse) {
-          const model = models.find((m) => m.model_id === id);
-          model!.stats!.deployment_stats = stats;
-        }
-      }
-
       return true;
     } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
+      toasts.addError(new Error(error.body.message), {
+        title: i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
           defaultMessage: 'Fetch model stats failed',
-        })
-      );
+        }),
+      });
     }
   }, []);
 
@@ -236,7 +220,6 @@ export const ModelsList: FC = () => {
       if (type) {
         acc.add(type);
       }
-      acc.add(item.model_type);
       return acc;
     }, new Set<string>());
     return [...result].map((v) => ({
@@ -250,7 +233,7 @@ export const ModelsList: FC = () => {
     if (await fetchModelsStats(models)) {
       setModelsToDelete(models as ModelItemFull[]);
     } else {
-      displayDangerToast(
+      toasts.addDanger(
         i18n.translate('xpack.ml.trainedModels.modelsList.unableToDeleteModelsErrorMessage', {
           defaultMessage: 'Unable to delete models',
         })
@@ -273,7 +256,7 @@ export const ModelsList: FC = () => {
           (model) => !modelsToDelete.some((toDelete) => toDelete.model_id === model.model_id)
         )
       );
-      displaySuccessToast(
+      toasts.addSuccess(
         i18n.translate('xpack.ml.trainedModels.modelsList.successfullyDeletedMessage', {
           defaultMessage:
             '{modelsCount, plural, one {Model {modelsToDeleteIds}} other {# models}} {modelsCount, plural, one {has} other {have}} been successfully deleted',
@@ -284,15 +267,14 @@ export const ModelsList: FC = () => {
         })
       );
     } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
+      toasts.addError(new Error(error?.body?.message), {
+        title: i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
           defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
           values: {
             modelsCount: modelsToDeleteIds.length,
           },
-        })
-      );
+        }),
+      });
     }
   }
 
@@ -352,77 +334,6 @@ export const ModelsList: FC = () => {
         });
 
         await navigateToPath(path, false);
-      },
-    },
-    {
-      name: i18n.translate('xpack.ml.inference.modelsList.startModelAllocationActionLabel', {
-        defaultMessage: 'Start allocation',
-      }),
-      description: i18n.translate('xpack.ml.inference.modelsList.startModelAllocationActionLabel', {
-        defaultMessage: 'Start allocation',
-      }),
-      icon: 'download',
-      type: 'icon',
-      isPrimary: true,
-      available: (item) => item.model_type === 'pytorch',
-      onClick: async (item) => {
-        try {
-          await trainedModelsApiService.startModelAllocation(item.model_id);
-          displaySuccessToast(
-            i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
-              defaultMessage: 'Deployment for "{modelId}" has been started successfully.',
-              values: {
-                modelId: item.model_id,
-              },
-            })
-          );
-        } catch (e) {
-          displayErrorToast(
-            e,
-            i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
-              defaultMessage: 'Failed to start "{modelId}"',
-              values: {
-                modelId: item.model_id,
-              },
-            })
-          );
-        }
-      },
-    },
-    {
-      name: i18n.translate('xpack.ml.inference.modelsList.stopModelAllocationActionLabel', {
-        defaultMessage: 'Stop allocation',
-      }),
-      description: i18n.translate('xpack.ml.inference.modelsList.stopModelAllocationActionLabel', {
-        defaultMessage: 'Stop allocation',
-      }),
-      icon: 'stop',
-      type: 'icon',
-      isPrimary: true,
-      available: (item) => item.model_type === 'pytorch',
-      enabled: (item) => !isPopulatedObject(item.pipelines),
-      onClick: async (item) => {
-        try {
-          await trainedModelsApiService.stopModelAllocation(item.model_id);
-          displaySuccessToast(
-            i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
-              defaultMessage: 'Deployment for "{modelId}" has been stopped successfully.',
-              values: {
-                modelId: item.model_id,
-              },
-            })
-          );
-        } catch (e) {
-          displayErrorToast(
-            e,
-            i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
-              defaultMessage: 'Failed to stop "{modelId}"',
-              values: {
-                modelId: item.model_id,
-              },
-            })
-          );
-        }
       },
     },
     {
@@ -488,7 +399,7 @@ export const ModelsList: FC = () => {
         defaultMessage: 'ID',
       }),
       sortable: true,
-      truncateText: false,
+      truncateText: true,
       'data-test-subj': 'mlModelsTableColumnId',
     },
     {
@@ -498,7 +409,7 @@ export const ModelsList: FC = () => {
         defaultMessage: 'Description',
       }),
       sortable: false,
-      truncateText: false,
+      truncateText: true,
       'data-test-subj': 'mlModelsTableColumnDescription',
     },
     {

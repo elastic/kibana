@@ -380,27 +380,6 @@ export function getMlClient(
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
       return mlClient.getTrainedModelsStats(...p);
     },
-    // TODO update when the new elasticsearch-js client is available
-    async getTrainedModelsDeploymentStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
-      return client.asCurrentUser.transport.request({
-        method: 'GET',
-        path: `/_ml/trained_models/${p[0]?.model_id ?? '*'}/deployment/_stats`,
-      });
-    },
-    // TODO update when the new elasticsearch-js client is available
-    async startTrainedModelDeployment(...p: Parameters<MlClient['deleteTrainedModel']>) {
-      return client.asCurrentUser.transport.request({
-        method: 'POST',
-        path: `/_ml/trained_models/${p[0].model_id}/deployment/_start`,
-      });
-    },
-    // TODO update when the new elasticsearch-js client is available
-    async stopTrainedModelDeployment(...p: Parameters<MlClient['deleteTrainedModel']>) {
-      return client.asCurrentUser.transport.request({
-        method: 'POST',
-        path: `/_ml/trained_models/${p[0].model_id}/deployment/_stop`,
-      });
-    },
     async info(...p: Parameters<MlClient['info']>) {
       return mlClient.info(...p);
     },
