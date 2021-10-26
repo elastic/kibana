@@ -279,9 +279,6 @@ test('throws an error when connector is invalid', async () => {
     name: 'Test',
     minimumLicenseRequired: 'basic',
     validate: {
-      config: schema.object({
-        param1: schema.string(),
-      }),
       connector: () => {
         return 'error';
       },
@@ -311,7 +308,7 @@ test('throws an error when connector is invalid', async () => {
     actionId: '1',
     status: 'error',
     retry: false,
-    message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
+    message: `error validating action type connector: error`,
   });
 });
 

@@ -149,12 +149,12 @@ export class ActionExecutor {
         let validatedSecrets: Record<string, unknown>;
         try {
           validatedParams = validateParams(actionType, params);
-          validatedConfig = validateConfig(actionType, config as Record<string, unknown>);
-          validatedSecrets = validateSecrets(actionType, secrets as Record<string, unknown>);
+          validatedConfig = validateConfig(actionType, config);
+          validatedSecrets = validateSecrets(actionType, secrets);
           if (actionType.validate?.connector) {
             validateConnector(actionType, {
-              config: config as Record<string, unknown>,
-              secrets: secrets as Record<string, unknown>,
+              config,
+              secrets,
             });
           }
         } catch (err) {
