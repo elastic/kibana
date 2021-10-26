@@ -134,7 +134,23 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
     {
       name: 'ft_all_space_ml_none',
       elasticsearch: { cluster: [], indices: [], run_as: [] },
-      kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['*'] }],
+      kibana: [
+        {
+          base: [],
+          // This role is intended to be used by the "ft_ml_poweruser" and "ft_ml_viewer" users; they should have access to ML by virtue of
+          // the "machine_learning_admin" and "machine_learning_user" roles. However, a user needs _at least_ one Kibana privilege to log
+          // into Kibana. This role allows these users to log in, but explicitly omits ML from the feature privileges.
+          // In addition: several functional tests that use these users also rely on UI elements that are enabled by other Kibana features,
+          // such as "View in Lens", "Add to Dashboard", and creating anomaly detection rules. These feature privileges are the minimal ones
+          // necessary to satisfy all of those functional tests.
+          feature: {
+            visualize: ['read'],
+            dashboard: ['all'],
+            actions: ['all'],
+          },
+          spaces: ['*'],
+        },
+      ],
     },
   ];
 
