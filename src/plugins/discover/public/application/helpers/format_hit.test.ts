@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { indexPatternMock as dataViewMock } from '../../__mocks__/index_pattern';
 import { formatHit } from './format_hit';
 import { discoverServiceMock } from '../../__mocks__/services';
