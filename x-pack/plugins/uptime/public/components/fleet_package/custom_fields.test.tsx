@@ -50,8 +50,7 @@ const defaultValidation = centralValidation[DataStream.HTTP];
 const defaultHTTPConfig = defaultConfig[DataStream.HTTP];
 const defaultTCPConfig = defaultConfig[DataStream.TCP];
 
-// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-describe.skip('<CustomFields />', () => {
+describe('<CustomFields />', () => {
   const WrappedComponent = ({
     validate = defaultValidation,
     isEditable = false,
