@@ -12,11 +12,5 @@ export function formatTrainedModelsManagementUrl(
   appBasePath: string,
   mlUrlGeneratorState: TrainedModelsUrlState['pageState']
 ): string {
-  const url = `${appBasePath}/${ML_PAGES.TRAINED_MODELS_MANAGE}`;
-
-  // if (mlUrlGeneratorState) {
-  //   const { modelId } = mlUrlGeneratorState;
-  // }
-
-  return url;
+  return `${appBasePath}/${ML_PAGES.TRAINED_MODELS_MANAGE}`;
 }
