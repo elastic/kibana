@@ -53,9 +53,9 @@ export const getNodeInfo = async (
   const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
   const timestampField = sourceConfiguration.fields.timestamp;
   const params = {
-    allowNoIndices: true,
-    ignoreUnavailable: true,
-    terminateAfter: 1,
+    allow_no_indices: true,
+    ignore_unavailable: true,
+    terminate_after: 1,
     index: sourceConfiguration.metricAlias,
     body: {
       size: 1,

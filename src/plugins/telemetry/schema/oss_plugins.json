@@ -5018,7 +5018,7 @@
             }
           }
         },
-        "securitySolution": {
+        "securitySolutionUI": {
           "properties": {
             "appId": {
               "type": "keyword",
@@ -7684,6 +7684,12 @@
           }
         },
         "labs:dashboard:deferBelowFold": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "discover:showFieldStatistics": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
