@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { LegacyUrlAlias } from 'src/core/server/saved_objects/object_types';
 import { SPACES } from '../lib/spaces';
 import { getUrlPrefix } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
@@ -44,7 +44,7 @@ const getTestTitle = ({ targetSpace, targetType, sourceId }: DisableLegacyUrlAli
 };
 
 export function disableLegacyUrlAliasesTestSuiteFactory(
-  es: KibanaClient,
+  es: Client,
   esArchiver: any,
   supertest: SuperTest<any>
 ) {
@@ -63,7 +63,7 @@ export function disableLegacyUrlAliasesTestSuiteFactory(
         index: '.kibana',
         id: `${LEGACY_URL_ALIAS_TYPE}:${targetSpace}:${targetType}:${sourceId}`,
       });
-      const doc = esResponse.body._source!;
+      const doc = esResponse._source!;
       expect(doc).not.to.be(undefined);
       expect(doc[LEGACY_URL_ALIAS_TYPE].disabled).to.be(statusCode === 204 ? true : undefined);
     };

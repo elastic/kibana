@@ -23,7 +23,7 @@ import {
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { getEndpointListPath } from '../../../common/routing';
 import { useAppUrl } from '../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
 
 export const PolicyDetails = React.memo(() => {
   // TODO: Remove this and related code when removing FF
@@ -62,7 +62,7 @@ export const PolicyDetails = React.memo(() => {
       ),
       backButtonUrl: getAppUrl({ path: endpointListPath }),
       onBackButtonNavigateTo: [
-        APP_ID,
+        APP_UI_ID,
         {
           path: endpointListPath,
         },
