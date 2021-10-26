@@ -9,6 +9,8 @@ import { ToolingLog } from '@kbn/dev-utils';
 import axios, { AxiosRequestConfig } from 'axios';
 import { ChildProcess, exec, spawn } from 'child_process';
 import { resolve } from 'path';
+import { hostname, networkInterfaces } from 'os';
+import { lookup } from 'dns';
 import { Manager } from './resource_manager';
 
 interface AgentManagerParams {
@@ -76,6 +78,13 @@ export class AgentManager extends Manager {
     const policy = apiKeys.list[1];
 
     this.log.info('Running the agent');
+
+    lookup(hostname(), (err: any, add: any) => {
+      this.log.info('addr: ' + add);
+    });
+
+    const nis = networkInterfaces();
+    this.log.info(nis);
 
     let ipAddress: string | undefined;
     await this.execute(
