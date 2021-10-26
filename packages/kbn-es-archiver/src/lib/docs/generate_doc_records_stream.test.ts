@@ -99,10 +99,8 @@ it('transforms each input index to a stream of docs using scrollSearch helper', 
         Array [
           Object {
             "_source": "true",
-            "body": Object {
-              "query": undefined,
-            },
             "index": "bar",
+            "query": undefined,
             "rest_total_hits_as_int": true,
             "scroll": "1m",
             "size": 1000,
@@ -116,10 +114,8 @@ it('transforms each input index to a stream of docs using scrollSearch helper', 
         Array [
           Object {
             "_source": "true",
-            "body": Object {
-              "query": undefined,
-            },
             "index": "foo",
+            "query": undefined,
             "rest_total_hits_as_int": true,
             "scroll": "1m",
             "size": 1000,

@@ -7,7 +7,11 @@
 
 import _ from 'lodash';
 import { FeatureCollection, Feature } from 'geojson';
-import { FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
+import { SOURCE_TYPES } from '../../../../common/constants';
+import { IVectorSource } from '../../sources/vector_source';
+
+export const GEOJSON_FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
+export const ES_MVT_FEATURE_ID_PROPERTY_NAME = '_id';
 
 let idCounter = 0;
 
@@ -43,7 +47,7 @@ export function assignFeatureIds(featureCollection: FeatureCollection): FeatureC
       geometry: feature.geometry, // do not copy geometry, this object can be massive
       properties: {
         // preserve feature id provided by source so features can be referenced across fetches
-        [FEATURE_ID_PROPERTY_NAME]: feature.id == null ? numericId : feature.id,
+        [GEOJSON_FEATURE_ID_PROPERTY_NAME]: feature.id == null ? numericId : feature.id,
         // create new object for properties so original is not polluted with kibana internal props
         ...feature.properties,
       },
@@ -55,4 +59,14 @@ export function assignFeatureIds(featureCollection: FeatureCollection): FeatureC
     type: 'FeatureCollection',
     features,
   };
+}
+
+export function getFeatureId(feature: Feature, source: IVectorSource): string | number | undefined {
+  if (!source.isMvt()) {
+    return feature.properties?.[GEOJSON_FEATURE_ID_PROPERTY_NAME];
+  }
+
+  return source.getType() === SOURCE_TYPES.ES_SEARCH
+    ? feature.properties?.[ES_MVT_FEATURE_ID_PROPERTY_NAME]
+    : feature.id;
 }
