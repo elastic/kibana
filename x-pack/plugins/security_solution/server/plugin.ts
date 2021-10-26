@@ -7,7 +7,7 @@
 
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { Logger, SavedObjectsClient } from '../../../../src/core/server';
 import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
@@ -107,6 +107,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
+  private kibanaIndex?: string;
 
   constructor(context: PluginInitializerContext) {
     this.pluginContext = context;
@@ -130,6 +131,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const { pluginContext, config, logger, appClientFactory } = this;
     const experimentalFeatures = config.experimentalFeatures;
+    this.kibanaIndex = core.savedObjects.getKibanaIndex();
 
     appClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
@@ -162,7 +164,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initUsageCollectors({
       core,
-      kibanaIndex: config.kibanaIndex,
+      kibanaIndex: core.savedObjects.getKibanaIndex(),
       signalsIndex: config.signalsIndex,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
@@ -175,6 +177,14 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
+
+    // rule options are used both to create and preview rules.
+    const ruleOptions: CreateRuleOptions = {
+      experimentalFeatures,
+      logger: this.logger,
+      ml: plugins.ml,
+      version: pluginContext.env.packageInfo.version,
+    };
 
     if (isRuleRegistryEnabled) {
       // NOTE: this is not used yet
@@ -203,14 +213,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         secondaryAlias: config.signalsIndex,
       });
 
-      // Register rule types via rule-registry
-      const createRuleOptions: CreateRuleOptions = {
-        experimentalFeatures,
-        logger,
-        ml: plugins.ml,
-        version: pluginContext.env.packageInfo.version,
-      };
-
       const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
         lists: plugins.lists,
         logger: this.logger,
@@ -219,17 +221,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         eventLogService,
       });
 
-      plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(createRuleOptions)));
+      plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
       plugins.alerting.registerType(
-        securityRuleTypeWrapper(createIndicatorMatchAlertType(createRuleOptions))
+        securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
       );
-      plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(createRuleOptions)));
-      plugins.alerting.registerType(
-        securityRuleTypeWrapper(createQueryAlertType(createRuleOptions))
-      );
-      plugins.alerting.registerType(
-        securityRuleTypeWrapper(createThresholdAlertType(createRuleOptions))
-      );
+      plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
+      plugins.alerting.registerType(securityRuleTypeWrapper(createQueryAlertType(ruleOptions)));
+      plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
     }
 
     // TODO We need to get the endpoint routes inside of initRoutes
@@ -238,9 +236,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       config,
       plugins.encryptedSavedObjects?.canEncrypt === true,
       plugins.security,
+      this.telemetryEventsSender,
       plugins.ml,
       logger,
-      isRuleRegistryEnabled
+      isRuleRegistryEnabled,
+      ruleOptions
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
@@ -414,7 +414,8 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryReceiver.start(
       core,
-      config.kibanaIndex,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.kibanaIndex!,
       this.endpointAppContextService,
       exceptionListClient
     );

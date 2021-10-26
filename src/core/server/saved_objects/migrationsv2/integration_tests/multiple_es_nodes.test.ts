@@ -67,7 +67,6 @@ function createRoot({ logFileName, hosts }: RootConfig) {
     },
     migrations: {
       skip: false,
-      enableV2: true,
       batchSize: 100, // fixture contains 5000 docs
     },
     logging: {
@@ -180,7 +179,7 @@ describe('migration v2', () => {
     });
 
     await root.start();
-    const esClient = esServer.es.getClient();
+    const esClient = esServer.es.getKibanaEsClient();
 
     const migratedFooDocs = await fetchDocs(esClient, migratedIndex, 'foo');
     expect(migratedFooDocs.length).toBe(2500);

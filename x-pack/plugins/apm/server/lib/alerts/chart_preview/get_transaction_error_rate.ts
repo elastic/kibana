@@ -13,10 +13,10 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
   getSearchAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../../helpers/transactions';
 import { Setup } from '../../helpers/setup_request';
 import {
   calculateFailedTransactionRate,
@@ -45,11 +45,7 @@ export async function getTransactionErrorRateChartPreview({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -62,7 +58,7 @@ export async function getTransactionErrorRateChartPreview({
               : []),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
-            ...getDocumentTypeFilterForAggregatedTransactions(
+            ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
           ],

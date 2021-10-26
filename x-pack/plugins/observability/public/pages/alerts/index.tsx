@@ -5,24 +5,29 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertWorkflowStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
+import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { RouteParams } from '../../routes';
+import { useTimefilterService } from '../../hooks/use_timefilter_service';
 import { callObservabilityApi } from '../../services/call_observability_api';
+import { getNoDataConfig } from '../../utils/no_data_config';
+import { LoadingObservability } from '../overview/loading_observability';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
+import { Provider, alertsPageStateContainer, useAlertsPageStateContainer } from './state_container';
 import './styles.scss';
 import { WorkflowStatusFilter } from './workflow_status_filter';
+import { AlertsDisclaimer } from './alerts_disclaimer';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -32,18 +37,24 @@ export interface TopAlert {
   active: boolean;
 }
 
-interface AlertsPageProps {
-  routeParams: RouteParams<'/alerts'>;
-}
+const NO_INDEX_NAMES: string[] = [];
+const NO_INDEX_PATTERNS: IndexPatternBase[] = [];
 
-export function AlertsPage({ routeParams }: AlertsPageProps) {
+function AlertsPage() {
   const { core, plugins, ObservabilityPageTemplate } = usePluginContext();
   const { prepend } = core.http.basePath;
-  const history = useHistory();
   const refetch = useRef<() => void>();
+  const timefilterService = useTimefilterService();
   const {
-    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', workflowStatus = 'open' },
-  } = routeParams;
+    rangeFrom,
+    setRangeFrom,
+    rangeTo,
+    setRangeTo,
+    kuery,
+    setKuery,
+    workflowStatus,
+    setWorkflowStatus,
+  } = useAlertsPageStateContainer();
 
   useBreadcrumbs([
     {
@@ -94,14 +105,9 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
 
   const setWorkflowStatusFilter = useCallback(
     (value: AlertWorkflowStatus) => {
-      const nextSearchParams = new URLSearchParams(history.location.search);
-      nextSearchParams.set('workflowStatus', value);
-      history.push({
-        ...history.location,
-        search: nextSearchParams.toString(),
-      });
+      setWorkflowStatus(value);
     },
-    [history]
+    [setWorkflowStatus]
   );
 
   const onQueryChange = useCallback(
@@ -109,18 +115,13 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
       if (rangeFrom === dateRange.from && rangeTo === dateRange.to && kuery === (query ?? '')) {
         return refetch.current && refetch.current();
       }
-      const nextSearchParams = new URLSearchParams(history.location.search);
 
-      nextSearchParams.set('rangeFrom', dateRange.from);
-      nextSearchParams.set('rangeTo', dateRange.to);
-      nextSearchParams.set('kuery', query ?? '');
-
-      history.push({
-        ...history.location,
-        search: nextSearchParams.toString(),
-      });
+      timefilterService.setTime(dateRange);
+      setRangeFrom(dateRange.from);
+      setRangeTo(dateRange.to);
+      setKuery(query);
     },
-    [history, rangeFrom, rangeTo, kuery]
+    [rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, timefilterService]
   );
 
   const addToQuery = useCallback(
@@ -141,8 +142,25 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     refetch.current = ref;
   }, []);
 
+  const { hasAnyData, isAllRequestsComplete } = useHasData();
+
+  // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
+  const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
+
+  if (!hasAnyData && !isAllRequestsComplete) {
+    return <LoadingObservability />;
+  }
+
+  const noDataConfig = getNoDataConfig({
+    hasData,
+    basePath: core.http.basePath,
+    docsLink: core.docLinks.links.observability.guide,
+  });
+
   return (
     <ObservabilityPageTemplate
+      noDataConfig={noDataConfig}
+      data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       pageHeader={{
         pageTitle: (
           <>
@@ -161,25 +179,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
-              defaultMessage: 'Experimental',
-            })}
-            color="warning"
-            iconType="beaker"
-          >
-            <p>
-              {i18n.translate('xpack.observability.alertsDisclaimerText', {
-                defaultMessage:
-                  'This page shows an experimental list of alerts. The data might not be accurate. All alerts are available in the ',
-              })}
-              <EuiLink href={prepend('/app/management/insightsAndAlerting/triggersActions/alerts')}>
-                {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
-                  defaultMessage: 'Rules and Connectors settings.',
-                })}
-              </EuiLink>
-            </p>
-          </EuiCallOut>
+          <AlertsDisclaimer />
         </EuiFlexItem>
         <EuiFlexItem>
           <AlertsSearchBar
@@ -215,5 +215,12 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   );
 }
 
-const NO_INDEX_NAMES: string[] = [];
-const NO_INDEX_PATTERNS: IndexPatternBase[] = [];
+function WrappedAlertsPage() {
+  return (
+    <Provider value={alertsPageStateContainer}>
+      <AlertsPage />
+    </Provider>
+  );
+}
+
+export { WrappedAlertsPage as AlertsPage };

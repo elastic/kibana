@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/apm-generator';
+import { service, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { first, isEmpty, last, meanBy } from 'lodash';
 import moment from 'moment';
@@ -20,7 +20,7 @@ type TransactionsGroupsDetailedStatistics =
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
-  const traceData = getService('traceData');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -87,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const transactionName = 'GET /api/product/list';
 
-        await traceData.index([
+        await synthtraceEsClient.index([
           ...timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
@@ -113,7 +113,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => traceData.clean());
+      after(() => synthtraceEsClient.clean());
 
       describe('without comparisons', () => {
         let transactionsStatistics: TransactionsGroupsDetailedStatistics;
