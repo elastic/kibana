@@ -38,6 +38,22 @@ describe('CTI Link Panel', () => {
   describe('enabled threat intel module', () => {
     before(() => {
       esArchiverLoad('threat_indicator');
+      cy.intercept('GET', '/api/fleet/epm/packages', {
+        response: [
+          {
+            name: 'ti_abusech',
+            title: 'AbuseCH',
+            id: 'ti_abusech',
+            status: 'installed',
+          },
+          {
+            name: 'ti_anomali',
+            title: 'Anomali',
+            id: 'ti_anomali',
+            status: 'not_installed',
+          },
+        ],
+      }).as('fetchIntegrations');
     });
 
     after(() => {
@@ -55,9 +71,12 @@ describe('CTI Link Panel', () => {
 
     it('renders dashboard module as expected when there are events in the selected time period', () => {
       loginAndWaitForPage(OVERVIEW_URL);
+      cy.wait('@fetchIntegrations');
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('not.exist');
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should('exist');
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON}`).should('exist');
+      cy.get(OVERVIEW_CTI_LINKS).should('not.contain.text', 'Anomali');
+      cy.get(OVERVIEW_CTI_LINKS).should('contain.text', 'AbuseCH');
       cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 indicator');
     });
   });
