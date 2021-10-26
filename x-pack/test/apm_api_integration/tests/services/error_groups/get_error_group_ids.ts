@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { take } from 'lodash';
-import { ApmApiSupertest } from '../../common/apm_api_supertest';
+import { ApmApiSupertest } from '../../../common/apm_api_supertest';
 
 export async function getErrorGroupIds({
   apmApiSupertest,

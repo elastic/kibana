@@ -8,11 +8,11 @@
 import url from 'url';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { createApmApiClient } from '../../common/apm_api_supertest';
+import archives_metadata from '../../../common/fixtures/es_archiver/archives_metadata';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { registry } from '../../../common/registry';
+import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { createApmApiClient } from '../../../common/apm_api_supertest';
 import { getErrorGroupIds } from './get_error_group_ids';
 
 type ErrorGroupsDetailedStatistics =

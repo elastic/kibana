@@ -10,10 +10,11 @@ import moment from 'moment';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { RecursivePartial } from '../../../../plugins/apm/typings/common';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
+} from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { RecursivePartial } from '../../../../../plugins/apm/typings/common';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { registry } from '../../../common/registry';
+import { generateData, config } from './generate_data';
 
 type ErrorGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
@@ -65,68 +66,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: ['apm_8.0.0_empty'] },
     () => {
       describe('when data is loaded', () => {
-        const GO_PROD_LIST_RATE = 75;
-        const GO_PROD_LIST_ERROR_RATE = 25;
-        const GO_PROD_ID_RATE = 50;
-        const GO_PROD_ID_ERROR_RATE = 50;
-        const ERROR_NAME_1 = 'Error test 1';
-        const ERROR_NAME_2 = 'Error test 2';
+        const { GO_PROD_LIST_ERROR_RATE, GO_PROD_ID_ERROR_RATE, ERROR_NAME_1, ERROR_NAME_2 } =
+          config;
+
         before(async () => {
-          const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
-            'instance-a'
-          );
-
-          const transactionNameProductList = 'GET /api/product/list';
-          const transactionNameProductId = 'GET /api/product/:id';
-
-          await synthtraceEsClient.index([
-            ...timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_LIST_RATE)
-              .flatMap((timestamp) =>
-                serviceGoProdInstance
-                  .transaction(transactionNameProductList)
-                  .timestamp(timestamp)
-                  .duration(1000)
-                  .success()
-                  .serialize()
-              ),
-            ...timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_LIST_ERROR_RATE)
-              .flatMap((timestamp) =>
-                serviceGoProdInstance
-                  .transaction(transactionNameProductList)
-                  .errors(serviceGoProdInstance.error(ERROR_NAME_1, 'foo').timestamp(timestamp))
-                  .duration(1000)
-                  .timestamp(timestamp)
-                  .failure()
-                  .serialize()
-              ),
-            ...timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_ID_RATE)
-              .flatMap((timestamp) =>
-                serviceGoProdInstance
-                  .transaction(transactionNameProductId)
-                  .timestamp(timestamp)
-                  .duration(1000)
-                  .success()
-                  .serialize()
-              ),
-            ...timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_ID_ERROR_RATE)
-              .flatMap((timestamp) =>
-                serviceGoProdInstance
-                  .transaction(transactionNameProductId)
-                  .errors(serviceGoProdInstance.error(ERROR_NAME_2, 'bar').timestamp(timestamp))
-                  .duration(1000)
-                  .timestamp(timestamp)
-                  .failure()
-                  .serialize()
-              ),
-          ]);
+          await generateData({ serviceName, start, end, synthtraceEsClient });
         });
 
         after(() => synthtraceEsClient.clean());
