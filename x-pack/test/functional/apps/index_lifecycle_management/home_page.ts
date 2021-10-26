@@ -20,7 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Home page', function () {
     before(async () => {
       await esClient.snapshot.createRepository({
-        repository: repoName,
+        name: repoName,
         body: {
           type: 'fs',
           settings: {
@@ -33,7 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
     });
     after(async () => {
-      await esClient.snapshot.deleteRepository({ repository: repoName });
+      await esClient.snapshot.deleteRepository({ name: repoName });
       await esClient.ilm.deleteLifecycle({ name: policyName });
     });
 

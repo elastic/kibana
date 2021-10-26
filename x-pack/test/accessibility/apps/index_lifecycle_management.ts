@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Index Lifecycle Management', async () => {
     before(async () => {
       await esClient.snapshot.createRepository({
-        repository: REPO_NAME,
+        name: REPO_NAME,
         body: {
           type: 'fs',
           settings: {
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await esClient.snapshot.deleteRepository({
-        repository: REPO_NAME,
+        name: REPO_NAME,
       });
       await esClient.ilm.deleteLifecycle({ name: POLICY_NAME });
       await esClient.indices.deleteIndexTemplate({ name: indexTemplateName });
