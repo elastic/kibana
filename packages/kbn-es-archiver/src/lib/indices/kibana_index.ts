@@ -8,7 +8,7 @@
 
 import { inspect } from 'util';
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { Stats } from '../stats';
@@ -23,7 +23,7 @@ export async function deleteKibanaIndices({
   stats,
   log,
 }: {
-  client: KibanaClient;
+  client: Client;
   stats: Stats;
   log: ToolingLog;
 }) {
@@ -35,7 +35,7 @@ export async function deleteKibanaIndices({
   await client.indices.putSettings(
     {
       index: indexNames,
-      body: { settings: { blocks: { read_only: false } } },
+      body: { blocks: { read_only: false } },
     },
     {
       headers: ES_CLIENT_HEADERS,
@@ -75,7 +75,7 @@ function isKibanaIndex(index?: string): index is string {
   );
 }
 
-async function fetchKibanaIndices(client: KibanaClient) {
+async function fetchKibanaIndices(client: Client) {
   const resp = await client.cat.indices(
     { index: '.kibana*', format: 'json' },
     {
@@ -83,11 +83,11 @@ async function fetchKibanaIndices(client: KibanaClient) {
     }
   );
 
-  if (!Array.isArray(resp.body)) {
-    throw new Error(`expected response to be an array ${inspect(resp.body)}`);
+  if (!Array.isArray(resp)) {
+    throw new Error(`expected response to be an array ${inspect(resp)}`);
   }
 
-  return resp.body.map((x: { index?: string }) => x.index).filter(isKibanaIndex);
+  return resp.map((x: { index?: string }) => x.index).filter(isKibanaIndex);
 }
 
 const delay = (delayInMs: number) => new Promise((resolve) => setTimeout(resolve, delayInMs));
@@ -97,7 +97,7 @@ export async function cleanKibanaIndices({
   stats,
   log,
 }: {
-  client: KibanaClient;
+  client: Client;
   stats: Stats;
   log: ToolingLog;
 }) {
@@ -123,11 +123,11 @@ export async function cleanKibanaIndices({
       }
     );
 
-    if (resp.body.total !== resp.body.deleted) {
+    if (resp.total !== resp.deleted) {
       log.warning(
         'delete by query deleted %d of %d total documents, trying again',
-        resp.body.deleted,
-        resp.body.total
+        resp.deleted,
+        resp.total
       );
       await delay(200);
       continue;
@@ -144,13 +144,7 @@ export async function cleanKibanaIndices({
   stats.deletedIndex('.kibana');
 }
 
-export async function createDefaultSpace({
-  index,
-  client,
-}: {
-  index: string;
-  client: KibanaClient;
-}) {
+export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {
   await client.create(
     {
       index,

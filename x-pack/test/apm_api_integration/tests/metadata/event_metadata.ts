@@ -32,7 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       },
     });
 
-    return response.body.hits.hits[0]._source![processorEvent].id;
+    return response.hits.hits[0]._source![processorEvent].id;
   }
 
   registry.when('Event metadata', { config: 'basic', archives: ['apm_8.0.0'] }, () => {

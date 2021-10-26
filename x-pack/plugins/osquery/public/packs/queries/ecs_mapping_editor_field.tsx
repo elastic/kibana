@@ -93,6 +93,7 @@ const StyledFieldSpan = styled.span`
 // align the icon to the inputs
 const StyledButtonWrapper = styled.div`
   margin-top: 11px;
+  width: 24px;
 `;
 
 const ECSFieldWrapper = styled(EuiFlexItem)`
@@ -477,11 +478,18 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
     );
 
     useEffect(() => {
+      if (onAdd && !deepEqual(formData, currentFormData.current)) {
+        currentFormData.current = formData;
+        handleSubmit();
+      }
+    }, [handleSubmit, formData, onAdd]);
+
+    useEffect(() => {
       if (onChange && !deepEqual(formData, currentFormData.current)) {
         currentFormData.current = formData;
         onChange(formData);
       }
-    }, [defaultValue, formData, onChange]);
+    }, [defaultValue, formData, handleDeleteClick, onChange]);
 
     useEffect(() => {
       if (defaultValue) {
@@ -497,18 +505,15 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
             <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
               <EuiFlexItem>
                 <CommonUseField
-                  path="value.field"
-                  component={OsqueryColumnField}
+                  path="key"
+                  component={ECSComboboxField}
                   // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  euiFieldProps={{
-                    options: osquerySchemaOptions,
-                    isDisabled,
-                  }}
+                  euiFieldProps={{ isDisabled }}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <StyledButtonWrapper>
-                  <EuiIcon type="arrowRight" />
+                  <EuiIcon type="arrowLeft" />
                 </StyledButtonWrapper>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -517,16 +522,19 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
             <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
               <ECSFieldWrapper>
                 <CommonUseField
-                  path="key"
-                  component={ECSComboboxField}
+                  path="value.field"
+                  component={OsqueryColumnField}
                   // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  euiFieldProps={{ isDisabled }}
+                  euiFieldProps={{
+                    options: osquerySchemaOptions,
+                    isDisabled,
+                  }}
                 />
               </ECSFieldWrapper>
               {!isDisabled && (
                 <EuiFlexItem grow={false}>
                   <StyledButtonWrapper>
-                    {defaultValue ? (
+                    {defaultValue && (
                       <EuiButtonIcon
                         aria-label={i18n.translate(
                           'xpack.osquery.pack.queryFlyoutForm.deleteECSMappingRowButtonAriaLabel',
@@ -537,18 +545,6 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
                         iconType="trash"
                         color="danger"
                         onClick={handleDeleteClick}
-                      />
-                    ) : (
-                      <EuiButtonIcon
-                        aria-label={i18n.translate(
-                          'xpack.osquery.pack.queryFlyoutForm.addECSMappingRowButtonAriaLabel',
-                          {
-                            defaultMessage: 'Add ECS mapping row',
-                          }
-                        )}
-                        iconType="plus"
-                        color="primary"
-                        onClick={handleSubmit}
                       />
                     )}
                   </StyledButtonWrapper>
@@ -873,16 +869,16 @@ export const ECSMappingEditorField = ({
         <EuiFlexItem>
           <EuiFormLabel>
             <FormattedMessage
-              id="xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldLabel"
-              defaultMessage="Osquery result"
+              id="xpack.osquery.pack.queryFlyoutForm.ecsFieldLabel"
+              defaultMessage="ECS field"
             />
           </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormLabel>
             <FormattedMessage
-              id="xpack.osquery.pack.queryFlyoutForm.ecsFieldLabel"
-              defaultMessage="ECS field"
+              id="xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldLabel"
+              defaultMessage="Osquery result"
             />
           </EuiFormLabel>
         </EuiFlexItem>

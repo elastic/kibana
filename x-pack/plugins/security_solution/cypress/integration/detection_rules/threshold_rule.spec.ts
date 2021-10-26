@@ -99,7 +99,7 @@ describe('Detection rules, threshold', () => {
     waitForAlertsIndexToBeCreated();
   });
 
-  it('Creates and activates a new threshold rule', () => {
+  it.skip('Creates and activates a new threshold rule', () => {
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
     goToCreateNewRule();
