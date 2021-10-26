@@ -15,7 +15,6 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
-  EuiButtonIcon,
   EuiLink,
 } from '@elastic/eui';
 
