@@ -33,7 +33,7 @@ import { Ransomware } from './ransomware';
 
 export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
   rule?: Exclude<RuleEcs, 'id'> & { uuid: string };
-  building_block_type?: string;
+  building_block_type?: string[];
   workflow_status?: string[];
 };
 export interface Ecs {
