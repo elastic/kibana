@@ -74,7 +74,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
           <EuiFlexItem>
             <EuiTitle size={titleSize}>
               <h4 data-test-subj="header-section-title">
-                {title}
+                <span className="eui-textBreakNormal">{title}</span>
                 {tooltip && (
                   <>
                     {' '}
