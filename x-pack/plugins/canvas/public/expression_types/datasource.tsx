@@ -24,7 +24,7 @@ type TemplateFn = (
   domNode: HTMLElement,
   config: DatasourceRenderProps,
   handlers: ExpressionFormHandlers,
-  onRef?: (ref: UpdatePropsRef | null) => void
+  onRef?: (ref: UpdatePropsRef<DatasourceRenderProps> | null) => void
 ) => void;
 
 export type DatasourceProps = {
@@ -51,7 +51,7 @@ interface DatasourceWrapperProps {
 
 const DatasourceWrapper: React.FunctionComponent<DatasourceWrapperProps> = (props) => {
   const domNodeRef = useRef<HTMLElement>();
-  const datasourceRef = useRef<UpdatePropsRef>();
+  const datasourceRef = useRef<UpdatePropsRef<DatasourceRenderProps>>();
 
   const { spec, datasourceProps, handlers } = props;
 
