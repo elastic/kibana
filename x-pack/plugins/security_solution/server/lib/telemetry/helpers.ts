@@ -108,6 +108,7 @@ export const trustedApplicationToTelemetryEntry = (trustedApplication: TrustedAp
     updated_at: trustedApplication.updated_at,
     entries: trustedApplication.entries,
     os_types: [trustedApplication.os],
+    scope: trustedApplication.effectScope,
   } as ExceptionListItem;
 };
 

@@ -11,7 +11,7 @@ import React, { useEffect, useMemo, useCallback } from 'react';
 import uuid from 'uuid';
 
 import { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
@@ -97,7 +97,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   const goToHostEvents = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.events, urlSearch),
       });

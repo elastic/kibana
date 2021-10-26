@@ -10,7 +10,7 @@ import React, { useEffect, useMemo, useCallback } from 'react';
 import { Position } from '@elastic/charts';
 
 import { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/alerts_viewer/translations';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
@@ -64,7 +64,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   const goToHostAlerts = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.alerts, urlSearch),
       });

@@ -37,17 +37,17 @@ import { SOLUTION_NAME } from './common/translations';
 
 import {
   APP_ID,
-  OVERVIEW_PATH,
-  APP_OVERVIEW_PATH,
+  APP_UI_ID,
   APP_PATH,
   DEFAULT_INDEX_KEY,
   APP_ICON_SOLUTION,
   DETECTION_ENGINE_INDEX_URL,
+  SERVER_APP_ID,
   SOURCERER_API_URL,
 } from '../common/constants';
 
-import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
-import { manageOldSiemRoutes } from './helpers';
+import { getDeepLinks } from './app/deep_links';
+import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
 import { SecuritySolutionUiConfigType } from './common/types';
@@ -96,7 +96,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       {
         usageCollection: plugins.usageCollection,
       },
-      APP_ID
+      APP_UI_ID
     );
 
     if (plugins.home) {
@@ -108,7 +108,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             'Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.',
         }),
         icon: 'logoSecurity',
-        path: APP_OVERVIEW_PATH,
+        path: APP_PATH,
         order: 300,
       });
     }
@@ -131,13 +131,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     })();
 
     core.application.register({
-      id: APP_ID,
+      id: APP_UI_ID,
       title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       navLinkStatus: AppNavLinkStatus.hidden,
       searchable: true,
-      defaultPath: OVERVIEW_PATH,
       updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
       deepLinks: getDeepLinks(this.experimentalFeatures),
@@ -150,7 +149,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           services: await startServices,
           store: await this.store(coreStart, startPlugins, subPlugins),
           usageCollection: plugins.usageCollection,
-          subPlugins,
+          subPluginRoutes: getSubPluginRoutesByCapabilities(
+            subPlugins,
+            coreStart.application.capabilities
+          ),
         });
       },
     });
@@ -230,11 +232,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       });
     } else {
-      updateGlobalNavigation({
-        capabilities: core.application.capabilities,
-        updater$: this.appUpdater$,
-        enableExperimental: this.experimentalFeatures,
-      });
+      this.appUpdater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+        deepLinks: getDeepLinks(
+          this.experimentalFeatures,
+          undefined,
+          core.application.capabilities
+        ),
+      }));
     }
 
     return {};
@@ -311,9 +316,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return {
       overview: subPlugins.overview.start(),
       alerts: subPlugins.alerts.start(storage),
+      cases: subPlugins.cases.start(),
       rules: subPlugins.rules.start(storage),
       exceptions: subPlugins.exceptions.start(storage),
-      cases: subPlugins.cases.start(),
       hosts: subPlugins.hosts.start(storage),
       network: subPlugins.network.start(storage),
       ueba: subPlugins.ueba.start(storage),
@@ -340,9 +345,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         //   }
         // );
         // signal = { name: indexName[0] };
-        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-          method: 'GET',
-        });
+        if (coreStart.application.capabilities[SERVER_APP_ID].read === true) {
+          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+            method: 'GET',
+          });
+        }
       } catch {
         signal = { name: null };
       }
