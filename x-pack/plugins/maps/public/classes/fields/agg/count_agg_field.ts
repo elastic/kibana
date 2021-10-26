@@ -18,13 +18,11 @@ export class CountAggField implements IESAggField {
   protected readonly _source: IESAggSource;
   private readonly _origin: FIELD_ORIGIN;
   protected readonly _label?: string;
-  private readonly _canReadFromGeoJson: boolean;
 
-  constructor({ label, source, origin, canReadFromGeoJson = true }: CountAggFieldParams) {
+  constructor({ label, source, origin }: CountAggFieldParams) {
     this._source = source;
     this._origin = origin;
     this._label = label;
-    this._canReadFromGeoJson = canReadFromGeoJson;
   }
 
   _getAggType(): AGG_TYPE {
@@ -79,7 +77,7 @@ export class CountAggField implements IESAggField {
     return null;
   }
 
-  supportsFieldMeta(): boolean {
+  supportsFieldMetaFromEs(): boolean {
     return false;
   }
 
@@ -103,12 +101,8 @@ export class CountAggField implements IESAggField {
     return null;
   }
 
-  supportsAutoDomain(): boolean {
+  supportsFieldMetaFromLocalData(): boolean {
     return true;
-  }
-
-  canReadFromGeoJson(): boolean {
-    return this._canReadFromGeoJson;
   }
 
   isEqual(field: IESAggField) {

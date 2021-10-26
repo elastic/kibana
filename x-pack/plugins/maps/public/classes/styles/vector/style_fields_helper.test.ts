@@ -11,24 +11,30 @@ import { AbstractField, IField } from '../../fields/field';
 
 class MockField extends AbstractField {
   private readonly _dataType: string;
-  private readonly _supportsAutoDomain: boolean;
-  constructor({ dataType, supportsAutoDomain }: { dataType: string; supportsAutoDomain: boolean }) {
+  private readonly _supportsFieldMetaFromLocalData: boolean;
+  constructor({
+    dataType,
+    supportsFieldMetaFromLocalData,
+  }: {
+    dataType: string;
+    supportsFieldMetaFromLocalData: boolean;
+  }) {
     super({ fieldName: 'foobar_' + dataType, origin: FIELD_ORIGIN.SOURCE });
     this._dataType = dataType;
-    this._supportsAutoDomain = supportsAutoDomain;
+    this._supportsFieldMetaFromLocalData = supportsFieldMetaFromLocalData;
   }
   async getDataType() {
     return this._dataType;
   }
 
-  supportsAutoDomain(): boolean {
-    return this._supportsAutoDomain;
+  supportsFieldMetaFromLocalData(): boolean {
+    return this._supportsFieldMetaFromLocalData;
   }
 }
 
 describe('StyleFieldHelper', () => {
   describe('isFieldDataTypeCompatibleWithStyleType', () => {
-    async function createHelper(supportsAutoDomain: boolean): Promise<{
+    async function createHelper(supportsFieldMetaFromLocalData: boolean): Promise<{
       styleFieldHelper: StyleFieldsHelper;
       stringField: IField;
       numberField: IField;
@@ -36,15 +42,15 @@ describe('StyleFieldHelper', () => {
     }> {
       const stringField = new MockField({
         dataType: 'string',
-        supportsAutoDomain,
+        supportsFieldMetaFromLocalData,
       });
       const numberField = new MockField({
         dataType: 'number',
-        supportsAutoDomain,
+        supportsFieldMetaFromLocalData,
       });
       const dateField = new MockField({
         dataType: 'date',
-        supportsAutoDomain,
+        supportsFieldMetaFromLocalData,
       });
       return {
         styleFieldHelper: await createStyleFieldsHelper([stringField, numberField, dateField]),

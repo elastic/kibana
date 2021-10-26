@@ -38,7 +38,7 @@ export class AggField extends CountAggField {
     return this._source.isMvt() ? this.getName() + '.value' : this.getName();
   }
 
-  supportsFieldMeta(): boolean {
+  supportsFieldMetaFromEs(): boolean {
     // count and sum aggregations are not within field bounds so they do not support field meta.
     return !isMetricCountable(this._getAggType());
   }

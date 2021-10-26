@@ -17,25 +17,25 @@ const defaultParams = {
   origin: FIELD_ORIGIN.SOURCE,
 };
 
-describe('supportsFieldMeta', () => {
+describe('supportsFieldMetaFromEs', () => {
   test('Non-counting aggregations should support field meta', () => {
     const avgMetric = new AggField({ ...defaultParams, aggType: AGG_TYPE.AVG });
-    expect(avgMetric.supportsFieldMeta()).toBe(true);
+    expect(avgMetric.supportsFieldMetaFromEs()).toBe(true);
     const maxMetric = new AggField({ ...defaultParams, aggType: AGG_TYPE.MAX });
-    expect(maxMetric.supportsFieldMeta()).toBe(true);
+    expect(maxMetric.supportsFieldMetaFromEs()).toBe(true);
     const minMetric = new AggField({ ...defaultParams, aggType: AGG_TYPE.MIN });
-    expect(minMetric.supportsFieldMeta()).toBe(true);
+    expect(minMetric.supportsFieldMetaFromEs()).toBe(true);
     const termsMetric = new AggField({ ...defaultParams, aggType: AGG_TYPE.TERMS });
-    expect(termsMetric.supportsFieldMeta()).toBe(true);
+    expect(termsMetric.supportsFieldMetaFromEs()).toBe(true);
   });
 
   test('Counting aggregations should not support field meta', () => {
     const sumMetric = new AggField({ ...defaultParams, aggType: AGG_TYPE.SUM });
-    expect(sumMetric.supportsFieldMeta()).toBe(false);
+    expect(sumMetric.supportsFieldMetaFromEs()).toBe(false);
     const uniqueCountMetric = new AggField({
       ...defaultParams,
       aggType: AGG_TYPE.UNIQUE_COUNT,
     });
-    expect(uniqueCountMetric.supportsFieldMeta()).toBe(false);
+    expect(uniqueCountMetric.supportsFieldMetaFromEs()).toBe(false);
   });
 });

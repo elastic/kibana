@@ -260,7 +260,7 @@ export class DynamicStyleProperty<T>
   }
 
   supportsFieldMeta() {
-    return this.isComplete() && !!this._field && this._field.supportsFieldMeta();
+    return this.isComplete() && !!this._field && this._field.supportsFieldMetaFromEs();
   }
 
   async getFieldMetaRequest() {
@@ -287,7 +287,7 @@ export class DynamicStyleProperty<T>
   }
 
   supportsMbFeatureState() {
-    return !!this._field && this._field.canReadFromGeoJson();
+    return !!this._field && !this._field.getSource().isMvt();
   }
 
   getMbLookupFunction(): MB_LOOKUP_FUNCTION {
@@ -502,7 +502,7 @@ export class DynamicStyleProperty<T>
       // They just re-use the original property-name
       targetName = this._field.getName();
     } else {
-      if (this._field.canReadFromGeoJson() && this._field.supportsAutoDomain()) {
+      if (!this._field.getSource().isMvt() && this._field.supportsFieldMetaFromLocalData()) {
         // Geojson-sources can support rewrite
         // e.g. field-formatters will create duplicate field
         targetName = getComputedFieldName(this.getStyleName(), this._field.getName());

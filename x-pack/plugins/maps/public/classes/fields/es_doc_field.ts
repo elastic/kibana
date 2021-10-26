@@ -16,22 +16,18 @@ import { IVectorSource } from '../sources/vector_source';
 
 export class ESDocField extends AbstractField implements IField {
   private readonly _source: IESSource;
-  private readonly _canReadFromGeoJson: boolean;
 
   constructor({
     fieldName,
     source,
     origin,
-    canReadFromGeoJson = true,
   }: {
     fieldName: string;
     source: IESSource;
     origin: FIELD_ORIGIN;
-    canReadFromGeoJson?: boolean;
   }) {
     super({ fieldName, origin });
     this._source = source;
-    this._canReadFromGeoJson = canReadFromGeoJson;
   }
 
   canValueBeFormatted(): boolean {
@@ -73,12 +69,8 @@ export class ESDocField extends AbstractField implements IField {
       : super.getLabel();
   }
 
-  supportsFieldMeta(): boolean {
+  supportsFieldMetaFromEs(): boolean {
     return true;
-  }
-
-  canReadFromGeoJson(): boolean {
-    return this._canReadFromGeoJson;
   }
 
   async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {

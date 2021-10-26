@@ -89,7 +89,7 @@ export function DynamicColorForm({
     if (styleProperty.isOrdinal()) {
       return (
         <ColorMapSelect
-          isCustomOnly={!field.supportsAutoDomain}
+          isCustomOnly={!field.supportsFieldMetaFromLocalData}
           onChange={onColorMapSelect}
           onColorMapTypeChange={onColorMapTypeChange}
           colorMapType={COLOR_MAP_TYPE.ORDINAL}
@@ -104,7 +104,7 @@ export function DynamicColorForm({
     } else if (styleProperty.isCategorical()) {
       return (
         <ColorMapSelect
-          isCustomOnly={!field.supportsAutoDomain}
+          isCustomOnly={!field.supportsFieldMetaFromLocalData}
           onColorMapTypeChange={onColorMapTypeChange}
           onChange={onColorMapSelect}
           colorMapType={COLOR_MAP_TYPE.CATEGORICAL}

@@ -110,7 +110,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
         new MockField({
           fieldName: previousFieldName,
           dataType: 'number',
-          supportsAutoDomain: false,
+          supportsFieldMetaFromLocalData: false,
         }),
       ];
       const { hasChanges, nextStyleDescriptor } =

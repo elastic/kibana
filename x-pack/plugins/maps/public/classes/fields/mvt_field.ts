@@ -55,11 +55,7 @@ export class MVTField extends AbstractField implements IField {
     return this.getName();
   }
 
-  supportsAutoDomain() {
-    return false;
-  }
-
-  canReadFromGeoJson(): boolean {
+  supportsFieldMetaFromLocalData() {
     return false;
   }
 }
