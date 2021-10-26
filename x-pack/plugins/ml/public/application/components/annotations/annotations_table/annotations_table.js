@@ -566,7 +566,6 @@ class AnnotationsTableUI extends Component {
     // Build the options to show in the Event type filter.
     // Do not try and run a search using a terms agg on the event field
     // because in 7.9 this field was incorrectly mapped as a text rather than keyword.
-    let filterOptions = [];
 
     // Always display options for user and delayed data types.
     const countsByEvent = {
@@ -575,16 +574,12 @@ class AnnotationsTableUI extends Component {
     };
     annotations.forEach((annotation) => {
       // Default to user type for annotations created in early releases which didn't have an event field
-      const event = annotation.event || ANNOTATION_EVENT_USER;
+      const event = annotation.event ?? ANNOTATION_EVENT_USER;
       if (countsByEvent[event] === undefined) {
         countsByEvent[event] = 0;
       }
-      countsByEvent[event] = ++countsByEvent[event];
+      countsByEvent[event]++;
     });
-    filterOptions = Object.keys(countsByEvent).map((eventType) => ({
-      key: eventType,
-      doc_count: countsByEvent[eventType],
-    }));
 
     const filters = [
       {
@@ -592,10 +587,10 @@ class AnnotationsTableUI extends Component {
         field: 'event',
         name: 'Event',
         multiSelect: 'or',
-        options: filterOptions.map((field) => ({
-          value: field.key,
-          name: field.key,
-          view: `${field.key} (${field.doc_count})`,
+        options: Object.entries(countsByEvent).map(([key, docCount]) => ({
+          value: key,
+          name: key,
+          view: `${key} (${docCount})`,
         })),
         'data-test-subj': 'mlAnnotationTableEventFilter',
       },
