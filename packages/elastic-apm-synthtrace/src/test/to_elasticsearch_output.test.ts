@@ -24,6 +24,7 @@ describe('output to elasticsearch', () => {
       '@timestamp': new Date('2020-12-31T23:00:00.000Z').getTime(),
       'processor.event': 'transaction',
       'processor.name': 'transaction',
+      'service.node.name': 'instance-a',
     };
   });
 
@@ -40,5 +41,34 @@ describe('output to elasticsearch', () => {
       event: 'transaction',
       name: 'transaction',
     });
+  });
+
+  it('formats all fields consistently', () => {
+    const doc = toElasticsearchOutput({ events: [event], writeTargets })[0] as any;
+
+    expect(doc._source).toMatchInlineSnapshot(`
+      Object {
+        "@timestamp": "2020-12-31T23:00:00.000Z",
+        "ecs": Object {
+          "version": "1.4",
+        },
+        "observer": Object {
+          "version": "7.16.0",
+          "version_major": 7,
+        },
+        "processor": Object {
+          "event": "transaction",
+          "name": "transaction",
+        },
+        "service": Object {
+          "node": Object {
+            "name": "instance-a",
+          },
+        },
+        "timestamp": Object {
+          "us": 1609455600000000,
+        },
+      }
+    `);
   });
 });

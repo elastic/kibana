@@ -22,6 +22,18 @@ export interface ElasticsearchOutputWriteTargets {
   metric: string;
 }
 
+const observerDefaults = getObserverDefaults();
+
+const esDocumentDefaults = {
+  ecs: {
+    version: '1.4',
+  },
+};
+
+// eslint-disable-next-line guard-for-in
+for (const key in observerDefaults) {
+  set(esDocumentDefaults, key, observerDefaults[key as keyof typeof observerDefaults]);
+}
 export function toElasticsearchOutput({
   events,
   writeTargets,
@@ -30,22 +42,25 @@ export function toElasticsearchOutput({
   writeTargets: ElasticsearchOutputWriteTargets;
 }): ElasticsearchOutput[] {
   return events.map((event) => {
-    const values = {
-      ...event,
-      ...getObserverDefaults(),
+    const values = {};
+
+    Object.assign(values, event, {
       '@timestamp': new Date(event['@timestamp']!).toISOString(),
       'timestamp.us': event['@timestamp']! * 1000,
-      'ecs.version': '1.4',
       'service.node.name':
         event['service.node.name'] || event['container.id'] || event['host.name'],
-    };
+    });
 
     const document = {};
+
+    Object.assign(document, esDocumentDefaults);
+
     // eslint-disable-next-line guard-for-in
     for (const key in values) {
       const val = values[key as keyof typeof values];
       set(document, key, val);
     }
+
     return {
       _index: writeTargets[event['processor.event'] as keyof ElasticsearchOutputWriteTargets],
       _source: document,

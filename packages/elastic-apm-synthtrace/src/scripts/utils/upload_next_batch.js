@@ -6,17 +6,10 @@
  * Side Public License, v 1.
  */
 
-let seq = 0;
+/* eslint-disable @typescript-eslint/no-var-requires*/
+require('@babel/register')({
+  extensions: ['.ts', '.js'],
+  presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
+});
 
-function generateId(seed?: string, length: number = 32) {
-  const str = seed ?? String(seq++);
-  return str.padStart(length, '0');
-}
-
-export function generateShortId(seed?: string) {
-  return generateId(seed, 16);
-}
-
-export function generateLongId(seed?: string) {
-  return generateId(seed, 32);
-}
+require('./upload_next_batch.ts');

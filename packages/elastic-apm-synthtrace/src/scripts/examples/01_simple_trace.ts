@@ -10,16 +10,20 @@ import { service, timerange, getTransactionMetrics, getSpanDestinationMetrics } 
 import { getBreakdownMetrics } from '../../lib/utils/get_breakdown_metrics';
 
 export default function ({ from, to }: { from: number; to: number }) {
-  const instance = service('opbeans-go', 'production', 'go').instance('instance');
+  const numServices = 3;
 
   const range = timerange(from, to);
 
   const transactionName = '240rpm/75% 1000ms';
 
-  const successfulTraceEvents = range
-    .interval('1s')
-    .rate(3)
-    .flatMap((timestamp) =>
+  const successfulTimestamps = range.interval('1s').rate(3);
+
+  const failedTimestamps = range.interval('1s').rate(1);
+
+  return new Array(numServices).fill(undefined).flatMap((_, index) => {
+    const instance = service(`opbeans-go-${index}`, 'production', 'go').instance('instance');
+
+    const successfulTraceEvents = successfulTimestamps.flatMap((timestamp) =>
       instance
         .transaction(transactionName)
         .timestamp(timestamp)
@@ -37,10 +41,7 @@ export default function ({ from, to }: { from: number; to: number }) {
         .serialize()
     );
 
-  const failedTraceEvents = range
-    .interval('1s')
-    .rate(1)
-    .flatMap((timestamp) =>
+    const failedTraceEvents = failedTimestamps.flatMap((timestamp) =>
       instance
         .transaction(transactionName)
         .timestamp(timestamp)
@@ -52,27 +53,28 @@ export default function ({ from, to }: { from: number; to: number }) {
         .serialize()
     );
 
-  const metricsets = range
-    .interval('30s')
-    .rate(1)
-    .flatMap((timestamp) =>
-      instance
-        .appMetrics({
-          'system.memory.actual.free': 800,
-          'system.memory.total': 1000,
-          'system.cpu.total.norm.pct': 0.6,
-          'system.process.cpu.total.norm.pct': 0.7,
-        })
-        .timestamp(timestamp)
-        .serialize()
-    );
-  const events = successfulTraceEvents.concat(failedTraceEvents);
+    const metricsets = range
+      .interval('30s')
+      .rate(1)
+      .flatMap((timestamp) =>
+        instance
+          .appMetrics({
+            'system.memory.actual.free': 800,
+            'system.memory.total': 1000,
+            'system.cpu.total.norm.pct': 0.6,
+            'system.process.cpu.total.norm.pct': 0.7,
+          })
+          .timestamp(timestamp)
+          .serialize()
+      );
+    const events = successfulTraceEvents.concat(failedTraceEvents);
 
-  return [
-    ...events,
-    ...metricsets,
-    ...getTransactionMetrics(events),
-    ...getSpanDestinationMetrics(events),
-    ...getBreakdownMetrics(events),
-  ];
+    return [
+      ...events,
+      ...metricsets,
+      ...getTransactionMetrics(events),
+      ...getSpanDestinationMetrics(events),
+      ...getBreakdownMetrics(events),
+    ];
+  });
 }

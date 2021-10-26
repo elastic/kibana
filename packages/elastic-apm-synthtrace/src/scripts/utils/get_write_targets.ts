@@ -38,7 +38,8 @@ export async function getWriteTargets({
           )?.[0],
         };
       })
-      .find(({ key }) => key.includes(filter))?.writeIndexAlias!;
+      .find(({ key, writeIndexAlias }) => writeIndexAlias && key.includes(filter))
+      ?.writeIndexAlias!;
   }
 
   const targets = {

@@ -61,6 +61,6 @@ describe('transactions with errors', () => {
       .serialize();
 
     expect(error['error.grouping_name']).toEqual('test error');
-    expect(error['error.grouping_key']).toMatchInlineSnapshot(`"8b96fa10a7f85a5d960198627bf50840"`);
+    expect(error['error.grouping_key']).toMatchInlineSnapshot(`"0000000000000000000000test error"`);
   });
 });
