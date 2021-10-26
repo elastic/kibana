@@ -54,18 +54,46 @@ export const validateSelectedPatterns = (
   payload: SelectedDataViewPayload
 ): Partial<SourcererScopeById> => {
   const { id, eventType, ...rest } = payload;
-  const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
-  const selectedPatterns =
-    rest.selectedPatterns != null && dataView != null
-      ? [...new Set(rest.selectedPatterns)].filter(
-          (pattern) => dataView.patternList.includes(pattern) || state.signalIndexName == null // this is a hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
+  let dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
+  // dedupe because these could come from a silly url or pre 8.0 timeline
+  const dedupePatterns = [...new Set(rest.selectedPatterns)];
+  let selectedPatterns =
+    dataView != null
+      ? dedupePatterns.filter(
+          (pattern) =>
+            // Typescript is being mean and telling me dataView could be undefined here
+            // so redoing the dataView != null check
+            (dataView != null && dataView.patternList.includes(pattern)) ||
+            // this is a hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
+            state.signalIndexName == null
         )
-      : [];
+      : // 7.16 -> 8.0 this will get hit because dataView == null
+        dedupePatterns;
+  if (selectedPatterns.length > 0 && dataView == null) {
+    // we have index patterns, but not a data view id
+    // find out if we have these index patterns in the defaultDataView
+    const areAllPatternsInDefault = selectedPatterns.every(
+      (pattern) => state.defaultDataView.title.indexOf(pattern) > -1
+    );
+    if (areAllPatternsInDefault) {
+      dataView = state.defaultDataView;
+      selectedPatterns = selectedPatterns.filter(
+        (pattern) => dataView != null && dataView.patternList.includes(pattern)
+      );
+    }
+  }
+
+  // TO DO: If dataView is still undefined here, create temporary dataView
+  // and prompt user to go create this dataView
+  // currently UI will take the undefined dataView and default to defaultDataView anyways
+  // this is a "strategically merged" bug ;)
+  // https://github.com/elastic/security-team/issues/1921
 
   return {
     [id]: {
       ...state.sourcererScopes[id],
       ...rest,
+      selectedDataViewId: dataView?.id ?? null,
       selectedPatterns,
       ...(isEmpty(selectedPatterns) && dataView?.id != null
         ? id === SourcererScopeName.timeline

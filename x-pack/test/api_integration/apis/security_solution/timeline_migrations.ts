@@ -199,32 +199,6 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.body.data.getOneTimeline.savedQueryId).to.be("It's me");
         });
       });
-
-      describe('dataViewId', () => {
-        it('removes the savedQueryId', async () => {
-          const timelines = await getSavedObjectFromES<TimelineWithoutSavedQueryId>(
-            es,
-            timelineSavedObjectType,
-            {
-              ids: { values: ['siem-ui-timeline:8dc70950-1012-11ec-9ad3-2d7c6600c0f7'] },
-            }
-          );
-
-          expect(
-            timelines.body.hits.hits[0]._source?.[timelineSavedObjectType]
-          ).to.not.have.property('dataViewId');
-        });
-
-        it('returns the dataViewId in the response', async () => {
-          const resp = await supertest
-            .get('/api/timeline')
-            .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' })
-            .set('kbn-xsrf', 'true');
-
-          expect(resp.body.data.getOneTimeline.dataViewId).to.be('security-solution');
-        });
-      });
-
       describe('pinned events timelineId', () => {
         it('removes the timelineId in the saved object', async () => {
           const timelines = await getSavedObjectFromES<PinnedEventWithoutTimelineId>(

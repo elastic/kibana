@@ -126,7 +126,7 @@ export const useSetInitialStateFromUrl = () => {
     [dispatch, updateTimeline, updateTimelineIsLoading]
   );
 
-  return setInitialStateFromUrl;
+  return Object.freeze({ setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading });
 };
 
 const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {

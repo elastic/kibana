@@ -203,6 +203,16 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     [isPopoverOpen, isOnlyDetectionAlerts, signalIndexName, selectedPatterns]
   );
 
+  const buttonWithTooptip = useMemo(() => {
+    return tooltipContent ? (
+      <EuiToolTip position="top" content={tooltipContent} data-test-subj="sourcerer-tooltip">
+        {trigger}
+      </EuiToolTip>
+    ) : (
+      trigger
+    );
+  }, [trigger, tooltipContent]);
+
   const onExpandAdvancedOptionsClicked = useCallback(() => {
     setExpandAdvancedOptions((prevState) => !prevState);
   }, []);
@@ -211,7 +221,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     <EuiToolTip position="top" content={tooltipContent}>
       <EuiPopover
         data-test-subj={isTimelineSourcerer ? 'timeline-sourcerer-popover' : 'sourcerer-popover'}
-        button={trigger}
+        button={buttonWithTooptip}
         isOpen={isPopoverOpen}
         closePopover={handleClosePopOver}
         display="block"

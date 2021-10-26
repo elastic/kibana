@@ -61,6 +61,7 @@ import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_fie
 import { DeferredSpinner } from './shared';
 import { ViewSavedSearchAction } from './application/embeddable/view_saved_search_action';
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
+import { FieldFormatsStart } from '../../field_formats/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -180,6 +181,7 @@ export interface DiscoverStartPlugins {
   navigation: NavigationStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   share?: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
@@ -346,6 +348,11 @@ export class DiscoverPlugin
         await depsStart.data.indexPatterns.clearCache();
 
         const { renderApp } = await import('./application');
+
+        // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
+        // due to EUI bug https://github.com/elastic/eui/pull/5152
+        params.element.classList.add('dscAppWrapper');
+
         const unmount = renderApp(params.element);
         return () => {
           unlistenParentHistory();

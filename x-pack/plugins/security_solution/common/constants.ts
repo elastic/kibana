@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ENABLE_ITOM } from '../../actions/server/constants/connectors';
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
@@ -33,6 +35,7 @@ export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
+export const DEFAULT_PREVIEW_INDEX = '.siem-preview-signals';
 export const DEFAULT_LISTS_INDEX = '.lists';
 export const DEFAULT_ITEMS_INDEX = '.items';
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
@@ -255,6 +258,8 @@ export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
 export const DETECTION_ENGINE_RULES_BULK_ACTION = `${DETECTION_ENGINE_RULES_URL}/_bulk_action`;
+export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview`;
+export const DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL = `${DETECTION_ENGINE_RULES_PREVIEW}/index`;
 
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve';
 export const TIMELINE_URL = '/api/timeline';
@@ -320,6 +325,11 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
 
 if (ENABLE_CASE_CONNECTOR) {
   NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
+}
+
+// TODO: Remove when ITOM is ready
+if (ENABLE_ITOM) {
+  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.servicenow-itom');
 }
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';

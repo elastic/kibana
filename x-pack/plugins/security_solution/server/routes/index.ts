@@ -7,8 +7,6 @@
 
 import { StartServicesAccessor } from 'kibana/server';
 import { Logger } from 'src/core/server';
-import { RuleDataPluginService } from '../../../rule_registry/server';
-
 import { SecuritySolutionPluginRouter } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
@@ -59,9 +57,12 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 import { SetupPlugins, StartPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
+import { CreateRuleOptions } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
 import { createSourcererDataViewRoute } from '../lib/sourcerer/routes';
+import { createPreviewIndexRoute } from '../lib/detection_engine/routes/index/create_preview_index_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -69,9 +70,9 @@ export const initRoutes = (
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
-  ruleDataService: RuleDataPluginService,
   logger: Logger,
   isRuleRegistryEnabled: boolean,
+  ruleOptions: CreateRuleOptions,
   getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
@@ -82,13 +83,14 @@ export const initRoutes = (
   patchRulesRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesRoute(router, isRuleRegistryEnabled);
   findRulesRoute(router, logger, isRuleRegistryEnabled);
+  previewRulesRoute(router, config, ml, security, ruleOptions);
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
   legacyCreateLegacyNotificationRoute(router, logger);
 
   // TODO: pass isRuleRegistryEnabled to all relevant routes
 
-  addPrepackedRulesRoute(router, config, security, isRuleRegistryEnabled);
+  addPrepackedRulesRoute(router);
   getPrepackagedRulesStatusRoute(router, config, security, isRuleRegistryEnabled);
   createRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   updateRulesBulkRoute(router, ml, isRuleRegistryEnabled);
@@ -130,9 +132,12 @@ export const initRoutes = (
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
-  createIndexRoute(router, ruleDataService, config);
+  createIndexRoute(router);
   readIndexRoute(router, config);
   deleteIndexRoute(router);
+
+  // Detection Engine Preview Index  /api/detection_engine/preview/index
+  createPreviewIndexRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
   readTagsRoute(router, isRuleRegistryEnabled);

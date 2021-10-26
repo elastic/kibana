@@ -30,7 +30,7 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
-  defaultMessage: 'Add data',
+  defaultMessage: 'Add integrations',
 });
 
 export const pagesWithSourcerer = [
