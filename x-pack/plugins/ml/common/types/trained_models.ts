@@ -44,7 +44,7 @@ export interface TrainedModelStat {
       }
     >;
   };
-  deployment_stats?: TrainedModelDeploymentStatsResponse;
+  deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
 }
 
 type TreeNode = object;
