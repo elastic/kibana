@@ -79,43 +79,45 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
 
           <EuiSpacer size={'m'} />
 
-          <EuiPanel>
-            <EuiTitle size={'xs'}>
-              <h5>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.nodesList.expandedRow.allocatedModelsTitle"
-                  defaultMessage="Allocated models"
-                />
-              </h5>
-            </EuiTitle>
-            <EuiSpacer size={'m'} />
-
-            {allocatedModels.map(({ model_id: modelId, ...rest }) => {
-              return (
-                <>
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xxs">
-                        <EuiTextColor color="subdued">
-                          <h5>{modelId}</h5>
-                        </EuiTextColor>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiHorizontalRule size={'full'} margin={'s'} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-
-                  <EuiDescriptionList
-                    compressed={true}
-                    type="column"
-                    listItems={formatToListItems(rest)}
+          {allocatedModels.length > 0 ? (
+            <EuiPanel>
+              <EuiTitle size={'xs'}>
+                <h5>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.nodesList.expandedRow.allocatedModelsTitle"
+                    defaultMessage="Allocated models"
                   />
-                  <EuiSpacer size={'s'} />
-                </>
-              );
-            })}
-          </EuiPanel>
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size={'m'} />
+
+              {allocatedModels.map(({ model_id: modelId, ...rest }) => {
+                return (
+                  <>
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiTitle size="xxs">
+                          <EuiTextColor color="subdued">
+                            <h5>{modelId}</h5>
+                          </EuiTextColor>
+                        </EuiTitle>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiHorizontalRule size={'full'} margin={'s'} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+
+                    <EuiDescriptionList
+                      compressed={true}
+                      type="column"
+                      listItems={formatToListItems(rest)}
+                    />
+                    <EuiSpacer size={'s'} />
+                  </>
+                );
+              })}
+            </EuiPanel>
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGrid>
     </>
