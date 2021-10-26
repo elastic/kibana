@@ -140,6 +140,7 @@ export const exceptionListEventFields: AllowlistFields = {
   name: true,
   os_types: true,
   rule_version: true,
+  scope: true,
 };
 
 /**

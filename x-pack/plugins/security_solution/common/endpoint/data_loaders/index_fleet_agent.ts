@@ -7,7 +7,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { AxiosResponse } from 'axios';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
 import { HostMetadata } from '../types';
@@ -81,7 +81,7 @@ export const indexFleetAgentForHost = async (
   return {
     fleetAgentsIndex: agentDoc._index,
     agents: [
-      await fetchFleetAgent(kbnClient, createdFleetAgent.body._id).catch(wrapErrorAndRejectPromise),
+      await fetchFleetAgent(kbnClient, createdFleetAgent._id).catch(wrapErrorAndRejectPromise),
     ],
   };
 };
@@ -110,29 +110,27 @@ export const deleteIndexedFleetAgents = async (
   };
 
   if (indexedData.agents.length) {
-    response.agents = (
-      await esClient
-        .deleteByQuery({
-          index: `${indexedData.fleetAgentsIndex}-*`,
-          wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      'local_metadata.elastic.agent.id': indexedData.agents.map(
-                        (agent) => agent.local_metadata.elastic.agent.id
-                      ),
-                    },
+    response.agents = await esClient
+      .deleteByQuery({
+        index: `${indexedData.fleetAgentsIndex}-*`,
+        wait_for_completion: true,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'local_metadata.elastic.agent.id': indexedData.agents.map(
+                      (agent) => agent.local_metadata.elastic.agent.id
+                    ),
                   },
-                ],
-              },
+                },
+              ],
             },
           },
-        })
-        .catch(wrapErrorAndRejectPromise)
-    ).body;
+        },
+      })
+      .catch(wrapErrorAndRejectPromise);
   }
 
   return response;

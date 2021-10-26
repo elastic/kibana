@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 /*
  * Contains utility functions for building and processing queries.
  */
@@ -18,7 +17,7 @@ export function buildBaseFilterCriteria(
   earliestMs?: number,
   latestMs?: number,
   query?: object
-): QueryDslQueryContainer[] {
+): estypes.QueryDslQueryContainer {
   const filterCriteria = [];
   if (timeFieldName && earliestMs && latestMs) {
     filterCriteria.push({
