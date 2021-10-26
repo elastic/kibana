@@ -23,10 +23,10 @@ import { rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
 import {
   percentCgroupMemoryUsedScript,
@@ -131,11 +131,7 @@ async function getTransactionStats({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -143,7 +139,7 @@ async function getTransactionStats({
         bool: {
           filter: [
             ...filter,
-            ...getDocumentTypeFilterForAggregatedTransactions(
+            ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
             {
@@ -161,7 +157,7 @@ async function getTransactionStats({
       aggs: {
         duration: {
           avg: {
-            field: getTransactionDurationFieldForAggregatedTransactions(
+            field: getTransactionDurationFieldForTransactions(
               searchAggregatedTransactions
             ),
           },

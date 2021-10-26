@@ -6,7 +6,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler, SavedObjectsBulkGetObject } from 'src/core/server';
+import type { RequestHandler } from 'src/core/server';
 
 import type { DataStream } from '../../types';
 import { KibanaSavedObjectType } from '../../../common';
@@ -15,7 +15,6 @@ import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
-
 interface ESDataStreamInfo {
   name: string;
   timestamp_field: {
@@ -94,17 +93,12 @@ export const getListHandler: RequestHandler = async (context, request, response)
     const allDashboardSavedObjectsResponse = await context.core.savedObjects.client.bulkGet<{
       title?: string;
     }>(
-      Object.values(dashboardIdsByPackageName).reduce<SavedObjectsBulkGetObject[]>(
-        (allDashboards, dashboardIds) => {
-          return allDashboards.concat(
-            dashboardIds.map((id) => ({
-              id,
-              type: KibanaSavedObjectType.dashboard,
-              fields: ['title'],
-            }))
-          );
-        },
-        []
+      Object.values(dashboardIdsByPackageName).flatMap((dashboardIds) =>
+        dashboardIds.map((id) => ({
+          id,
+          type: KibanaSavedObjectType.dashboard,
+          fields: ['title'],
+        }))
       )
     );
     // Ignore dashboards not found
@@ -142,12 +136,12 @@ export const getListHandler: RequestHandler = async (context, request, response)
       const {
         body: { aggregations: dataStreamAggs },
       } = await esClient.search({
-        index: dataStream.indices.map((index) => index.index_name),
+        index: dataStream.name,
         body: {
           size: 0,
           query: {
             bool: {
-              must: [
+              filter: [
                 {
                   exists: {
                     field: 'data_stream.namespace',
@@ -234,7 +228,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       return dataStreamResponse;
     });
 
-    // Return final data streams objects sorted by last activity, decending
+    // Return final data streams objects sorted by last activity, descending
     // After filtering out data streams that are missing dataset/namespace/type fields
     body.data_streams = (await Promise.all(dataStreamPromises))
       .filter(({ dataset, namespace, type }) => dataset && namespace && type)

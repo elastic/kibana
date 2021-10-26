@@ -31,24 +31,23 @@ export type WriteConfigParameters = {
 );
 
 export class KibanaConfigWriter {
-  constructor(private readonly configPath: string, private readonly logger: Logger) {}
+  constructor(
+    private readonly configPath: string,
+    private readonly dataDirectoryPath: string,
+    private readonly logger: Logger
+  ) {}
 
   /**
-   * Checks if we can write to the Kibana configuration file and configuration directory.
+   * Checks if we can write to the Kibana configuration file and data directory.
    */
   public async isConfigWritable() {
     try {
       // We perform two separate checks here:
-      // 1. If we can write to config directory to add a new CA certificate file and potentially Kibana configuration
-      // file if it doesn't exist for some reason.
+      // 1. If we can write to data directory to add a new CA certificate file.
       // 2. If we can write to the Kibana configuration file if it exists.
-      const canWriteToConfigDirectory = fs.access(path.dirname(this.configPath), constants.W_OK);
       await Promise.all([
-        canWriteToConfigDirectory,
-        fs.access(this.configPath, constants.F_OK).then(
-          () => fs.access(this.configPath, constants.W_OK),
-          () => canWriteToConfigDirectory
-        ),
+        fs.access(this.dataDirectoryPath, constants.W_OK),
+        fs.access(this.configPath, constants.W_OK),
       ]);
       return true;
     } catch {
@@ -61,7 +60,7 @@ export class KibanaConfigWriter {
    * @param params
    */
   public async writeConfig(params: WriteConfigParameters) {
-    const caPath = path.join(path.dirname(this.configPath), `ca_${Date.now()}.crt`);
+    const caPath = path.join(this.dataDirectoryPath, `ca_${Date.now()}.crt`);
     const config: Record<string, string | string[]> = { 'elasticsearch.hosts': [params.host] };
     if ('serviceAccountToken' in params && params.serviceAccountToken) {
       config['elasticsearch.serviceAccountToken'] = params.serviceAccountToken.value;
