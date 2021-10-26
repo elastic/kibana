@@ -22,7 +22,7 @@ export const Error: FC<Props> = ({ error }) => {
       <p>
         <FormattedMessage
           id="xpack.ingestPipelines.createFromCsv.errorMessage"
-          defaultMessage="{errorDetails}"
+          defaultMessage="{details}"
           values={{ details }}
         />
       </p>
