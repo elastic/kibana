@@ -25,15 +25,18 @@ export const CtiNoEventsComponent = ({
   to,
   from,
   someIntegrationsIsDisabled,
+  installedIntegrationsId,
 }: {
   to: string;
   from: string;
   someIntegrationsIsDisabled: boolean;
+  installedIntegrationsId: string[];
 }) => {
   const { buttonHref, listItems, isPluginDisabled } = useCtiDashboardLinks(
     emptyEventCountsByDataset,
     to,
-    from
+    from,
+    installedIntegrationsId
   );
 
   return (

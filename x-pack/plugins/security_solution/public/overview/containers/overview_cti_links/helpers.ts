@@ -10,13 +10,20 @@ import { CTI_DATASET_KEY_MAP } from '../../../../common/cti/constants';
 import { LinkPanelListItem } from '../../components/link_panel';
 import { EventCounts } from '../../components/link_panel/helpers';
 
-export const ctiTitles = Object.keys(CTI_DATASET_KEY_MAP) as string[];
+export const getInstalledCtiTitles = (installedIntegrationsId: string[]) =>
+  Object.entries(CTI_DATASET_KEY_MAP)
+    .filter(([title, dataset]) => {
+      const moduleId = dataset.split('.')[0];
+      return installedIntegrationsId.includes(moduleId);
+    })
+    .map(([title, dataset]) => title);
 
-export const EMPTY_LIST_ITEMS: LinkPanelListItem[] = ctiTitles.map((title) => ({
-  title,
-  count: 0,
-  path: '',
-}));
+export const getEmptyList = (installedIntegrationsId: string[]): LinkPanelListItem[] =>
+  getInstalledCtiTitles(installedIntegrationsId).map((title) => ({
+    title,
+    count: 0,
+    path: '',
+  }));
 
 const TAG_REQUEST_BODY_SEARCH = 'threat intel';
 export const TAG_REQUEST_BODY = {
@@ -28,8 +35,11 @@ export const TAG_REQUEST_BODY = {
 export const DASHBOARD_SO_TITLE_PREFIX = '[Filebeat Threat Intel] ';
 export const OVERVIEW_DASHBOARD_LINK_TITLE = 'Overview';
 
-export const getCtiListItemsWithoutLinks = (eventCounts: EventCounts): LinkPanelListItem[] => {
-  return EMPTY_LIST_ITEMS.map((item) => ({
+export const getCtiListItemsWithoutLinks = (
+  eventCounts: EventCounts,
+  installedIntegrationsId: string[]
+): LinkPanelListItem[] => {
+  return getEmptyList(installedIntegrationsId).map((item) => ({
     ...item,
     count: eventCounts[CTI_DATASET_KEY_MAP[item.title]] ?? 0,
   }));

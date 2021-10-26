@@ -16,17 +16,20 @@ export const CtiWithEventsComponent = ({
   to,
   totalCount,
   someIntegrationsIsDisabled,
+  installedIntegrationsId,
 }: {
   eventCountsByDataset: { [key: string]: number };
   from: string;
   to: string;
   totalCount: number;
   someIntegrationsIsDisabled: boolean;
+  installedIntegrationsId: string[];
 }) => {
   const { buttonHref, isPluginDisabled, listItems } = useCtiDashboardLinks(
     eventCountsByDataset,
     to,
-    from
+    from,
+    installedIntegrationsId
   );
 
   return (

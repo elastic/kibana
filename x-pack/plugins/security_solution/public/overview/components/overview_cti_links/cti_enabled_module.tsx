@@ -32,6 +32,7 @@ export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props
             to={to}
             from={from}
             someIntegrationsIsDisabled={props.someIntegrationsIsDisabled}
+            installedIntegrationsId={props.installedIntegrationsId}
           />
         </div>
       );
@@ -44,6 +45,7 @@ export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props
             to={to}
             from={from}
             someIntegrationsIsDisabled={props.someIntegrationsIsDisabled}
+            installedIntegrationsId={props.installedIntegrationsId}
           />
         </div>
       );

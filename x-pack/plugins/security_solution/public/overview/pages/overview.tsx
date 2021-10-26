@@ -161,6 +161,7 @@ const OverviewComponent = () => {
                             someIntegrationsIsDisabled={
                               tiIntegrationStatus.someIntegrationsIsDisabled
                             }
+                            installedIntegrationsId={tiIntegrationStatus.installedIntegrationsId}
                             deleteQuery={deleteQuery}
                             from={from}
                             setQuery={setQuery}
