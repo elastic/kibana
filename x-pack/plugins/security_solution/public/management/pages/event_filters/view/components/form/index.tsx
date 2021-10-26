@@ -129,7 +129,8 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           listNamespaceType: 'agnostic',
           ruleName: RULE_NAME,
           indexPatterns,
-          isOrDisabled: true, // TODO: pending to be validated
+          isOrDisabled: true,
+          isOrHidden: true,
           isAndDisabled: false,
           isNestedDisabled: false,
           dataTestSubj: 'alert-exception-builder',
