@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
 
-  describe('Interactive Setup Functional Tests (Enrolment token)', function () {
+  describe('Interactive Setup Functional Tests (Enrollment token)', function () {
     this.tags(['skipCloud', 'ciGroup2']);
 
     const elasticsearchConfig = config.get('servers.elasticsearch');
@@ -42,19 +42,19 @@ export default function ({ getService }: FtrProviderContext) {
 
     let enrollmentAPIKey: string;
     beforeEach(async function () {
-      const apiResponse = await es.security.createApiKey({ body: { name: 'enrolment_api_key' } });
-      enrollmentAPIKey = `${apiResponse.body.id}:${apiResponse.body.api_key}`;
-      log.info(`API key for enrolment token: ${enrollmentAPIKey}`);
+      const apiResponse = await es.security.createApiKey({ body: { name: 'enrollment_api_key' } });
+      enrollmentAPIKey = `${apiResponse.id}:${apiResponse.api_key}`;
+      log.info(`API key for enrollment token: ${enrollmentAPIKey}`);
     });
 
     afterEach(async function () {
-      await es.security.invalidateApiKey({ body: { name: 'enrolment_api_key' } });
+      await es.security.invalidateApiKey({ body: { name: 'enrollment_api_key' } });
     });
 
     it('should configure Kibana successfully', async function () {
       this.timeout(150_000);
 
-      const enrolmentToken = btoa(
+      const enrollmentToken = btoa(
         JSON.stringify({
           ver: kibanaPackageJson.version,
           adr: [`${elasticsearchConfig.hostname}:${elasticsearchConfig.port}`],
@@ -69,8 +69,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const tokenField = await find.byName('token');
       await tokenField.clearValueWithKeyboard();
-      await tokenField.type(enrolmentToken);
-      log.info(`Entered enrolment token: ${enrolmentToken}`);
+      await tokenField.type(enrollmentToken);
+      log.info(`Entered enrollment token: ${enrollmentToken}`);
 
       await find.clickByButtonText('Configure Elastic');
       log.info('Submitted form');

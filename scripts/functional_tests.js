@@ -17,7 +17,7 @@ const alwaysImportedTests = [
   require.resolve(
     '../test/interactive_setup_api_integration/manual_configuration_flow_without_tls.config.ts'
   ),
-  require.resolve('../test/interactive_setup_functional/enrolment_token.config.ts'),
+  require.resolve('../test/interactive_setup_functional/enrollment_token.config.ts'),
   require.resolve('../test/interactive_setup_functional/manual_configuration.config.ts'),
   require.resolve(
     '../test/interactive_setup_functional/manual_configuration_without_security.config.ts'

@@ -28,10 +28,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...manualConfigurationConfig.getAll(),
 
-    testFiles: [require.resolve('./tests/enrolment_token')],
+    testFiles: [require.resolve('./tests/enrollment_token')],
 
     junit: {
-      reportName: 'Interactive Setup Functional Tests (Enrolment token)',
+      reportName: 'Interactive Setup Functional Tests (Enrollment token)',
     },
 
     esTestCluster: {
