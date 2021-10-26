@@ -27,19 +27,19 @@ export default function ({ getService }: FtrProviderContext) {
     const builtInModelData = {
       modelId: 'lang_ident_model_1',
       description: 'Model used for identifying language from arbitrary input text.',
-      modelTypes: ['classification', 'built-in', 'lang_ident'],
+      modelTypes: ['classification', 'built-in'],
     };
 
     const modelWithPipelineData = {
       modelId: 'dfa_classification_model_n_0',
       description: '',
-      modelTypes: ['classification', 'tree_ensemble'],
+      modelTypes: ['classification'],
     };
 
     const modelWithoutPipelineData = {
       modelId: 'dfa_regression_model_n_0',
       description: '',
-      modelTypes: ['regression', 'tree_ensemble'],
+      modelTypes: ['regression'],
     };
 
     it('renders trained models list', async () => {
