@@ -16,8 +16,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const dashboard = getPageObject('dashboard');
   const reporting = getPageObject('reporting');
 
-  // TODO: unskip when https://github.com/elastic/kibana/issues/116109 is fixed
-  describe.skip('reporting dashbaord', () => {
+  describe('reporting dashbaord', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/performance/kbn_archives/reporting_dashboard'
