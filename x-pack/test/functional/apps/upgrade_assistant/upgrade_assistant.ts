@@ -17,10 +17,9 @@ export default function upgradeAssistantFunctionalTests({
   const security = getService('security');
   const log = getService('log');
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
 
   // Updated for the hiding of the UA UI.
-  describe('Upgrade Checkup', function () {
+  describe.skip('Upgrade Checkup', function () {
     this.tags('skipFirefox');
 
     before(async () => {
@@ -32,13 +31,6 @@ export default function upgradeAssistantFunctionalTests({
       await PageObjects.upgradeAssistant.waitForTelemetryHidden();
       await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       await security.testUser.restoreDefaults();
-    });
-
-    it('Overview page', async () => {
-      await PageObjects.upgradeAssistant.navigateToPage();
-      await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
-        return testSubjects.exists('comingSoonPrompt');
-      });
     });
 
     it.skip('allows user to navigate to upgrade checkup', async () => {

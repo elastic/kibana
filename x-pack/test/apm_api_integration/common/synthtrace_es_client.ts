@@ -16,7 +16,7 @@ import pLimit from 'p-limit';
 import { inspect } from 'util';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
-export async function traceData(context: InheritedFtrProviderContext) {
+export async function synthtraceEsClient(context: InheritedFtrProviderContext) {
   const es = context.getService('es');
   return {
     index: (events: any[]) => {
@@ -50,7 +50,7 @@ export async function traceData(context: InheritedFtrProviderContext) {
         )
       ).then((results) => {
         const errors = results
-          .flatMap((result) => result.body.items)
+          .flatMap((result) => result.items)
           .filter((item) => !!item.index?.error)
           .map((item) => item.index?.error);
 

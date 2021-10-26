@@ -73,7 +73,9 @@ export class MapsPlugin implements Plugin {
       defaultMessage: 'Map',
     });
 
-    home.sampleData.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
+    // commented out since it registers an SO already registered by home plugin
+    // https://github.com/elastic/kibana/blob/2ddaddc2e958f60c6685ab9f9840cdd86da9d398/src/plugins/home/server/services/sample_data/data_sets/ecommerce/saved_objects.ts#L151
+    // home.sampleData.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
 
     home.sampleData.addAppLinksToSampleDataset('ecommerce', [
       {
