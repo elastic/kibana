@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, within } from '@testing-library/react';
+import { EuiToolTip } from '@elastic/eui';
+
 import React from 'react';
 import { PickEventType } from './pick_events';
 import {
@@ -18,6 +20,14 @@ import {
 import { TimelineEventsType } from '../../../../../common';
 import { createStore } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiToolTip: jest.fn(),
+  };
+});
 
 describe('pick_events', () => {
   const defaultProps = {
@@ -53,6 +63,23 @@ describe('pick_events', () => {
     },
   };
   const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+  const mockTooltip = ({
+    tooltipContent,
+    children,
+  }: {
+    tooltipContent: string;
+    children: React.ReactElement;
+  }) => (
+    <div data-test-subj="timeline-sourcerer-tooltip">
+      <span>{tooltipContent}</span>
+      {children}
+    </div>
+  );
+
+  beforeAll(() => {
+    (EuiToolTip as unknown as jest.Mock).mockImplementation(mockTooltip);
+  });
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -68,6 +95,32 @@ describe('pick_events', () => {
       initialPatterns.sort().join('')
     );
   });
+
+  it('renders tooltip', () => {
+    render(
+      <TestProviders>
+        <PickEventType {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect((EuiToolTip as unknown as jest.Mock).mock.calls[0][0].content).toEqual(
+      initialPatterns
+        .filter((p) => p != null)
+        .sort()
+        .join(', ')
+    );
+  });
+
+  it('renders popover button inside tooltip', () => {
+    const wrapper = render(
+      <TestProviders>
+        <PickEventType {...defaultProps} />
+      </TestProviders>
+    );
+    const tooltip = wrapper.getByTestId('timeline-sourcerer-tooltip');
+    expect(within(tooltip).getByTestId('sourcerer-timeline-trigger')).toBeTruthy();
+  });
+
   it('correctly filters options', () => {
     const wrapper = render(
       <TestProviders store={store}>
