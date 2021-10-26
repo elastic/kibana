@@ -90,7 +90,7 @@ export const configProtectedKeysValidator = (
         'xpack.osquery.fleetIntegration.osqueryConfig.restrictedOptionsErrorMessage',
         {
           defaultMessage:
-            'The following options are restricted and cannot be set: {restrictedFlags}.',
+            'The following osquery options are not supported and must be removed: {restrictedFlags}.',
           values: {
             restrictedFlags: restrictedFlags.join(', '),
           },
@@ -123,7 +123,7 @@ export const packConfigFilesValidator = (
         'xpack.osquery.fleetIntegration.osqueryConfig.packConfigFilesErrorMessage',
         {
           defaultMessage:
-            'Pack config files are not supported, please update config for: {packNames}.',
+            'Pack configuration files are not supported. These packs must be removed: {packNames}.',
           values: {
             packNames: packsWithConfigPaths.join(', '),
           },
