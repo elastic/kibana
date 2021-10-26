@@ -24,14 +24,18 @@ export interface IField {
   getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null>;
   getCategoricalFieldMetaRequest(size: number): Promise<unknown | null>;
 
-  // IField.supportsFieldMetaFromLocalData returns boolean indicating whether field value domain
-  // can be determined from local data
+  /*
+   * IField.supportsFieldMetaFromLocalData returns boolean indicating whether field value domain
+   * can be determined from local data
+   */
   supportsFieldMetaFromLocalData(): boolean;
 
-  // IField.supportsFieldMetaFromEs returns boolean indicating whether field value domain
-  // can be determined from Elasticsearch.
-  // When true, getExtendedStatsFieldMetaRequest, getPercentilesFieldMetaRequest, and getCategoricalFieldMetaRequest
-  // can not return null
+  /*
+   * IField.supportsFieldMetaFromEs returns boolean indicating whether field value domain
+   * can be determined from Elasticsearch.
+   * When true, getExtendedStatsFieldMetaRequest, getPercentilesFieldMetaRequest, and getCategoricalFieldMetaRequest
+   * can not return null
+   */
   supportsFieldMetaFromEs(): boolean;
 
   isEqual(field: IField): boolean;
