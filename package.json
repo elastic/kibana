@@ -148,6 +148,7 @@
     "@kbn/securitysolution-list-constants": "link:bazel-bin/packages/kbn-securitysolution-list-constants",
     "@kbn/securitysolution-list-hooks": "link:bazel-bin/packages/kbn-securitysolution-list-hooks",
     "@kbn/securitysolution-list-utils": "link:bazel-bin/packages/kbn-securitysolution-list-utils",
+    "@kbn/securitysolution-rules": "link:bazel-bin/packages/kbn-securitysolution-rules",
     "@kbn/securitysolution-t-grid": "link:bazel-bin/packages/kbn-securitysolution-t-grid",
     "@kbn/securitysolution-utils": "link:bazel-bin/packages/kbn-securitysolution-utils",
     "@kbn/server-http-tools": "link:bazel-bin/packages/kbn-server-http-tools",

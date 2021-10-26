@@ -15,7 +15,10 @@ import {
   setSignalsStatusSchema,
 } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
+import {
+  DEFAULT_ALERTS_INDEX,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+} from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
@@ -50,6 +53,7 @@ export const setSignalsStatusRoute = (
       const siemClient = context.securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
       const validationErrors = setSignalStatusValidateTypeDependents(request.body);
+      const spaceId = context.securitySolution?.getSpaceId() ?? 'default';
 
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
@@ -96,7 +100,7 @@ export const setSignalsStatusRoute = (
       }
       try {
         const { body } = await esClient.updateByQuery({
-          index: siemClient.getSignalsIndex(),
+          index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
           conflicts: conflicts ?? 'abort',
           // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#_refreshing_shards_2
           // Note: Before we tried to use "refresh: wait_for" but I do not think that was available and instead it defaulted to "refresh: true"
