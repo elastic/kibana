@@ -43,7 +43,7 @@ export async function getHasAggregatedTransactions({
           },
         },
       },
-      terminateAfter: 1,
+      terminate_after: 1,
     }
   );
 
@@ -77,7 +77,7 @@ export async function getSearchAggregatedTransactions({
   );
 }
 
-export function getTransactionDurationFieldForAggregatedTransactions(
+export function getTransactionDurationFieldForTransactions(
   searchAggregatedTransactions: boolean
 ) {
   return searchAggregatedTransactions
@@ -85,7 +85,7 @@ export function getTransactionDurationFieldForAggregatedTransactions(
     : TRANSACTION_DURATION;
 }
 
-export function getDocumentTypeFilterForAggregatedTransactions(
+export function getDocumentTypeFilterForTransactions(
   searchAggregatedTransactions: boolean
 ) {
   return searchAggregatedTransactions
@@ -93,7 +93,7 @@ export function getDocumentTypeFilterForAggregatedTransactions(
     : [];
 }
 
-export function getProcessorEventForAggregatedTransactions(
+export function getProcessorEventForTransactions(
   searchAggregatedTransactions: boolean
 ): ProcessorEvent.metric | ProcessorEvent.transaction {
   return searchAggregatedTransactions
