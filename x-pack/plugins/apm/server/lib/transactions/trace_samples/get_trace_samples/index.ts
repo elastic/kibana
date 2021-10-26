@@ -104,7 +104,7 @@ export async function getTraceSamples({
     }));
 
     return {
-      noHits: samplesForDistributionHits.length === 0,
+      samplesForDistributionHits,
       traceSamples,
     };
   });

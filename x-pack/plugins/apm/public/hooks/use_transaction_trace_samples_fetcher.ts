@@ -17,7 +17,6 @@ export interface TraceSample {
 }
 
 const INITIAL_DATA = {
-  noHits: true,
   traceSamples: [] as TraceSample[],
 };
 
@@ -71,14 +70,13 @@ export function useTransactionTraceSamplesFetcher({
           },
         });
 
-        if (response.noHits) {
+        if (response.traceSamples.length === 0) {
           return response;
         }
 
         const { traceSamples } = response;
 
         return {
-          noHits: false,
           traceSamples,
         };
       }
