@@ -32,6 +32,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName: 'Interactive Setup Functional Tests (Manual configuration without Security)',
     },
 
+    security: { disableTestUser: true },
+
     esTestCluster: {
       ...functionalConfig.get('esTestCluster'),
       serverArgs: [
@@ -47,14 +49,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...functionalConfig
           .get('kbnTestServer.serverArgs')
-          .filter(
-            (arg: string) =>
-              !arg.startsWith('--elasticsearch.') && !arg.startsWith('--xpack.security.')
-          ),
+          .filter((arg: string) => !arg.startsWith('--elasticsearch.')),
         `--plugin-path=${testEndpointsPlugin}`,
         `--config=${tempKibanaYamlFile}`,
-        '--xpack.security.enabled=false',
-        '--interactiveSetup.enabled=true',
       ],
       runOptions: {
         ...functionalConfig.get('kbnTestServer.runOptions'),

@@ -44,12 +44,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...withoutSecurityConfig
           .get('kbnTestServer.serverArgs')
-          .filter(
-            (arg: string) =>
-              !arg.startsWith('--elasticsearch.') && !arg.startsWith('--xpack.security.')
-          ),
+          .filter((arg: string) => !arg.startsWith('--config')),
         `--config=${tempKibanaYamlFile}`,
-        '--xpack.security.enabled=true',
       ],
     },
   };

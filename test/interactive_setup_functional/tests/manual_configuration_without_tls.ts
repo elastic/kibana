@@ -16,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const deployment = getService('deployment');
   const config = getService('config');
   const retry = getService('retry');
+  const log = getService('log');
 
   describe('Interactive Setup Functional Tests (Manual configuration without TLS)', function () {
     this.tags(['skipCloud', 'ciGroup2']);
@@ -27,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should configure Kibana successfully', async function () {
-      this.timeout(120_000);
+      this.timeout(150_000);
 
       await browser.get(`${deployment.getHostPort()}?code=${verificationCode}`);
       const url = await browser.getCurrentUrl();
@@ -52,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
       await find.clickByButtonText('Configure Elastic');
 
       await retry.waitForWithTimeout('redirect to login page', 120_000, async () => {
+        log.debug(`Current URL: ${await browser.getCurrentUrl()}, initial URL: ${url}`);
         return (await browser.getCurrentUrl()) !== url;
       });
     });

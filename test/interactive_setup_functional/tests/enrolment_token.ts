@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should configure Kibana successfully', async function () {
-      this.timeout(120_000);
+      this.timeout(150_000);
 
       const enrolmentToken = btoa(
         JSON.stringify({
@@ -76,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
       log.info('Submitted form');
 
       await retry.waitForWithTimeout('redirect to login page', 120_000, async () => {
+        log.debug(`Current URL: ${await browser.getCurrentUrl()}, initial URL: ${initialUrl}`);
         return (await browser.getCurrentUrl()) !== initialUrl;
       });
     });

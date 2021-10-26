@@ -36,9 +36,12 @@ export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ o
     } catch (error) {
       const { response, body = {} } = error as IHttpFetchError;
       isAvailable = response ? response.status < 500 : undefined;
+
+      // We're only interested in the availability of the critical core services.
       isPastPreboot =
         response?.headers.get('content-type')?.includes('application/json') &&
-        body?.status?.overall?.level === 'available';
+        body?.status?.core?.elasticsearch?.level === 'available' &&
+        body?.status?.core?.savedObjects?.level === 'available';
     }
     return isAvailable === true && isPastPreboot === true
       ? 'complete'
