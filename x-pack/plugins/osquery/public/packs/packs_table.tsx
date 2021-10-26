@@ -41,7 +41,7 @@ const renderName = (_: unknown, item: { id: string; attributes: { name: string }
   <ScheduledQueryName id={item.id} name={item.attributes.name} />
 );
 
-const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: string[] }) => {
+export const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: string[] }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(
@@ -52,12 +52,16 @@ const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: string[] }) 
 
   const button = useMemo(
     () => (
-      <EuiButtonEmpty onClick={onButtonClick}>
+      <EuiButtonEmpty flush="both" onClick={onButtonClick}>
         <>{agentPolicyIds?.length ?? 0}</>
       </EuiButtonEmpty>
     ),
     [agentPolicyIds?.length, onButtonClick]
   );
+
+  if (!agentPolicyIds?.length) {
+    return <>{agentPolicyIds?.length ?? 0}</>;
+  }
 
   return (
     <EuiPopover

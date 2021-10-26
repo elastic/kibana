@@ -27,6 +27,7 @@ import { usePack } from '../../../packs/use_pack';
 import { PackQueriesStatusTable } from '../../../packs/pack_queries_status_table';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useAgentPolicyAgentIds } from '../../../agents/use_agent_policy_agent_ids';
+import { AgentPoliciesPopover } from '../../../packs/packs_table';
 
 const Divider = styled.div`
   width: 0;
@@ -109,7 +110,7 @@ const PackDetailsPageComponent = () => {
             <EuiDescriptionListDescription className="eui-textNoWrap">
               {
                 // @ts-expect-error update types
-                data?.policy_ids?.length
+                <AgentPoliciesPopover agentPolicyIds={data?.policy_ids} />
               }
             </EuiDescriptionListDescription>
           </EuiDescriptionList>

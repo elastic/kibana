@@ -28,7 +28,6 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
   const {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
-
   const { data } = useAgentPolicy({ policyId });
 
   const href = useMemo(

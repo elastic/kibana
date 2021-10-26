@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, isEmpty, unset, set } from 'lodash';
+import { pickBy, get, isEmpty, isString, unset, set, intersection } from 'lodash';
 import satisfies from 'semver/functions/satisfies';
 import {
   EuiFlexGroup,
@@ -44,7 +44,96 @@ import {
   getUseField,
   FIELD_TYPES,
   fieldValidators,
+  ValidationFunc,
 } from '../shared_imports';
+
+// https://github.com/elastic/beats/blob/master/x-pack/osquerybeat/internal/osqd/args.go#L57
+const RESTRICTED_CONFIG_OPTIONS = [
+  'force',
+  'disable_watchdog',
+  'utc',
+  'events_expiry',
+  'extensions_socket',
+  'extensions_interval',
+  'extensions_timeout',
+  'pidfile',
+  'database_path',
+  'extensions_autoload',
+  'flagfile',
+  'config_plugin',
+  'logger_plugin',
+  'pack_delimiter',
+  'config_refresh',
+];
+
+export const configProtectedKeysValidator = (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc> => {
+  const [{ value }] = args;
+
+  let configJSON;
+  try {
+    configJSON = JSON.parse(value as string);
+  } catch (e) {
+    return;
+  }
+
+  const restrictedFlags = intersection(
+    Object.keys(configJSON?.options ?? {}),
+    RESTRICTED_CONFIG_OPTIONS
+  );
+
+  if (restrictedFlags.length) {
+    return {
+      code: 'ERR_RESTRICTED_OPTIONS',
+      message: i18n.translate(
+        'xpack.osquery.fleetIntegration.osqueryConfig.restrictedOptionsErrorMessage',
+        {
+          defaultMessage:
+            'The following options are restricted and cannot be set: {restrictedFlags}.',
+          values: {
+            restrictedFlags: restrictedFlags.join(', '),
+          },
+        }
+      ),
+    };
+  }
+
+  return;
+};
+
+export const packConfigFilesValidator = (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc> => {
+  const [{ value }] = args;
+
+  let configJSON;
+  try {
+    configJSON = JSON.parse(value as string);
+  } catch (e) {
+    return;
+  }
+
+  const packsWithConfigPaths = Object.keys(pickBy(configJSON?.packs ?? {}, isString));
+
+  if (packsWithConfigPaths.length) {
+    return {
+      code: 'ERR_RESTRICTED_OPTIONS',
+      message: i18n.translate(
+        'xpack.osquery.fleetIntegration.osqueryConfig.packConfigFilesErrorMessage',
+        {
+          defaultMessage:
+            'Pack config files are not supported, please update config for: {packNames}.',
+          values: {
+            packNames: packsWithConfigPaths.join(', '),
+          },
+        }
+      ),
+    };
+  }
+
+  return;
+};
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -101,6 +190,10 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
               { allowEmptyString: true }
             ),
           },
+          { validator: packConfigFilesValidator },
+          {
+            validator: configProtectedKeysValidator,
+          },
         ],
       },
     },
@@ -131,7 +224,9 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
           JSON.stringify(
             {
               ...newConfig,
-              ...(currentPacks ? { packs: currentPacks } : {}),
+              ...(currentPacks || newConfig.packs
+                ? { packs: { ...newConfig.packs, ...currentPacks } }
+                : {}),
             },
             null,
             2

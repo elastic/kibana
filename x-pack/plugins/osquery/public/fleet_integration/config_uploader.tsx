@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -59,7 +58,7 @@ const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) =>
       filePickerRef.current?.removeFiles(new Event('fake'));
     }
 
-    onChange(omit(parsedContent, 'packs'));
+    onChange(parsedContent);
     // @ts-expect-error update types
     filePickerRef.current?.removeFiles(new Event('fake'));
   };
