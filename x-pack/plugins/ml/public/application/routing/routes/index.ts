@@ -14,4 +14,3 @@ export * from './data_frame_analytics';
 export { timeSeriesExplorerRouteFactory } from './timeseriesexplorer';
 export * from './explorer';
 export * from './access_denied';
-export * from './trained_models';

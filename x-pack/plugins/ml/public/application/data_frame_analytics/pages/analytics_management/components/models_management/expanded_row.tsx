@@ -6,30 +6,30 @@
  */
 
 import React, { FC, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiCodeBlock,
   EuiDescriptionList,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText,
-  EuiTextColor,
   EuiTitle,
+  EuiNotificationBadge,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiCodeBlock,
+  EuiText,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiTextColor,
+  EuiButtonEmpty,
+  EuiBadge,
 } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { ModelItemFull } from './models_list';
-import { useMlKibana } from '../../contexts/kibana';
-import { timeFormatter } from '../../../../common/util/date_utils';
-import { isDefined } from '../../../../common/types/guards';
-import { isPopulatedObject } from '../../../../common';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { timeFormatter } from '../../../../../../../common/util/date_utils';
+import { isDefined } from '../../../../../../../common/types/guards';
+import { isPopulatedObject } from '../../../../../../../common';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
@@ -51,38 +51,6 @@ const formatterDictionary: Record<string, (value: any) => JSX.Element | string |
   create_time: timeFormatter,
   timestamp: timeFormatter,
 };
-
-export function formatToListItems(
-  items: Record<string, unknown> | object
-): EuiDescriptionListProps['listItems'] {
-  return Object.entries(items)
-    .filter(([, value]) => isDefined(value))
-    .map(([title, value]) => {
-      if (title in formatterDictionary) {
-        return {
-          title,
-          description: formatterDictionary[title](value),
-        };
-      }
-      return {
-        title,
-        description:
-          typeof value === 'object' ? (
-            <EuiCodeBlock
-              language="json"
-              fontSize="s"
-              paddingSize="s"
-              overflowHeight={300}
-              isCopyable={false}
-            >
-              {JSON.stringify(value, null, 2)}
-            </EuiCodeBlock>
-          ) : (
-            value.toString()
-          ),
-      };
-    });
-}
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   const {
@@ -114,6 +82,36 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     default_field_map,
     license_level,
   };
+
+  function formatToListItems(items: Record<string, any>): EuiDescriptionListProps['listItems'] {
+    return Object.entries(items)
+      .filter(([, value]) => isDefined(value))
+      .map(([title, value]) => {
+        if (title in formatterDictionary) {
+          return {
+            title,
+            description: formatterDictionary[title](value),
+          };
+        }
+        return {
+          title,
+          description:
+            typeof value === 'object' ? (
+              <EuiCodeBlock
+                language="json"
+                fontSize="s"
+                paddingSize="s"
+                overflowHeight={300}
+                isCopyable={false}
+              >
+                {JSON.stringify(value, null, 2)}
+              </EuiCodeBlock>
+            ) : (
+              value.toString()
+            ),
+        };
+      });
+  }
 
   const {
     services: { share },
@@ -245,27 +243,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       content: (
         <>
           <EuiSpacer size={'m'} />
-          {stats.deployment_stats && (
-            <>
-              <EuiPanel>
-                <EuiTitle size={'xs'}>
-                  <h5>
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.expandedRow.deploymentStatsTitle"
-                      defaultMessage="Deployment stats"
-                    />
-                  </h5>
-                </EuiTitle>
-                <EuiSpacer size={'m'} />
-                <EuiDescriptionList
-                  compressed={true}
-                  type="column"
-                  listItems={formatToListItems(stats.deployment_stats)}
-                />
-              </EuiPanel>
-              <EuiSpacer size={'m'} />
-            </>
-          )}
           <EuiFlexGrid columns={2}>
             {stats.inference_stats && (
               <EuiFlexItem>
