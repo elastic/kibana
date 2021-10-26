@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from 'kibana/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 
-import type { AgentStatus, Agent } from '../types';
+import type { AgentStatus } from '../types';
 
 import type { GetAgentStatusResponse } from '../../common';
 
@@ -48,13 +47,6 @@ export interface AgentService {
    * Get an Agent by id
    */
   getAgent: typeof getAgentById;
-  /**
-   * Authenticate an agent with access toekn
-   */
-  authenticateAgentWithAccessToken(
-    esClient: ElasticsearchClient,
-    request: KibanaRequest
-  ): Promise<Agent>;
   /**
    * Return the status by the Agent's id
    */
