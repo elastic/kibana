@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { TimeRange, Filter, Query, esFilters } from '../../../../src/plugins/data/public';
+import { SerializableRecord } from '@kbn/utility-types';
+import { esFilters, Filter, Query, TimeRange } from '../../../../src/plugins/data/public';
 import { getStatesFromKbnUrl, setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
-import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
+import { LocatorDefinition } from '../../../../src/plugins/share/common';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
 
-export const SEARCH_SESSIONS_EXAMPLES_APP_URL_GENERATOR =
-  'SEARCH_SESSIONS_EXAMPLES_APP_URL_GENERATOR';
+export const SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR = 'SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR';
 
-export interface AppUrlState {
+export interface AppUrlState extends SerializableRecord {
   filters?: Filter[];
   query?: Query;
   indexPatternId?: string;
@@ -24,32 +24,32 @@ export interface AppUrlState {
   searchSessionId?: string;
 }
 
-export interface GlobalUrlState {
+export interface GlobalUrlState extends SerializableRecord {
   filters?: Filter[];
   time?: TimeRange;
 }
 
-export type SearchSessionExamplesUrlGeneratorState = AppUrlState & GlobalUrlState;
+export type SearchSessionsExamplesAppLocatorParams = AppUrlState & GlobalUrlState;
 
-export const createSearchSessionsExampleUrlGenerator = (
-  getStartServices: () => Promise<{
-    appBasePath: string;
-  }>
-): UrlGeneratorsDefinition<typeof SEARCH_SESSIONS_EXAMPLES_APP_URL_GENERATOR> => ({
-  id: SEARCH_SESSIONS_EXAMPLES_APP_URL_GENERATOR,
-  createUrl: async (state: SearchSessionExamplesUrlGeneratorState) => {
-    const startServices = await getStartServices();
-    const appBasePath = startServices.appBasePath;
-    const path = `${appBasePath}/app/searchExamples/search-sessions`;
+export class SearchSessionsExamplesAppLocatorDefinition
+  implements LocatorDefinition<SearchSessionsExamplesAppLocatorParams>
+{
+  public readonly id = SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR;
+
+  constructor(protected readonly getAppBasePath: () => Promise<string>) {}
+
+  public readonly getLocation = async (params: SearchSessionsExamplesAppLocatorParams) => {
+    const appBasePath = await this.getAppBasePath();
+    const path = `${appBasePath}/search-sessions`;
 
     let url = setStateToKbnUrl<AppUrlState>(
       STATE_STORAGE_KEY,
       {
-        query: state.query,
-        filters: state.filters?.filter((f) => !esFilters.isFilterPinned(f)),
-        indexPatternId: state.indexPatternId,
-        numericFieldName: state.numericFieldName,
-        searchSessionId: state.searchSessionId,
+        query: params.query,
+        filters: params.filters?.filter((f) => !esFilters.isFilterPinned(f)),
+        indexPatternId: params.indexPatternId,
+        numericFieldName: params.numericFieldName,
+        searchSessionId: params.searchSessionId,
       } as AppUrlState,
       { useHash: false, storeInHashQuery: false },
       path
@@ -58,18 +58,22 @@ export const createSearchSessionsExampleUrlGenerator = (
     url = setStateToKbnUrl<GlobalUrlState>(
       GLOBAL_STATE_STORAGE_KEY,
       {
-        time: state.time,
-        filters: state.filters?.filter((f) => esFilters.isFilterPinned(f)),
+        time: params.time,
+        filters: params.filters?.filter((f) => esFilters.isFilterPinned(f)),
       } as GlobalUrlState,
       { useHash: false, storeInHashQuery: false },
       url
     );
 
-    return url;
-  },
-});
+    return {
+      app: 'searchExamples',
+      path: url,
+      state: {},
+    };
+  };
+}
 
-export function getInitialStateFromUrl(): SearchSessionExamplesUrlGeneratorState {
+export function getInitialStateFromUrl(): SearchSessionsExamplesAppLocatorParams {
   const {
     _a: { numericFieldName, indexPatternId, searchSessionId, filters: aFilters, query } = {},
     _g: { filters: gFilters, time } = {},

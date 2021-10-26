@@ -287,7 +287,7 @@ export class SearchSessionService
     {
       name,
       appId,
-      urlGeneratorId,
+      locatorId,
       initialState = {},
       restoreState = {},
     }: Partial<SearchSessionSavedObjectAttributes>
@@ -295,12 +295,12 @@ export class SearchSessionService
     if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
     if (!name) throw new Error('Name is required');
     if (!appId) throw new Error('AppId is required');
-    if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
+    if (!locatorId) throw new Error('locatorId is required');
 
     return this.updateOrCreate(deps, user, sessionId, {
       name,
       appId,
-      urlGeneratorId,
+      locatorId,
       initialState,
       restoreState,
       persisted: true,
