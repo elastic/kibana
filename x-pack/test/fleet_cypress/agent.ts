@@ -76,27 +76,39 @@ export class AgentManager extends Manager {
     const policy = apiKeys.list[1];
 
     this.log.info('Running the agent');
-    await this.execute(
-      `ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'`,
-      (ipAddress: string) => {
-        ipAddress = ipAddress.trim();
 
-        const args = [
-          'run',
-          '--env',
-          'FLEET_ENROLL=1',
-          '--env',
-          `FLEET_URL=http://${ipAddress}:8220`,
-          '--env',
-          `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
-          '--env',
-          'FLEET_INSECURE=true',
-          'docker.elastic.co/beats/elastic-agent:8.0.0-SNAPSHOT',
-        ];
+    let ipAddress: string | undefined;
+    await this.execute('hostname –I', async (result: string) => {
+      ipAddress = result.trim();
+      this.log.info(ipAddress);
 
-        this.agentProcess = spawn('docker', args, { stdio: 'inherit' });
+      if (!ipAddress) {
+        // local
+        await this.execute(
+          `ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'`,
+          (res: string) => {
+            ipAddress = res.trim();
+
+            this.log.info(ipAddress);
+
+            const args = [
+              'run',
+              '--env',
+              'FLEET_ENROLL=1',
+              '--env',
+              `FLEET_URL=http://${ipAddress}:8220`,
+              '--env',
+              `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
+              '--env',
+              'FLEET_INSECURE=true',
+              'docker.elastic.co/beats/elastic-agent:8.0.0-SNAPSHOT',
+            ];
+
+            this.agentProcess = spawn('docker', args, { stdio: 'inherit' });
+          }
+        );
       }
-    );
+    });
 
     // Wait til we see the agent is online
     let done = false;
