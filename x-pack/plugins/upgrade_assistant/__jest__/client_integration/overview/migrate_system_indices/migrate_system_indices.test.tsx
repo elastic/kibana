@@ -132,5 +132,36 @@ describe('Overview - Migrate system indices', () => {
       expect(exists('startSystemIndicesMigrationButton')).toBe(true);
       expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(false);
     });
+
+    test('Handles errors from migration', async () => {
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+        migration_status: 'ERROR',
+        features: [
+          {
+            feature_name: 'kibana',
+            indices: [
+              {
+                index: '.kibana',
+                migration_status: 'ERROR',
+                failure_cause: {
+                  error: {
+                    type: 'mapper_parsing_exception',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      testBed = await setupOverviewPage();
+
+      const { exists } = testBed;
+
+      // Error is displayed
+      expect(exists('migrationFailedCallout')).toBe(true);
+      // CTA is enabled
+      expect(exists('startSystemIndicesMigrationButton')).toBe(true);
+    });
   });
 });
