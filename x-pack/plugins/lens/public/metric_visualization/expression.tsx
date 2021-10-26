@@ -65,10 +65,7 @@ function getColorStyling(
     return {};
   }
   const cssProp = colorMode === ColorMode.Background ? 'backgroundColor' : 'color';
-  const colorIndex = Math.max(
-    0,
-    palette.params.stops.findIndex((v) => v > value)
-  );
+  const colorIndex = Math.max(0, palette.params.stops.findIndex((v) => v > value) - 1);
   const color = palette.params.colors[colorIndex];
   const styling = {
     [cssProp]: color,

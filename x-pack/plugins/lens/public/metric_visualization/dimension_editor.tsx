@@ -22,6 +22,7 @@ import {
   applyPaletteParams,
   CustomizablePalette,
   FIXED_PROGRESSION,
+  getColorStops,
   getStopsForFixedMode,
   PalettePanelContainer,
 } from '../shared_components';
@@ -119,8 +120,7 @@ export function MetricDimensionEditor(
                 ...activePalette,
                 params: {
                   ...activePalette.params,
-                  // that's ok, at first open we're going to throw them away and recompute
-                  stops: displayStops,
+                  stops: getColorStops(props.paletteService, [], activePalette, currentMinMax),
                 },
               };
             }
