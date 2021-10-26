@@ -7013,7 +7013,6 @@
     "xpack.observability.alerts.manageRulesButtonLabel": "管理规则",
     "xpack.observability.alerts.searchBarPlaceholder": "kibana.alert.evaluation.threshold > 75",
     "xpack.observability.alertsDisclaimerLinkText": "告警和操作",
-    "xpack.observability.alertsDisclaimerText": "此页面显示实验性告警视图。此处显示的数据可能无法准确表示告警。在“堆栈管理”的“告警和操作”中提供了告警的非实验性列表。",
     "xpack.observability.alertsDisclaimerTitle": "实验性",
     "xpack.observability.alertsFlyout.actualValueLabel": "实际值",
     "xpack.observability.alertsFlyout.durationLabel": "持续时间",
