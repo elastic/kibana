@@ -1575,17 +1575,9 @@ describe('update()', () => {
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       validate: {
-        config: schema.object({
-          param1: schema.string(),
-        }),
-        connector: schema.object({
-          config: schema.object({
-            param1: schema.string(),
-          }),
-          secrets: schema.object({
-            param2: schema.string(),
-          }),
-        }),
+        connector: () => {
+          return '[param1] is required';
+        },
       },
       executor,
     });
@@ -1607,7 +1599,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [param1]: expected value of type [string] but got [undefined]"`
+      `"error validating action type connector: [param1] is required"`
     );
   });
 
