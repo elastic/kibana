@@ -37,7 +37,7 @@ import {
   ArtifactEntryCardProps,
 } from '../../../../../components/artifact_entry_card';
 import { AppAction } from '../../../../../../common/store/actions';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 
 export interface PaginationBarProps {
@@ -115,7 +115,7 @@ export const TrustedAppsGrid = memo(() => {
             backLink: {
               label: BACK_TO_TRUSTED_APPS_LABEL,
               navigateTo: [
-                APP_ID,
+                APP_UI_ID,
                 {
                   path: currentPagePath,
                 },
@@ -123,7 +123,7 @@ export const TrustedAppsGrid = memo(() => {
               href: getAppUrl({ path: currentPagePath }),
             },
             onCancelNavigateTo: [
-              APP_ID,
+              APP_UI_ID,
               {
                 path: currentPagePath,
               },
@@ -131,6 +131,7 @@ export const TrustedAppsGrid = memo(() => {
           };
 
           policyToNavOptionsMap[policyId] = {
+            navigateAppId: APP_UI_ID,
             navigateOptions: {
               path: policyDetailsPath,
               state: routeState,

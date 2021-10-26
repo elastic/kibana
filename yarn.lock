@@ -2302,7 +2302,7 @@
     is-absolute "^1.0.0"
     is-negated-glob "^1.0.0"
 
-"@elastic/apm-generator@link:bazel-bin/packages/elastic-apm-generator":
+"@elastic/apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace":
   version "0.0.0"
   uid ""
 
@@ -2337,10 +2337,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@37.0.0":
-  version "37.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-37.0.0.tgz#a94526461c404b449953cca4fe34f8bf3620413e"
-  integrity sha512-Pfm58/voERWVPJlxy13DphwgRoBGYhnSyz65kdsPg6lYGxN5ngWvuTuJ3477fyApYV01Pz4Ckt9yj1BSQue80Q==
+"@elastic/charts@38.0.1":
+  version "38.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-38.0.1.tgz#9c1db7e0f1de869e0b2b505e192bbb9d62d60dc8"
+  integrity sha512-i9mIA3Ji9jSjuFDtuh9gV1xpCl3sbBEDgJiOgLVt04pr/qZH2W+tr3AV5yHvjsR7Te0Pmh/Cm5wLBvFKaI1nIA==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -2412,10 +2412,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@39.1.1":
-  version "39.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-39.1.1.tgz#52e59f1dd6448b2e80047259ca60c6c87e9873f0"
-  integrity sha512-zYCNitpp6Ds7U6eaa9QkJqc20ZMo2wjpZokNtd1WalFV22vdfiVizFg7DMtDjJrCDLmoXcLOOCMasKlmmJ1cRg==
+"@elastic/eui@40.0.0":
+  version "40.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-40.0.0.tgz#9556a87fa5eb7d9061e85f71ea9d3e6a9022dc3e"
+  integrity sha512-Zsz8eczEjthMgU00YhnsNmkKA8j4hxQpWNnrgecMgpcFEIj+Nn5WBofL/TJux/latS/mB4WWmrq4FTiSIyv/+Q==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -4085,6 +4085,21 @@
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@mapbox/mapbox-gl-supported/-/mapbox-gl-supported-1.5.0.tgz#f60b6a55a5d8e5ee908347d2ce4250b15103dc8e"
   integrity sha512-/PT1P6DNf7vjEEiPkVIRJkvibbqWtqnyGaBz3nfRdcxclNSnSdaLU5tfAgcD7I8Yt5i+L19s406YLl1koLnLbg==
+
+"@mapbox/node-pre-gyp@^1.0.0":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.5.tgz#2a0b32fcb416fb3f2250fd24cb2a81421a4f5950"
+  integrity sha512-4srsKPXWlIxp5Vbqz5uLfBN+du2fJChBoYn/f2h991WLdk7jUvcSk/McVLSv/X+xQIPI8eGD5GjrnygdyHnhPA==
+  dependencies:
+    detect-libc "^1.0.3"
+    https-proxy-agent "^5.0.0"
+    make-dir "^3.1.0"
+    node-fetch "^2.6.1"
+    nopt "^5.0.0"
+    npmlog "^4.1.2"
+    rimraf "^3.0.2"
+    semver "^7.3.4"
+    tar "^6.1.0"
 
 "@mapbox/point-geometry@0.1.0", "@mapbox/point-geometry@^0.1.0", "@mapbox/point-geometry@~0.1.0":
   version "0.1.0"
@@ -10072,6 +10087,15 @@ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001097, caniuse-lite@^1.0.30001109, can
   version "1.0.30001261"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001261.tgz#96d89813c076ea061209a4e040d8dcf0c66a1d01"
   integrity sha512-vM8D9Uvp7bHIN0fZ2KQ4wnmYFpJo/Etb4Vwsuc+ka0tfGDHvOPrFm6S/7CCNLSOkAUjenT2HnUPESdOIL91FaA==
+
+canvas@2.8.0:
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/canvas/-/canvas-2.8.0.tgz#f99ca7f25e6e26686661ffa4fec1239bbef74461"
+  integrity sha512-gLTi17X8WY9Cf5GZ2Yns8T5lfBOcGgFehDFb+JQwDqdOoBOcECS9ZWMEAqMSVcMYwXD659J8NyzjRY/2aE+C2Q==
+  dependencies:
+    "@mapbox/node-pre-gyp" "^1.0.0"
+    nan "^2.14.0"
+    simple-get "^3.0.3"
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -19188,18 +19212,17 @@ listr@^0.14.1:
     p-map "^2.0.0"
     rxjs "^6.3.3"
 
-lmdb-store@^1.6.8:
-  version "1.6.8"
-  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-1.6.8.tgz#f57c1fa4a8e8e7a73d58523d2bfbcee96782311f"
-  integrity sha512-Ltok13VVAfgO5Fdj/jVzXjPJZjefl1iENEHerZyAfAlzFUhvOrA73UdKItqmEPC338U29mm56ZBQr5NJQiKXow==
+lmdb-store@^1.6.11:
+  version "1.6.11"
+  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-1.6.11.tgz#801da597af8c7a01c81f87d5cc7a7497e381236d"
+  integrity sha512-hIvoGmHGsFhb2VRCmfhodA/837ULtJBwRHSHKIzhMB7WtPH6BRLPsvXp1MwD3avqGzuZfMyZDUp3tccLvr721Q==
   dependencies:
-    mkdirp "^1.0.4"
     nan "^2.14.2"
     node-gyp-build "^4.2.3"
     ordered-binary "^1.0.0"
     weak-lru-cache "^1.0.0"
   optionalDependencies:
-    msgpackr "^1.3.7"
+    msgpackr "^1.4.7"
 
 load-bmfont@^1.3.1, load-bmfont@^1.4.0:
   version "1.4.0"
@@ -20648,7 +20671,7 @@ ms@^2.1.3:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
-msgpackr-extract@^1.0.13:
+msgpackr-extract@^1.0.14:
   version "1.0.14"
   resolved "https://registry.yarnpkg.com/msgpackr-extract/-/msgpackr-extract-1.0.14.tgz#87d3fe825d226e7f3d9fe136375091137f958561"
   integrity sha512-t8neMf53jNZRF+f0H9VvEUVvtjGZ21odSBRmFfjZiyxr9lKYY0mpY3kSWZAIc7YWXtCZGOvDQVx2oqcgGiRBrw==
@@ -20656,12 +20679,12 @@ msgpackr-extract@^1.0.13:
     nan "^2.14.2"
     node-gyp-build "^4.2.3"
 
-msgpackr@^1.3.7:
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/msgpackr/-/msgpackr-1.4.2.tgz#52ddf0130ccdb1067957fe61c8be828e82bb29ce"
-  integrity sha512-6gvaU+3xIflium8eJcruT66kLQr14lgTEmXtDm7KKzBSWHljD7pqu3VBQv1PDipFD5UGXLTIxGg5hGbO/jTvxQ==
+msgpackr@^1.4.7:
+  version "1.4.7"
+  resolved "https://registry.yarnpkg.com/msgpackr/-/msgpackr-1.4.7.tgz#d802ade841e7d2e873000b491cdda6574a3d5748"
+  integrity sha512-bhC8Ed1au3L3oHaR/fe4lk4w7PLGFcWQ5XY/Tk9N6tzDRz8YndjCG68TD8zcvYZoxNtw767eF/7VpaTpU9kf9w==
   optionalDependencies:
-    msgpackr-extract "^1.0.13"
+    msgpackr-extract "^1.0.14"
 
 multicast-dns-service-types@^1.1.0:
   version "1.1.0"
@@ -20902,11 +20925,6 @@ next-tick@1:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/next-tick/-/next-tick-1.0.0.tgz#ca86d1fe8828169b0120208e3dc8424b9db8342c"
   integrity sha1-yobR/ogoFpsBICCOPchCS524NCw=
-
-ngreact@^0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/ngreact/-/ngreact-0.5.1.tgz#2dcccc1541771796689d13e51bb8d5010af41c57"
-  integrity sha512-u/jOWS0KF/twS09O+yuBgNNEEytEhrmSfLTewAuglDSfEYru6a4I8tUnU4fs9/WvlRWbvJTk7WEnwbGamM+Kvg==
 
 nice-try@^1.0.4:
   version "1.0.4"
@@ -22292,6 +22310,19 @@ pbkdf2@^3.0.3:
     ripemd160 "^2.0.1"
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
+
+pdf-to-img@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/pdf-to-img/-/pdf-to-img-1.1.1.tgz#1918738477c3cc95a6786877bb1e36de81909400"
+  integrity sha512-e+4BpKSDhU+BZt34yo2P5OAqO0CRRy8xSNGDP7HhpT2FMEo5H7mzNcXdymYKRcj7xIr0eK1gYFhyjpWwHGp46Q==
+  dependencies:
+    canvas "2.8.0"
+    pdfjs-dist "2.9.359"
+
+pdfjs-dist@2.9.359:
+  version "2.9.359"
+  resolved "https://registry.yarnpkg.com/pdfjs-dist/-/pdfjs-dist-2.9.359.tgz#e67bafebf20e50fc41f1a5c189155ad008ac4f81"
+  integrity sha512-P2nYtkacdlZaNNwrBLw1ZyMm0oE2yY/5S/GDCAmMJ7U4+ciL/D0mrlEC/o4HZZc/LNE3w8lEVzBEyVgEQlPVKQ==
 
 pdfkit@>=0.8.1, pdfkit@^0.11.0:
   version "0.11.0"
@@ -27524,7 +27555,7 @@ tar@6.1.9:
     mkdirp "^1.0.3"
     yallist "^4.0.0"
 
-tar@^6.0.2, tar@^6.1.11, tar@^6.1.2:
+tar@^6.0.2, tar@^6.1.0, tar@^6.1.11, tar@^6.1.2:
   version "6.1.11"
   resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.11.tgz#6760a38f003afa1b2ffd0ffe9e9abbd0eab3d621"
   integrity sha512-an/KZQzQUkZCkuoAA64hM92X0Urb6VpRhAFllDzz44U2mcD5scmT3zBc4VgVpkugF580+DQn8eAFSyoQt0tznA==
