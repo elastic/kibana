@@ -114,8 +114,8 @@ export default ({ getService }: FtrProviderContext) => {
           expect(statusBody[body.id].current_status.status).to.eql('succeeded');
         });
 
-        /*
-        it('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
+        // TODO: does the below test work?
+        it.skip('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
           const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
@@ -136,7 +136,6 @@ export default ({ getService }: FtrProviderContext) => {
             'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.'
           );
         });
-        */
 
         it('should create a single rule with a rule_id and an index pattern that does not match anything and an index pattern that does and the rule should be successful', async () => {
           const simpleRule = getRuleForSignalTesting(['does-not-exist-*', 'auditbeat-*']);

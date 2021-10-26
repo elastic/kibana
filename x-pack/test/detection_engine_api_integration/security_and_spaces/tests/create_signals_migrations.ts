@@ -43,7 +43,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // Skipping as migrations work only on legacy indices
   describe('Creating signals migrations', () => {
     let createdMigrations: CreateResponse[];
     let legacySignalsIndexName: string;

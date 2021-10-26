@@ -101,11 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
     });
 
-    beforeEach(async () => {
-      // await createSignalsIndex(supertest);
-    });
     afterEach(async () => {
-      // await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
     });
 
