@@ -353,6 +353,36 @@ describe('create()', () => {
     );
   });
 
+  test('validates connector: config and secrets', async () => {
+    const connectorValidator = ({}, secrets: { param1: '1' }) => {
+      if (secrets.param1 == null) {
+        return '[param1] is required';
+      }
+      return null;
+    };
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      validate: {
+        connector: connectorValidator,
+      },
+      executor,
+    });
+    await expect(
+      actionsClient.create({
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: [param1] is required"`
+    );
+  });
+
   test(`throws an error when an action type doesn't exist`, async () => {
     await expect(
       actionsClient.create({
@@ -1536,6 +1566,40 @@ describe('update()', () => {
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [param1]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
+  test('validates connector: config and secrets', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      validate: {
+        connector: () => {
+          return '[param1] is required';
+        },
+      },
+      executor,
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+      },
+      references: [],
+    });
+    await expect(
+      actionsClient.update({
+        id: 'my-action',
+        action: {
+          name: 'my name',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: [param1] is required"`
     );
   });
 
