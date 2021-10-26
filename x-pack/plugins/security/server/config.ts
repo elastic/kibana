@@ -395,7 +395,7 @@ export function createConfig(
     ...config,
     audit: {
       ...config.audit,
-      ...(config.audit.enabled && appender),
+      ...(config.audit.enabled && { appender }),
     },
     authc: {
       selector: { ...config.authc.selector, enabled: isLoginSelectorEnabled },
