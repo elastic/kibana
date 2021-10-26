@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import Papa from 'papaparse';
+
 import { FieldCopyAction, Pipeline, Processor } from '../../common/types';
 
 const REQUIRED_CSV_HEADERS = ['source_field', 'destination_field'];
@@ -74,7 +75,7 @@ function parseAndValidate(file: string) {
     }
     return [...acc, header];
   }, []);
-  
+
   if (missingHeaders.length > 0) {
     throw new Error(
       i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.missingHeaders', {

@@ -59,7 +59,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
     if (sourcePipeline) {
       return sourcePipeline;
     }
-  
+
     if (history.location.state?.sourcePipeline) {
       return history.location.state.sourcePipeline as Pipeline;
     }

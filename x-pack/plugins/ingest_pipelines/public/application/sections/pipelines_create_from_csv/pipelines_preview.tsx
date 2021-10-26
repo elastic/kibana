@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
+
 import { CodeEditorField } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {

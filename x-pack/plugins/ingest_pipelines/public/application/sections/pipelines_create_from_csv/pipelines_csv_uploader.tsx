@@ -9,8 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, useState } from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
   EuiFilePicker,
   EuiButton,
@@ -18,6 +16,7 @@ import {
   EuiIconTip,
   EuiRadioGroup,
 } from '@elastic/eui';
+
 import { useKibana } from '../../../shared_imports';
 import { FieldCopyAction } from '../../../../common/types';
 
@@ -84,9 +83,9 @@ export const PipelinesCsvUploader: FC<Props> = ({
           accept=".csv"
         />
       </EuiFormRow>
-  
+
       <EuiSpacer size="l" />
-  
+
       <EuiFormRow
         fullWidth
         label={
@@ -110,9 +109,9 @@ export const PipelinesCsvUploader: FC<Props> = ({
           onChange={(id) => setAction(id as FieldCopyAction)}
         />
       </EuiFormRow>
-  
+
       <EuiSpacer size="l" />
-  
+
       <div>
         <EuiButton
           onClick={() => onFileUpload(action)}
@@ -128,5 +127,5 @@ export const PipelinesCsvUploader: FC<Props> = ({
         </EuiButton>
       </div>
     </>
-  );  
+  );
 };

@@ -72,12 +72,9 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
             defaultMessage: 'File is empty',
           }
         ),
-        message: i18n.translate(
-          'xpack.ingestPipelines.createFromCsv.processFile.emptyFileError',
-          {
-            defaultMessage: 'The file provided is empty.',
-          }
-        ),
+        message: i18n.translate('xpack.ingestPipelines.createFromCsv.processFile.emptyFileError', {
+          defaultMessage: 'The file provided is empty.',
+        }),
       });
     } else if (csv.size > maxBytes) {
       setErrorInfo({

@@ -21,10 +21,7 @@ export const Instructions: FC = () => {
                 defaultMessage="Map your CSV into a starter ingest pipeline. Reference&nbsp;{templateLink} for more information."
                 values={{
                   templateLink: (
-                    <EuiLink
-                      href="https://ela.st/sample-pipeline-mapping"
-                      target="_blank"
-                    >
+                    <EuiLink href="https://ela.st/sample-pipeline-mapping" target="_blank">
                       sample mapping templates
                     </EuiLink>
                   ),
