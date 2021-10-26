@@ -22,10 +22,10 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('Signals migration status', () => {
     let legacySignalsIndexName: string;
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
       legacySignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
+      await createSignalsIndex(supertest);
     });
 
     afterEach(async () => {

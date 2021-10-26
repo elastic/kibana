@@ -18,7 +18,6 @@ import {
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   ruleToNdjson,
-  waitFor,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -26,59 +25,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 
   describe('import_rules', () => {
-    describe('importing rules without an index', () => {
-      it('should not create a rule if the index does not exist', async () => {
-        await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .expect(400);
-
-        await waitFor(async () => {
-          const { body } = await supertest
-            .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
-            .send();
-          return body.status_code === 404;
-        }, `within should not create a rule if the index does not exist, ${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`);
-
-        // Try to fetch the rule which should still be a 404 (not found)
-        const { body } = await supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`).send();
-
-        expect(body).to.eql({
-          status_code: 404,
-          message: 'rule_id: "rule-1" not found',
-        });
-      });
-
-      it('should return an error that the index needs to be created before you are able to import a single rule', async () => {
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .expect(400);
-
-        expect(body).to.eql({
-          message:
-            'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-          status_code: 400,
-        });
-      });
-
-      it('should return an error that the index needs to be created before you are able to import two rules', async () => {
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
-          .expect(400);
-
-        expect(body).to.eql({
-          message:
-            'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-          status_code: 400,
-        });
-      });
-    });
-
     describe('importing rules with an index', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);

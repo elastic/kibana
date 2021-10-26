@@ -129,7 +129,7 @@ export const performBulkActionRoute = (
                 throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
                 await rulesClient.create({
-                  data: duplicateRule(rule),
+                  data: duplicateRule(rule, isRuleRegistryEnabled),
                 });
               })
             );

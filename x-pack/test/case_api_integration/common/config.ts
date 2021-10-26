@@ -146,6 +146,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
               ]
             : []),
+          '--xpack.ruleRegistry.write.enabled=true',
+          '--xpack.ruleRegistry.write.cache.enabled=false',
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
         ],
       },
     };

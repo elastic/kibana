@@ -3886,6 +3886,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-rules@link:bazel-bin/packages/kbn-securitysolution-rules":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-t-grid@link:bazel-bin/packages/kbn-securitysolution-t-grid":
   version "0.0.0"
   uid ""

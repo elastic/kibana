@@ -104,7 +104,8 @@ const getPayload = (
   },
 });
 
-describe('signal_rule_alert_type', () => {
+// Deprecated
+describe.skip('signal_rule_alert_type', () => {
   const version = '8.0.0';
   const jobsSummaryMock = jest.fn();
   const mlMock = {

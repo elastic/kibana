@@ -426,7 +426,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql(['word four']);
       });
 
-      it('should filter 4 text if all are set as exceptions', async () => {
+      // This test is unreliable due to a race condition... we don't know if the rule ran and
+      // generated 0 signals, or if the index hasn't refreshed yet.
+      it.skip('should filter 4 text if all are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['text']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
@@ -446,7 +448,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('"is not one of" operator', () => {
-      it('will return 0 results if it cannot find what it is excluding', async () => {
+      // This test is unreliable due to a race condition... we don't know if the rule ran and
+      // generated 0 signals, or if the index hasn't refreshed yet.
+      it.skip('will return 0 results if it cannot find what it is excluding', async () => {
         const rule = getRuleForSignalTesting(['text']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
@@ -485,7 +489,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('"exists" operator', () => {
-      it('will return 0 results if matching against text', async () => {
+      // This test is unreliable due to a race condition... we don't know if the rule ran and
+      // generated 0 signals, or if the index hasn't refreshed yet.
+      it.skip('will return 0 results if matching against text', async () => {
         const rule = getRuleForSignalTesting(['text']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
@@ -571,7 +577,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(hits).to.eql(['four', 'two']);
         });
 
-        it('will return 0 results if we have a list that includes all text', async () => {
+        it.skip('will return 0 results if we have a list that includes all text', async () => {
           await importTextFile(
             supertest,
             'text',

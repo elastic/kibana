@@ -5,22 +5,19 @@
  * 2.0.
  */
 
+import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { SanitizedAlert } from '../../../../../alerting/common';
-import {
-  NOTIFICATION_THROTTLE_NO_ACTIONS,
-  SERVER_APP_ID,
-  SIGNALS_ID,
-} from '../../../../common/constants';
+import { NOTIFICATION_THROTTLE_NO_ACTIONS, SERVER_APP_ID } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { PartialFilter, RuleTypeParams } from '../types';
 import { transformToAlertThrottle, transformToNotifyWhen } from './utils';
-import { ruleTypeMappings } from '../signals/utils';
 
 export const createRules = async ({
   rulesClient,

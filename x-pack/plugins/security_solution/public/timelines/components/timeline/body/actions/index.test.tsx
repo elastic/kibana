@@ -126,7 +126,7 @@ describe('Actions', () => {
     test('it enables for eventType=signal', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
-        signal: { rule: { id: ['123'] } },
+        kibana: { alert: { rule: { uuid: ['123'] } } },
       };
       const wrapper = mount(
         <TestProviders>

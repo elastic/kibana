@@ -290,6 +290,7 @@ export const systemFieldsMap: Readonly<Record<string, string>> = {
   'system.auth.ssh.method': 'system.auth.ssh.method',
 };
 
+// Is this being used?
 export const signalFieldsMap: Readonly<Record<string, string>> = {
   'signal.original_time': 'signal.original_time',
   'signal.rule.id': 'signal.rule.id',
@@ -331,6 +332,7 @@ export const ruleFieldsMap: Readonly<Record<string, string>> = {
   'rule.reference': 'rule.reference',
 };
 
+// Is this being used?
 export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
   '@timestamp': '@timestamp',

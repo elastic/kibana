@@ -91,6 +91,7 @@ yarn kbn watch
 - @kbn/securitysolution-list-constants
 - @kbn/securitysolution-list-hooks
 - @kbn/securitysolution-list-utils
+- @kbn/securitysolution-rules
 - @kbn/securitysolution-utils
 - @kbn/server-http-tools
 - @kbn/server-route-repository

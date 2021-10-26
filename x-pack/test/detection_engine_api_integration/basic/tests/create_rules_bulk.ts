@@ -23,31 +23,10 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const supertest = getService('supertest');
 
   describe('create_rules_bulk', () => {
-    describe('validation errors', () => {
-      it('should give a 200 even if the index does not exist as all bulks return a 200 but have an error of 409 bad request in the body', async () => {
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
-          .set('kbn-xsrf', 'true')
-          .send([getSimpleRule()])
-          .expect(200);
-
-        expect(body).to.eql([
-          {
-            error: {
-              message:
-                'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-              status_code: 400,
-            },
-            rule_id: 'rule-1',
-          },
-        ]);
-      });
-    });
-
     describe('creating rules in bulk', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');

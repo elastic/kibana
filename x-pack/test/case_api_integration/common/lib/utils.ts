@@ -74,6 +74,7 @@ function toArray<T>(input: T | T[]): T[] {
 /**
  * Query Elasticsearch for a set of signals within a set of indices
  */
+// TODO: fix this to use new API/schema
 export const getSignalsWithES = async ({
   es,
   indices,

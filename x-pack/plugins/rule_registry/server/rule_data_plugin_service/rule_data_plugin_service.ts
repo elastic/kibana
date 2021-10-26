@@ -44,6 +44,13 @@ export interface IRuleDataService {
   isWriteEnabled(): boolean;
 
   /**
+   * If writer cache is enabled (the default), the writer will be cached
+   * after being initialized. Disabling this is useful for tests, where we
+   * expect to easily be able to clean up after ourselves between test cases.
+   */
+  isWriterCacheEnabled(): boolean;
+
+  /**
    * Installs common Elasticsearch resources used by all alerts-as-data indices.
    */
   initializeService(): void;
@@ -75,6 +82,7 @@ interface ConstructorOptions {
   logger: Logger;
   kibanaVersion: string;
   isWriteEnabled: boolean;
+  isWriterCacheEnabled: boolean;
 }
 
 export class RuleDataService implements IRuleDataService {
@@ -111,6 +119,18 @@ export class RuleDataService implements IRuleDataService {
     return this.options.isWriteEnabled;
   }
 
+  /**
+   * If writer cache is enabled (the default), the writer will be cached
+   * after being initialized. Disabling this is useful for tests, where we
+   * expect to easily be able to clean up after ourselves between test cases.
+   */
+  public isWriterCacheEnabled(): boolean {
+    return this.options.isWriterCacheEnabled;
+  }
+
+  /**
+   * Installs common Elasticsearch resources used by all alerts-as-data indices.
+   */
   public initializeService(): void {
     // Run the installation of common resources and handle exceptions.
     this.installCommonResources = this.resourceInstaller
@@ -176,6 +196,7 @@ export class RuleDataService implements IRuleDataService {
       indexInfo,
       resourceInstaller: this.resourceInstaller,
       isWriteEnabled: this.isWriteEnabled(),
+      isWriterCacheEnabled: this.isWriterCacheEnabled(),
       waitUntilReadyForReading,
       waitUntilReadyForWriting,
       logger: this.options.logger,

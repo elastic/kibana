@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should not give errors when querying and the signals index does exist and is empty', async () => {
+      it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
         await createSignalsIndex(supertest);
         const { body } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should not give errors when querying and the signals index does exist and is empty', async () => {
+        it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
           await createSignalsIndex(supertest);
           const { body } = await supertest
             .post(ALERTS_AS_DATA_FIND_URL)
@@ -186,13 +186,13 @@ export default ({ getService }: FtrProviderContext) => {
                         filter: [
                           {
                             match_phrase: {
-                              'signal.rule.id': 'c76f1a10-ffb6-11eb-8914-9b237bf6808c',
+                              'kibana.alert.rule.uuid': 'c76f1a10-ffb6-11eb-8914-9b237bf6808c',
                             },
                           },
-                          { term: { 'signal.status': 'open' } },
+                          { term: { 'kibana.alert.workflow_status': 'open' } },
                         ],
                         should: [],
-                        must_not: [{ exists: { field: 'signal.rule.building_block_type' } }],
+                        must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
                       },
                     },
                     {

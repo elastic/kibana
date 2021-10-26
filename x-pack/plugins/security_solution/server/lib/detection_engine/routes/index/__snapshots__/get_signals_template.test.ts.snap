@@ -23,6 +23,10 @@ Object {
       "path": "signal.ancestors.type",
       "type": "alias",
     },
+    "kibana.alert.building_block_type": Object {
+      "path": "signal.rule.building_block_type",
+      "type": "alias",
+    },
     "kibana.alert.depth": Object {
       "path": "signal.depth",
       "type": "alias",
@@ -125,10 +129,6 @@ Object {
     },
     "kibana.alert.rule.author": Object {
       "path": "signal.rule.author",
-      "type": "alias",
-    },
-    "kibana.alert.rule.building_block_type": Object {
-      "path": "signal.rule.building_block_type",
       "type": "alias",
     },
     "kibana.alert.rule.created_at": Object {
@@ -2306,6 +2306,10 @@ Object {
           "path": "signal.ancestors.type",
           "type": "alias",
         },
+        "kibana.alert.building_block_type": Object {
+          "path": "signal.rule.building_block_type",
+          "type": "alias",
+        },
         "kibana.alert.depth": Object {
           "path": "signal.depth",
           "type": "alias",
@@ -2408,10 +2412,6 @@ Object {
         },
         "kibana.alert.rule.author": Object {
           "path": "signal.rule.author",
-          "type": "alias",
-        },
-        "kibana.alert.rule.building_block_type": Object {
-          "path": "signal.rule.building_block_type",
           "type": "alias",
         },
         "kibana.alert.rule.created_at": Object {
