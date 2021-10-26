@@ -16,7 +16,7 @@ import ServiceNowSelectableRowComponent from './servicenow_dropdown_row';
 const connector: ActionConnector = {
   secrets: {},
   config: {
-    isLegacy: true,
+    usesTableApi: true,
   },
   id: 'test',
   actionTypeId: '.test',
@@ -46,7 +46,7 @@ describe('ServiceNowSelectableRowComponent', () => {
   });
 
   it('does not add the deprecated text to the connector title when it is not deprecated', () => {
-    const nonDeprecatedConnector = { ...connector, config: { isLegacy: false } };
+    const nonDeprecatedConnector = { ...connector, config: { usesTableApi: false } };
 
     render(
       <EuiThemeProvider>
@@ -58,7 +58,7 @@ describe('ServiceNowSelectableRowComponent', () => {
   });
 
   it('does not render an icon marking the connector as deprecated when its config is marked as not deprecated', () => {
-    const nonDeprecatedConnector = { ...connector, config: { isLegacy: false } };
+    const nonDeprecatedConnector = { ...connector, config: { usesTableApi: false } };
 
     const wrapper = mountWithIntl(
       <EuiThemeProvider>
