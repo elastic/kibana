@@ -23,7 +23,7 @@ import { ServiceNowITSMActionParams, Choice, Fields, ServiceNowActionConnector }
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { useGetChoices } from './use_get_choices';
-import { choicesToEuiOptions, DEFAULT_CORRELATION_ID, isLegacyConnector } from './helpers';
+import { choicesToEuiOptions, DEFAULT_CORRELATION_ID, isDeprecatedConnector } from './helpers';
 
 import * as i18n from './translations';
 
@@ -45,10 +45,6 @@ const ServiceNowParamsFields: React.FunctionComponent<
     http,
     notifications: { toasts },
   } = useKibana().services;
-
-  const isDeprecatedConnector = isLegacyConnector(
-    actionConnector as unknown as ServiceNowActionConnector
-  );
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
@@ -244,7 +240,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!isDeprecatedConnector && (
+      {!isDeprecatedConnector(actionConnector as unknown as ServiceNowActionConnector) && (
         <>
           <EuiFlexGroup>
             <EuiFlexItem>

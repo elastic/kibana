@@ -6,16 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
 
+import { isEmpty } from 'lodash';
 import { LicenseType } from '../../../../licensing/common/types';
 import { SecurityPageName } from '../types';
-import {
-  AppDeepLink,
-  ApplicationStart,
-  AppNavLinkStatus,
-  AppUpdater,
-} from '../../../../../../src/core/public';
+import { AppDeepLink, ApplicationStart, AppNavLinkStatus } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
   DETECT,
@@ -50,6 +45,7 @@ import {
   UEBA_PATH,
   CASES_FEATURE_ID,
   HOST_ISOLATION_EXCEPTIONS_PATH,
+  SERVER_APP_ID,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
@@ -362,25 +358,18 @@ export function getDeepLinks(
 ): AppDeepLink[] {
   const isPremium = isPremiumLicense(licenseType);
 
+  /**
+   * Recursive DFS function to filter deepLinks by permissions (licence and capabilities).
+   * Checks "end" deepLinks with no children first, the other parent deepLinks will be included if
+   * they still have children deepLinks after filtering
+   */
   const filterDeepLinks = (deepLinks: AppDeepLink[]): AppDeepLink[] => {
     return deepLinks
-      .filter((deepLink) => {
-        if (!isPremium && PREMIUM_DEEP_LINK_IDS.has(deepLink.id)) {
-          return false;
-        }
-        if (deepLink.id === SecurityPageName.case) {
-          return capabilities == null || capabilities[CASES_FEATURE_ID].read_cases === true;
-        }
-        if (deepLink.id === SecurityPageName.ueba) {
-          return enableExperimental.uebaEnabled;
-        }
-        return true;
-      })
       .map((deepLink) => {
         if (
           deepLink.id === SecurityPageName.case &&
           capabilities != null &&
-          capabilities[CASES_FEATURE_ID].crud_cases === false
+          capabilities[CASES_FEATURE_ID]?.crud_cases === false
         ) {
           return {
             ...deepLink,
@@ -394,6 +383,21 @@ export function getDeepLinks(
           };
         }
         return deepLink;
+      })
+      .filter((deepLink) => {
+        if (!isPremium && PREMIUM_DEEP_LINK_IDS.has(deepLink.id)) {
+          return false;
+        }
+        if (deepLink.path && deepLink.path.startsWith(CASES_PATH)) {
+          return capabilities == null || capabilities[CASES_FEATURE_ID]?.read_cases === true;
+        }
+        if (deepLink.id === SecurityPageName.ueba) {
+          return enableExperimental.uebaEnabled;
+        }
+        if (!isEmpty(deepLink.deepLinks)) {
+          return true;
+        }
+        return capabilities == null || capabilities[SERVER_APP_ID]?.show === true;
       });
   };
 
@@ -407,19 +411,4 @@ export function isPremiumLicense(licenseType?: LicenseType): boolean {
     licenseType === 'enterprise' ||
     licenseType === 'trial'
   );
-}
-
-export function updateGlobalNavigation({
-  capabilities,
-  updater$,
-  enableExperimental,
-}: {
-  capabilities: ApplicationStart['capabilities'];
-  updater$: Subject<AppUpdater>;
-  enableExperimental: ExperimentalFeatures;
-}) {
-  updater$.next(() => ({
-    navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent showing main nav link
-    deepLinks: getDeepLinks(enableExperimental, undefined, capabilities),
-  }));
 }

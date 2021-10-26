@@ -14,11 +14,11 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
   getSearchAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../../helpers/transactions';
 import { Setup } from '../../helpers/setup_request';
 
 export async function getTransactionDurationChartPreview({
@@ -52,17 +52,14 @@ export async function getTransactionDurationChartPreview({
           : []),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
-        ...getDocumentTypeFilterForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
       ] as QueryDslQueryContainer[],
     },
   };
 
-  const transactionDurationField =
-    getTransactionDurationFieldForAggregatedTransactions(
-      searchAggregatedTransactions
-    );
+  const transactionDurationField = getTransactionDurationFieldForTransactions(
+    searchAggregatedTransactions
+  );
 
   const aggs = {
     timeseries: {
@@ -90,11 +87,7 @@ export async function getTransactionDurationChartPreview({
   };
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: { size: 0, query, aggs },
   };
