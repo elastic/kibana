@@ -76,14 +76,15 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/internal/apm/service-map/backend/{backendName}', () => {
+    describe('/internal/apm/service-map/backend', () => {
       it('returns an object with nulls', async () => {
         const q = querystring.stringify({
+          backendName: 'postgres',
           start: metadata.start,
           end: metadata.end,
           environment: 'ENVIRONMENT_ALL',
         });
-        const response = await supertest.get(`/internal/apm/service-map/backend/postgres?${q}`);
+        const response = await supertest.get(`/internal/apm/service-map/backend?${q}`);
 
         expect(response.status).to.be(200);
 
@@ -305,14 +306,15 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/internal/apm/service-map/backend/{backendName}', () => {
+    describe('/internal/apm/service-map/backend', () => {
       it('returns an object with data', async () => {
         const q = querystring.stringify({
+          backendName: 'postgresql',
           start: metadata.start,
           end: metadata.end,
           environment: 'ENVIRONMENT_ALL',
         });
-        const response = await supertest.get(`/internal/apm/service-map/backend/postgresql?${q}`);
+        const response = await supertest.get(`/internal/apm/service-map/backend?${q}`);
 
         expect(response.status).to.be(200);
 

@@ -114,12 +114,13 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 });
 
 const serviceMapBackendNodeRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/backend/{backendName}',
+  endpoint: 'GET /internal/apm/service-map/backend',
   params: t.type({
-    path: t.type({
-      backendName: t.string,
-    }),
-    query: t.intersection([environmentRt, rangeRt]),
+    query: t.intersection([
+      t.type({ backendName: t.string }),
+      environmentRt,
+      rangeRt,
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
@@ -134,8 +135,7 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const {
-      path: { backendName },
-      query: { environment, start, end },
+      query: { backendName, environment, start, end },
     } = params;
 
     return getServiceMapBackendNodeInfo({
