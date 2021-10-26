@@ -12796,8 +12796,6 @@
     "xpack.infra.chartSection.missingMetricDataText": "データが欠けています",
     "xpack.infra.chartSection.notEnoughDataPointsToRenderText": "チャートのレンダリングに必要なデータポイントが足りません。時間範囲を広げてみてください。",
     "xpack.infra.chartSection.notEnoughDataPointsToRenderTitle": "データが不十分です",
-    "xpack.infra.common.tabBetaBadgeLabel": "ベータ",
-    "xpack.infra.common.tabBetaBadgeTooltipContent": "この機能は現在開発中です。他にも機能が追加され、機能によっては変更されるものもあります。",
     "xpack.infra.configureSourceActionLabel": "ソース構成を変更",
     "xpack.infra.dataSearch.abortedRequestErrorMessage": "リクエストが中断されましたか。",
     "xpack.infra.dataSearch.cancelButtonLabel": "リクエストのキャンセル",
