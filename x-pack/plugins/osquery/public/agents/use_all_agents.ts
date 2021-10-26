@@ -59,6 +59,7 @@ export const useAllAgents = (
           title: i18n.translate('xpack.osquery.agents.fetchError', {
             defaultMessage: 'Error while fetching agents',
           }),
+          // @ts-expect-error update types
           toastMessage: error?.body?.error,
         }),
     }
