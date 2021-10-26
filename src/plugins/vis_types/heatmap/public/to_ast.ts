@@ -156,6 +156,15 @@ export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis,
     args
   );
 
+  if (vis.params.colorsRange) {
+    vis.params.colorsRange.forEach((range: any) => {
+      visTypeHeatmap.addArgument(
+        'colorsRange',
+        buildExpression(`range from=${range.from} to=${range.to}`)
+      );
+    });
+  }
+
   const ast = buildExpression([getEsaggsFn(vis), visTypeHeatmap]);
 
   return ast.toAst();

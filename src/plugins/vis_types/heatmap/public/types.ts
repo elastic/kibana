@@ -7,9 +7,16 @@
  */
 import { UiCounterMetricType } from '@kbn/analytics';
 import type { Position } from '@elastic/charts';
-import type { PaletteOutput, ChartsPluginSetup, Style, Labels } from '../../../charts/public';
+import type {
+  PaletteOutput,
+  ChartsPluginSetup,
+  Style,
+  Labels,
+  ColorSchemas,
+} from '../../../charts/public';
 import type { ExpressionValueBoxed } from '../../../expressions/public';
-import { RangeValues } from '../../../vis_default_editor/public';
+// import { RangeValues } from '../../../vis_default_editor/public';
+import { Range } from '../../../expressions/public';
 import type {
   SchemaConfig,
   FakeParams,
@@ -31,8 +38,8 @@ interface HeatmapCommonParams {
   legendPosition: Position;
   colorsNumber: number | '';
   invertColors: boolean;
-  //   colorsRange: RangeValues[];
-  colorSchema: string;
+  colorsRange?: Range[];
+  colorSchema: ColorSchemas;
   setColorRange: boolean;
   percentageMode: boolean;
   percentageFormatPattern?: string;

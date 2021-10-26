@@ -12,6 +12,7 @@ import {
   Datatable,
   ExpressionValueRender,
 } from '../../../expressions/common';
+import { vislibColorMaps } from '../../../charts/common';
 import { HeatmapVisConfig, HeatmapVisParams } from './types';
 import { prepareLogTable, Dimension } from '../../../visualizations/public';
 
@@ -128,14 +129,24 @@ export const createHeatmapVisFn = (): ExpressionHeatmapFunction => ({
     },
     colorSchema: {
       types: ['string'],
-      help: i18n.translate('visTypeHeatmap.function.args.colorSchemaHelpText', {
-        defaultMessage: 'TBD',
+      default: '"Green to Red"',
+      options: Object.values(vislibColorMaps).map((value: any) => value.id),
+      help: i18n.translate('visTypeHeatmap.function.colorSchema.help', {
+        defaultMessage: 'Color schema to use',
       }),
     },
     setColorRange: {
       types: ['boolean'],
       help: i18n.translate('visTypeHeatmap.function.args.setColorRangeHelpText', {
-        defaultMessage: 'TBD',
+        defaultMessage: 'When this is enabled. it highlights the ranges of the same color',
+      }),
+    },
+    colorsRange: {
+      types: ['range'],
+      multi: true,
+      help: i18n.translate('visTypeHeatmap.function.colorRange.help', {
+        defaultMessage:
+          'A range object specifying groups of values to which different colors should be applied.',
       }),
     },
     percentageMode: {
@@ -173,7 +184,7 @@ export const createHeatmapVisFn = (): ExpressionHeatmapFunction => ({
     palette: {
       types: ['palette', 'system_palette'],
       help: i18n.translate('visTypeHeatmap.function.args.paletteHelpText', {
-        defaultMessage: 'Defines the chart palette',
+        defaultMessage: 'Provides colors for the values, based on the bounds',
       }),
       default: '{palette}',
     },

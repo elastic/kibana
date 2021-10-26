@@ -167,7 +167,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
           setValue={setValue}
         />
 
-        {stateParams.setColorRange && (
+        {stateParams.setColorRange && stateParams.colorsRange && (
           <ColorRanges
             data-test-subj="heatmapColorRange"
             colorsRange={stateParams.colorsRange}
