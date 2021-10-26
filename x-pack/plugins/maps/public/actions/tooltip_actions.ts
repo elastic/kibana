@@ -14,7 +14,7 @@ import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../common/constants';
 import { TooltipFeature, TooltipState } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
 import { ILayer } from '../classes/layers/layer';
-import { IVectorLayer, getFeatureId, isVectorLayer } from '../classes/layers/vector_layer';
+import { IVectorLayer, isVectorLayer } from '../classes/layers/vector_layer';
 
 export function closeOnClickTooltip(tooltipId: string) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
@@ -85,8 +85,7 @@ export function updateTooltipStateForLayer(layer: ILayer, layerFeatures: Feature
                 ? layerFeature.properties![FEATURE_VISIBLE_PROPERTY_NAME]
                 : true;
             return (
-              isVisible &&
-              getFeatureId(layerFeature, (layer as IVectorLayer).getSource()) === tooltipFeature.id
+              isVisible && (layer as IVectorLayer).getFeatureId(layerFeature) === tooltipFeature.id
             );
           });
 
