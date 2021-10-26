@@ -57,18 +57,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           </EuiPanel>
 
           <EuiSpacer size={'m'} />
-
-          <EuiPanel>
-            <EuiTitle size={'xs'}>
-              <h5>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.nodesList.expandedRow.memoryUsageTitle"
-                  defaultMessage="Memory usage"
-                />
-              </h5>
-            </EuiTitle>
-            <EuiSpacer size={'m'} />
-          </EuiPanel>
         </EuiFlexItem>
 
         <EuiFlexItem>
