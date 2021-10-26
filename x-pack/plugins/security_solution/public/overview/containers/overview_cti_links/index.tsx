@@ -12,28 +12,37 @@ import {
   createLinkFromDashboardSO,
   getCtiListItemsWithoutLinks,
   isOverviewItem,
-  EMPTY_LIST_ITEMS,
+  getEmptyList,
 } from './helpers';
 import { LinkPanelListItem, isLinkPanelListItem } from '../../components/link_panel';
 
 export const useCtiDashboardLinks = (
   eventCountsByDataset: { [key: string]: number },
   to: string,
-  from: string
+  from: string,
+  installedIntegrationsId: string[] = []
 ) => {
   const createDashboardUrl = useKibana().services.dashboard?.dashboardUrlGenerator?.createUrl;
   const savedObjectsClient = useKibana().services.savedObjects.client;
 
   const [buttonHref, setButtonHref] = useState<string | undefined>();
-  const [listItems, setListItems] = useState<LinkPanelListItem[]>(EMPTY_LIST_ITEMS);
+  const [listItems, setListItems] = useState<LinkPanelListItem[]>(
+    getEmptyList(installedIntegrationsId)
+  );
 
   const [isPluginDisabled, setIsDashboardPluginDisabled] = useState(false);
   const handleDisabledPlugin = useCallback(() => {
     if (!isPluginDisabled) {
       setIsDashboardPluginDisabled(true);
     }
-    setListItems(getCtiListItemsWithoutLinks(eventCountsByDataset));
-  }, [setIsDashboardPluginDisabled, setListItems, eventCountsByDataset, isPluginDisabled]);
+    setListItems(getCtiListItemsWithoutLinks(eventCountsByDataset, installedIntegrationsId));
+  }, [
+    setIsDashboardPluginDisabled,
+    setListItems,
+    eventCountsByDataset,
+    installedIntegrationsId,
+    isPluginDisabled,
+  ]);
 
   const handleTagsReceived = useCallback(
     (TagsSO?) => {
