@@ -47,6 +47,7 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
       <EuiTabs style={{ paddingLeft: euiThemeVars.euiSizeS }} size="l">
         {devTools.map((currentDevTool) => (
           <EuiTab
+            key={currentDevTool.id}
             disabled={currentDevTool.isDisabled()}
             isSelected={currentDevTool === activeDevTool}
             onClick={() => {
@@ -55,7 +56,7 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
               }
             }}
           >
-            <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
+            <EuiToolTip content={currentDevTool.tooltipContent}>
               <span>{currentDevTool.title}</span>
             </EuiToolTip>
           </EuiTab>
