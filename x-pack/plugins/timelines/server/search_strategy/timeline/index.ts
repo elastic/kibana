@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  AlertConsumers,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_TYPE_ID,
-  SPACE_IDS,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
 
@@ -114,7 +109,6 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps,
   queryFactory,
   alerting,
-  alertConsumers = [],
   auditLogger,
 }: {
   es: ISearchStrategy;
@@ -123,7 +117,6 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps: SearchStrategyDependencies;
   alerting: AlertingPluginStartContract;
   queryFactory: TimelineFactory<T>;
-  alertConsumers?: AlertConsumers[];
   auditLogger: AuditLogger | undefined;
 }) => {
   const indices = request.defaultIndex ?? request.indexType;
@@ -153,7 +146,6 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
     }),
     map((response) => {
       const rawResponse = shimHitsTotal(response.rawResponse, options);
-
       // Do we have to loop over each hit? Yes.
       // ecs auditLogger requires that we log each alert independently
       if (auditLogger != null) {
