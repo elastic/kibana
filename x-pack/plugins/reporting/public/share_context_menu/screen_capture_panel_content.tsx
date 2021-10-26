@@ -8,7 +8,7 @@
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
-import { LayoutParams } from '../../common/types';
+import type { LayoutParams } from 'x-pack/plugins/screenshotting/server';
 import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
 
 export interface Props extends ReportingPanelProps {

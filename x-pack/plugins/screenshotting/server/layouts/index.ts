@@ -5,10 +5,37 @@
  * 2.0.
  */
 
-import { LevelLogger } from '../';
-import { Size } from '../../../common/types';
-import { HeadlessChromiumDriver } from '../../browsers';
+import type { Logger } from 'src/core/server';
+import type { HeadlessChromiumDriver } from '../browsers';
 import type { Layout } from './layout';
+
+export interface Size {
+  width: number;
+  height: number;
+}
+
+export interface LayoutParams {
+  id: string;
+  dimensions?: Size;
+}
+
+export interface LayoutConfig {
+  zoom: number;
+}
+
+export interface PageSizeParams {
+  pageMarginTop: number;
+  pageMarginBottom: number;
+  pageMarginWidth: number;
+  tableBorderWidth: number;
+  headingHeight: number;
+  subheadingHeight: number;
+}
+
+export interface PdfImageSize {
+  width: number;
+  height?: number;
+}
 
 export interface LayoutSelectorDictionary {
   screenshot: string;
@@ -19,7 +46,6 @@ export interface LayoutSelectorDictionary {
   timefilterDurationAttribute: string;
 }
 
-export type { LayoutParams, PageSizeParams, PdfImageSize, Size } from '../../../common/types';
 export { CanvasLayout } from './canvas_layout';
 export { createLayout } from './create_layout';
 export type { Layout } from './layout';
@@ -45,7 +71,7 @@ interface LayoutSelectors {
   // Fields that are not part of Layout: the instances
   // independently implement these fields on their own
   selectors: LayoutSelectorDictionary;
-  positionElements?: (browser: HeadlessChromiumDriver, logger: LevelLogger) => Promise<void>;
+  positionElements?: (browser: HeadlessChromiumDriver, logger: Logger) => Promise<void>;
 }
 
 export type LayoutInstance = Layout & LayoutSelectors & Partial<Size>;

@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  getDefaultLayoutSelectors,
-  LayoutInstance,
-  LayoutSelectorDictionary,
-  LayoutTypes,
-  PageSizeParams,
-  Size,
-} from './';
+import { getDefaultLayoutSelectors, LayoutTypes } from '.';
+import type { LayoutInstance, LayoutSelectorDictionary, PageSizeParams, Size } from '.';
 import { Layout } from './layout';
 
 // FIXME - should use zoom from capture config

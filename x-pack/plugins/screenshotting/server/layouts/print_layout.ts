@@ -6,9 +6,10 @@
  */
 
 import { PageOrientation, PredefinedPageSize } from 'pdfmake/interfaces';
-import { DEFAULT_VIEWPORT, LAYOUT_TYPES } from '../../../common/constants';
-import { CaptureConfig } from '../../types';
-import { getDefaultLayoutSelectors, LayoutInstance, LayoutSelectorDictionary } from './';
+import type { LayoutConfig, LayoutInstance, LayoutSelectorDictionary } from '.';
+import { LayoutTypes } from '.';
+import { DEFAULT_VIEWPORT } from '../browsers';
+import { getDefaultLayoutSelectors } from '.';
 import { Layout } from './layout';
 
 export class PrintLayout extends Layout implements LayoutInstance {
@@ -17,12 +18,10 @@ export class PrintLayout extends Layout implements LayoutInstance {
     screenshot: '[data-shared-item]', // override '[data-shared-items-container]'
   };
   public readonly groupCount = 2;
-  private readonly captureConfig: CaptureConfig;
   private readonly viewport = DEFAULT_VIEWPORT;
 
-  constructor(captureConfig: CaptureConfig) {
-    super(LAYOUT_TYPES.PRINT);
-    this.captureConfig = captureConfig;
+  constructor(private readonly config: LayoutConfig) {
+    super(LayoutTypes.PRINT);
   }
 
   public getCssOverridesPath() {
@@ -34,16 +33,17 @@ export class PrintLayout extends Layout implements LayoutInstance {
   }
 
   public getBrowserZoom() {
-    return this.captureConfig.zoom;
+    return this.config.zoom;
   }
 
   public getViewport(itemsCount: number) {
     return {
-      zoom: this.captureConfig.zoom,
+      zoom: this.config.zoom,
       width: this.viewport.width,
       height: this.viewport.height * itemsCount,
     };
   }
+
   public getPdfImageSize() {
     return {
       width: 500,

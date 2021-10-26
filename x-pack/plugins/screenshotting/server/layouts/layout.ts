@@ -6,7 +6,7 @@
  */
 
 import type { CustomPageSize, PredefinedPageSize } from 'pdfmake/interfaces';
-import type { PageSizeParams, PdfImageSize, Size } from '../../../common/types';
+import type { PageSizeParams, PdfImageSize, Size } from '.';
 
 export interface ViewZoomWidthHeight {
   zoom: number;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { createMockLayoutInstance } from './create_mock_layoutinstance';
 export { createMockLevelLogger } from './create_mock_levellogger';
 export {
   createMockConfig,

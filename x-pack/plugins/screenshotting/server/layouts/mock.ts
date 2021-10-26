@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { LAYOUT_TYPES } from '../../common/constants';
-import { createLayout, LayoutInstance } from '../lib/layouts';
-import { CaptureConfig } from '../types';
+import { createLayout, LayoutTypes, LayoutInstance } from '.';
 
-export const createMockLayoutInstance = (captureConfig: CaptureConfig) => {
-  const mockLayout = createLayout(captureConfig, {
-    id: LAYOUT_TYPES.PRESERVE_LAYOUT,
-    dimensions: { height: 100, width: 100 },
-  }) as LayoutInstance;
-  mockLayout.selectors = {
+export function createMockLayoutInstance(): LayoutInstance {
+  const layout = createLayout(
+    { zoom: 1 },
+    {
+      id: LayoutTypes.PRESERVE_LAYOUT,
+      dimensions: { height: 100, width: 100 },
+    }
+  ) as LayoutInstance;
+
+  layout.selectors = {
     renderComplete: 'renderedSelector',
     itemsCountAttribute: 'itemsSelector',
     screenshot: 'screenshotSelector',
@@ -22,5 +24,6 @@ export const createMockLayoutInstance = (captureConfig: CaptureConfig) => {
     renderErrorAttribute: 'dataRenderErrorSelector',
     timefilterDurationAttribute: 'timefilterDurationSelector',
   };
-  return mockLayout;
-};
+
+  return layout;
+}

@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { LAYOUT_TYPES } from '../../../common/constants';
-import { CaptureConfig } from '../../types';
-import { LayoutInstance, LayoutParams, LayoutTypes } from './';
+import type { LayoutConfig, LayoutInstance, LayoutParams } from '.';
+import { LayoutTypes } from '.';
 import { CanvasLayout } from './canvas_layout';
 import { PreserveLayout } from './preserve_layout';
 import { PrintLayout } from './print_layout';
 
-export function createLayout(
-  captureConfig: CaptureConfig,
-  layoutParams?: LayoutParams
-): LayoutInstance {
-  if (layoutParams && layoutParams.dimensions && layoutParams.id === LAYOUT_TYPES.PRESERVE_LAYOUT) {
+export function createLayout(config: LayoutConfig, layoutParams?: LayoutParams): LayoutInstance {
+  if (layoutParams && layoutParams.dimensions && layoutParams.id === LayoutTypes.PRESERVE_LAYOUT) {
     return new PreserveLayout(layoutParams.dimensions);
   }
 
@@ -25,5 +21,5 @@ export function createLayout(
   }
 
   // layoutParams is optional as PrintLayout doesn't use it
-  return new PrintLayout(captureConfig);
+  return new PrintLayout(config);
 }

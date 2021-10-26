@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { ReportingConfig } from '../..';
-import { createMockConfig, createMockConfigSchema } from '../../test_helpers';
-import { createLayout, LayoutParams, PreserveLayout } from './';
+import { createLayout, LayoutConfig, LayoutParams, PreserveLayout } from '.';
 import { CanvasLayout } from './canvas_layout';
 
 describe('Create Layout', () => {
-  let config: ReportingConfig;
+  let config: LayoutConfig;
   beforeEach(() => {
-    config = createMockConfig(createMockConfigSchema());
+    config = { zoom: 1 };
   });
 
   it('creates preserve layout instance', () => {
     const { id, height, width } = new PreserveLayout({ width: 16, height: 16 });
     const preserveParams: LayoutParams = { id, dimensions: { height, width } };
-    const layout = createLayout(config.get('capture'), preserveParams);
+    const layout = createLayout(config, preserveParams);
     expect(layout).toMatchInlineSnapshot(`
       PreserveLayout {
         "groupCount": 1,
@@ -44,19 +42,15 @@ describe('Create Layout', () => {
   });
 
   it('creates the print layout', () => {
-    const print = createLayout(config.get('capture'));
+    const print = createLayout(config);
     const printParams: LayoutParams = {
       id: print.id,
     };
-    const layout = createLayout(config.get('capture'), printParams);
+    const layout = createLayout(config, printParams);
     expect(layout).toMatchInlineSnapshot(`
       PrintLayout {
-        "captureConfig": Object {
-          "browser": Object {
-            "chromium": Object {
-              "disableSandbox": true,
-            },
-          },
+        "config": Object {
+          "zoom": 1,
         },
         "groupCount": 2,
         "hasFooter": true,
@@ -82,7 +76,7 @@ describe('Create Layout', () => {
   it('creates the canvas layout', () => {
     const { id, height, width } = new CanvasLayout({ width: 18, height: 18 });
     const canvasParams: LayoutParams = { id, dimensions: { height, width } };
-    const layout = createLayout(config.get('capture'), canvasParams);
+    const layout = createLayout(config, canvasParams);
     expect(layout).toMatchInlineSnapshot(`
       CanvasLayout {
         "groupCount": 1,
