@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -179,16 +179,7 @@ function AlertsPage() {
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
-              defaultMessage:
-                'Alert history is currently an experimental feature within observability',
-            })}
-            color="warning"
-            iconType="beaker"
-          >
-            <AlertsDisclaimer />
-          </EuiCallOut>
+          <AlertsDisclaimer />
         </EuiFlexItem>
         <EuiFlexItem>
           <AlertsSearchBar

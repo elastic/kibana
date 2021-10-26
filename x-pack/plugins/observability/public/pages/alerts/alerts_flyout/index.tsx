@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -47,7 +46,7 @@ import { asDuration } from '../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import { parseAlert } from '../parse_alert';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
-import { AlertsDisclaimer } from '../alerts_disclaimer';
+import { ExperimentalBadge } from '../../../components/shared/experimental_badge';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
@@ -139,12 +138,7 @@ export function AlertsFlyout({
   return (
     <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
       <EuiFlyoutHeader>
-        <EuiBetaBadge
-          label={i18n.translate('xpack.observability.alertsExperimentalTitle', {
-            defaultMessage: 'Experimental',
-          })}
-          tooltipContent={<AlertsDisclaimer />}
-        />
+        <ExperimentalBadge />
         <EuiSpacer size="s" />
         <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
           <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>
