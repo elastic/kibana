@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 import { commonSearchSuccessResponseFieldsRT } from '../../../../utils/elasticsearch_runtime_types';

@@ -24,7 +24,7 @@ import {
   GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold/types';
 import { alertsMock } from '../../../../../alerting/server/mocks';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 // Mocks //
 const numericField = {

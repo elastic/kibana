@@ -12,7 +12,7 @@
  * funcationality contained here.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type AliasAction =
   | {

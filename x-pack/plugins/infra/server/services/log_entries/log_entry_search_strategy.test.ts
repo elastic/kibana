@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { of, throwError } from 'rxjs';
 import {
   elasticsearchServiceMock,
@@ -196,7 +196,7 @@ describe('LogEntry search strategy', () => {
       mockDependencies
     );
 
-    await expect(response.toPromise()).rejects.toThrowError(ResponseError);
+    await expect(response.toPromise()).rejects.toThrowError(errors.ResponseError);
   });
 
   it('forwards cancellation to the underlying search strategy', async () => {
@@ -257,7 +257,7 @@ const createEsSearchStrategyMock = (esSearchResponse: IEsSearchResponse) => ({
         return of(esSearchResponse);
       } else {
         return throwError(
-          new ResponseError({
+          new errors.ResponseError({
             body: {},
             headers: {},
             meta: {} as any,

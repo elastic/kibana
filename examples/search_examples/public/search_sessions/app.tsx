@@ -55,11 +55,7 @@ import {
   createStateContainer,
   useContainerState,
 } from '../../../../src/plugins/kibana_utils/public';
-import {
-  getInitialStateFromUrl,
-  SEARCH_SESSIONS_EXAMPLES_APP_URL_GENERATOR,
-  SearchSessionExamplesUrlGeneratorState,
-} from './url_generator';
+import { getInitialStateFromUrl, SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR } from './app_locator';
 
 interface SearchSessionsExampleAppDeps {
   notifications: CoreStart['notifications'];
@@ -140,14 +136,14 @@ export const SearchSessionsExampleApp = ({
   const enableSessionStorage = useCallback(() => {
     data.search.session.enableStorage({
       getName: async () => 'Search sessions example',
-      getUrlGeneratorData: async () => ({
+      getLocatorData: async () => ({
         initialState: {
           time: data.query.timefilter.timefilter.getTime(),
           filters: data.query.filterManager.getFilters(),
           query: data.query.queryString.getQuery(),
           indexPatternId: indexPattern?.id,
           numericFieldName,
-        } as SearchSessionExamplesUrlGeneratorState,
+        },
         restoreState: {
           time: data.query.timefilter.timefilter.getAbsoluteTime(),
           filters: data.query.filterManager.getFilters(),
@@ -155,8 +151,8 @@ export const SearchSessionsExampleApp = ({
           indexPatternId: indexPattern?.id,
           numericFieldName,
           searchSessionId: data.search.session.getSessionId(),
-        } as SearchSessionExamplesUrlGeneratorState,
-        urlGeneratorId: SEARCH_SESSIONS_EXAMPLES_APP_URL_GENERATOR,
+        },
+        id: SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR,
       }),
     });
   }, [
