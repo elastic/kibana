@@ -312,7 +312,7 @@ describe('connector validation: secrets with config', () => {
     const config: Record<string, unknown> = {
       hasAuth: true,
     };
-    expect(validateConnector(actionType, { config, secrets })).toEqual({ ...secrets, clientSecret: null });
+    expect(validateConnector(actionType, { config, secrets })).toBeNull();
   });
 
   test('connector validation succeeds when username/password not filled for hasAuth false', () => {
@@ -324,9 +324,10 @@ describe('connector validation: secrets with config', () => {
     const config: Record<string, unknown> = {
       hasAuth: false,
     };
-    expect(validateConnector(actionType, { config, secrets: {} })).toEqual(secrets);
-    expect(validateConnector(actionType, { config, secrets: { user: null }})).toEqual(secrets);
-    expect(validateConnector(actionType, { config, secrets:{ password: null }})).toEqual(secrets);
+    expect(validateConnector(actionType, { config, secrets })).toBeNull();
+    expect(validateConnector(actionType, { config, secrets: {} })).toBeNull();
+    expect(validateConnector(actionType, { config, secrets: { user: null } })).toBeNull();
+    expect(validateConnector(actionType, { config, secrets: { password: null } })).toBeNull();
   });
 
   test('connector validation fails when username/password was populated for hasAuth true', () => {
@@ -337,11 +338,12 @@ describe('connector validation: secrets with config', () => {
     const config: Record<string, unknown> = {
       hasAuth: true,
     };
-    expect(validateConnector(actionType, { config, secrets })).toEqual({
-      ...secrets,
-      user: null,
-      password: null,
-    });
+    // invalid user
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: [user] is required"`
+    );
   });
 
   test('connector validation succeeds when service is exchange_server and clientSecret is populated', () => {
@@ -351,25 +353,22 @@ describe('connector validation: secrets with config', () => {
     const config: Record<string, unknown> = {
       service: 'exchange_server',
     };
-    expect(validateConnector(actionType, { config, secrets })).toEqual({
-      ...secrets,
-      user: null,
-      password: null,
-    });
+    expect(validateConnector(actionType, { config, secrets })).toBeNull();
   });
 
   test('connector validation fails when service is exchange_server and clientSecret is not populated', () => {
     const secrets: Record<string, unknown> = {
-      clientSecret: '12345678',
+      clientSecret: null,
     };
     const config: Record<string, unknown> = {
       service: 'exchange_server',
     };
-    expect(validateConnector(actionType, { config, secrets })).toEqual({
-      ...secrets,
-      user: null,
-      password: null,
-    });
+    // invalid user
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: [clientSecret] is required"`
+    );
   });
 });
 

@@ -354,19 +354,18 @@ describe('create()', () => {
   });
 
   test('validates connector: config and secrets', async () => {
+    const connectorValidator = ({}, secrets: { param1: '1' }) => {
+      if (secrets.param1 == null) {
+        return '[param1] is required';
+      }
+      return null;
+    };
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       validate: {
-        connector: schema.object({
-          config: schema.object({
-            param1: schema.string(),
-          }),
-          secrets: schema.object({
-            param2: schema.string(),
-          }),
-        }),
+        connector: connectorValidator,
       },
       executor,
     });
@@ -380,7 +379,7 @@ describe('create()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [param1]: expected value of type [string] but got [undefined]"`
+      `"error validating action type connector: [param1] is required"`
     );
   });
 

@@ -53,8 +53,8 @@ test('should validate when there are no individual validators', () => {
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(testValue);
 
-  result = validateConnector(actionType, { config: testValue } );
-  expect(result).toEqual({ config: testValue, secrets: undefined });
+  result = validateConnector(actionType, { config: testValue });
+  expect(result).toBeNull();
 });
 
 test('should validate when validators return incoming value', () => {
@@ -83,8 +83,8 @@ test('should validate when validators return incoming value', () => {
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(testValue);
 
-  result = validateConnector(actionType, { config: testValue } );
-  expect(result).toEqual({ config: testValue, secrets: undefined });
+  result = validateConnector(actionType, { config: testValue });
+  expect(result).toBeNull();
 });
 
 test('should validate when validators return different values', () => {
@@ -114,8 +114,8 @@ test('should validate when validators return different values', () => {
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(returnedValue);
 
-  result = validateConnector(actionType, { config: testValue, secrets: { user: 'test' } } );
-  expect(result).toEqual({ config: testValue, secrets: { user: 'test' } });
+  result = validateConnector(actionType, { config: testValue, secrets: { user: 'test' } });
+  expect(result).toBeNull();
 });
 
 test('should throw with expected error when validators fail', () => {
@@ -133,6 +133,9 @@ test('should throw with expected error when validators fail', () => {
       params: erroringValidator,
       config: erroringValidator,
       secrets: erroringValidator,
+      connector: () => {
+        return 'test error';
+      },
     },
   };
 
@@ -150,9 +153,9 @@ test('should throw with expected error when validators fail', () => {
     `"error validating action type secrets: test error"`
   );
 
-  expect(() => validateConnector(actionType, testValue)).toThrowErrorMatchingInlineSnapshot(
-    `"error validating action type secrets: test error"`
-  );
+  expect(() =>
+    validateConnector(actionType, { config: testValue, secrets: { user: 'test' } })
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type connector: test error"`);
 });
 
 test('should work with @kbn/config-schema', () => {
@@ -166,10 +169,7 @@ test('should work with @kbn/config-schema', () => {
       params: testSchema,
       config: testSchema,
       secrets: testSchema,
-      connector: schema.object({
-        config: testSchema,
-        secrets: testSchema,
-      }),
+      connector: () => null,
     },
   };
 

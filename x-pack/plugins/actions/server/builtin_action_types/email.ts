@@ -169,13 +169,10 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-function validateConnector(connector: {
-  config: ActionTypeConfigType;
-  secrets: ActionTypeSecretsType;
-}): string | void {
-  const config = connector.config;
-  const secrets = connector.secrets;
-
+function validateConnector(
+  config: ActionTypeConfigType,
+  secrets: ActionTypeSecretsType
+): string | null {
   if (config.service === AdditionalEmailServices.EXCHANGE) {
     if (secrets.clientSecret == null) {
       return '[clientSecret] is required';
@@ -188,6 +185,7 @@ function validateConnector(connector: {
       return '[password] is required';
     }
   }
+  return null;
 }
 
 // action type definition
@@ -206,13 +204,7 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
       }),
       secrets: SecretsSchema,
       params: ParamsSchema,
-      connector: schema.object(
-        {
-          config: ConfigSchema,
-          secrets: SecretsSchema,
-        },
-        { validate: validateConnector }
-      ),
+      connector: validateConnector,
     },
     renderParameterTemplates,
     executor: curry(executor)({ logger, publicBaseUrl, configurationUtilities }),

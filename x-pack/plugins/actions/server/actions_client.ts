@@ -151,15 +151,7 @@ export class ActionsClient {
     let validatedActionTypeConfig = validateConfig(actionType, config);
     let validatedActionTypeSecrets = validateSecrets(actionType, secrets);
     if (actionType.validate?.connector) {
-      const validateActionTypeConnector = validateConnector(actionType, { config, secrets });
-      validatedActionTypeConfig = {
-        ...validatedActionTypeConfig,
-        ...(validateActionTypeConnector.config as Record<string, unknown>),
-      };
-      validatedActionTypeSecrets = {
-        ...validatedActionTypeSecrets,
-        ...(validateActionTypeConnector.secrets as Record<string, unknown>),
-      };
+      validateConnector(actionType, { config, secrets });
     }
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
@@ -232,15 +224,7 @@ export class ActionsClient {
     let validatedActionTypeConfig = validateConfig(actionType, config);
     let validatedActionTypeSecrets = validateSecrets(actionType, secrets);
     if (actionType.validate?.connector) {
-      const validateActionTypeConnector = validateConnector(actionType, { config, secrets });
-      validatedActionTypeConfig = {
-        ...validatedActionTypeConfig,
-        ...(validateActionTypeConnector.config as Record<string, unknown>),
-      };
-      validatedActionTypeSecrets = {
-        ...validatedActionTypeSecrets,
-        ...(validateActionTypeConnector.secrets as Record<string, unknown>),
-      };
+      validateConnector(actionType, { config, secrets });
     }
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);

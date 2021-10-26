@@ -92,13 +92,6 @@ interface ValidatorType<Type> {
   validate(value: unknown): Type;
 }
 
-interface ValidatorConnector<
-  Config extends ActionTypeConfig = ActionTypeConfig,
-  Secrets extends ActionTypeSecrets = ActionTypeSecrets
-> {
-  validate(connector: { config: Config; secrets?: Secrets }): { config: Config; secrets?: Secrets };
-}
-
 export interface ActionValidationService {
   isHostnameAllowed(hostname: string): boolean;
   isUriAllowed(uri: string): boolean;
@@ -118,7 +111,7 @@ export interface ActionType<
     params?: ValidatorType<Params>;
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
-    connector?: ValidatorConnector<Config, Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
   };
   renderParameterTemplates?(
     params: Params,
