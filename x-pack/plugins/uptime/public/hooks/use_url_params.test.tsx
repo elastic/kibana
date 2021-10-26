@@ -7,7 +7,7 @@
 
 import DateMath from '@elastic/datemath';
 import React, { useState, Fragment } from 'react';
-import { useLegacyUrlParams, UptimeUrlParamsHook } from './use_url_params';
+import { useUrlParams, UptimeUrlParamsHook } from './use_url_params';
 import { UptimeRefreshContext } from '../contexts';
 import { mountWithRouter, MountWithReduxProvider } from '../lib';
 import { createMemoryHistory } from 'history';
@@ -17,7 +17,7 @@ interface MockUrlParamsComponentProps {
   updateParams?: { [key: string]: any };
 }
 
-const UseLegacyUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponentProps) => {
+const UseUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponentProps) => {
   const [params, setParams] = useState({});
   const [getUrlParams, updateUrlParams] = hook();
   const queryParams = getUrlParams();
@@ -39,7 +39,7 @@ const UseLegacyUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsCo
   );
 };
 
-describe('useLegacyUrlParams', () => {
+describe('useUrlParams', () => {
   let dateMathSpy: any;
   const MOCK_DATE_VALUE = 20;
 
@@ -55,7 +55,7 @@ describe('useLegacyUrlParams', () => {
     const component = mountWithRouter(
       <MountWithReduxProvider>
         <UptimeRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
-          <UseLegacyUrlParamsTestComponent hook={useLegacyUrlParams} />
+          <UseUrlParamsTestComponent hook={useUrlParams} />
         </UptimeRefreshContext.Provider>
       </MountWithReduxProvider>,
       history
@@ -78,7 +78,7 @@ describe('useLegacyUrlParams', () => {
             refreshApp: jest.fn(),
           }}
         >
-          <UseLegacyUrlParamsTestComponent hook={useLegacyUrlParams} />
+          <UseUrlParamsTestComponent hook={useUrlParams} />
         </UptimeRefreshContext.Provider>
       </MountWithReduxProvider>
     );
@@ -104,10 +104,7 @@ describe('useLegacyUrlParams', () => {
             refreshApp: jest.fn(),
           }}
         >
-          <UseLegacyUrlParamsTestComponent
-            hook={useLegacyUrlParams}
-            updateParams={{ pagination: '' }}
-          />
+          <UseUrlParamsTestComponent hook={useUrlParams} updateParams={{ pagination: '' }} />
         </UptimeRefreshContext.Provider>
       </MountWithReduxProvider>,
       history

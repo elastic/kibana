@@ -29,7 +29,7 @@ import {
   useGetAgentPolicies,
   sendGetAgents,
   sendGetAgentStatus,
-  useLegacyUrlParams,
+  useUrlParams,
   useLink,
   useBreadcrumbs,
   useLicense,
@@ -148,7 +148,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { notifications } = useStartServices();
   useBreadcrumbs('agent_list');
   const { getHref } = useLink();
-  const defaultKuery: string = (useLegacyUrlParams().urlParams.kuery as string) || '';
+  const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
   const isGoldPlus = useLicense().isGoldPlus();
   const kibanaVersion = useKibanaVersion();

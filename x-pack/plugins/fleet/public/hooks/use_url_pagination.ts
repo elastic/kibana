@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import { useLegacyUrlParams } from './use_url_params';
+import { useUrlParams } from './use_url_params';
 import { PAGE_SIZE_OPTIONS, usePagination } from './use_pagination';
 import type { Pagination } from './use_pagination';
 
@@ -27,7 +27,7 @@ type UrlPaginationParams = Partial<Pagination>;
 export const useUrlPagination = (): UrlPagination => {
   const location = useLocation();
   const history = useHistory();
-  const { urlParams, toUrlParams } = useLegacyUrlParams();
+  const { urlParams, toUrlParams } = useUrlParams();
   const urlPaginationParams = useMemo(() => {
     return paginationFromUrlParams(urlParams);
   }, [urlParams]);

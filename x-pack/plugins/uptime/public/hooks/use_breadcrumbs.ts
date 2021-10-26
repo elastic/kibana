@@ -12,7 +12,7 @@ import { EuiBreadcrumb } from '@elastic/eui';
 import { UptimeUrlParams } from '../lib/helper';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { useLegacyUrlParams } from '.';
+import { useUrlParams } from '.';
 import { PLUGIN } from '../../common/constants/plugin';
 
 const EMPTY_QUERY = '?';
@@ -66,7 +66,7 @@ export const makeBaseBreadcrumb = (
 };
 
 export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
-  const params = useLegacyUrlParams()[0]();
+  const params = useUrlParams()[0]();
   const kibana = useKibana();
   const setBreadcrumbs = kibana.services.chrome?.setBreadcrumbs;
   const uptimePath = kibana.services.application?.getUrlForApp(PLUGIN.ID) ?? '';

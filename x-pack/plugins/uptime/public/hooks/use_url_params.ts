@@ -39,7 +39,7 @@ const getMapFromFilters = (value: any): Map<string, any> | undefined => {
   }
 };
 
-export const useLegacyUrlParams: UptimeUrlParamsHook = () => {
+export const useUrlParams: UptimeUrlParamsHook = () => {
   const { pathname, search } = useLocation();
   const history = useHistory();
   const dispatch = useDispatch();

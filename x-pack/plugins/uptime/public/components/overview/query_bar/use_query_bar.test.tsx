@@ -20,7 +20,7 @@ const SAMPLE_ES_FILTERS = `{"bool":{"should":[{"match_phrase":{"monitor.id":"Nod
 describe('useQueryBar', () => {
   let DEFAULT_URL_PARAMS: UptimeUrlParams;
   let wrapper: any;
-  let useLegacyUrlParamsSpy: jest.SpyInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
+  let useUrlParamsSpy: jest.SpyInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
   let useGetUrlParamsSpy: jest.SpyInstance<UptimeUrlParams>;
   let updateUrlParamsMock: jest.Mock;
   let useUpdateKueryStringSpy: jest.SpyInstance;
@@ -46,12 +46,12 @@ describe('useQueryBar', () => {
         </MockKibanaProvider>
       </MountWithReduxProvider>
     );
-    useLegacyUrlParamsSpy = jest.spyOn(URL, 'useLegacyUrlParams');
+    useUrlParamsSpy = jest.spyOn(URL, 'useUrlParams');
     useGetUrlParamsSpy = jest.spyOn(URL, 'useGetUrlParams');
     useUpdateKueryStringSpy = jest.spyOn(ES_FILTERS, 'useUpdateKueryString');
     updateUrlParamsMock = jest.fn();
 
-    useLegacyUrlParamsSpy.mockImplementation(() => [jest.fn(), updateUrlParamsMock]);
+    useUrlParamsSpy.mockImplementation(() => [jest.fn(), updateUrlParamsMock]);
     useGetUrlParamsSpy.mockReturnValue(DEFAULT_URL_PARAMS);
     useUpdateKueryStringSpy.mockReturnValue([SAMPLE_ES_FILTERS]);
   });

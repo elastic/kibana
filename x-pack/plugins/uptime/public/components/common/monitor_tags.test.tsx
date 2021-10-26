@@ -134,7 +134,7 @@ describe('MonitorTags component', () => {
 
   beforeAll(() => {
     jest.spyOn(hooks, 'useGetUrlParams').mockReturnValue({} as any);
-    jest.spyOn(hooks, 'useLegacyUrlParams').mockReturnValue([
+    jest.spyOn(hooks, 'useUrlParams').mockReturnValue([
       () => {
         return {};
       },

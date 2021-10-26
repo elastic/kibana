@@ -15,7 +15,7 @@ import { useCallback, useEffect, useState } from 'react';
  * `urlParams` that was parsed) for use in the url.
  * Object will be recreated every time `search` changes.
  */
-export function useLegacyUrlParams() {
+export function useUrlParams() {
   const { search } = useLocation();
   const [urlParams, setUrlParams] = useState(() => parse(search));
   const toUrlParams = useCallback((params = urlParams) => stringify(params), [urlParams]);

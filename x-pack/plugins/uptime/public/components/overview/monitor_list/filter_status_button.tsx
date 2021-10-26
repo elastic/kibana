@@ -7,7 +7,7 @@
 
 import { EuiFilterButton } from '@elastic/eui';
 import React from 'react';
-import { useLegacyUrlParams } from '../../../hooks';
+import { useUrlParams } from '../../../hooks';
 
 export interface FilterStatusButtonProps {
   content: string | JSX.Element;
@@ -26,7 +26,7 @@ export const FilterStatusButton = ({
   value,
   withNext,
 }: FilterStatusButtonProps) => {
-  const [getUrlParams, setUrlParams] = useLegacyUrlParams();
+  const [getUrlParams, setUrlParams] = useUrlParams();
   const { statusFilter: urlValue } = getUrlParams();
   return (
     <EuiFilterButton

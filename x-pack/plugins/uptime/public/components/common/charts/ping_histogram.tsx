@@ -28,7 +28,7 @@ import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
 import { HistogramResult } from '../../../../common/runtime_types';
-import { useMonitorId, useLegacyUrlParams } from '../../../hooks';
+import { useMonitorId, useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
 import { getDateRangeFromChartElement } from './utils';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../translations';
@@ -80,7 +80,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
 
   const { basePath } = useUptimeSettingsContext();
 
-  const [getUrlParams, updateUrlParams] = useLegacyUrlParams();
+  const [getUrlParams, updateUrlParams] = useUrlParams();
 
   const { dateRangeStart, dateRangeEnd } = getUrlParams();
 

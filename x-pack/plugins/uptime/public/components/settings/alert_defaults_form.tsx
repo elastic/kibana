@@ -21,7 +21,7 @@ import styled from 'styled-components';
 import { SettingsFormProps } from '../../pages/settings';
 import { connectorsSelector } from '../../state/alerts/alerts';
 import { AddConnectorFlyout, ALLOWED_ACTION_TYPES } from './add_connector_flyout';
-import { useGetUrlParams, useLegacyUrlParams } from '../../hooks';
+import { useGetUrlParams, useUrlParams } from '../../hooks';
 import { alertFormI18n } from './translations';
 import { useInitApp } from '../../hooks/use_init_app';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -58,7 +58,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
   } = useKibana<KibanaDeps>();
   const { focusConnectorField } = useGetUrlParams();
 
-  const updateUrlParams = useLegacyUrlParams()[1];
+  const updateUrlParams = useUrlParams()[1];
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 

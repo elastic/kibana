@@ -10,7 +10,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getMonitorList } from '../../../state/actions';
 import { esKuerySelector, monitorListSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
-import { useLegacyUrlParams } from '../../../hooks';
+import { useUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
 import { getConnectorsAction, getMonitorAlertsAction } from '../../../state/alerts/alerts';
 import { useMappingCheck } from '../../../hooks/use_mapping_check';
@@ -36,7 +36,7 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
 
   const dispatch = useDispatch();
 
-  const [getUrlValues] = useLegacyUrlParams();
+  const [getUrlValues] = useUrlParams();
   const { dateRangeStart, dateRangeEnd, pagination, statusFilter, query } = getUrlValues();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);

@@ -23,7 +23,7 @@ import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
 import { ChartWrapper } from './chart_wrapper';
-import { useLegacyUrlParams } from '../../../hooks';
+import { useUrlParams } from '../../../hooks';
 import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
@@ -61,7 +61,7 @@ export const DurationChartComponent = ({
   loading,
 }: DurationChartProps) => {
   const hasLines = locationDurationLines.length > 0;
-  const [getUrlParams, updateUrlParams] = useLegacyUrlParams();
+  const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
 
   const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);

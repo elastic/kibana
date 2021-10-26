@@ -8,7 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import { useLegacyUrlParams } from './use_url_params';
+import { useUrlParams } from './use_url_params';
 
 type Modal = 'settings';
 
@@ -18,7 +18,7 @@ type Modal = 'settings';
 export const useUrlModal = () => {
   const location = useLocation();
   const history = useHistory();
-  const { urlParams, toUrlParams } = useLegacyUrlParams();
+  const { urlParams, toUrlParams } = useUrlParams();
 
   const setModal = useCallback(
     (modal: Modal | null) => {

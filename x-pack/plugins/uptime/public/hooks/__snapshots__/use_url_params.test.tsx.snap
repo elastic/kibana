@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`useLegacyUrlParams deletes keys that do not have truthy values 1`] = `
+exports[`useUrlParams deletes keys that do not have truthy values 1`] = `
 <Router
   history={
     Object {
@@ -201,7 +201,7 @@ exports[`useLegacyUrlParams deletes keys that do not have truthy values 1`] = `
         }
       }
     >
-      <UseLegacyUrlParamsTestComponent
+      <UseUrlParamsTestComponent
         hook={[Function]}
         updateParams={
           Object {
@@ -224,13 +224,13 @@ exports[`useLegacyUrlParams deletes keys that do not have truthy values 1`] = `
         >
           Get url params
         </button>
-      </UseLegacyUrlParamsTestComponent>
+      </UseUrlParamsTestComponent>
     </Provider>
   </MountWithReduxProvider>
 </Router>
 `;
 
-exports[`useLegacyUrlParams gets the expected values using the context 1`] = `
+exports[`useUrlParams gets the expected values using the context 1`] = `
 <Router
   history={
     Object {
@@ -431,7 +431,7 @@ exports[`useLegacyUrlParams gets the expected values using the context 1`] = `
         }
       }
     >
-      <UseLegacyUrlParamsTestComponent
+      <UseUrlParamsTestComponent
         hook={[Function]}
       >
         <div>
@@ -449,7 +449,7 @@ exports[`useLegacyUrlParams gets the expected values using the context 1`] = `
         >
           Get url params
         </button>
-      </UseLegacyUrlParamsTestComponent>
+      </UseUrlParamsTestComponent>
     </Provider>
   </MountWithReduxProvider>
 </Router>
