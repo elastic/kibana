@@ -64,6 +64,7 @@ export const mockProps = {
   setQuery: jest.fn(),
   deleteQuery: jest.fn(),
   someIntegrationsIsDisabled: true,
+  installedIntegrationsId: [],
 };
 
 export const mockCtiWithEventsProps = {
