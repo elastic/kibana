@@ -166,7 +166,7 @@ export interface NodeDeploymentStatsResponse {
     model_id: string;
     state: string;
     model_threads: number;
-    model_size: string;
+    model_size_bytes: number;
   }>;
   memory_overview: {
     machine_memory: {

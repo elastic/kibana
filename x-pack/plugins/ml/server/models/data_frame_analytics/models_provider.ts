@@ -90,10 +90,9 @@ export function modelsProvider(
       const adMemoryReport = await memoryOverviewService.getAnomalyDetectionMemoryOverview();
       const dfaMemoryReport = await memoryOverviewService.getDFAMemoryOverview();
 
-      // @ts-ignore
       const nodeDeploymentStatsResponses: NodeDeploymentStatsResponse[] = mlNodes.map(
         ([nodeId, node]) => {
-          const nodeFields = pick(node, NODE_FIELDS);
+          const nodeFields = pick(node, NODE_FIELDS) as RequiredNodeFields;
 
           const allocatedModels = deploymentStats.deployment_stats
             .filter((v) => v.nodes.some((n) => Object.keys(n.node)[0] === nodeId))
