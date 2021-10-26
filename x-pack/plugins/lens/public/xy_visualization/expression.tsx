@@ -31,6 +31,7 @@ import {
   LabelOverflowConstraint,
   DisplayValueStyle,
   RecursivePartial,
+  ScaleType,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import type {
@@ -767,6 +768,8 @@ export function XYChart({
             axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
           );
 
+          const formatter = table?.columns.find((column) => column.id === accessor)?.meta?.params;
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: isStacked ? [xAccessor as string] : [],
@@ -775,7 +778,10 @@ export function XYChart({
             yAccessors: [accessor],
             data: rows,
             xScaleType: xAccessor ? xScaleType : 'ordinal',
-            yScaleType,
+            yScaleType:
+              formatter?.id === 'bytes' && yScaleType === ScaleType.Linear
+                ? ScaleType.LinearBinary
+                : yScaleType,
             color: ({ yAccessor, seriesKeys }) => {
               const overwriteColor = getSeriesColor(layer, accessor);
               if (overwriteColor !== null) {

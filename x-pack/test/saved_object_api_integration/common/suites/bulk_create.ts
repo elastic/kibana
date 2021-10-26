@@ -65,6 +65,7 @@ const INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES = Object.freeze({
   expectedNamespaces: [ALL_SPACES_ID], // expected namespaces of resulting object
   initialNamespaces: [ALL_SPACES_ID], // args passed to the bulkCreate method
 });
+const ALIAS_CONFLICT_OBJ = Object.freeze({ type: 'resolvetype', id: 'alias-match' }); // this fixture was created to test the resolve API, but we are reusing to test the alias conflict error
 const NEW_NAMESPACE_AGNOSTIC_OBJ = Object.freeze({ type: 'globaltype', id: 'new-globaltype-id' });
 export const TEST_CASES: Record<string, BulkCreateTestCase> = Object.freeze({
   ...CASES,
@@ -74,6 +75,7 @@ export const TEST_CASES: Record<string, BulkCreateTestCase> = Object.freeze({
   INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE,
   INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE,
   INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
+  ALIAS_CONFLICT_OBJ,
   NEW_NAMESPACE_AGNOSTIC_OBJ,
 });
 
@@ -103,12 +105,20 @@ export function bulkCreateTestSuiteFactory(esArchiver: any, supertest: SuperTest
         for (let i = 0; i < savedObjects.length; i++) {
           const object = savedObjects[i];
           const testCase = testCaseArray[i];
-          if (testCase.failure === 409 && testCase.fail409Param === 'unresolvableConflict') {
+          if (testCase.failure === 409) {
             const { type, id } = testCase;
-            const error = SavedObjectsErrorHelpers.createConflictError(type, id);
-            const payload = { ...error.output.payload, metadata: { isNotOverwritable: true } };
             expect(object.type).to.eql(type);
             expect(object.id).to.eql(id);
+            let metadata;
+            if (testCase.fail409Param === 'unresolvableConflict') {
+              metadata = { isNotOverwritable: true };
+            } else if (testCase.fail409Param === 'aliasConflictSpace1') {
+              metadata = { spacesWithConflictingAliases: ['space_1'] };
+            } else if (testCase.fail409Param === 'aliasConflictAllSpaces') {
+              metadata = { spacesWithConflictingAliases: ['space_1', 'space_x'] };
+            }
+            const error = SavedObjectsErrorHelpers.createConflictError(type, id);
+            const payload = { ...error.output.payload, ...(metadata && { metadata }) };
             expect(object.error).to.eql(payload);
             continue;
           }
