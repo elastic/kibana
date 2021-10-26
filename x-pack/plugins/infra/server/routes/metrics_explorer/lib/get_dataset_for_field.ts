@@ -22,9 +22,9 @@ export const getDatasetForField = async (
   timerange: { field: string; to: number; from: number }
 ) => {
   const params = {
-    allowNoIndices: true,
-    ignoreUnavailable: true,
-    terminateAfter: 1,
+    allow_no_indices: true,
+    ignore_unavailable: true,
+    terminate_after: 1,
     index: indexPattern,
     body: {
       query: {

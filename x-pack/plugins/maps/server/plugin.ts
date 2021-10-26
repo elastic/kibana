@@ -73,7 +73,9 @@ export class MapsPlugin implements Plugin {
       defaultMessage: 'Map',
     });
 
-    home.sampleData.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
+    // commented out since it registers an SO already registered by home plugin
+    // https://github.com/elastic/kibana/blob/2ddaddc2e958f60c6685ab9f9840cdd86da9d398/src/plugins/home/server/services/sample_data/data_sets/ecommerce/saved_objects.ts#L151
+    // home.sampleData.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
 
     home.sampleData.addAppLinksToSampleDataset('ecommerce', [
       {
@@ -138,15 +140,6 @@ export class MapsPlugin implements Plugin {
     const { usageCollection, home, licensing, features, mapsEms } = plugins;
     const mapsEmsConfig = mapsEms.config;
     const config$ = this._initializerContext.config.create();
-    const currentConfig = this._initializerContext.config.get();
-
-    // @ts-ignore
-    const mapsEnabled = currentConfig.enabled;
-    // TODO: Consider dynamic way to disable maps app on config change
-    if (!mapsEnabled) {
-      this._logger.warn('Maps app disabled by configuration');
-      return;
-    }
 
     let isEnterprisePlus = false;
     let lastLicenseId: string | undefined;

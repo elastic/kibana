@@ -27,6 +27,7 @@ export const getHttp = (basepath = BASE_PATH) => {
       serverBasePath: basepath,
     },
     get: (async (path: string, options: HttpFetchOptions) => {
+      action('get')(path, options);
       // TODO: all of this needs revision, as it's far too clunky... but it works for now,
       // with the few paths we're supporting.
       if (path === '/api/fleet/agents/setup') {
@@ -74,6 +75,11 @@ export const getHttp = (basepath = BASE_PATH) => {
         return await import('./fixtures/integration.okta');
       }
 
+      if (path.startsWith('/api/fleet/check-permissions')) {
+        return { success: true };
+      }
+
+      action(path)('KP: UNSUPPORTED ROUTE');
       return {};
     }) as HttpHandler,
   } as unknown as HttpStart;

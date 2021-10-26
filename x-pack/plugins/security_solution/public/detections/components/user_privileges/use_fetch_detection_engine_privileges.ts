@@ -13,7 +13,7 @@ import * as i18n from './translations';
 
 export const useFetchPrivileges = () => useAsync(withOptionalSignal(getUserPrivilege));
 
-export const useFetchDetectionEnginePrivileges = () => {
+export const useFetchDetectionEnginePrivileges = (isAppAvailable: boolean = true) => {
   const { start, ...detectionEnginePrivileges } = useFetchPrivileges();
   const { addError } = useAppToasts();
   const abortCtrlRef = useRef(new AbortController());
@@ -21,12 +21,12 @@ export const useFetchDetectionEnginePrivileges = () => {
   useEffect(() => {
     const { loading, result, error } = detectionEnginePrivileges;
 
-    if (!loading && !(result || error)) {
+    if (isAppAvailable && !loading && !(result || error)) {
       abortCtrlRef.current.abort();
       abortCtrlRef.current = new AbortController();
       start({ signal: abortCtrlRef.current.signal });
     }
-  }, [start, detectionEnginePrivileges]);
+  }, [start, detectionEnginePrivileges, isAppAvailable]);
 
   useEffect(() => {
     return () => {

@@ -20,9 +20,9 @@ export const runtimeMappingsSchema = schema.object(
   }
 );
 
-export const indexPatternTitleSchema = schema.object({
-  /** Title of the index pattern for which to return stats. */
-  indexPatternTitle: schema.string(),
+export const dataViewTitleSchema = schema.object({
+  /** Title of the data view for which to return stats. */
+  dataViewTitle: schema.string(),
 });
 
 export const dataVisualizerFieldHistogramsSchema = schema.object({

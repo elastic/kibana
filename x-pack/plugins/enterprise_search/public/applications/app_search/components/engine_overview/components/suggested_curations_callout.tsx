@@ -16,12 +16,19 @@ import { EngineLogic, generateEnginePath } from '../../engine';
 
 export const SuggestedCurationsCallout: React.FC = () => {
   const {
-    engine: { search_relevance_suggestions: searchRelevanceSuggestions },
+    engine: {
+      search_relevance_suggestions: searchRelevanceSuggestions,
+      search_relevance_suggestions_active: searchRelevanceSuggestionsActive,
+    },
   } = useValues(EngineLogic);
 
   const pendingCount = searchRelevanceSuggestions?.curation.pending;
 
-  if (typeof searchRelevanceSuggestions === 'undefined' || pendingCount === 0) {
+  if (
+    typeof searchRelevanceSuggestions === 'undefined' ||
+    pendingCount === 0 ||
+    searchRelevanceSuggestionsActive === false
+  ) {
     return null;
   }
 

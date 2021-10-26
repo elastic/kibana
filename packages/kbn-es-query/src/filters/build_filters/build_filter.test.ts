@@ -7,13 +7,14 @@
  */
 
 import { buildFilter, FilterStateStore, FILTERS } from '.';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 import { fields as stubFields } from '../stubs';
 
 describe('buildFilter', () => {
-  const stubIndexPattern: IndexPatternBase = {
+  const stubIndexPattern: DataViewBase = {
     id: 'logstash-*',
     fields: stubFields,
+    title: 'dataView',
   };
 
   it('should build phrase filters', () => {

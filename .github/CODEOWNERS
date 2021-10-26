@@ -39,6 +39,7 @@
 /src/plugins/visualize/ @elastic/kibana-vis-editors
 /src/plugins/visualizations/ @elastic/kibana-vis-editors
 /src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-vis-editors
+/src/plugins/chart_expressions/expression_metric/ @elastic/kibana-vis-editors
 /src/plugins/url_forwarding/ @elastic/kibana-vis-editors
 /packages/kbn-tinymath/ @elastic/kibana-vis-editors
 /x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
@@ -62,7 +63,7 @@
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
 /src/plugins/data/ @elastic/kibana-app-services
-/src/plugins/data-views/ @elastic/kibana-app-services
+/src/plugins/data_views/ @elastic/kibana-app-services
 /src/plugins/embeddable/ @elastic/kibana-app-services
 /src/plugins/expressions/ @elastic/kibana-app-services
 /src/plugins/field_formats/ @elastic/kibana-app-services
@@ -94,15 +95,15 @@
 # Observability Shared
 /x-pack/plugins/observability/ @elastic/observability-ui
 
-# Logs and Metrics (Infra)
-/x-pack/plugins/infra/ @elastic/logs-metrics-ui
-/x-pack/plugins/infra/server/routes/log* @elastic/logs-metrics-ui @elastic/logs-ui
-/x-pack/plugins/infra/public/pages/logs/ @elastic/logs-metrics-ui @elastic/logs-ui
-/x-pack/plugins/infra/server/routes/metrics* @elastic/logs-metrics-ui @elastic/metrics-ui
-/x-pack/plugins/infra/public/pages/metrics/ @elastic/logs-metrics-ui @elastic/metrics-ui
+# Infra Monitoring
+/x-pack/plugins/infra/ @elastic/infra-monitoring-ui
+/x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui
+/x-pack/test/api_integration/apis/infra @elastic/infra-monitoring-ui
 
-# Stack Monitoring
-/x-pack/plugins/monitoring/ @elastic/stack-monitoring-ui @elastic/logs-metrics-ui @elastic/metrics-ui
+# Elastic Stack Monitoring
+/x-pack/plugins/monitoring/ @elastic/infra-monitoring-ui
+/x-pack/test/functional/apps/monitoring @elastic/infra-monitoring-ui
+/x-pack/test/api_integration/apis/monitoring @elastic/infra-monitoring-ui
 
 # Fleet
 /x-pack/plugins/fleet/ @elastic/fleet
@@ -243,7 +244,6 @@
 /packages/kbn-std/ @elastic/kibana-core
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
-/packages/kbn-crypto/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/dev/run_check_published_api_changes.ts @elastic/kibana-core
@@ -253,7 +253,6 @@
 /src/plugins/kibana_overview/ @elastic/kibana-core
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core
 #CC# /src/core/server/csp/ @elastic/kibana-core
-#CC# /src/plugins/xpack_legacy/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
 #CC# /x-pack/plugins/features/ @elastic/kibana-core
@@ -285,9 +284,11 @@
 /packages/kbn-i18n/  @elastic/kibana-localization @elastic/kibana-core
 #CC# /x-pack/plugins/translations/ @elastic/kibana-localization @elastic/kibana-core
 
-# Security
+# Kibana Platform Security
+/packages/kbn-crypto/ @elastic/kibana-security
 /src/core/server/csp/ @elastic/kibana-security @elastic/kibana-core
 /src/plugins/interactive_setup/ @elastic/kibana-security
+/test/interactive_setup_api_integration/ @elastic/kibana-security
 /x-pack/plugins/spaces/ @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/ @elastic/kibana-security
 /x-pack/plugins/security/ @elastic/kibana-security

@@ -92,7 +92,6 @@ export function PieComponent(
   }
 
   const fillLabel: Partial<PartitionFillLabel> = {
-    textInvertible: true,
     valueFont: {
       fontWeight: 700,
     },
@@ -291,7 +290,7 @@ export function PieComponent(
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}
-          legendAction={getLegendAction(firstTable, onClickValue)}
+          legendAction={props.interactive ? getLegendAction(firstTable, onClickValue) : undefined}
           theme={{
             ...chartTheme,
             background: {

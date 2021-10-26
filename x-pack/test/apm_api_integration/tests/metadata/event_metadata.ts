@@ -32,7 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       },
     });
 
-    return response.body.hits.hits[0]._source![processorEvent].id;
+    return response.hits.hits[0]._source![processorEvent].id;
   }
 
   registry.when('Event metadata', { config: 'basic', archives: ['apm_8.0.0'] }, () => {
@@ -40,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const id = await getLastDocId(ProcessorEvent.transaction);
 
       const { body } = await apmApiClient.readUser({
-        endpoint: 'GET /api/apm/event_metadata/{processorEvent}/{id}',
+        endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
         params: {
           path: {
             processorEvent: ProcessorEvent.transaction,
@@ -70,7 +70,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const id = await getLastDocId(ProcessorEvent.error);
 
       const { body } = await apmApiClient.readUser({
-        endpoint: 'GET /api/apm/event_metadata/{processorEvent}/{id}',
+        endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
         params: {
           path: {
             processorEvent: ProcessorEvent.error,
@@ -100,7 +100,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const id = await getLastDocId(ProcessorEvent.span);
 
       const { body } = await apmApiClient.readUser({
-        endpoint: 'GET /api/apm/event_metadata/{processorEvent}/{id}',
+        endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
         params: {
           path: {
             processorEvent: ProcessorEvent.span,

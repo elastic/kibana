@@ -12,7 +12,7 @@ import { getRandomString } from '@kbn/test/jest';
 
 import { getWatch } from '../../__fixtures__';
 import { defaultWatch } from '../../public/application/models/watch';
-import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
+import { setupEnvironment, pageHelpers, wrapBodyResponse } from './helpers';
 import { WatchEditTestBed } from './helpers/watch_edit.helpers';
 import { WATCH } from './helpers/jest_constants';
 
@@ -41,7 +41,12 @@ describe('<WatchEdit />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchEditTestBed;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
   afterAll(() => {
+    jest.useRealTimers();
     server.restore();
   });
 
@@ -50,11 +55,7 @@ describe('<WatchEdit />', () => {
       httpRequestsMockHelpers.setLoadWatchResponse(WATCH);
 
       testBed = await setup();
-
-      await act(async () => {
-        await nextTick();
-        testBed.component.update();
-      });
+      testBed.component.update();
     });
 
     describe('on component mount', () => {
@@ -87,7 +88,6 @@ describe('<WatchEdit />', () => {
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick();
         });
 
         const latestRequest = server.requests[server.requests.length - 1];
@@ -141,12 +141,7 @@ describe('<WatchEdit />', () => {
       httpRequestsMockHelpers.setLoadWatchResponse({ watch });
 
       testBed = await setup();
-
-      await act(async () => {
-        const { component } = testBed;
-        await nextTick();
-        component.update();
-      });
+      testBed.component.update();
     });
 
     describe('on component mount', () => {
@@ -172,7 +167,6 @@ describe('<WatchEdit />', () => {
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick();
         });
 
         const latestRequest = server.requests[server.requests.length - 1];
