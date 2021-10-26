@@ -17,6 +17,7 @@ import { StepDetailLink } from '../../common/step_detail_link';
 import { VIEW_PERFORMANCE } from '../../monitor/synthetics/translations';
 import { StepImage } from './step_image';
 import { useExpandedRow } from './use_expanded_row';
+import { StepDuration } from './step_duration';
 
 export const SpanWithMargin = styled.span`
   margin-right: 16px;
@@ -94,6 +95,12 @@ export const StepsList = ({ data, error, loading }: Props) => {
       render: (_timestamp: string, item) => <StepImage step={item} />,
     },
     {
+      name: 'Step duration',
+      render: (item: JourneyStep) => {
+        return <StepDuration step={item} />;
+      },
+    },
+    {
       align: 'left',
       field: 'timestamp',
       name: '',
@@ -106,6 +113,7 @@ export const StepsList = ({ data, error, loading }: Props) => {
         </StepDetailLink>
       ),
     },
+
     {
       align: 'right',
       width: '24px',
@@ -133,7 +141,12 @@ export const StepsList = ({ data, error, loading }: Props) => {
         const targetElem = evt.target as HTMLElement;
 
         // we dont want to capture image click event
-        if (targetElem.tagName !== 'IMG' && targetElem.tagName !== 'BUTTON') {
+        if (
+          targetElem.tagName !== 'IMG' &&
+          targetElem.tagName !== 'BUTTON' &&
+          !targetElem.classList.contains('euiButtonEmpty__text') &&
+          !targetElem.classList.contains('euiIcon')
+        ) {
           toggleExpand({ journeyStep: item });
         }
       },
