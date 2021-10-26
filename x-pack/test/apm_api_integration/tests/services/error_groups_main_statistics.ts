@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import url from 'url';
 import expect from '@kbn/expect';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -16,7 +15,7 @@ type ErrorGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
@@ -27,9 +26,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/opbeans-java/error_groups/main_statistics`,
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/services/{serviceName}/error_groups/main_statistics`,
+          params: {
+            path: { serviceName: 'opbeans-java' },
             query: {
               start,
               end,
@@ -37,8 +37,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
             },
-          })
-        );
+          },
+        });
 
         expect(response.status).to.be(200);
 
@@ -54,9 +54,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns the correct data', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/opbeans-java/error_groups/main_statistics`,
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/services/{serviceName}/error_groups/main_statistics`,
+          params: {
+            path: { serviceName: 'opbeans-java' },
             query: {
               start,
               end,
@@ -64,8 +65,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               environment: 'production',
               kuery: '',
             },
-          })
-        );
+          },
+        });
 
         expect(response.status).to.be(200);
 
