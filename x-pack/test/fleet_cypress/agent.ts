@@ -9,8 +9,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 import axios, { AxiosRequestConfig } from 'axios';
 import { ChildProcess, exec, spawn } from 'child_process';
 import { resolve } from 'path';
-import { hostname, networkInterfaces } from 'os';
-import { lookup } from 'dns';
+import { networkInterfaces } from 'os';
 import { Manager } from './resource_manager';
 
 interface AgentManagerParams {
@@ -79,10 +78,6 @@ export class AgentManager extends Manager {
 
     this.log.info('Running the agent');
 
-    lookup(hostname(), (err: any, add: any) => {
-      this.log.info('addr: ' + add);
-    });
-
     const nis = networkInterfaces();
     this.log.info(nis);
 
@@ -94,29 +89,23 @@ export class AgentManager extends Manager {
         this.log.info(ipAddress);
 
         if (!ipAddress) {
-          await this.execute(`ifconfig`, (res: string) => {
-            this.log.info(res);
-
-            if (!ipAddress) {
-              return;
-            }
-
-            const args = [
-              'run',
-              '--env',
-              'FLEET_ENROLL=1',
-              '--env',
-              `FLEET_URL=http://${ipAddress}:8220`,
-              '--env',
-              `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
-              '--env',
-              'FLEET_INSECURE=true',
-              'docker.elastic.co/beats/elastic-agent:8.0.0-SNAPSHOT',
-            ];
-
-            this.agentProcess = spawn('docker', args, { stdio: 'inherit' });
-          });
+          return;
         }
+
+        const args = [
+          'run',
+          '--env',
+          'FLEET_ENROLL=1',
+          '--env',
+          `FLEET_URL=http://${ipAddress}:8220`,
+          '--env',
+          `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
+          '--env',
+          'FLEET_INSECURE=true',
+          'docker.elastic.co/beats/elastic-agent:8.0.0-SNAPSHOT',
+        ];
+
+        this.agentProcess = spawn('docker', args, { stdio: 'inherit' });
       }
     );
 
