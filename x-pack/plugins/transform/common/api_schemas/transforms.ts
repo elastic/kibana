@@ -98,12 +98,6 @@ export const _metaSchema = schema.object(
   {},
   {
     unknowns: 'allow',
-    validate: (v: object) => {
-      // Values should all be objects
-      if (Object.values(v).some((arg) => arg === undefined || arg === null)) {
-        return 'Invalid _meta request';
-      }
-    },
   }
 );
 
