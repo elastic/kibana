@@ -47,7 +47,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esClient = getService('es');
   const a11y = getService('a11y');
 
+  const filterByPolicyName = async (policyName: string) => {
+    await testSubjects.setValue('ilmSearchBar', policyName);
+  };
+
   const findPolicyLinkInListView = async (policyName: string) => {
+    await filterByPolicyName(policyName);
     const links = await testSubjects.findAll('policyTablePolicyNameLink');
     for (const link of links) {
       const name = await link.getVisibleText();
