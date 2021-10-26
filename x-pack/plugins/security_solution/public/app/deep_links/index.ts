@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { isEmpty, get } from 'lodash';
+import { get } from 'lodash';
 import { LicenseType } from '../../../../licensing/common/types';
 import { SecurityPageName } from '../types';
 import { AppDeepLink, AppNavLinkStatus, Capabilities } from '../../../../../../src/core/public';
@@ -95,7 +95,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: ALERTS,
         path: ALERTS_PATH,
         navLinkStatus: AppNavLinkStatus.visible,
-        features: [FEATURE.general],
         keywords: [
           i18n.translate('xpack.securitySolution.search.alerts', {
             defaultMessage: 'Alerts',
@@ -109,7 +108,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: RULES,
         path: RULES_PATH,
         navLinkStatus: AppNavLinkStatus.hidden,
-        features: [FEATURE.general],
         keywords: [
           i18n.translate('xpack.securitySolution.search.rules', {
             defaultMessage: 'Rules',
@@ -122,7 +120,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: EXCEPTIONS,
         path: EXCEPTIONS_PATH,
         navLinkStatus: AppNavLinkStatus.hidden,
-        features: [FEATURE.general],
         keywords: [
           i18n.translate('xpack.securitySolution.search.exceptions', {
             defaultMessage: 'Exceptions',
@@ -148,7 +145,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: HOSTS,
         path: HOSTS_PATH,
         navLinkStatus: AppNavLinkStatus.visible,
-        features: [FEATURE.general],
         keywords: [
           i18n.translate('xpack.securitySolution.search.hosts', {
             defaultMessage: 'Hosts',
@@ -162,7 +158,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Authentications',
             }),
             path: `${HOSTS_PATH}/authentications`,
-            features: [FEATURE.general],
           },
           {
             id: SecurityPageName.uncommonProcesses,
@@ -170,7 +165,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Uncommon Processes',
             }),
             path: `${HOSTS_PATH}/uncommonProcesses`,
-            features: [FEATURE.general],
           },
           {
             id: SecurityPageName.events,
@@ -178,7 +172,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Events',
             }),
             path: `${HOSTS_PATH}/events`,
-            features: [FEATURE.general],
           },
           {
             id: SecurityPageName.hostsExternalAlerts,
@@ -186,7 +179,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'External Alerts',
             }),
             path: `${HOSTS_PATH}/externalAlerts`,
-            features: [FEATURE.general],
           },
           {
             id: SecurityPageName.hostsAnomalies,
@@ -194,7 +186,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Anomalies',
             }),
             path: `${HOSTS_PATH}/anomalies`,
-            features: [FEATURE.general],
             isPremium: true,
           },
         ],
@@ -204,7 +195,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: NETWORK,
         path: NETWORK_PATH,
         navLinkStatus: AppNavLinkStatus.visible,
-        features: [FEATURE.general],
         keywords: [
           i18n.translate('xpack.securitySolution.search.network', {
             defaultMessage: 'Network',
@@ -218,7 +208,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'DNS',
             }),
             path: `${NETWORK_PATH}/dns`,
-            features: [FEATURE.general],
           },
           {
             id: SecurityPageName.networkHttp,
@@ -226,7 +215,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'HTTP',
             }),
             path: `${NETWORK_PATH}/http`,
-            features: [FEATURE.general],
           },
           {
             id: SecurityPageName.networkTls,
@@ -234,7 +222,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'TLS',
             }),
             path: `${NETWORK_PATH}/tls`,
-            features: [FEATURE.general],
           },
           {
             id: SecurityPageName.networkExternalAlerts,
@@ -242,7 +229,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'External Alerts',
             }),
             path: `${NETWORK_PATH}/external-alerts`,
-            features: [FEATURE.general],
           },
           {
             id: SecurityPageName.networkAnomalies,
@@ -250,7 +236,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Anomalies',
             }),
             path: `${NETWORK_PATH}/anomalies`,
-            features: [FEATURE.general],
             isPremium: true,
           },
         ],
@@ -301,7 +286,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Templates',
             }),
             path: `${TIMELINES_PATH}/template`,
-            features: [FEATURE.general],
           },
         ],
       },
@@ -357,25 +341,21 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: ENDPOINTS,
         order: 9006,
         path: ENDPOINTS_PATH,
-        features: [FEATURE.general],
       },
       {
         id: SecurityPageName.trustedApps,
         title: TRUSTED_APPLICATIONS,
         path: TRUSTED_APPS_PATH,
-        features: [FEATURE.general],
       },
       {
         id: SecurityPageName.eventFilters,
         title: EVENT_FILTERS,
         path: EVENT_FILTERS_PATH,
-        features: [FEATURE.general],
       },
       {
         id: SecurityPageName.hostIsolationExceptions,
         title: HOST_ISOLATION_EXCEPTIONS,
         path: HOST_ISOLATION_EXCEPTIONS_PATH,
-        features: [FEATURE.general],
       },
     ],
   },
@@ -404,7 +384,7 @@ export function getDeepLinks(
         if (experimentalKey && !enableExperimental[experimentalKey]) {
           return deepLinks;
         }
-        if (capabilities != null && !hasFeaturesCapability(features ?? [], capabilities)) {
+        if (capabilities != null && !hasFeaturesCapability(features, capabilities)) {
           return deepLinks;
         }
         if (deepLink.deepLinks) {
@@ -419,9 +399,12 @@ export function getDeepLinks(
   return filterDeepLinks(securitySolutionsDeepLinks);
 }
 
-function hasFeaturesCapability(features: Feature[], capabilities: Capabilities): boolean {
-  if (isEmpty(features)) {
-    return false;
+function hasFeaturesCapability(
+  features: Feature[] | undefined,
+  capabilities: Capabilities
+): boolean {
+  if (!features) {
+    return true;
   }
   return features.some((featureKey) => get(capabilities, featureKey, false));
 }
