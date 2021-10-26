@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Subscription } from 'rxjs';
 import { distinctUntilKeyChanged, map } from 'rxjs/operators';
 
 import type {
@@ -58,18 +57,10 @@ interface AuditServiceSetupParams {
 }
 
 export class AuditService {
-  /**
-   * @deprecated
-   */
-  private licenseFeaturesSubscription?: Subscription;
-  /**
-   * @deprecated
-   */
-  private allowLegacyAuditLogging = false;
   private ecsLogger: Logger;
   private usageIntervalId?: NodeJS.Timeout;
 
-  constructor(private readonly logger: Logger) {
+  constructor(logger: Logger) {
     this.ecsLogger = logger.get('ecs');
   }
 
@@ -83,14 +74,6 @@ export class AuditService {
     getSpaceId,
     recordAuditLoggingUsage,
   }: AuditServiceSetupParams): AuditServiceSetup {
-    if (config.enabled && !config.appender) {
-      this.licenseFeaturesSubscription = license.features$.subscribe(
-        ({ allowLegacyAuditLogging }) => {
-          this.allowLegacyAuditLogging = allowLegacyAuditLogging;
-        }
-      );
-    }
-
     // Configure logging during setup and when license changes
     logging.configure(
       license.features$.pipe(
@@ -181,17 +164,7 @@ export class AuditService {
      */
     const getLogger = (id?: string): LegacyAuditLogger => {
       return {
-        log: (eventType: string, message: string, data?: Record<string, any>) => {
-          if (!this.allowLegacyAuditLogging) {
-            return;
-          }
-
-          this.logger.info(message, {
-            tags: id ? [id, eventType] : [eventType],
-            eventType,
-            ...data,
-          });
-        },
+        log: (eventType: string, message: string, data?: Record<string, any>) => {},
       };
     };
 
@@ -206,10 +179,6 @@ export class AuditService {
   }
 
   stop() {
-    if (this.licenseFeaturesSubscription) {
-      this.licenseFeaturesSubscription.unsubscribe();
-      this.licenseFeaturesSubscription = undefined;
-    }
     clearInterval(this.usageIntervalId!);
   }
 }
