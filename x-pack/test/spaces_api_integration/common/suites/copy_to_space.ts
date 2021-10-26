@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { EsArchiver } from '@kbn/es-archiver';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
 import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
@@ -64,9 +64,8 @@ interface SpaceBucket {
 }
 
 const INITIAL_COUNTS: Record<string, Record<string, number>> = {
-  [DEFAULT_SPACE_ID]: { dashboard: 2, visualization: 3, 'index-pattern': 1 },
-  space_1: { dashboard: 2, visualization: 3, 'index-pattern': 1 },
-  space_2: { dashboard: 1 },
+  [DEFAULT_SPACE_ID]: { dashboard: 1, visualization: 3, 'index-pattern': 1 },
+  space_1: { dashboard: 1, visualization: 3, 'index-pattern': 1 },
 };
 const UUID_PATTERN = new RegExp(
   /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
@@ -77,12 +76,12 @@ const getDestinationWithConflicts = (originSpaceId?: string) =>
   !originSpaceId || originSpaceId === DEFAULT_SPACE_ID ? 'space_1' : DEFAULT_SPACE_ID;
 
 export function copyToSpaceTestSuiteFactory(
-  es: KibanaClient,
+  es: Client,
   esArchiver: EsArchiver,
   supertest: SuperTest<any>
 ) {
   const collectSpaceContents = async () => {
-    const { body: response } = await getAggregatedSpaceData(es, [
+    const response = await getAggregatedSpaceData(es, [
       'visualization',
       'dashboard',
       'index-pattern',
@@ -148,18 +147,23 @@ export function copyToSpaceTestSuiteFactory(
     (spaceId: string, destination: string, expectedDashboardCount: number) =>
     async (resp: TestResponse) => {
       const result = resp.body as CopyResponse;
+
+      const dashboardDestinationId = result[destination].successResults![0].destinationId;
+      expect(dashboardDestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
+
       expect(result).to.eql({
         [destination]: {
           success: true,
           successCount: 1,
           successResults: [
             {
-              id: 'cts_dashboard',
+              id: `cts_dashboard_${spaceId}`,
               type: 'dashboard',
               meta: {
                 title: `This is the ${spaceId} test space CTS dashboard`,
                 icon: 'dashboardApp',
               },
+              destinationId: dashboardDestinationId,
             },
           ],
         },
@@ -172,7 +176,7 @@ export function copyToSpaceTestSuiteFactory(
     };
 
   const expectNoConflictsWithoutReferencesResult = (spaceId: string = DEFAULT_SPACE_ID) =>
-    createExpectNoConflictsWithoutReferencesForSpace(spaceId, getDestinationWithoutConflicts(), 2);
+    createExpectNoConflictsWithoutReferencesForSpace(spaceId, getDestinationWithoutConflicts(), 1);
 
   const expectNoConflictsForNonExistentSpaceResult = (spaceId: string = DEFAULT_SPACE_ID) =>
     createExpectNoConflictsWithoutReferencesForSpace(spaceId, 'non_existent_space', 1);
@@ -191,6 +195,8 @@ export function copyToSpaceTestSuiteFactory(
       expect(vis2DestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
       const vis3DestinationId = result[destination].successResults![3].destinationId;
       expect(vis3DestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
+      const dashboardDestinationId = result[destination].successResults![4].destinationId;
+      expect(dashboardDestinationId).to.match(UUID_PATTERN); // this was copied to space 2 and hit an unresolvable conflict, so the object ID was regenerated silently / the destinationId is a UUID
 
       expect(result).to.eql({
         [destination]: {
@@ -225,12 +231,13 @@ export function copyToSpaceTestSuiteFactory(
               destinationId: vis3DestinationId,
             },
             {
-              id: 'cts_dashboard',
+              id: `cts_dashboard_${spaceId}`,
               type: 'dashboard',
               meta: {
                 icon: 'dashboardApp',
                 title: `This is the ${spaceId} test space CTS dashboard`,
               },
+              destinationId: dashboardDestinationId,
             },
           ],
         },
@@ -238,7 +245,7 @@ export function copyToSpaceTestSuiteFactory(
 
       // Query ES to ensure that we copied everything we expected
       await assertSpaceCounts(destination, {
-        dashboard: 2,
+        dashboard: 1,
         visualization: 3,
         'index-pattern': 1,
       });
@@ -353,13 +360,14 @@ export function copyToSpaceTestSuiteFactory(
               destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
             },
             {
-              id: 'cts_dashboard',
+              id: `cts_dashboard_${spaceId}`,
               type: 'dashboard',
               meta: {
                 icon: 'dashboardApp',
                 title: `This is the ${spaceId} test space CTS dashboard`,
               },
               overwrite: true,
+              destinationId: `cts_dashboard_${destination}`, // this conflicted with another dashboard in the destination space because of a shared originId
             },
           ],
         },
@@ -367,7 +375,7 @@ export function copyToSpaceTestSuiteFactory(
 
       // Query ES to ensure that we copied everything we expected
       await assertSpaceCounts(destination, {
-        dashboard: 2,
+        dashboard: 1,
         visualization: 5,
         'index-pattern': 1,
       });
@@ -403,8 +411,11 @@ export function copyToSpaceTestSuiteFactory(
       ];
       const expectedErrors = [
         {
-          error: { type: 'conflict' },
-          id: 'cts_dashboard',
+          error: {
+            type: 'conflict',
+            destinationId: `cts_dashboard_${destination}`, // this conflicted with another dashboard in the destination space because of a shared originId
+          },
+          id: `cts_dashboard_${spaceId}`,
           title: `This is the ${spaceId} test space CTS dashboard`,
           type: 'dashboard',
           meta: {
@@ -662,7 +673,7 @@ export function copyToSpaceTestSuiteFactory(
             )
           );
 
-          const dashboardObject = { type: 'dashboard', id: 'cts_dashboard' };
+          const dashboardObject = { type: 'dashboard', id: `cts_dashboard_${spaceId}` };
 
           it(`should return ${tests.noConflictsWithoutReferences.statusCode} when copying to space without conflicts or references`, async () => {
             const destination = getDestinationWithoutConflicts();
