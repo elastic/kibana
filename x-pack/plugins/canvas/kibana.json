@@ -28,7 +28,7 @@
     "uiActions",
     "share"
   ],
-  "optionalPlugins": ["home", "reporting", "usageCollection"],
+  "optionalPlugins": ["home", "reporting", "spaces", "usageCollection"],
   "requiredBundles": [
     "discover",
     "home",

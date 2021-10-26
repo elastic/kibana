@@ -14,6 +14,7 @@ export interface AllowlistFields {
 // Allow list process fields within events.  This includes "process" and "Target.process".'
 const allowlistProcessFields: AllowlistFields = {
   args: true,
+  entity_id: true,
   name: true,
   executable: true,
   code_signature: true,
@@ -30,6 +31,9 @@ const allowlistProcessFields: AllowlistFields = {
     dll: true,
     malware_signature: true,
     memory_region: true,
+    real: {
+      entity_id: true,
+    },
     token: {
       integrity_level_name: true,
     },
@@ -49,6 +53,7 @@ const allowlistBaseEventFields: AllowlistFields = {
       original_file_name: true,
     },
   },
+  dns: true,
   event: true,
   file: {
     extension: true,
@@ -129,13 +134,12 @@ export const allowlistEventFields: AllowlistFields = {
 
 export const exceptionListEventFields: AllowlistFields = {
   created_at: true,
-  description: true,
   effectScope: true,
   entries: true,
   id: true,
   name: true,
-  os: true,
   os_types: true,
+  rule_version: true,
 };
 
 /**
@@ -143,7 +147,7 @@ export const exceptionListEventFields: AllowlistFields = {
  *
  * @param allowlist
  * @param event
- * @returns
+ * @returns TelemetryEvent with explicitly required fields
  */
 export function copyAllowlistedFields(
   allowlist: AllowlistFields,

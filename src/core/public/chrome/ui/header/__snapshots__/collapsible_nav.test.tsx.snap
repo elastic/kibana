@@ -565,6 +565,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           "data-test-subj": "homeLink",
                           "href": "/",
                           "iconType": "home",
+                          "isActive": false,
                           "label": "Home",
                           "onClick": [Function],
                         },
@@ -587,6 +588,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         data-test-subj="homeLink"
                         href="/"
                         iconType="home"
+                        isActive={false}
                         key="title-0"
                         label="Home"
                         onClick={[Function]}
@@ -642,6 +644,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         >
           <EuiAccordion
             arrowDisplay="right"
+            arrowProps={
+              Object {
+                "color": "text",
+              }
+            }
             buttonClassName="euiCollapsibleNavGroup__heading"
             buttonContent={
               <EuiFlexGroup
@@ -663,8 +670,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
+            buttonElement="button"
             className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
             data-test-subj="collapsibleNavGroup-recentlyViewed"
+            element="div"
             id="generated-id"
             initialIsOpen={true}
             isLoading={false}
@@ -683,28 +692,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 <button
                   aria-controls="generated-id"
                   aria-expanded={true}
-                  className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                  className="euiAccordion__button euiCollapsibleNavGroup__heading"
                   id="generated-id"
                   onClick={[Function]}
                   type="button"
                 >
                   <span
-                    className="euiAccordion__iconWrapper"
-                  >
-                    <EuiIcon
-                      className="euiAccordion__icon euiAccordion__icon-isOpen"
-                      size="m"
-                      type="arrowRight"
-                    >
-                      <span
-                        className="euiAccordion__icon euiAccordion__icon-isOpen"
-                        data-euiicon-type="arrowRight"
-                        size="m"
-                      />
-                    </EuiIcon>
-                  </span>
-                  <span
-                    className="euiIEFlexWrapFix"
+                    className="euiAccordion__buttonContent"
                   >
                     <EuiFlexGroup
                       alignItems="center"
@@ -734,6 +728,43 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexGroup>
                   </span>
                 </button>
+                <EuiButtonIcon
+                  aria-controls="generated-id"
+                  aria-expanded={true}
+                  aria-labelledby="generated-id"
+                  className="euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                  color="text"
+                  iconType="arrowRight"
+                  onClick={[Function]}
+                  tabIndex={-1}
+                >
+                  <button
+                    aria-controls="generated-id"
+                    aria-expanded={true}
+                    aria-labelledby="generated-id"
+                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                    disabled={false}
+                    onClick={[Function]}
+                    tabIndex={-1}
+                    type="button"
+                  >
+                    <EuiIcon
+                      aria-hidden="true"
+                      className="euiButtonIcon__icon"
+                      color="inherit"
+                      size="m"
+                      type="arrowRight"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowRight"
+                        size="m"
+                      />
+                    </EuiIcon>
+                  </button>
+                </EuiButtonIcon>
               </div>
               <div
                 aria-labelledby="generated-id"
@@ -890,6 +921,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             >
               <EuiAccordion
                 arrowDisplay="right"
+                arrowProps={
+                  Object {
+                    "color": "text",
+                  }
+                }
                 buttonClassName="euiCollapsibleNavGroup__heading"
                 buttonContent={
                   <EuiFlexGroup
@@ -919,8 +955,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
+                buttonElement="button"
                 className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                 data-test-subj="collapsibleNavGroup-kibana"
+                element="div"
                 id="generated-id"
                 initialIsOpen={true}
                 isLoading={false}
@@ -939,28 +977,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <button
                       aria-controls="generated-id"
                       aria-expanded={true}
-                      className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                      className="euiAccordion__button euiCollapsibleNavGroup__heading"
                       id="generated-id"
                       onClick={[Function]}
                       type="button"
                     >
                       <span
-                        className="euiAccordion__iconWrapper"
-                      >
-                        <EuiIcon
-                          className="euiAccordion__icon euiAccordion__icon-isOpen"
-                          size="m"
-                          type="arrowRight"
-                        >
-                          <span
-                            className="euiAccordion__icon euiAccordion__icon-isOpen"
-                            data-euiicon-type="arrowRight"
-                            size="m"
-                          />
-                        </EuiIcon>
-                      </span>
-                      <span
-                        className="euiIEFlexWrapFix"
+                        className="euiAccordion__buttonContent"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -1007,6 +1030,43 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         </EuiFlexGroup>
                       </span>
                     </button>
+                    <EuiButtonIcon
+                      aria-controls="generated-id"
+                      aria-expanded={true}
+                      aria-labelledby="generated-id"
+                      className="euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                      color="text"
+                      iconType="arrowRight"
+                      onClick={[Function]}
+                      tabIndex={-1}
+                    >
+                      <button
+                        aria-controls="generated-id"
+                        aria-expanded={true}
+                        aria-labelledby="generated-id"
+                        className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                        disabled={false}
+                        onClick={[Function]}
+                        tabIndex={-1}
+                        type="button"
+                      >
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          color="inherit"
+                          size="m"
+                          type="arrowRight"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowRight"
+                            size="m"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiButtonIcon>
                   </div>
                   <div
                     aria-labelledby="generated-id"
@@ -1182,6 +1242,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             >
               <EuiAccordion
                 arrowDisplay="right"
+                arrowProps={
+                  Object {
+                    "color": "text",
+                  }
+                }
                 buttonClassName="euiCollapsibleNavGroup__heading"
                 buttonContent={
                   <EuiFlexGroup
@@ -1211,8 +1276,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
+                buttonElement="button"
                 className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                 data-test-subj="collapsibleNavGroup-observability"
+                element="div"
                 id="generated-id"
                 initialIsOpen={true}
                 isLoading={false}
@@ -1231,28 +1298,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <button
                       aria-controls="generated-id"
                       aria-expanded={true}
-                      className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                      className="euiAccordion__button euiCollapsibleNavGroup__heading"
                       id="generated-id"
                       onClick={[Function]}
                       type="button"
                     >
                       <span
-                        className="euiAccordion__iconWrapper"
-                      >
-                        <EuiIcon
-                          className="euiAccordion__icon euiAccordion__icon-isOpen"
-                          size="m"
-                          type="arrowRight"
-                        >
-                          <span
-                            className="euiAccordion__icon euiAccordion__icon-isOpen"
-                            data-euiicon-type="arrowRight"
-                            size="m"
-                          />
-                        </EuiIcon>
-                      </span>
-                      <span
-                        className="euiIEFlexWrapFix"
+                        className="euiAccordion__buttonContent"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -1299,6 +1351,43 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         </EuiFlexGroup>
                       </span>
                     </button>
+                    <EuiButtonIcon
+                      aria-controls="generated-id"
+                      aria-expanded={true}
+                      aria-labelledby="generated-id"
+                      className="euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                      color="text"
+                      iconType="arrowRight"
+                      onClick={[Function]}
+                      tabIndex={-1}
+                    >
+                      <button
+                        aria-controls="generated-id"
+                        aria-expanded={true}
+                        aria-labelledby="generated-id"
+                        className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                        disabled={false}
+                        onClick={[Function]}
+                        tabIndex={-1}
+                        type="button"
+                      >
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          color="inherit"
+                          size="m"
+                          type="arrowRight"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowRight"
+                            size="m"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiButtonIcon>
                   </div>
                   <div
                     aria-labelledby="generated-id"
@@ -1435,6 +1524,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             >
               <EuiAccordion
                 arrowDisplay="right"
+                arrowProps={
+                  Object {
+                    "color": "text",
+                  }
+                }
                 buttonClassName="euiCollapsibleNavGroup__heading"
                 buttonContent={
                   <EuiFlexGroup
@@ -1464,8 +1558,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
+                buttonElement="button"
                 className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                 data-test-subj="collapsibleNavGroup-securitySolution"
+                element="div"
                 id="generated-id"
                 initialIsOpen={true}
                 isLoading={false}
@@ -1484,28 +1580,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <button
                       aria-controls="generated-id"
                       aria-expanded={true}
-                      className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                      className="euiAccordion__button euiCollapsibleNavGroup__heading"
                       id="generated-id"
                       onClick={[Function]}
                       type="button"
                     >
                       <span
-                        className="euiAccordion__iconWrapper"
-                      >
-                        <EuiIcon
-                          className="euiAccordion__icon euiAccordion__icon-isOpen"
-                          size="m"
-                          type="arrowRight"
-                        >
-                          <span
-                            className="euiAccordion__icon euiAccordion__icon-isOpen"
-                            data-euiicon-type="arrowRight"
-                            size="m"
-                          />
-                        </EuiIcon>
-                      </span>
-                      <span
-                        className="euiIEFlexWrapFix"
+                        className="euiAccordion__buttonContent"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -1552,6 +1633,43 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         </EuiFlexGroup>
                       </span>
                     </button>
+                    <EuiButtonIcon
+                      aria-controls="generated-id"
+                      aria-expanded={true}
+                      aria-labelledby="generated-id"
+                      className="euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                      color="text"
+                      iconType="arrowRight"
+                      onClick={[Function]}
+                      tabIndex={-1}
+                    >
+                      <button
+                        aria-controls="generated-id"
+                        aria-expanded={true}
+                        aria-labelledby="generated-id"
+                        className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                        disabled={false}
+                        onClick={[Function]}
+                        tabIndex={-1}
+                        type="button"
+                      >
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          color="inherit"
+                          size="m"
+                          type="arrowRight"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowRight"
+                            size="m"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiButtonIcon>
                   </div>
                   <div
                     aria-labelledby="generated-id"
@@ -1649,6 +1767,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             >
               <EuiAccordion
                 arrowDisplay="right"
+                arrowProps={
+                  Object {
+                    "color": "text",
+                  }
+                }
                 buttonClassName="euiCollapsibleNavGroup__heading"
                 buttonContent={
                   <EuiFlexGroup
@@ -1678,8 +1801,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
+                buttonElement="button"
                 className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                 data-test-subj="collapsibleNavGroup-management"
+                element="div"
                 id="generated-id"
                 initialIsOpen={true}
                 isLoading={false}
@@ -1698,28 +1823,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <button
                       aria-controls="generated-id"
                       aria-expanded={true}
-                      className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                      className="euiAccordion__button euiCollapsibleNavGroup__heading"
                       id="generated-id"
                       onClick={[Function]}
                       type="button"
                     >
                       <span
-                        className="euiAccordion__iconWrapper"
-                      >
-                        <EuiIcon
-                          className="euiAccordion__icon euiAccordion__icon-isOpen"
-                          size="m"
-                          type="arrowRight"
-                        >
-                          <span
-                            className="euiAccordion__icon euiAccordion__icon-isOpen"
-                            data-euiicon-type="arrowRight"
-                            size="m"
-                          />
-                        </EuiIcon>
-                      </span>
-                      <span
-                        className="euiIEFlexWrapFix"
+                        className="euiAccordion__buttonContent"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -1766,6 +1876,43 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         </EuiFlexGroup>
                       </span>
                     </button>
+                    <EuiButtonIcon
+                      aria-controls="generated-id"
+                      aria-expanded={true}
+                      aria-labelledby="generated-id"
+                      className="euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                      color="text"
+                      iconType="arrowRight"
+                      onClick={[Function]}
+                      tabIndex={-1}
+                    >
+                      <button
+                        aria-controls="generated-id"
+                        aria-expanded={true}
+                        aria-labelledby="generated-id"
+                        className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                        disabled={false}
+                        onClick={[Function]}
+                        tabIndex={-1}
+                        type="button"
+                      >
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          color="inherit"
+                          size="m"
+                          type="arrowRight"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowRight"
+                            size="m"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiButtonIcon>
                   </div>
                   <div
                     aria-labelledby="generated-id"

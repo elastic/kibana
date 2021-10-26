@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import url from 'url';
 import { Either, fromNullable, chain, getOrElse, toError } from 'fp-ts/Either';
 import { flow, pipe } from 'fp-ts/function';
 import * as TE from 'fp-ts/lib/TaskEither';
 import * as T from 'fp-ts/lib/Task';
 import { ToolingLog } from '@kbn/dev-utils';
-import { run as jq } from 'node-jq';
 import { FtrService } from '../../ftr_provider_context';
 import { print } from './utils';
 
@@ -38,7 +37,7 @@ export const types =
     await pipe(
       TE.tryCatch(
         async () => {
-          const { body } = await new Client({ node }).search({
+          const body = await new Client({ node, Connection: HttpConnection }).search({
             index,
             size: 0,
             body: query,
@@ -61,22 +60,8 @@ export const types =
 export class SavedObjectInfoService extends FtrService {
   private readonly config = this.ctx.getService('config');
 
-  private readonly typesF = async () =>
-    await types(url.format(this.config.get('servers.elasticsearch')))();
-
   public async logSoTypes(log: ToolingLog, msg: string | null = null) {
     // @ts-ignore
-    pipe(await this.typesF(), print(log)(msg));
-  }
-
-  /**
-   * See test/common/services/saved_object_info/README.md for "jq filtering" ideas.
-   */
-  public async filterSoTypes(log: ToolingLog, jqFilter: string, title: string | null = null) {
-    pipe(await this.typesF(), filterAndLog);
-
-    async function filterAndLog(payload: any) {
-      log.info(`${title ? title + '\n' : ''}${await jq(jqFilter, payload, { input: 'json' })}`);
-    }
+    pipe(await types(url.format(this.config.get('servers.elasticsearch'))), print(log)(msg));
   }
 }

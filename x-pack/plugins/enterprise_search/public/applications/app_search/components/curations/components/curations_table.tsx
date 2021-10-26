@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
@@ -25,6 +25,10 @@ import { generateEnginePath } from '../../engine';
 import { CurationsLogic } from '../curations_logic';
 import { Curation } from '../types';
 import { convertToDate } from '../utils';
+
+import { AutomatedIcon } from './automated_icon';
+
+import './curations_table.scss';
 
 export const CurationsTable: React.FC = () => {
   const { dataLoading, curations, meta } = useValues(CurationsLogic);
@@ -43,17 +47,34 @@ export const CurationsTable: React.FC = () => {
           to={generateEnginePath(ENGINE_CURATION_PATH, { curationId: curation.id })}
         >
           {queries.join(', ')}
+          {curation.suggestion?.status === 'automated' && (
+            <>
+              <EuiBadge color="accent" iconType={AutomatedIcon} className="curationsTableBadge">
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.curations.table.automatedLabel',
+                  { defaultMessage: 'Automated' }
+                )}
+              </EuiBadge>
+            </>
+          )}
+          {curation.suggestion?.status === 'pending' && (
+            <>
+              <EuiBadge color="default" className="curationsTableBadge">
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.engine.curations.table.newSuggestionLabel',
+                  { defaultMessage: 'New suggestion' }
+                )}
+              </EuiBadge>
+            </>
+          )}
         </EuiLinkTo>
       ),
       width: '40%',
       truncateText: true,
       mobileOptions: {
         header: true,
-        // Note: the below props are valid props per https://elastic.github.io/eui/#/tabular-content/tables (Responsive tables), but EUI's types have a bug reporting it as an error
-        // @ts-ignore
         enlarge: true,
         width: '100%',
-        truncateText: false,
       },
     },
     {
@@ -103,6 +124,7 @@ export const CurationsTable: React.FC = () => {
 
   return (
     <DataPanel
+      className="curationsTable"
       hasBorder
       iconType="package"
       title={

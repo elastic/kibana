@@ -162,7 +162,6 @@ export default ({ getService }: FtrProviderContext) => {
             enabled: true,
             created_by: 'elastic',
             updated_by: 'elastic',
-            throttle: null,
             description: 'Test ML rule description',
             risk_score: 50,
             severity: 'critical',
@@ -212,9 +211,10 @@ export default ({ getService }: FtrProviderContext) => {
       const signalsOpen = await getOpenSignals(supertest, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(7);
     });
+
     describe('with non-value list exception', () => {
       afterEach(async () => {
-        await deleteAllExceptions(es);
+        await deleteAllExceptions(supertest);
       });
       it('generates no signals when an exception is added for an ML rule', async () => {
         const createdRule = await createRuleWithExceptionEntries(supertest, testRule, [
@@ -239,7 +239,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteListsIndex(supertest);
-        await deleteAllExceptions(es);
+        await deleteAllExceptions(supertest);
       });
 
       it('generates no signals when a value list exception is added for an ML rule', async () => {

@@ -18,7 +18,7 @@ import {
 import { useTheme } from '../../../../hooks/use_theme';
 
 type ServiceInstanceMainStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem =
   ServiceInstanceMainStatistics['currentPeriod'][0];
 

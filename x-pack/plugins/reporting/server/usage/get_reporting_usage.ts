@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import type { ReportingConfig } from '../';
+import { REPORTING_SYSTEM_INDEX } from '../../common/constants';
 import type { ExportTypesRegistry } from '../lib/export_types_registry';
 import type { GetLicense } from './';
 import { getExportStats } from './get_export_stats';
@@ -144,10 +145,10 @@ export async function getReportingUsage(
   esClient: ElasticsearchClient,
   exportTypesRegistry: ExportTypesRegistry
 ): Promise<ReportingUsageType> {
-  const reportingIndex = config.get('index');
+  const reportingIndex = REPORTING_SYSTEM_INDEX;
   const params = {
     index: `${reportingIndex}-*`,
-    filterPath: 'aggregations.*.buckets',
+    filter_path: 'aggregations.*.buckets',
     body: {
       size: 0,
       aggs: {

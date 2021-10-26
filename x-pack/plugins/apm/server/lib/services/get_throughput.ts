@@ -14,10 +14,11 @@ import {
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
+import { calculateThroughputWithInterval } from '../helpers/calculate_throughput';
 
 interface Options {
   environment: string;
@@ -30,7 +31,7 @@ interface Options {
   start: number;
   end: number;
   intervalString: string;
-  throughputUnit: 'minute' | 'second';
+  bucketSize: number;
 }
 
 export async function getThroughput({
@@ -44,16 +45,14 @@ export async function getThroughput({
   start,
   end,
   intervalString,
-  throughputUnit,
+  bucketSize,
 }: Options) {
   const { apmEventClient } = setup;
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    ...getDocumentTypeFilterForAggregatedTransactions(
-      searchAggregatedTransactions
-    ),
+    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
@@ -69,11 +68,7 @@ export async function getThroughput({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -85,13 +80,6 @@ export async function getThroughput({
             fixed_interval: intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
-          },
-          aggs: {
-            throughput: {
-              rate: {
-                unit: throughputUnit,
-              },
-            },
           },
         },
       },
@@ -107,7 +95,10 @@ export async function getThroughput({
     response.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key,
-        y: bucket.throughput.value,
+        y: calculateThroughputWithInterval({
+          bucketSize,
+          value: bucket.doc_count,
+        }),
       };
     }) ?? []
   );

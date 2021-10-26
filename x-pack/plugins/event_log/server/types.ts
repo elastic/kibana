@@ -18,7 +18,6 @@ import { SavedObjectProvider } from './saved_object_provider_registry';
 export const SAVED_OBJECT_REL_PRIMARY = 'primary';
 
 export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   logEntries: schema.boolean({ defaultValue: false }),
   indexEntries: schema.boolean({ defaultValue: true }),
 });
@@ -27,7 +26,6 @@ export type IEventLogConfig = TypeOf<typeof ConfigSchema>;
 
 // the object exposed by plugin.setup()
 export interface IEventLogService {
-  isEnabled(): boolean;
   isLoggingEntries(): boolean;
   isIndexingEntries(): boolean;
   registerProviderActions(provider: string, actions: string[]): void;

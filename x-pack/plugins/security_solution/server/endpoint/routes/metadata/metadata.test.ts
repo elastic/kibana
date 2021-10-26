@@ -22,6 +22,7 @@ import { HostInfo, HostResultList, HostStatus } from '../../../../common/endpoin
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { registerEndpointRoutes } from './index';
 import {
+  createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createMockPackageService,
   createRouteHandlerContext,
@@ -131,8 +132,10 @@ describe('test endpoint route', () => {
               type: ElasticsearchAssetType.transform,
             },
           ],
+          keep_policies_up_to_date: false,
         })
       );
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
       mockAgentService = startContract.agentService!;
 
@@ -170,8 +173,8 @@ describe('test endpoint route', () => {
       const esSearchMock = mockScopedClient.asCurrentUser.search;
       // should be called twice, united index first, then legacy index
       expect(esSearchMock).toHaveBeenCalledTimes(2);
-      expect(esSearchMock.mock.calls[0][0]!.index).toEqual(METADATA_UNITED_INDEX);
-      expect(esSearchMock.mock.calls[1][0]!.index).toEqual(metadataCurrentIndexPattern);
+      expect(esSearchMock.mock.calls[0][0]?.index).toEqual(METADATA_UNITED_INDEX);
+      expect(esSearchMock.mock.calls[1][0]?.index).toEqual(metadataCurrentIndexPattern);
       expect(routeConfig.options).toEqual({
         authRequired: true,
         tags: ['access:securitySolution'],
@@ -223,7 +226,7 @@ describe('test endpoint route', () => {
       );
 
       expect(esSearchMock).toHaveBeenCalledTimes(1);
-      expect(esSearchMock.mock.calls[0][0]!.index).toEqual(METADATA_UNITED_INDEX);
+      expect(esSearchMock.mock.calls[0][0]?.index).toEqual(METADATA_UNITED_INDEX);
       expect(esSearchMock.mock.calls[0][0]?.body?.query).toEqual({
         bool: {
           must: [
@@ -390,8 +393,10 @@ describe('test endpoint route', () => {
               type: ElasticsearchAssetType.transform,
             },
           ],
+          keep_policies_up_to_date: false,
         })
       );
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
       mockAgentService = startContract.agentService!;
 

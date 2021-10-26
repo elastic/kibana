@@ -28,7 +28,7 @@ import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
 const hasFleetDataRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/fleet/has_data',
+  endpoint: 'GET /internal/apm/fleet/has_data',
   options: { tags: [] },
   handler: async ({ core, plugins }) => {
     const fleetPluginStart = await plugins.fleet?.start();
@@ -44,7 +44,7 @@ const hasFleetDataRoute = createApmServerRoute({
 });
 
 const fleetAgentsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/fleet/agents',
+  endpoint: 'GET /internal/apm/fleet/agents',
   options: { tags: [] },
   handler: async ({ core, plugins }) => {
     const cloudSetup = plugins.cloud?.setup;
@@ -113,7 +113,7 @@ const saveApmServerSchemaRoute = createApmServerRoute({
 });
 
 const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/fleet/apm_server_schema/unsupported',
+  endpoint: 'GET /internal/apm/fleet/apm_server_schema/unsupported',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const { context } = resources;
@@ -125,12 +125,11 @@ const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
 });
 
 const getMigrationCheckRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/fleet/migration_check',
+  endpoint: 'GET /internal/apm/fleet/migration_check',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const { plugins, context, config, request } = resources;
-    const cloudApmMigrationEnabled =
-      config['xpack.apm.agent.migrations.enabled'];
+    const cloudApmMigrationEnabled = config.agent.migrations.enabled;
     if (!plugins.fleet || !plugins.security) {
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
@@ -144,22 +143,23 @@ const getMigrationCheckRoute = createApmServerRoute({
           fleetPluginStart,
         })
       : undefined;
+    const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
     return {
       has_cloud_agent_policy: !!cloudAgentPolicy,
-      has_cloud_apm_package_policy: !!getApmPackagePolicy(cloudAgentPolicy),
+      has_cloud_apm_package_policy: !!apmPackagePolicy,
       cloud_apm_migration_enabled: cloudApmMigrationEnabled,
       has_required_role: hasRequiredRole,
+      cloud_apm_package_policy: apmPackagePolicy,
     };
   },
 });
 
 const createCloudApmPackagePolicyRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/fleet/cloud_apm_package_policy',
+  endpoint: 'POST /internal/apm/fleet/cloud_apm_package_policy',
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (resources) => {
     const { plugins, context, config, request, logger } = resources;
-    const cloudApmMigrationEnabled =
-      config['xpack.apm.agent.migrations.enabled'];
+    const cloudApmMigrationEnabled = config.agent.migrations.enabled;
     if (!plugins.fleet || !plugins.security) {
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }

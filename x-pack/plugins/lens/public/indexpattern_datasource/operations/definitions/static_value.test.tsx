@@ -80,14 +80,14 @@ describe('static_value', () => {
     };
   });
 
-  function getLayerWithStaticValue(newValue: string): IndexPatternLayer {
+  function getLayerWithStaticValue(newValue: string | null | undefined): IndexPatternLayer {
     return {
       ...layer,
       columns: {
         ...layer.columns,
         col2: {
           ...layer.columns.col2,
-          label: `Static value: ${newValue}`,
+          label: `Static value: ${newValue ?? String(newValue)}`,
           params: {
             value: newValue,
           },
@@ -155,8 +155,9 @@ describe('static_value', () => {
       ).toBeUndefined();
     });
 
-    it('should return error for invalid values', () => {
-      for (const value of ['NaN', 'Infinity', 'string']) {
+    it.each(['NaN', 'Infinity', 'string'])(
+      'should return error for invalid values: %s',
+      (value) => {
         expect(
           staticValueOperation.getErrorMessage!(
             getLayerWithStaticValue(value),
@@ -165,6 +166,16 @@ describe('static_value', () => {
           )
         ).toEqual(expect.arrayContaining([expect.stringMatching('is not a valid number')]));
       }
+    );
+
+    it.each([null, undefined])('should return no error for: %s', (value) => {
+      expect(
+        staticValueOperation.getErrorMessage!(
+          getLayerWithStaticValue(value),
+          'col2',
+          createMockedIndexPattern()
+        )
+      ).toBe(undefined);
     });
   });
 

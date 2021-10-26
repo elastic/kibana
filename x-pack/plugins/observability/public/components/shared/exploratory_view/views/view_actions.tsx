@@ -11,7 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { allSeriesKey, convertAllShortSeries, useSeriesStorage } from '../hooks/use_series_storage';
 
-export function ViewActions() {
+interface Props {
+  onApply?: () => void;
+}
+
+export function ViewActions({ onApply }: Props) {
   const { allSeries, storage, applyChanges } = useSeriesStorage();
 
   const noChanges = isEqual(allSeries, convertAllShortSeries(storage.get(allSeriesKey) ?? []));
@@ -19,7 +23,7 @@ export function ViewActions() {
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiButton onClick={() => applyChanges()} isDisabled={noChanges} fill size="s">
+        <EuiButton onClick={() => applyChanges(onApply)} isDisabled={noChanges} fill size="s">
           {i18n.translate('xpack.observability.expView.seriesBuilder.apply', {
             defaultMessage: 'Apply changes',
           })}

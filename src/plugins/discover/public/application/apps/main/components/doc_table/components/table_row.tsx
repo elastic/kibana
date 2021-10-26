@@ -10,11 +10,12 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
+import { formatFieldValue } from '../../../../../helpers/format_value';
+import { flattenHit } from '../../../../../../../../data/common';
 import { DocViewer } from '../../../../../components/doc_viewer/doc_viewer';
 import { FilterManager, IndexPattern } from '../../../../../../../../data/public';
 import { TableCell } from './table_row/table_cell';
 import { ElasticSearchHit, DocViewFilterFn } from '../../../../../doc_views/doc_views_types';
-import { trimAngularSpan } from '../../../../../components/table/table_helper';
 import { getContextUrl } from '../../../../../helpers/get_context_url';
 import { getSingleDocUrl } from '../../../../../helpers/get_single_doc_url';
 import { TableRowDetails } from './table_row_details';
@@ -58,7 +59,10 @@ export const TableRow = ({
   });
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';
 
-  const flattenedRow = useMemo(() => indexPattern.flattenHit(row), [indexPattern, row]);
+  const flattenedRow = useMemo(
+    () => flattenHit(row, indexPattern, { includeIgnoredValues: true }),
+    [indexPattern, row]
+  );
   const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
 
   // toggle display of the rows details, a full list of the fields from each row
@@ -68,14 +72,24 @@ export const TableRow = ({
    * Fill an element with the value of a field
    */
   const displayField = (fieldName: string) => {
-    const text = indexPattern.formatField(row, fieldName);
-    const formattedField = trimAngularSpan(String(text));
+    // If we're formatting the _source column, don't use the regular field formatter,
+    // but our Discover mechanism to format a hit in a better human-readable way.
+    if (fieldName === '_source') {
+      return formatRow(row, indexPattern, fieldsToShow);
+    }
 
-    // field formatters take care of escaping
-    // eslint-disable-next-line react/no-danger
-    const fieldElement = <span dangerouslySetInnerHTML={{ __html: formattedField }} />;
+    const formattedField = formatFieldValue(
+      flattenedRow[fieldName],
+      row,
+      indexPattern,
+      mapping(fieldName)
+    );
 
-    return <div className="truncate-by-height">{fieldElement}</div>;
+    return (
+      // formatFieldValue always returns sanitized HTML
+      // eslint-disable-next-line react/no-danger
+      <div className="truncate-by-height" dangerouslySetInnerHTML={{ __html: formattedField }} />
+    );
   };
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
@@ -142,10 +156,9 @@ export const TableRow = ({
     );
   } else {
     columns.forEach(function (column: string) {
-      // when useNewFieldsApi is true, addressing to the fields property is safe
-      if (useNewFieldsApi && !mapping(column) && !row.fields![column]) {
+      if (useNewFieldsApi && !mapping(column) && row.fields && !row.fields[column]) {
         const innerColumns = Object.fromEntries(
-          Object.entries(row.fields!).filter(([key]) => {
+          Object.entries(row.fields).filter(([key]) => {
             return key.indexOf(`${column}.`) === 0;
           })
         );
@@ -162,7 +175,13 @@ export const TableRow = ({
           />
         );
       } else {
-        const isFilterable = Boolean(mapping(column)?.filterable && filter);
+        // Check whether the field is defined as filterable in the mapping and does
+        // NOT have ignored values in it to determine whether we want to allow filtering.
+        // We should improve this and show a helpful tooltip why the filter buttons are not
+        // there/disabled when there are ignored values.
+        const isFilterable = Boolean(
+          mapping(column)?.filterable && filter && !row._ignored?.includes(column)
+        );
         rowCells.push(
           <TableCell
             key={column}

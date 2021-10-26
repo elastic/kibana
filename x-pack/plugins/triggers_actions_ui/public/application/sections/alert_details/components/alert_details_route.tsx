@@ -10,7 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { ToastsApi } from 'kibana/public';
 import { EuiSpacer } from '@elastic/eui';
-import { Alert, AlertType, ActionType, ResolvedRule } from '../../../../types';
+import { AlertType, ActionType, ResolvedRule } from '../../../../types';
 import { AlertDetailsWithApi as AlertDetails } from './alert_details';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
 import {
@@ -28,13 +28,12 @@ type AlertDetailsRouteProps = RouteComponentProps<{
   ruleId: string;
 }> &
   Pick<ActionApis, 'loadActionTypes'> &
-  Pick<AlertApis, 'loadAlert' | 'loadAlertTypes' | 'resolveRule'>;
+  Pick<AlertApis, 'loadAlertTypes' | 'resolveRule'>;
 
 export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> = ({
   match: {
     params: { ruleId },
   },
-  loadAlert,
   loadAlertTypes,
   loadActionTypes,
   resolveRule,
@@ -47,14 +46,13 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
 
   const { basePath } = http;
 
-  const [alert, setAlert] = useState<Alert | ResolvedRule | null>(null);
+  const [alert, setAlert] = useState<ResolvedRule | null>(null);
   const [alertType, setAlertType] = useState<AlertType | null>(null);
   const [actionTypes, setActionTypes] = useState<ActionType[] | null>(null);
   const [refreshToken, requestRefresh] = React.useState<number>();
   useEffect(() => {
     getRuleData(
       ruleId,
-      loadAlert,
       loadAlertTypes,
       resolveRule,
       loadActionTypes,
@@ -63,7 +61,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
       setActionTypes,
       toasts
     );
-  }, [ruleId, http, loadActionTypes, loadAlert, loadAlertTypes, resolveRule, toasts, refreshToken]);
+  }, [ruleId, http, loadActionTypes, loadAlertTypes, resolveRule, toasts, refreshToken]);
 
   useEffect(() => {
     if (alert) {
@@ -128,26 +126,16 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
 
 export async function getRuleData(
   ruleId: string,
-  loadAlert: AlertApis['loadAlert'],
   loadAlertTypes: AlertApis['loadAlertTypes'],
   resolveRule: AlertApis['resolveRule'],
   loadActionTypes: ActionApis['loadActionTypes'],
-  setAlert: React.Dispatch<React.SetStateAction<Alert | ResolvedRule | null>>,
+  setAlert: React.Dispatch<React.SetStateAction<ResolvedRule | null>>,
   setAlertType: React.Dispatch<React.SetStateAction<AlertType | null>>,
   setActionTypes: React.Dispatch<React.SetStateAction<ActionType[] | null>>,
   toasts: Pick<ToastsApi, 'addDanger'>
 ) {
   try {
-    let loadedRule: Alert | ResolvedRule;
-    try {
-      loadedRule = await loadAlert(ruleId);
-    } catch (err) {
-      // Try resolving this rule id if the error is a 404, otherwise re-throw
-      if (err?.body?.statusCode !== 404) {
-        throw err;
-      }
-      loadedRule = await resolveRule(ruleId);
-    }
+    const loadedRule: ResolvedRule = await resolveRule(ruleId);
     setAlert(loadedRule);
 
     const [loadedAlertType, loadedActionTypes] = await Promise.all<AlertType, ActionType[]>([

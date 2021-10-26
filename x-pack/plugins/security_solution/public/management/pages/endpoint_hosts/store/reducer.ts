@@ -50,9 +50,9 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
         }
       : { ...state.endpointDetails.activityLog };
   return {
-    ...state!,
+    ...state,
     endpointDetails: {
-      ...state.endpointDetails!,
+      ...state.endpointDetails,
       activityLog: {
         ...updatedActivityLog,
         logData: action.payload,
@@ -181,7 +181,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     return {
       ...state,
       endpointDetails: {
-        ...state.endpointDetails!,
+        ...state.endpointDetails,
         activityLog: {
           ...state.endpointDetails.activityLog,
           paging: {
@@ -195,7 +195,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     return {
       ...state,
       endpointDetails: {
-        ...state.endpointDetails!,
+        ...state.endpointDetails,
         activityLog: {
           ...state.endpointDetails.activityLog,
           paging: {
@@ -458,6 +458,7 @@ const handleEndpointIsolationRequestStateChanged: ImmutableReducer<
   AppAction & { type: 'endpointIsolationRequestStateChange' }
 > = (state, action) => {
   return {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     ...state!,
     isolationRequestState: action.payload,
   };

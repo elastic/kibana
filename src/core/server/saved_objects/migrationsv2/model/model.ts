@@ -9,7 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AliasAction, isLeftTypeof } from '../actions';
 import { AllActionStates, MigrationLog, State } from '../types';
 import type { ResponseType } from '../next';
@@ -265,7 +265,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // control state progression and simplify the implementation.
         return { ...stateP, controlState: 'LEGACY_DELETE' };
       } else if (isLeftTypeof(left, 'wait_for_task_completion_timeout')) {
-        // After waiting for the specificed timeout, the task has not yet
+        // After waiting for the specified timeout, the task has not yet
         // completed. Retry this step to see if the task has completed after an
         // exponential delay. We will basically keep polling forever until the
         // Elasticeasrch task succeeds or fails.
@@ -854,7 +854,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // If there are none versionIndexReadyActions another instance
         // already completed this migration and we only transformed outdated
-        // documents and updated the mappings for incase a new plugin was
+        // documents and updated the mappings for in case a new plugin was
         // enabled.
         return {
           ...stateP,

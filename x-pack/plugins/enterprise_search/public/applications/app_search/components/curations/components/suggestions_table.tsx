@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { VIEW_BUTTON_LABEL } from '../../../../shared/constants';
@@ -26,6 +26,8 @@ import { convertToDate } from '../utils';
 
 import { SuggestionsLogic } from './suggestions_logic';
 
+import './suggestions_table.scss';
+
 const getSuggestionRoute = (query: string) => {
   return generateEnginePath(ENGINE_CURATION_SUGGESTION_PATH, { query });
 };
@@ -37,7 +39,21 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
       'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsTable.column.queryTableHeader',
       { defaultMessage: 'Query' }
     ),
-    render: (query: string) => <EuiLinkTo to={getSuggestionRoute(query)}>{query}</EuiLinkTo>,
+    render: (query: string, curation: CurationSuggestion) => (
+      <EuiLinkTo to={getSuggestionRoute(query)}>
+        {query}
+        {curation.override_manual_curation && (
+          <>
+            <EuiBadge iconType="alert" color="warning" className="suggestionsTableBadge">
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsTable.overridesLabel',
+                { defaultMessage: 'Overrides' }
+              )}
+            </EuiBadge>
+          </>
+        )}
+      </EuiLinkTo>
+    ),
   },
   {
     field: 'updated_at',
@@ -52,7 +68,7 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
     field: 'promoted',
     name: i18n.translate(
       'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsTable.column.promotedDocumentsTableHeader',
-      { defaultMessage: 'Promoted documents' }
+      { defaultMessage: 'Promoted results' }
     ),
     render: (promoted: string[]) => <span>{promoted.length}</span>,
   },
@@ -89,6 +105,7 @@ export const SuggestionsTable: React.FC = () => {
 
   return (
     <DataPanel
+      className="suggestionsTable"
       iconType={LightbulbIcon}
       title={
         <h2>

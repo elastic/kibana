@@ -7,20 +7,26 @@
  */
 
 import type { GetDeprecationsContext } from './types';
-import { DeprecationsFactory } from './deprecations_factory';
+import { DeprecationsFactory, DeprecationsFactoryConfig } from './deprecations_factory';
 import { loggerMock } from '../logging/logger.mock';
+import { DeprecationsDetails } from './types';
 
 describe('DeprecationsFactory', () => {
-  const logger = loggerMock.create();
+  let logger: ReturnType<typeof loggerMock.create>;
+  let config: DeprecationsFactoryConfig;
+
   beforeEach(() => {
-    loggerMock.clear(logger);
+    logger = loggerMock.create();
+    config = {
+      ignoredConfigDeprecations: [],
+    };
   });
 
   describe('getRegistry', () => {
     const domainId = 'test-plugin';
 
     it('creates a registry for a domainId', async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const registry = deprecationsFactory.getRegistry(domainId);
 
       expect(registry).toHaveProperty('registerDeprecations');
@@ -28,7 +34,7 @@ describe('DeprecationsFactory', () => {
     });
 
     it('creates one registry for a domainId', async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const registry = deprecationsFactory.getRegistry(domainId);
       const sameRegistry = deprecationsFactory.getRegistry(domainId);
 
@@ -36,7 +42,7 @@ describe('DeprecationsFactory', () => {
     });
 
     it('returns a registered registry', () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const mockRegistry = 'mock-reg';
       const mockRegistries = {
         set: jest.fn(),
@@ -61,7 +67,7 @@ describe('DeprecationsFactory', () => {
     } as unknown as GetDeprecationsContext;
 
     it('returns a flattened array of deprecations', async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const mockPluginDeprecationsInfo = [
         {
           message: 'mockPlugin message',
@@ -97,8 +103,8 @@ describe('DeprecationsFactory', () => {
         getDeprecations: jest.fn().mockResolvedValue(anotherMockPluginDeprecationsInfo),
       });
 
-      const derpecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
-      expect(derpecations).toStrictEqual(
+      const deprecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
+      expect(deprecations).toStrictEqual(
         [
           mockPluginDeprecationsInfo.map((info) => ({ ...info, domainId: 'mockPlugin' })),
           anotherMockPluginDeprecationsInfo.map((info) => ({
@@ -110,7 +116,7 @@ describe('DeprecationsFactory', () => {
     });
 
     it(`returns a failure message for failed getDeprecations functions`, async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const domainId = 'mockPlugin';
       const mockError = new Error();
 
@@ -142,7 +148,7 @@ describe('DeprecationsFactory', () => {
     });
 
     it(`returns successful results even when some getDeprecations fail`, async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const mockPluginRegistry = deprecationsFactory.getRegistry('mockPlugin');
       const anotherMockPluginRegistry = deprecationsFactory.getRegistry('anotherMockPlugin');
       const mockError = new Error();
@@ -161,14 +167,14 @@ describe('DeprecationsFactory', () => {
       anotherMockPluginRegistry.registerDeprecations({
         getDeprecations: jest.fn().mockRejectedValue(mockError),
       });
-      const derpecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
+      const deprecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
 
       expect(logger.warn).toBeCalledTimes(1);
       expect(logger.warn).toBeCalledWith(
         `Failed to get deprecations info for plugin "anotherMockPlugin".`,
         mockError
       );
-      expect(derpecations).toStrictEqual([
+      expect(deprecations).toStrictEqual([
         ...mockPluginDeprecationsInfo.map((info) => ({ ...info, domainId: 'mockPlugin' })),
         {
           domainId: 'anotherMockPlugin',
@@ -181,6 +187,123 @@ describe('DeprecationsFactory', () => {
         },
       ]);
     });
+
+    it('excludes config deprecations explicitly ignored via `ignoredConfigDeprecations`', async () => {
+      const deprecationsFactory = new DeprecationsFactory({
+        logger,
+        config: {
+          ignoredConfigDeprecations: ['mockPlugin.foo', 'anotherMockPlugin.bar'],
+        },
+      });
+      const mockPluginDeprecationsInfo: DeprecationsDetails[] = [
+        {
+          configPath: 'mockPlugin.foo',
+          title: 'mockPlugin.foo is deprecated',
+          message: 'mockPlugin.foo is deprecated and will be removed in a future Kibana version',
+          level: 'critical',
+          deprecationType: 'config',
+          correctiveActions: {
+            manualSteps: ['come on', 'do something'],
+          },
+        },
+        {
+          configPath: 'mockPlugin.bar',
+          title: 'mockPlugin.bar is deprecated',
+          message: 'mockPlugin.bar is deprecated and will be removed in a future Kibana version',
+          level: 'critical',
+          deprecationType: 'config',
+          correctiveActions: {
+            manualSteps: ['come on', 'do something'],
+          },
+        },
+      ];
+      const anotherMockPluginDeprecationsInfo: DeprecationsDetails[] = [
+        {
+          configPath: 'anotherMockPlugin.foo',
+          title: 'anotherMockPlugin.foo is deprecated',
+          message:
+            'anotherMockPlugin.foo is deprecated and will be removed in a future Kibana version',
+          level: 'critical',
+          deprecationType: 'config',
+          correctiveActions: {
+            manualSteps: ['come on', 'do something'],
+          },
+        },
+        {
+          configPath: 'anotherMockPlugin.bar',
+          title: 'anotherMockPlugin.bar is deprecated',
+          message:
+            'anotherMockPlugin.bar is deprecated and will be removed in a future Kibana version',
+          level: 'critical',
+          deprecationType: 'config',
+          correctiveActions: {
+            manualSteps: ['come on', 'do something'],
+          },
+        },
+      ];
+
+      const mockPluginRegistry = deprecationsFactory.getRegistry('mockPlugin');
+      mockPluginRegistry.registerDeprecations({
+        getDeprecations: jest.fn().mockResolvedValue(mockPluginDeprecationsInfo),
+      });
+
+      const anotherMockPluginRegistry = deprecationsFactory.getRegistry('anotherMockPlugin');
+      anotherMockPluginRegistry.registerDeprecations({
+        getDeprecations: jest.fn().mockResolvedValue(anotherMockPluginDeprecationsInfo),
+      });
+
+      const deprecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
+
+      expect(deprecations).toHaveLength(2);
+      expect(deprecations).toEqual([
+        expect.objectContaining({
+          configPath: 'mockPlugin.bar',
+          title: 'mockPlugin.bar is deprecated',
+        }),
+        expect.objectContaining({
+          configPath: 'anotherMockPlugin.foo',
+          title: 'anotherMockPlugin.foo is deprecated',
+        }),
+      ]);
+    });
+
+    it('does not throw when configured with paths not matching any deprecation', async () => {
+      const deprecationsFactory = new DeprecationsFactory({
+        logger,
+        config: {
+          ignoredConfigDeprecations: ['unknown.bar'],
+        },
+      });
+      const mockPluginDeprecationsInfo: DeprecationsDetails[] = [
+        {
+          configPath: 'mockPlugin.foo',
+          title: 'mockPlugin.foo is deprecated',
+          message: 'mockPlugin.foo is deprecated and will be removed in a future Kibana version',
+          level: 'critical',
+          deprecationType: 'config',
+          correctiveActions: {
+            manualSteps: ['come on', 'do something'],
+          },
+        },
+        {
+          configPath: 'mockPlugin.bar',
+          title: 'mockPlugin.bar is deprecated',
+          message: 'mockPlugin.bar is deprecated and will be removed in a future Kibana version',
+          level: 'critical',
+          deprecationType: 'config',
+          correctiveActions: {
+            manualSteps: ['come on', 'do something'],
+          },
+        },
+      ];
+
+      const mockPluginRegistry = deprecationsFactory.getRegistry('mockPlugin');
+      mockPluginRegistry.registerDeprecations({
+        getDeprecations: jest.fn().mockResolvedValue(mockPluginDeprecationsInfo),
+      });
+
+      await expect(deprecationsFactory.getAllDeprecations(mockDependencies)).resolves.toBeDefined();
+    });
   });
 
   describe('getDeprecations', () => {
@@ -190,7 +313,7 @@ describe('DeprecationsFactory', () => {
     } as unknown as GetDeprecationsContext;
 
     it('returns a flattened array of DeprecationInfo', async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const deprecationsRegistry = deprecationsFactory.getRegistry('mockPlugin');
       const deprecationsBody = [
         {
@@ -215,40 +338,62 @@ describe('DeprecationsFactory', () => {
         getDeprecations: jest.fn().mockResolvedValue(deprecationsBody),
       });
 
-      const derpecations = await deprecationsFactory.getDeprecations(
+      const deprecations = await deprecationsFactory.getDeprecations(
         'mockPlugin',
         mockDependencies
       );
-      expect(derpecations).toStrictEqual(
+      expect(deprecations).toStrictEqual(
         deprecationsBody.flat().map((body) => ({ ...body, domainId: 'mockPlugin' }))
       );
     });
 
-    it('removes empty entries from the returned array', async () => {
-      const deprecationsFactory = new DeprecationsFactory({ logger });
+    it('excludes config deprecations explicitly ignored via `ignoredConfigDeprecations`', async () => {
+      const deprecationsFactory = new DeprecationsFactory({
+        logger,
+        config: {
+          ignoredConfigDeprecations: ['test.foo'],
+        },
+      });
       const deprecationsRegistry = deprecationsFactory.getRegistry('mockPlugin');
-      const deprecationsBody = [
+      const deprecationsBody: DeprecationsDetails[] = [
         {
-          message: 'mockPlugin message',
+          configPath: 'test.foo',
+          title: 'test.foo is deprecated',
+          message: 'test.foo is deprecated and will be removed in a future Kibana version',
           level: 'critical',
+          deprecationType: 'config',
           correctiveActions: {
-            manualSteps: ['mockPlugin step 1', 'mockPlugin step 2'],
+            manualSteps: ['come on', 'do something'],
           },
         },
-        [undefined],
-        undefined,
+        {
+          configPath: 'test.bar',
+          title: 'test.bar is deprecated',
+          message: 'test.bar is deprecated and will be removed in a future Kibana version',
+          level: 'critical',
+          deprecationType: 'config',
+          correctiveActions: {
+            manualSteps: ['come on', 'do something'],
+          },
+        },
       ];
 
       deprecationsRegistry.registerDeprecations({
         getDeprecations: jest.fn().mockResolvedValue(deprecationsBody),
       });
 
-      const derpecations = await deprecationsFactory.getDeprecations(
+      const deprecations = await deprecationsFactory.getDeprecations(
         'mockPlugin',
         mockDependencies
       );
-      expect(derpecations).toHaveLength(1);
-      expect(derpecations).toStrictEqual([{ ...deprecationsBody[0], domainId: 'mockPlugin' }]);
+      expect(deprecations).toHaveLength(1);
+      expect(deprecations[0]).toEqual(
+        expect.objectContaining({
+          deprecationType: 'config',
+          configPath: 'test.bar',
+          title: 'test.bar is deprecated',
+        })
+      );
     });
   });
 });

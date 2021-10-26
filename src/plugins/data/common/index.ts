@@ -58,7 +58,6 @@ export {
   DATA_VIEW_SAVED_OBJECT_TYPE,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
   isFilterable,
-  isNestedField,
   fieldList,
   DataViewField,
   IndexPatternField,
@@ -75,4 +74,8 @@ export {
   DuplicateDataViewError,
   DataViewSavedObjectConflictError,
   getIndexPatternLoadMeta,
+  isNestedField,
+  isMultiField,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
 } from '../../data_views/common';

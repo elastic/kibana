@@ -23,6 +23,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Filter } from '@kbn/es-query';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { hasLargeValueList } from '../has_large_value_list';
 
 type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists;
@@ -39,21 +40,11 @@ export type ExceptionItemSansLargeValueLists =
   | CreateExceptionListItemNonLargeList;
 
 export interface BooleanFilter {
-  bool: {
-    must?: unknown | unknown[];
-    must_not?: unknown | unknown[];
-    should?: unknown[];
-    filter?: unknown | unknown[];
-    minimum_should_match?: number;
-  };
+  bool: estypes.QueryDslBoolQuery;
 }
 
 export interface NestedFilter {
-  nested: {
-    path: string;
-    query: unknown | unknown[];
-    score_mode: string;
-  };
+  nested: estypes.QueryDslNestedQuery;
 }
 
 export const chunkExceptions = (
@@ -178,7 +169,7 @@ export const buildExceptionFilter = ({
     return undefined;
   } else if (exceptionsWithoutLargeValueLists.length <= chunkSize) {
     const clause = createOrClauses(exceptionsWithoutLargeValueLists);
-    exceptionFilter.query!.bool.should = clause;
+    exceptionFilter.query!.bool!.should = clause;
     return exceptionFilter;
   } else {
     const chunks = chunkExceptions(exceptionsWithoutLargeValueLists, chunkSize);

@@ -37,7 +37,7 @@ describe('legacy_extract_rule_id', () => {
     ).toEqual<FuncReturn>([]);
 
     expect(logger.error).toBeCalledWith(
-      'Security Solution notification (Legacy) system "ruleAlertId" is null or undefined when it never should be. ,This indicates potentially that saved object migrations did not run correctly. Returning empty reference'
+      'Security Solution notification (Legacy) system "ruleAlertId" is null or undefined when it never should be. This indicates potentially that saved object migrations did not run correctly. Returning empty reference.'
     );
   });
 

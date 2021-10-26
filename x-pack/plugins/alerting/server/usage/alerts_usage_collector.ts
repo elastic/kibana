@@ -17,6 +17,7 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   // Built-in
   '__index-threshold': { type: 'long' },
   '__es-query': { type: 'long' },
+  transform_health: { type: 'long' },
   // APM
   apm__error_rate: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   apm__transaction_error_rate: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
@@ -45,8 +46,8 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   // Maps
   '__geo-containment': { type: 'long' },
   // ML
-  xpack_ml_anomaly_detection_alert: { type: 'long' },
-  xpack_ml_anomaly_detection_jobs_health: { type: 'long' },
+  xpack__ml__anomaly_detection_alert: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  xpack__ml__anomaly_detection_jobs_health: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
 };
 
 export function createAlertsUsageCollector(
@@ -74,14 +75,14 @@ export function createAlertsUsageCollector(
           count_active_total: 0,
           count_disabled_total: 0,
           throttle_time: {
-            min: '0s',
-            avg: '0s',
-            max: '0s',
+            min: 0,
+            avg: 0,
+            max: 0,
           },
           schedule_time: {
-            min: '0s',
-            avg: '0s',
-            max: '0s',
+            min: 0,
+            avg: 0,
+            max: 0,
           },
           connectors_per_alert: {
             min: 0,
@@ -90,6 +91,7 @@ export function createAlertsUsageCollector(
           },
           count_active_by_type: {},
           count_by_type: {},
+          count_rules_namespaces: 0,
         };
       }
     },
@@ -98,14 +100,14 @@ export function createAlertsUsageCollector(
       count_active_total: { type: 'long' },
       count_disabled_total: { type: 'long' },
       throttle_time: {
-        min: { type: 'keyword' },
-        avg: { type: 'keyword' },
-        max: { type: 'keyword' },
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
       },
       schedule_time: {
-        min: { type: 'keyword' },
-        avg: { type: 'keyword' },
-        max: { type: 'keyword' },
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
       },
       connectors_per_alert: {
         min: { type: 'long' },
@@ -114,6 +116,7 @@ export function createAlertsUsageCollector(
       },
       count_active_by_type: byTypeSchema,
       count_by_type: byTypeSchema,
+      count_rules_namespaces: { type: 'long' },
     },
   });
 }

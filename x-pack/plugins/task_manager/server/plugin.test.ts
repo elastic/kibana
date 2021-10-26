@@ -16,9 +16,7 @@ describe('TaskManagerPlugin', () => {
   describe('setup', () => {
     test('throws if no valid UUID is available', async () => {
       const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-        enabled: true,
         max_workers: 10,
-        index: 'foo',
         max_attempts: 9,
         poll_interval: 3000,
         version_conflict_threshold: 80,
@@ -59,9 +57,7 @@ describe('TaskManagerPlugin', () => {
 
     test('throws if setup methods are called after start', async () => {
       const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-        enabled: true,
         max_workers: 10,
-        index: 'foo',
         max_attempts: 9,
         poll_interval: 3000,
         version_conflict_threshold: 80,
@@ -131,9 +127,7 @@ describe('TaskManagerPlugin', () => {
 
     test('it logs a warning when the unsafe `exclude_task_types` config is used', async () => {
       const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-        enabled: true,
         max_workers: 10,
-        index: 'foo',
         max_attempts: 9,
         poll_interval: 3000,
         version_conflict_threshold: 80,

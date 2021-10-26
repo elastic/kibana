@@ -41,6 +41,7 @@ export interface TestRenderer {
   kibanaVersion: string;
   AppWrapper: React.FC<any>;
   render: UiRender;
+  setHeaderActionMenu: Function;
 }
 
 export const createFleetTestRendererMock = (): TestRenderer => {
@@ -55,6 +56,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     config: createConfigurationMock(),
     startInterface: createStartMock(extensions),
     kibanaVersion: '8.0.0',
+    setHeaderActionMenu: jest.fn(),
     AppWrapper: memo(({ children }) => {
       return (
         <FleetAppContext
@@ -96,6 +98,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
     config: createConfigurationMock(),
     startInterface: createStartMock(extensions),
     kibanaVersion: '8.0.0',
+    setHeaderActionMenu: jest.fn(),
     AppWrapper: memo(({ children }) => {
       return (
         <IntegrationsAppContext
@@ -106,6 +109,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
           kibanaVersion={testRendererMocks.kibanaVersion}
           extensions={extensions}
           routerHistory={testRendererMocks.history}
+          setHeaderActionMenu={() => {}}
         >
           {children}
         </IntegrationsAppContext>
