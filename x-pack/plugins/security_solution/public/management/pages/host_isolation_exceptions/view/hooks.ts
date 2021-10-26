@@ -48,18 +48,18 @@ export function useCanSeeHostIsolationExceptionsMenu() {
   const http = useHttp();
   const privileges = useEndpointPrivileges();
 
-  const [hasExceptions, setHasExceptions] = useState(privileges.canIsolateHost);
+  const [canSeeMenu, setCanSeeMenu] = useState(privileges.canIsolateHost);
 
   useEffect(() => {
     async function checkIfHasExceptions() {
       try {
         const summary = await getHostIsolationExceptionSummary(http);
         if (summary?.total > 0) {
-          setHasExceptions(true);
+          setCanSeeMenu(true);
         }
       } catch (error) {
         // an error will ocurr if the exception list does not exist
-        setHasExceptions(false);
+        setCanSeeMenu(false);
       }
     }
     if (!privileges.canIsolateHost) {
@@ -67,5 +67,5 @@ export function useCanSeeHostIsolationExceptionsMenu() {
     }
   }, [http, privileges.canIsolateHost]);
 
-  return hasExceptions;
+  return canSeeMenu;
 }
