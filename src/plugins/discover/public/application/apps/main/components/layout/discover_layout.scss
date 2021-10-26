@@ -86,6 +86,11 @@ discover-app {
   padding: $euiSizeS $euiSizeS $euiSizeS $euiSizeS;
 }
 
+.dscHistogramTimeRange {
+  padding: 0 $euiSizeS 0 $euiSizeS;
+  margin-top: - $euiSizeS;
+}
+
 .dscTable {
   // needs for scroll container of lagacy table
   min-height: 0;

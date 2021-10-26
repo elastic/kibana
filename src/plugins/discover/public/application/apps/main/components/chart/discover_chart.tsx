@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import {
   EuiButtonEmpty,
@@ -14,9 +14,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
-import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../../saved_searches';
@@ -57,31 +55,7 @@ export function DiscoverChart({
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = services.uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
-  const { data, storage, uiSettings } = services;
-
-  const { from, to } = data.query.timefilter.timefilter.getAbsoluteTime();
-  const dateFormat = useMemo(() => uiSettings.get('dateFormat'), [uiSettings]);
-
-  const toMoment = useCallback(
-    (datetime: moment.Moment | undefined) => {
-      if (!datetime) {
-        return '';
-      }
-      if (!dateFormat) {
-        return String(datetime);
-      }
-      return datetime.format(dateFormat);
-    },
-    [dateFormat]
-  );
-
-  const timeRangeText = useMemo(() => {
-    const timeRange = {
-      from: dateMath.parse(from),
-      to: dateMath.parse(to, { roundUp: true }),
-    };
-    return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)}`;
-  }, [from, to, toMoment]);
+  const { data, storage } = services;
 
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
     element: null,
@@ -141,11 +115,6 @@ export function DiscoverChart({
               onResetQuery={resetSavedSearch}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" textAlign="left">
-              {timeRangeText}
-            </EuiText>
-          </EuiFlexItem>
           {showViewModeToggle && (
             <EuiFlexItem grow={false}>
               <DocumentViewModeToggle
@@ -195,7 +164,6 @@ export function DiscoverChart({
               savedSearchData$={savedSearchDataChart$}
               timefilterUpdateHandler={timefilterUpdateHandler}
               services={services}
-              timeRangeText={timeRangeText}
             />
           </section>
           <EuiSpacer size="s" />
