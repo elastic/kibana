@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { SavedObjectsSerializer } from '../../serialization';
+import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import { getRootFields } from './included_fields';
 import {

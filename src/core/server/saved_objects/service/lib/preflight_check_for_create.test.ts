@@ -25,7 +25,6 @@ import {
   PreflightCheckForCreateParams,
 } from './preflight_check_for_create';
 import { preflightCheckForCreate } from './preflight_check_for_create';
-import { SavedObjectsErrorHelpers } from './errors';
 
 beforeEach(() => {
   mockFindLegacyUrlAliases.mockReset();
@@ -64,6 +63,7 @@ describe('preflightCheckForCreate', () => {
         docs: results.map(({ found, disabled }, i) => {
           return found
             ? {
+                // @ts-expect-error
                 _id: params!.body!.docs![i]._id as string, // needed for mockRawDocExistsInNamespaces mock implementation and existingDocument assertions
                 _index: 'doesnt-matter',
                 _source: {
@@ -242,21 +242,5 @@ describe('preflightCheckForCreate', () => {
       { type: obj10.type, id: obj10.id, error: { type: 'conflict' } },
       { type: obj11.type, id: obj11.id, error: { type: 'conflict' } },
     ]);
-  });
-
-  it(`throws on 404 with missing Elasticsearch header`, async () => {
-    const obj1 = { type: 'obj-type', id: 'id-1', overwrite: false, namespaces: ['a'] }; // mget aliases
-    const params = setup(obj1);
-    client.mget.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        { docs: [] },
-        { statusCode: 404 },
-        {}
-      )
-    );
-    await expect(preflightCheckForCreate(params)).rejects.toThrowError(
-      SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError()
-    );
-    expect(client.mget).toHaveBeenCalledTimes(1);
   });
 });

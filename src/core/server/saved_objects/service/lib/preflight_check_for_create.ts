@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type {
@@ -14,7 +13,6 @@ import type {
   SavedObjectsRawDocSource,
   SavedObjectsSerializer,
 } from '../../serialization';
-import { SavedObjectsErrorHelpers } from './errors';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import { Either, rawDocExistsInNamespaces } from './internal_utils';
 import { getObjectKey, isLeft, isRight } from './internal_utils';
@@ -272,16 +270,6 @@ async function bulkGetObjectsAndAliases(
         { ignore: [404] }
       )
     : undefined;
-  // exit early if a 404 isn't from elasticsearch
-  if (
-    bulkGetResponse &&
-    isNotFoundFromUnsupportedServer({
-      statusCode: bulkGetResponse.statusCode,
-      headers: bulkGetResponse.headers,
-    })
-  ) {
-    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-  }
 
   return { bulkGetResponse, aliasSpaces };
 }
