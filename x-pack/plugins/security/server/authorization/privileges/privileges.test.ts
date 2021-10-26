@@ -1631,7 +1631,7 @@ describe('subFeatures', () => {
   });
 
   describe(`when license does not allow sub features`, () => {
-    test(`should augment the primary feature privileges, and should not sub-feature privileges`, () => {
+    test(`should augment the primary feature privileges, and should not create sub-feature privileges`, () => {
       const features: KibanaFeature[] = [
         new KibanaFeature({
           id: 'foo',
