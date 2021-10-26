@@ -14,6 +14,7 @@ import { SavedObjectReference } from '../../../../src/core/types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../src/plugins/data/common';
 
 export const APP_ID = 'securitySolution';
+export const APP_UI_ID = 'securitySolutionUI';
 export const CASES_FEATURE_ID = 'securitySolutionCases';
 export const SERVER_APP_ID = 'siem';
 export const APP_NAME = 'Security';

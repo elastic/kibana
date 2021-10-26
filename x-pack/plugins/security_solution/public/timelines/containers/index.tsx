@@ -248,6 +248,7 @@ export const useTimelineEvents = ({
                       activeTimeline.setEqlRequest(request as TimelineEqlRequestOptions);
                       activeTimeline.setEqlResponse(newTimelineResponse);
                     } else {
+                      // @ts-expect-error EqlSearchRequest.query is not compatible with QueryDslQueryContainer
                       activeTimeline.setRequest(request);
                       activeTimeline.setResponse(newTimelineResponse);
                     }

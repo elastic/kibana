@@ -99,7 +99,7 @@ export const getDeprecatedSettingWarning = (
 ): ReindexWarning | undefined => {
   const { settings } = flatSettings;
 
-  const deprecatedSettingsInUse = Object.keys(settings).filter((setting) => {
+  const deprecatedSettingsInUse = Object.keys(settings || {}).filter((setting) => {
     return deprecatedSettings.indexOf(setting) > -1;
   });
 
