@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { getUrl } from '@kbn/test';
+import moment from 'moment';
 import { FtrService } from '../ftr_provider_context';
 
 interface NavigateProps {
@@ -502,8 +503,23 @@ export class CommonPageObject extends FtrService {
     }
   }
 
+  formatTime(time: { from: string; to: string }, fmt: string = 'MMM D, YYYY @ HH:mm:ss.SSS') {
+    return Object.keys(time)
+      .map((x: unknown) => moment(time[x], [fmt]).format())
+      .reduce(
+        (acc, curr, idx) => {
+          if (idx === 0) acc.from = curr;
+          acc.to = curr;
+          return acc;
+        },
+        { from: '', to: '' }
+      );
+  }
+
   async setTime(time: { from: string; to: string }) {
-    await this.kibanaServer.uiSettings.replace({ 'timepicker:timeDefaults': JSON.stringify(time) });
+    await this.kibanaServer.uiSettings.replace({
+      'timepicker:timeDefaults': JSON.stringify(this.formatTime(time)),
+    });
   }
 
   async unsetTime() {
