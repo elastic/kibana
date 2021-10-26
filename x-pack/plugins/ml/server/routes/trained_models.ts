@@ -302,7 +302,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const { body } = await mlClient.getTrainedModelsDeploymentStats({
+        const { body } = await mlClient.getTrainedModelDeploymentStats({
           model_id: modelId,
         });
         return response.ok({
