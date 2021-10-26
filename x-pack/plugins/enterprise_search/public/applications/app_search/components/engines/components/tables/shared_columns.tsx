@@ -36,11 +36,8 @@ export const NAME_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   truncateText: true,
   mobileOptions: {
     header: true,
-    // Note: the below props are valid props per https://elastic.github.io/eui/#/tabular-content/tables (Responsive tables), but EUI's types have a bug reporting it as an error
-    // @ts-ignore
     enlarge: true,
     width: '100%',
-    truncateText: false,
   },
 };
 
