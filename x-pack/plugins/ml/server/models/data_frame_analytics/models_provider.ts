@@ -127,10 +127,8 @@ export function modelsProvider(
           };
 
           for (const key of Object.keys(memoryRes)) {
-            // @ts-ignore
-            if (memoryRes[key] > 0) {
-              // @ts-ignore
-              memoryRes[key] += NATIVE_EXECUTABLE_CODE_OVERHEAD;
+            if (memoryRes[key as keyof typeof memoryRes] > 0) {
+              memoryRes[key as keyof typeof memoryRes] += NATIVE_EXECUTABLE_CODE_OVERHEAD;
               break;
             }
           }
