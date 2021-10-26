@@ -80,10 +80,6 @@ export class AgentManager extends Manager {
 
     this.log.info(ipAddress);
 
-    if (!ipAddress) {
-      return;
-    }
-
     const args = [
       'run',
       '--env',
