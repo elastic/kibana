@@ -13,6 +13,8 @@ import { createMockExecutionContext } from '../../../../../src/plugins/expressio
 import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common';
 import { layerTypes } from '../../common';
 import type { LensMultiTable } from '../../common';
+import { IUiSettingsClient } from 'kibana/public';
+import { ColorMode } from 'src/plugins/charts/common';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -43,6 +45,8 @@ function sampleArgs() {
     description: 'Fancy chart description',
     metricTitle: 'My fanci metric chart',
     mode: 'full',
+    colorMode: ColorMode.None,
+    palette: { type: 'palette', name: 'status' },
   };
 
   const noAttributesArgs: MetricConfig = {
@@ -53,6 +57,8 @@ function sampleArgs() {
     description: '',
     metricTitle: 'My fanci metric chart',
     mode: 'full',
+    colorMode: ColorMode.None,
+    palette: { type: 'palette', name: 'status' },
   };
 
   return { data, args, noAttributesArgs };
@@ -82,6 +88,7 @@ describe('metric_expression', () => {
             data={data}
             args={args}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -129,6 +136,7 @@ describe('metric_expression', () => {
             data={data}
             args={args}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -175,6 +183,7 @@ describe('metric_expression', () => {
             data={data}
             args={noAttributesArgs}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -221,6 +230,7 @@ describe('metric_expression', () => {
             data={data}
             args={{ ...noAttributesArgs, mode: 'reduced' }}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -257,6 +267,7 @@ describe('metric_expression', () => {
             data={{ ...data, tables: {} }}
             args={noAttributesArgs}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -283,6 +294,7 @@ describe('metric_expression', () => {
             data={data}
             args={noAttributesArgs}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -309,6 +321,7 @@ describe('metric_expression', () => {
             data={data}
             args={noAttributesArgs}
             formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+            uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           />
         )
       ).toMatchInlineSnapshot(`
@@ -350,7 +363,14 @@ describe('metric_expression', () => {
       const { data, args } = sampleArgs();
       const factory = jest.fn(() => ({ convert: (x) => x } as IFieldFormat));
 
-      shallow(<MetricChart data={data} args={args} formatFactory={factory} />);
+      shallow(
+        <MetricChart
+          data={data}
+          args={args}
+          formatFactory={factory}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        />
+      );
       expect(factory).toHaveBeenCalledWith({ id: 'percent', params: { format: '0.000%' } });
     });
   });

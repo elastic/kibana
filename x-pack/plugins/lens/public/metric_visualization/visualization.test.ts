@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { metricVisualization } from './visualization';
+import { getMetricVisualization } from './visualization';
 import { MetricState } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 jest.mock('../id_generator');
 
@@ -31,6 +32,10 @@ function mockFrame(): FramePublicAPI {
     },
   };
 }
+
+const metricVisualization = getMetricVisualization({
+  paletteService: chartPluginMock.createPaletteRegistry(),
+});
 
 describe('metric_visualization', () => {
   describe('#initialize', () => {
