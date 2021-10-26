@@ -7,7 +7,7 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 import axios, { AxiosRequestConfig } from 'axios';
-import { ChildProcess, exec, spawn } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import { resolve } from 'path';
 import { networkInterfaces } from 'os';
 import { Manager } from './resource_manager';
@@ -46,12 +46,6 @@ export class AgentManager extends Manager {
     return resolve(this.directoryPath, 'elastic-agent');
   }
 
-  private execute(command: string, callback: Function) {
-    exec(command, function (error, stdout, stderr) {
-      callback(stdout);
-    });
-  }
-
   public async setup() {
     this.log.info('Running agent preconfig');
     await axios.post(`${this.params.kibanaUrl}/api/fleet/agents/setup`, {}, this.requestOptions);
@@ -79,35 +73,31 @@ export class AgentManager extends Manager {
     this.log.info('Running the agent');
 
     const nis = networkInterfaces();
+    const ipAddress = Object.values(nis)
+      .flatMap((x) => x)
+      .find((inf: any) => inf.family === 'IPv4' && inf.address !== '127.0.0.1')?.address;
     this.log.info(nis);
 
-    let ipAddress: string | undefined;
-    await this.execute(
-      `ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'`,
-      async (result: string) => {
-        ipAddress = result.trim();
-        this.log.info(ipAddress);
+    this.log.info(ipAddress);
 
-        if (!ipAddress) {
-          return;
-        }
+    if (!ipAddress) {
+      return;
+    }
 
-        const args = [
-          'run',
-          '--env',
-          'FLEET_ENROLL=1',
-          '--env',
-          `FLEET_URL=http://${ipAddress}:8220`,
-          '--env',
-          `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
-          '--env',
-          'FLEET_INSECURE=true',
-          'docker.elastic.co/beats/elastic-agent:8.0.0-SNAPSHOT',
-        ];
+    const args = [
+      'run',
+      '--env',
+      'FLEET_ENROLL=1',
+      '--env',
+      `FLEET_URL=http://${ipAddress}:8220`,
+      '--env',
+      `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
+      '--env',
+      'FLEET_INSECURE=true',
+      'docker.elastic.co/beats/elastic-agent:8.0.0-SNAPSHOT',
+    ];
 
-        this.agentProcess = spawn('docker', args, { stdio: 'inherit' });
-      }
-    );
+    this.agentProcess = spawn('docker', args, { stdio: 'inherit' });
 
     // Wait til we see the agent is online
     let done = false;
