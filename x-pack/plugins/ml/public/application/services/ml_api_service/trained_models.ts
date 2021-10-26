@@ -15,6 +15,7 @@ import {
   ModelPipelines,
   TrainedModelStat,
   NodesOverviewResponse,
+  TrainedModelDeploymentStatsResponse,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -115,7 +116,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
      * @param modelId - Model ID
      */
     deleteTrainedModel(modelId: string) {
-      return httpService.http<any>({
+      return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}`,
         method: 'DELETE',
       });
@@ -127,7 +128,10 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         model = modelId.join(',');
       }
 
-      return httpService.http<any>({
+      return httpService.http<{
+        count: number;
+        deployment_stats: TrainedModelDeploymentStatsResponse[];
+      }>({
         path: `${apiBasePath}/trained_models/${model}/deployment/_stats`,
         method: 'GET',
       });
@@ -141,14 +145,14 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     },
 
     startModelAllocation(modelId: string) {
-      return httpService.http<any>({
+      return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
       });
     },
 
     stopModelAllocation(modelId: string) {
-      return httpService.http<any>({
+      return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}/deployment/_stop`,
         method: 'POST',
       });

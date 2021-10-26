@@ -191,7 +191,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    *
    * @api {get} /api/ml/trained_models/nodes_overview Get node overview about the models allocation
    * @apiName GetTrainedModelsNodesOverview
-   * @apiDescription Retrieves the list of nodes with allocated models info
+   * @apiDescription Retrieves the list of ML nodes with memory breakdown and allocated models info
    */
   router.get(
     {
