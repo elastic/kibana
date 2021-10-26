@@ -10,6 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { EngineLogic } from '../../../engine';
+import { CurationsLogic } from '../../curations_logic';
 
 export interface CurationsSettings {
   enabled: boolean;
@@ -101,6 +102,10 @@ export const CurationsSettingsLogic = kea<
           }
         );
         actions.onCurationsSettingsLoad(response.curation);
+
+        //  Re-fetch data so that UI updates to new settings
+        CurationsLogic.actions.loadCurations();
+        EngineLogic.actions.initializeEngine();
       } catch (e) {
         flashAPIErrors(e);
       }
