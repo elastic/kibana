@@ -90,7 +90,6 @@ export async function getServiceTransactionGroupDetailedStatistics({
           bool: {
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
-              { terms: { [TRANSACTION_NAME]: transactionNames } },
               { term: { [TRANSACTION_TYPE]: transactionType } },
               ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
@@ -106,6 +105,8 @@ export async function getServiceTransactionGroupDetailedStatistics({
           transaction_groups: {
             terms: {
               field: TRANSACTION_NAME,
+              include: transactionNames,
+              size: transactionNames.length,
             },
             aggs: {
               transaction_group_total_duration: {
