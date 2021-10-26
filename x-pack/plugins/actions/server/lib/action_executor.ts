@@ -152,18 +152,10 @@ export class ActionExecutor {
           validatedConfig = validateConfig(actionType, config as Record<string, unknown>);
           validatedSecrets = validateSecrets(actionType, secrets as Record<string, unknown>);
           if (actionType.validate?.connector) {
-            const validateActionTypeConnector = validateConnector(actionType, {
+            validateConnector(actionType, {
               config: config as Record<string, unknown>,
               secrets: secrets as Record<string, unknown>,
             });
-            validatedConfig = {
-              ...validatedConfig,
-              ...(validateActionTypeConnector.config as Record<string, unknown>),
-            };
-            validatedSecrets = {
-              ...validatedSecrets,
-              ...(validateActionTypeConnector.secrets as Record<string, unknown>),
-            };
           }
         } catch (err) {
           span?.setOutcome('failure');

@@ -282,14 +282,9 @@ test('throws an error when connector is invalid', async () => {
       config: schema.object({
         param1: schema.string(),
       }),
-      connector: schema.object({
-        config: schema.object({
-          param1: schema.string(),
-        }),
-        secrets: schema.object({
-          param2: schema.string(),
-        }),
-      }),
+      connector: () => {
+        return 'error';
+      },
     },
     executor: jest.fn(),
   };
