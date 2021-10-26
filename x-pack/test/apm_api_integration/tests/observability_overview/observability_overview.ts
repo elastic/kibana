@@ -15,7 +15,7 @@ import { roundNumber } from '../../utils';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
 
-  const traceData = getService('traceData');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -99,7 +99,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           'instance-c'
         );
 
-        await traceData.index([
+        await synthtraceEsClient.index([
           ...timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
@@ -133,7 +133,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => traceData.clean());
+      after(() => synthtraceEsClient.clean());
 
       describe('compare throughput values', () => {
         let throughputValues: PromiseReturnType<typeof getThroughputValues>;

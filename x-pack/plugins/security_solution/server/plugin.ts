@@ -7,7 +7,7 @@
 
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { Logger, SavedObjectsClient } from '../../../../src/core/server';
 import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
