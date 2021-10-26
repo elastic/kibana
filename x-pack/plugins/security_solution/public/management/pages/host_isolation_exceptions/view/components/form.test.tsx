@@ -44,6 +44,7 @@ describe('When on the host isolation exceptions add entry form', () => {
       newException = createEmptyHostIsolationException();
       renderResult = render(newException);
     });
+
     it('should render the form with empty inputs', () => {
       expect(renderResult.getByTestId('hostIsolationExceptions-form-name-input')).toHaveValue('');
       expect(renderResult.getByTestId('hostIsolationExceptions-form-ip-input')).toHaveValue('');
@@ -51,20 +52,31 @@ describe('When on the host isolation exceptions add entry form', () => {
         renderResult.getByTestId('hostIsolationExceptions-form-description-input')
       ).toHaveValue('');
     });
-    it('should call onError with true when a wrong ip value is introduced', () => {
-      const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
-      userEvent.type(ipInput, 'not an ip');
-      expect(onError).toHaveBeenCalledWith(true);
-    });
-    it('should call onError with false when a correct values are introduced', () => {
-      const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
-      const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
 
-      userEvent.type(nameInput, 'test name');
-      userEvent.type(ipInput, '10.0.0.1');
+    it.each(['not an ip', '100', '900.0.0.1', 'x.x.x.x', '10.0.0'])(
+      'should call onError with true when a wrong ip value is introduced. Case: "%s"',
+      (value: string) => {
+        const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
+        const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
+        userEvent.type(nameInput, 'test name');
+        userEvent.type(ipInput, value);
+        expect(onError).toHaveBeenCalledWith(true);
+      }
+    );
 
-      expect(onError).toHaveBeenLastCalledWith(false);
-    });
+    it.each(['192.168.0.1', '10.0.0.1', '100.90.1.1/24', '192.168.200.6/30'])(
+      'should call onError with false when a correct ip value is introduced. Case: "%s"',
+      (value: string) => {
+        const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
+        const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
+
+        userEvent.type(nameInput, 'test name');
+        userEvent.type(ipInput, value);
+
+        expect(onError).toHaveBeenLastCalledWith(false);
+      }
+    );
+
     it('should call onChange when a value is introduced in a field', () => {
       const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
       userEvent.type(ipInput, '10.0.0.1');
@@ -76,6 +88,7 @@ describe('When on the host isolation exceptions add entry form', () => {
       });
     });
   });
+
   describe('When editing an existing exception', () => {
     let existingException: UpdateExceptionListItemSchema;
     beforeEach(() => {
@@ -96,6 +109,7 @@ describe('When on the host isolation exceptions add entry form', () => {
       };
       renderResult = render(existingException);
     });
+
     it('should render the form with pre-filled inputs', () => {
       expect(renderResult.getByTestId('hostIsolationExceptions-form-name-input')).toHaveValue(
         'name edit me'
@@ -107,6 +121,7 @@ describe('When on the host isolation exceptions add entry form', () => {
         renderResult.getByTestId('hostIsolationExceptions-form-description-input')
       ).toHaveValue('initial description');
     });
+
     it('should call onChange when a value is introduced in a field', () => {
       const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
       userEvent.clear(ipInput);
