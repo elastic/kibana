@@ -42,5 +42,9 @@ export function agentSOAttributesToFleetServerAgentDoc(
     doc.policy_revision_idx = policyRevison;
   }
 
+  if (!doc.updated_at) {
+    doc.updated_at = new Date().toISOString();
+  }
+
   return doc;
 }
