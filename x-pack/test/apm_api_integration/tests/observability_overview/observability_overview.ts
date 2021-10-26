@@ -8,11 +8,11 @@ import { service, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { roundNumber } from '../../utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
 
   const synthtraceEsClient = getService('synthtraceEsClient');

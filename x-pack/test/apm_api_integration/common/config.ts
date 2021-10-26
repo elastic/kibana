@@ -14,7 +14,7 @@ import { PromiseReturnType } from '../../../plugins/observability/typings/common
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
-import { registry } from './registry';
+import { RegistryProvider } from './registry';
 import { synthtraceEsClient } from './synthtrace_es_client';
 
 interface Config {
@@ -70,13 +70,13 @@ export function createTestConfig(config: Config) {
     const servers = xPackAPITestsConfig.get('servers');
     const kibanaServer = servers.kibana;
 
-    registry.init(config.name);
-
     return {
       testFiles: [require.resolve('../tests')],
       servers,
       services: {
         ...services,
+        apmFtrConfig: () => config,
+        registry: RegistryProvider,
         synthtraceEsClient,
         apmApiClient: async (context: InheritedFtrProviderContext) => {
           const security = context.getService('security');

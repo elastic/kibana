@@ -12,12 +12,12 @@ import moment from 'moment';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 type ErrorRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';

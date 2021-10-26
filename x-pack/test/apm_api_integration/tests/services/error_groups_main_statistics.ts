@@ -9,13 +9,13 @@ import url from 'url';
 import expect from '@kbn/expect';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 
 type ErrorGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';

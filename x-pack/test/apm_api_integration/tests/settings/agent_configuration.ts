@@ -11,9 +11,9 @@ import { AgentConfigurationIntake } from '../../../../plugins/apm/common/agent_c
 import { AgentConfigSearchParams } from '../../../../plugins/apm/server/routes/settings/agent_configuration';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
 
   const log = getService('log');

@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';

@@ -8,9 +8,9 @@ import expect from '@kbn/expect';
 import { PROCESSOR_EVENT } from '../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../plugins/apm/common/processor_event';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const esClient = getService('es');
 

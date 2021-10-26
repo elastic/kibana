@@ -16,12 +16,12 @@ import {
 } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { RecursivePartial } from '../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { roundNumber } from '../../utils';
 
 type ThroughputReturn = APIReturnType<'GET /internal/apm/services/{serviceName}/throughput'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 

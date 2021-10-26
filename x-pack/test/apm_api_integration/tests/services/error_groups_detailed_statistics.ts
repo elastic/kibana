@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { createApmApiClient } from '../../common/apm_api_supertest';
 import { getErrorGroupIds } from './get_error_group_ids';
@@ -19,6 +18,7 @@ type ErrorGroupsDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
   const apmApiSupertest = createApmApiClient(supertest);
 

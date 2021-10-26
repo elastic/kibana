@@ -14,10 +14,10 @@ import type { RawSearchStrategyClientParams } from '../../../../plugins/apm/comm
 import { APM_SEARCH_STRATEGIES } from '../../../../plugins/apm/common/search_strategies/constants';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { parseBfetchResponse } from '../../common/utils/parse_b_fetch';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const retry = getService('retry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
