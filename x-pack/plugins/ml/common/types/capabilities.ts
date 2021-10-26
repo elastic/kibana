@@ -96,7 +96,7 @@ export function getPluginPrivileges() {
   ];
   const privilege = {
     app: [PLUGIN_ID, 'kibana'],
-    excludeFromBasePrivileges: true,
+    excludeFromBasePrivileges: false,
     management: {
       insightsAndAlerting: ['jobsListLink'],
     },

@@ -42,7 +42,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.except('ml', 'monitoring', 'osquery')
+              navLinksBuilder.except('monitoring', 'osquery')
             );
             break;
           case 'everything_space_all at everything_space':
@@ -53,7 +53,6 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.except(
-                'ml',
                 'monitoring',
                 'enterpriseSearch',
                 'appSearch',

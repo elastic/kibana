@@ -13,10 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error']);
   const ml = getService('ml');
 
-  const testUsers = [
-    { user: USER.ML_UNAUTHORIZED, discoverAvailable: true },
-    { user: USER.ML_UNAUTHORIZED_SPACES, discoverAvailable: true },
-  ];
+  const testUsers = [{ user: USER.ML_UNAUTHORIZED, discoverAvailable: true }];
 
   describe('for user with no ML access', function () {
     this.tags(['skipFirefox', 'mlqa']);
