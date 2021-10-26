@@ -6,13 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ApmMainTemplate } from './apm_main_template';
 import { SpanIcon } from '../../shared/span_icon';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { useFetcher } from '../../../hooks/use_fetcher';
 
 interface Props {
   title: string;
@@ -46,23 +45,7 @@ export function BackendDetailTemplate({ title, children }: Props) {
     [backendName, start, end]
   );
 
-  const value = useMemo(() => {
-    return {
-      metadata: {
-        data: backendMetadataFetch.data,
-        status: backendMetadataFetch.status,
-      } as {
-        data?: APIReturnType<'GET /internal/apm/backends/metadata'>;
-        status?: FETCH_STATUS;
-      },
-    };
-  }, [backendMetadataFetch.data, backendMetadataFetch.status]);
-
-  const {
-    metadata: { data },
-  } = value;
-
-  const metadata = data?.metadata;
+  const { data: { metadata } = {} } = backendMetadataFetch;
 
   return (
     <ApmMainTemplate
