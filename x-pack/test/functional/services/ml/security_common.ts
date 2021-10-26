@@ -148,6 +148,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
             visualize: ['read'],
             dashboard: ['all'],
             actions: ['all'],
+            savedObjectsManagement: ['all'],
           },
           spaces: ['*'],
         },
