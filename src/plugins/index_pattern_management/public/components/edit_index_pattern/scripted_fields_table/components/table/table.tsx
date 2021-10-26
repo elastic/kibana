@@ -106,6 +106,7 @@ export class Table extends PureComponent<TableProps> {
             ),
             icon: 'pencil',
             onClick: editField,
+            available: (field) => !!field.isUserEditable,
           },
           {
             type: 'icon',
@@ -122,6 +123,7 @@ export class Table extends PureComponent<TableProps> {
             icon: 'trash',
             color: 'danger',
             onClick: deleteField,
+            available: (field) => !!field.isUserEditable,
           },
         ],
         width: '40px',

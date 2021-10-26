@@ -80,7 +80,7 @@ export function Tabs({
   location,
   refreshFields,
 }: TabsProps) {
-  const { uiSettings, docLinks, indexPatternFieldEditor } =
+  const { application, uiSettings, docLinks, indexPatternFieldEditor } =
     useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
@@ -149,6 +149,7 @@ export function Tabs({
     [uiSettings]
   );
 
+  const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
   const getFilterSection = useCallback(
     (type: string) => {
       return (
@@ -174,11 +175,13 @@ export function Tabs({
                   aria-label={filterAriaLabel}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={() => openFieldEditor()} data-test-subj="addField">
-                  {addFieldButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
+              {userEditPermission && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton fill onClick={() => openFieldEditor()} data-test-subj="addField">
+                    {addFieldButtonLabel}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
             </>
           )}
           {type === TAB_SCRIPTED_FIELDS && scriptedFieldLanguages.length > 0 && (
@@ -201,6 +204,7 @@ export function Tabs({
       scriptedFieldLanguageFilter,
       scriptedFieldLanguages,
       openFieldEditor,
+      userEditPermission,
     ]
   );
 
