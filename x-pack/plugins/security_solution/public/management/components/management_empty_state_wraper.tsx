@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
+import React, { memo } from 'react';
+import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
 import styled from 'styled-components';
 
-export const ManagementEmptyStateWraper = styled(EuiPageTemplate)`
-  margin-top: 130px;
+export const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  min-height: calc(100vh - 140px);
 `;
+
+export const ManagementEmptyStateWraper = memo(({ children }) => {
+  return (
+    <StyledEuiFlexGroup direction="column" alignItems="center">
+      <EuiPageTemplate template="centeredContent">{children}</EuiPageTemplate>
+    </StyledEuiFlexGroup>
+  );
+});
+
+ManagementEmptyStateWraper.displayName = 'ManagementEmptyStateWraper';

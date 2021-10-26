@@ -65,7 +65,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
 
     return (
       <div {...otherProps}>
-        {!hideHeader ? (
+        {!hideHeader && (
           <>
             <EuiPageHeader
               pageTitle={header}
@@ -76,19 +76,19 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
               data-test-subj={getTestId('header')}
             />
             <EuiSpacer size="l" />
-            <EuiPageContent
-              hasBorder={false}
-              hasShadow={false}
-              paddingSize="none"
-              color="transparent"
-              borderRadius="none"
-            >
-              <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
-            </EuiPageContent>
           </>
-        ) : (
-          children
         )}
+
+        <EuiPageContent
+          hasBorder={false}
+          hasShadow={false}
+          paddingSize="none"
+          color="transparent"
+          borderRadius="none"
+        >
+          <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
+        </EuiPageContent>
+
         <SpyRoute pageName={SecurityPageName.administration} />
       </div>
     );

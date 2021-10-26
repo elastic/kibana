@@ -16,7 +16,7 @@ export const EmptyState = memo<{
   isAddDisabled?: boolean;
 }>(({ onAdd, isAddDisabled = false }) => {
   return (
-    <ManagementEmptyStateWraper template="centeredContent">
+    <ManagementEmptyStateWraper>
       <EuiEmptyPrompt
         data-test-subj="trustedAppEmptyState"
         iconType="plusInCircle"
