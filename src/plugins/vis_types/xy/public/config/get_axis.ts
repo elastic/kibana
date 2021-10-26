@@ -40,7 +40,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
   { params, format, formatter, title: fallbackTitle = '', aggType }: Aspect,
   seriesParams: SeriesParam[],
   isDateHistogram = false,
-  useMultiLayerTimeAxis = true,
+  useMultiLayerTimeAxis = false,
   darkMode = false
 ): AxisConfig<S> {
   const isCategoryAxis = type === AxisType.Category;
