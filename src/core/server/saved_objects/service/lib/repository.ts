@@ -7,10 +7,9 @@
  */
 
 import { omit, isObject } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as esKuery from '@kbn/es-query';
 import type { ElasticsearchClient } from '../../../elasticsearch/';
-import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import type { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
@@ -374,15 +373,11 @@ export class SavedObjectsRepository {
       require_alias: true,
     };
 
-    const { body, statusCode, headers } =
+    const { body } =
       id && overwrite
         ? await this.client.index(requestParams)
         : await this.client.create(requestParams);
 
-    // throw if we can't verify a 404 response is from Elasticsearch
-    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
-    }
     return this._rawToSavedObject<T>({
       ...raw,
       ...body,
@@ -638,16 +633,7 @@ export class SavedObjectsRepository {
           { ignore: [404] }
         )
       : undefined;
-    // throw if we can't verify a 404 response is from Elasticsearch
-    if (
-      bulkGetResponse &&
-      isNotFoundFromUnsupportedServer({
-        statusCode: bulkGetResponse.statusCode,
-        headers: bulkGetResponse.headers,
-      })
-    ) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-    }
+
     const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
     expectedBulkGetResults.forEach((expectedResult) => {
       if (isLeft(expectedResult)) {
@@ -719,7 +705,7 @@ export class SavedObjectsRepository {
       }
     }
 
-    const { body, statusCode, headers } = await this.client.delete(
+    const { body, statusCode } = await this.client.delete(
       {
         id: rawId,
         index: this.getIndexForType(type),
@@ -728,10 +714,6 @@ export class SavedObjectsRepository {
       },
       { ignore: [404] }
     );
-
-    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-    }
 
     const deleted = body.result === 'deleted';
     if (deleted) {
@@ -781,7 +763,7 @@ export class SavedObjectsRepository {
     const match2 = buildNode('not', buildNode('is', 'type', LEGACY_URL_ALIAS_TYPE));
     const kueryNode = buildNode('or', [match1, match2]);
 
-    const { body, statusCode, headers } = await this.client.updateByQuery(
+    const { body } = await this.client.updateByQuery(
       {
         index: this.getIndicesForTypes(typesToUpdate),
         refresh: options.refresh,
@@ -810,10 +792,6 @@ export class SavedObjectsRepository {
       },
       { ignore: [404] }
     );
-    // throw if we can't verify a 404 response is from Elasticsearch
-    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-    }
 
     return body;
   }
@@ -958,16 +936,10 @@ export class SavedObjectsRepository {
       },
     };
 
-    const { body, statusCode, headers } = await this.client.search<SavedObjectsRawDocSource>(
-      esOptions,
-      {
-        ignore: [404],
-      }
-    );
+    const { body, statusCode } = await this.client.search<SavedObjectsRawDocSource>(esOptions, {
+      ignore: [404],
+    });
     if (statusCode === 404) {
-      if (!isSupportedEsServer(headers)) {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-      }
       // 404 is only possible here if the index is missing, which
       // we don't want to leak, see "404s from missing index" above
       return {
@@ -1074,16 +1046,7 @@ export class SavedObjectsRepository {
           { ignore: [404] }
         )
       : undefined;
-    // fail fast if we can't verify a 404 is from Elasticsearch
-    if (
-      bulkGetResponse &&
-      isNotFoundFromUnsupportedServer({
-        statusCode: bulkGetResponse.statusCode,
-        headers: bulkGetResponse.headers,
-      })
-    ) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-    }
+
     return {
       saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
@@ -1174,7 +1137,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
     const namespace = normalizeNamespace(options.namespace);
-    const { body, statusCode, headers } = await this.client.get<SavedObjectsRawDocSource>(
+    const { body, statusCode } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
@@ -1182,10 +1145,7 @@ export class SavedObjectsRepository {
       { ignore: [404] }
     );
     const indexNotFound = statusCode === 404;
-    // check if we have the elasticsearch header when index is not found and if we do, ensure it is Elasticsearch
-    if (indexNotFound && !isSupportedEsServer(headers)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-    }
+
     if (
       !isFoundGetResponse(body) ||
       indexNotFound ||
@@ -1320,9 +1280,6 @@ export class SavedObjectsRepository {
         require_alias: true,
       })
       .catch((err) => {
-        if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
-          throw err;
-        }
         if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
           // see "404s from missing index" above
           throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -1495,16 +1452,7 @@ export class SavedObjectsRepository {
           }
         )
       : undefined;
-    // fail fast if we can't verify a 404 response is from Elasticsearch
-    if (
-      bulkGetResponse &&
-      isNotFoundFromUnsupportedServer({
-        statusCode: bulkGetResponse.statusCode,
-        headers: bulkGetResponse.headers,
-      })
-    ) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-    }
+
     let bulkUpdateRequestIndexCounter = 0;
     const bulkUpdateParams: object[] = [];
     const expectedBulkUpdateResults: Array<Either<Record<string, any>, Record<string, any>>> =
@@ -1638,7 +1586,7 @@ export class SavedObjectsRepository {
     // we need to target all SO indices as all types of objects may have references to the given SO.
     const targetIndices = this.getIndicesForTypes(allTypes);
 
-    const { body, statusCode, headers } = await this.client.updateByQuery(
+    const { body } = await this.client.updateByQuery(
       {
         index: targetIndices,
         refresh,
@@ -1671,10 +1619,7 @@ export class SavedObjectsRepository {
       },
       { ignore: [404] }
     );
-    // fail fast if we can't verify a 404 is from Elasticsearch
-    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-    }
+
     if (body.failures?.length) {
       throw SavedObjectsErrorHelpers.createConflictError(
         type,
@@ -1956,15 +1901,12 @@ export class SavedObjectsRepository {
       ...(preference ? { preference } : {}),
     };
 
-    const { body, statusCode, headers } = await this.client.openPointInTime(esOptions, {
+    const { body, statusCode } = await this.client.openPointInTime(esOptions, {
       ignore: [404],
     });
+
     if (statusCode === 404) {
-      if (!isSupportedEsServer(headers)) {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-      } else {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError();
-      }
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
     }
 
     return {
@@ -2135,7 +2077,7 @@ export class SavedObjectsRepository {
       throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
     }
 
-    const { body, statusCode, headers } = await this.client.get<SavedObjectsRawDocSource>(
+    const { body, statusCode } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this._serializer.generateRawId(undefined, type, id),
         index: this.getIndexForType(type),
@@ -2157,9 +2099,6 @@ export class SavedObjectsRepository {
         savedObjectNamespaces: initialNamespaces ?? getSavedObjectNamespaces(namespace, body),
         rawDocSource: body,
       };
-    } else if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-      // checking if the 404 is from Elasticsearch
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
     }
     return {
       checkResult: 'not_found',

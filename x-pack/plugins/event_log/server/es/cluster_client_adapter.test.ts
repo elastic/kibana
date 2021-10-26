@@ -16,7 +16,8 @@ import { findOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { times } from 'lodash';
 import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { estypes, RequestEvent } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
 
@@ -399,9 +400,7 @@ describe('setIndexToHidden', () => {
     expect(clusterClient.indices.putSettings).toHaveBeenCalledWith({
       index: 'foo-bar-000001',
       body: {
-        settings: {
-          'index.hidden': true,
-        },
+        'index.hidden': true,
       },
     });
   });
@@ -1270,10 +1269,10 @@ type RetryableFunction = () => boolean;
 const RETRY_UNTIL_DEFAULT_COUNT = 20;
 const RETRY_UNTIL_DEFAULT_WAIT = 1000; // milliseconds
 
-function asApiResponse<T>(body: T): RequestEvent<T> {
+function asApiResponse<T>(body: T): TransportResult<T> {
   return {
     body,
-  } as RequestEvent<T>;
+  } as TransportResult<T>;
 }
 
 async function retryUntil(

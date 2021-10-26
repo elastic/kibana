@@ -24,7 +24,6 @@ import {
   SavedObjectsCollectMultiNamespaceReferencesOptions,
 } from './collect_multi_namespace_references';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
-import { SavedObjectsErrorHelpers } from './errors';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
 
 const SPACES = ['default', 'another-space'];
@@ -284,23 +283,6 @@ describe('collectMultiNamespaceReferences', () => {
       { ...obj2, spaces: [], inboundReferences: [] },
       // obj3 is excluded from the results
     ]);
-  });
-  it(`handles 404 responses that don't come from Elasticsearch`, async () => {
-    const createEsUnavailableNotFoundError = () => {
-      return SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-    };
-    const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
-    const params = setup([obj1]);
-    client.mget.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        { docs: [] },
-        { statusCode: 404 },
-        {}
-      )
-    );
-    await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrowError(
-      createEsUnavailableNotFoundError()
-    );
   });
 
   describe('legacy URL aliases', () => {
