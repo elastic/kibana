@@ -38,22 +38,6 @@ describe('CTI Link Panel', () => {
   describe('enabled threat intel module', () => {
     before(() => {
       esArchiverLoad('threat_indicator');
-      cy.intercept('GET', '/api/fleet/epm/packages', {
-        response: [
-          {
-            name: 'ti_abusech',
-            title: 'AbuseCH',
-            id: 'ti_abusech',
-            status: 'installed',
-          },
-          {
-            name: 'ti_anomali',
-            title: 'Anomali',
-            id: 'ti_anomali',
-            status: 'not_installed',
-          },
-        ],
-      }).as('fetchIntegrations');
     });
 
     after(() => {
@@ -70,8 +54,24 @@ describe('CTI Link Panel', () => {
     });
 
     it('renders dashboard module as expected when there are events in the selected time period', () => {
+      cy.intercept('GET', '/api/fleet/epm/packages*', {
+        response: [
+          {
+            name: 'ti_abusech',
+            title: 'AbuseCH',
+            id: 'ti_abusech',
+            status: 'installed',
+          },
+          {
+            name: 'ti_anomali',
+            title: 'Anomali',
+            id: 'ti_anomali',
+            status: 'not_installed',
+          },
+        ],
+      });
+
       loginAndWaitForPage(OVERVIEW_URL);
-      cy.wait('@fetchIntegrations');
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('not.exist');
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should('exist');
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON}`).should('exist');
@@ -84,7 +84,7 @@ describe('CTI Link Panel', () => {
   describe('all integrations installed', () => {
     before(() => {
       esArchiverLoad('threat_indicator');
-      cy.intercept('GET', '/api/fleet/epm/packages', {
+      cy.intercept('GET', '/api/fleet/epm/packages*', {
         response: [
           {
             name: 'ti_abusech',
@@ -93,7 +93,7 @@ describe('CTI Link Panel', () => {
             status: 'installed',
           },
         ],
-      }).as('fetchIntegrations');
+      });
     });
 
     after(() => {
@@ -102,7 +102,6 @@ describe('CTI Link Panel', () => {
 
     it('render cti dashboard without enable integrations button', () => {
       loginAndWaitForPage(OVERVIEW_URL);
-      cy.wait('@fetchIntegrations');
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON}`).should(
         'not.exist'
       );
