@@ -325,6 +325,7 @@ export async function getTotalExecutionsCount(
 ) {
   const { body: searchResult } = await esClient.search({
     index: eventLogIndex,
+    size: 0,
     body: {
       query: {
         bool: {
@@ -335,7 +336,7 @@ export async function getTotalExecutionsCount(
                   term: { 'event.action': 'execute' },
                 },
                 {
-                  term: { 'event.kind': 'alert' },
+                  term: { 'event.provider': 'alerting' },
                 },
               ],
             },
@@ -358,8 +359,9 @@ export async function getTotalExecutionsCount(
 
   const aggsAvgExecutionTime = Math.round(
     // @ts-expect-error aggegation type is not specified
+    // convert nanoseconds to milliseconds
     searchResult.aggregations.avgDuration.value / (1000 * 1000)
-  ); // nano seconds
+  );
 
   const executionFailuresAggregations = searchResult.aggregations as {
     failuresByReason: { value: { reasons: Record<string, Record<string, string>> } };

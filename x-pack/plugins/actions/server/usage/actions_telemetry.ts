@@ -437,22 +437,7 @@ export async function getExecutionsTotalCount(
                   term: { 'event.action': 'execute' },
                 },
                 {
-                  nested: {
-                    path: 'kibana.saved_objects',
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            term: {
-                              'kibana.saved_objects.type': {
-                                value: 'action',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
+                  term: { 'event.provider': 'actions' },
                 },
               ],
             },
@@ -498,10 +483,11 @@ export async function getExecutionsTotalCount(
 
   // @ts-expect-error aggegation type is not specified
   const aggsExecutions = actionResults.aggregations.totalExecutions?.byConnectorTypeId.value;
+  // convert nanoseconds to milliseconds
   const aggsAvgExecutionTime = Math.round(
     // @ts-expect-error aggegation type is not specified
     actionResults.aggregations.avgDuration.value / (1000 * 1000)
-  ); // nano seconds
+  );
   const aggsFailedExecutions =
     // @ts-expect-error aggegation type is not specified
     actionResults.aggregations.failedExecutions?.refs?.byConnectorTypeId.value;
@@ -520,6 +506,9 @@ export async function getExecutionsTotalCount(
                   must: [
                     {
                       term: { 'event.action': 'execute' },
+                    },
+                    {
+                      term: { 'event.provider': 'actions' },
                     },
                     {
                       nested: {
@@ -545,7 +534,7 @@ export async function getExecutionsTotalCount(
                           },
                         },
                       },
-                    },
+                    }
                   ],
                 },
               },
@@ -558,9 +547,12 @@ export async function getExecutionsTotalCount(
       })
     )
   ).then((connectorTypeResults) => {
-    avgExecutionTimeByType[replaceFirstAndLastDotSymbols('')] =
+    connectorTypeResults.forEach((result) => {
+      avgExecutionTimeByType[replaceFirstAndLastDotSymbols(result.body.hits.hits[0]?._source?.kibana.saved_objects.type_id)] =
       // @ts-expect-error aggegation type is not specified
-      Math.round(connectorTypeResults.aggregations?.avgDuration.value / (1000 * 1000));
+      // convert nanoseconds to milliseconds
+      Math.round(result.aggregations?.avgDuration.value / (1000 * 1000));
+    });
   });
 
   return {
