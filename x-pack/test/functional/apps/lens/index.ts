@@ -54,6 +54,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./lens_tagging'));
       loadTestFile(require.resolve('./formula'));
       loadTestFile(require.resolve('./heatmap'));
+      loadTestFile(require.resolve('./metrics'));
       loadTestFile(require.resolve('./reference_lines'));
       loadTestFile(require.resolve('./inspector'));
       loadTestFile(require.resolve('./error_handling'));
