@@ -11,14 +11,14 @@ import { i18n } from '@kbn/i18n';
 export const filterInValueButtonLabel = i18n.translate(
   'xpack.observability.hoverActions.filterInValueButtonLabel',
   {
-    defaultMessage: 'Filter In',
+    defaultMessage: 'Filter in',
   }
 );
 
 export const filterOutValueButtonLabel = i18n.translate(
   'xpack.observability.hoverActions.filterOutValueButtonLabel',
   {
-    defaultMessage: 'Filter Out',
+    defaultMessage: 'Filter out',
   }
 );
 
