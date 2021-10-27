@@ -17,6 +17,7 @@ import { CanvasNavLinkService } from './nav_link';
 import { CanvasNotifyService } from './notify';
 import { CanvasPlatformService } from './platform';
 import { CanvasReportingService } from './reporting';
+import { CanvasVisualizationsService } from './visualizations';
 import { CanvasWorkpadService } from './workpad';
 
 export interface CanvasPluginServices {
@@ -28,6 +29,7 @@ export interface CanvasPluginServices {
   notify: CanvasNotifyService;
   platform: CanvasPlatformService;
   reporting: CanvasReportingService;
+  visualizations: CanvasVisualizationsService;
   workpad: CanvasWorkpadService;
 }
 
@@ -44,4 +46,6 @@ export const useNavLinkService = () => (() => pluginServices.getHooks().navLink.
 export const useNotifyService = () => (() => pluginServices.getHooks().notify.useService())();
 export const usePlatformService = () => (() => pluginServices.getHooks().platform.useService())();
 export const useReportingService = () => (() => pluginServices.getHooks().reporting.useService())();
+export const useVisualizationsService = () =>
+  (() => pluginServices.getHooks().visualizations.useService())();
 export const useWorkpadService = () => (() => pluginServices.getHooks().workpad.useService())();
