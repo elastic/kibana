@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React, { Fragment, FunctionComponent } from 'react';
 // @ts-expect-error unconverted component
 import { ElementConfig } from '../../element_config';
