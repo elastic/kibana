@@ -8,7 +8,7 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
-import { useNavigateToPath } from '../../../../../contexts/kibana';
+import { useNavigateToPath } from '../contexts/kibana';
 
 interface Tab {
   id: string;
@@ -16,36 +16,32 @@ interface Tab {
   path: string;
 }
 
-export const AnalyticsNavigationBar: FC<{
+export const TrainedModelsNavigationBar: FC<{
   selectedTabId?: string;
-  jobId?: string;
-  modelId?: string;
-}> = ({ jobId, modelId, selectedTabId }) => {
+}> = ({ selectedTabId }) => {
   const navigateToPath = useNavigateToPath();
 
   const tabs = useMemo(() => {
     const navTabs = [
       {
-        id: 'data_frame_analytics',
-        name: i18n.translate('xpack.ml.dataframe.jobsTabLabel', {
-          defaultMessage: 'Jobs',
+        id: 'trained_models',
+        name: i18n.translate('xpack.ml.trainedModels.modelsTabLabel', {
+          defaultMessage: 'Models',
         }),
-        path: '/data_frame_analytics',
-        testSubj: 'mlAnalyticsJobsTab',
+        path: '/trained_models',
+        testSubj: 'mlTrainedModelsTab',
+      },
+      {
+        id: 'nodes',
+        name: i18n.translate('xpack.ml.trainedModels.nodesTabLabel', {
+          defaultMessage: 'Nodes',
+        }),
+        path: '/trained_models/nodes',
+        testSubj: 'mlNodesOverviewTab',
       },
     ];
-    if (jobId !== undefined || modelId !== undefined) {
-      navTabs.push({
-        id: 'map',
-        name: i18n.translate('xpack.ml.dataframe.mapTabLabel', {
-          defaultMessage: 'Map',
-        }),
-        path: '/data_frame_analytics/map',
-        testSubj: '',
-      });
-    }
     return navTabs;
-  }, [jobId !== undefined]);
+  }, []);
 
   const onTabClick = useCallback(
     async (tab: Tab) => {
