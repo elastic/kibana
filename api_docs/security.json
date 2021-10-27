@@ -1403,7 +1403,7 @@
               "\nDetails about these errors. This field is not present in the response when error_count is 0."
             ],
             "signature": [
-              "{ type: string; reason: string; caused_by?: { type: string; reason: string; } | undefined; }[] | undefined"
+              "{ type?: string | undefined; reason?: string | undefined; caused_by?: { type?: string | undefined; reason?: string | undefined; } | undefined; }[] | undefined"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
             "deprecated": false
@@ -1659,6 +1659,10 @@
             },
             {
               "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
+            },
+            {
+              "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts"
             },
             {
@@ -1668,6 +1672,14 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/preview_rules_route.ts"
             },
             {
               "plugin": "securitySolution",
@@ -1782,7 +1794,13 @@
             "\nExposes services to access kibana roles per feature id with the GetDeprecationsContext"
           ],
           "signature": [
-            "PrivilegeDeprecationsService"
+            {
+              "pluginId": "security",
+              "scope": "common",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-common.PrivilegeDeprecationsService",
+              "text": "PrivilegeDeprecationsService"
+            }
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
           "deprecated": false
@@ -1933,6 +1951,53 @@
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.PrivilegeDeprecationsService",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrivilegeDeprecationsService",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/deprecations.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.PrivilegeDeprecationsService.getKibanaRolesByFeatureId",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaRolesByFeatureId",
+            "description": [],
+            "signature": [
+              "(args: ",
+              "PrivilegeDeprecationsRolesByFeatureIdRequest",
+              ") => Promise<",
+              "PrivilegeDeprecationsRolesByFeatureIdResponse",
+              ">"
+            ],
+            "path": "x-pack/plugins/security/common/model/deprecations.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-common.PrivilegeDeprecationsService.getKibanaRolesByFeatureId.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "PrivilegeDeprecationsRolesByFeatureIdRequest"
+                ],
+                "path": "x-pack/plugins/security/common/model/deprecations.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
