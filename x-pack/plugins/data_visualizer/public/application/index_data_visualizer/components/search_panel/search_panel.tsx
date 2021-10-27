@@ -22,6 +22,7 @@ import { SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import './_index.scss';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
+import { OverallStats } from '../../types/overall_stats';
 interface Props {
   indexPattern: IndexPattern;
   searchString: Query['query'];
@@ -29,7 +30,7 @@ interface Props {
   searchQueryLanguage: SearchQueryLanguage;
   samplerShardSize: number;
   setSamplerShardSize(s: number): void;
-  overallStats: any;
+  overallStats: OverallStats;
   indexedFieldTypes: JobFieldType[];
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];

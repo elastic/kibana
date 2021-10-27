@@ -49,7 +49,7 @@ function isDisplayField(fieldName: string): boolean {
 export const useDataVisualizerGridData = (
   input: DataVisualizerGridInput,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
-  onUpdate?: (params: string | Dictionary<any>) => void
+  onUpdate?: (params: Dictionary<unknown>) => void
 ) => {
   const { services } = useDataVisualizerKibana();
   const { uiSettings, data } = services;

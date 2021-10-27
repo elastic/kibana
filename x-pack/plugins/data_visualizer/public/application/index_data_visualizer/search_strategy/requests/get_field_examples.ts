@@ -81,7 +81,7 @@ export const fetchFieldExamples = (
         const body = resp.rawResponse;
         const stats = {
           fieldName: field.fieldName,
-          examples: [] as any[],
+          examples: [] as unknown[],
         } as FieldExamples;
 
         if (body.hits.total > 0) {

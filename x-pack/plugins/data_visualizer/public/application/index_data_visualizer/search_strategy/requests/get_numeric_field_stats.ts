@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { find, get } from 'lodash';
 import { catchError, switchMap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
+import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   MAX_PERCENT,
   PERCENTILE_SPACING,
@@ -20,7 +21,7 @@ import {
   getSamplerAggregationsResponsePath,
 } from '../../../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
-import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
+import type { Aggs, FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
 import type {
   Field,
   NumericFieldStats,
@@ -54,23 +55,7 @@ export const getNumericFieldStatsRequest = (
     () => (count += PERCENTILE_SPACING)
   );
 
-  const aggs: { [key: string]: any } = {};
   const safeFieldName = field.safeFieldName;
-  aggs[`${safeFieldName}_field_stats`] = {
-    filter: { exists: { field: field.fieldName } },
-    aggs: {
-      actual_stats: {
-        stats: { field: field.fieldName },
-      },
-    },
-  };
-  aggs[`${safeFieldName}_percentiles`] = {
-    percentiles: {
-      field: field.fieldName,
-      percents,
-      keyed: false,
-    },
-  };
 
   const top = {
     terms: {
@@ -79,23 +64,39 @@ export const getNumericFieldStatsRequest = (
       order: {
         _count: 'desc',
       },
-    },
+    } as AggregationsTermsAggregation,
   };
 
-  // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
-  // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
-  if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-    aggs[`${safeFieldName}_top`] = {
-      sampler: {
-        shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-      },
+  const aggs: Aggs = {
+    [`${safeFieldName}_field_stats`]: {
+      filter: { exists: { field: field.fieldName } },
       aggs: {
-        top,
+        actual_stats: {
+          stats: { field: field.fieldName },
+        },
       },
-    };
-  } else {
-    aggs[`${safeFieldName}_top`] = top;
-  }
+    },
+    [`${safeFieldName}_percentiles`]: {
+      percentiles: {
+        field: field.fieldName,
+        percents,
+        keyed: false,
+      },
+    },
+    // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
+    // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
+    [`${safeFieldName}_top`]:
+      samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
+        ? {
+            sampler: {
+              shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
+            },
+            aggs: {
+              top,
+            },
+          }
+        : top,
+  };
 
   const searchBody = {
     query,

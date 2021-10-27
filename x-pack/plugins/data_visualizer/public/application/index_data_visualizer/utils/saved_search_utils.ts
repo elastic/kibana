@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
 import {
@@ -15,6 +14,7 @@ import {
   Query,
   Filter,
 } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
 import { IndexPattern, SearchSource } from '../../../../../../../src/plugins/data/common';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
@@ -22,7 +22,7 @@ import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
-const DEFAULT_QUERY = {
+const DEFAULT_QUERY: estypes.QueryDslQueryContainer = {
   bool: {
     must: [
       {
@@ -32,7 +32,7 @@ const DEFAULT_QUERY = {
   },
 };
 
-export function getDefaultQuery() {
+export function getDefaultQuery(): estypes.QueryDslQueryContainer {
   return cloneDeep(DEFAULT_QUERY);
 }
 
@@ -75,8 +75,10 @@ export function createMergedEsQuery(
   filters?: Filter[],
   indexPattern?: IndexPattern,
   uiSettings?: IUiSettingsClient
-) {
-  let combinedQuery: any = getDefaultQuery();
+): estypes.QueryDslQueryContainer {
+  let combinedQuery = getDefaultQuery();
+  let boolFilters: estypes.QueryDslQueryContainer[] = [];
+  let mustNotFilters: estypes.QueryDslQueryContainer[] = [];
 
   if (query && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
@@ -87,17 +89,19 @@ export function createMergedEsQuery(
       const filterQuery = buildQueryFromFilters(filters, indexPattern);
 
       if (Array.isArray(combinedQuery.bool.filter) === false) {
-        combinedQuery.bool.filter =
-          combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];
+        boolFilters = (
+          combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter]
+        ) as estypes.QueryDslQueryContainer[];
       }
 
       if (Array.isArray(combinedQuery.bool.must_not) === false) {
-        combinedQuery.bool.must_not =
-          combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not];
+        mustNotFilters = (
+          combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not]
+        ) as estypes.QueryDslQueryContainer[];
       }
 
-      combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
-      combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
+      combinedQuery.bool.filter = [...boolFilters, ...filterQuery.filter];
+      combinedQuery.bool.must_not = [...mustNotFilters, ...filterQuery.must_not];
     }
   } else {
     combinedQuery = buildEsQuery(

@@ -37,7 +37,7 @@ export interface HistogramField {
 }
 
 export interface Distribution {
-  percentiles: any[];
+  percentiles: Array<{ value?: number; percent: number; minValue: number; maxValue: number }>;
   minPercentile: number;
   maxPercentile: number;
 }
@@ -101,7 +101,7 @@ export interface DocumentCountStats {
 
 export interface FieldExamples {
   fieldName: string;
-  examples: any[];
+  examples: unknown[];
 }
 
 export interface NumericColumnStats {
@@ -154,17 +154,8 @@ export interface UnsupportedChartData {
   type: 'unsupported';
 }
 
-export interface FieldAggCardinality {
-  field: string;
-  percent?: any;
-}
-
-export interface ScriptAggCardinality {
-  script: any;
-}
-
 export interface AggCardinality {
-  cardinality: FieldAggCardinality | ScriptAggCardinality;
+  cardinality: estypes.AggregationsCardinalityAggregation;
 }
 
 export type ChartRequestAgg = AggHistogram | AggCardinality | AggTerms;
@@ -251,17 +242,4 @@ export interface Field {
 
 export interface Aggs {
   [key: string]: estypes.AggregationsAggregationContainer;
-}
-
-export interface FieldAggCardinality {
-  field: string;
-  percent?: any;
-}
-
-export interface ScriptAggCardinality {
-  script: any;
-}
-
-export interface AggCardinality {
-  cardinality: FieldAggCardinality | ScriptAggCardinality;
 }
