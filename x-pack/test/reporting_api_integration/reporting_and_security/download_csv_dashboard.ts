@@ -294,8 +294,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
-
-        await reportingAPI.teardownTestSavedObjects();
       });
 
       it('Formatted date_nanos data, custom timezone (New York)', async () => {
