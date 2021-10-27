@@ -15,14 +15,14 @@ interface Integration {
   status: string;
 }
 
-interface TIIntegrationStatus {
+interface TiIntegrationStatus {
   isSomeIntegrationsInstalled: boolean | undefined;
   isSomeIntegrationsDisabled: boolean | undefined;
   installedIntegrationIds: string[];
 }
 
 export const useTiIntegrations = () => {
-  const [tiIntegrationsStatus, setTiIntegrationsStatus] = useState<TIIntegrationStatus | null>(
+  const [tiIntegrationsStatus, setTiIntegrationsStatus] = useState<TiIntegrationStatus | null>(
     null
   );
 
