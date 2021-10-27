@@ -34,6 +34,8 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./kibana/instance'));
     loadTestFile(require.resolve('./kibana/instance_mb'));
 
+    loadTestFile(require.resolve('./logstash/overview'));
+    loadTestFile(require.resolve('./logstash/overview_mb'));
     loadTestFile(require.resolve('./logstash/pipelines'));
     loadTestFile(require.resolve('./logstash/pipelines_mb'));
 

@@ -20,6 +20,7 @@ export { MonitoringBeatsOverviewProvider } from './beats_overview';
 export { MonitoringBeatsListingProvider } from './beats_listing';
 export { MonitoringBeatDetailProvider } from './beat_detail';
 export { MonitoringBeatsSummaryStatusProvider } from './beats_summary_status';
+export { MonitoringLogstashOverviewProvider } from './logstash_overview';
 export { MonitoringLogstashPipelinesProvider } from './logstash_pipelines';
 export { MonitoringLogstashSummaryStatusProvider } from './logstash_summary_status';
 export { MonitoringKibanaOverviewProvider } from './kibana_overview';
