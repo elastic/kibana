@@ -9,7 +9,6 @@
 import React, { useMemo, useState } from 'react';
 import {
   EuiFilterSelectItem,
-  EuiLoadingChart,
   EuiPopoverTitle,
   EuiFieldSearch,
   EuiButtonIcon,
@@ -21,11 +20,11 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
+import { OptionsListEmbeddableInput } from './types';
 import { OptionsListStrings } from './options_list_strings';
-import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
-import { OptionsListEmbeddableInput } from './options_list_embeddable';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListComponentState } from './options_list_component';
+import { useReduxEmbeddableContext } from '../../../redux_embeddables/redux_embeddable_context';
 
 export const OptionsListPopover = ({
   loading,
@@ -122,20 +121,9 @@ export const OptionsListPopover = ({
                   dispatch(selectOption(availableOption));
                 }}
               >
-                {availableOption}
+                {`${availableOption}`}
               </EuiFilterSelectItem>
             ))}
-            {loading && (
-              <div className="optionsList--loadingOverlay">
-                <div className="euiFilterSelect__note">
-                  <div className="euiFilterSelect__noteContent">
-                    <EuiLoadingChart size="m" />
-                    <EuiSpacer size="xs" />
-                    <p>{OptionsListStrings.popover.getLoadingMessage()}</p>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {!loading && (!availableOptions || availableOptions.length === 0) && (
               <div className="euiFilterSelect__note">
@@ -157,7 +145,7 @@ export const OptionsListPopover = ({
                   key={index}
                   onClick={() => dispatch(deselectOption(availableOption))}
                 >
-                  {availableOption}
+                  {`${availableOption}`}
                 </EuiFilterSelectItem>
               ))}
             {(!selectedOptions || selectedOptions.length === 0) && (

@@ -6,80 +6,54 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '@kbn/es-query';
-import { Query, TimeRange } from '../../../data/public';
+import { EmbeddableFactory } from '../../../embeddable/public';
 import {
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '../../../embeddable/public';
-
-/**
- * Control embeddable types
- */
-export type InputControlFactory = EmbeddableFactory<
-  InputControlInput,
-  InputControlOutput,
-  InputControlEmbeddable
->;
-
-export type InputControlInput = EmbeddableInput & {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  twoLineLayout?: boolean;
-};
-
-export type InputControlOutput = EmbeddableOutput & {
-  filters?: Filter[];
-};
-
-export type InputControlEmbeddable<
-  TInputControlEmbeddableInput extends InputControlInput = InputControlInput,
-  TInputControlEmbeddableOutput extends InputControlOutput = InputControlOutput
-> = IEmbeddable<TInputControlEmbeddableInput, TInputControlEmbeddableOutput>;
+  ControlEmbeddable,
+  ControlFactory,
+  ControlOutput,
+  ControlInput,
+} from '../components/controls/types';
 
 export interface ControlTypeRegistry {
-  [key: string]: InputControlFactory;
+  [key: string]: ControlFactory;
 }
 
 export interface PresentationControlsService {
-  registerInputControlType: (factory: InputControlFactory) => void;
+  registerControlType: (factory: ControlFactory) => void;
 
   getControlFactory: <
-    I extends InputControlInput = InputControlInput,
-    O extends InputControlOutput = InputControlOutput,
-    E extends InputControlEmbeddable<I, O> = InputControlEmbeddable<I, O>
+    I extends ControlInput = ControlInput,
+    O extends ControlOutput = ControlOutput,
+    E extends ControlEmbeddable<I, O> = ControlEmbeddable<I, O>
   >(
     type: string
   ) => EmbeddableFactory<I, O, E>;
 
-  getInputControlTypes: () => string[];
+  getControlTypes: () => string[];
 }
 
 export const getCommonControlsService = () => {
   const controlsFactoriesMap: ControlTypeRegistry = {};
 
-  const registerInputControlType = (factory: InputControlFactory) => {
+  const registerControlType = (factory: ControlFactory) => {
     controlsFactoriesMap[factory.type] = factory;
   };
 
   const getControlFactory = <
-    I extends InputControlInput = InputControlInput,
-    O extends InputControlOutput = InputControlOutput,
-    E extends InputControlEmbeddable<I, O> = InputControlEmbeddable<I, O>
+    I extends ControlInput = ControlInput,
+    O extends ControlOutput = ControlOutput,
+    E extends ControlEmbeddable<I, O> = ControlEmbeddable<I, O>
   >(
     type: string
   ) => {
     return controlsFactoriesMap[type] as EmbeddableFactory<I, O, E>;
   };
 
-  const getInputControlTypes = () => Object.keys(controlsFactoriesMap);
+  const getControlTypes = () => Object.keys(controlsFactoriesMap);
 
   return {
-    registerInputControlType,
+    registerControlType,
     getControlFactory,
-    getInputControlTypes,
+    getControlTypes,
   };
 };
