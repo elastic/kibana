@@ -1,0 +1,28 @@
+name: Add to APM Project
+on:
+  issues:
+    types:
+      - labeled
+jobs:
+  add_to_project:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: octokit/graphql-action@v2.x
+        id: add_to_project
+        if: |
+          github.event.label.name == 'Team:apm'
+        with:
+          headers: '{"GraphQL-Features": "projects_next_graphql"}'
+          query: |
+            mutation add_to_project($projectid:String!,$contentid:String!) {
+              addProjectNextItem(input:{projectId:$projectid contentId:$contentid}) {
+                projectNextItem {
+                  id
+                }
+              }
+            }
+          projectid: ${{ env.PROJECT_ID }}
+          contentid: ${{ github.event.issue.node_id }}
+        env:
+          PROJECT_ID: "PN_kwDOAGc3Zs0VSg"
+          GITHUB_TOKEN: ${{ secrets.APM_TECH_KIBANA_USER_TOKEN }}
