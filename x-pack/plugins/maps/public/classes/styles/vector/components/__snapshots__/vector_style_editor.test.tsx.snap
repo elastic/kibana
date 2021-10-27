@@ -27,7 +27,7 @@ exports[`should render 1`] = `
           "label": "field0",
           "name": "field0",
           "origin": "source",
-          "supportsFieldMetaFromLocalData": true,
+          "supportsAutoDomain": true,
           "type": "string",
         },
       ]
@@ -85,7 +85,7 @@ exports[`should render 1`] = `
           "label": "field0",
           "name": "field0",
           "origin": "source",
-          "supportsFieldMetaFromLocalData": true,
+          "supportsAutoDomain": true,
           "type": "string",
         },
       ]
@@ -171,7 +171,7 @@ exports[`should render 1`] = `
           "label": "field0",
           "name": "field0",
           "origin": "source",
-          "supportsFieldMetaFromLocalData": true,
+          "supportsAutoDomain": true,
           "type": "string",
         },
       ]
@@ -215,7 +215,7 @@ exports[`should render 1`] = `
           "label": "field0",
           "name": "field0",
           "origin": "source",
-          "supportsFieldMetaFromLocalData": true,
+          "supportsAutoDomain": true,
           "type": "string",
         },
       ]
@@ -309,7 +309,7 @@ exports[`should render 1`] = `
           "label": "field0",
           "name": "field0",
           "origin": "source",
-          "supportsFieldMetaFromLocalData": true,
+          "supportsAutoDomain": true,
           "type": "string",
         },
       ]

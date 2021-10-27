@@ -294,22 +294,24 @@ describe('supportsFieldMeta', () => {
 
   test('should not support fieldMeta when field does not support fieldMeta from ES', () => {
     const field = {
-      supportsFieldMetaFromEs: function () {
+      supportsFieldMetaFromEs() {
         return false;
-      }
+      },
     } as unknown as IField;
     const layer = {} as unknown as IVectorLayer;
     const options = {
       type: COLOR_MAP_TYPE.ORDINAL,
       fieldMetaOptions: { isEnabled: true },
-    }
+    };
 
     const styleProp = new DynamicColorProperty(
       options,
       VECTOR_STYLES.LINE_COLOR,
       field,
       layer,
-      () => {}
+      () => {
+        return (value: RawValue) => value + '_format';
+      }
     );
 
     expect(styleProp.supportsFieldMeta()).toEqual(false);
@@ -392,36 +394,48 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       });
       test('should return mapbox expression for color ramp', async () => {
         const field = {
-          getMbFieldName: () => { return 'foobar' },
-          getName: () => { return 'foobar' },
-          getOrigin: () => { return FIELD_ORIGIN.SOURCE; },
-          supportsFieldMetaFromEs: () => { return true; },
+          getMbFieldName: () => {
+            return 'foobar';
+          },
+          getName: () => {
+            return 'foobar';
+          },
+          getOrigin: () => {
+            return FIELD_ORIGIN.SOURCE;
+          },
+          supportsFieldMetaFromEs: () => {
+            return true;
+          },
           getSource: () => {
             return {
-              isMvt : () => {
+              isMvt: () => {
                 return false;
-              }
+              },
             };
-          }
+          },
         } as unknown as IField;
         const layer = {
-          getDataRequest: () => { return null; },
+          getDataRequest: () => {
+            return null;
+          },
           getStyle: () => {
             return new MockStyle();
-          }
+          },
         } as unknown as IVectorLayer;
         const options = {
           type: COLOR_MAP_TYPE.ORDINAL,
           color: 'Blues',
           fieldMetaOptions: { isEnabled: true },
-        }
+        };
 
         const colorProperty = new DynamicColorProperty(
           options,
           VECTOR_STYLES.LINE_COLOR,
           field,
           layer,
-          () => {}
+          () => {
+            return (value: RawValue) => value + '_format';
+          }
         );
 
         expect(colorProperty._getMbColor()).toEqual([
@@ -483,14 +497,16 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
 
       test('should use `feature-state` for geojson source', async () => {
         const field = {
-          getMbFieldName: () => { return 'foobar' },
+          getMbFieldName: () => {
+            return 'foobar';
+          },
           getSource: () => {
             return {
-              isMvt : () => {
+              isMvt: () => {
                 return false;
-              }
+              },
             };
-          }
+          },
         } as unknown as IField;
         const layer = {} as unknown as IVectorLayer;
         const options = {
@@ -501,14 +517,16 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
             { stop: 100, color: '#072f6b' },
           ],
           fieldMetaOptions: { isEnabled: true },
-        }
+        };
 
         const colorProperty = new DynamicColorProperty(
           options,
           VECTOR_STYLES.LINE_COLOR,
           field,
           layer,
-          () => {}
+          () => {
+            return (value: RawValue) => value + '_format';
+          }
         );
 
         expect(colorProperty._getMbColor()).toEqual([
@@ -533,14 +551,16 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
 
       test('should use `get` for MVT source', async () => {
         const field = {
-          getMbFieldName: () => { return 'foobar' },
+          getMbFieldName: () => {
+            return 'foobar';
+          },
           getSource: () => {
             return {
-              isMvt : () => {
+              isMvt: () => {
                 return true;
-              }
+              },
             };
-          }
+          },
         } as unknown as IField;
         const layer = {} as unknown as IVectorLayer;
         const options = {
@@ -551,14 +571,16 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
             { stop: 100, color: '#072f6b' },
           ],
           fieldMetaOptions: { isEnabled: true },
-        }
+        };
 
         const colorProperty = new DynamicColorProperty(
           options,
           VECTOR_STYLES.LINE_COLOR,
           field,
           layer,
-          () => {}
+          () => {
+            return (value: RawValue) => value + '_format';
+          }
         );
 
         expect(colorProperty._getMbColor()).toEqual([

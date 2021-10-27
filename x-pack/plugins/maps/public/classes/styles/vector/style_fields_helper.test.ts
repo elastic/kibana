@@ -7,30 +7,7 @@
 
 import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../common/constants';
 import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
-import { AbstractField, IField } from '../../fields/field';
-
-class MockField extends AbstractField {
-  private readonly _dataType: string;
-  private readonly _supportsFieldMetaFromLocalData: boolean;
-  constructor({
-    dataType,
-    supportsFieldMetaFromLocalData,
-  }: {
-    dataType: string;
-    supportsFieldMetaFromLocalData: boolean;
-  }) {
-    super({ fieldName: 'foobar_' + dataType, origin: FIELD_ORIGIN.SOURCE });
-    this._dataType = dataType;
-    this._supportsFieldMetaFromLocalData = supportsFieldMetaFromLocalData;
-  }
-  async getDataType() {
-    return this._dataType;
-  }
-
-  supportsFieldMetaFromLocalData(): boolean {
-    return this._supportsFieldMetaFromLocalData;
-  }
-}
+import { IField } from '../../fields/field';
 
 describe('StyleFieldHelper', () => {
   describe('isFieldDataTypeCompatibleWithStyleType', () => {
@@ -40,18 +17,66 @@ describe('StyleFieldHelper', () => {
       numberField: IField;
       dateField: IField;
     }> {
-      const stringField = new MockField({
-        dataType: 'string',
-        supportsFieldMetaFromLocalData,
-      });
-      const numberField = new MockField({
-        dataType: 'number',
-        supportsFieldMetaFromLocalData,
-      });
-      const dateField = new MockField({
-        dataType: 'date',
-        supportsFieldMetaFromLocalData,
-      });
+      const stringField = {
+        getDataType: async () => {
+          return 'string';
+        },
+        getLabel: async () => {
+          return 'foobar_string_label';
+        },
+        getName: () => {
+          return 'foobar_string';
+        },
+        getOrigin: () => {
+          return FIELD_ORIGIN.SOURCE;
+        },
+        supportsFieldMetaFromLocalData: () => {
+          return supportsFieldMetaFromLocalData;
+        },
+        supportsFieldMetaFromEs: () => {
+          return false;
+        },
+      } as unknown as IField;
+      const numberField = {
+        getDataType: async () => {
+          return 'number';
+        },
+        getLabel: async () => {
+          return 'foobar_number_label';
+        },
+        getName: () => {
+          return 'foobar_number';
+        },
+        getOrigin: () => {
+          return FIELD_ORIGIN.SOURCE;
+        },
+        supportsFieldMetaFromLocalData: () => {
+          return supportsFieldMetaFromLocalData;
+        },
+        supportsFieldMetaFromEs: () => {
+          return false;
+        },
+      } as unknown as IField;
+      const dateField = {
+        getDataType: async () => {
+          return 'date';
+        },
+        getLabel: async () => {
+          return 'foobar_date_label';
+        },
+        getName: () => {
+          return 'foobar_date';
+        },
+        getOrigin: () => {
+          return FIELD_ORIGIN.SOURCE;
+        },
+        supportsFieldMetaFromLocalData: () => {
+          return supportsFieldMetaFromLocalData;
+        },
+        supportsFieldMetaFromEs: () => {
+          return false;
+        },
+      } as unknown as IField;
       return {
         styleFieldHelper: await createStyleFieldsHelper([stringField, numberField, dateField]),
         stringField,
