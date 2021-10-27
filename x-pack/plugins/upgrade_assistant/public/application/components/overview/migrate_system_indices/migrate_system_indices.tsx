@@ -18,9 +18,11 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCode,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import type { SystemIndicesMigrationFeature } from '../../../../../common/types';
 import type { OverviewStepProps } from '../../types';
 import { useMigrateSystemIndices } from './use_migrate_system_indices';
 
@@ -28,21 +30,27 @@ interface Props {
   setIsComplete: OverviewStepProps['setIsComplete'];
 }
 
-interface StepProps extends OverviewStepProps {
-  nextMajor: number;
-}
+const getFailureCause = (features: SystemIndicesMigrationFeature[]) => {
+  const featureWithError = features.find((feature) => feature.migration_status === 'ERROR');
+
+  if (featureWithError) {
+    const indexWithError = featureWithError.indices.find((index) => index.failure_cause);
+    return {
+      feature: featureWithError?.feature_name,
+      failureCause: indexWithError?.failure_cause?.error.type,
+    };
+  }
+
+  return {};
+};
 
 const i18nTexts = {
   title: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.title', {
     defaultMessage: 'Migrate system indices',
   }),
-  bodyDescription: (nextMajor: number) => (
-    <FormattedMessage
-      id="xpack.upgradeAssistant.overview.systemIndices.body"
-      defaultMessage="Migrate the indices that store system information before you upgrade to {nextMajor}.0."
-      values={{ nextMajor }}
-    />
-  ),
+  bodyDescription: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.body', {
+    defaultMessage: 'Migrate the indices that store system information before you upgrade.',
+  }),
   startButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.startButtonLabel',
     {
@@ -64,7 +72,7 @@ const i18nTexts = {
   viewSystemIndicesStatus: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.viewSystemIndicesStatus',
     {
-      defaultMessage: 'View migration information',
+      defaultMessage: 'View migration details',
     }
   ),
   retryButtonLabel: i18n.translate(
@@ -76,6 +84,26 @@ const i18nTexts = {
   loadingError: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.loadingError', {
     defaultMessage: 'Could not retrieve the system indices status',
   }),
+  migrationFailedTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.migrationFailedTitle',
+    {
+      defaultMessage: 'System indices migration failed',
+    }
+  ),
+  migrationFailedBody: (features: SystemIndicesMigrationFeature[]) => {
+    const { feature, failureCause } = getFailureCause(features);
+
+    return (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.overview.systemIndices.migrationFailedBody"
+        defaultMessage="An error ocurred while migrating system indices for {feature}: {failureCause}"
+        values={{
+          feature,
+          failureCause: <EuiCode>{failureCause}</EuiCode>,
+        }}
+      />
+    );
+  },
 };
 
 const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
@@ -83,10 +111,10 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
     useMigrateSystemIndices();
 
   useEffect(() => {
-    setIsComplete(migrationStatus.data?.upgrade_status === 'NO_UPGRADE_NEEDED');
+    setIsComplete(migrationStatus.data?.migration_status === 'NO_MIGRATION_NEEDED');
     // Depending upon setIsComplete would create an infinite loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [migrationStatus.data?.upgrade_status]);
+  }, [migrationStatus.data?.migration_status]);
 
   if (migrationStatus.error) {
     return (
@@ -111,7 +139,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
     );
   }
 
-  if (migrationStatus.data?.upgrade_status === 'NO_UPGRADE_NEEDED') {
+  if (migrationStatus.data?.migration_status === 'NO_MIGRATION_NEEDED') {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="noMigrationNeededSection">
         <EuiFlexItem grow={false}>
@@ -127,7 +155,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
   }
 
   const isButtonDisabled = migrationStatus.isInitialRequest && migrationStatus.isLoading;
-  const isMigrating = migrationStatus.data?.upgrade_status === 'IN_PROGRESS';
+  const isMigrating = migrationStatus.data?.migration_status === 'IN_PROGRESS';
 
   return (
     <>
@@ -142,6 +170,21 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
             }`}
             data-test-subj="startSystemIndicesMigrationCalloutError"
           />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {migrationStatus.data?.migration_status === 'ERROR' && (
+        <>
+          <EuiCallOut
+            size="s"
+            color="danger"
+            iconType="alert"
+            title={i18nTexts.migrationFailedTitle}
+            data-test-subj="migrationFailedCallout"
+          >
+            <p>{i18nTexts.migrationFailedBody(migrationStatus.data?.features)}</p>
+          </EuiCallOut>
           <EuiSpacer size="m" />
         </>
       )}
@@ -172,10 +215,9 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
 };
 
 export const getMigrateSystemIndicesStep = ({
-  nextMajor,
   isComplete,
   setIsComplete,
-}: StepProps): EuiStepProps => {
+}: OverviewStepProps): EuiStepProps => {
   const status = isComplete ? 'complete' : 'incomplete';
 
   return {
@@ -185,7 +227,7 @@ export const getMigrateSystemIndicesStep = ({
     children: (
       <>
         <EuiText>
-          <p>{i18nTexts.bodyDescription(nextMajor)}</p>
+          <p>{i18nTexts.bodyDescription}</p>
         </EuiText>
 
         <EuiSpacer size="m" />

@@ -13,11 +13,7 @@ export {
   ILLEGAL_CHARACTERS,
   validateDataView,
 } from '../common/lib';
-export {
-  formatHitProvider,
-  onRedirectNoIndexPattern,
-  onUnsupportedTimePattern,
-} from './data_views';
+export { onRedirectNoIndexPattern, onUnsupportedTimePattern } from './data_views';
 
 export { IndexPatternField, IIndexPatternFieldList, TypeMeta } from '../common';
 

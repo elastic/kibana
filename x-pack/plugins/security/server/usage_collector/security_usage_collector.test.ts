@@ -46,7 +46,7 @@ describe('Security UsageCollector', () => {
     authProviderCount: 1,
     enabledAuthProviders: ['basic'],
     loginSelectorEnabled: false,
-    httpAuthSchemes: ['apikey'],
+    httpAuthSchemes: ['apikey', 'bearer'],
     sessionIdleTimeoutInMinutes: 0,
     sessionLifespanInMinutes: 0,
     sessionCleanupInMinutes: 60,

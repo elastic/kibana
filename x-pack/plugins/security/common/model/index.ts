@@ -34,7 +34,7 @@ export {
   RoleMapping,
 } from './role_mapping';
 export {
-  PrivilegeDeprecationsRolesByFeatureIdRequest,
-  PrivilegeDeprecationsRolesByFeatureIdResponse,
+  PrivilegeDeprecationsRolesRequest,
+  PrivilegeDeprecationsRolesResponse,
   PrivilegeDeprecationsService,
 } from './deprecations';

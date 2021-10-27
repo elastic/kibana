@@ -10,11 +10,12 @@ import uuid from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import type { DomainDeprecationDetails } from 'kibana/public';
 import { SectionLoading, GlobalFlyout } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
+import { uiMetricService, UIM_KIBANA_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
 import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
 import { KibanaDeprecationsTable } from './kibana_deprecations_table';
 import {
@@ -28,21 +29,9 @@ const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.pageTitle', {
     defaultMessage: 'Kibana deprecation issues',
   }),
-  pageDescription: (
-    <FormattedMessage
-      id="xpack.upgradeAssistant.kibanaDeprecations.pageDescription"
-      defaultMessage="You must resolve all critical issues before upgrading. Follow the instructions or use {quickResolve} to fix issues automatically."
-      values={{
-        quickResolve: (
-          <strong>
-            {i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.quickResolveText', {
-              defaultMessage: 'Quick Resolve',
-            })}
-          </strong>
-        ),
-      }}
-    />
-  ),
+  pageDescription: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.pageDescription', {
+    defaultMessage: 'Resolve all critical issues before upgrading.',
+  }),
   docLinkText: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.docLinkText', {
     defaultMessage: 'Documentation',
   }),
@@ -116,7 +105,6 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
     services: {
       core: { deprecations },
       breadcrumbs,
-      api,
     },
   } = useAppContext();
 
@@ -225,14 +213,8 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
   ]);
 
   useEffect(() => {
-    async function sendTelemetryData() {
-      await api.sendPageTelemetryData({
-        kibana: true,
-      });
-    }
-
-    sendTelemetryData();
-  }, [api]);
+    uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_KIBANA_DEPRECATIONS_PAGE_LOAD);
+  }, []);
 
   useEffect(() => {
     breadcrumbs.setBreadcrumbs('kibanaDeprecations');

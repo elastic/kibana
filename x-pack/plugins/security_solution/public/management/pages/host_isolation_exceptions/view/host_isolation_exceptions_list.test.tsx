@@ -16,8 +16,7 @@ import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
 import { useLicense } from '../../../../common/hooks/use_license';
 
-jest.mock('../../../../common/components/user_privileges/use_endpoint_privileges');
-
+jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 jest.mock('../service');
 jest.mock('../../../../common/hooks/use_license');
 
@@ -131,10 +130,11 @@ describe('When on the host isolation exceptions page', () => {
       beforeEach(() => {
         isPlatinumPlusMock.mockReturnValue(true);
       });
-      it('should show the create flyout when the add button is pressed', () => {
+      it('should show the create flyout when the add button is pressed', async () => {
         render();
+        await dataReceived();
         act(() => {
-          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
+          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsEmptyStateAddButton'));
         });
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });

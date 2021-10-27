@@ -211,7 +211,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       {
         field: 'packagePolicy.name',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.name', {
-          defaultMessage: 'Integration',
+          defaultMessage: 'Integration Policy',
         }),
         render(_, { packagePolicy }) {
           return <IntegrationDetailsLink packagePolicy={packagePolicy} />;
