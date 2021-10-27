@@ -15,6 +15,11 @@
   padding-bottom: $euiSizeXS;
 }
 
+.lnsSuggestionPanel__accordion {
+  // this makes the accordion content scrollable
+  display: inline-grid;
+}
+
 .lnsSuggestionPanel--hideSuggestions {
   padding-bottom: $euiSizeS;
 }

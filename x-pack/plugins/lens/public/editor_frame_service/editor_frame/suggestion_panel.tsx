@@ -341,6 +341,7 @@ export function SuggestionPanel({
       <EuiFlexGroup alignItems="flexStart" gutterSize="none">
         <EuiFlexItem>
           <EuiAccordion
+            className="lnsSuggestionPanel__accordion"
             id="lensSuggestionsPanel"
             buttonContent={
               <EuiTitle size="xxs">
