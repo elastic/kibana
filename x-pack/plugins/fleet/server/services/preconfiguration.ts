@@ -361,7 +361,9 @@ export function comparePreconfiguredPolicyToCurrent(
   policyFromConfig: PreconfiguredAgentPolicy,
   currentPolicy: AgentPolicy
 ) {
-  const configTopLevelFields = omit(policyFromConfig, 'package_policies', 'id');
+  // Namespace is omitted from being compared because even for managed policies, we still
+  // want users to be able to pick their own namespace: https://github.com/elastic/kibana/issues/110533
+  const configTopLevelFields = omit(policyFromConfig, 'package_policies', 'id', 'namespace');
   const currentTopLevelFields = pick(currentPolicy, ...Object.keys(configTopLevelFields));
 
   return {

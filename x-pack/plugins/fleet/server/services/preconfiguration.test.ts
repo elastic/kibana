@@ -497,6 +497,17 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
     );
     expect(hasChanged).toBe(false);
   });
+
+  it('should not return hasChanged when only namespace field changes', () => {
+    const { hasChanged } = comparePreconfiguredPolicyToCurrent(
+      {
+        ...baseConfig,
+        namespace: 'newnamespace',
+      },
+      basePackagePolicy
+    );
+    expect(hasChanged).toBe(false);
+  });
 });
 
 describe('output preconfiguration', () => {
