@@ -273,31 +273,21 @@ export const ConfigSchema = schema.object({
       schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey', 'bearer'] }),
     }),
   }),
-  audit: schema.object(
-    {
-      enabled: schema.boolean({ defaultValue: false }),
-      appender: schema.maybe(coreConfig.logging.appenders),
-      ignore_filters: schema.maybe(
-        schema.arrayOf(
-          schema.object({
-            actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-            categories: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-            types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-            outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-            spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          })
-        )
-      ),
-    },
-    {
-      validate: (auditConfig) => {
-        if (!auditConfig.enabled) return;
-        if (!auditConfig.appender) {
-          return 'xpack.security.audit.appender is required when xpack.security.audit.enabled is set to true.';
-        }
-      },
-    }
-  ),
+  audit: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    appender: schema.maybe(coreConfig.logging.appenders),
+    ignore_filters: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          categories: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+        })
+      )
+    ),
+  }),
 });
 
 export function createConfig(

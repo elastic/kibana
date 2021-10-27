@@ -330,20 +330,21 @@ For more details and a reference of audit events, refer to <<xpack-security-audi
 [source,yaml]
 ----------------------------------------
 xpack.security.audit.enabled: true
-xpack.security.audit.appender:
+xpack.security.audit.appender: <1>
   type: rolling-file
-  fileName: ./audit.log
+  fileName: ./data/audit.log
   policy:
     type: time-interval
-    interval: 24h <1>
+    interval: 24h <2>
   strategy:
     type: numeric
-    max: 10 <2>
+    max: 10 <3>
   layout:
     type: json
 ----------------------------------------
-<1> Rotates log files every 24 hours.
-<2> Keeps maximum of 10 log files before deleting older ones.
+<1> This appender is the default and will be used if no `appender.*` config options are specified.
+<2> Rotates log files every 24 hours.
+<3> Keeps maximum of 10 log files before deleting older ones.
 
 [NOTE]
 ============
@@ -357,7 +358,7 @@ xpack.security.audit.appender.type: rolling-file
 ============
 
 | `xpack.security.audit.appender` {ess-icon}
-| Required. Specifies where audit logs should be written to and how they should be formatted.
+| Optional. Specifies where audit logs should be written to and how they should be formatted. If no appender is specified, a default appender will be used (see above).
 
 | `xpack.security.audit.appender.type` {ess-icon}
 | Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, or `rolling-file`. 

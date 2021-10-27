@@ -35,10 +35,7 @@ const createAuditConfig = (settings: Partial<ConfigType['audit']>) => {
     .audit;
 };
 
-const config = createAuditConfig({
-  enabled: true,
-  appender: { type: 'console', layout: { type: 'json' } },
-});
+const config = createAuditConfig({ enabled: true });
 const { logging } = coreMock.createSetup();
 const http = httpServiceMock.createSetupContract();
 const getCurrentUser = jest.fn().mockReturnValue({ username: 'jdoe', roles: ['admin'] });

@@ -347,7 +347,6 @@ describe('Security UsageCollector', () => {
         ConfigSchema.validate({
           audit: {
             enabled: true,
-            appender: { type: 'console', layout: { type: 'json' } },
           },
         })
       );
