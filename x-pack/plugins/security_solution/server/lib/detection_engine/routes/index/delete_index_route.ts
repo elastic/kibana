@@ -7,7 +7,7 @@
 
 import {
   transformError,
-  getBootstrapIndexExists,
+  getIndexExists,
   getPolicyExists,
   deletePolicy,
   deleteAllIndex,
@@ -49,10 +49,7 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
         }
 
         const index = siemClient.getSignalsIndex();
-        const indexExists = await getBootstrapIndexExists(
-          context.core.elasticsearch.client.asInternalUser,
-          index
-        );
+        const indexExists = await getIndexExists(esClient, index);
 
         if (!indexExists) {
           return siemResponse.error({
