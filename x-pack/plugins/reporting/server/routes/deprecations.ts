@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import { SecurityHasPrivilegesIndexPrivilegesCheck } from '@elastic/elasticsearch/api/types';
+import { SecurityHasPrivilegesIndexPrivilegesCheck } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RequestHandler } from 'src/core/server';
 import {
   API_MIGRATE_ILM_POLICY_URL,

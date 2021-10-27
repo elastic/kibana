@@ -12,11 +12,11 @@ import { EuiContextMenu, EuiIcon, EuiContextMenuPanelItemDescriptor } from '@ela
 import { i18n } from '@kbn/i18n';
 import { PrimaryActionPopover } from '../../../../../../../src/plugins/presentation_util/public';
 import { getId } from '../../../lib/get_id';
-import { ClosePopoverFn } from '../../popover';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { AssetManager } from '../../asset_manager';
+import { ClosePopoverFn } from '../../popover';
 import { SavedElementsModal } from '../../saved_elements_modal';
 
 interface CategorizedElementLists {
@@ -112,7 +112,7 @@ const categorizeElementsByType = (elements: ElementSpec[]): { [key: string]: Ele
   return categories;
 };
 
-interface Props {
+export interface Props {
   /**
    * Dictionary of elements from elements registry
    */
@@ -120,7 +120,7 @@ interface Props {
   /**
    * Handler for adding a selected element to the workpad
    */
-  addElement: (element: ElementSpec) => void;
+  addElement: (element: Partial<ElementSpec>) => void;
 }
 
 export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) => {
