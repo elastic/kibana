@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { DocValueFields } from '../../../../common/search_strategy';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
