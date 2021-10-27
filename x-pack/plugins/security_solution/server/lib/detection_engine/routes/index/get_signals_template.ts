@@ -112,6 +112,33 @@ export const createSignalsFieldAliases = () => {
   return fieldAliases;
 };
 
+// signalExtraFields contains the field mappings that have been added to the signals indices over time.
+// We need to include these here because we can't add an alias for a field that isn't in the mapping,
+// and we want to apply the aliases to all old signals indices at the same time.
+const baseProps = {
+  ...signalExtraFields,
+  ...createSignalsFieldAliases(),
+};
+
+const properties = {
+  ...baseProps,
+  signal: {
+    ...baseProps.signal,
+    properties: {
+      ...baseProps.signal.properties,
+      rule: {
+        ...baseProps.signal.properties.rule,
+        properties: {
+          ...baseProps.signal.properties.rule.properties,
+          building_block_type: {
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  },
+};
+
 export const backwardsCompatibilityMappings = [
   {
     minVersion: 0,
@@ -127,13 +154,7 @@ export const backwardsCompatibilityMappings = [
           },
         },
       },
-      properties: {
-        // signalExtraFields contains the field mappings that have been added to the signals indices over time.
-        // We need to include these here because we can't add an alias for a field that isn't in the mapping,
-        // and we want to apply the aliases to all old signals indices at the same time.
-        ...signalExtraFields,
-        ...createSignalsFieldAliases(),
-      },
+      properties,
     },
   },
 ];

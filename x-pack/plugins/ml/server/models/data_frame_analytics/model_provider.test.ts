@@ -104,7 +104,7 @@ describe('Model service', () => {
     },
   } as unknown as jest.Mocked<IScopedClusterClient>;
   const mlClient = {
-    getTrainedModelsDeploymentStats: jest.fn(() => {
+    getTrainedModelDeploymentStats: jest.fn(() => {
       return Promise.resolve({ body: mockResponse });
     }),
   } as unknown as jest.Mocked<MlClient>;
