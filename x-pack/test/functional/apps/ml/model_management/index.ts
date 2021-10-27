@@ -8,13 +8,9 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('data frame analytics', function () {
+  describe('model management', function () {
     this.tags(['mlqa', 'skipFirefox']);
 
-    loadTestFile(require.resolve('./outlier_detection_creation'));
-    loadTestFile(require.resolve('./regression_creation'));
-    loadTestFile(require.resolve('./classification_creation'));
-    loadTestFile(require.resolve('./cloning'));
-    loadTestFile(require.resolve('./feature_importance'));
+    loadTestFile(require.resolve('./model_list'));
   });
 }

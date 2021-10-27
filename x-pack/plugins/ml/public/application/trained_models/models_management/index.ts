@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export * from './analytics_jobs_list';
-export * from './analytics_job_exploration';
-export * from './analytics_job_creation';
-export * from './analytics_map';
+export * from './models_list';
+
+export const ModelsTableToConfigMapping = {
+  id: 'model_id',
+  description: 'description',
+  createdAt: 'create_time',
+  type: 'type',
+  modelType: 'model_type',
+} as const;
