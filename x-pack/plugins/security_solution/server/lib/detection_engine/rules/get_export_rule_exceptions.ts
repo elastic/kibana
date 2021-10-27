@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { chunk } from 'lodash/fp';
 import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
@@ -21,10 +22,18 @@ export const getRuleExceptionsForExport = async (
   exceptions: ListArray,
   exceptionsListClient: ExceptionListClient | undefined
 ): Promise<ExportExceptionListAndItemsReturn> => {
+  const uniqueExceptionLists = new Set();
+
   if (exceptionsListClient != null) {
-    const exceptionsWithoutUnexportableLists = exceptions.filter(
-      ({ list_id: listId }) => !NON_EXPORTABLE_LIST_IDS.includes(listId)
-    );
+    const exceptionsWithoutUnexportableLists = exceptions.filter((list) => {
+      const listHash = createHash('sha256').update(JSON.stringify(list)).digest('hex');
+      if (!uniqueExceptionLists.has(listHash)) {
+        uniqueExceptionLists.add(listHash);
+        return !NON_EXPORTABLE_LIST_IDS.includes(list.list_id);
+      } else {
+        return false;
+      }
+    });
     return getExportableExceptions(exceptionsWithoutUnexportableLists, exceptionsListClient);
   } else {
     return { exportData: '', exportDetails: getDefaultExportDetails() };
@@ -72,9 +81,9 @@ export const getExportableExceptions = async (
 };
 
 /**
- * Creates promises of the rules and returns them.
+ * Creates promises of the exceptions to be exported and returns them.
  * @param exceptionsListClient Exception Lists client
- * @param exceptions The rules to apply the update for
+ * @param exceptions The exceptions to be exported
  * @returns Promise of export ready exceptions.
  */
 export const createPromises = (
