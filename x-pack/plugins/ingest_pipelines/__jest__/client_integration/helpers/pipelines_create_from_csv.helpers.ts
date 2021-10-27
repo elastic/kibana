@@ -31,9 +31,12 @@ const createFromCsvActions = (testBed: TestBed) => {
   // User Actions
 
   const selectCsvForUpload = (file?: File) => {
-    const { component } = testBed;
+    const { find } = testBed;
     const csv = [file ? file : 'foo'] as any;
-    component.find(EuiFilePicker).prop('onChange')!(csv);
+
+    act(() => {
+      find('csvFilePicker').simulate('change', { files: csv });
+    });
   };
 
   const clickProcessCsv = async () => {

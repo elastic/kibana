@@ -43,7 +43,7 @@ const appServices = {
   documentation: documentationService,
   api: apiService,
   fileReader: {
-    readFile: jest.fn().mockResolvedValue(''),
+    readFile: jest.fn((file) => file.text()),
   },
   notifications: notificationServiceMock.createSetupContract(),
   history,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../common/constants';
@@ -13,6 +14,33 @@ import { setupEnvironment, pageHelpers } from './helpers';
 import { PipelineCreateFromCsvTestBed } from './helpers/pipelines_create_from_csv.helpers';
 
 const { setup } = pageHelpers.pipelinesCreateFromCsv;
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    EuiFilePicker: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockFilePicker'}
+        onChange={(syntheticEvent: any) => {
+          props.onChange(syntheticEvent.files);
+        }}
+      />
+    ),
+  };
+});
+
+jest.mock('../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../src/plugins/kibana_react/public');
+
+  return {
+    ...original,
+    CodeEditorField: (props: any) => (
+      <p data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}>{props.value}</p>
+    ),
+  };
+});
 
 describe('<PipelinesCreateFromCsv />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -55,11 +83,25 @@ describe('<PipelinesCreateFromCsv />', () => {
     });
 
     describe('form submission', () => {
+      const fileContent = 'Mock file content';
+
       const mockFile = {
         name: 'foo.csv',
-        path: '/home/foo.csv',
-        size: 100,
-      } as unknown as File;
+        text: () => Promise.resolve(fileContent),
+        size: fileContent.length,
+      } as File;
+
+      const parsedCsv = {
+        processors: [
+          {
+            set: {
+              field: 'foo',
+              if: 'ctx.bar != null',
+              value: '{{bar}}',
+            },
+          },
+        ],
+      };
 
       beforeEach(async () => {
         await act(async () => {
@@ -68,25 +110,29 @@ describe('<PipelinesCreateFromCsv />', () => {
 
         testBed.component.update();
 
-        await act(async () => {
-          testBed.actions.selectCsvForUpload(mockFile);
-        });
+        testBed.actions.selectCsvForUpload(mockFile);
 
         testBed.component.update();
 
-        httpRequestsMockHelpers.setParseCsvResponse({}, undefined);
+        httpRequestsMockHelpers.setParseCsvResponse(parsedCsv, undefined);
       });
 
-      test('should map pipeline from file upload', async () => {
-        const { actions } = testBed;
+      test('should parse csv from file upload', async () => {
+        const { actions, find } = testBed;
         const totalRequests = server.requests.length;
 
-        await act(async () => {
-          actions.clickProcessCsv();
-        });
+        await actions.clickProcessCsv();
 
         expect(server.requests.length).toBe(totalRequests + 1);
-        expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/parse_csv`);
+
+        const lastRequest = server.requests[server.requests.length - 1];
+        expect(lastRequest.url).toBe(`${API_BASE_PATH}/parse_csv`);
+        expect(JSON.parse(JSON.parse(lastRequest.requestBody).body)).toEqual({
+          copyAction: 'copy',
+          file: fileContent,
+        });
+
+        expect(JSON.parse(find('pipelineMappingsJSONEditor').text())).toEqual(parsedCsv);
       });
 
       test('should render an error message if error mapping pipeline', async () => {
