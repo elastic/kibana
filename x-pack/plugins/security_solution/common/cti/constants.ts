@@ -21,7 +21,7 @@ export const EVENT_DATASET = 'event.dataset';
 
 export const FIRST_SEEN = 'indicator.first_seen';
 export const LAST_SEEN = 'indicator.last_seen';
-export const PROVIDER = 'indicator.provider';
+export const PROVIDER = 'feed.name';
 export const REFERENCE = 'indicator.reference';
 
 export const INDICATOR_FIRSTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${FIRST_SEEN}`;
