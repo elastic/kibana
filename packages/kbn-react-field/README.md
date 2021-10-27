@@ -1,1 +1,1 @@
-Sharable field type related React components
+Shareable field type related React components
