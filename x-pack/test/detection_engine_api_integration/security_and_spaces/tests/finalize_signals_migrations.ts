@@ -55,13 +55,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     beforeEach(async () => {
       createdMigrations = [];
-      await createSignalsIndex(supertest);
       legacySignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
       outdatedSignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
+      await createSignalsIndex(supertest);
 
       ({
         body: { indices: createdMigrations },
@@ -75,6 +75,13 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
+      // Finalize the migration after each test so that the .siem-signals alias gets added to the migrated index -
+      // this allows deleteSignalsIndex to find and delete the migrated index
+      await supertest
+        .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ migration_ids: [createdMigration.migration_id] })
+        .expect(200);
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
       await deleteMigrations({
@@ -157,9 +164,9 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       const statusAfter: StatusResponse[] = bodyAfter.indices;
-      expect(statusAfter.map((s) => s.index)).to.eql(
-        createdMigrations.map((c) => c.migration_index)
-      );
+      expect(statusAfter.map((s) => s.index)).to.eql([
+        ...createdMigrations.map((c) => c.migration_index),
+      ]);
       expect(statusAfter.map((s) => s.is_outdated)).to.eql([false, false]);
     });
 
