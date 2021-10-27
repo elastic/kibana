@@ -117,6 +117,13 @@ export const AnalysisFieldsTable: FC<{
           }
         });
         setFormState({ includes: includedFields });
+      } else if (includes.length > 0) {
+        setFormState({
+          includes:
+            dependentVariable && includes.includes(dependentVariable)
+              ? includes
+              : [...includes, dependentVariable],
+        });
       }
       setMinimumFieldsRequiredMessage(undefined);
     }, [tableItems]);
