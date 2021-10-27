@@ -34,6 +34,25 @@ describe('BuilderLogicButtons', () => {
     expect(wrapper.find('[data-test-subj="exceptionsNestedButton"] button')).toHaveLength(0);
   });
 
+  test('it hides "or" button', () => {
+    const wrapper = mount(
+      <BuilderLogicButtons
+        isAndDisabled={false}
+        isOrDisabled={false}
+        isOrHidden={true}
+        isNestedDisabled={false}
+        isNested={false}
+        showNestedButton={false}
+        onOrClicked={jest.fn()}
+        onAndClicked={jest.fn()}
+        onNestedClicked={jest.fn()}
+        onAddClickWhenNested={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="exceptionsOrButton"] button')).toHaveLength(0);
+  });
+
   test('it invokes "onOrClicked" when "or" button is clicked', () => {
     const onOrClicked = jest.fn();
 

@@ -135,7 +135,7 @@ describe('When on the host isolation exceptions page', () => {
         render();
         await dataReceived();
         act(() => {
-          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
+          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsEmptyStateAddButton'));
         });
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });

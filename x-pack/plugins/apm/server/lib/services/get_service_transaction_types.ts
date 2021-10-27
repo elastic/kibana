@@ -12,9 +12,9 @@ import {
 import { rangeQuery } from '../../../../observability/server';
 import { Setup } from '../helpers/setup_request';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 
 export async function getServiceTransactionTypes({
   setup,
@@ -33,18 +33,14 @@ export async function getServiceTransactionTypes({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            ...getDocumentTypeFilterForAggregatedTransactions(
+            ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
             { term: { [SERVICE_NAME]: serviceName } },
