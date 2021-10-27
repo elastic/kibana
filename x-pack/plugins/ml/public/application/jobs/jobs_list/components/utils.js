@@ -16,7 +16,7 @@ import {
 import { getToastNotifications } from '../../../util/dependency_cache';
 import { ml } from '../../../services/ml_api_service';
 import { stringMatch } from '../../../util/string_utils';
-import { getIndexPatternNames } from '../../../util/index_utils';
+import { getDataViewNames } from '../../../util/index_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { JOB_ACTION } from '../../../../../common/constants/job_actions';
 import { parseInterval } from '../../../../../common/util/parse_interval';
@@ -219,9 +219,8 @@ export async function cloneJob(jobId) {
       loadFullJob(jobId, false),
     ]);
 
-    const indexPatternNames = await getIndexPatternNames();
-    const indexPatternTitle = datafeed.indices.join(',');
-    const jobIndicesAvailable = indexPatternNames.includes(indexPatternTitle);
+    const dataViewNames = await getDataViewNames();
+    const jobIndicesAvailable = dataViewNames.includes(datafeed.indices.join(','));
 
     if (jobIndicesAvailable === false) {
       return;

@@ -14,7 +14,7 @@ export const useMlContext = () => {
 
   if (
     context.combinedQuery === undefined ||
-    context.currentIndexPattern === undefined ||
+    context.currentDataView === undefined ||
     context.currentSavedSearch === undefined ||
     context.dataViewsContract === undefined ||
     context.kibanaConfig === undefined

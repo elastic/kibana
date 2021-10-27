@@ -164,7 +164,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
     return { value: dashboard.id, text: dashboard.title };
   });
 
-  const indexPatternOptions = dataViewListItems.map(({ id, title }) => {
+  const dataViewOptions = dataViewListItems.map(({ id, title }) => {
     return { value: id, text: title };
   });
 
@@ -274,7 +274,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
             display="rowCompressed"
           >
             <EuiSelect
-              options={indexPatternOptions}
+              options={dataViewOptions}
               value={kibanaSettings.discoverIndexPatternId}
               onChange={onDiscoverIndexPatternChange}
               data-test-subj="mlJobCustomUrlDiscoverIndexPatternInput"

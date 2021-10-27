@@ -19,13 +19,13 @@ export async function preConfiguredJobRedirect(
   const { createdBy, job, datafeed } = mlJobService.tempJobCloningObjects;
 
   if (job && datafeed) {
-    const indexPatternId = await getIndexPatternIdFromName(datafeed, dataViewsContract);
-    if (indexPatternId === null) {
+    const dataViewId = await getDataViewIdFromName(datafeed, dataViewsContract);
+    if (dataViewId === null) {
       return Promise.resolve();
     }
 
     try {
-      const redirectUrl = await getWizardUrlFromCloningJob(createdBy, indexPatternId);
+      const redirectUrl = await getWizardUrlFromCloningJob(createdBy, dataViewId);
       await navigateToUrl(`${basePath}/app/ml/${redirectUrl}`);
       return Promise.reject();
     } catch (error) {
@@ -38,7 +38,7 @@ export async function preConfiguredJobRedirect(
   }
 }
 
-async function getWizardUrlFromCloningJob(createdBy: string | undefined, indexPatternId: string) {
+async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataViewId: string) {
   const created = createdBy;
   let page = '';
 
@@ -63,10 +63,10 @@ async function getWizardUrlFromCloningJob(createdBy: string | undefined, indexPa
       break;
   }
 
-  return `jobs/new_job/${page}?index=${indexPatternId}&_g=()`;
+  return `jobs/new_job/${page}?index=${dataViewId}&_g=()`;
 }
 
-async function getIndexPatternIdFromName(
+async function getDataViewIdFromName(
   datafeed: Datafeed,
   dataViewsContract: DataViewsContract
 ): Promise<string | null> {

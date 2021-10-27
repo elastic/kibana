@@ -65,7 +65,7 @@ describe('useResolver', () => {
             ],
           },
         },
-        currentIndexPattern: null,
+        currentDataView: null,
         currentSavedSearch: null,
         indexPatterns: null,
         kibanaConfig: {},

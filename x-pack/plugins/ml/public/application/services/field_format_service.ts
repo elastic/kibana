@@ -6,7 +6,7 @@
  */
 
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
-import { getIndexPatternById, getIndexPatternIdFromName } from '../util/index_utils';
+import { getDataViewById, getDataViewIdFromName } from '../util/index_utils';
 import { mlJobService } from './job_service';
 import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
@@ -36,7 +36,7 @@ class FieldFormatService {
           const jobObj = mlJobService.getJob(jobId);
           return {
             jobId,
-            dataViewId: await getIndexPatternIdFromName(jobObj.datafeed_config.indices.join(',')),
+            dataViewId: await getDataViewIdFromName(jobObj.datafeed_config.indices.join(',')),
           };
         })
       )
@@ -92,13 +92,13 @@ class FieldFormatService {
       const detectors = jobObj.analysis_config.detectors || [];
       const formatsByDetector: any[] = [];
 
-      const indexPatternId = this.indexPatternIdsByJob[jobId];
-      if (indexPatternId !== undefined) {
+      const dataViewId = this.indexPatternIdsByJob[jobId];
+      if (dataViewId !== undefined) {
         // Load the full data view configuration to obtain the formats of each field.
-        getIndexPatternById(indexPatternId)
-          .then((indexPatternData) => {
+        getDataViewById(dataViewId)
+          .then((dataView) => {
             // Store the FieldFormat for each job by detector_index.
-            const fieldList = indexPatternData.fields;
+            const fieldList = dataView.fields;
             detectors.forEach((dtr) => {
               const esAgg = mlFunctionToESAggregation(dtr.function);
               // distinct_count detectors should fall back to the default
@@ -106,8 +106,7 @@ class FieldFormatService {
               if (dtr.field_name !== undefined && esAgg !== 'cardinality') {
                 const field = fieldList.getByName(dtr.field_name);
                 if (field !== undefined) {
-                  formatsByDetector[dtr.detector_index!] =
-                    indexPatternData.getFormatterForField(field);
+                  formatsByDetector[dtr.detector_index!] = dataView.getFormatterForField(field);
                 }
               }
             });

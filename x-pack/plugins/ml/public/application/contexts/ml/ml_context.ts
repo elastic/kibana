@@ -12,7 +12,7 @@ import { MlServicesContext } from '../../app';
 
 export interface MlContextValue {
   combinedQuery: any;
-  currentIndexPattern: DataView; // TODO this should be IndexPattern or null
+  currentDataView: DataView; // TODO this should be IndexPattern or null
   currentSavedSearch: SavedSearchSavedObject | null;
   dataViewsContract: DataViewsContract;
   kibanaConfig: any; // IUiSettingsClient;
@@ -22,7 +22,7 @@ export interface MlContextValue {
 export type SavedSearchQuery = object;
 
 // This context provides dependencies which can be injected
-// via angularjs only (like services, currentIndexPattern etc.).
+// via angularjs only (like services, currentDataView etc.).
 // Because we cannot just import these dependencies, the default value
 // for the context is just {} and of type `Partial<KibanaContextValue>`
 // for the angularjs based dependencies. Therefore, the

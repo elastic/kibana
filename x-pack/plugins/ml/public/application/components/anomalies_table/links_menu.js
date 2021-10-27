@@ -28,7 +28,7 @@ import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
-import { getIndexPatternIdFromName } from '../../util/index_utils';
+import { getDataViewIdFromName } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 /*
@@ -268,7 +268,7 @@ class LinksMenuUI extends Component {
           // index configured in the datafeed. If a Kibana data view has not been created
           // for this index, then the user will see a warning message on the Discover tab advising
           // them that no matching data view has been configured.
-          const indexPatternId = (await getIndexPatternIdFromName(index)) ?? index;
+          const dataViewId = (await getDataViewIdFromName(index)) ?? index;
 
           let query = null;
           // Build query using categorization regex (if keyword type) or terms (if text type).
@@ -313,7 +313,7 @@ class LinksMenuUI extends Component {
           });
 
           const appStateProps = {
-            index: indexPatternId,
+            index: dataViewId,
             filters: [],
           };
           if (query !== null) {

@@ -15,7 +15,6 @@ import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../../src/plugins
 import { getPartitioningFieldNames } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
-// import { getIndexPatternIdFromName } from '../../../util/index_utils';
 import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 import { getSavedObjectsClient, getGetUrlGenerator } from '../../../util/dependency_cache';
@@ -46,11 +45,9 @@ export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
     datafeedConfig.indices !== undefined &&
     datafeedConfig.indices.length > 0
   ) {
-    // const defaultIndexPatternId =
-    //   (await getIndexPatternIdFromName(datafeedConfig.indices.join())) ?? dataViews[0].id;
     const indicesName = datafeedConfig.indices.join();
-    const defaultIndexPatternId = dataViews.find((dv) => dv.title === indicesName)?.id;
-    kibanaSettings.discoverIndexPatternId = defaultIndexPatternId;
+    const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
+    kibanaSettings.discoverIndexPatternId = defaultDataViewId;
   }
 
   return {

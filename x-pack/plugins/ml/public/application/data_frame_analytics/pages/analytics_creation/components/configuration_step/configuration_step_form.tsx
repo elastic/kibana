@@ -102,7 +102,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   setCurrentStep,
 }) => {
   const mlContext = useMlContext();
-  const { currentSavedSearch, currentIndexPattern } = mlContext;
+  const { currentSavedSearch, currentDataView } = mlContext;
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
   const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);
@@ -168,7 +168,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   };
 
   const indexData = useIndexData(
-    currentIndexPattern,
+    currentDataView,
     getIndexDataQuery(savedSearchQuery, jobConfigQuery),
     toastNotifications,
     runtimeMappings
@@ -197,7 +197,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     setMaxDistinctValuesError(undefined);
 
     try {
-      if (currentIndexPattern !== undefined) {
+      if (currentDataView !== undefined) {
         const depVarOptions = [];
         let depVarUpdate = formState.dependentVariable;
         // Get fields and filter for supported types for job type
@@ -335,7 +335,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   }, 300);
 
   useEffect(() => {
-    setFormState({ sourceIndex: currentIndexPattern.title });
+    setFormState({ sourceIndex: currentDataView.title });
   }, []);
 
   const indexPatternFieldsTableItems = useMemo(() => {
@@ -357,7 +357,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   useEffect(() => {
     if (isJobTypeWithDepVar) {
-      const indexPatternRuntimeFields = getCombinedRuntimeMappings(currentIndexPattern);
+      const indexPatternRuntimeFields = getCombinedRuntimeMappings(currentDataView);
       let runtimeOptions;
 
       if (indexPatternRuntimeFields) {
@@ -499,14 +499,14 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       fields: includesTableItems
         .filter((d) => d.feature_type === 'numerical' && d.is_included)
         .map((d) => d.name),
-      index: currentIndexPattern.title,
+      index: currentDataView.title,
       legendType: getScatterplotMatrixLegendType(jobType),
       searchQuery: jobConfigQuery,
       runtimeMappings,
-      indexPattern: currentIndexPattern,
+      indexPattern: currentDataView,
     }),
     [
-      currentIndexPattern.title,
+      currentDataView.title,
       dependentVariable,
       includesTableItems,
       isJobTypeWithDepVar,
@@ -549,7 +549,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           fullWidth
         >
           <ExplorationQueryBar
-            indexPattern={currentIndexPattern}
+            indexPattern={currentDataView}
             setSearchQuery={setJobConfigQuery}
             query={query}
           />
@@ -569,7 +569,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
             <EuiBadge color="hollow">
               {savedSearchQuery !== null
                 ? currentSavedSearch?.attributes.title
-                : currentIndexPattern.title}
+                : currentDataView.title}
             </EuiBadge>
           </Fragment>
         }
@@ -587,7 +587,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
             helpText={
               dependentVariableOptions.length === 0 &&
               dependentVariableFetchFail === false &&
-              currentIndexPattern &&
+              currentDataView &&
               i18n.translate(
                 'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
                 {

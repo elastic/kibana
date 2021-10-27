@@ -15,7 +15,7 @@ export const kibanaContextValueMock = {
     query: 'the-query-string',
     language: 'the-query-language',
   },
-  currentIndexPattern: indexPatternMock,
+  currentDataView: indexPatternMock,
   currentSavedSearch: savedSearchMock,
   indexPatterns: indexPatternsMock,
   kibanaConfig: kibanaConfigMock,

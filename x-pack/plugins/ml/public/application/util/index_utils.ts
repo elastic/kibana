@@ -37,14 +37,14 @@ export async function loadSavedSearchById(id: string) {
   return ss.error === undefined ? ss : null;
 }
 
-export async function getIndexPatternNames() {
+export async function getDataViewNames() {
   if (dataViewsContract === null) {
     throw new Error('Data views are not initialized!');
   }
   return (await dataViewsContract.getIdsWithTitle()).map(({ title }) => title);
 }
 
-export async function getIndexPatternIdFromName(name: string): Promise<string | null> {
+export async function getDataViewIdFromName(name: string): Promise<string | null> {
   if (dataViewsContract === null) {
     throw new Error('Data views are not initialized!');
   }
@@ -55,7 +55,7 @@ export async function getIndexPatternIdFromName(name: string): Promise<string | 
   return dv.id ?? dv.title;
 }
 
-export function getIndexPatternById(id: string): Promise<DataView> {
+export function getDataViewById(id: string): Promise<DataView> {
   if (dataViewsContract === null) {
     throw new Error('Data views are not initialized!');
   }
@@ -67,15 +67,15 @@ export function getIndexPatternById(id: string): Promise<DataView> {
   }
 }
 
-export interface IndexPatternAndSavedSearch {
+export interface DataViewAndSavedSearch {
   savedSearch: SavedSearchSavedObject | null;
-  indexPattern: DataView | null;
+  dataView: DataView | null;
 }
 
-export async function getIndexPatternAndSavedSearch(savedSearchId: string) {
-  const resp: IndexPatternAndSavedSearch = {
+export async function getDataViewAndSavedSearch(savedSearchId: string) {
+  const resp: DataViewAndSavedSearch = {
     savedSearch: null,
-    indexPattern: null,
+    dataView: null,
   };
 
   if (savedSearchId === undefined) {
@@ -86,8 +86,8 @@ export async function getIndexPatternAndSavedSearch(savedSearchId: string) {
   if (ss === null) {
     return resp;
   }
-  const indexPatternId = ss.references.find((r) => r.type === 'index-pattern')?.id;
-  resp.indexPattern = await getIndexPatternById(indexPatternId!);
+  const dataViewId = ss.references.find((r) => r.type === 'index-pattern')?.id;
+  resp.dataView = await getDataViewById(dataViewId!);
   resp.savedSearch = ss;
   return resp;
 }
@@ -109,14 +109,14 @@ export function getSavedSearchById(id: string): SavedSearchSavedObject | undefin
  * an optional flag will trigger the display a notification at the top of the page
  * warning that the index is not time based
  */
-export function timeBasedIndexCheck(indexPattern: DataView, showNotification = false) {
-  if (!indexPattern.isTimeBased()) {
+export function timeBasedIndexCheck(dataView: DataView, showNotification = false) {
+  if (!dataView.isTimeBased()) {
     if (showNotification) {
       const toastNotifications = getToastNotifications();
       toastNotifications.addWarning({
         title: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationTitle', {
           defaultMessage: 'The data view {dataViewName} is not based on a time series',
-          values: { dataViewName: indexPattern.title },
+          values: { dataViewName: dataView.title },
         }),
         text: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationDescription', {
           defaultMessage: 'Anomaly detection only runs over time-based indices',

@@ -104,7 +104,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FullTimeRangeSelector
-                indexPattern={mlContext.currentIndexPattern}
+                dataView={mlContext.currentDataView}
                 query={mlContext.combinedQuery}
                 disabled={false}
                 callback={fullTimeRangeCallback}

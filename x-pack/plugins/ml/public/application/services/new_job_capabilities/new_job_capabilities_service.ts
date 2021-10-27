@@ -36,8 +36,8 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
     return filterCategoryFields(this._fields);
   }
 
-  public async initializeFromIndexPattern(
-    indexPattern: DataView,
+  public async initializeFromDataVIew(
+    dataView: DataView,
     includeEventRateField = true,
     removeTextFields = true
   ) {
@@ -45,8 +45,8 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
       this._includeEventRateField = includeEventRateField;
       this._removeTextFields = removeTextFields;
 
-      const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
-      const { fields: allFields, aggs } = createObjects(resp, indexPattern.title);
+      const resp = await ml.jobs.newJobCaps(dataView.title, dataView.type === 'rollup');
+      const { fields: allFields, aggs } = createObjects(resp, dataView.title);
 
       if (this._includeEventRateField === true) {
         addEventRateField(aggs, allFields);
