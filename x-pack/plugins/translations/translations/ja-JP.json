@@ -18832,8 +18832,6 @@
     "xpack.osquery.breadcrumbs.newSavedQueryPageTitle": "新規",
     "xpack.osquery.breadcrumbs.overviewPageTitle": "概要",
     "xpack.osquery.breadcrumbs.savedQueriesPageTitle": "保存されたクエリ",
-    "xpack.osquery.common.tabBetaBadgeLabel": "ベータ",
-    "xpack.osquery.common.tabBetaBadgeTooltipContent": "この機能は現在開発中です。他にも機能が追加され、機能によっては変更されるものもあります。",
     "xpack.osquery.editSavedQuery.deleteSavedQueryButtonLabel": "クエリを削除",
     "xpack.osquery.editSavedQuery.deleteSuccessToastMessageText": "保存されたクエリが正常に削除されました。",
     "xpack.osquery.editSavedQuery.form.cancelButtonLabel": "キャンセル",
