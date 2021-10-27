@@ -289,7 +289,8 @@ describe('ElasticsearchService', () => {
 
       it('treats product check error the same as successful response', async () => {
         mockConnectionStatusClient.asInternalUser.ping.mockRejectedValue(
-          new errors.ProductNotSupportedError(interactiveSetupMock.createApiResponse({ body: {} }))
+          // @ts-expect-error not full interface
+          new errors.ProductNotSupportedError('product-name', { body: {} })
         );
 
         const mockHandler = jest.fn();
@@ -538,7 +539,8 @@ some weird+ca/with
 
       it('fails if host is not supported', async () => {
         mockPingClient.asInternalUser.ping.mockRejectedValue(
-          new errors.ProductNotSupportedError(interactiveSetupMock.createApiResponse({ body: {} }))
+          // @ts-expect-error not full interface
+          new errors.ProductNotSupportedError('Elasticsearch', { body: {} })
         );
 
         await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
