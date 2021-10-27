@@ -46,7 +46,7 @@ import {
   TimelineTabs,
   SetEventsLoading,
   SetEventsDeleted,
-  CreateFieldComponentType,
+  RuntimeFieldEditorType,
 } from '../../../../common/types/timeline';
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
@@ -87,7 +87,7 @@ interface OwnProps {
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
-  createFieldComponent?: CreateFieldComponentType;
+  runtimeFieldEditor?: RuntimeFieldEditorType;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
   filters?: Filter[];
@@ -162,7 +162,7 @@ const transformControlColumns = ({
   actionColumnsWidth,
   columnHeaders,
   controlColumns,
-  createFieldComponent,
+  runtimeFieldEditor,
   data,
   isEventViewer = false,
   loadingEventIds,
@@ -185,7 +185,7 @@ const transformControlColumns = ({
   actionColumnsWidth: number;
   columnHeaders: ColumnHeaderOptions[];
   controlColumns: ControlColumnProps[];
-  createFieldComponent?: CreateFieldComponentType;
+  runtimeFieldEditor?: RuntimeFieldEditorType;
   data: TimelineItem[];
   isEventViewer?: boolean;
   loadingEventIds: string[];
@@ -231,7 +231,7 @@ const transformControlColumns = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
-                createFieldComponent={createFieldComponent}
+                runtimeFieldEditor={runtimeFieldEditor}
               />
             )}
           </>
@@ -313,7 +313,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     bulkActions = true,
     clearSelected,
     columnHeaders,
-    createFieldComponent,
+    runtimeFieldEditor,
     data,
     defaultCellActions,
     filterQuery,
@@ -497,7 +497,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 <StatefulFieldsBrowser
                   data-test-subj="field-browser"
                   browserFields={browserFields}
-                  createFieldComponent={createFieldComponent}
+                  runtimeFieldEditor={runtimeFieldEditor}
                   timelineId={id}
                   columnHeaders={columnHeaders}
                 />
@@ -534,7 +534,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         additionalControls,
         browserFields,
         columnHeaders,
-        createFieldComponent,
+        runtimeFieldEditor,
       ]
     );
 
@@ -624,7 +624,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         transformControlColumns({
           columnHeaders,
           controlColumns,
-          createFieldComponent,
+          runtimeFieldEditor,
           data,
           isEventViewer,
           actionColumnsWidth: hasAdditionalActions(id as TimelineId)
@@ -657,7 +657,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       leadingControlColumns,
       trailingControlColumns,
       columnHeaders,
-      createFieldComponent,
+      runtimeFieldEditor,
       data,
       isEventViewer,
       id,

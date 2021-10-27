@@ -466,10 +466,12 @@ export enum TimelineTabs {
   pinned = 'pinned',
   eql = 'eql',
 }
-
-export type CreateFieldComponentType = React.FC<{
-  onClick: () => void;
-}>;
+export interface RuntimeFieldEditorType {
+  openFieldEditor: (fieldName?: string | undefined, fieldCategory?: string) => void;
+  openDeleteFieldModal: (fieldName: string, fieldCategory: string) => void;
+  isLoading: boolean;
+  hasEditPermission: boolean;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EmptyObject = Partial<Record<any, never>>;

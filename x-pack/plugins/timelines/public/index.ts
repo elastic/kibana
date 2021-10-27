@@ -68,4 +68,4 @@ export function plugin() {
 export const StatefulEventContext = createContext<StatefulEventContextType | null>(null);
 export { TimelineContext } from './components/t_grid/shared';
 
-export type { CreateFieldComponentType } from '../common';
+export type { RuntimeFieldEditorType } from '../common';

@@ -73,25 +73,17 @@ export const findExistingIndices = async (
 
 export const requestIndexFieldSearch = async (
   request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
-  { savedObjectsClient, esClient }: SearchStrategyDependencies,
+  deps: SearchStrategyDependencies,
   beatFields: BeatFields,
   getStartServices: StartServicesAccessor<StartPlugins>
 ): Promise<IndexFieldsStrategyResponse> => {
+  const { esClient } = deps;
   const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
   const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
+
   if ('dataViewId' in request && 'indices' in request) {
     throw new Error('Provide index field search with either `dataViewId` or `indices`, not both');
   }
-  const [
-    ,
-    {
-      data: { indexPatterns },
-    },
-  ] = await getStartServices();
-  const dataViewService = await indexPatterns.indexPatternsServiceFactory(
-    savedObjectsClient,
-    esClient.asCurrentUser
-  );
 
   let indicesExist: string[] = [];
   let indexFields: IndexField[] = [];
@@ -99,21 +91,7 @@ export const requestIndexFieldSearch = async (
 
   // if dataViewId is provided, get fields and indices from the Kibana Data View
   if ('dataViewId' in request) {
-    let dataView;
-    try {
-      dataView = await dataViewService.get(request.dataViewId);
-    } catch (r) {
-      if (
-        r.output.payload.statusCode === 404 &&
-        // this is the only place this id is hard coded as there are no security_solution dependencies in timeline
-        // needs to match value in DEFAULT_DATA_VIEW_ID security_solution/common/constants.ts
-        r.output.payload.message.indexOf('security-solution') > -1
-      ) {
-        throw new Error(DELETED_SECURITY_SOLUTION_DATA_VIEW);
-      } else {
-        throw r;
-      }
-    }
+    const dataView = await getDataViewById(request.dataViewId, deps, getStartServices);
 
     const patternList = dataView.title.split(',');
     indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
@@ -179,6 +157,41 @@ export const requestIndexFieldSearch = async (
   };
 };
 
+export const getDataViewById = async (
+  dataViewId: string,
+  { savedObjectsClient, esClient }: SearchStrategyDependencies,
+  getStartServices: StartServicesAccessor<StartPlugins>
+) => {
+  const [
+    ,
+    {
+      data: { indexPatterns },
+    },
+  ] = await getStartServices();
+  const dataViewService = await indexPatterns.indexPatternsServiceFactory(
+    savedObjectsClient,
+    esClient.asCurrentUser
+  );
+
+  let dataView;
+  try {
+    dataView = await dataViewService.get(dataViewId);
+  } catch (r) {
+    if (
+      r.output.payload.statusCode === 404 &&
+      // this is the only place this id is hard coded as there are no security_solution dependencies in timeline
+      // needs to match value in DEFAULT_DATA_VIEW_ID security_solution/common/constants.ts
+      r.output.payload.message.indexOf('security-solution') > -1
+    ) {
+      throw new Error(DELETED_SECURITY_SOLUTION_DATA_VIEW);
+    } else {
+      throw r;
+    }
+  }
+
+  return dataView;
+};
+
 export const dedupeIndexName = (indices: string[]) =>
   indices.reduce<string[]>((acc, index) => {
     if (index.trim() !== '' && index.trim() !== '_all' && !acc.includes(index.trim())) {
@@ -187,7 +200,7 @@ export const dedupeIndexName = (indices: string[]) =>
     return acc;
   }, []);
 
-const missingFields: FieldSpec[] = [
+const MISSING_FIELDS: FieldSpec[] = [
   {
     name: '_id',
     type: 'string',
@@ -259,7 +272,8 @@ export const createFieldItem = (
 export const formatFirstFields = async (
   beatFields: BeatFields,
   responsesFieldSpec: FieldSpec[][],
-  indexesAlias: string[]
+  indexesAlias: string[],
+  missingFields: FieldSpec[] = MISSING_FIELDS
 ): Promise<IndexField[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -333,9 +347,15 @@ export const formatSecondFields = async (fields: IndexField[]): Promise<IndexFie
 export const formatIndexFields = async (
   beatFields: BeatFields,
   responsesFieldSpec: FieldSpec[][],
-  indexesAlias: string[]
+  indexesAlias: string[],
+  missingFields: FieldSpec[] = MISSING_FIELDS
 ): Promise<IndexField[]> => {
-  const fields = await formatFirstFields(beatFields, responsesFieldSpec, indexesAlias);
+  const fields = await formatFirstFields(
+    beatFields,
+    responsesFieldSpec,
+    indexesAlias,
+    missingFields
+  );
   const secondFields = await formatSecondFields(fields);
   return secondFields;
 };

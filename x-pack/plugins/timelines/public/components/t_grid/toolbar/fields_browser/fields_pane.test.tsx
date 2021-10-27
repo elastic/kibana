@@ -28,6 +28,7 @@ describe('FieldsPane', () => {
           filteredBrowserFields={mockBrowserFields}
           onCategorySelected={jest.fn()}
           onUpdateColumns={jest.fn()}
+          onCloseModal={jest.fn()}
           searchInput=""
           selectedCategoryId={selectedCategory}
           timelineId={timelineId}
@@ -47,6 +48,7 @@ describe('FieldsPane', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldsPane
+          onCloseModal={jest.fn()}
           columnHeaders={[]}
           filteredBrowserFields={mockBrowserFields}
           onCategorySelected={jest.fn()}
@@ -70,6 +72,7 @@ describe('FieldsPane', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldsPane
+          onCloseModal={jest.fn()}
           columnHeaders={[]}
           filteredBrowserFields={{}}
           onCategorySelected={jest.fn()}
@@ -93,6 +96,7 @@ describe('FieldsPane', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldsPane
+          onCloseModal={jest.fn()}
           columnHeaders={[]}
           filteredBrowserFields={{}}
           onCategorySelected={jest.fn()}

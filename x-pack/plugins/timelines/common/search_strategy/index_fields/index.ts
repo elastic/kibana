@@ -6,10 +6,14 @@
  */
 
 import type { IFieldSubType } from '@kbn/es-query';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  MappingRuntimeField,
+  MappingRuntimeFields,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   IEsSearchRequest,
   IEsSearchResponse,
+  RuntimeField,
 } from '../../../../../../src/plugins/data/common';
 import type { DocValueFields, Maybe } from '../common';
 import { FieldSpec } from '../../../../../../src/plugins/data/common';
@@ -71,6 +75,7 @@ export interface BrowserField {
   type: string;
   subType?: IFieldSubType;
   readFromDocValues: boolean;
+  runtimeField?: RuntimeField;
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
@@ -78,3 +83,13 @@ export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 export const EMPTY_BROWSER_FIELDS = {};
 export const EMPTY_DOCVALUE_FIELD: DocValueFields[] = [];
 export const EMPTY_INDEX_FIELDS: FieldSpec[] = [];
+
+export interface RuntimeFieldStrategyRequest extends IEsSearchRequest {
+  dataViewId: string;
+  fieldName: string;
+}
+
+export interface RuntimeFieldStrategyResponse extends IEsSearchResponse {
+  indexField: IndexField;
+  runtimeMapping: MappingRuntimeField;
+}

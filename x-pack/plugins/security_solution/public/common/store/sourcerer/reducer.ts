@@ -7,6 +7,7 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import { set, unset } from 'lodash/fp';
 import {
   setSourcererDataViews,
   setSourcererScopeLoading,
@@ -14,9 +15,18 @@ import {
   setSignalIndexName,
   setDataView,
   setDataViewLoading,
+  addRuntimeField,
+  removeRuntimeField,
 } from './actions';
-import { initDataView, initialSourcererState, SourcererModel, SourcererScopeName } from './model';
+import {
+  initDataView,
+  initialSourcererState,
+  SourcererDataView,
+  SourcererModel,
+  SourcererScopeName,
+} from './model';
 import { validateSelectedPatterns } from './helpers';
+import { indexFieldToFieldSpec } from '../../containers/source/use_data_view';
 
 export type SourcererState = SourcererModel;
 
@@ -90,4 +100,55 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       dv.id === dataView.id ? { ...dv, ...dataView } : dv
     ),
   }))
+  .case(addRuntimeField, (state, { id, indexField, runtimeMapping }) => {
+    const updateDataView = (dataView: SourcererDataView) => {
+      return {
+        ...dataView,
+        browserFields: set(
+          [indexField.category, 'fields', indexField.name],
+          indexField,
+          dataView.browserFields
+        ),
+        indexFields: [...dataView.indexFields, indexFieldToFieldSpec(indexField)],
+        runtimeMappings: {
+          ...dataView.runtimeMappings,
+          [indexField.name]: runtimeMapping,
+        },
+      };
+    };
+
+    return {
+      ...state,
+      ...(id === state.defaultDataView.id
+        ? {
+            defaultDataView: updateDataView(state.defaultDataView),
+          }
+        : {}),
+      kibanaDataViews: state.kibanaDataViews.map((dataView) =>
+        dataView.id === id ? updateDataView(dataView) : dataView
+      ),
+    };
+  })
+  .case(removeRuntimeField, (state, { id, fieldName, fieldCategory }) => {
+    const updateDataView = (dataView: SourcererDataView) => {
+      return {
+        ...dataView,
+        browserFields: unset([fieldCategory, 'fields', fieldName], dataView.browserFields),
+        indexFields: dataView.indexFields.filter(({ name }) => name !== fieldName),
+        runtimeMappings: unset(fieldName, dataView.runtimeMappings),
+      };
+    };
+
+    return {
+      ...state,
+      ...(id === state.defaultDataView.id
+        ? {
+            defaultDataView: updateDataView(state.defaultDataView),
+          }
+        : {}),
+      kibanaDataViews: state.kibanaDataViews.map((dataView) =>
+        dataView.id === id ? updateDataView(dataView) : dataView
+      ),
+    };
+  })
   .build();

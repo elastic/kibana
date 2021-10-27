@@ -103,3 +103,25 @@ export const VIEW_COLUMN = (field: string) =>
     values: { field },
     defaultMessage: 'View {field} column',
   });
+
+export const CREATE_FIELD = i18n.translate('xpack.timelines.fieldBrowser.createFieldButton', {
+  defaultMessage: 'Create field',
+});
+
+export const DELETE_FIELD = i18n.translate('xpack.timelines.fieldBrowser.deleteFieldButton', {
+  defaultMessage: 'Delete',
+});
+
+export const EDIT_FIELD = i18n.translate('xpack.timelines.fieldBrowser.editFieldButton', {
+  defaultMessage: 'Edit',
+});
+
+export const RUNTIME_FIELD_TIP_TITLE = i18n.translate(
+  'xpack.timelines.fieldBrowser.runtimeIconTipTitle',
+  { defaultMessage: 'Runtime field' }
+);
+
+export const RUNTIME_FIELD_TIP_TEXT = i18n.translate(
+  'xpack.timelines.fieldBrowser.runtimeIconTipText',
+  { defaultMessage: 'This field exists on the data view only.' }
+);

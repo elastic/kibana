@@ -40,6 +40,7 @@ import { mockTimelines } from '../../mock/mock_timelines_plugin';
 jest.mock('../../lib/kibana', () => ({
   useKibana: () => ({
     services: {
+      data: { dataViews: { get: () => new Promise(() => {}) } },
       application: {
         navigateToApp: jest.fn(),
         getUrlForApp: jest.fn(),

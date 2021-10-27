@@ -27,13 +27,12 @@ import {
 import * as i18n from './translations';
 import { getBrowserFields, getDocValueFields } from './';
 
+export const indexFieldToFieldSpec = (field: IndexField): FieldSpec =>
+  pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field);
+
 const getEsFields = memoizeOne(
   (fields: IndexField[]): FieldSpec[] =>
-    fields && fields.length > 0
-      ? fields.map((field) =>
-          pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
-        )
-      : [],
+    fields && fields.length > 0 ? fields.map(indexFieldToFieldSpec) : [],
   (newArgs, lastArgs) => newArgs[0].length === lastArgs[0].length
 );
 
@@ -56,6 +55,7 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading({ id: selectedDataViewId, loading: true });
+
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
             {

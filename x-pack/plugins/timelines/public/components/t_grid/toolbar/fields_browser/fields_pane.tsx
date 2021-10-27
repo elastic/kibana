@@ -15,7 +15,12 @@ import { getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH, TABLE_HEIGHT } from './helpers';
 
 import * as i18n from './translations';
-import type { BrowserFields, ColumnHeaderOptions, OnUpdateColumns } from '../../../../../common';
+import type {
+  BrowserFields,
+  ColumnHeaderOptions,
+  OnUpdateColumns,
+  RuntimeFieldEditorType,
+} from '../../../../../common';
 import { tGridActions } from '../../../../store/t_grid';
 
 const NoFieldsPanel = styled.div`
@@ -56,6 +61,8 @@ interface Props {
   selectedCategoryId: string;
   /** The width field browser */
   width: number;
+  onCloseModal: () => void;
+  runtimeFieldEditor?: RuntimeFieldEditorType;
 }
 export const FieldsPane = React.memo<Props>(
   ({
@@ -67,6 +74,8 @@ export const FieldsPane = React.memo<Props>(
     selectedCategoryId,
     timelineId,
     width,
+    onCloseModal,
+    runtimeFieldEditor,
   }) => {
     const dispatch = useDispatch();
 
@@ -109,6 +118,8 @@ export const FieldsPane = React.memo<Props>(
             highlight: searchInput,
             timelineId,
             toggleColumn,
+            onCloseModal,
+            runtimeFieldEditor,
           })}
           width={width}
           onCategorySelected={onCategorySelected}

@@ -54,6 +54,7 @@ describe('field_items', () => {
                 highlight: '',
                 timelineId,
                 toggleColumn: jest.fn(),
+                onCloseModal: jest.fn(),
               })}
               width={FIELDS_PANE_WIDTH}
               onCategorySelected={jest.fn()}
@@ -83,6 +84,7 @@ describe('field_items', () => {
                 highlight: '',
                 timelineId,
                 toggleColumn: jest.fn(),
+                onCloseModal: jest.fn(),
               })}
               width={FIELDS_PANE_WIDTH}
               onCategorySelected={jest.fn()}
@@ -111,6 +113,7 @@ describe('field_items', () => {
               highlight: '',
               timelineId,
               toggleColumn: jest.fn(),
+              onCloseModal: jest.fn(),
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
@@ -139,6 +142,7 @@ describe('field_items', () => {
               highlight: '',
               timelineId,
               toggleColumn: jest.fn(),
+              onCloseModal: jest.fn(),
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
@@ -169,6 +173,7 @@ describe('field_items', () => {
               highlight: '',
               timelineId,
               toggleColumn,
+              onCloseModal: jest.fn(),
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
@@ -226,6 +231,7 @@ describe('field_items', () => {
               highlight: '',
               timelineId,
               toggleColumn,
+              onCloseModal: jest.fn(),
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
@@ -263,6 +269,7 @@ describe('field_items', () => {
               highlight: '',
               timelineId,
               toggleColumn: jest.fn(),
+              onCloseModal: jest.fn(),
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
@@ -290,6 +297,7 @@ describe('field_items', () => {
               highlight: '',
               timelineId,
               toggleColumn: jest.fn(),
+              onCloseModal: jest.fn(),
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}

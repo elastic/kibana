@@ -19,6 +19,7 @@ import { timelineSearchStrategyProvider } from './search_strategy/timeline';
 import { timelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { indexFieldsProvider } from './search_strategy/index_fields';
 import { SecurityPluginSetup } from '../../security/server';
+import { runtimeFieldProvider } from './search_strategy/runtime_field';
 
 export class TimelinesPlugin
   implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins>
@@ -40,6 +41,8 @@ export class TimelinesPlugin
     defineRoutes(router);
 
     const IndexFields = indexFieldsProvider(core.getStartServices);
+    const RuntimeField = runtimeFieldProvider(core.getStartServices);
+
     // Register search strategy
     core.getStartServices().then(([_, depsStart]) => {
       const TimelineSearchStrategy = timelineSearchStrategyProvider(
@@ -49,6 +52,7 @@ export class TimelinesPlugin
       );
       const TimelineEqlSearchStrategy = timelineEqlSearchStrategyProvider(depsStart.data);
 
+      plugins.data.search.registerSearchStrategy('runtimeField', RuntimeField);
       plugins.data.search.registerSearchStrategy('indexFields', IndexFields);
       plugins.data.search.registerSearchStrategy('timelineSearchStrategy', TimelineSearchStrategy);
       plugins.data.search.registerSearchStrategy(

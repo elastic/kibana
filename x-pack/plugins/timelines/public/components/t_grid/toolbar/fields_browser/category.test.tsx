@@ -34,6 +34,7 @@ describe('Category', () => {
             highlight: '',
             timelineId,
             toggleColumn: jest.fn(),
+            onCloseModal: jest.fn(),
           })}
           width={FIELDS_PANE_WIDTH}
           onCategorySelected={jest.fn()}
@@ -61,6 +62,7 @@ describe('Category', () => {
             highlight: '',
             timelineId,
             toggleColumn: jest.fn(),
+            onCloseModal: jest.fn(),
           })}
           width={FIELDS_PANE_WIDTH}
           onCategorySelected={jest.fn()}
@@ -86,6 +88,7 @@ describe('Category', () => {
             highlight: '',
             timelineId,
             toggleColumn: jest.fn(),
+            onCloseModal: jest.fn(),
           })}
           width={FIELDS_PANE_WIDTH}
           onCategorySelected={jest.fn()}

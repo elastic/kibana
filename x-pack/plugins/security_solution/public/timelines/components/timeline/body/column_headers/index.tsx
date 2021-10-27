@@ -34,7 +34,7 @@ import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { useCreateFieldButton } from '../../../create_field_button';
+import { useRuntimeFieldEditor } from '../../../../hooks/use_runtime_field_editor';
 
 interface Props {
   actionsColumnWidth: number;
@@ -172,7 +172,7 @@ export const ColumnHeadersComponent = ({
     [trailingControlColumns]
   );
 
-  const createFieldComponent = useCreateFieldButton(
+  const runtimeFieldEditor = useRuntimeFieldEditor(
     SourcererScopeName.timeline,
     timelineId as TimelineId
   );
@@ -202,7 +202,7 @@ export const ColumnHeadersComponent = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
-                createFieldComponent={createFieldComponent}
+                runtimeFieldEditor={runtimeFieldEditor}
               />
             )}
           </EventsThGroupActions>
@@ -215,10 +215,10 @@ export const ColumnHeadersComponent = ({
     actionsColumnWidth,
     browserFields,
     columnHeaders,
-    createFieldComponent,
     isEventViewer,
     isSelectAllChecked,
     onSelectAll,
+    runtimeFieldEditor,
     showEventsSelect,
     showSelectAllCheckbox,
     sort,
@@ -251,7 +251,7 @@ export const ColumnHeadersComponent = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
-                createFieldComponent={createFieldComponent}
+                runtimeFieldEditor={runtimeFieldEditor}
               />
             )}
           </EventsThGroupActions>
@@ -264,7 +264,7 @@ export const ColumnHeadersComponent = ({
     actionsColumnWidth,
     browserFields,
     columnHeaders,
-    createFieldComponent,
+    runtimeFieldEditor,
     isEventViewer,
     isSelectAllChecked,
     onSelectAll,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiCheckbox,
   EuiIcon,
@@ -13,13 +13,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiScreenReaderOnly,
+  EuiBasicTableColumn,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { getEmptyValue } from '../../../empty_value';
 import { getExampleText, getIconFromType } from '../../../utils/helpers';
-import type { ColumnHeaderOptions, BrowserField } from '../../../../../common';
+import type {
+  ColumnHeaderOptions,
+  BrowserField,
+  RuntimeFieldEditorType,
+} from '../../../../../common';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../body/constants';
 import { TruncatableText } from '../../../truncatable_text';
@@ -35,9 +41,17 @@ const TypeIcon = styled(EuiIcon)`
 
 TypeIcon.displayName = 'TypeIcon';
 
-export const Description = styled.span`
+const InlineIcon = styled(EuiIcon)`
+  margin: 0 4px;
+`;
+
+InlineIcon.displayName = 'InlineIcon';
+
+export const Description = styled.span<{
+  $isRuntime: boolean;
+}>`
   user-select: text;
-  width: 400px;
+  width: ${(props) => (props.$isRuntime ? '356px' : '400px')};
 `;
 
 Description.displayName = 'Description';
@@ -62,12 +76,16 @@ export const getFieldItems = ({
   highlight = '',
   timelineId,
   toggleColumn,
+  onCloseModal,
+  runtimeFieldEditor,
 }: {
   category: Partial<BrowserField>;
   columnHeaders: ColumnHeaderOptions[];
   highlight?: string;
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
+  onCloseModal: () => void;
+  runtimeFieldEditor?: RuntimeFieldEditorType;
 }): FieldItem[] =>
   uniqBy('name', [
     ...Object.values(category != null && category.fields != null ? category.fields : {}),
@@ -105,32 +123,111 @@ export const getFieldItems = ({
         <EuiFlexItem grow={false}>
           <FieldName data-test-subj="field-name" fieldId={field.name ?? ''} highlight={highlight} />
         </EuiFlexItem>
+
+        {field.runtimeField && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              title={i18n.RUNTIME_FIELD_TIP_TITLE}
+              content={<span>{i18n.RUNTIME_FIELD_TIP_TEXT}</span>}
+            >
+              <InlineIcon type="indexRuntime" />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     ),
     description: (
-      <div data-colindex={3} tabIndex={0}>
-        <EuiToolTip content={field.description}>
-          <>
-            <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
-              <p>{i18n.DESCRIPTION_FOR_FIELD(field.name ?? '')}</p>
-            </EuiScreenReaderOnly>
-            <TruncatableText>
-              <Description data-test-subj={`field-${field.name}-description`}>
-                {`${field.description ?? getEmptyValue()} ${getExampleText(field.example)}`}
-              </Description>
-            </TruncatableText>
-          </>
-        </EuiToolTip>
-      </div>
+      <EuiFlexGroup data-colindex={3} tabIndex={0} alignItems="center" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={field.description}>
+            <>
+              <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
+                <p>{i18n.DESCRIPTION_FOR_FIELD(field.name ?? '')}</p>
+              </EuiScreenReaderOnly>
+              <TruncatableText>
+                <Description
+                  $isRuntime={!!field.runtimeField}
+                  data-test-subj={`field-${field.name}-description`}
+                >
+                  {`${field.description ?? getEmptyValue()} ${getExampleText(field.example)}`}
+                </Description>
+              </TruncatableText>
+            </>
+          </EuiToolTip>
+        </EuiFlexItem>
+        {field.runtimeField && field.name && field.category && (
+          <RuntimeFieldActions
+            runtimeFieldEditor={runtimeFieldEditor}
+            fieldName={field.name}
+            fieldCategory={field.category}
+            onCloseModal={onCloseModal}
+          />
+        )}
+      </EuiFlexGroup>
     ),
     fieldId: field.name ?? '',
   }));
 
+interface RuntimeFieldActionsProps {
+  fieldName: string;
+  fieldCategory: string;
+  runtimeFieldEditor?: RuntimeFieldEditorType;
+  onCloseModal: () => void;
+}
+
+const RuntimeFieldActions: React.FC<RuntimeFieldActionsProps> = ({
+  fieldName,
+  fieldCategory,
+  onCloseModal,
+  runtimeFieldEditor,
+}) => {
+  const deleteField = useCallback(() => {
+    onCloseModal();
+    runtimeFieldEditor?.openDeleteFieldModal(fieldName, fieldCategory);
+  }, [fieldName, fieldCategory, runtimeFieldEditor, onCloseModal]);
+
+  const editField = useCallback(() => {
+    onCloseModal();
+    runtimeFieldEditor?.openFieldEditor(fieldName, fieldCategory);
+  }, [fieldName, fieldCategory, runtimeFieldEditor, onCloseModal]);
+
+  if (
+    !runtimeFieldEditor ||
+    !runtimeFieldEditor.hasEditPermission ||
+    runtimeFieldEditor.isLoading
+  ) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiToolTip content={i18n.EDIT_FIELD}>
+        <EuiButtonIcon
+          size="xs"
+          aria-label={i18n.EDIT_FIELD}
+          iconType="pencil"
+          onClick={editField}
+          data-test-subj={`edit-${fieldName}`}
+        />
+      </EuiToolTip>
+
+      <EuiToolTip content={i18n.DELETE_FIELD}>
+        <EuiButtonIcon
+          size="xs"
+          aria-label={i18n.DELETE_FIELD}
+          iconType="trash"
+          onClick={deleteField}
+          data-test-subj={`delete-${fieldName}`}
+        />
+      </EuiToolTip>
+    </>
+  );
+};
 /**
  * Returns a table column template provided to the `EuiInMemoryTable`'s
  * `columns` prop
  */
-export const getFieldColumns = () => [
+export const getFieldColumns: () => Array<EuiBasicTableColumn<FieldItem>> = () => [
   {
     field: 'checkbox',
     name: '',

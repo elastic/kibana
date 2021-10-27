@@ -6,10 +6,12 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
+import { MappingRuntimeField } from '@elastic/elasticsearch/lib/api/types';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
 import { SourcererDataView, SourcererScopeName } from './model';
 import { SecurityDataView } from '../../containers/sourcerer/api';
+import { IndexField } from '../../../../common';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
@@ -44,3 +46,15 @@ export interface SelectedDataViewPayload {
   eventType?: TimelineEventsType;
 }
 export const setSelectedDataView = actionCreator<SelectedDataViewPayload>('SET_SELECTED_DATA_VIEW');
+
+export const addRuntimeField = actionCreator<{
+  id: SourcererDataView['id'];
+  indexField: IndexField;
+  runtimeMapping: MappingRuntimeField;
+}>('ADD_RUNTIME_FIELD');
+
+export const removeRuntimeField = actionCreator<{
+  id: SourcererDataView['id'];
+  fieldName: string;
+  fieldCategory: string;
+}>('REMOVE_RUNTIME_FIELD');

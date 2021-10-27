@@ -31,7 +31,7 @@ import { defaultControlColumn } from '../../../timelines/components/timeline/bod
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
-import { useCreateFieldButton } from '../../../timelines/components/create_field_button';
+import { useRuntimeFieldEditor } from '../../../timelines/hooks/use_runtime_field_editor';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
@@ -174,8 +174,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     }
   }, [id, timelineQuery, globalQuery]);
   const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
-
-  const createFieldComponent = useCreateFieldButton(scopeId, id);
+  const runtimeFieldEditor = useRuntimeFieldEditor(scopeId, id);
 
   return (
     <>
@@ -220,7 +219,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               trailingControlColumns,
               type: 'embedded',
               unit,
-              createFieldComponent,
+              runtimeFieldEditor,
             })
           ) : (
             <EventsViewer

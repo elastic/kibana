@@ -24,7 +24,7 @@ import { useDispatch } from 'react-redux';
 import type {
   BrowserFields,
   ColumnHeaderOptions,
-  CreateFieldComponentType,
+  RuntimeFieldEditorType,
 } from '../../../../../common';
 import { isEscape, isTab, stopPropagationAndPreventDefault } from '../../../../../common';
 import { CategoriesPane } from './categories_pane';
@@ -53,13 +53,19 @@ const PanesFlexGroup = styled(EuiFlexGroup)`
 `;
 PanesFlexGroup.displayName = 'PanesFlexGroup';
 
+const CreateFieldButton = styled(EuiButton)`
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
+`;
+
+CreateFieldButton.displayName = 'CreateFieldButton';
+
 type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> & {
   /**
    * The current timeline column headers
    */
   columnHeaders: ColumnHeaderOptions[];
 
-  createFieldComponent?: CreateFieldComponentType;
+  runtimeFieldEditor?: RuntimeFieldEditorType;
 
   /**
    * A map of categoryId -> metadata about the fields in that category,
@@ -107,7 +113,7 @@ type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> &
 const FieldsBrowserComponent: React.FC<Props> = ({
   columnHeaders,
   filteredBrowserFields,
-  createFieldComponent: CreateField,
+  runtimeFieldEditor,
   isSearching,
   onCategorySelected,
   onSearchInputChange,
@@ -186,6 +192,11 @@ const FieldsBrowserComponent: React.FC<Props> = ({
     [closeAndRestoreFocus, containerElement, selectedCategoryId, timelineId]
   );
 
+  const onClickCreateButton = useCallback(() => {
+    onHide();
+    runtimeFieldEditor?.openFieldEditor();
+  }, [runtimeFieldEditor, onHide]);
+
   return (
     <EuiModal onClose={closeAndRestoreFocus} style={{ width, maxWidth: width }}>
       <div data-test-subj="fields-browser-container" onKeyDown={onKeyDown} ref={containerElement}>
@@ -208,7 +219,17 @@ const FieldsBrowserComponent: React.FC<Props> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {CreateField && <CreateField onClick={onHide} />}
+              {runtimeFieldEditor && runtimeFieldEditor.hasEditPermission && (
+                <CreateFieldButton
+                  iconType={runtimeFieldEditor.isLoading ? 'none' : 'plusInCircle'}
+                  aria-label={i18n.CREATE_FIELD}
+                  data-test-subj="create-field"
+                  onClick={onClickCreateButton}
+                  isLoading={runtimeFieldEditor.isLoading}
+                >
+                  {i18n.CREATE_FIELD}
+                </CreateFieldButton>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
 
@@ -236,6 +257,8 @@ const FieldsBrowserComponent: React.FC<Props> = ({
                 selectedCategoryId={selectedCategoryId}
                 timelineId={timelineId}
                 width={FIELDS_PANE_WIDTH}
+                onCloseModal={closeAndRestoreFocus}
+                runtimeFieldEditor={runtimeFieldEditor}
               />
             </EuiFlexItem>
           </PanesFlexGroup>

@@ -7,7 +7,7 @@
 import { ComponentType, JSXElementConstructor } from 'react';
 import { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@elastic/eui';
 
-import { CreateFieldComponentType, OnRowSelected, SortColumnTimeline, TimelineTabs } from '..';
+import { RuntimeFieldEditorType, OnRowSelected, SortColumnTimeline, TimelineTabs } from '..';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { ColumnHeaderOptions } from '../columns';
 import { TimelineNonEcsData } from '../../../search_strategy';
@@ -67,7 +67,7 @@ export interface HeaderActionProps {
   width: number;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
-  createFieldComponent?: CreateFieldComponentType;
+  runtimeFieldEditor?: RuntimeFieldEditorType;
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
   onSelectAll: ({ isSelected }: { isSelected: boolean }) => void;
