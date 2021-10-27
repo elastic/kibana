@@ -106,7 +106,7 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
     } catch (e) {
       throw new Error(`${getErrorInfo(emsTileLayerId)} - ${e.message}`);
     }
-    const tmsService = emsTMSServices.find((tmsService) => tmsService.getId() === emsTileLayerId);
+    const tmsService = emsTMSServices.find((service) => service.getId() === emsTileLayerId);
     if (!tmsService) {
       throw new Error(getErrorInfo(emsTileLayerId));
     }
