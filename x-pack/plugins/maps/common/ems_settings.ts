@@ -15,7 +15,6 @@ import {
 export interface IEMSConfig {
   emsUrl?: string;
   includeElasticMapsService?: boolean;
-  proxyElasticMapsServiceInMaps?: boolean;
   emsFileApiUrl?: string;
   emsTileApiUrl?: string;
   emsLandingPageUrl?: string;
@@ -61,10 +60,6 @@ export class EMSSettings {
     } else {
       return `${this.getEMSRoot()}/file`;
     }
-  }
-
-  isProxyElasticMapsServiceInMaps(): boolean {
-    return !!this._config.proxyElasticMapsServiceInMaps;
   }
 
   getEMSTileApiUrl(): string {

@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Synopsis } from './synopsis';
@@ -224,7 +224,17 @@ class TutorialDirectoryUi extends React.Component {
           description: (
             <FormattedMessage
               id="home.tutorial.addDataToKibanaDescription"
-              defaultMessage="In addition to adding integrations, you can try our sample data, or upload your own data."
+              defaultMessage="In addition to adding {integrationsLink}, you can try our sample data or upload your own data."
+              values={{
+                integrationsLink: (
+                  <EuiLink href={this.props.addBasePath(`/app/integrations/browse`)}>
+                    <FormattedMessage
+                      id="home.tutorial.addDataToKibanaDescription.integrations"
+                      defaultMessage="integrations"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
           ),
           tabs,
