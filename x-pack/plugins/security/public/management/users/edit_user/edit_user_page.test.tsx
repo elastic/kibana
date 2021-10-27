@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  fireEvent,
-  render,
-  waitFor,
-  within,
-} from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
@@ -86,7 +81,7 @@ describe('EditUserPage', () => {
 
     fireEvent.click(await findByRole('button', { name: 'Back to users' }));
 
-    expect(history.location.pathname).toBe('/')
+    expect(history.location.pathname).toBe('/');
   });
 
   it('warns when viewing built-in user', async () => {
@@ -106,7 +101,7 @@ describe('EditUserPage', () => {
 
     fireEvent.click(await findByRole('button', { name: 'Back to users' }));
 
-    expect(history.location.pathname).toBe('/')
+    expect(history.location.pathname).toBe('/');
   });
 
   it('warns when selecting deprecated role', async () => {
@@ -151,7 +146,7 @@ describe('EditUserPage', () => {
       target: { value: 'jdoe@elastic.co' },
     });
     fireEvent.click(await findByRole('button', { name: 'Update user' }));
-    
+
     await waitFor(() => {
       expect(coreStart.http.get).toHaveBeenCalledWith('/internal/security/users/jdoe');
       expect(coreStart.http.get).toHaveBeenCalledWith('/api/security/role');
@@ -224,14 +219,13 @@ describe('EditUserPage', () => {
       target: { value: 'changeme' },
     });
     fireEvent.click(await within(dialog).findByRole('button', { name: 'Change password' }));
-  
-    expect(await findByRole('dialog')).not.toBeInTheDocument()
+
+    expect(await findByRole('dialog')).not.toBeInTheDocument();
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/password', {
       body: JSON.stringify({
         newPassword: 'changeme',
       }),
     });
-    
   });
 
   it('changes password of current user when submitting form and closes dialog', async () => {
@@ -259,7 +253,7 @@ describe('EditUserPage', () => {
     });
     fireEvent.click(await within(dialog).findByRole('button', { name: 'Change password' }));
 
-    expect(await findByRole('dialog')).not.toBeInTheDocument()
+    expect(await findByRole('dialog')).not.toBeInTheDocument();
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/password', {
       body: JSON.stringify({
         newPassword: 'changeme',
@@ -291,7 +285,7 @@ describe('EditUserPage', () => {
       target: { value: 'changeme' },
     });
     fireEvent.click(await within(dialog).findByRole('button', { name: 'Change password' }));
-    
+
     await waitFor(() => {
       expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
         text: 'Error message',
@@ -312,7 +306,6 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    
     fireEvent.click(await findByRole('button', { name: 'Change password' }));
     const dialog = await findByRole('dialog');
     fireEvent.click(await within(dialog).findByRole('button', { name: 'Change password' }));
@@ -349,9 +342,9 @@ describe('EditUserPage', () => {
 
     fireEvent.click(await findByRole('button', { name: 'Deactivate user' }));
     const dialog = await findByRole('dialog');
-    fireEvent.click(await within(dialog).findByRole('button', { name: 'Deactivate user' }));   
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Deactivate user' }));
 
-    expect(await findByRole('dialog')).not.toBeInTheDocument()
+    expect(await findByRole('dialog')).not.toBeInTheDocument();
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/_disable');
   });
 
@@ -371,7 +364,7 @@ describe('EditUserPage', () => {
     const dialog = await findByRole('dialog');
     fireEvent.click(await within(dialog).findByRole('button', { name: 'Activate user' }));
 
-    expect(await findByRole('dialog')).not.toBeInTheDocument()
+    expect(await findByRole('dialog')).not.toBeInTheDocument();
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/_enable');
   });
 
