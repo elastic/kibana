@@ -264,7 +264,7 @@ describe('palette panel', () => {
       );
       expect(
         instance
-          .find('data-test-subj="lnsPalettePanel_dynamicColoring_custom_range_groups"')
+          .find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_range_groups"]')
           .exists()
       ).toBe(false);
     });

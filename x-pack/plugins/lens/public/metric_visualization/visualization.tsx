@@ -42,6 +42,7 @@ const toExpression = (
     ...state.palette?.params,
     colors: stops.map(({ color }) => color),
     stops: isPaletteCustom ? stops.map(({ stop }) => stop) : [],
+    reverse: false,
   };
 
   return {

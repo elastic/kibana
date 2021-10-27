@@ -43,11 +43,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should change the color when reverting the palette', async () => {
-      // TODO: check why the reverse is not working
       await testSubjects.click('lnsPalettePanel_dynamicColoring_reverse');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getMetricStyle();
-      expect(styleObj.color).to.be('rgb(133, 189, 177)');
+      expect(styleObj.color).to.be('rgb(204, 86, 66)');
     });
 
     it('should reset the color stops when changing palette to a predefined one', async () => {
