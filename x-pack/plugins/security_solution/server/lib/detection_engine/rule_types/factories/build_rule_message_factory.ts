@@ -13,6 +13,7 @@ export interface BuildRuleMessageFactoryParams {
   index: string;
 }
 
+// TODO: change `index` param to `spaceId`
 export const buildRuleMessageFactory =
   ({ id, ruleId, index, name }: BuildRuleMessageFactoryParams): BuildRuleMessage =>
   (...messages) =>
@@ -21,5 +22,5 @@ export const buildRuleMessageFactory =
       `name: "${name}"`,
       `id: "${id}"`,
       `rule id: "${ruleId ?? '(unknown rule id)'}"`,
-      `signals index alias: "${index}"`,
+      `space ID: "${index}"`,
     ].join(' ');

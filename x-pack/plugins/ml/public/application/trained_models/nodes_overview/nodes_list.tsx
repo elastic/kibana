@@ -30,6 +30,7 @@ import {
 import { MemoryPreviewChart } from './memory_preview_chart';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { ListingPageUrlState } from '../../../../common/types/common';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
 export type NodeItem = NodeDeploymentStatsResponse;
 
@@ -46,6 +47,7 @@ export const getDefaultNodesListState = (): ListingPageUrlState => ({
 
 export const NodesList: FC = () => {
   const trainedModelsApiService = useTrainedModelsApiService();
+  const { displayErrorToast } = useToastNotificationService();
   const bytesFormatter = useFieldFormatter('bytes');
   const [items, setItems] = useState<NodeItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,10 +62,19 @@ export const NodesList: FC = () => {
   const searchQueryText = pageState.queryText ?? '';
 
   const fetchNodesData = useCallback(async () => {
-    const nodesResponse = await trainedModelsApiService.getTrainedModelsNodesOverview();
-    setItems(nodesResponse.nodes);
-    setIsLoading(false);
-    refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
+    try {
+      const nodesResponse = await trainedModelsApiService.getTrainedModelsNodesOverview();
+      setItems(nodesResponse.nodes);
+      setIsLoading(false);
+      refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
+    } catch (e) {
+      displayErrorToast(
+        e,
+        i18n.translate('xpack.ml.trainedModels.nodesList.nodesFetchError', {
+          defaultMessage: 'Nodes fetch failed',
+        })
+      );
+    }
   }, []);
 
   const toggleDetails = (item: NodeItem) => {

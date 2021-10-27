@@ -2337,10 +2337,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@38.0.1":
-  version "38.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-38.0.1.tgz#9c1db7e0f1de869e0b2b505e192bbb9d62d60dc8"
-  integrity sha512-i9mIA3Ji9jSjuFDtuh9gV1xpCl3sbBEDgJiOgLVt04pr/qZH2W+tr3AV5yHvjsR7Te0Pmh/Cm5wLBvFKaI1nIA==
+"@elastic/charts@38.1.0":
+  version "38.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-38.1.0.tgz#52146564c0e399da2267c10ec4536c33e50969e4"
+  integrity sha512-u2hQ8+daCvqapKQiFqN8QHWTz3OXby5Xf/ta1Dv59KTDTFIinCZD/M8PyD3MapbKx4b67hL7UxbErqr4rZ8jeA==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -2351,6 +2351,7 @@
     d3-interpolate "^1.4.0"
     d3-scale "^1.0.7"
     d3-shape "^1.3.4"
+    luxon "^1.25.0"
     prop-types "^15.7.2"
     re-reselect "^3.4.0"
     react-redux "^7.1.0"
@@ -3883,6 +3884,10 @@
   uid ""
 
 "@kbn/securitysolution-list-utils@link:bazel-bin/packages/kbn-securitysolution-list-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-rules@link:bazel-bin/packages/kbn-securitysolution-rules":
   version "0.0.0"
   uid ""
 
@@ -19716,6 +19721,11 @@ lru-queue@0.1:
   dependencies:
     es5-ext "~0.10.2"
 
+luxon@^1.25.0:
+  version "1.28.0"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.28.0.tgz#e7f96daad3938c06a62de0fb027115d251251fbf"
+  integrity sha512-TfTiyvZhwBYM/7QdAVDh+7dBTBA29v4ik0Ce9zda3Mnf8on1S5KJI8P2jKFZ8+5C0jhmr0KwJEO/Wdpm0VeWJQ==
+
 lz-string@^1.4.4:
   version "1.4.4"
   resolved "https://registry.yarnpkg.com/lz-string/-/lz-string-1.4.4.tgz#c0d8eaf36059f705796e1e344811cf4c498d3a26"
@@ -24093,10 +24103,10 @@ react-popper@^2.2.4:
     react-fast-compare "^3.0.1"
     warning "^4.0.2"
 
-react-query@^3.27.0:
-  version "3.27.0"
-  resolved "https://registry.yarnpkg.com/react-query/-/react-query-3.27.0.tgz#77c76377ae41d180c4718da07ef72df82e07306b"
-  integrity sha512-2MR5LBXnR6OMXQVLcv/57x1zkDNj6gK5J5mtjGi6pu0aQ6Y4jGQysVvkrAErMKMZJVZELFcYGA8LsGIHzlo/zg==
+react-query@^3.28.0:
+  version "3.28.0"
+  resolved "https://registry.yarnpkg.com/react-query/-/react-query-3.28.0.tgz#1bfe12944860b2b773680054de37f19438f59d1d"
+  integrity sha512-OeX+nRqs7Zi0MvvtaKxKWE4N966UGtqSVuedOsz8cJh9eW195fgtYZ9nW3hZjIPPmeDY1PkArLUiV4wZvNRDPw==
   dependencies:
     "@babel/runtime" "^7.5.5"
     broadcast-channel "^3.4.1"

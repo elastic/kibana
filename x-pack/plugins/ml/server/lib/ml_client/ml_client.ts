@@ -380,26 +380,16 @@ export function getMlClient(
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
       return mlClient.getTrainedModelsStats(...p);
     },
-    // TODO update when the new elasticsearch-js client is available
-    async getTrainedModelsDeploymentStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
-      return client.asCurrentUser.transport.request({
-        method: 'GET',
-        path: `/_ml/trained_models/${p[0]?.model_id ?? '*'}/deployment/_stats`,
-      });
+    async getTrainedModelDeploymentStats(
+      ...p: Parameters<MlClient['getTrainedModelDeploymentStats']>
+    ) {
+      return mlClient.getTrainedModelDeploymentStats(...p);
     },
-    // TODO update when the new elasticsearch-js client is available
-    async startTrainedModelDeployment(...p: Parameters<MlClient['deleteTrainedModel']>) {
-      return client.asCurrentUser.transport.request({
-        method: 'POST',
-        path: `/_ml/trained_models/${p[0].model_id}/deployment/_start`,
-      });
+    async startTrainedModelDeployment(...p: Parameters<MlClient['startTrainedModelDeployment']>) {
+      return mlClient.startTrainedModelDeployment(...p);
     },
-    // TODO update when the new elasticsearch-js client is available
-    async stopTrainedModelDeployment(...p: Parameters<MlClient['deleteTrainedModel']>) {
-      return client.asCurrentUser.transport.request({
-        method: 'POST',
-        path: `/_ml/trained_models/${p[0].model_id}/deployment/_stop`,
-      });
+    async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
+      return mlClient.stopTrainedModelDeployment(...p);
     },
     async info(...p: Parameters<MlClient['info']>) {
       return mlClient.info(...p);

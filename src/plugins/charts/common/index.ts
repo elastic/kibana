@@ -7,6 +7,7 @@
  */
 
 export const COLOR_MAPPING_SETTING = 'visualization:colorMapping';
+export const LEGACY_TIME_AXIS = 'visualization:useLegacyTimeAxis';
 
 export {
   CustomPaletteArguments,
