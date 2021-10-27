@@ -6,13 +6,14 @@
  */
 
 import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
-import { CanvasEmbeddablesService } from '../embeddables';
+import { CanvasVisualizationsService } from '../visualizations';
 
-type EmbeddablesServiceFactory = PluginServiceFactory<CanvasEmbeddablesService>;
+type VisualizationsServiceFactory = PluginServiceFactory<CanvasVisualizationsService>;
 
 const noop = (..._args: any[]): any => {};
 
-export const embeddablesServiceFactory: EmbeddablesServiceFactory = () => ({
-  getEmbeddableFactories: noop,
-  getStateTransfer: noop,
+export const visualizationsServiceFactory: VisualizationsServiceFactory = () => ({
+  showNewVisModal: noop,
+  getByGroup: noop,
+  getAliases: noop,
 });
