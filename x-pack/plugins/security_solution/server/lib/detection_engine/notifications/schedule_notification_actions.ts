@@ -10,13 +10,15 @@ import { AlertInstance } from '../../../../../alerting/server';
 import { expandDottedObject } from '../rule_types/utils';
 import { RuleParams } from '../schemas/rule_schemas';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
+import { isRACAlert } from '../signals/utils';
+import { RACAlert } from '../rule_types/types';
 
 export type NotificationRuleTypeParams = RuleParams & {
   id: string;
   name: string;
 };
 
-const convertToLegacyAlert = (alert: Record<string, unknown>): object =>
+const convertToLegacyAlert = (alert: RACAlert) =>
   Object.entries(aadFieldConversion).reduce((acc, [legacyField, aadField]) => {
     const val = alert[aadField];
     if (val != null) {
@@ -29,12 +31,14 @@ const convertToLegacyAlert = (alert: Record<string, unknown>): object =>
   }, {});
 
 const formatAlertsForNotificationActions = (alerts: unknown[]) => {
-  return alerts.map((alert) => {
-    return {
-      ...expandDottedObject(convertToLegacyAlert(alert as Record<string, unknown>)),
-      ...expandDottedObject(alert as object),
-    };
-  });
+  return alerts.map((alert) =>
+    isRACAlert(alert)
+      ? {
+          ...expandDottedObject(convertToLegacyAlert(alert)),
+          ...expandDottedObject(alert as object),
+        }
+      : alerts
+  );
 };
 
 interface ScheduleNotificationActions {
