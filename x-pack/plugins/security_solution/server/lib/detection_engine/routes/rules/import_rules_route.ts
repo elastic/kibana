@@ -41,7 +41,7 @@ import {
 
 import { patchRules } from '../../rules/patch_rules';
 import { legacyMigrate } from '../../rules/utils';
-import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
+import { getTupleDuplicateErrorsAndUniqueRules, getInvalidConnectors } from './utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { HapiReadableStream } from '../../rules/types';
@@ -79,6 +79,7 @@ export const importRulesRoute = (
 
       try {
         const rulesClient = context.alerting?.getRulesClient();
+        const actionsClient = context.actions.getActionsClient();
         const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
@@ -103,6 +104,7 @@ export const importRulesRoute = (
             body: `Invalid file extension ${fileExtension}`,
           });
         }
+
         const signalsIndex = siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
         if (!isRuleRegistryEnabled && !indexExists) {
@@ -118,9 +120,13 @@ export const importRulesRoute = (
           request.body.file as HapiReadableStream,
           ...readStream,
         ]);
-        const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueRules(
-          parsedObjects,
-          request.query.overwrite
+
+        const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
+          getTupleDuplicateErrorsAndUniqueRules(parsedObjects, request.query.overwrite);
+
+        const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
+          parsedObjectsWithoutDuplicateErrors,
+          actionsClient
         );
 
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
@@ -362,6 +368,7 @@ export const importRulesRoute = (
             }, [])
           );
           importRuleResponse = [
+            ...nonExistentActionErrors,
             ...duplicateIdErrors,
             ...importRuleResponse,
             ...newImportRuleResponse,

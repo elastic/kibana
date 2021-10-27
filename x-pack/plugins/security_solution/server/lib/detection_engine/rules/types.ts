@@ -276,7 +276,6 @@ export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   defaultOutputIndex: string;
   ruleUpdate: UpdateRulesSchema;
-  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export interface PatchRulesOptions {
