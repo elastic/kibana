@@ -45,9 +45,9 @@ export function createUninstallRoute(
           });
         } catch (err) {
           return response.customError({
-            statusCode: err.status,
+            statusCode: err.body.status,
             body: {
-              message: `Unable to delete sample data index "${index}", error: ${err.message}`,
+              message: `Unable to delete sample data index "${index}", error: ${err.body.error.type}`,
             },
           });
         }
@@ -67,9 +67,9 @@ export function createUninstallRoute(
         await Promise.all(deletePromises);
       } catch (err) {
         return response.customError({
-          statusCode: err.status,
+          statusCode: err.body.status,
           body: {
-            message: `Unable to delete sample dataset saved objects, error: ${err.message}`,
+            message: `Unable to delete sample dataset saved objects, error: ${err.body.error.type}`,
           },
         });
       }
