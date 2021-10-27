@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { each, last } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { JOB_FIELD_TYPES } from '../../../common';
 import type {
   BatchStats,
@@ -40,7 +40,7 @@ export class DataVisualizer {
     this._client = client;
   }
 
-  // Obtains overall stats on the fields in the supplied index pattern, returning an object
+  // Obtains overall stats on the fields in the supplied data view, returning an object
   // containing the total document count, and four arrays showing which of the supplied
   // aggregatable and non-aggregatable fields do or do not exist in documents.
   // Sampling will be used if supplied samplerShardSize > 0.

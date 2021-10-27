@@ -12,7 +12,7 @@
  */
 
 import _ from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MigrationEsClient } from './migration_es_client';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
@@ -306,7 +306,7 @@ export async function convertToAlias(
  * alias, meaning that it will only point to one index at a time, so we
  * remove any other indices from the alias.
  *
- * @param {CallCluster} client
+ * @param {MigrationEsClient} client
  * @param {string} index
  * @param {string} alias
  * @param {AliasAction[]} aliasActions - Optional actions to be added to the updateAliases call

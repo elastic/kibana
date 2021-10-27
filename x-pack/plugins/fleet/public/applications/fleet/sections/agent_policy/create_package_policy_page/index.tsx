@@ -22,7 +22,6 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import type { ApplicationStart } from 'kibana/public';
 import { safeLoad } from 'js-yaml';
 
 import type {
@@ -46,7 +45,6 @@ import { ConfirmDeployAgentPolicyModal } from '../components';
 import { useIntraAppState, useUIExtension } from '../../../hooks';
 import { ExtensionWrapper } from '../../../components';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { PLUGIN_ID } from '../../../../../../common/constants';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
 import { CreatePackagePolicyPageLayout, PostInstallAddAgentModal } from './components';
@@ -76,14 +74,16 @@ interface AddToPolicyParams {
 }
 
 export const CreatePackagePolicyPage: React.FunctionComponent = () => {
-  const { notifications } = useStartServices();
+  const {
+    application: { navigateToApp },
+    notifications,
+  } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const { params } = useRouteMatch<AddToPolicyParams>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
-  const handleNavigateTo = useNavigateToCallback();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
 
   const { search } = useLocation();
@@ -254,10 +254,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     (ev) => {
       if (routeState && routeState.onCancelNavigateTo) {
         ev.preventDefault();
-        handleNavigateTo(routeState.onCancelNavigateTo);
+        navigateToApp(...routeState.onCancelNavigateTo);
       }
     },
-    [routeState, handleNavigateTo]
+    [routeState, navigateToApp]
   );
 
   // Save package policy
@@ -298,15 +298,15 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             mappingOptions: routeState.onSaveQueryParams,
             paramsToApply,
           });
-          handleNavigateTo([appId, { ...options, path: pathWithQueryString }]);
+          navigateToApp(appId, { ...options, path: pathWithQueryString });
         } else {
-          handleNavigateTo(routeState.onSaveNavigateTo);
+          navigateToApp(...routeState.onSaveNavigateTo);
         }
       } else {
         history.push(getPath('policy_details', { policyId: agentPolicy!.id }));
       }
     },
-    [agentPolicy, getPath, handleNavigateTo, history, routeState]
+    [agentPolicy, getPath, navigateToApp, history, routeState]
   );
 
   const onSubmit = useCallback(async () => {
@@ -553,7 +553,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                   >
                     <FormattedMessage
                       id="xpack.fleet.createPackagePolicy.saveButton"
-                      defaultMessage="Save integration"
+                      defaultMessage="Save and continue"
                     />
                   </EuiButton>
                 </EuiFlexItem>
@@ -577,30 +577,4 @@ const IntegrationBreadcrumb: React.FunctionComponent<{
     ...(integration ? { integration } : {}),
   });
   return null;
-};
-
-const useNavigateToCallback = () => {
-  const history = useHistory();
-  const {
-    application: { navigateToApp },
-  } = useStartServices();
-
-  return useCallback(
-    (navigateToProps: Parameters<ApplicationStart['navigateToApp']>) => {
-      // If navigateTo appID is `fleet`, then don't use Kibana's navigateTo method, because that
-      // uses BrowserHistory but within fleet, we are using HashHistory.
-      // This temporary workaround hook can be removed once this issue is addressed:
-      // https://github.com/elastic/kibana/issues/70358
-      if (navigateToProps[0] === PLUGIN_ID) {
-        const { path = '', state } = navigateToProps[1] || {};
-        history.push({
-          pathname: path.charAt(0) === '#' ? path.substr(1) : path,
-          state,
-        });
-      }
-
-      return navigateToApp(...navigateToProps);
-    },
-    [history, navigateToApp]
-  );
 };
