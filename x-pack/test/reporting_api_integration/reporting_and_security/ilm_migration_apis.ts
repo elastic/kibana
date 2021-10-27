@@ -13,7 +13,6 @@ import { ILM_POLICY_NAME } from '../../../plugins/reporting/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -22,13 +21,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('ILM policy migration APIs', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await reportingAPI.initTestSavedObjects();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await reportingAPI.teardownTestSavedObjects();
     });
 
     afterEach(async () => {

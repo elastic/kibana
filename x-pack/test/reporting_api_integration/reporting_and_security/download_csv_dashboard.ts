@@ -195,12 +195,10 @@ export default function ({ getService }: FtrProviderContext) {
     describe('date formatting', () => {
       before(async () => {
         // load test data that contains a saved search and documents
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
-        await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+        await reportingAPI.initTestSavedObjects();
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await reportingAPI.teardownTestSavedObjects();
       });
 
       it('With filters and timebased data, default to UTC', async () => {
@@ -279,8 +277,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Formatted date_nanos data, UTC timezone', async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
-
         const res = await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
             searchSource: {
@@ -299,12 +295,10 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
 
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/nanos');
+        await reportingAPI.teardownTestSavedObjects();
       });
 
       it('Formatted date_nanos data, custom timezone (New York)', async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
-
         const res = await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
             browserTimezone: 'America/New_York',
@@ -323,15 +317,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
-
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/nanos');
       });
     });
 
     describe('non-timebased', () => {
       it('Handle _id and _index columns', async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
-
         const res = await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
             searchSource: {
@@ -349,8 +339,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
-
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/nanos');
       });
 
       it('With filters and non-timebased data', async () => {
