@@ -146,21 +146,24 @@ export default function (providerContext: FtrProviderContext) {
 
       // Wait until backing indices are created
       await retry.tryForTime(10000, async () => {
-        const { body } = await es.transport.request({
-          method: 'GET',
-          path: `/${logsTemplateName}-default,${metricsTemplateName}-default/_search`,
-          body: {
-            size: 0,
-            aggs: {
-              index: {
-                terms: {
-                  field: '_index',
-                  size: 100000,
+        const { body } = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/${logsTemplateName}-default,${metricsTemplateName}-default/_search`,
+            body: {
+              size: 0,
+              aggs: {
+                index: {
+                  terms: {
+                    field: '_index',
+                    size: 100000,
+                  },
                 },
               },
             },
           },
-        });
+          { meta: true }
+        );
         expect(body.aggregations.index.buckets.length).to.eql(4);
       });
 
