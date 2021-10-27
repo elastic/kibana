@@ -377,7 +377,11 @@ export function registerEcommerceSampleData(sampleDataRegistry: SampleDataRegist
 export function registerEcommerceSampleDataLink(sampleDataRegistry: SampleDataRegistrySetup) {
   sampleDataRegistry.addAppLinksToSampleDataset(datasetId, [
     {
-      path: createWorkspacePath('46fa9d30-319c-11ea-bbe4-818d9c786051'),
+      sampleObject: {
+        type: 'graph-workspace',
+        id: '46fa9d30-319c-11ea-bbe4-818d9c786051',
+      },
+      getPath: createWorkspacePath,
       label: i18n.translate('xpack.graph.sampleData.label', { defaultMessage: 'Graph' }),
       icon: APP_ICON,
     },

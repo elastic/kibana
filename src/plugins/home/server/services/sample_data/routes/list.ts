@@ -7,16 +7,24 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import type { AppLinkData, SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 
 const NOT_INSTALLED = 'not_installed';
 const INSTALLED = 'installed';
 const UNKNOWN = 'unknown';
 
-export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSchema[]) => {
+export const createListRoute = (
+  router: IRouter,
+  sampleDatasets: SampleDatasetSchema[],
+  appLinksMap: Map<string, AppLinkData[]>
+) => {
   router.get({ path: '/api/sample_data', validate: false }, async (context, req, res) => {
     const registeredSampleDatasets = sampleDatasets.map((sampleDataset) => {
+      const appLinks = (appLinksMap.get(sampleDataset.id) ?? []).map((data) => {
+        const { sampleObject, getPath, label, icon } = data;
+        return { path: getPath(sampleObject?.id ?? ''), label, icon };
+      });
       return {
         id: sampleDataset.id,
         name: sampleDataset.name,
@@ -24,7 +32,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
         previewImagePath: sampleDataset.previewImagePath,
         darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
         overviewDashboard: sampleDataset.overviewDashboard,
-        appLinks: sampleDataset.appLinks,
+        appLinks,
         defaultIndex: sampleDataset.defaultIndex,
         dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),
         status: sampleDataset.status,

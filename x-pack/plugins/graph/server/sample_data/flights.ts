@@ -1631,7 +1631,11 @@ export function registerFlightsSampleData(sampleDataRegistry: SampleDataRegistry
 export function registerFlightsSampleDataLink(sampleDataRegistry: SampleDataRegistrySetup) {
   sampleDataRegistry.addAppLinksToSampleDataset(datasetId, [
     {
-      path: createWorkspacePath('5dc018d0-32f8-11ea-bbe4-818d9c786051'),
+      sampleObject: {
+        type: 'graph-workspace',
+        id: '5dc018d0-32f8-11ea-bbe4-818d9c786051',
+      },
+      getPath: createWorkspacePath,
       label: i18n.translate('xpack.graph.sampleData.label', { defaultMessage: 'Graph' }),
       icon: APP_ICON,
     },

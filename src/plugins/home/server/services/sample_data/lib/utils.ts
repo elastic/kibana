@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { SampleDataRegistry } from './sample_data_registry';
+import type { SampleObject } from './sample_dataset_registry_types';
 
-export type { SampleDataRegistrySetup, SampleDataRegistryStart } from './sample_data_registry';
-
-export type {
-  SampleDatasetSchema,
-  SampleDatasetProvider,
-  AppLinkData,
-} from './lib/sample_dataset_registry_types';
+export function getUniqueObjectTypes(objects: SampleObject[]) {
+  return [...new Set(objects.map(({ type }) => type))];
+}

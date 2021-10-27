@@ -448,7 +448,11 @@ export function registerLogsSampleData(sampleDataRegistry: SampleDataRegistrySet
 export function registerLogsSampleDataLink(sampleDataRegistry: SampleDataRegistrySetup) {
   sampleDataRegistry.addAppLinksToSampleDataset(datasetId, [
     {
-      path: createWorkspacePath('e2141080-32fa-11ea-bbe4-818d9c786051'),
+      sampleObject: {
+        type: 'graph-workspace',
+        id: 'e2141080-32fa-11ea-bbe4-818d9c786051',
+      },
+      getPath: createWorkspacePath,
       label: i18n.translate('xpack.graph.sampleData.label', { defaultMessage: 'Graph' }),
       icon: APP_ICON,
     },

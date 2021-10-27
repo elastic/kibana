@@ -18,6 +18,8 @@ import {
 } from '../lib/translate_timestamp';
 import { loadData } from '../lib/load_data';
 import { SampleDataUsageTracker } from '../usage/usage';
+import { getSavedObjectsClient } from './utils';
+import { getUniqueObjectTypes } from '../lib/utils';
 
 const insertDataIntoIndex = (
   dataIndexConfig: any,
@@ -139,13 +141,10 @@ export function createInstallRoute(
         }
       }
 
-      const { getClient, getImporter, typeRegistry } = context.core.savedObjects;
-
-      const includedHiddenTypes = sampleDataset.savedObjects
-        .map((object) => object.type)
-        .filter((supportedType) => typeRegistry.isHidden(supportedType));
-      const client = getClient({ includedHiddenTypes });
-      const importer = getImporter(client);
+      const { getImporter } = context.core.savedObjects;
+      const objectTypes = getUniqueObjectTypes(sampleDataset.savedObjects);
+      const savedObjectsClient = getSavedObjectsClient(context, objectTypes);
+      const importer = getImporter(savedObjectsClient);
 
       const savedObjects = sampleDataset.savedObjects.map(({ version, ...obj }) => obj);
       const readStream = Readable.from(savedObjects);
