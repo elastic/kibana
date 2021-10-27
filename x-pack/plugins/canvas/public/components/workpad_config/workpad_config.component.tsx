@@ -76,10 +76,6 @@ const strings = {
     i18n.translate('xpack.canvas.workpadConfig.widthLabel', {
       defaultMessage: 'Width',
     }),
-  getTitle: () =>
-    i18n.translate('xpack.canvas.workpadConfig.title', {
-      defaultMessage: 'Workpad settings',
-    }),
   getUSLetterButtonLabel: () =>
     i18n.translate('xpack.canvas.workpadConfig.USLetterButtonLabel', {
       defaultMessage: 'US Letter',
@@ -127,14 +123,6 @@ export const WorkpadConfig: FunctionComponent<Props> = (props) => {
 
   return (
     <div>
-      <div className="canvasLayout__sidebarHeaderWorkpad">
-        <EuiTitle size="xs">
-          <h4>{strings.getTitle()}</h4>
-        </EuiTitle>
-      </div>
-
-      <EuiSpacer size="m" />
-
       <EuiFormRow label={strings.getNameLabel()} display="rowCompressed">
         <EuiFieldText compressed value={name} onChange={(e) => setName(e.target.value)} />
       </EuiFormRow>
