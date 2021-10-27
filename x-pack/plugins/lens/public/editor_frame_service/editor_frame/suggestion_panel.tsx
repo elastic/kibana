@@ -20,7 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiSwitch,
+  EuiAccordion,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter/common';
@@ -333,13 +333,16 @@ export function SuggestionPanel({
   }
 
   return (
-    <div>
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+    <div
+      className={classNames('lnsSuggestionPanel', {
+        'lnsSuggestionPanel--hideSuggestions': hideSuggestions,
+      })}
+    >
+      <EuiFlexGroup alignItems="flexStart" gutterSize="none">
         <EuiFlexItem>
-          <EuiSwitch
-            className="lnsSuggestionPanel__switch"
-            compressed
-            label={
+          <EuiAccordion
+            id="lensSuggestionsPanel"
+            buttonContent={
               <EuiTitle size="xxs">
                 <h3>
                   <FormattedMessage
@@ -349,11 +352,55 @@ export function SuggestionPanel({
                 </h3>
               </EuiTitle>
             }
-            data-test-subj="lensHideSuggestionSwitch"
-            showLabel={true}
-            checked={!hideSuggestions}
-            onChange={toggleSuggestions}
-          />
+            forceState={hideSuggestions ? 'closed' : 'open'}
+            onToggle={toggleSuggestions}
+          >
+            <div className="lnsSuggestionPanel__suggestions" data-test-subj="lnsSuggestionsPanel">
+              {currentVisualization.activeId && !hideSuggestions && (
+                <SuggestionPreview
+                  preview={{
+                    error: currentStateError != null,
+                    expression: currentStateExpression,
+                    icon:
+                      visualizationMap[currentVisualization.activeId].getDescription(
+                        currentVisualization.state
+                      ).icon || 'empty',
+                    title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
+                      defaultMessage: 'Current visualization',
+                    }),
+                  }}
+                  ExpressionRenderer={AutoRefreshExpressionRenderer}
+                  onSelect={rollbackToCurrentVisualization}
+                  selected={lastSelectedSuggestion === -1}
+                  showTitleAsLabel
+                />
+              )}
+              {!hideSuggestions &&
+                suggestions.map((suggestion, index) => {
+                  return (
+                    <SuggestionPreview
+                      preview={{
+                        expression: suggestion.previewExpression,
+                        icon: suggestion.previewIcon,
+                        title: suggestion.title,
+                      }}
+                      ExpressionRenderer={AutoRefreshExpressionRenderer}
+                      key={index}
+                      onSelect={() => {
+                        trackUiEvent('suggestion_clicked');
+                        if (lastSelectedSuggestion === index) {
+                          rollbackToCurrentVisualization();
+                        } else {
+                          setLastSelectedSuggestion(index);
+                          switchToSuggestion(dispatchLens, suggestion);
+                        }
+                      }}
+                      selected={index === lastSelectedSuggestion}
+                    />
+                  );
+                })}
+            </div>
+          </EuiAccordion>
         </EuiFlexItem>
         {existsStagedPreview && !hideSuggestions && (
           <EuiFlexItem grow={false}>
@@ -379,58 +426,6 @@ export function SuggestionPanel({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-
-      <div
-        className={classNames('lnsSuggestionPanel__suggestions', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          'lnsSuggestionPanel__suggestions--hideSuggestions': hideSuggestions,
-        })}
-        data-test-subj="lnsSuggestionsPanel"
-      >
-        {currentVisualization.activeId && !hideSuggestions && (
-          <SuggestionPreview
-            preview={{
-              error: currentStateError != null,
-              expression: currentStateExpression,
-              icon:
-                visualizationMap[currentVisualization.activeId].getDescription(
-                  currentVisualization.state
-                ).icon || 'empty',
-              title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
-                defaultMessage: 'Current visualization',
-              }),
-            }}
-            ExpressionRenderer={AutoRefreshExpressionRenderer}
-            onSelect={rollbackToCurrentVisualization}
-            selected={lastSelectedSuggestion === -1}
-            showTitleAsLabel
-          />
-        )}
-        {!hideSuggestions &&
-          suggestions.map((suggestion, index) => {
-            return (
-              <SuggestionPreview
-                preview={{
-                  expression: suggestion.previewExpression,
-                  icon: suggestion.previewIcon,
-                  title: suggestion.title,
-                }}
-                ExpressionRenderer={AutoRefreshExpressionRenderer}
-                key={index}
-                onSelect={() => {
-                  trackUiEvent('suggestion_clicked');
-                  if (lastSelectedSuggestion === index) {
-                    rollbackToCurrentVisualization();
-                  } else {
-                    setLastSelectedSuggestion(index);
-                    switchToSuggestion(dispatchLens, suggestion);
-                  }
-                }}
-                selected={index === lastSelectedSuggestion}
-              />
-            );
-          })}
-      </div>
     </div>
   );
 }

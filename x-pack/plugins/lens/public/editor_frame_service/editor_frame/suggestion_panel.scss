@@ -1,10 +1,6 @@
 @import '../../mixins';
 @import '../../variables';
 
-.lnsSuggestionPanel__switch {
-  align-items: center;
-}
-
 .lnsSuggestionPanel__suggestions {
   @include euiScrollBar;
   @include lnsOverflowShadowHorizontal;
@@ -17,15 +13,10 @@
   padding-left: $euiSizeXS;
   margin-left: -$euiSizeXS;
   padding-bottom: $euiSizeXS;
-  // transitioning suggestions panel properties
-  max-height: 150px;
-  opacity: 1;
-  transition: $euiAnimSpeedFast linear max-height, opacity .5s;
 }
 
-.lnsSuggestionPanel__suggestions--hideSuggestions {
-  opacity: 0;
-  max-height: 0;
+.lnsSuggestionPanel--hideSuggestions {
+  padding-bottom: $euiSizeS;
 }
 
 .lnsSuggestionPanel__button {
