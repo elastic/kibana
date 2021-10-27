@@ -177,7 +177,8 @@ export default ({ getService }: FtrProviderContext) => {
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
 
-      const results = await getVisualizationCounts(() => Promise.resolve(es), '.kibana');
+      const kibanaClient = convertToKibanaClient(es);
+      const results = await getVisualizationCounts(() => Promise.resolve(kibanaClient), '.kibana');
 
       expect(results).to.have.keys([
         'saved_overall',
