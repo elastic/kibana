@@ -8,12 +8,61 @@
 
 import React, { useState } from 'react';
 
-import useMount from 'react-use/lib/useMount';
+import { DataView, DataViewField, IIndexPatternFieldList } from '../../../../data_views/common';
+
+import { StorybookParams } from '../../services/storybook';
 import { DataViewPicker } from './data_view_picker';
-import { DataView, DataViewListItem } from '../../../../data_views/common';
-import { injectStorybookDataView } from '../../services/storybook/data_views';
-import { storybookFlightsDataView } from '../controls/__stories__/fixtures/flights';
-import { pluginServices, registry, StorybookParams } from '../../services/storybook';
+
+// TODO: we probably should remove this once the PR is merged that has better data views for stories
+const flightFieldNames: string[] = [
+  'AvgTicketPrice',
+  'Cancelled',
+  'Carrier',
+  'dayOfWeek',
+  'Dest',
+  'DestAirportID',
+  'DestCityName',
+  'DestCountry',
+  'DestLocation',
+  'DestRegion',
+  'DestWeather',
+  'DistanceKilometers',
+  'DistanceMiles',
+  'FlightDelay',
+  'FlightDelayMin',
+  'FlightDelayType',
+  'FlightNum',
+  'FlightTimeHour',
+  'FlightTimeMin',
+  'Origin',
+  'OriginAirportID',
+  'OriginCityName',
+  'OriginCountry',
+  'OriginLocation',
+  'OriginRegion',
+  'OriginWeather',
+  'timestamp',
+];
+const flightFieldByName: { [key: string]: DataViewField } = {};
+flightFieldNames.forEach(
+  (flightFieldName) =>
+    (flightFieldByName[flightFieldName] = {
+      name: flightFieldName,
+      type: 'string',
+    } as unknown as DataViewField)
+);
+
+// Change some types manually for now
+flightFieldByName.Cancelled = { name: 'Cancelled', type: 'boolean' } as DataViewField;
+flightFieldByName.timestamp = { name: 'timestamp', type: 'date' } as DataViewField;
+
+const flightFields: DataViewField[] = Object.values(flightFieldByName);
+const storybookFlightsDataView: DataView = {
+  id: 'demoDataFlights',
+  title: 'demo data flights',
+  fields: flightFields as unknown as IIndexPatternFieldList,
+  getFieldByName: (name: string) => flightFieldByName[name],
+} as unknown as DataView;
 
 export default {
   component: DataViewPicker,
@@ -21,29 +70,15 @@ export default {
   argTypes: {},
 };
 
-injectStorybookDataView(storybookFlightsDataView);
-
 export function Example({}: {} & StorybookParams) {
-  pluginServices.setRegistry(registry.start({}));
+  const dataViews = [storybookFlightsDataView];
 
-  const {
-    dataViews: { getIdsWithTitle, get },
-  } = pluginServices.getServices();
-
-  const [dataViews, setDataViews] = useState<DataViewListItem[]>();
   const [dataView, setDataView] = useState<DataView | undefined>(undefined);
 
-  useMount(() => {
-    (async () => {
-      const listItems = await getIdsWithTitle();
-      setDataViews(listItems);
-    })();
-  });
-
   const onChange = (newId: string) => {
-    get(newId).then((newDataView) => {
-      setDataView(newDataView);
-    });
+    const newIndexPattern = dataViews.find((ip) => ip.id === newId);
+
+    setDataView(newIndexPattern);
   };
 
   const triggerLabel = dataView?.title || 'Choose Data View';
@@ -51,9 +86,9 @@ export function Example({}: {} & StorybookParams) {
   return (
     <DataViewPicker
       trigger={{ label: triggerLabel, title: triggerLabel }}
-      dataViews={dataViews ?? []}
+      dataViews={[storybookFlightsDataView]}
       selectedDataViewId={dataView?.id}
-      onChangeDataViewId={onChange}
+      onChangeIndexPattern={onChange}
     />
   );
 }

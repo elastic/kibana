@@ -13,16 +13,13 @@ import { DashboardContainer, DashboardReactContextValue } from '../dashboard_con
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { ControlGroupContainer } from '../../../../../presentation_util/public';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
-  controlGroup?: ControlGroupContainer;
 }
 
 interface State {
   isFullScreenMode: boolean;
-  controlGroupReady: boolean;
   useMargins: boolean;
   title: string;
   description?: string;
@@ -32,10 +29,8 @@ interface State {
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;
+
   public readonly context!: DashboardReactContextValue;
-
-  private controlsRoot: React.RefObject<HTMLDivElement>;
-
   private subscription?: Subscription;
   private mounted: boolean = false;
   constructor(props: DashboardViewportProps) {
@@ -43,10 +38,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     const { isFullScreenMode, panels, useMargins, title, isEmbeddedExternally } =
       this.props.container.getInput();
 
-    this.controlsRoot = React.createRef();
-
     this.state = {
-      controlGroupReady: !this.props.controlGroup,
       isFullScreenMode,
       panels,
       useMargins,
@@ -70,12 +62,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
         });
       }
     });
-    if (this.props.controlGroup && this.controlsRoot.current) {
-      this.props.controlGroup.render(this.controlsRoot.current);
-    }
-    if (this.props.controlGroup) {
-      this.props.controlGroup?.untilReady().then(() => this.setState({ controlGroupReady: true }));
-    }
   }
 
   public componentWillUnmount() {
@@ -97,8 +83,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     const { isEmbeddedExternally, isFullScreenMode, panels, title, description, useMargins } =
       this.state;
     return (
-      <>
-        <div className="dshDashboardViewport-controlGroup" ref={this.controlsRoot} />
+      <React.Fragment>
         <div
           data-shared-items-count={Object.values(panels).length}
           data-shared-items-container
@@ -124,9 +109,9 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
               />
             </div>
           )}
-          {this.state.controlGroupReady && <DashboardGrid container={container} />}
+          <DashboardGrid container={container} />
         </div>
-      </>
+      </React.Fragment>
     );
   }
 }

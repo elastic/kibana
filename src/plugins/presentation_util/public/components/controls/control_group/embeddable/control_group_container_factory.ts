@@ -14,20 +14,28 @@
  * Side Public License, v 1.
  */
 
-import { Container, EmbeddableFactoryDefinition } from '../../../../../../embeddable/public';
-import { EmbeddablePersistableStateService } from '../../../../../../embeddable/common';
-import { ControlGroupInput, CONTROL_GROUP_TYPE } from '../types';
-import { ControlGroupStrings } from '../control_group_strings';
 import {
-  createControlGroupExtract,
-  createControlGroupInject,
-} from '../../../../../common/controls/control_group/control_group_persistable_state';
+  Container,
+  ContainerOutput,
+  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
+  ErrorEmbeddable,
+} from '../../../../../../embeddable/public';
+import { ControlGroupInput } from '../types';
+import { ControlGroupStrings } from '../control_group_strings';
+import { CONTROL_GROUP_TYPE } from '../control_group_constants';
+import { ControlGroupContainer } from './control_group_container';
 
-export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition {
+export type DashboardContainerFactory = EmbeddableFactory<
+  ControlGroupInput,
+  ContainerOutput,
+  ControlGroupContainer
+>;
+export class ControlGroupContainerFactory
+  implements EmbeddableFactoryDefinition<ControlGroupInput, ContainerOutput, ControlGroupContainer>
+{
   public readonly isContainerType = true;
   public readonly type = CONTROL_GROUP_TYPE;
-
-  constructor(private persistableStateService: EmbeddablePersistableStateService) {}
 
   public isEditable = async () => false;
 
@@ -38,19 +46,18 @@ export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition
   public getDefaultInput(): Partial<ControlGroupInput> {
     return {
       panels: {},
-      ignoreParentSettings: {
-        ignoreFilters: false,
-        ignoreQuery: false,
-        ignoreTimerange: false,
+      inheritParentState: {
+        useFilters: true,
+        useQuery: true,
+        useTimerange: true,
       },
     };
   }
 
-  public create = async (initialInput: ControlGroupInput, parent?: Container) => {
-    const { ControlGroupContainer } = await import('./control_group_container');
+  public create = async (
+    initialInput: ControlGroupInput,
+    parent?: Container
+  ): Promise<ControlGroupContainer | ErrorEmbeddable> => {
     return new ControlGroupContainer(initialInput, parent);
   };
-
-  public inject = createControlGroupInject(this.persistableStateService);
-  public extract = createControlGroupExtract(this.persistableStateService);
 }

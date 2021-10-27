@@ -6,23 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { ControlsService } from '../controls_service';
+import { InputControlFactory } from '../../../services/controls';
 import { flightFields, getFlightSearchOptions } from './flights';
 import { OptionsListEmbeddableFactory } from '../control_types/options_list';
-import { InputControlFactory, PresentationControlsService } from '../../../services/controls';
 
-export const populateStorybookControlFactories = (
-  controlsServiceStub: PresentationControlsService
-) => {
+export const getControlsServiceStub = () => {
+  const controlsServiceStub = new ControlsService();
+
   const optionsListFactoryStub = new OptionsListEmbeddableFactory(
     ({ field, search }) =>
       new Promise((r) => setTimeout(() => r(getFlightSearchOptions(field.name, search)), 120)),
-    () =>
-      Promise.resolve([
-        {
-          title: 'demo data flights',
-          fields: [],
-        },
-      ]),
+    () => Promise.resolve([{ title: 'demo data flights', fields: [] }]),
     () => Promise.resolve(flightFields)
   );
 
@@ -30,4 +25,5 @@ export const populateStorybookControlFactories = (
   const optionsListControlFactory = optionsListFactoryStub as unknown as InputControlFactory;
   optionsListControlFactory.getDefaultInput = () => ({});
   controlsServiceStub.registerInputControlType(optionsListControlFactory);
+  return controlsServiceStub;
 };

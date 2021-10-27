@@ -15,7 +15,6 @@ import {
   DashboardPanelMap,
   DashboardState,
 } from '../../types';
-import { controlGroupInputIsEqual } from './dashboard_control_group';
 
 interface DashboardDiffCommon {
   [key: string]: unknown;
@@ -41,7 +40,7 @@ export const diffDashboardState = (
   const common = commonDiffFilters<DashboardState>(
     original as unknown as DashboardDiffCommonFilters,
     newState as unknown as DashboardDiffCommonFilters,
-    ['viewMode', 'panels', 'options', 'savedQuery', 'expandedPanelId', 'controlGroupInput'],
+    ['viewMode', 'panels', 'options', 'savedQuery', 'expandedPanelId'],
     true
   );
 
@@ -49,9 +48,6 @@ export const diffDashboardState = (
     ...common,
     ...(panelsAreEqual(original.panels, newState.panels) ? {} : { panels: newState.panels }),
     ...(optionsAreEqual(original.options, newState.options) ? {} : { options: newState.options }),
-    ...(controlGroupInputIsEqual(original.controlGroupInput, newState.controlGroupInput)
-      ? {}
-      : { controlGroupInput: newState.controlGroupInput }),
   };
 };
 

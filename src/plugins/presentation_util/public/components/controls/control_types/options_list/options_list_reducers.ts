@@ -9,7 +9,7 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
-import { OptionsListEmbeddableInput } from './types';
+import { OptionsListEmbeddableInput } from './options_list_embeddable';
 
 export const optionsListReducers = {
   deselectOption: (

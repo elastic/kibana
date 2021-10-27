@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 import { useEffect, useState } from 'react';
-import { ControlEmbeddable } from '../types';
+import { InputControlEmbeddable } from '../../../services/controls';
 
 export const useChildEmbeddable = ({
   untilEmbeddableLoaded,
   embeddableId,
 }: {
-  untilEmbeddableLoaded: (embeddableId: string) => Promise<ControlEmbeddable>;
+  untilEmbeddableLoaded: (embeddableId: string) => Promise<InputControlEmbeddable>;
   embeddableId: string;
 }) => {
-  const [embeddable, setEmbeddable] = useState<ControlEmbeddable>();
+  const [embeddable, setEmbeddable] = useState<InputControlEmbeddable>();
 
   useEffect(() => {
     let mounted = true;

@@ -7,4 +7,4 @@
  */
 
 export { OptionsListEmbeddableFactory } from './options_list_embeddable_factory';
-export type { OptionsListEmbeddable } from './options_list_embeddable';
+export { OptionsListEmbeddable } from './options_list_embeddable';

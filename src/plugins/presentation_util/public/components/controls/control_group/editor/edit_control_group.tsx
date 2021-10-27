@@ -26,7 +26,7 @@ import {
   CONTROL_LAYOUT_OPTIONS,
   CONTROL_WIDTH_OPTIONS,
   DEFAULT_CONTROL_WIDTH,
-} from './editor_constants';
+} from '../control_group_constants';
 import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../../../services';
 import { ControlStyle, ControlWidth } from '../../types';

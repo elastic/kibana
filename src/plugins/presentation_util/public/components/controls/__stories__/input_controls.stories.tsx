@@ -6,22 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiTextAlign } from '@elastic/eui';
 import React, { useEffect, useMemo, useState, useCallback, FC } from 'react';
+import uuid from 'uuid';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiTextAlign } from '@elastic/eui';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 
-import uuid from 'uuid';
 import { decorators } from './decorators';
-import { ControlsPanels } from '../control_group/types';
-import { ViewMode } from '../../../../../embeddable/public';
-import { getFlightOptionsAsync, storybookFlightsDataView } from './fixtures/flights';
 import { pluginServices, registry } from '../../../services/storybook';
-import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../../..';
-import { replaceValueSuggestionMethod } from '../../../services/storybook/data';
-import { injectStorybookDataView } from '../../../services/storybook/data_views';
 import { populateStorybookControlFactories } from './storybook_control_factories';
-import { EmbeddablePersistableStateService } from '../../../../../embeddable/common';
 import { ControlGroupContainerFactory } from '../control_group/embeddable/control_group_container_factory';
+import { ControlsPanels } from '../control_group/types';
+import {
+  OptionsListEmbeddableInput,
+  OPTIONS_LIST_CONTROL,
+} from '../control_types/options_list/options_list_embeddable';
+import { ViewMode } from '../control_group/types';
 
 export default {
   title: 'Controls',
@@ -32,10 +31,7 @@ export default {
 type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
 type EmbeddableType = UnwrapPromise<ReturnType<ControlGroupContainerFactory['create']>>;
 
-injectStorybookDataView(storybookFlightsDataView);
-replaceValueSuggestionMethod(getFlightOptionsAsync);
-
-const ControlGroupStoryComponent: FC<{
+const EmptyControlGroupStoryComponent: FC<{
   panels?: ControlsPanels;
   edit?: boolean;
 }> = ({ panels, edit }) => {
@@ -58,10 +54,13 @@ const ControlGroupStoryComponent: FC<{
 
   useEffectOnce(() => {
     (async () => {
-      const factory = new ControlGroupContainerFactory(
-        {} as unknown as EmbeddablePersistableStateService
-      );
+      const factory = new ControlGroupContainerFactory();
       const controlGroupContainerEmbeddable = await factory.create({
+        inheritParentState: {
+          useQuery: false,
+          useFilters: false,
+          useTimerange: false,
+        },
         controlStyle: 'oneLine',
         panels: panels ?? {},
         id: uuid.v4(),
@@ -103,9 +102,9 @@ const ControlGroupStoryComponent: FC<{
   );
 };
 
-export const EmptyControlGroupStory = () => <ControlGroupStoryComponent edit={false} />;
+export const EmptyControlGroupStory = () => <EmptyControlGroupStoryComponent edit={false} />;
 export const ConfiguredControlGroupStory = () => (
-  <ControlGroupStoryComponent
+  <EmptyControlGroupStoryComponent
     panels={{
       optionsList1: {
         type: OPTIONS_LIST_CONTROL,
@@ -114,8 +113,14 @@ export const ConfiguredControlGroupStory = () => (
         explicitInput: {
           title: 'Origin City',
           id: 'optionsList1',
-          dataViewId: 'demoDataFlights',
-          fieldName: 'OriginCityName',
+          indexPattern: {
+            title: 'demo data flights',
+          },
+          field: {
+            name: 'OriginCityName',
+            type: 'string',
+            aggregatable: true,
+          },
           selectedOptions: ['Toronto'],
         } as OptionsListEmbeddableInput,
       },
@@ -126,8 +131,14 @@ export const ConfiguredControlGroupStory = () => (
         explicitInput: {
           title: 'Destination City',
           id: 'optionsList2',
-          dataViewId: 'demoDataFlights',
-          fieldName: 'DestCityName',
+          indexPattern: {
+            title: 'demo data flights',
+          },
+          field: {
+            name: 'DestCityName',
+            type: 'string',
+            aggregatable: true,
+          },
           selectedOptions: ['London'],
         } as OptionsListEmbeddableInput,
       },
@@ -138,8 +149,14 @@ export const ConfiguredControlGroupStory = () => (
         explicitInput: {
           title: 'Carrier',
           id: 'optionsList3',
-          dataViewId: 'demoDataFlights',
-          fieldName: 'Carrier',
+          indexPattern: {
+            title: 'demo data flights',
+          },
+          field: {
+            name: 'Carrier',
+            type: 'string',
+            aggregatable: true,
+          },
         } as OptionsListEmbeddableInput,
       },
     }}

@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
-import { DataViewListItem } from '../../../../data_views/common';
+import { DataView } from '../../../../data_views/common';
 
 import { ToolbarButton, ToolbarButtonProps } from '../../../../kibana_react/public';
 
@@ -21,14 +21,14 @@ export type DataViewTriggerProps = ToolbarButtonProps & {
 export function DataViewPicker({
   dataViews,
   selectedDataViewId,
-  onChangeDataViewId,
+  onChangeIndexPattern,
   trigger,
   selectableProps,
 }: {
-  dataViews: DataViewListItem[];
+  dataViews: DataView[];
   selectedDataViewId?: string;
   trigger: DataViewTriggerProps;
-  onChangeDataViewId: (newId: string) => void;
+  onChangeIndexPattern: (newId: string) => void;
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -92,7 +92,7 @@ export function DataViewPicker({
               const choice = choices.find(({ checked }) => checked) as unknown as {
                 value: string;
               };
-              onChangeDataViewId(choice.value);
+              onChangeIndexPattern(choice.value);
               setPopoverIsOpen(false);
             }}
             searchProps={{

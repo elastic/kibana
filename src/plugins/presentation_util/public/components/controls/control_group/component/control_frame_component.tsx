@@ -13,7 +13,6 @@ import {
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
-  EuiLoadingChart,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -53,9 +52,7 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
       embeddable.render(embeddableRoot.current);
     }
     const subscription = embeddable?.getInput$().subscribe((newInput) => setTitle(newInput.title));
-    return () => {
-      subscription?.unsubscribe();
-    };
+    return () => subscription?.unsubscribe();
   }, [embeddable, embeddableRoot]);
 
   const floatingActions = (
@@ -90,18 +87,13 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
     </div>
   );
 
-  const embeddableParentClassNames = classNames('controlFrame__control', {
-    'controlFrame--twoLine': controlStyle === 'twoLine',
-    'controlFrame--oneLine': controlStyle === 'oneLine',
-  });
-
   const form = (
     <EuiFormControlLayout
       className={'controlFrame__formControlLayout'}
       fullWidth
       prepend={
         <>
-          {(embeddable && customPrepend) ?? null}
+          {customPrepend ?? null}
           {usingTwoLineLayout ? undefined : (
             <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
               {title}
@@ -110,34 +102,21 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
         </>
       }
     >
-      {embeddable && (
-        <div
-          className={embeddableParentClassNames}
-          id={`controlFrame--${embeddableId}`}
-          ref={embeddableRoot}
-        />
-      )}
-      {!embeddable && (
-        <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>
-          <div className="controlFrame--controlLoading">
-            <EuiLoadingChart />
-          </div>
-        </div>
-      )}
+      <div
+        className={classNames('controlFrame__control', {
+          'controlFrame--twoLine': controlStyle === 'twoLine',
+          'controlFrame--oneLine': controlStyle === 'oneLine',
+        })}
+        id={`controlFrame--${embeddableId}`}
+        ref={embeddableRoot}
+      />
     </EuiFormControlLayout>
   );
 
   return (
     <>
-      {embeddable && enableActions && floatingActions}
-      <EuiFormRow
-        fullWidth
-        label={
-          usingTwoLineLayout
-            ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
-            : undefined
-        }
-      >
+      {enableActions && floatingActions}
+      <EuiFormRow fullWidth label={usingTwoLineLayout ? title : undefined}>
         {form}
       </EuiFormRow>
     </>

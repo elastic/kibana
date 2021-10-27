@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DashboardPanelState } from '../embeddable';
-import { DashboardContainer } from '../embeddable/dashboard_container';
+import { DashboardContainer, DashboardPanelState } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';

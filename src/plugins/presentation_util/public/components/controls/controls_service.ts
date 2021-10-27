@@ -6,26 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { ControlEmbeddable, ControlFactory, ControlInput, ControlOutput } from '.';
 import { EmbeddableFactory } from '../../../../embeddable/public';
-import { ControlTypeRegistry } from '../../services/controls';
+import {
+  InputControlEmbeddable,
+  ControlTypeRegistry,
+  InputControlFactory,
+  InputControlOutput,
+  InputControlInput,
+} from '../../services/controls';
 
 export class ControlsService {
   private controlsFactoriesMap: ControlTypeRegistry = {};
 
-  public registerControlType = (factory: ControlFactory) => {
+  public registerInputControlType = (factory: InputControlFactory) => {
     this.controlsFactoriesMap[factory.type] = factory;
   };
 
   public getControlFactory = <
-    I extends ControlInput = ControlInput,
-    O extends ControlOutput = ControlOutput,
-    E extends ControlEmbeddable<I, O> = ControlEmbeddable<I, O>
+    I extends InputControlInput = InputControlInput,
+    O extends InputControlOutput = InputControlOutput,
+    E extends InputControlEmbeddable<I, O> = InputControlEmbeddable<I, O>
   >(
     type: string
   ) => {
     return this.controlsFactoriesMap[type] as EmbeddableFactory<I, O, E>;
   };
 
-  public getControlTypes = () => Object.keys(this.controlsFactoriesMap);
+  public getInputControlTypes = () => Object.keys(this.controlsFactoriesMap);
 }

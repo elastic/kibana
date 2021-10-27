@@ -18,7 +18,7 @@ type ManagedEmbeddableReduxStore = EnhancedStore & {
   asyncReducers: { [key: string]: Reducer<unknown> };
   injectReducer: <StateShape>(props: InjectReducerProps<StateShape>) => void;
 };
-const embeddablesStore = configureStore({ reducer: (state) => state }); // store with blank reducers
+const embeddablesStore = configureStore({ reducer: {} as { [key: string]: Reducer } });
 
 const managedEmbeddablesStore = embeddablesStore as ManagedEmbeddableReduxStore;
 managedEmbeddablesStore.asyncReducers = {};
@@ -27,12 +27,10 @@ managedEmbeddablesStore.injectReducer = <StateShape>({
   key,
   asyncReducer,
 }: InjectReducerProps<StateShape>) => {
-  if (!managedEmbeddablesStore.asyncReducers[key]) {
-    managedEmbeddablesStore.asyncReducers[key] = asyncReducer as Reducer<unknown>;
-    managedEmbeddablesStore.replaceReducer(
-      combineReducers({ ...managedEmbeddablesStore.asyncReducers })
-    );
-  }
+  managedEmbeddablesStore.asyncReducers[key] = asyncReducer as Reducer<unknown>;
+  managedEmbeddablesStore.replaceReducer(
+    combineReducers({ ...managedEmbeddablesStore.asyncReducers })
+  );
 };
 
 /**
