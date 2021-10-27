@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   // Failing: See https://github.com/elastic/kibana/issues/104260
-  describe.skip('hosts', () => {
+  describe('hosts', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts'));
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts'));
 
@@ -184,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send({
           factoryQueryType: HostsQueries.firstOrLastSeen,
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-*'],
           docValueFields: [{ field: '@timestamp', format: 'epoch_millis' }],
           hostName: 'zeek-sensor-san-francisco',
           order: 'asc',
@@ -200,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send({
           factoryQueryType: HostsQueries.firstOrLastSeen,
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-*'],
           docValueFields: [{ field: '@timestamp', format: 'epoch_millis' }],
           hostName: 'zeek-sensor-san-francisco',
           order: 'desc',
