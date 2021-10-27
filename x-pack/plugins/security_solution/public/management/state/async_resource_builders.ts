@@ -44,3 +44,25 @@ export const createFailedResourceState = <Data, Error = ServerApiError>(
     lastLoadedState,
   };
 };
+
+/**
+ * Takes an existing AsyncResourceState and transforms it into a StaleResourceState (not loading)
+ * Note: If a loading state is passed, the resource is returned as UninitialisedResourceState
+ */
+export const asStaleResourceState = <Data, Error = ServerApiError>(resource: {
+  type:
+    | 'LoadedResourceState'
+    | 'FailedResourceState'
+    | 'UninitialisedResourceState'
+    | 'LoadingResourceState';
+}): StaleResourceState<Data, Error> => {
+  switch (resource.type) {
+    case 'LoadedResourceState':
+      return resource as LoadedResourceState<Data>;
+    case 'FailedResourceState':
+      return resource as FailedResourceState<Data, Error>;
+    case 'LoadingResourceState':
+    case 'UninitialisedResourceState':
+      return createUninitialisedResourceState();
+  }
+};
