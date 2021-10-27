@@ -32,13 +32,14 @@ export const initValidateLogAnalysisDatasetsRoute = ({
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       try {
         const {
-          data: { indices, startTime, endTime, runtimeMappings },
+          data: { indices, timestampField, startTime, endTime, runtimeMappings },
         } = request.body;
 
         const datasets = await Promise.all(
           indices.map(async (indexName) => {
             const indexDatasets = await logEntries.getLogEntryDatasets(
               requestContext,
+              timestampField,
               indexName,
               startTime,
               endTime,
