@@ -53,6 +53,7 @@ export default async function ({ readConfigFile }) {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
         'visualization:visualize:legacyPieChartsLibrary': true,
+        'visualization:useLegacyTimeAxis': true,
       },
     },
 

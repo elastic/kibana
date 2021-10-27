@@ -8,7 +8,13 @@
 
 import { identity } from 'lodash';
 
-import { AxisSpec, TickFormatter, YDomainRange, ScaleType as ECScaleType } from '@elastic/charts';
+import {
+  AxisSpec,
+  TickFormatter,
+  YDomainRange,
+  ScaleType as ECScaleType,
+  Position,
+} from '@elastic/charts';
 
 import { LabelRotation } from '../../../../charts/public';
 import { BUCKET_TYPES } from '../../../../data/public';
@@ -33,7 +39,9 @@ export function getAxis<S extends XScaleType | YScaleType>(
   { categoryLines, valueAxis }: Grid,
   { params, format, formatter, title: fallbackTitle = '', aggType }: Aspect,
   seriesParams: SeriesParam[],
-  isDateHistogram = false
+  isDateHistogram = false,
+  useMultiLayerTimeAxis = false,
+  darkMode = false
 ): AxisConfig<S> {
   const isCategoryAxis = type === AxisType.Category;
   // Hide unassigned axis, not supported in elastic charts
@@ -74,9 +82,10 @@ export function getAxis<S extends XScaleType | YScaleType>(
     ticks,
     grid,
     scale,
-    style: getAxisStyle(ticks, title, fallbackRotation),
+    style: getAxisStyle(useMultiLayerTimeAxis, darkMode, ticks, title, fallbackRotation),
     domain: getAxisDomain(scale, isCategoryAxis),
     integersOnly: aggType === 'count',
+    timeAxisLayerCount: useMultiLayerTimeAxis ? 3 : 0,
   };
 }
 
@@ -147,19 +156,52 @@ export function getScale<S extends XScaleType | YScaleType>(
 }
 
 function getAxisStyle(
+  isMultiLayerTimeAxis: boolean,
+  darkMode: boolean,
   ticks?: TickOptions,
   title?: string,
   rotationFallback: LabelRotation = LabelRotation.Vertical
 ): AxisSpec['style'] {
-  return {
-    axisTitle: {
-      visible: (title ?? '').trim().length > 0,
-    },
-    tickLabel: {
-      visible: ticks?.show,
-      rotation: -(ticks?.rotation ?? rotationFallback),
-    },
-  };
+  return isMultiLayerTimeAxis
+    ? {
+        tickLabel: {
+          visible: Boolean(ticks?.show),
+          rotation: 0, // rotation is disabled on new time axis
+          fontSize: 11,
+          padding: 0,
+          alignment: {
+            vertical: Position.Bottom,
+            horizontal: Position.Left,
+          },
+          offset: {
+            x: 1.5,
+            y: 0,
+          },
+        },
+        axisLine: {
+          stroke: darkMode ? 'lightgray' : 'darkgray',
+          strokeWidth: 1,
+        },
+        tickLine: {
+          size: 12,
+          strokeWidth: 0.15,
+          stroke: darkMode ? 'white' : 'black',
+          padding: -10,
+          visible: Boolean(ticks?.show),
+        },
+        axisTitle: {
+          visible: (title ?? '').trim().length > 0,
+        },
+      }
+    : {
+        axisTitle: {
+          visible: (title ?? '').trim().length > 0,
+        },
+        tickLabel: {
+          visible: ticks?.show,
+          rotation: -(ticks?.rotation ?? rotationFallback),
+        },
+      };
 }
 
 function getAxisDomain<S extends XScaleType | YScaleType>(
