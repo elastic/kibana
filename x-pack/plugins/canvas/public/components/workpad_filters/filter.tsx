@@ -15,8 +15,8 @@ interface Props {
 export const Filter: FC<Props> = ({ filter }) => {
   const fields = Object.keys(filter).map((name, index) => (
     <EuiFlexItem key={`fields-${index}`}>
-      <EuiText>
-        <h5>{name}</h5>
+      <EuiText size="m">
+        <strong>{name}</strong>
       </EuiText>
     </EuiFlexItem>
   ));
@@ -31,10 +31,14 @@ export const Filter: FC<Props> = ({ filter }) => {
     <EuiPanel grow={false} hasShadow={false}>
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column">{fields}</EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            {fields}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup direction="column">{values}</EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            {values}
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
