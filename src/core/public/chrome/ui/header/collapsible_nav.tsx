@@ -85,6 +85,14 @@ interface Props {
   button: EuiCollapsibleNavProps['button'];
 }
 
+const overviewIDsToHide = ['kibanaOverview', 'enterpriseSearch'];
+const overviewIDs = [
+  ...overviewIDsToHide,
+  'observability-overview',
+  'securitySolutionUI:overview',
+  'management',
+];
+
 export function CollapsibleNav({
   basePath,
   id,
@@ -99,11 +107,16 @@ export function CollapsibleNav({
   ...observables
 }: Props) {
   const allLinks = useObservable(observables.navLinks$, []);
-  // Filterting out hidden links, overview pages, and integrations link in favor of a specific Add Data button at the bottom
   const allowedLinks = useMemo(
     () =>
       allLinks.filter(
-        (link) => !link.hidden && link.id !== 'integrations' && link.title !== 'Overview'
+        (link) =>
+          // Filterting out hidden links,
+          !link.hidden &&
+          // integrations link in favor of a specific Add Data button at the bottom,
+          link.id !== 'integrations' &&
+          // and non-data overview pages
+          !overviewIDsToHide.includes(link.id)
       ),
     [allLinks]
   );
@@ -114,12 +127,7 @@ export function CollapsibleNav({
   );
   // Find all the overview (landing page) links
   const overviewLinks = useMemo(
-    () => allLinks.filter((link) => link.title === 'Overview'),
-    [allLinks]
-  );
-  // Find all the Stack Management link to use as the Management "overview" page
-  const stackManagmentLink = useMemo(
-    () => allLinks.find((link) => link.id === 'management'),
+    () => allLinks.filter((link) => overviewIDs.includes(link.id)),
     [allLinks]
   );
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
@@ -275,10 +283,7 @@ export function CollapsibleNav({
         {/* Kibana, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;
-          const overviewLink =
-            category.label === 'Management'
-              ? stackManagmentLink
-              : overviewLinks.find((link) => link.category === category);
+          const overviewLink = overviewLinks.find((link) => link.category === category);
 
           return (
             <EuiCollapsibleNavGroup
@@ -286,10 +291,11 @@ export function CollapsibleNav({
               iconType={category.euiIconType}
               iconSize="m"
               buttonElement={overviewLink ? 'div' : 'button'}
+              buttonClassName="kbnCollapsibleNav__solutionGroupButton"
               title={
                 overviewLink ? (
                   <a
-                    className="eui-textInheritColor"
+                    className="eui-textInheritColor kbnCollapsibleNav__solutionGroupLink"
                     {...createOverviewLink({
                       link: overviewLink,
                       navigateToUrl,
