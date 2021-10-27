@@ -41,15 +41,13 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Exports and Spaces', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces'); // multiple spaces with different config settings
+      await reportingAPI.initEcommerce();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces'
-      );
+      await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
     });
 
     describe('CSV saved search export', () => {
@@ -105,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
           jobParams: `(conflictedTypesFields:!(),fields:!(order_date,order_date,customer_full_name,taxful_total_price),indexPatternId:aac3e500-f2c7-11ea-8250-fb138aa491e7,metaFields:!(_source,_id,_type,_index,_score),objectType:search,searchRequest:(body:(_source:(includes:!(order_date,customer_full_name,taxful_total_price)),docvalue_fields:!((field:order_date,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-11T04:49:43.495Z',lte:'2019-07-14T10:25:34.149Z')))),must:!(),must_not:!(),should:!())),script_fields:(),sort:!((order_date:(order:desc,unmapped_type:boolean))),stored_fields:!(order_date,customer_full_name,taxful_total_price),version:!t),index:'ec*'),title:'EC SEARCH')`,
         });
         const csv = await getCompleted$(path).toPromise();
+
         expect(csv).to.match(
           /^"order_date","order_date","customer_full_name","taxful_total_price"\n"Jul 12, 2019 @ 00:00:00.000","Jul 12, 2019 @ 00:00:00.000","Sultan Al Boone","173.96"/
         );

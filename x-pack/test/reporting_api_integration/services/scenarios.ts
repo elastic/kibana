@@ -37,10 +37,12 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
 
   const initEcommerce = async () => {
+    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces'); // multiple spaces with different config settings
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
     await kibanaServer.importExport.load(ecommerceSOPath);
   };
   const teardownEcommerce = async () => {
+    await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces');
     await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
     await kibanaServer.importExport.unload(ecommerceSOPath);
     await deleteAllReports();
@@ -53,10 +55,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     );
   };
   const teardownTestSavedObjects = async () => {
-    await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     await kibanaServer.importExport.unload(
       'x-pack/test/functional/fixtures/kbn_archiver/reporting/consolidated'
     );
+    await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
   };
 
   const createDataAnalystRole = async () => {
