@@ -12,7 +12,7 @@ import {
   ISavedObjectsRepository,
 } from 'kibana/server';
 import chalk from 'chalk';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
