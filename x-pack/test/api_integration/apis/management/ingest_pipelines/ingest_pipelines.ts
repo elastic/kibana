@@ -509,15 +509,15 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(body.processors).to.eql(
-          [{
-            "set": {
-              "field":"source.address",
-              "value":"{{srcip}}",
-              "if":"ctx.srcip != null"
-            }
-          }]
-        );
+        expect(body.processors).to.eql([
+          {
+            set: {
+              field: 'source.address',
+              value: '{{srcip}}',
+              if: 'ctx.srcip != null',
+            },
+          },
+        ]);
       });
     });
   });
