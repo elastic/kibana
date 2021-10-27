@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { find, get } from 'lodash';
 import { catchError, switchMap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
@@ -117,7 +117,7 @@ export const fetchNumericFieldStats = (
   options: ISearchOptions
 ): Observable<NumericFieldStats | FieldStatsError> => {
   const { samplerShardSize } = params;
-  const request: SearchRequest = getNumericFieldStatsRequest(params, field);
+  const request: estypes.SearchRequest = getNumericFieldStatsRequest(params, field);
 
   return data.search
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)

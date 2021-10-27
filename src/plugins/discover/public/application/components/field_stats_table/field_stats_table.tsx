@@ -39,7 +39,7 @@ export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
 }
 
-export interface DiscoverDataVisualizerGridProps {
+export interface FieldStatisticsTableProps {
   /**
    * Determines which columns are displayed
    */
@@ -89,7 +89,7 @@ export interface DiscoverDataVisualizerGridProps {
   savedSearchRefetch$?: DataRefetch$;
 }
 
-export const FieldStatisticsTable = (props: DiscoverDataVisualizerGridProps) => {
+export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
     services,
     indexPattern,

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { FieldVisConfig } from '../../../../../plugins/data_visualizer/public/application/common/components/stats_table/types';
+import type { FieldVisConfig } from '../../../../../plugins/data_visualizer/public/application/common/components/stats_table/types';
 
 export interface MetricFieldVisConfig extends FieldVisConfig {
+  fieldName: string;
   statsMaxDecimalPlaces: number;
   docCountFormatted: string;
   topValuesCount: number;
@@ -16,6 +17,7 @@ export interface MetricFieldVisConfig extends FieldVisConfig {
 }
 
 export interface NonMetricFieldVisConfig extends FieldVisConfig {
+  fieldName: string;
   docCountFormatted: string;
   exampleCount: number;
   exampleContent?: string[];

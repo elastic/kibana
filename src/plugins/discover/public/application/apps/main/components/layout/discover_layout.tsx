@@ -58,7 +58,7 @@ export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
-const DataVisualizerGridMemoized = React.memo(FieldStatisticsTable);
+const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
 export function DiscoverLayout({
   indexPattern,
@@ -327,7 +327,7 @@ export function DiscoverLayout({
                       stateContainer={stateContainer}
                     />
                   ) : (
-                    <DataVisualizerGridMemoized
+                    <FieldStatisticsTableMemoized
                       savedSearch={savedSearch}
                       services={services}
                       indexPattern={indexPattern}

@@ -17,7 +17,7 @@ export function buildBaseFilterCriteria(
   earliestMs?: number,
   latestMs?: number,
   query?: object
-): estypes.QueryDslQueryContainer {
+): estypes.QueryDslQueryContainer[] {
   const filterCriteria = [];
   if (timeFieldName && earliestMs && latestMs) {
     filterCriteria.push({

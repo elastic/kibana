@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import type { SearchRequest } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import {
@@ -68,7 +68,7 @@ export const fetchBooleanFieldStats = (
   options: ISearchOptions
 ): Observable<BooleanFieldStats | FieldStatsError> => {
   const { samplerShardSize } = params;
-  const request: SearchRequest = getBooleanFieldStatsRequest(params, field);
+  const request: estypes.SearchRequest = getBooleanFieldStatsRequest(params, field);
   return data.search
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
     .pipe(

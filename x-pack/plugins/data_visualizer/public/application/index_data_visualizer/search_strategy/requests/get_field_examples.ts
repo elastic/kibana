@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SearchRequest } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
@@ -66,7 +65,7 @@ export const fetchFieldExamples = (
   field: Field,
   options: ISearchOptions
 ): Observable<FieldExamples | FieldStatsError> => {
-  const request: SearchRequest = getFieldExamplesRequest(params, field);
+  const request: estypes.SearchRequest = getFieldExamplesRequest(params, field);
   const { maxExamples } = params;
   return data.search
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)

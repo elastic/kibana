@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AggregationsAggregationContainer, SearchRequest } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
@@ -39,7 +38,7 @@ export const getStringFieldStatsRequest = (params: FieldStatsCommonRequestParams
   const aggs: Aggs = {};
 
   const safeFieldName = field.safeFieldName;
-  const top: AggregationsAggregationContainer = {
+  const top: estypes.AggregationsAggregationContainer = {
     terms: {
       field: field.fieldName,
       size: 10,
@@ -84,7 +83,7 @@ export const fetchStringFieldStats = (
   options: ISearchOptions
 ): Observable<StringFieldStats | FieldStatsError> => {
   const { samplerShardSize } = params;
-  const request: SearchRequest = getStringFieldStatsRequest(params, field);
+  const request: estypes.SearchRequest = getStringFieldStatsRequest(params, field);
 
   return data.search
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)

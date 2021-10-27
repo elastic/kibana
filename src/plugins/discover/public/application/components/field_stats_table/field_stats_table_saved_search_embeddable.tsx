@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { FieldStatisticsTable, DiscoverDataVisualizerGridProps } from './field_stats_table';
+import { FieldStatisticsTable, FieldStatisticsTableProps } from './field_stats_table';
 
-export function FieldStatsTableSavedSearchEmbeddable(renderProps: DiscoverDataVisualizerGridProps) {
+export function FieldStatsTableSavedSearchEmbeddable(renderProps: FieldStatisticsTableProps) {
   return (
     <I18nProvider>
       <FieldStatisticsTable

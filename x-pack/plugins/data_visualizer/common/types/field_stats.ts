@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { AggregationsHistogramAggregation } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '../utils/object_utils';
 import { IKibanaSearchResponse } from '../../../../../src/plugins/data/common';
 import { TimeBucketsInterval } from '../services/time_buckets';
@@ -113,7 +112,7 @@ export interface NumericColumnStats {
 export type NumericColumnStatsMap = Record<string, NumericColumnStats>;
 
 export interface AggHistogram {
-  histogram: AggregationsHistogramAggregation;
+  histogram: estypes.AggregationsHistogramAggregation;
 }
 
 export interface AggTerms {
