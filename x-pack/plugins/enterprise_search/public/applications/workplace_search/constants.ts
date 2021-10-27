@@ -267,6 +267,9 @@ export const SOURCE_OBJ_TYPES = {
       defaultMessage: 'Repository List',
     }
   ),
+  FILES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.files', {
+    defaultMessage: 'Files (markdown only)',
+  }),
   EMAILS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.emails', {
     defaultMessage: 'Emails',
   }),
