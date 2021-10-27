@@ -187,21 +187,20 @@ export default ({ getService }: FtrProviderContext) => {
             const cells = await observability.alerts.common.getTableCells();
             const alertStatusCell = cells[2];
             await alertStatusCell.moveMouseTo();
-            await retry.waitFor(
-              'cell actions visible',
-              async () => await observability.alerts.common.copyToClipboardButtonExists()
-            );
+            await retry.waitFor('cell actions visible', async () => {
+              try {
+                await observability.alerts.common.filterForValueButtonExists();
+                await observability.alerts.common.filterOutValueButtonExists();
+              } catch (_e) {
+                return false;
+              }
+              return true;
+            });
           });
         });
 
         afterEach(async () => {
           await observability.alerts.common.clearQueryBar();
-        });
-
-        it('Copy button works', async () => {
-          // NOTE: We don't have access to the clipboard in a headless environment,
-          // so we'll just check the button is clickable in the functional tests.
-          await (await observability.alerts.common.getCopyToClipboardButton()).click();
         });
 
         it('Filter for value works', async () => {
@@ -214,6 +213,19 @@ export default ({ getService }: FtrProviderContext) => {
           await retry.try(async () => {
             const cells = await observability.alerts.common.getTableCells();
             expect(cells.length).to.be(ACTIVE_ALERTS_CELL_COUNT);
+          });
+        });
+
+        it('Filter out value works', async () => {
+          await (await observability.alerts.common.getFilterOutValueButton()).click();
+          const queryBarValue = await (
+            await observability.alerts.common.getQueryBar()
+          ).getAttribute('value');
+          expect(queryBarValue).to.be('not kibana.alert.status: "active"');
+          // Wait for request
+          await retry.try(async () => {
+            const cells = await observability.alerts.common.getTableCells();
+            expect(cells.length).to.be(RECOVERED_ALERTS_CELL_COUNT);
           });
         });
       });

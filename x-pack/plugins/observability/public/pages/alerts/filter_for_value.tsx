@@ -43,12 +43,13 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
     }, [text, addToQuery]);
     const label = exclude ? filterOutValueButtonLabel : filterInValueButtonLabel;
     const iconType = exclude ? 'minusInCircle' : 'plusInCircle';
+    const testSubj = exclude ? 'filter-out-value' : 'filter-for-value';
     const button = useMemo(
       () =>
         Component ? (
           <Component
             aria-label={label}
-            data-test-subj="filter-for-value"
+            data-test-subj={testSubj}
             iconType={iconType}
             onClick={onClick}
             title={label}
@@ -59,13 +60,13 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
           <EuiButtonIcon
             aria-label={label}
             className="timelines__hoverActionButton"
-            data-test-subj="filter-for-value"
+            data-test-subj={testSubj}
             iconSize="s"
             iconType={iconType}
             onClick={onClick}
           />
         ),
-      [Component, onClick, label, iconType]
+      [Component, onClick, label, iconType, testSubj]
     );
     return button;
   }

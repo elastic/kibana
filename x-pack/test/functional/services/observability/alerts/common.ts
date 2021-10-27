@@ -16,7 +16,8 @@ const DATE_WITH_DATA = {
 };
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
-const COPY_TO_CLIPBOARD_BUTTON_SELECTOR = 'copy-to-clipboard';
+const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filter-for-value';
+const FILTER_OUT_VALUE_BUTTON_SELECTOR = 'filter-out-value';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const ACTION_COLUMN_INDEX = 1;
 
@@ -149,16 +150,20 @@ export function ObservabilityAlertsCommonProvider({
 
   // Cell actions
 
-  const copyToClipboardButtonExists = async () => {
-    return await testSubjects.exists(COPY_TO_CLIPBOARD_BUTTON_SELECTOR);
+  const filterForValueButtonExists = async () => {
+    return await testSubjects.exists(FILTER_FOR_VALUE_BUTTON_SELECTOR);
   };
 
-  const getCopyToClipboardButton = async () => {
-    return await testSubjects.find(COPY_TO_CLIPBOARD_BUTTON_SELECTOR);
+  const filterOutValueButtonExists = async () => {
+    return await testSubjects.exists(FILTER_OUT_VALUE_BUTTON_SELECTOR);
   };
 
   const getFilterForValueButton = async () => {
-    return await testSubjects.find('filter-for-value');
+    return await testSubjects.find(FILTER_FOR_VALUE_BUTTON_SELECTOR);
+  };
+
+  const getFilterOutValueButton = async () => {
+    return await testSubjects.find(FILTER_OUT_VALUE_BUTTON_SELECTOR);
   };
 
   const openActionsMenuForRow = async (rowIndex: number) => {
@@ -216,15 +221,16 @@ export function ObservabilityAlertsCommonProvider({
     getQueryBar,
     clearQueryBar,
     closeAlertsFlyout,
+    filterForValueButtonExists,
+    filterOutValueButtonExists,
     getAlertsFlyout,
     getAlertsFlyoutDescriptionListDescriptions,
     getAlertsFlyoutDescriptionListTitles,
     getAlertsFlyoutOrFail,
     getAlertsFlyoutTitle,
     getAlertsFlyoutViewInAppButtonOrFail,
-    getCopyToClipboardButton,
     getFilterForValueButton,
-    copyToClipboardButtonExists,
+    getFilterOutValueButton,
     getNoDataPageOrFail,
     getNoDataStateOrFail,
     getTableCells,
