@@ -7,15 +7,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import _ from 'lodash';
-import { IRouter } from 'src/core/server';
+import type { IRouter, Logger } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import { SampleDataUsageTracker } from '../usage/usage';
+import { findSampleObjects } from '../lib/find_sample_objects';
+import { getUniqueObjectTypes } from '../lib/utils';
+import { getSavedObjectsClient } from './utils';
 
 export function createUninstallRoute(
   router: IRouter,
   sampleDatasets: SampleDatasetSchema[],
+  logger: Logger,
   usageTracker: SampleDataUsageTracker
 ): void {
   router.delete(
@@ -25,16 +28,7 @@ export function createUninstallRoute(
         params: schema.object({ id: schema.string() }),
       },
     },
-    async (
-      {
-        core: {
-          elasticsearch: { client: esClient },
-          savedObjects: { getClient: getSavedObjectsClient, typeRegistry },
-        },
-      },
-      request,
-      response
-    ) => {
+    async (context, request, response) => {
       const sampleDataset = sampleDatasets.find(({ id }) => id === request.params.id);
 
       if (!sampleDataset) {
@@ -46,7 +40,7 @@ export function createUninstallRoute(
         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
 
         try {
-          await esClient.asCurrentUser.indices.delete({
+          await context.core.elasticsearch.client.asCurrentUser.indices.delete({
             index,
           });
         } catch (err) {
@@ -59,28 +53,25 @@ export function createUninstallRoute(
         }
       }
 
-      const includedHiddenTypes = sampleDataset.savedObjects
-        .map((object) => object.type)
-        .filter((supportedType) => typeRegistry.isHidden(supportedType));
+      const objects = sampleDataset.savedObjects.map(({ type, id }) => ({ type, id }));
+      const objectTypes = getUniqueObjectTypes(objects);
+      const client = getSavedObjectsClient(context, objectTypes);
+      const findSampleObjectsResult = await findSampleObjects({ client, logger, objects });
 
-      const savedObjectsClient = getSavedObjectsClient({ includedHiddenTypes });
-
-      const deletePromises = sampleDataset.savedObjects.map(({ type, id }) =>
-        savedObjectsClient.delete(type, id)
+      const objectsToDelete = findSampleObjectsResult.filter(({ foundObjectId }) => foundObjectId);
+      const deletePromises = objectsToDelete.map(({ type, foundObjectId }) =>
+        client.delete(type, foundObjectId!)
       );
 
       try {
         await Promise.all(deletePromises);
       } catch (err) {
-        // ignore 404s since users could have deleted some of the saved objects via the UI
-        if (_.get(err, 'output.statusCode') !== 404) {
-          return response.customError({
-            statusCode: err.status,
-            body: {
-              message: `Unable to delete sample dataset saved objects, error: ${err.message}`,
-            },
-          });
-        }
+        return response.customError({
+          statusCode: err.status,
+          body: {
+            message: `Unable to delete sample dataset saved objects, error: ${err.message}`,
+          },
+        });
       }
 
       // track the usage operation in a non-blocking way
