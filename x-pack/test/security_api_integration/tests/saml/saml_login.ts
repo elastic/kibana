@@ -568,7 +568,7 @@ export default function ({ getService }: FtrProviderContext) {
           body: { query: { match: { doc_type: 'token' } } },
           refresh: true,
         });
-        expect(esResponse.body).to.have.property('deleted').greaterThan(0);
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
       });
 
       it('should redirect user to a page that would capture URL fragment', async () => {
@@ -650,7 +650,7 @@ export default function ({ getService }: FtrProviderContext) {
               body: { query: { match: { doc_type: 'token' } } },
               refresh: true,
             });
-            expect(esResponse.body).to.have.property('deleted').greaterThan(0);
+            expect(esResponse).to.have.property('deleted').greaterThan(0);
           },
         ],
       ];

@@ -22,7 +22,7 @@ const actionConnector: ServiceNowActionConnector = {
   name: 'servicenow',
   config: {
     apiUrl: 'https://test/',
-    isLegacy: true,
+    usesTableApi: true,
   },
 };
 

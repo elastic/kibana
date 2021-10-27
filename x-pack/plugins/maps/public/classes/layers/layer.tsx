@@ -63,13 +63,18 @@ export interface ILayer {
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
   isLoadingBounds(): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
+
+  /*
+   * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
+   */
   getMbLayerIds(): string[];
+
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
@@ -77,7 +82,7 @@ export interface ILayer {
   isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getType(): LAYER_TYPE | undefined;
+  getType(): LAYER_TYPE;
   isVisible(): boolean;
   cloneDescriptor(): Promise<LayerDescriptor>;
   renderStyleEditor(
@@ -325,9 +330,8 @@ export class AbstractLayer implements ILayer {
     return await source.getImmutableProperties();
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
-    const source = this.getSourceForEditing();
-    return source.renderSourceSettingsEditor({ onChange, currentLayerType: this._descriptor.type });
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
+    return this.getSourceForEditing().renderSourceSettingsEditor(sourceEditorArgs);
   }
 
   getPrevRequestToken(dataId: string): symbol | undefined {
@@ -437,7 +441,7 @@ export class AbstractLayer implements ILayer {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
-  getType(): LAYER_TYPE | undefined {
+  getType(): LAYER_TYPE {
     return this._descriptor.type as LAYER_TYPE;
   }
 

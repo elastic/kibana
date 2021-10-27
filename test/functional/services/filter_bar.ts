@@ -199,5 +199,6 @@ export class FilterBarService extends FtrService {
   public async selectIndexPattern(indexPatternTitle: string): Promise<void> {
     await this.testSubjects.click('addFilter');
     await this.comboBox.set('filterIndexPatternsSelect', indexPatternTitle);
+    await this.testSubjects.click('addFilter');
   }
 }

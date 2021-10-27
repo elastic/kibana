@@ -13,8 +13,9 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
   EuiSpacer,
+  EuiLink,
+  EuiHealth,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,7 +31,6 @@ import { getEndpointDetailsPath } from '../../../../common/routing';
 import { EndpointPolicyLink } from '../components/endpoint_policy_link';
 import { OutOfDate } from '../components/out_of_date';
 import { EndpointAgentStatus } from '../components/endpoint_agent_status';
-import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -53,9 +53,8 @@ export const EndpointDetailsContent = memo(
     const policyStatus = useEndpointSelector(
       policyResponseStatus
     ) as keyof typeof POLICY_STATUS_TO_BADGE_COLOR;
-    const { getAppUrl } = useAppUrl();
 
-    const [policyResponseUri, policyResponseRoutePath] = useMemo(() => {
+    const policyResponseRoutePath = useMemo(() => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { selected_endpoint, show, ...currentUrlParams } = queryParams;
       const path = getEndpointDetailsPath({
@@ -63,8 +62,8 @@ export const EndpointDetailsContent = memo(
         ...currentUrlParams,
         selected_endpoint: details.agent.id,
       });
-      return [getAppUrl({ path }), path];
-    }, [details.agent.id, getAppUrl, queryParams]);
+      return path;
+    }, [details.agent.id, queryParams]);
 
     const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
@@ -142,26 +141,20 @@ export const EndpointDetailsContent = memo(
             defaultMessage: 'Policy Status',
           }),
           description: (
-            // https://github.com/elastic/eui/issues/4530
-            // @ts-ignore
-            <EuiBadge
+            <EuiHealth
+              data-test-subj={`policyStatusValue-${policyStatus}`}
               color={POLICY_STATUS_TO_BADGE_COLOR[policyStatus] || 'default'}
-              data-test-subj="policyStatusValue"
-              href={policyResponseUri}
-              onClick={policyStatusClickHandler}
-              onClickAriaLabel={i18n.translate(
-                'xpack.securitySolution.endpoint.details.policyStatus',
-                { defaultMessage: 'Policy Status' }
-              )}
             >
-              <EuiText size="m">
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.details.policyStatusValue"
-                  defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
-                  values={{ policyStatus }}
-                />
-              </EuiText>
-            </EuiBadge>
+              <EuiLink onClick={policyStatusClickHandler} data-test-subj="policyStatusValue">
+                <EuiText size="m">
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.details.policyStatusValue"
+                    defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
+                    values={{ policyStatus }}
+                  />
+                </EuiText>
+              </EuiLink>
+            </EuiHealth>
           ),
         },
         {
@@ -185,14 +178,7 @@ export const EndpointDetailsContent = memo(
           ),
         },
       ];
-    }, [
-      details,
-      hostStatus,
-      policyResponseUri,
-      policyStatus,
-      policyStatusClickHandler,
-      policyInfo,
-    ]);
+    }, [details, hostStatus, policyStatus, policyStatusClickHandler, policyInfo]);
 
     return (
       <>

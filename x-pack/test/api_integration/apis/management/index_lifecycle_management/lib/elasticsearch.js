@@ -22,7 +22,7 @@ export const initElasticsearchHelpers = (getService) => {
   let dataStreamsCreated = [];
 
   // Indices
-  const getIndex = (index) => es.indices.get({ index }).then(({ body }) => body);
+  const getIndex = (index) => es.indices.get({ index });
 
   const createIndex = (index = getRandomString()) => {
     indicesCreated.push(index);
@@ -37,34 +37,34 @@ export const initElasticsearchHelpers = (getService) => {
   // Data streams
   const createDataStream = (dataStream = getRandomString(), document) => {
     dataStreamsCreated.push(dataStream);
-    return es.index({ index: dataStream, body: document });
+    return es.index({ index: dataStream, body: document }, { meta: true });
   };
 
   const deleteDataStream = (dataStream) => {
     dataStreamsCreated = dataStreamsCreated.filter((i) => i !== dataStream);
-    return es.indices.deleteDataStream({ name: dataStream });
+    return es.indices.deleteDataStream({ name: dataStream }, { meta: true });
   };
 
   const deleteAllDataStreams = () =>
     Promise.all(dataStreamsCreated.map(deleteDataStream)).then(() => (dataStreamsCreated = []));
 
   // Index templates
-  const getIndexTemplates = () => es.indices.getTemplate();
+  const getIndexTemplates = () => es.indices.getTemplate(undefined, { meta: true });
 
   // Create index template if it does not already exist
   const createIndexTemplate = (name, template) => {
     templatesCreated.push(name);
-    return es.indices.putTemplate({ name, body: template }, { create: true });
+    return es.indices.putTemplate({ name, body: template }, { create: true, meta: true });
   };
 
   const createComposableIndexTemplate = (name, template) => {
     composableTemplatesCreated.push(name);
-    return es.indices.putIndexTemplate({ name, body: template }, { create: true });
+    return es.indices.putIndexTemplate({ name, body: template }, { create: true, meta: true });
   };
 
   const deleteIndexTemplate = (name) => {
     templatesCreated = templatesCreated.filter((i) => i !== name);
-    return es.indices.deleteTemplate({ name }).catch((err) => {
+    return es.indices.deleteTemplate({ name }, { meta: true }).catch((err) => {
       // Silently fail templates not found
       if (err.statusCode !== 404) {
         throw err;
@@ -74,7 +74,7 @@ export const initElasticsearchHelpers = (getService) => {
 
   const deleteComposableIndexTemplate = (name) => {
     composableTemplatesCreated = composableTemplatesCreated.filter((i) => i !== name);
-    return es.indices.deleteIndexTemplate({ name }).catch((err) => {
+    return es.indices.deleteIndexTemplate({ name }, { meta: true }).catch((err) => {
       // Silently fail if templates not found
       if (err.statusCode !== 404) {
         throw err;
@@ -98,7 +98,7 @@ export const initElasticsearchHelpers = (getService) => {
       deleteAllDataStreams(),
     ]);
 
-  const getNodesStats = () => es.nodes.stats().then(({ body }) => body);
+  const getNodesStats = () => es.nodes.stats();
 
   return {
     getIndex,
