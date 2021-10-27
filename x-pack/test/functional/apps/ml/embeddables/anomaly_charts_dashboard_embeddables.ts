@@ -42,6 +42,7 @@ const testDataList = [
     panelTitle: `ML anomaly charts for ${JOB_CONFIG.job_id}`,
     jobConfig: JOB_CONFIG,
     datafeedConfig: DATAFEED_CONFIG,
+    dashboardTitle: `ML anomaly charts for fq_multi_1_ae ${Date.now()}`,
     expected: {
       influencers: [
         {
@@ -59,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
 
-  describe('anomaly charts', function () {
+  describe('anomaly charts in dashboard', function () {
     this.tags(['mlqa']);
 
     before(async () => {
@@ -67,6 +68,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
+    });
+
+    after(async () => {
+      await ml.api.cleanMlIndices();
     });
 
     for (const testData of testDataList) {
@@ -79,12 +84,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.common.navigateToApp('dashboard');
         });
 
-        after(async () => {
-          await ml.api.cleanMlIndices();
-        });
-
         it('can open job selection flyout', async () => {
-          await PageObjects.dashboard.clickCreateDashboardPrompt();
+          await PageObjects.dashboard.clickNewDashboard();
           await ml.dashboardEmbeddables.assertDashboardIsEmpty();
           await ml.dashboardEmbeddables.openJobSelectionFlyout();
         });
@@ -109,8 +110,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.timePicker.pauseAutoRefresh();
           await ml.dashboardEmbeddables.assertAnomalyChartsSeverityThresholdControlExists();
           await ml.dashboardEmbeddables.assertAnomalyChartsExists();
+          await PageObjects.dashboard.saveDashboard(testData.dashboardTitle);
         });
       });
     }
+
+    describe('supports migrations', function () {
+      const panelTitle = `Saved ML anomaly charts for fq_multi_1_ae`;
+      const dashboardSavedObject = {
+        attributes: {
+          title: `ML anomaly charts 7.15 dashboard ${Date.now()}`,
+          description: '',
+          panelsJSON: `[{"version":"7.15.2","type":"ml_anomaly_charts","gridData":{"x":0,"y":0,"w":36,"h":20,"i":"ffcdb1ed-0079-41ee-8dda-3f6c138182ab"},"panelIndex":"ffcdb1ed-0079-41ee-8dda-3f6c138182ab","embeddableConfig":{"jobIds":["fq_multi_1_ae"],"maxSeriesToPlot":6,"severityThreshold":0,"enhancements":{}},"title":"${panelTitle}"}]`,
+          optionsJSON: '{"useMargins":true,"syncColors":false,"hidePanelTitles":false}',
+          timeRestore: true,
+          timeTo: '2016-02-11T00:00:00.000Z',
+          timeFrom: '2016-02-07T00:00:00.000Z',
+          refreshInterval: {
+            pause: true,
+            value: 0,
+          },
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+          },
+        },
+        coreMigrationVersion: '7.15.2',
+      };
+
+      before(async () => {
+        await ml.testResources.createDashboardSavedObject(
+          dashboardSavedObject.attributes.title,
+          dashboardSavedObject
+        );
+        await PageObjects.common.navigateToApp('dashboard');
+      });
+
+      it('loads saved dashboard from version 7.15', async () => {
+        await PageObjects.dashboard.loadSavedDashboard(dashboardSavedObject.attributes.title);
+        await ml.dashboardEmbeddables.assertDashboardPanelExists(panelTitle);
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Feb 7, 2016 @ 00:00:00.000',
+          'Feb 11, 2016 @ 00:00:00.000'
+        );
+        await PageObjects.timePicker.pauseAutoRefresh();
+        await ml.dashboardEmbeddables.assertAnomalyChartsSeverityThresholdControlExists();
+        await ml.dashboardEmbeddables.assertAnomalyChartsExists();
+      });
+    });
   });
 }

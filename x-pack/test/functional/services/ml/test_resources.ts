@@ -128,6 +128,19 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       return createResponse.id;
     },
 
+    async createDashboardSavedObject(title: string, body: object): Promise<string> {
+      log.debug(`Creating dashboard with title '${title}'`);
+
+      const createResponse = await supertest
+        .post(`/api/saved_objects/${SavedObjectType.DASHBOARD}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(body)
+        .then((res: any) => res.body);
+
+      log.debug(` > Created with id '${createResponse.id}'`);
+      return createResponse.id;
+    },
+
     async createIndexPatternIfNeeded(title: string, timeFieldName?: string): Promise<string> {
       const indexPatternId = await this.getIndexPatternId(title);
       if (indexPatternId !== undefined) {
