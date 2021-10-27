@@ -1062,20 +1062,21 @@ describe('AlertingAuthorization', () => {
         getSpaceId,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-      const { ensureRuleTypeIsAuthorized, logSuccessfulAuthorization } =
-        await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
+      const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Rule,
+        {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
             ruleTypeId: 'ruleId',
             consumer: 'consumer',
           },
-        });
+        }
+      );
       expect(() => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
         ensureRuleTypeIsAuthorized('mySecondAppAlertType', 'myOtherApp', 'rule');
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
       }).not.toThrow();
-      logSuccessfulAuthorization();
     });
 
     // This is a specific use case currently for alerts as data

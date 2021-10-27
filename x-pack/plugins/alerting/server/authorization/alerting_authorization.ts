@@ -245,7 +245,6 @@ export class AlertingAuthorization {
   ): Promise<{
     filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
-    logSuccessfulAuthorization: () => void;
   }> {
     return this.getAuthorizationFilter(authorizationEntity, filterOpts, ReadOperations.Find);
   }
@@ -257,7 +256,6 @@ export class AlertingAuthorization {
   ): Promise<{
     filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
-    logSuccessfulAuthorization: () => void;
   }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
       const { authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
@@ -305,14 +303,12 @@ export class AlertingAuthorization {
             }
           }
         },
-        logSuccessfulAuthorization: () => {}, // TODO: Do we really want to not log this?
       };
     }
 
     return {
       filter: asFiltersBySpaceId(filterOpts, this.spaceId) as JsonObject,
       ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {},
-      logSuccessfulAuthorization: () => {},
     };
   }
 
