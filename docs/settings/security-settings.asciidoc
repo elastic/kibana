@@ -357,10 +357,10 @@ xpack.security.audit.appender.type: rolling-file
 ----------------------------------------
 ============
 
-| `xpack.security.audit.appender` {ess-icon}
+| `xpack.security.audit.appender`
 | Optional. Specifies where audit logs should be written to and how they should be formatted. If no appender is specified, a default appender will be used (see above).
 
-| `xpack.security.audit.appender.type` {ess-icon}
+| `xpack.security.audit.appender.type`
 | Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, or `rolling-file`. 
 
 Refer to <<audit-logging-file-appender>> and <<audit-logging-rolling-file-appender>> for appender specific settings.
