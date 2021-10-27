@@ -22,7 +22,7 @@ interface TIIntegrationStatus {
 }
 
 export const useTiIntegrations = () => {
-  const [TIIntegrationsStatus, setTIIntegrationsStatus] = useState<TIIntegrationStatus | null>(
+  const [tiIntegrationsStatus, setTiIntegrationsStatus] = useState<TIIntegrationStatus | null>(
     null
   );
 
@@ -46,7 +46,7 @@ export const useTiIntegrations = () => {
           (integration: Integration) => integration.status !== installationStatuses.Installed
         );
 
-        setTIIntegrationsStatus({
+        setTiIntegrationsStatus({
           isSomeIntegrationsDisabled,
           isSomeIntegrationsInstalled: installedIntegrations.length > 0,
           installedIntegrationIds: installedIntegrations.map(
@@ -54,7 +54,7 @@ export const useTiIntegrations = () => {
           ),
         });
       } catch (e) {
-        setTIIntegrationsStatus({
+        setTiIntegrationsStatus({
           isSomeIntegrationsInstalled: undefined,
           isSomeIntegrationsDisabled: undefined,
           installedIntegrationIds: [],
@@ -65,5 +65,5 @@ export const useTiIntegrations = () => {
     getPackages();
   }, []);
 
-  return TIIntegrationsStatus;
+  return tiIntegrationsStatus;
 };
