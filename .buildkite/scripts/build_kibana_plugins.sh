@@ -3,7 +3,7 @@
 set -euo pipefail
 
 echo "--- Build Platform Plugins"
-node scripts/build_kibana_platform_plugins \
+node scripts/build_kibana_platform_plugins --dist \
   --scan-dir "$KIBANA_DIR/test/plugin_functional/plugins" \
   --scan-dir "$KIBANA_DIR/test/interpreter_functional/plugins" \
   --scan-dir "$KIBANA_DIR/test/common/fixtures/plugins" \
