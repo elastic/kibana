@@ -84,9 +84,13 @@ export const useDataVisualizerGridData = (
       savedSearch: currentSavedSearch,
       query: currentQuery,
       filters: currentFilters,
+      filterManager: data.query.filterManager,
     });
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
+      if (dataVisualizerListState.filters) {
+        data.query.filterManager.setFilters(dataVisualizerListState.filters);
+      }
       return {
         searchQuery: dataVisualizerListState.searchQuery,
         searchString: dataVisualizerListState.searchString,
