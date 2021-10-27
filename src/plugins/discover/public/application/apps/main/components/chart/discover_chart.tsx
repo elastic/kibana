@@ -115,7 +115,6 @@ export function DiscoverChart({
               onResetQuery={resetSavedSearch}
             />
           </EuiFlexItem>
-
           {showViewModeToggle && (
             <EuiFlexItem grow={false}>
               <DocumentViewModeToggle
@@ -124,7 +123,6 @@ export function DiscoverChart({
               />
             </EuiFlexItem>
           )}
-
           {timefield && (
             <EuiFlexItem className="dscResultCount__toggle" grow={false}>
               <EuiPopover
