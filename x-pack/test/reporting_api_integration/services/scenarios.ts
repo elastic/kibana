@@ -132,7 +132,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
-  const generateCsv = async (job: JobParamsCSV, username = 'elastic', password = 'changeme') => {
+  const generateCsv = async (
+    job: JobParamsCSV,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS
+  ) => {
     const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/csv_searchsource`)
