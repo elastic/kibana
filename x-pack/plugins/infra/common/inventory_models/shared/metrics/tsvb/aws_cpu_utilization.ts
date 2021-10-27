@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-export const awsCpuUtilization: TSVBMetricModelCreator = (indexPattern): TSVBMetricModel => ({
+export const awsCpuUtilization: TSVBMetricModelCreator = (
+  timeField,
+  indexPattern
+): TSVBMetricModel => ({
   id: 'awsCpuUtilization',
   requires: ['aws.ec2'],
   map_field_to: 'cloud.instance.id',
   id_type: 'cloud',
   index_pattern: indexPattern,
   interval: '>=5m',
-  time_field: TIMESTAMP_FIELD,
+  time_field: timeField,
   type: 'timeseries',
   series: [
     {

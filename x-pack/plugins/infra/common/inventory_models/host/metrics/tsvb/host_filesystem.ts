@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
 export const hostFilesystem: TSVBMetricModelCreator = (
+  timeField,
   indexPattern,
   interval
 ): TSVBMetricModel => ({
@@ -16,7 +16,7 @@ export const hostFilesystem: TSVBMetricModelCreator = (
   requires: ['system.filesystem'],
   filter: 'system.filesystem.device_name:\\/*',
   index_pattern: indexPattern,
-  time_field: TIMESTAMP_FIELD,
+  time_field: timeField,
   interval,
   type: 'timeseries',
   series: [

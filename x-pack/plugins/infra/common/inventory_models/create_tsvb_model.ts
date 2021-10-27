@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD } from '../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel, TSVBSeries, InventoryMetric } from './types';
 
 export const createTSVBModel =
@@ -16,13 +15,13 @@ export const createTSVBModel =
     interval = '>=300s',
     dropLastBucket = true
   ): TSVBMetricModelCreator =>
-  (indexPattern): TSVBMetricModel => ({
+  (timeField, indexPattern): TSVBMetricModel => ({
     id,
     requires,
     drop_last_bucket: dropLastBucket,
     index_pattern: indexPattern,
     interval,
-    time_field: TIMESTAMP_FIELD,
+    time_field: timeField,
     type: 'timeseries',
     series,
   });

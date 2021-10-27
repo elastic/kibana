@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD } from '../../../../constants';
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
 export const hostDockerOverview: TSVBMetricModelCreator = (
+  timeField,
   indexPattern,
   interval
 ): TSVBMetricModel => ({
@@ -16,7 +16,7 @@ export const hostDockerOverview: TSVBMetricModelCreator = (
   requires: ['docker.info'],
   index_pattern: indexPattern,
   interval,
-  time_field: TIMESTAMP_FIELD,
+  time_field: timeField,
   type: 'top_n',
   series: [
     {

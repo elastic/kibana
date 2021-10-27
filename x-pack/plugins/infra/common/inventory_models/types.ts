@@ -220,6 +220,7 @@ export const TSVBMetricModelRT = rt.intersection([
 export type TSVBMetricModel = rt.TypeOf<typeof TSVBMetricModelRT>;
 
 export type TSVBMetricModelCreator = (
+  timeField: string,
   indexPattern: string | string[],
   interval: string
 ) => TSVBMetricModel;

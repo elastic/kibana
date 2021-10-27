@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { flatten, get } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
@@ -122,7 +123,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       max: options.timerange.to,
     };
 
-    const model = createTSVBModel(indexPattern, options.timerange.interval);
+    const model = createTSVBModel(TIMESTAMP_FIELD, indexPattern, options.timerange.interval);
 
     const client = <Hit = {}, Aggregation = undefined>(
       opts: CallWithRequestParams
