@@ -139,6 +139,7 @@ describe('pollEsNodesVersion', () => {
   });
 
   const nodeInfosSuccessOnce = (infos: NodesInfo) => {
+    // @ts-expect-error not full interface
     internalClient.nodes.info.mockImplementationOnce(() => createEsSuccess(infos));
   };
   const nodeInfosErrorOnce = (error: any) => {
