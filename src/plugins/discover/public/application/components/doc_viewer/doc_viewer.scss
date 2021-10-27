@@ -53,6 +53,31 @@
   align-items: flex-start;
 }
 
+@media only screen and (min-width: 1024px) {
+  .kbnDocViewer__table {
+    table {
+      table-layout: auto;
+    }
+  }
+
+  .kbnDocViewer__tableRow {
+    td:nth-of-type(1) {
+      max-width: 10%;
+      min-width: unset !important;
+    }
+
+    td:nth-of-type(2) {
+      max-width: 30%;
+      min-width: unset !important;
+    }
+
+    td:nth-of-type(3) {
+      max-width: 70%;
+      min-width: unset !important;
+    }
+  }
+}
+
 .kbnDocViewer__value {
   word-break: break-all;
   word-wrap: break-word;
