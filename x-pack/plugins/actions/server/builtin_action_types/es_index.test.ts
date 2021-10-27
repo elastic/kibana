@@ -8,7 +8,7 @@
 jest.mock('./lib/send_email', () => ({
   sendEmail: jest.fn(),
 }));
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { validateConfig, validateParams } from '../lib';
 import { createActionTypeRegistry } from './index.test';
 import { actionsMock } from '../mocks';
@@ -216,10 +216,12 @@ describe('execute()', () => {
     });
 
     const calls = scopedClusterClient.bulk.mock.calls;
-    const timeValue = ((calls[0][0]?.body as unknown[])[1] as Record<string, unknown>)
-      .field_to_use_for_time;
+    const timeValue = (
+      ((calls[0][0] as estypes.BulkRequest)?.body as unknown[])[1] as Record<string, unknown>
+    ).field_to_use_for_time;
     expect(timeValue).toBeInstanceOf(Date);
-    delete ((calls[0][0]?.body as unknown[])[1] as Record<string, unknown>).field_to_use_for_time;
+    delete (((calls[0][0] as estypes.BulkRequest)?.body as unknown[])[1] as Record<string, unknown>)
+      .field_to_use_for_time;
     expect(calls).toMatchInlineSnapshot(`
         Array [
           Array [
