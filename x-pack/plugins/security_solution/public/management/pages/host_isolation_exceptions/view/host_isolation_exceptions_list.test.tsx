@@ -94,10 +94,13 @@ describe('When on the host isolation exceptions page', () => {
         expect(renderResult.container.querySelector('.euiProgress')).toBeNull();
       });
 
-      it('should display the search bar', async () => {
+      it('should display the search bar and item count', async () => {
         render();
         await dataReceived();
         expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
+        expect(renderResult.getByTestId('hostIsolationExceptions-totalCount').textContent).toBe(
+          'Showing 1 exception'
+        );
       });
 
       it('should show items on the list', async () => {
@@ -135,7 +138,7 @@ describe('When on the host isolation exceptions page', () => {
         render();
         await dataReceived();
         act(() => {
-          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsEmptyStateAddButton'));
+          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
         });
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
