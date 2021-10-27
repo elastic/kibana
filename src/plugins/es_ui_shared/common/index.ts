@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { Privileges, MissingPrivileges } from '../__packages_do_not_import__/authorization';
+export { Privileges, MissingPrivileges } from '../__packages_do_not_import__/authorization/types';

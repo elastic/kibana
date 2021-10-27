@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+
 import { SavedObjectsFindResponse, SavedObjectsFindResult } from 'kibana/server';
+
 import { ActionResult } from '../../../../../../actions/server';
-import { SignalSearchResponse } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -34,12 +38,11 @@ import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/det
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { Alert } from '../../../../../../alerting/common';
+import { SanitizedAlert, ResolvedSanitizedRule } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { FindBulkExecutionLogResponse } from '../../rule_execution_log/types';
-import { ruleTypeMappings } from '../../signals/utils';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleNotificationAlertType } from '../../notifications/legacy_types';
 
@@ -59,7 +62,7 @@ export const typicalSignalsQuery = (): QuerySignalsSchemaDecoded => ({
 });
 
 export const typicalSignalsQueryAggs = (): QuerySignalsSchemaDecoded => ({
-  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
+  aggs: { statuses: { terms: { field: ALERT_WORKFLOW_STATUS, size: 10 } } },
 });
 
 export const setStatusSignalMissingIdsAndQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
@@ -85,6 +88,13 @@ export const getReadRequest = () =>
     method: 'get',
     path: DETECTION_ENGINE_RULES_URL,
     query: { rule_id: 'rule-1' },
+  });
+
+export const getReadRequestWithId = (id: string) =>
+  requestMock.create({
+    method: 'get',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { id },
   });
 
 export const getFindRequest = () =>
@@ -362,7 +372,7 @@ export const nonRuleAlert = (isRuleRegistryEnabled: boolean) => ({
 export const getAlertMock = <T extends RuleParams>(
   isRuleRegistryEnabled: boolean,
   params: T
-): Alert<T> => ({
+): SanitizedAlert<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
@@ -378,7 +388,6 @@ export const getAlertMock = <T extends RuleParams>(
   notifyWhen: null,
   createdBy: 'elastic',
   updatedBy: 'elastic',
-  apiKey: null,
   apiKeyOwner: 'elastic',
   muteAll: false,
   mutedInstanceIds: [],
@@ -387,6 +396,14 @@ export const getAlertMock = <T extends RuleParams>(
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+});
+
+export const resolveAlertMock = <T extends RuleParams>(
+  isRuleRegistryEnabled: boolean,
+  params: T
+): ResolvedSanitizedRule<T> => ({
+  outcome: 'exactMatch',
+  ...getAlertMock(isRuleRegistryEnabled, params),
 });
 
 export const updateActionResult = (): ActionResult => ({
@@ -465,7 +482,6 @@ export const getRuleExecutionStatuses = (): Array<
     type: 'my-type',
     id: 'e0b86950-4e9f-11ea-bdbd-07b56aa159b3',
     attributes: {
-      alertId: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
       statusDate: '2020-02-18T15:26:49.783Z',
       status: RuleExecutionStatus.succeeded,
       lastFailureAt: undefined,
@@ -478,7 +494,13 @@ export const getRuleExecutionStatuses = (): Array<
       bulkCreateTimeDurations: ['800.43'],
     },
     score: 1,
-    references: [],
+    references: [
+      {
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
+        type: 'alert',
+        name: 'alert_0',
+      },
+    ],
     updated_at: '2020-02-18T15:26:51.333Z',
     version: 'WzQ2LDFd',
   },
@@ -486,7 +508,6 @@ export const getRuleExecutionStatuses = (): Array<
     type: 'my-type',
     id: '91246bd0-5261-11ea-9650-33b954270f67',
     attributes: {
-      alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
       statusDate: '2020-02-18T15:15:58.806Z',
       status: RuleExecutionStatus.failed,
       lastFailureAt: '2020-02-18T15:15:58.806Z',
@@ -500,7 +521,13 @@ export const getRuleExecutionStatuses = (): Array<
       bulkCreateTimeDurations: ['800.43'],
     },
     score: 1,
-    references: [],
+    references: [
+      {
+        id: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
+        type: 'alert',
+        name: 'alert_0',
+      },
+    ],
     updated_at: '2020-02-18T15:15:58.860Z',
     version: 'WzMyLDFd',
   },
@@ -509,7 +536,6 @@ export const getRuleExecutionStatuses = (): Array<
 export const getFindBulkResultStatus = (): FindBulkExecutionLogResponse => ({
   '04128c15-0d1b-4716-a4c5-46997ac7f3bd': [
     {
-      alertId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       statusDate: '2020-02-18T15:26:49.783Z',
       status: RuleExecutionStatus.succeeded,
       lastFailureAt: undefined,
@@ -524,7 +550,6 @@ export const getFindBulkResultStatus = (): FindBulkExecutionLogResponse => ({
   ],
   '1ea5a820-4da1-4e82-92a1-2b43a7bece08': [
     {
-      alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
       statusDate: '2020-02-18T15:15:58.806Z',
       status: RuleExecutionStatus.failed,
       lastFailureAt: '2020-02-18T15:15:58.806Z',
@@ -540,7 +565,29 @@ export const getFindBulkResultStatus = (): FindBulkExecutionLogResponse => ({
   ],
 });
 
-export const getEmptySignalsResponse = (): SignalSearchResponse => ({
+export const getBasicEmptySearchResponse = (): estypes.SearchResponse<unknown> => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: {
+    hits: [],
+    total: { relation: 'eq', value: 0 },
+    max_score: 0,
+  },
+});
+
+export const getBasicNoShardsSearchResponse = (): estypes.SearchResponse<unknown> => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+  hits: {
+    hits: [],
+    total: { relation: 'eq', value: 0 },
+    max_score: 0,
+  },
+});
+
+export const getEmptySignalsResponse = (): estypes.SearchResponse<unknown> => ({
   took: 1,
   timed_out: false,
   _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
@@ -566,7 +613,7 @@ export const getEmptyEqlSequencesResponse = (): EqlSearchResponse<unknown> => ({
   timed_out: false,
 });
 
-export const getSuccessfulSignalUpdateResponse = () => ({
+export const getSuccessfulSignalUpdateResponse = (): estypes.UpdateByQueryResponse => ({
   took: 18,
   timed_out: false,
   total: 1,

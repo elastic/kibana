@@ -27,10 +27,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await a11y.testAppSnapshot();
     });
-
-    it('Add flights sample data set', async () => {
-      await PageObjects.home.addSampleDataSet('flights');
-      await a11y.testAppSnapshot();
-    });
   });
 }

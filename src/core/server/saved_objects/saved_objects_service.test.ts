@@ -301,7 +301,7 @@ describe('SavedObjectsService', () => {
     });
 
     describe('#createScopedRepository', () => {
-      it('creates a respository scoped to the user', async () => {
+      it('creates a repository scoped to the user', async () => {
         const coreContext = createCoreContext({ skipMigration: false });
         const soService = new SavedObjectsService(coreContext);
         const coreSetup = createSetupDeps();
@@ -321,7 +321,7 @@ describe('SavedObjectsService', () => {
         expect(includedHiddenTypes).toEqual([]);
       });
 
-      it('creates a respository including hidden types when specified', async () => {
+      it('creates a repository including hidden types when specified', async () => {
         const coreContext = createCoreContext({ skipMigration: false });
         const soService = new SavedObjectsService(coreContext);
         const coreSetup = createSetupDeps();
@@ -341,7 +341,7 @@ describe('SavedObjectsService', () => {
     });
 
     describe('#createInternalRepository', () => {
-      it('creates a respository using the admin user', async () => {
+      it('creates a repository using the admin user', async () => {
         const coreContext = createCoreContext({ skipMigration: false });
         const soService = new SavedObjectsService(coreContext);
         const coreSetup = createSetupDeps();
@@ -359,7 +359,7 @@ describe('SavedObjectsService', () => {
         expect(includedHiddenTypes).toEqual([]);
       });
 
-      it('creates a respository including hidden types when specified', async () => {
+      it('creates a repository including hidden types when specified', async () => {
         const coreContext = createCoreContext({ skipMigration: false });
         const soService = new SavedObjectsService(coreContext);
         const coreSetup = createSetupDeps();

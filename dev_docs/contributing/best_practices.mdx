@@ -111,7 +111,7 @@ export getSearchService: (searchSpec: { username: string; password: string }) =>
 
 In the former, there will be a link to the `SearchSpec` interface with documentation for the `username` and `password` properties. In the latter the object will render inline, without comments:
 
-![prefer interfaces documentation](./assets/dev_docs_nested_object.png)
+![prefer interfaces documentation](../assets/dev_docs_nested_object.png)
 
 #### Export every type used in a public API
 
@@ -135,7 +135,7 @@ export type foo: string | AnInterface;
 
 `Pick` not only ends up being unhelpful in our documentation system, but it's also of limited help in your IDE. For that reason, avoid `Pick` and other similarly complex types on your public API items. Using these semantics internally is fine.
 
-![pick api documentation](./assets/api_doc_pick.png)
+![pick api documentation](../assets/api_doc_pick.png)
 
 ### Example plugins
 
@@ -196,7 +196,7 @@ Over-refactoring can be a problem in it's own right, but it's still important to
 Try not to put your PR in review mode, or merge large changes, right before Feature Freeze. It's inevitably one of the most volatile times for the
 Kibana code base, try not to contribute to this volatility. Doing this can:
 
-- increase the likelyhood of conflicts from other features being merged at the last minute
+- increase the likelihood of conflicts from other features being merged at the last minute
 - means your feature has less QA time
 - means your feature gets less careful review as reviewers are often swamped at this time
 
@@ -210,7 +210,7 @@ your large change right _after_ feature freeze. If you are worried about missing
 
 When possible, build features with incrementals sets of small and focused PRs, but don't check in unused code, and don't expose any feature on master that you would not be comfortable releasing.
 
-![product_stages](./assets/product_stages.png)
+![product_stages](../assets/product_stages.png)
 
 If your feature cannot be broken down into smaller components, or multiple engineers will be contributing, you have a few other options to consider.
 

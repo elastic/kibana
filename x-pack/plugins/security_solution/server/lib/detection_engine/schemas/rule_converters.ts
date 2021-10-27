@@ -6,6 +6,9 @@
  */
 
 import uuid from 'uuid';
+
+import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
@@ -25,9 +28,9 @@ import {
 } from '../../../../common/detection_engine/schemas/request';
 import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
-import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
+import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { ResolvedSanitizedRule, SanitizedAlert } from '../../../../../alerting/common';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -37,7 +40,6 @@ import {
   transformToNotifyWhen,
   transformActions,
 } from '../rules/utils';
-import { ruleTypeMappings } from '../signals/utils';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleActions } from '../rule_actions/legacy_types';
 
@@ -281,12 +283,17 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 };
 
 export const internalRuleToAPIResponse = (
-  rule: SanitizedAlert<RuleParams>,
+  rule: SanitizedAlert<RuleParams> | ResolvedSanitizedRule<RuleParams>,
   ruleStatus?: IRuleStatusSOAttributes,
   legacyRuleActions?: LegacyRuleActions | null
 ): FullResponseSchema => {
   const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
+  const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
+    (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
   return {
+    // saved object properties
+    outcome: isResolvedRule(rule) ? rule.outcome : undefined,
+    alias_target_id: isResolvedRule(rule) ? rule.alias_target_id : undefined,
     // Alerting framework params
     id: rule.id,
     updated_at: rule.updatedAt.toISOString(),

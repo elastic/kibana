@@ -1,0 +1,578 @@
+{
+  "id": "@elastic/datemath",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@elastic/datemath",
+        "id": "def-server.parse",
+        "type": "Function",
+        "tags": [],
+        "label": "parse",
+        "description": [],
+        "signature": [
+          "(input: string, options: { roundUp?: boolean | undefined; momentInstance?: typeof moment | undefined; forceNow?: Date | undefined; }) => moment.Moment | undefined"
+        ],
+        "path": "packages/elastic-datemath/src/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/datemath",
+            "id": "def-server.parse.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/elastic-datemath/src/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@elastic/datemath",
+            "id": "def-server.parse.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "packages/elastic-datemath/src/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.parse.$2.roundUp",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "roundUp",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.parse.$2.momentInstance",
+                "type": "Function",
+                "tags": [],
+                "label": "momentInstance",
+                "description": [],
+                "signature": [
+                  "typeof moment | undefined"
+                ],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.parse.$2.forceNow",
+                "type": "Object",
+                "tags": [],
+                "label": "forceNow",
+                "description": [],
+                "signature": [
+                  "Date | undefined"
+                ],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@elastic/datemath",
+        "id": "def-server.Unit",
+        "type": "Type",
+        "tags": [],
+        "label": "Unit",
+        "description": [],
+        "signature": [
+          "\"y\" | \"M\" | \"w\" | \"d\" | \"h\" | \"m\" | \"s\" | \"ms\""
+        ],
+        "path": "packages/elastic-datemath/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/datemath",
+        "id": "def-server.units",
+        "type": "Array",
+        "tags": [],
+        "label": "units",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@elastic/datemath",
+            "scope": "server",
+            "docId": "kibElasticDatemathPluginApi",
+            "section": "def-server.Unit",
+            "text": "Unit"
+          },
+          "[]"
+        ],
+        "path": "packages/elastic-datemath/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/datemath",
+        "id": "def-server.unitsAsc",
+        "type": "Array",
+        "tags": [],
+        "label": "unitsAsc",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@elastic/datemath",
+            "scope": "server",
+            "docId": "kibElasticDatemathPluginApi",
+            "section": "def-server.Unit",
+            "text": "Unit"
+          },
+          "[]"
+        ],
+        "path": "packages/elastic-datemath/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/datemath",
+        "id": "def-server.unitsDesc",
+        "type": "Array",
+        "tags": [],
+        "label": "unitsDesc",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@elastic/datemath",
+            "scope": "server",
+            "docId": "kibElasticDatemathPluginApi",
+            "section": "def-server.Unit",
+            "text": "Unit"
+          },
+          "[]"
+        ],
+        "path": "packages/elastic-datemath/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/datemath",
+        "id": "def-server.UnitsMap",
+        "type": "Type",
+        "tags": [],
+        "label": "UnitsMap",
+        "description": [],
+        "signature": [
+          "{ y: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; M: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; w: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; d: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; h: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; m: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; s: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; ms: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; }"
+        ],
+        "path": "packages/elastic-datemath/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@elastic/datemath",
+        "id": "def-server.unitsMap",
+        "type": "Object",
+        "tags": [],
+        "label": "unitsMap",
+        "description": [],
+        "path": "packages/elastic-datemath/src/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/datemath",
+            "id": "def-server.unitsMap.ms",
+            "type": "Object",
+            "tags": [],
+            "label": "ms",
+            "description": [],
+            "path": "packages/elastic-datemath/src/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.ms.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.ms.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"fixed\""
+                ],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.ms.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@elastic/datemath",
+            "id": "def-server.unitsMap.s",
+            "type": "Object",
+            "tags": [],
+            "label": "s",
+            "description": [],
+            "path": "packages/elastic-datemath/src/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.s.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.s.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"fixed\""
+                ],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.s.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@elastic/datemath",
+            "id": "def-server.unitsMap.m",
+            "type": "Object",
+            "tags": [],
+            "label": "m",
+            "description": [],
+            "path": "packages/elastic-datemath/src/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.m.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.m.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"mixed\""
+                ],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.m.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@elastic/datemath",
+            "id": "def-server.unitsMap.h",
+            "type": "Object",
+            "tags": [],
+            "label": "h",
+            "description": [],
+            "path": "packages/elastic-datemath/src/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.h.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.h.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"mixed\""
+                ],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.h.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@elastic/datemath",
+            "id": "def-server.unitsMap.d",
+            "type": "Object",
+            "tags": [],
+            "label": "d",
+            "description": [],
+            "path": "packages/elastic-datemath/src/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.d.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.d.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"mixed\""
+                ],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.d.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@elastic/datemath",
+            "id": "def-server.unitsMap.w",
+            "type": "Object",
+            "tags": [],
+            "label": "w",
+            "description": [],
+            "path": "packages/elastic-datemath/src/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.w.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.w.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"calendar\""
+                ],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.w.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@elastic/datemath",
+            "id": "def-server.unitsMap.M",
+            "type": "Object",
+            "tags": [],
+            "label": "M",
+            "description": [],
+            "path": "packages/elastic-datemath/src/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.M.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.M.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"calendar\""
+                ],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.M.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@elastic/datemath",
+            "id": "def-server.unitsMap.y",
+            "type": "Object",
+            "tags": [],
+            "label": "y",
+            "description": [
+              "// q: { weight: 8, type: 'calendar' }, // TODO: moment duration does not support quarter"
+            ],
+            "path": "packages/elastic-datemath/src/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.y.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.y.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"calendar\""
+                ],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@elastic/datemath",
+                "id": "def-server.unitsMap.y.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/elastic-datemath/src/index.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

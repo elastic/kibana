@@ -36,14 +36,14 @@ describe('EnrollmentTokenForm', () => {
     const onSuccess = jest.fn();
 
     const { findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart}>
         <EnrollmentTokenForm onSuccess={onSuccess} />
       </Providers>
     );
     fireEvent.change(await findByLabelText('Enrollment token'), {
       target: { value: btoa(JSON.stringify(token)) },
     });
-    fireEvent.click(await findByRole('button', { name: 'Connect to cluster', hidden: true }));
+    fireEvent.click(await findByRole('button', { name: 'Configure Elastic', hidden: true }));
 
     await waitFor(() => {
       expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/interactive_setup/enroll', {
@@ -62,12 +62,12 @@ describe('EnrollmentTokenForm', () => {
     const onSuccess = jest.fn();
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart}>
         <EnrollmentTokenForm onSuccess={onSuccess} />
       </Providers>
     );
 
-    fireEvent.click(await findByRole('button', { name: 'Connect to cluster', hidden: true }));
+    fireEvent.click(await findByRole('button', { name: 'Configure Elastic', hidden: true }));
 
     await findAllByText(/Enter an enrollment token/i);
 
@@ -87,6 +87,20 @@ describe('decodeEnrollmentToken', () => {
       key: 'SkgtMzZIb0JvNEVZSW9WaEhoMkY6dUVvNGRrc0FSTXFfQlNIYUFIVXI4UQ==',
       ver: '8.0.0',
     });
+  });
+
+  it('should sort IPv4 before IPv6 addresses', () => {
+    expect(
+      decodeEnrollmentToken(
+        btoa(
+          JSON.stringify({ ...token, adr: ['[::1]:9200', '127.0.0.1:9200', '10.17.1.163:9200'] })
+        )
+      )
+    ).toEqual(
+      expect.objectContaining({
+        adr: ['https://127.0.0.1:9200', 'https://10.17.1.163:9200', 'https://[::1]:9200'],
+      })
+    );
   });
 
   it('should not decode an invalid token', () => {

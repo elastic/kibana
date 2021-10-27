@@ -17,6 +17,7 @@ const CONSUMERS = `${KIBANA_NAMESPACE}.consumers` as const;
 const ECS_VERSION = 'ecs.version' as const;
 const EVENT_ACTION = 'event.action' as const;
 const EVENT_KIND = 'event.kind' as const;
+const EVENT_MODULE = 'event.module' as const;
 const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
 const TAGS = 'tags' as const;
 const TIMESTAMP = '@timestamp' as const;
@@ -52,6 +53,7 @@ const ALERT_RULE_LICENSE = `${ALERT_RULE_NAMESPACE}.license` as const;
 const ALERT_RULE_CATEGORY = `${ALERT_RULE_NAMESPACE}.category` as const;
 const ALERT_RULE_NAME = `${ALERT_RULE_NAMESPACE}.name` as const;
 const ALERT_RULE_NOTE = `${ALERT_RULE_NAMESPACE}.note` as const;
+const ALERT_RULE_PARAMS = `${ALERT_RULE_NAMESPACE}.params` as const;
 const ALERT_RULE_REFERENCES = `${ALERT_RULE_NAMESPACE}.references` as const;
 const ALERT_RULE_RISK_SCORE = `${ALERT_RULE_NAMESPACE}.risk_score` as const;
 const ALERT_RULE_RISK_SCORE_MAPPING = `${ALERT_RULE_NAMESPACE}.risk_score_mapping` as const;
@@ -87,6 +89,7 @@ const fields = {
   ECS_VERSION,
   EVENT_KIND,
   EVENT_ACTION,
+  EVENT_MODULE,
   TAGS,
   TIMESTAMP,
   ALERT_ACTION_GROUP,
@@ -109,6 +112,7 @@ const fields = {
   ALERT_RULE_LICENSE,
   ALERT_RULE_NAME,
   ALERT_RULE_NOTE,
+  ALERT_RULE_PARAMS,
   ALERT_RULE_REFERENCES,
   ALERT_RULE_RISK_SCORE,
   ALERT_RULE_RISK_SCORE_MAPPING,
@@ -164,6 +168,7 @@ export {
   ALERT_RULE_LICENSE,
   ALERT_RULE_NAME,
   ALERT_RULE_NOTE,
+  ALERT_RULE_PARAMS,
   ALERT_RULE_REFERENCES,
   ALERT_RULE_RISK_SCORE,
   ALERT_RULE_RISK_SCORE_MAPPING,
@@ -186,6 +191,7 @@ export {
   ECS_VERSION,
   EVENT_ACTION,
   EVENT_KIND,
+  EVENT_MODULE,
   KIBANA_NAMESPACE,
   ALERT_RULE_UUID,
   ALERT_RULE_CATEGORY,

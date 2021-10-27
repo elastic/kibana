@@ -9,6 +9,7 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '.';
+import { ERROR_OUTSIDE_PREBOOT_STAGE, ERROR_PING_FAILURE } from '../../common';
 import type { PingResult } from '../../common/types';
 
 export function definePingRoute({ router, logger, elasticsearch, preboot }: RouteDefinitionParams) {
@@ -25,7 +26,12 @@ export function definePingRoute({ router, logger, elasticsearch, preboot }: Rout
     async (context, request, response) => {
       if (!preboot.isSetupOnHold()) {
         logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot stage`);
-        return response.badRequest({ body: 'Cannot process request outside of preboot stage.' });
+        return response.badRequest({
+          body: {
+            message: 'Cannot process request outside of preboot stage.',
+            attributes: { type: ERROR_OUTSIDE_PREBOOT_STAGE },
+          },
+        });
       }
 
       let result: PingResult;
@@ -34,7 +40,7 @@ export function definePingRoute({ router, logger, elasticsearch, preboot }: Rout
       } catch {
         return response.customError({
           statusCode: 500,
-          body: { message: 'Failed to ping cluster.', attributes: { type: 'ping_failure' } },
+          body: { message: 'Failed to ping cluster.', attributes: { type: ERROR_PING_FAILURE } },
         });
       }
 

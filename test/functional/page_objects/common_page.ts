@@ -30,6 +30,7 @@ export class CommonPageObject extends FtrService {
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly loginPage = this.ctx.getPageObject('login');
+  private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -67,10 +68,14 @@ export class CommonPageObject extends FtrService {
         await this.loginPage.login('test_user', 'changeme');
       }
 
-      await this.find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
-        6 * this.defaultFindTimeout
-      );
+      if (appUrl.includes('/status')) {
+        await this.testSubjects.find('statusPageRoot');
+      } else {
+        await this.find.byCssSelector(
+          '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
+          6 * this.defaultFindTimeout
+        );
+      }
       await this.browser.get(appUrl, insertTimestamp);
       currentUrl = await this.browser.getCurrentUrl();
       this.log.debug(`Finished login process currentUrl = ${currentUrl}`);
@@ -495,5 +500,13 @@ export class CommonPageObject extends FtrService {
     } else {
       await this.testSubjects.exists(validator);
     }
+  }
+
+  async setTime(time: { from: string; to: string }) {
+    await this.kibanaServer.uiSettings.replace({ 'timepicker:timeDefaults': JSON.stringify(time) });
+  }
+
+  async unsetTime() {
+    await this.kibanaServer.uiSettings.unset('timepicker:timeDefaults');
   }
 }

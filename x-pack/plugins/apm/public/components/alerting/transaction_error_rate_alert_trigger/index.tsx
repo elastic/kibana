@@ -68,7 +68,8 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       });
       if (interval && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
+          endpoint:
+            'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
           params: {
             query: {
               environment: params.environment,
@@ -130,6 +131,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       data={data?.errorRateChartPreview}
       yTickFormat={(d: number | null) => asPercent(d, 1)}
       threshold={thresholdAsPercent}
+      uiSettings={services.uiSettings}
     />
   );
 

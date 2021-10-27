@@ -61,6 +61,15 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
     };
   }
 
+  if (action.type === 'policyArtifactsDeosAnyTrustedAppExists') {
+    return {
+      ...state,
+      artifacts: {
+        ...state?.artifacts,
+        doesAnyTrustedAppExists: action.payload,
+      },
+    };
+  }
   if (action.type === 'assignedTrustedAppsListStateChanged') {
     return {
       ...state,
@@ -77,6 +86,26 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
       artifacts: {
         ...state.artifacts,
         policies: action.payload,
+      },
+    };
+  }
+
+  if (action.type === 'policyDetailsTrustedAppsRemoveListStateChanged') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        removeList: action.payload,
+      },
+    };
+  }
+
+  if (action.type === 'policyDetailsArtifactsResetRemove') {
+    return {
+      ...state,
+      artifacts: {
+        ...state.artifacts,
+        removeList: initialPolicyDetailsState().artifacts.removeList,
       },
     };
   }

@@ -8,7 +8,8 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { errors as esErrors, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import type { SavedObjectsRawDoc } from '../../serialization';
 import {
@@ -92,7 +93,7 @@ export const bulkOverwriteTransformedDocuments =
       .then((res) => {
         // Filter out version_conflict_engine_exception since these just mean
         // that another instance already updated these documents
-        const errors = (res.body.items ?? [])
+        const errors: estypes.ErrorCause[] = (res.body.items ?? [])
           .filter((item) => item.index?.error)
           .map((item) => item.index!.error!)
           .filter(({ type }) => type !== 'version_conflict_engine_exception');

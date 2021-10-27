@@ -34,6 +34,7 @@ interface Props {
   children?: JSX.Element | JSX.Element[];
   hideConnectorServiceNowSir?: boolean;
   onSuccess?: (theCase: Case) => Promise<void>;
+  syncAlertsDefaultValue?: boolean;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -42,6 +43,7 @@ export const FormContext: React.FC<Props> = ({
   children,
   hideConnectorServiceNowSir,
   onSuccess,
+  syncAlertsDefaultValue = true,
 }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
   const owner = useOwnerContext();
@@ -51,7 +53,12 @@ export const FormContext: React.FC<Props> = ({
 
   const submitCase = useCallback(
     async (
-      { connectorId: dataConnectorId, fields, syncAlerts = true, ...dataWithoutConnectorId },
+      {
+        connectorId: dataConnectorId,
+        fields,
+        syncAlerts = syncAlertsDefaultValue,
+        ...dataWithoutConnectorId
+      },
       isValid
     ) => {
       if (isValid) {
@@ -94,6 +101,7 @@ export const FormContext: React.FC<Props> = ({
       onSuccess,
       postComment,
       pushCaseToExternalService,
+      syncAlertsDefaultValue,
     ]
   );
 

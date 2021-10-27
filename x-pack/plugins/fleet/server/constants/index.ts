@@ -58,6 +58,7 @@ export {
   // Preconfiguration
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_LATEST_KEYWORD,
+  AUTO_UPDATE_PACKAGES,
 } from '../../common';
 
 export {

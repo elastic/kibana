@@ -34,12 +34,12 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
             should: [
               {
                 term: {
-                  'signal.status': status,
+                  'kibana.alert.workflow_status': status,
                 },
               },
               {
                 term: {
-                  'signal.status': 'in-progress',
+                  'kibana.alert.workflow_status': 'in-progress',
                 },
               },
             ],
@@ -47,7 +47,7 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
         }
       : {
           term: {
-            'signal.status': status,
+            'kibana.alert.workflow_status': status,
           },
         };
 
@@ -58,7 +58,7 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
         negate: false,
         disabled: false,
         type: 'phrase',
-        key: 'signal.status',
+        key: 'kibana.alert.workflow_status',
         params: {
           query: status,
         },
@@ -76,7 +76,7 @@ export const buildAlertStatusesFilter = (statuses: Status[]): Filter[] => {
     bool: {
       should: statuses.map((status) => ({
         term: {
-          'signal.status': status,
+          'kibana.alert.workflow_status': status,
         },
       })),
     },
@@ -103,14 +103,14 @@ export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
             negate: false,
             disabled: false,
             type: 'phrase',
-            key: 'signal.rule.id',
+            key: 'kibana.alert.rule.uuid',
             params: {
               query: ruleId,
             },
           },
           query: {
             match_phrase: {
-              'signal.rule.id': ruleId,
+              'kibana.alert.rule.uuid': ruleId,
             },
           },
         },
@@ -127,11 +127,10 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'signal.rule.building_block_type',
+            key: 'kibana.alert.building_block_type',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'signal.rule.building_block_type' },
+          query: { exists: { field: 'kibana.alert.building_block_type' } },
         },
       ];
 
@@ -143,12 +142,11 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
             alias: null,
             disabled: false,
             negate: false,
-            key: 'signal.rule.threat_mapping',
+            key: 'kibana.alert.rule.threat_mapping',
             type: 'exists',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'signal.rule.threat_mapping' },
+          query: { exists: { field: 'kibana.alert.rule.threat_mapping' } },
         },
       ]
     : [];
@@ -162,21 +160,21 @@ export const alertsDefaultModel: SubsetTimelineModel = {
 
 export const requiredFieldsForActions = [
   '@timestamp',
-  'signal.status',
-  'signal.group.id',
-  'signal.original_time',
-  'signal.rule.building_block_type',
-  'signal.rule.filters',
-  'signal.rule.from',
-  'signal.rule.language',
-  'signal.rule.query',
-  'signal.rule.name',
-  'signal.rule.to',
-  'signal.rule.id',
-  'signal.rule.index',
-  'signal.rule.type',
-  'signal.original_event.kind',
-  'signal.original_event.module',
+  'kibana.alert.workflow_status',
+  'kibana.alert.group.id',
+  'kibana.alert.original_time',
+  'kibana.alert.building_block_type',
+  'kibana.alert.rule.filters',
+  'kibana.alert.rule.from',
+  'kibana.alert.rule.language',
+  'kibana.alert.rule.query',
+  'kibana.alert.rule.name',
+  'kibana.alert.rule.to',
+  'kibana.alert.rule.uuid',
+  'kibana.alert.rule.index',
+  'kibana.alert.rule.type',
+  'kibana.alert.original_event.kind',
+  'kibana.alert.original_event.module',
   // Endpoint exception fields
   'file.path',
   'file.Ext.code_signature.subject_name',
@@ -265,11 +263,10 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'kibana.rule.building_block_type',
+            key: 'kibana.alert.building_block_type',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'kibana.rule.building_block_type' },
+          query: { exists: { field: 'kibana.alert.building_block_type' } },
         },
       ];
 
