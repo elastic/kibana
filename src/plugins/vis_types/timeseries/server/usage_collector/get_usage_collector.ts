@@ -21,7 +21,14 @@ export interface TimeseriesUsage {
   timeseries_use_last_value_mode_total: number;
   timeseries_use_es_indices_total: number;
   timeseries_table_use_aggregate_function: number;
-  timeseries_types: { [key in PANEL_TYPES]: number };
+  timeseries_types: {
+    table: number;
+    gauge: number;
+    markdown: number;
+    top_n: number;
+    timeseries: number;
+    metric: number;
+  };
 }
 
 const doTelemetryFoVisualizations = async (
