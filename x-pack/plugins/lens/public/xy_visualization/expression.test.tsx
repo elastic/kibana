@@ -531,6 +531,7 @@ describe('xy_expression', () => {
         onClickValue,
         onSelectRange,
         syncColors: false,
+        useLegacyTimeAxis: false,
       };
     });
 
