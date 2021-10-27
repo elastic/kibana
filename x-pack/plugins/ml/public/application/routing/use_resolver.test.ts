@@ -45,7 +45,7 @@ describe('useResolver', () => {
     jest.useRealTimers();
   });
 
-  it('should accept undefined as indexPatternId and savedSearchId.', async () => {
+  it('should accept undefined as dataViewId and savedSearchId.', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useResolver(undefined, undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
     );
@@ -76,7 +76,7 @@ describe('useResolver', () => {
     expect(redirectToJobsManagementPage).toHaveBeenCalledTimes(0);
   });
 
-  it('should add an error toast and redirect if indexPatternId is an empty string.', async () => {
+  it('should add an error toast and redirect if dataViewId is an empty string.', async () => {
     const { result } = renderHook(() =>
       useResolver('', undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
     );
