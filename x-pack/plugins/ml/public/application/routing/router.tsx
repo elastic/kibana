@@ -43,7 +43,7 @@ export interface PageProps {
 interface PageDependencies {
   config: IUiSettingsClient;
   history: AppMountParameters['history'];
-  indexPatterns: DataViewsContract;
+  dataViewsContract: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   redirectToMlAccessDeniedPage: () => Promise<void>;
 }

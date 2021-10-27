@@ -112,9 +112,9 @@ export const Controls: FC<Props> = React.memo(
     const nodeType = selectedNode?.data('type');
 
     const onCreateJobClick = useCallback(async () => {
-      const indexId = getIndexPatternIdFromName(nodeLabel);
+      const indexId = await getIndexPatternIdFromName(nodeLabel);
 
-      if (indexId) {
+      if (indexId !== null) {
         const path = await mlLocator.getUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
           pageState: { index: indexId },

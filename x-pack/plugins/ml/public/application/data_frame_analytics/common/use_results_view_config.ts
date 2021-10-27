@@ -98,17 +98,17 @@ export const useResultsViewConfig = (jobId: string) => {
             const destIndex = Array.isArray(jobConfigUpdate.dest.index)
               ? jobConfigUpdate.dest.index[0]
               : jobConfigUpdate.dest.index;
-            const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
+            const destIndexPatternId = (await getIndexPatternIdFromName(destIndex)) ?? destIndex;
             let indexP: DataView | undefined;
 
             try {
-              indexP = await mlContext.indexPatterns.get(destIndexPatternId);
+              indexP = await mlContext.dataViewsContract.get(destIndexPatternId);
 
               // Force refreshing the fields list here because a user directly coming
               // from the job creation wizard might land on the page without the
               // data view being fully initialized because it was created
               // before the analytics job populated the destination index.
-              await mlContext.indexPatterns.refreshFields(indexP);
+              await mlContext.dataViewsContract.refreshFields(indexP);
             } catch (e) {
               indexP = undefined;
             }
@@ -116,9 +116,10 @@ export const useResultsViewConfig = (jobId: string) => {
             if (indexP === undefined) {
               setNeedsDestIndexPattern(true);
               const sourceIndex = jobConfigUpdate.source.index[0];
-              const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+              const sourceIndexPatternId =
+                (await getIndexPatternIdFromName(sourceIndex)) ?? sourceIndex;
               try {
-                indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+                indexP = await mlContext.dataViewsContract.get(sourceIndexPatternId);
               } catch (e) {
                 indexP = undefined;
               }

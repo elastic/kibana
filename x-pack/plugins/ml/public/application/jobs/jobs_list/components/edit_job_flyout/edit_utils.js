@@ -102,7 +102,12 @@ export function loadSavedDashboards(maxNumber) {
   });
 }
 
-export function loadIndexPatterns(maxNumber) {
+export async function loadDataViewListItems() {
+  const dataViewsContract = getDataViews();
+  return (await dataViewsContract.getIdsWithTitle()).sort((a, b) => a.title.localeCompare(b.title));
+}
+
+export function loadIndexPatterns2(maxNumber) {
   // Loads the list of Kibana data views, as used in editing custom URLs.
   return new Promise((resolve, reject) => {
     const dataViewsContract = getDataViews();

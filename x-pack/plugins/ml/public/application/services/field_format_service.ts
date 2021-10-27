@@ -25,35 +25,40 @@ class FieldFormatService {
   // configured in the datafeed of each job.
   // Builds a map of Kibana FieldFormats (plugins/data/common/field_formats)
   // against detector index by job ID.
-  populateFormats(jobIds: string[]): Promise<FormatsByJobId> {
-    return new Promise((resolve, reject) => {
-      // Populate a map of data view IDs against job ID, by finding the ID of the data
-      // view with a title attribute which matches the indices configured in the datafeed.
-      // If a Kibana data view has not been created
-      // for this index, then no custom field formatting will occur.
-      jobIds.forEach((jobId) => {
-        const jobObj = mlJobService.getJob(jobId);
-        const datafeedIndices = jobObj.datafeed_config.indices;
-        const id = getIndexPatternIdFromName(datafeedIndices.length ? datafeedIndices[0] : '');
-        if (id !== null) {
-          this.indexPatternIdsByJob[jobId] = id;
-        }
+  async populateFormats(jobIds: string[]): Promise<FormatsByJobId> {
+    // Populate a map of data view IDs against job ID, by finding the ID of the data
+    // view with a title attribute which matches the indices configured in the datafeed.
+    // If a Kibana data view has not been created
+    // for this index, then no custom field formatting will occur.
+    (
+      await Promise.all(
+        jobIds.map(async (jobId) => {
+          const jobObj = mlJobService.getJob(jobId);
+          return {
+            jobId,
+            dataViewId: await getIndexPatternIdFromName(jobObj.datafeed_config.indices.join(',')),
+          };
+        })
+      )
+    ).forEach(({ jobId, dataViewId }) => {
+      if (dataViewId !== null) {
+        this.indexPatternIdsByJob[jobId] = dataViewId;
+      }
+    });
+
+    const promises = jobIds.map((jobId) => Promise.all([this.getFormatsForJob(jobId)]));
+
+    try {
+      const fmtsByJobByDetector = await Promise.all(promises);
+      fmtsByJobByDetector.forEach((formatsByDetector, i) => {
+        this.formatsByJob[jobIds[i]] = formatsByDetector[0];
       });
 
-      const promises = jobIds.map((jobId) => Promise.all([this.getFormatsForJob(jobId)]));
-
-      Promise.all(promises)
-        .then((fmtsByJobByDetector) => {
-          fmtsByJobByDetector.forEach((formatsByDetector, i) => {
-            this.formatsByJob[jobIds[i]] = formatsByDetector[0];
-          });
-
-          resolve(this.formatsByJob);
-        })
-        .catch((err) => {
-          reject({ formats: {}, err });
-        });
-    });
+      return this.formatsByJob;
+    } catch (error) {
+      console.log('Error populating field formats:', error); // eslint-disable-line no-console
+      return { formats: {}, error };
+    }
   }
 
   // Return the FieldFormat to use for formatting values from

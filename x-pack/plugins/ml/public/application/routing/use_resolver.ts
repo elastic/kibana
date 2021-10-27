@@ -10,7 +10,6 @@ import { IUiSettingsClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
   getIndexPatternById,
-  getIndexPatternsContract,
   getIndexPatternAndSavedSearch,
   IndexPatternAndSavedSearch,
 } from '../util/index_utils';
@@ -20,6 +19,7 @@ import { MlContextValue } from '../contexts/ml';
 import { useNotifications } from '../contexts/kibana';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../common/constants/locator';
+import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
 
 /**
  * Hook to resolve route specific requirements
@@ -33,6 +33,7 @@ export const useResolver = (
   indexPatternId: string | undefined,
   savedSearchId: string | undefined,
   config: IUiSettingsClient,
+  dataViewsContract: DataViewsContract,
   resolvers: Resolvers
 ): { context: MlContextValue; results: ResolverResults } => {
   const notifications = useNotifications();
@@ -94,7 +95,7 @@ export const useResolver = (
           combinedQuery,
           currentIndexPattern: indexPattern,
           currentSavedSearch: savedSearch,
-          indexPatterns: getIndexPatternsContract(),
+          dataViewsContract,
           kibanaConfig: config,
         });
       } catch (error) {

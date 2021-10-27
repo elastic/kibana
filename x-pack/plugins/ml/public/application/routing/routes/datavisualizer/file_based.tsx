@@ -16,7 +16,7 @@ import { FileDataVisualizerPage } from '../../../datavisualizer/file_based';
 
 import { checkBasicLicense } from '../../../license';
 import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/check_capabilities';
-import { loadIndexPatterns } from '../../../util/index_utils';
+import { cacheDataViewsContract } from '../../../util/index_utils';
 
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
@@ -41,9 +41,9 @@ export const fileBasedRouteFactory = (
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
-  const { context } = useResolver(undefined, undefined, deps.config, {
+  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
     checkBasicLicense,
-    loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
+    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
     checkFindFileStructurePrivilege: () =>
       checkFindFileStructurePrivilegeResolver(redirectToMlAccessDeniedPage),
   });

@@ -14,7 +14,7 @@ export interface MlContextValue {
   combinedQuery: any;
   currentIndexPattern: DataView; // TODO this should be IndexPattern or null
   currentSavedSearch: SavedSearchSavedObject | null;
-  indexPatterns: DataViewsContract;
+  dataViewsContract: DataViewsContract;
   kibanaConfig: any; // IUiSettingsClient;
   kibanaVersion: string;
 }

@@ -16,6 +16,7 @@ import {
 import { getToastNotifications } from '../../../util/dependency_cache';
 import { ml } from '../../../services/ml_api_service';
 import { stringMatch } from '../../../util/string_utils';
+import { getIndexPatternNames } from '../../../util/index_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { JOB_ACTION } from '../../../../../common/constants/job_actions';
 import { parseInterval } from '../../../../../common/util/parse_interval';
@@ -217,6 +218,15 @@ export async function cloneJob(jobId) {
       loadJobForCloning(jobId),
       loadFullJob(jobId, false),
     ]);
+
+    const indexPatternNames = await getIndexPatternNames();
+    const indexPatternTitle = datafeed.indices.join(',');
+    const jobIndicesAvailable = indexPatternNames.includes(indexPatternTitle);
+
+    if (jobIndicesAvailable === false) {
+      return;
+    }
+
     if (cloneableJob !== undefined && originalJob?.custom_settings?.created_by !== undefined) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
