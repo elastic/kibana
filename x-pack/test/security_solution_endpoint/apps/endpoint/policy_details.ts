@@ -235,7 +235,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     );
   };
 
-  describe.only('When on the Endpoint Policy Details Page', function () {
+  describe('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
