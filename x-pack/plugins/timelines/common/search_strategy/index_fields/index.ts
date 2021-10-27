@@ -6,7 +6,7 @@
  */
 
 import type { IFieldSubType } from '@kbn/es-query';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   IEsSearchRequest,
   IEsSearchResponse,
