@@ -29,7 +29,7 @@ import {
 import { TooltipPopover } from './tooltip_popover';
 import { FeatureGeometryFilterForm } from './features_tooltip';
 import { ILayer } from '../../../classes/layers/layer';
-import { IVectorLayer, isVectorLayer, getFeatureId } from '../../../classes/layers/vector_layer';
+import { IVectorLayer, isVectorLayer } from '../../../classes/layers/vector_layer';
 import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
 
 function justifyAnchorLocation(
@@ -204,7 +204,7 @@ export class TooltipControl extends Component<Props, {}> {
         break;
       }
 
-      const featureId = getFeatureId(mbFeature, layer.getSource());
+      const featureId = layer.getFeatureId(mbFeature);
       const layerId = layer.getId();
       let match = false;
       for (let j = 0; j < uniqueFeatures.length; j++) {
@@ -288,7 +288,7 @@ export class TooltipControl extends Component<Props, {}> {
     const layer = this._getLayerByMbLayerId(targetMbFeature.layer.id);
     if (layer && this.props.openTooltips[0] && this.props.openTooltips[0].features.length) {
       const firstFeature = this.props.openTooltips[0].features[0];
-      if (getFeatureId(targetMbFeature, layer.getSource()) === firstFeature.id) {
+      if (layer.getFeatureId(targetMbFeature) === firstFeature.id) {
         // ignore hover events when hover tooltip is all ready opened for feature
         return;
       }
