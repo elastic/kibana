@@ -196,6 +196,13 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
 
+/**
+ * Given a set of rules and an actions client this will return connectors that are invalid
+ * such as missing connectors and filter out the rules that have invalid connectors.
+ * @param rules The rules to check for invalid connectors
+ * @param actionsClient The actions client to get all the connectors.
+ * @returns An array of connector errors if it found any and then the promise stream of valid and invalid connectors.
+ */
 export const getInvalidConnectors = async (
   rules: PromiseFromStreams[],
   actionsClient: ActionsClient
