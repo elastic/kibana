@@ -7156,6 +7156,8 @@
     "xpack.observability.formatters.secondsTimeUnitLabel": "s",
     "xpack.observability.formatters.secondsTimeUnitLabelExtended": "秒",
     "xpack.observability.home.addData": "データの追加",
+    "xpack.observability.hoverActions.filterInValueButtonLabel": "Filter In",
+    "xpack.observability.hoverActions.filterOutValueButtonLabel": "Filter Out",
     "xpack.observability.navigation.newBadge": "新規",
     "xpack.observability.news.readFullStory": "詳細なストーリーを読む",
     "xpack.observability.news.title": "新機能",
