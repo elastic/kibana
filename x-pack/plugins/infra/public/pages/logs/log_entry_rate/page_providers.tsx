@@ -43,12 +43,14 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
           indexPattern={resolvedSourceConfiguration.indices}
           sourceId={sourceId}
           spaceId={space.id}
+          timestampField={resolvedSourceConfiguration.timestampField}
           runtimeMappings={resolvedSourceConfiguration.runtimeMappings}
         >
           <LogEntryCategoriesModuleProvider
             indexPattern={resolvedSourceConfiguration.indices}
             sourceId={sourceId}
             spaceId={space.id}
+            timestampField={resolvedSourceConfiguration.timestampField}
             runtimeMappings={resolvedSourceConfiguration.runtimeMappings}
           >
             <LogAnalysisSetupFlyoutStateProvider>{children}</LogAnalysisSetupFlyoutStateProvider>
