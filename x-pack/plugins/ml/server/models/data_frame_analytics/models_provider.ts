@@ -7,7 +7,7 @@
 
 import type { IScopedClusterClient } from 'kibana/server';
 import { sumBy, pick } from 'lodash';
-import { NodesInfoNodeInfo } from '@elastic/elasticsearch/api/types';
+import { NodesInfoNodeInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   NodeDeploymentStatsResponse,
   PipelineDefinition,
@@ -18,6 +18,7 @@ import {
   MemoryOverviewService,
   NATIVE_EXECUTABLE_CODE_OVERHEAD,
 } from '../memory_overview/memory_overview_service';
+import { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
@@ -77,15 +78,15 @@ export function modelsProvider(
         throw new Error('Memory overview service is not provided');
       }
 
-      const { body: deploymentStats } = await mlClient.getTrainedModelsDeploymentStats();
+      const { body: deploymentStats } = await mlClient.getTrainedModelDeploymentStats({
+        model_id: '*',
+      });
 
       const {
         body: { nodes: clusterNodes },
       } = await client.asCurrentUser.nodes.stats();
 
-      const mlNodes = Object.entries(clusterNodes).filter(([id, node]) =>
-        node.roles.includes('ml')
-      );
+      const mlNodes = Object.entries(clusterNodes).filter(([, node]) => node.roles.includes('ml'));
 
       const adMemoryReport = await memoryOverviewService.getAnomalyDetectionMemoryOverview();
       const dfaMemoryReport = await memoryOverviewService.getDFAMemoryOverview();
@@ -94,7 +95,9 @@ export function modelsProvider(
         ([nodeId, node]) => {
           const nodeFields = pick(node, NODE_FIELDS) as RequiredNodeFields;
 
-          const allocatedModels = deploymentStats.deployment_stats
+          const allocatedModels = (
+            deploymentStats.deployment_stats as TrainedModelDeploymentStatsResponse[]
+          )
             .filter((v) => v.nodes.some((n) => Object.keys(n.node)[0] === nodeId))
             .map(({ nodes, ...rest }) => {
               const { node: tempNode, ...nodeRest } = nodes.find(

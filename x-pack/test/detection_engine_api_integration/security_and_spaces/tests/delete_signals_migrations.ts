@@ -41,10 +41,11 @@ export default ({ getService }: FtrProviderContext): void => {
     let finalizedMigration: FinalizeResponse;
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
       outdatedSignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
+
+      await createSignalsIndex(supertest);
 
       ({
         body: {
