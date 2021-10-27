@@ -49,8 +49,6 @@ export const TimestampFromString = new rt.Type<number, string>(
 export const sourceConfigurationConfigFilePropertiesRT = rt.type({
   sources: rt.type({
     default: rt.partial({
-      logAlias: rt.string, // Cannot be deprecated until 8.0.0. Will be converted to an indexName reference.
-      metricAlias: rt.string,
       fields: rt.partial({
         message: rt.array(rt.string),
       }),
