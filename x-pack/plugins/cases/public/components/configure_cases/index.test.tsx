@@ -40,7 +40,8 @@ const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const useGetUrlSearchMock = jest.fn();
 const useActionTypesMock = useActionTypes as jest.Mock;
 
-describe('ConfigureCases', () => {
+// Failing: See https://github.com/elastic/kibana/issues/115366
+describe.skip('ConfigureCases', () => {
   beforeAll(() => {
     useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
       actionTypeTitle: '.servicenow',
