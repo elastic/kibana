@@ -7,8 +7,6 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { EuiFilePicker } from '@elastic/eui';
-
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 import { PipelinesCreateFromCsv } from '../../../public/application/sections/pipelines_create_from_csv';
 import { WithAppDependencies } from './setup_environment';
