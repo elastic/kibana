@@ -161,6 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Add policy to index template modal', async () => {
+      await filterByPolicyName(POLICY_NAME);
       const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
       const addPolicyButton = await policyRow.findByTestSubject('addPolicyToTemplate');
 
@@ -174,6 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Delete policy modal', async () => {
+      await filterByPolicyName(POLICY_NAME);
       const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
       const deleteButton = await policyRow.findByTestSubject('deletePolicy');
 
@@ -187,6 +189,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Index templates flyout', async () => {
+      await filterByPolicyName(POLICY_NAME);
       const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
       const actionsButton = await policyRow.findByTestSubject('viewIndexTemplates');
 
