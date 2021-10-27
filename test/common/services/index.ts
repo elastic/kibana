@@ -16,6 +16,7 @@ import { SecurityServiceProvider } from './security';
 import { EsDeleteAllIndicesProvider } from './es_delete_all_indices';
 import { SavedObjectInfoService } from './saved_object_info';
 import { IndexPatternsService } from './index_patterns';
+import { BSearchProvider } from './bsearch';
 
 export const services = {
   deployment: DeploymentService,
@@ -28,4 +29,5 @@ export const services = {
   esDeleteAllIndices: EsDeleteAllIndicesProvider,
   savedObjectInfo: SavedObjectInfoService,
   indexPatterns: IndexPatternsService,
+  bsearch: BSearchProvider,
 };
