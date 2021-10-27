@@ -7,7 +7,7 @@
 
 import './suggestion_panel.scss';
 
-import { camelCase, pick } from 'lodash';
+import { camelCase, pick, isEqual, sortBy } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -106,7 +106,6 @@ const PreviewRenderer = ({
           className="lnsSuggestionPanel__expressionRenderer"
           padding="s"
           expression={expression}
-          debounce={2000}
           renderError={() => {
             return onErrorMessage;
           }}
@@ -282,6 +281,17 @@ export function SuggestionPanel({
   const sessionIdRef = useRef<string>(searchSessionId);
   sessionIdRef.current = searchSessionId;
 
+  const suggestionsRef = useRef(suggestions);
+  suggestionsRef.current = suggestions;
+  const [localSuggestions, setLocalSuggestions] = useState<typeof suggestions>([]);
+
+  useEffect(() => {
+    if (frame.activeData && !isEqual(sortBy(localSuggestions), sortBy(suggestionsRef.current))) {
+      setLocalSuggestions(suggestionsRef.current);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frame.activeData]);
+
   const AutoRefreshExpressionRenderer = useMemo(() => {
     return (props: ReactExpressionRendererProps) => (
       <ExpressionRendererComponent
@@ -378,7 +388,7 @@ export function SuggestionPanel({
             showTitleAsLabel
           />
         )}
-        {suggestions.map((suggestion, index) => {
+        {localSuggestions.map((suggestion, index) => {
           return (
             <SuggestionPreview
               preview={{
