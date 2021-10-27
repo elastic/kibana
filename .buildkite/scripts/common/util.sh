@@ -86,5 +86,3 @@ set_git_merge_base() {
 
   export GITHUB_PR_MERGE_BASE
 }
-
-export ES_SNAPSHOT_MANIFEST="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/archives/20211026-141722_d4bf2dc8/manifest.json"
