@@ -12,8 +12,8 @@ load("@build_bazel_rules_nodejs//internal/linker:link_node_modules.bzl", "module
 
 
 #### TODO
-###### study around completely split types and code trees for all packages (also test if we can symlink pkg npm into /npm_module instead of base folder)
-###### source maps for api extractor
+# Implement a way to produce source maps for api extractor
+# summarised types as referenced at (https://github.com/microsoft/rushstack/issues/1886#issuecomment-933997910)
 
 def _deps_inputs(ctx):
   """Returns all transitively referenced files on deps """
