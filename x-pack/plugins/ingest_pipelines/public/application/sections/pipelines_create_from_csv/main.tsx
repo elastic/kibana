@@ -87,7 +87,8 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
         message: i18n.translate(
           'xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeError',
           {
-            defaultMessage: `File is greater than allowed size of ${maxBytes} bytes.`,
+            defaultMessage: 'File is greater than allowed size of {maxBytes} bytes.',
+            values: { maxBytes },
           }
         ),
       });
