@@ -7,7 +7,16 @@
 
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  SIGNALS_ID,
+  QUERY_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
 
 import { Logger, SavedObjectsClient } from '../../../../src/core/server';
 import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
@@ -23,6 +32,7 @@ import {
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
+  createSavedQueryAlertType,
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
@@ -34,16 +44,7 @@ import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import {
-  APP_ID,
-  SERVER_APP_ID,
-  SIGNALS_ID,
-  LEGACY_NOTIFICATIONS_ID,
-  QUERY_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-} from '../common/constants';
+import { APP_ID, SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
@@ -223,6 +224,9 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
       plugins.alerting.registerType(
+        securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions))
+      );
+      plugins.alerting.registerType(
         securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
       );
       plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
@@ -238,8 +242,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.security,
       this.telemetryEventsSender,
       plugins.ml,
+      ruleDataService,
       logger,
-      isRuleRegistryEnabled,
+      ruleDataClient,
       ruleOptions
     );
     registerEndpointRoutes(router, endpointContext);
@@ -251,9 +256,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const racRuleTypes = [
       EQL_RULE_TYPE_ID,
-      QUERY_RULE_TYPE_ID,
       INDICATOR_RULE_TYPE_ID,
       ML_RULE_TYPE_ID,
+      QUERY_RULE_TYPE_ID,
+      SAVED_QUERY_RULE_TYPE_ID,
+      THRESHOLD_RULE_TYPE_ID,
     ];
     const ruleTypes = [
       SIGNALS_ID,

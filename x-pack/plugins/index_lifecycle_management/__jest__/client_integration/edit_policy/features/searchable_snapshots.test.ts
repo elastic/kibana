@@ -33,7 +33,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
     component.update();
   });
 
-  test('enabling searchable snapshot should hide force merge, freeze, readonly and shrink in subsequent phases', async () => {
+  test('enabling searchable snapshot should hide force merge, readonly and shrink in subsequent phases', async () => {
     const { actions } = testBed;
 
     await actions.togglePhase('warm');
@@ -43,7 +43,6 @@ describe('<EditPolicy /> searchable snapshots', () => {
     expect(actions.warm.shrinkExists()).toBeTruthy();
     expect(actions.warm.readonlyExists()).toBeTruthy();
     expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
-    expect(actions.cold.freezeExists()).toBeTruthy();
     expect(actions.cold.readonlyExists()).toBeTruthy();
 
     await actions.hot.setSearchableSnapshot('my-repo');
@@ -53,7 +52,6 @@ describe('<EditPolicy /> searchable snapshots', () => {
     expect(actions.warm.readonlyExists()).toBeFalsy();
     // searchable snapshot in cold is still visible
     expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
-    expect(actions.cold.freezeExists()).toBeFalsy();
     expect(actions.cold.readonlyExists()).toBeFalsy();
   });
 

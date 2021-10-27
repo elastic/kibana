@@ -179,7 +179,7 @@ describe('migration v2', () => {
     });
 
     await root.start();
-    const esClient = esServer.es.getClient();
+    const esClient = esServer.es.getKibanaEsClient();
 
     const migratedFooDocs = await fetchDocs(esClient, migratedIndex, 'foo');
     expect(migratedFooDocs.length).toBe(2500);
