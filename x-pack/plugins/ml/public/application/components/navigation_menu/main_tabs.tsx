@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useEffect } from 'react';
 
-import { EuiPageHeader } from '@elastic/eui';
+import { EuiPageHeader, EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TabId } from './navigation_menu';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
@@ -20,6 +20,7 @@ export interface Tab {
   id: TabId;
   name: any;
   disabled: boolean;
+  betaTag?: JSX.Element;
 }
 
 interface Props {
@@ -49,6 +50,27 @@ function getTabs(disableLinks: boolean): Tab[] {
         defaultMessage: 'Data Frame Analytics',
       }),
       disabled: disableLinks,
+    },
+    {
+      id: 'trained_models',
+      name: i18n.translate('xpack.ml.navMenu.trainedModelsTabLinkText', {
+        defaultMessage: 'Model Management',
+      }),
+      disabled: disableLinks,
+      betaTag: (
+        <EuiBetaBadge
+          label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
+            defaultMessage: 'Experimental',
+          })}
+          size="m"
+          color="hollow"
+          iconType="beaker"
+          tooltipContent={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaTooltipContent', {
+            defaultMessage:
+              "Model Management is an experimental feature and subject to change. We'd love to hear your feedback.",
+          })}
+        />
+      ),
     },
     {
       id: 'datavisualizer',
@@ -91,6 +113,12 @@ const TAB_DATA: Record<TabId, TabData> = {
     testSubject: 'mlMainTab dataFrameAnalytics',
     name: i18n.translate('xpack.ml.dataFrameAnalyticsTabLabel', {
       defaultMessage: 'Data Frame Analytics',
+    }),
+  },
+  trained_models: {
+    testSubject: 'mlMainTab modelManagement',
+    name: i18n.translate('xpack.ml.trainedModelsTabLabel', {
+      defaultMessage: 'Trained Models',
     }),
   },
   datavisualizer: {
@@ -173,6 +201,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
           },
           'data-test-subj': testSubject + (id === selectedTabId ? ' selected' : ''),
           isSelected: id === selectedTabId,
+          append: tab.betaTag,
         };
       })}
     />
