@@ -20,14 +20,14 @@ export const useCtiDashboardLinks = (
   eventCountsByDataset: { [key: string]: number },
   to: string,
   from: string,
-  installedIntegrationsId: string[] = []
+  installedIntegrationIds: string[] = []
 ) => {
   const createDashboardUrl = useKibana().services.dashboard?.dashboardUrlGenerator?.createUrl;
   const savedObjectsClient = useKibana().services.savedObjects.client;
 
   const [buttonHref, setButtonHref] = useState<string | undefined>();
   const [listItems, setListItems] = useState<LinkPanelListItem[]>(
-    getEmptyList(installedIntegrationsId)
+    getEmptyList(installedIntegrationIds)
   );
 
   const [isPluginDisabled, setIsDashboardPluginDisabled] = useState(false);
@@ -35,12 +35,12 @@ export const useCtiDashboardLinks = (
     if (!isPluginDisabled) {
       setIsDashboardPluginDisabled(true);
     }
-    setListItems(getCtiListItemsWithoutLinks(eventCountsByDataset, installedIntegrationsId));
+    setListItems(getCtiListItemsWithoutLinks(eventCountsByDataset, installedIntegrationIds));
   }, [
     setIsDashboardPluginDisabled,
     setListItems,
     eventCountsByDataset,
-    installedIntegrationsId,
+    installedIntegrationIds,
     isPluginDisabled,
   ]);
 

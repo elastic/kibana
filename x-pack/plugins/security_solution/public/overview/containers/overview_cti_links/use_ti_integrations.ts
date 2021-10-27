@@ -16,12 +16,12 @@ interface Integration {
 }
 
 interface TIIntegrationStatus {
-  someIntegrationsIsInstalled: boolean | undefined;
-  someIntegrationsIsDisabled: boolean | undefined;
-  installedIntegrationsId: string[];
+  isSomeIntegrationsInstalled: boolean | undefined;
+  isSomeIntegrationsDisabled: boolean | undefined;
+  installedIntegrationIds: string[];
 }
 
-export const useTIIntegrations = () => {
+export const useTiIntegrations = () => {
   const [TIIntegrationsStatus, setTIIntegrationsStatus] = useState<TIIntegrationStatus | null>(
     null
   );
@@ -42,22 +42,22 @@ export const useTIIntegrations = () => {
         const installedIntegrations = tiIntegrations.filter(
           (integration: Integration) => integration.status === installationStatuses.Installed
         );
-        const someIntegrationsIsDisabled = tiIntegrations.some(
+        const isSomeIntegrationsDisabled = tiIntegrations.some(
           (integration: Integration) => integration.status !== installationStatuses.Installed
         );
 
         setTIIntegrationsStatus({
-          someIntegrationsIsDisabled,
-          someIntegrationsIsInstalled: installedIntegrations.length > 0,
-          installedIntegrationsId: installedIntegrations.map(
+          isSomeIntegrationsDisabled,
+          isSomeIntegrationsInstalled: installedIntegrations.length > 0,
+          installedIntegrationIds: installedIntegrations.map(
             (integration: Integration) => integration.id
           ),
         });
       } catch (e) {
         setTIIntegrationsStatus({
-          someIntegrationsIsInstalled: undefined,
-          someIntegrationsIsDisabled: undefined,
-          installedIntegrationsId: [],
+          isSomeIntegrationsInstalled: undefined,
+          isSomeIntegrationsDisabled: undefined,
+          installedIntegrationIds: [],
         });
       }
     };

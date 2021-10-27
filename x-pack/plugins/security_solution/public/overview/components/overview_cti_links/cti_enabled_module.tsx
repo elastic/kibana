@@ -13,14 +13,14 @@ import { CtiWithEvents } from './cti_with_events';
 
 export type CtiEnabledModuleProps = Omit<
   ThreatIntelLinkPanelProps,
-  'hasSomeThreatIntelData' | 'someIntegrationsIsInstalled' | 'someIntegrationsIsDisabled'
+  'hasSomeThreatIntelData' | 'isSomeIntegrationsInstalled' | 'isSomeIntegrationsDisabled'
 > & {
-  someIntegrationsIsDisabled: boolean;
+  isSomeIntegrationsDisabled: boolean;
 };
 
 export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props) => {
   const { eventCountsByDataset, totalCount } = useCtiEventCounts(props);
-  const { to, from } = props;
+  const { to, from, isSomeIntegrationsDisabled, installedIntegrationIds } = props;
 
   switch (totalCount) {
     case -1:
@@ -31,8 +31,8 @@ export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props
           <CtiNoEvents
             to={to}
             from={from}
-            someIntegrationsIsDisabled={props.someIntegrationsIsDisabled}
-            installedIntegrationsId={props.installedIntegrationsId}
+            isSomeIntegrationsDisabled={isSomeIntegrationsDisabled}
+            installedIntegrationIds={installedIntegrationIds}
           />
         </div>
       );
@@ -44,8 +44,8 @@ export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props
             totalCount={totalCount}
             to={to}
             from={from}
-            someIntegrationsIsDisabled={props.someIntegrationsIsDisabled}
-            installedIntegrationsId={props.installedIntegrationsId}
+            isSomeIntegrationsDisabled={isSomeIntegrationsDisabled}
+            installedIntegrationIds={installedIntegrationIds}
           />
         </div>
       );

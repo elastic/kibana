@@ -52,8 +52,8 @@ describe('ThreatIntelLinkPanel', () => {
             <ThreatIntelLinkPanel
               {...mockProps}
               hasSomeThreatIntelData={true}
-              someIntegrationsIsDisabled={true}
-              someIntegrationsIsInstalled={true}
+              isSomeIntegrationsDisabled={true}
+              isSomeIntegrationsInstalled={true}
             />
           </ThemeProvider>
         </I18nProvider>
@@ -71,8 +71,8 @@ describe('ThreatIntelLinkPanel', () => {
             <ThreatIntelLinkPanel
               {...mockProps}
               hasSomeThreatIntelData={false}
-              someIntegrationsIsInstalled={false}
-              someIntegrationsIsDisabled={true}
+              isSomeIntegrationsInstalled={false}
+              isSomeIntegrationsDisabled={true}
             />
           </ThemeProvider>
         </I18nProvider>
@@ -90,8 +90,8 @@ describe('ThreatIntelLinkPanel', () => {
             <ThreatIntelLinkPanel
               {...mockProps}
               hasSomeThreatIntelData={undefined}
-              someIntegrationsIsInstalled={false}
-              someIntegrationsIsDisabled={true}
+              isSomeIntegrationsInstalled={false}
+              isSomeIntegrationsDisabled={true}
             />
           </ThemeProvider>
         </I18nProvider>

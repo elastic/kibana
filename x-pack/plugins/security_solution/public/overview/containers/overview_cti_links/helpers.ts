@@ -10,16 +10,16 @@ import { CTI_DATASET_KEY_MAP } from '../../../../common/cti/constants';
 import { LinkPanelListItem } from '../../components/link_panel';
 import { EventCounts } from '../../components/link_panel/helpers';
 
-export const getInstalledCtiTitles = (installedIntegrationsId: string[]) =>
+export const getInstalledCtiTitles = (installedIntegrationIds: string[]) =>
   Object.entries(CTI_DATASET_KEY_MAP)
     .filter(([title, dataset]) => {
       const moduleId = dataset.split('.')[0];
-      return installedIntegrationsId.includes(moduleId);
+      return installedIntegrationIds.includes(moduleId);
     })
     .map(([title, dataset]) => title);
 
-export const getEmptyList = (installedIntegrationsId: string[]): LinkPanelListItem[] =>
-  getInstalledCtiTitles(installedIntegrationsId).map((title) => ({
+export const getEmptyList = (installedIntegrationIds: string[]): LinkPanelListItem[] =>
+  getInstalledCtiTitles(installedIntegrationIds).map((title) => ({
     title,
     count: 0,
     path: '',
@@ -37,9 +37,9 @@ export const OVERVIEW_DASHBOARD_LINK_TITLE = 'Overview';
 
 export const getCtiListItemsWithoutLinks = (
   eventCounts: EventCounts,
-  installedIntegrationsId: string[]
+  installedIntegrationIds: string[]
 ): LinkPanelListItem[] => {
-  return getEmptyList(installedIntegrationsId).map((item) => ({
+  return getEmptyList(installedIntegrationIds).map((item) => ({
     ...item,
     count: eventCounts[CTI_DATASET_KEY_MAP[item.title]] ?? 0,
   }));
