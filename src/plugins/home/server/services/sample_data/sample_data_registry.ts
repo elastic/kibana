@@ -70,13 +70,9 @@ export class SampleDataRegistry {
       this.initContext.logger.get('sample_data', 'usage')
     );
     const router = core.http.createRouter();
-    createListRoute(router, this.sampleDatasets, this.appLinksMap);
-    createInstallRoute(
-      router,
-      this.sampleDatasets,
-      this.initContext.logger.get('sampleData'),
-      usageTracker
-    );
+    const logger = this.initContext.logger.get('sampleData');
+    createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
+    createInstallRoute(router, this.sampleDatasets, logger, usageTracker);
     createUninstallRoute(router, this.sampleDatasets, usageTracker);
 
     this.registerSampleDataSet(flightsSpecProvider);
