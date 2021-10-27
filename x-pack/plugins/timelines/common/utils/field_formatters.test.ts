@@ -135,8 +135,8 @@ describe('Events Details Helpers', () => {
   it('#getDataFromSourceHits', () => {
     const _source: EventSource = {
       '@timestamp': '2021-02-24T00:41:06.527Z',
-      'signal.status': 'open',
-      'signal.rule.name': 'Rawr',
+      'kibana.alert.workflow_status': 'open',
+      'kibana.alert.rule.name': 'Rawr',
       'threat.indicator': [
         {
           provider: 'yourself',
@@ -161,15 +161,15 @@ describe('Events Details Helpers', () => {
         isObjectArray: false,
       },
       {
-        category: 'signal',
-        field: 'signal.status',
+        category: 'kibana',
+        field: 'kibana.alert.workflow_status',
         values: ['open'],
         originalValue: ['open'],
         isObjectArray: false,
       },
       {
-        category: 'signal',
-        field: 'signal.rule.name',
+        category: 'kibana',
+        field: 'kibana.alert.rule.name',
         values: ['Rawr'],
         originalValue: ['Rawr'],
         isObjectArray: false,
