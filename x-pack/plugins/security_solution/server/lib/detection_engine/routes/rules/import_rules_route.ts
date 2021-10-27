@@ -371,6 +371,12 @@ export const importRulesRoute = (
           ];
         }
 
+        // If we had 100% errors and no successful rule could be imported we still have to output an error.
+        // otherwise we would output we are success importing 0 rules.
+        if (chunkParseObjects.length === 0) {
+          importRuleResponse = [...nonExistentActionErrors, ...duplicateIdErrors];
+        }
+
         const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
         const successes = importRuleResponse.filter((resp) => {
           if (isImportRegular(resp)) {
