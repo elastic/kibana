@@ -150,5 +150,5 @@ const REMOVE_REPORT_METRIC_LABEL = i18n.translate(
 );
 
 const NO_DATA_AVAILABLE = i18n.translate('xpack.observability.expView.seriesEditor.noData', {
-  defaultMessage: 'No data available.',
+  defaultMessage: 'No data available',
 });
