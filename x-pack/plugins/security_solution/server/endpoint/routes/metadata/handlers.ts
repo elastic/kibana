@@ -41,7 +41,7 @@ import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { getAllEndpointPackagePolicies } from './support/endpoint_package_policies';
 import { findAgentIdsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { catchAndWrapError, fleetAgentStatusToEndpointHostStatus } from '../../utils';
+import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
 import {
   queryResponseToHostListResult,
   queryResponseToHostResult,
@@ -194,9 +194,7 @@ export async function getHostMetaData(
 
   const query = getESQueryHostMetadataByID(id);
 
-  const response = await esClient.asCurrentUser
-    .search<HostMetadata>(query)
-    .catch(catchAndWrapError);
+  const response = await esClient.asCurrentUser.search<HostMetadata>(query);
 
   const hostResult = queryResponseToHostResult(response.body);
 
