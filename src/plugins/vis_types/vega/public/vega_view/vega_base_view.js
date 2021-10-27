@@ -7,6 +7,7 @@
  */
 
 import $ from 'jquery';
+import ReactDOM from 'react-dom';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
@@ -20,6 +21,7 @@ import { esFilters } from '../../../../data/public';
 
 import { getEnableExternalUrls, getData } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { VegaMessagesList } from './vega_messages_list';
 
 scheme('elastic', euiPaletteColorBlind());
 
@@ -85,6 +87,7 @@ export class VegaBaseView {
     this._view = null;
     this._vegaViewConfig = null;
     this._$messages = null;
+    this._messages = [];
     this._destroyHandlers = [];
     this._initialized = false;
     this._externalUrl = opts.externalUrl;
@@ -243,15 +246,29 @@ export class VegaBaseView {
     }
   }
 
+  _renderMessages = () =>
+    ReactDOM.render(
+      // eslint-disable-next-line new-cap
+      VegaMessagesList({
+        messages: this._messages,
+        removeMessage: this._removeMessage,
+      }),
+      document.querySelector('.vgaVis__messages')
+    );
+
+  _removeMessage = (text) => {
+    this._messages = this._messages.filter((message) => message.text !== text);
+    this._renderMessages();
+  };
+
   _addMessage(type, text) {
     if (!this._$messages) {
       this._$messages = $(`<ul class="vgaVis__messages">`).appendTo(this._$parentEl);
     }
-    this._$messages.append(
-      $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
-        $(`<pre class="vgaVis__messageCode">`).text(text)
-      )
-    );
+    if (!this._messages.find((message) => message.text === text)) {
+      this._messages.push({ type, text });
+      this._renderMessages();
+    }
   }
 
   resize() {
