@@ -138,6 +138,7 @@ export const EmbeddableWrapper = ({
       extendedColumns={extendedColumns}
       showPreviewByDefault={input?.showPreviewByDefault}
       onChange={onOutputChange}
+      loading={progress < 100}
     />
   );
 };

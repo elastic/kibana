@@ -55,6 +55,7 @@ interface DataVisualizerTableProps<T> {
   showPreviewByDefault?: boolean;
   /** Callback to receive any updates when table or page state is changed **/
   onChange?: (update: Partial<DataVisualizerTableState>) => void;
+  loading?: boolean;
 }
 
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -65,6 +66,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   extendedColumns,
   showPreviewByDefault,
   onChange,
+  loading,
 }: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, setExpandAll] = useState<boolean>(false);
@@ -323,6 +325,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       {(resizeRef) => (
         <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
           <EuiInMemoryTable<T>
+            loading={loading === true}
             className={'dvTable'}
             items={items}
             itemId={FIELD_NAME}

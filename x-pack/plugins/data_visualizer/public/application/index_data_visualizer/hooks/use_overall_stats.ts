@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
 import { combineLatest, forkJoin, of, Subscription } from 'rxjs';
-import { mergeMap, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from 'kibana/public';
 import { useDataVisualizerKibana } from '../../kibana_context';
@@ -176,7 +176,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       nonAggregatableOverallStatsResp: nonAggregatableOverallStats$,
       aggregatableOverallStatsResp: aggregatableOverallStats$,
     }).pipe(
-      mergeMap(
+      switchMap(
         ({
           documentCountStatsResp,
           nonAggregatableOverallStatsResp,
