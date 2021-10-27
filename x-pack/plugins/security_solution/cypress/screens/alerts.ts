@@ -34,6 +34,8 @@ export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="close-alert-status"]'
 
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
+export const EMPTY_ALERT_TABLE = '[data-test-subj="tGridEmptyState"]';
+
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 
 export const ACKNOWLEDGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAlerts"]';
