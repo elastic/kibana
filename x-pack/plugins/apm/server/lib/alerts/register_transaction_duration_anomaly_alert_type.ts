@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { compact } from 'lodash';
 import { ESSearchResponse } from 'src/core/types/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,

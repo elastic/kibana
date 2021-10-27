@@ -10,8 +10,8 @@ import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
 import { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
-import { functions as externalFunctions } from '../canvas_plugin_src/functions/external';
-import { initFunctions } from '../public/functions';
+import { initFunctions as initExternalFunctions } from '../canvas_plugin_src/functions/external';
+import { initFunctions as initClientFunctions } from '../public/functions';
 
 /**
  * A `ExpressionFunctionFactory` is a powerful type used for any function that produces
@@ -90,9 +90,11 @@ export type FunctionFactory<FnFactory> =
 type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;
 type BrowserFunction = FunctionFactory<typeof browserFunctions[number]>;
 type ServerFunction = FunctionFactory<typeof serverFunctions[number]>;
-type ExternalFunction = FunctionFactory<typeof externalFunctions[number]>;
+type ExternalFunction = FunctionFactory<
+  ReturnType<typeof initExternalFunctions> extends Array<infer U> ? U : never
+>;
 type ClientFunctions = FunctionFactory<
-  ReturnType<typeof initFunctions> extends Array<infer U> ? U : never
+  ReturnType<typeof initClientFunctions> extends Array<infer U> ? U : never
 >;
 
 /**

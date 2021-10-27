@@ -35,4 +35,5 @@ export const UI_SETTINGS = {
   AUTOCOMPLETE_USE_TIMERANGE: 'autocomplete:useTimeRange',
   AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: 'autocomplete:valueSuggestionMethod',
   DATE_FORMAT: 'dateFormat',
+  DATEFORMAT_TZ: 'dateFormat:tz',
 } as const;

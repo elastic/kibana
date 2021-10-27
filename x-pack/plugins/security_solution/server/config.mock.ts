@@ -34,7 +34,6 @@ export const createMockConfig = (): ConfigType => {
       underlyingClient: UnderlyingLogClient.savedObjects,
     },
 
-    kibanaIndex: '.kibana',
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
   };
 };

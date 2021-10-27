@@ -14,9 +14,12 @@ export const setTemplate = async (
   body: Record<string, unknown>
 ): Promise<unknown> => {
   return (
-    await esClient.indices.putTemplate({
-      name,
-      body,
-    })
+    await esClient.indices.putTemplate(
+      {
+        name,
+        body,
+      },
+      { meta: true }
+    )
   ).body;
 };
