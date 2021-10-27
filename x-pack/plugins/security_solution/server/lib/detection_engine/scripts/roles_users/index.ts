@@ -13,3 +13,7 @@ export * from './rule_author';
 export * from './soc_manager';
 export * from './t1_analyst';
 export * from './t2_analyst';
+
+// TODO: Steph/sourcerer remove from roles once we have our internal saved object client
+// "indexPatterns": ["read"],
+// "savedObjectsManagement": ["read"],

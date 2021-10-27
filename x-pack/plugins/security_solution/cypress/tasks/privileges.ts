@@ -69,6 +69,7 @@ export const secAll: Role = {
           // TODO: Steph/sourcerer remove once we have our internal saved object client
           indexPatterns: ['read'],
           savedObjectsManagement: ['read'],
+          // END TODO: Steph/sourcerer remove
         },
         spaces: ['*'],
       },
@@ -103,6 +104,7 @@ export const secReadCasesAll: Role = {
           // TODO: Steph/sourcerer remove once we have our internal saved object client
           indexPatterns: ['read'],
           savedObjectsManagement: ['read'],
+          // END TODO: Steph/sourcerer remove
         },
         spaces: ['*'],
       },

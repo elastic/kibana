@@ -67,6 +67,7 @@ export const createInitialState = (
       signalIndexName
     ),
   };
+
   const preloadedState: State = {
     ...pluginsInitState,
     app: { ...initialAppState, enableExperimental },
@@ -95,7 +96,10 @@ export const createInitialState = (
           indicesExist: initialPatterns[SourcererScopeName.timeline].length > 0,
         },
       },
-      defaultDataView,
+      defaultDataView: {
+        ...sourcererModel.initialSourcererState.defaultDataView,
+        ...defaultDataView,
+      },
       kibanaDataViews,
       signalIndexName,
     },
