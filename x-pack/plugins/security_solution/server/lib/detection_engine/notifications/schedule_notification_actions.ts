@@ -7,11 +7,34 @@
 
 import { mapKeys, snakeCase } from 'lodash/fp';
 import { AlertInstance } from '../../../../../alerting/server';
+import { expandDottedObject } from '../rule_types/utils';
 import { RuleParams } from '../schemas/rule_schemas';
+import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 
 export type NotificationRuleTypeParams = RuleParams & {
   id: string;
   name: string;
+};
+
+const convertToLegacyAlert = (alert: Record<string, unknown>): object =>
+  Object.entries(aadFieldConversion).reduce((acc, [legacyField, aadField]) => {
+    const val = alert[aadField];
+    if (val != null) {
+      return {
+        ...acc,
+        [legacyField]: val,
+      };
+    }
+    return acc;
+  }, {});
+
+const formatAlertsForNotificationActions = (alerts: unknown[]) => {
+  return alerts.map((alert) => {
+    return {
+      ...expandDottedObject(convertToLegacyAlert(alert as Record<string, unknown>)),
+      ...expandDottedObject(alert as object),
+    };
+  });
 };
 
 interface ScheduleNotificationActions {
@@ -36,5 +59,5 @@ export const scheduleNotificationActions = ({
     .scheduleActions('default', {
       results_link: resultsLink,
       rule: mapKeys(snakeCase, ruleParams),
-      alerts: signals,
+      alerts: formatAlertsForNotificationActions(signals),
     });
