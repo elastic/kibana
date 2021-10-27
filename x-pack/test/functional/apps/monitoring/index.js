@@ -36,6 +36,8 @@ export default function ({ loadTestFile }) {
 
     loadTestFile(require.resolve('./logstash/overview'));
     loadTestFile(require.resolve('./logstash/overview_mb'));
+    loadTestFile(require.resolve('./logstash/nodes'));
+    loadTestFile(require.resolve('./logstash/nodes_mb'));
     loadTestFile(require.resolve('./logstash/pipelines'));
     loadTestFile(require.resolve('./logstash/pipelines_mb'));
 

@@ -21,6 +21,7 @@ export { MonitoringBeatsListingProvider } from './beats_listing';
 export { MonitoringBeatDetailProvider } from './beat_detail';
 export { MonitoringBeatsSummaryStatusProvider } from './beats_summary_status';
 export { MonitoringLogstashOverviewProvider } from './logstash_overview';
+export { MonitoringLogstashNodesProvider } from './logstash_nodes';
 export { MonitoringLogstashPipelinesProvider } from './logstash_pipelines';
 export { MonitoringLogstashSummaryStatusProvider } from './logstash_summary_status';
 export { MonitoringKibanaOverviewProvider } from './kibana_overview';

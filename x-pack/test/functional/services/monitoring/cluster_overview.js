@@ -183,6 +183,9 @@ export function MonitoringClusterOverviewProvider({ getService }) {
     clickLsOverview() {
       return testSubjects.click(SUBJ_LS_OVERVIEW);
     }
+    clickLsNodes() {
+      return testSubjects.click(SUBJ_LS_NODES);
+    }
     getLsPipelines() {
       return testSubjects.getVisibleText(SUBJ_LS_PIPELINES);
     }
