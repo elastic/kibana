@@ -109,7 +109,6 @@ export default ({ getService }: FtrProviderContext) => {
             migrationIds: [migration.migration_id],
             supertest,
           });
-
           return completed === true;
         }, `polling finalize_migration until complete`);
 
