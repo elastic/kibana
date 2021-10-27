@@ -9,7 +9,7 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable @typescript-eslint/no-useless-constructor */
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import moment from 'moment';
 import uuid from 'uuid';
 import {
@@ -50,7 +50,7 @@ export const mockAuditLogSearchResult = (results?: Results[]) => {
   return response;
 };
 
-export const mockSearchResult = (results: any = []): ApiResponse<any> => {
+export const mockSearchResult = (results: any = []): TransportResult<any> => {
   return {
     body: {
       hits: {

@@ -157,7 +157,7 @@ export const applicationUsageSchema = {
   security_login: commonSchema,
   security_logout: commonSchema,
   security_overwritten_session: commonSchema,
-  securitySolution: commonSchema,
+  securitySolutionUI: commonSchema,
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,

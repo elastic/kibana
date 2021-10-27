@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 import { isActivePlatinumLicense } from '../../common/license_check';
 import { invalidLicenseMessage } from '../../common/service_map';
 import { notifyFeatureUsage } from '../feature';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceMapBackendNodeInfo } from '../lib/service_map/get_service_map_backend_node_info';
@@ -114,12 +114,13 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 });
 
 const serviceMapBackendNodeRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/backend/{backendName}',
+  endpoint: 'GET /internal/apm/service-map/backend',
   params: t.type({
-    path: t.type({
-      backendName: t.string,
-    }),
-    query: t.intersection([environmentRt, rangeRt]),
+    query: t.intersection([
+      t.type({ backendName: t.string }),
+      environmentRt,
+      rangeRt,
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
@@ -134,8 +135,7 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const {
-      path: { backendName },
-      query: { environment, start, end },
+      query: { backendName, environment, start, end },
     } = params;
 
     return getServiceMapBackendNodeInfo({
