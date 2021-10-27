@@ -503,9 +503,9 @@ export class CommonPageObject extends FtrService {
     }
   }
 
-  formatTime(time: { from: string; to: string }, fmt: string = 'MMM D, YYYY @ HH:mm:ss.SSS') {
+  formatTime(time: TimeStrings, fmt: string = 'MMM D, YYYY @ HH:mm:ss.SSS') {
     return Object.keys(time)
-      .map((x: unknown) => moment(time[x], [fmt]).format())
+      .map((x) => moment(time[x], [fmt]).format())
       .reduce(
         (acc, curr, idx) => {
           if (idx === 0) acc.from = curr;
@@ -525,4 +525,8 @@ export class CommonPageObject extends FtrService {
   async unsetTime() {
     await this.kibanaServer.uiSettings.unset('timepicker:timeDefaults');
   }
+}
+export interface TimeStrings extends Record<string, any> {
+  from: string;
+  to: string;
 }
