@@ -179,8 +179,6 @@ export const configDeprecations: ConfigDeprecationProvider = ({ deprecate }) => 
         return completeConfig;
       }
   ),
-  deprecate('sources.default.logAlias', '8.0.0'),
-  deprecate('sources.default.metricAlias', '8.0.0'),
 ];
 
 export const getInfraDeprecationsFactory =
