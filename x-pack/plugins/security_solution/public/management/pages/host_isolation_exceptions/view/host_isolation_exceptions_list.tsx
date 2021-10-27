@@ -135,7 +135,7 @@ export const HostIsolationExceptionsList = () => {
       subtitle={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageSubTitle"
-          defaultMessage="Add a Host isolation exception to allow isolated host to communicate with specific IPs"
+          defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
         />
       }
       actions={
