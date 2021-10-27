@@ -128,6 +128,12 @@ export const importRulesRoute = (
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
         let importRuleResponse: ImportRuleResponse[] = [];
 
+        // If we had 100% errors and no successful rule could be imported we still have to output an error.
+        // otherwise we would output we are success importing 0 rules.
+        if (chunkParseObjects.length === 0) {
+          importRuleResponse = [...nonExistentActionErrors, ...duplicateIdErrors];
+        }
+
         while (chunkParseObjects.length) {
           const batchParseObjects = chunkParseObjects.shift() ?? [];
           const newImportRuleResponse = await Promise.all(
@@ -369,12 +375,6 @@ export const importRulesRoute = (
             ...importRuleResponse,
             ...newImportRuleResponse,
           ];
-        }
-
-        // If we had 100% errors and no successful rule could be imported we still have to output an error.
-        // otherwise we would output we are success importing 0 rules.
-        if (chunkParseObjects.length === 0) {
-          importRuleResponse = [...nonExistentActionErrors, ...duplicateIdErrors];
         }
 
         const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
