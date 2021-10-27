@@ -7,6 +7,8 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
+# .buildkite/scripts/download_build_artifacts.sh
+
+export KIBANA_BUILD_LOCATION=''
 
 is_test_execution_step
