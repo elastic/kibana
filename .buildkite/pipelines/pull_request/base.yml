@@ -9,8 +9,10 @@ steps:
     label: Build Kibana Distribution and Plugins
     agents:
       queue: c2-16
+    env:
+      KIBANA_BUILD_ID: "90bfc8e5-5ebb-40c8-88a9-660b53562e9d"
     key: build
-    if: "false"
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
 
   - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
