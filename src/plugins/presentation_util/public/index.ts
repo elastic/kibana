@@ -54,6 +54,8 @@ export {
   SolutionToolbarPopover,
 } from './components/solution_toolbar';
 
+export * from './components/controls';
+
 export function plugin() {
   return new PresentationUtilPlugin();
 }
