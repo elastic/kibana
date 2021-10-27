@@ -117,7 +117,6 @@ export async function SecuritySolutionCypressUpgradeCliTestRunner({
   getService,
 }: FtrProviderContext) {
   const log = getService('log');
-  const config = getService('config');
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
