@@ -62,7 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Error groups main statistics',
-    { config: 'basic', archives: ['apm_8.0.0_empty'] },
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       describe('when data is loaded', () => {
         const { PROD_LIST_ERROR_RATE, PROD_ID_ERROR_RATE, ERROR_NAME_1, ERROR_NAME_2 } = config;
