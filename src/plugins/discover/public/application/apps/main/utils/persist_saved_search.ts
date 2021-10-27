@@ -52,6 +52,14 @@ export async function persistSavedSearch(
     savedSearch.hideChart = state.hideChart;
   }
 
+  if (state.viewMode) {
+    savedSearch.viewMode = state.viewMode;
+  }
+
+  if (state.hideAggregatedPreview) {
+    savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
+  }
+
   try {
     const id = await saveSavedSearch(savedSearch, saveOptions, services.core.savedObjects.client);
     if (id) {
