@@ -84,38 +84,24 @@ function getFieldAsString(doc: unknown, field: string): string | undefined {
 export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validateEntities.query>> {
   return async (context, request, response) => {
     const {
-      query: { _id, indices },
+      query: { _id, _index },
     } = request;
 
-    const queryResponse = await context.core.elasticsearch.client.asCurrentUser.search({
-      ignore_unavailable: true,
-      index: indices,
-      body: {
-        // only return 1 match at most
-        size: 1,
-        query: {
-          bool: {
-            filter: [
-              {
-                // only return documents with the matching _id
-                ids: {
-                  values: _id,
-                },
-              },
-            ],
-          },
-        },
-      },
+    const eventResponse = await context.core.elasticsearch.client.asCurrentUser.get({
+      id: _id,
+      index: _index,
     });
 
+    const eventBody = eventResponse.body;
+
     const responseBody: ResolverEntityIndex = [];
-    for (const hit of queryResponse.body.hits.hits) {
+    if (eventBody.found) {
       for (const supportedSchema of supportedSchemas) {
         let foundSchema = true;
         // check that the constraint and id fields are defined and that the id field is not an empty string
-        const id = getFieldAsString(hit._source, supportedSchema.schema.id);
+        const id = getFieldAsString(eventBody._source, supportedSchema.schema.id);
         for (const constraint of supportedSchema.constraints) {
-          const fieldValue = getFieldAsString(hit._source, constraint.field);
+          const fieldValue = getFieldAsString(eventBody._source, constraint.field);
           // track that all the constraints are true, if one of them is false then this schema is not valid so mark it
           // that we did not find the schema
           foundSchema = foundSchema && fieldValue?.toLowerCase() === constraint.value.toLowerCase();
@@ -130,6 +116,7 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
         }
       }
     }
+
     return response.ok({ body: responseBody });
   };
 }

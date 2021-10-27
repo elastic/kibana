@@ -27,7 +27,6 @@ export default function ({
   const find = getService('find');
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/87425
   describe('Resolver test app', function () {
     this.tags('ciGroup7');
 

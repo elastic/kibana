@@ -235,18 +235,18 @@ export function dataAccessLayerFactory(
      */
     async entities({
       _id,
-      indices,
+      _index,
       signal,
     }: {
       _id: string;
-      indices: string[];
+      _index: string;
       signal: AbortSignal;
     }): Promise<ResolverEntityIndex> {
       return context.services.http.get('/api/endpoint/resolver/entity', {
         signal,
         query: {
           _id,
-          indices,
+          _index,
         },
       });
     },

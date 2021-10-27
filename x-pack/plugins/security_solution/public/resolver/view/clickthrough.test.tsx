@@ -13,18 +13,18 @@ import { Simulator } from '../test_utilities/simulator';
 import '../test_utilities/extend_jest';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { urlSearch } from '../test_utilities/url_search';
-import { Vector2, AABB, TimeRange, DataAccessLayer } from '../types';
+import { Vector2, AABB, TimeRange, DataAccessLayer, OriginEventInfo } from '../types';
 import { generateTreeWithDAL } from '../data_access_layer/mocks/generator_tree';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
 
 let simulator: Simulator;
-let databaseDocumentID: string;
+let originEventInfo: OriginEventInfo;
 let entityIDs: { origin: string; firstChild: string; secondChild: string };
 
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
-describe("Resolver, when rendered with the `indices` prop set to `[]` and the `databaseDocumentID` prop set to `_id`, and when the document is found in an index called 'awesome_index'", () => {
+describe("Resolver, when rendered with the `indices` prop set to `[]` and the `originEventInfo` prop set to `_id` and `_index`, and when the document is found in an index called 'awesome_index'", () => {
   beforeEach(async () => {
     // create a mock data access layer
     const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
@@ -33,12 +33,12 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
     // save a reference to the entity IDs exposed by the mock data layer
     entityIDs = dataAccessLayerMetadata.entityIDs;
 
-    // save a reference to the `_id` supported by the mock data layer
-    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+    // save a reference to the `_id` and `_index` supported by the mock data layer
+    originEventInfo = dataAccessLayerMetadata.originEventInfo;
 
     // create a resolver simulator, using the data access layer and an arbitrary component instance ID
     simulator = new Simulator({
-      databaseDocumentID,
+      originEventInfo,
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],
@@ -59,7 +59,10 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
 
   describe("when rerendered with the `indices` prop set to `['awesome_index'`]", () => {
     beforeEach(async () => {
-      simulator.indices = ['awesome_index'];
+      simulator.originEventInfo = {
+        ...originEventInfo,
+        databaseDocumentIndex: 'awesome_index',
+      };
     });
     // Combining assertions here for performance. Unfortunately, Enzyme + jsdom + React is slow.
     it(`should have 3 nodes, with the entityID's 'origin', 'firstChild', and 'secondChild'. 'origin' should be selected when the simulator has the right indices`, async () => {
@@ -88,12 +91,12 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
     // save a reference to the entity IDs exposed by the mock data layer
     entityIDs = dataAccessLayerMetadata.entityIDs;
 
-    // save a reference to the `_id` supported by the mock data layer
-    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+    // save a reference to the `_id` and `_index` supported by the mock data layer
+    originEventInfo = dataAccessLayerMetadata.originEventInfo;
 
     // create a resolver simulator, using the data access layer and an arbitrary component instance ID
     simulator = new Simulator({
-      databaseDocumentID,
+      originEventInfo,
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],
@@ -262,8 +265,8 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
     });
 
     generatorDAL = dataAccessLayer;
-    // save a reference to the `_id` supported by the mock data layer
-    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+    // save a reference to the `_id` and `_index` supported by the mock data layer
+    originEventInfo = dataAccessLayerMetadata.originEventInfo;
   });
 
   describe('when clicking on a node in the panel whose node data has not yet been loaded and using a data access layer that returns an error for the clicked node', () => {
@@ -296,7 +299,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
       // create a simulator using most of the generator's data access layer, but let's use our nodeDataError
       // so we can simulator an error when loading data
       simulator = new Simulator({
-        databaseDocumentID,
+        originEventInfo,
         dataAccessLayer: { ...generatorDAL, nodeData: nodeDataError },
         resolverComponentInstanceID,
         indices: [],
@@ -354,7 +357,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
     let foundLoadingNodeInList: string;
     beforeEach(async () => {
       simulator = new Simulator({
-        databaseDocumentID,
+        originEventInfo,
         dataAccessLayer: generatorDAL,
         resolverComponentInstanceID,
         indices: [],
@@ -425,12 +428,12 @@ describe('Resolver, when analyzing a tree that has 2 related registry and 1 rela
     // save a reference to the entity IDs exposed by the mock data layer
     entityIDs = dataAccessLayerMetadata.entityIDs;
 
-    // save a reference to the `_id` supported by the mock data layer
-    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+    // save a reference to the `_id` and `_index` supported by the mock data layer
+    originEventInfo = dataAccessLayerMetadata.originEventInfo;
 
     // create a resolver simulator, using the data access layer and an arbitrary component instance ID
     simulator = new Simulator({
-      databaseDocumentID,
+      originEventInfo,
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],

@@ -37,7 +37,7 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
         return simulatorInstance;
       } else {
         simulatorInstance = new Simulator({
-          databaseDocumentID: dataAccessLayerMetadata.databaseDocumentID,
+          originEventInfo: dataAccessLayerMetadata.originEventInfo,
           dataAccessLayer,
           resolverComponentInstanceID,
           history: memoryHistory,

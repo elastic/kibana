@@ -7,6 +7,7 @@
 
 import { useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { OriginEventInfo } from '../types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 
 /**
@@ -14,16 +15,16 @@ import { useResolverDispatch } from './use_resolver_dispatch';
  * It dispatches actions that keep the store in sync with external properties.
  */
 export function useStateSyncingActions({
-  databaseDocumentID,
+  originEventInfo,
   resolverComponentInstanceID,
   indices,
   filters,
   shouldUpdate,
 }: {
   /**
-   * The `_id` of an event in ES. Used to determine the origin of the Resolver graph.
+   * The `_id` and `_index` of an event in ES. Used to determine the origin of the Resolver graph.
    */
-  databaseDocumentID: string;
+  originEventInfo: OriginEventInfo;
   resolverComponentInstanceID: string;
   indices: string[];
   shouldUpdate: boolean;
@@ -35,7 +36,7 @@ export function useStateSyncingActions({
     dispatch({
       type: 'appReceivedNewExternalProperties',
       payload: {
-        databaseDocumentID,
+        originEventInfo,
         resolverComponentInstanceID,
         locationSearch,
         indices,
@@ -45,7 +46,7 @@ export function useStateSyncingActions({
     });
   }, [
     dispatch,
-    databaseDocumentID,
+    originEventInfo,
     resolverComponentInstanceID,
     locationSearch,
     indices,

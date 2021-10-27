@@ -98,7 +98,7 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
             <Provider store={props.store}>
               <ResolverWithoutProviders
                 ref={resolverRef}
-                databaseDocumentID={props.databaseDocumentID}
+                originEventInfo={props.originEventInfo}
                 resolverComponentInstanceID={props.resolverComponentInstanceID}
                 indices={props.indices}
                 shouldUpdate={props.shouldUpdate}

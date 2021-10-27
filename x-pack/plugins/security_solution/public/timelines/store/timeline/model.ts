@@ -93,7 +93,7 @@ export type SubsetTimelineModel = Readonly<
     | 'excludedRowRendererIds'
     | 'expandedDetail'
     | 'footerText'
-    | 'graphEventId'
+    | 'graphEventInfo'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
     | 'indexNames'

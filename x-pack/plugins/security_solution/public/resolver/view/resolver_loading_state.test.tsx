@@ -18,14 +18,14 @@ describe('Resolver: data loading and resolution states', () => {
   describe('When entities data is being requested', () => {
     beforeEach(() => {
       const {
-        metadata: { databaseDocumentID },
+        metadata: { originEventInfo },
         dataAccessLayer,
         pause,
       } = pausifyMock(noAncestorsTwoChildren());
       pause(['entities']);
       simulator = new Simulator({
         dataAccessLayer,
-        databaseDocumentID,
+        originEventInfo,
         resolverComponentInstanceID,
         indices: [],
         shouldUpdate: false,
@@ -51,14 +51,14 @@ describe('Resolver: data loading and resolution states', () => {
   describe('When resolver tree data is being requested', () => {
     beforeEach(() => {
       const {
-        metadata: { databaseDocumentID },
+        metadata: { originEventInfo },
         dataAccessLayer,
         pause,
       } = pausifyMock(noAncestorsTwoChildren());
       pause(['resolverTree']);
       simulator = new Simulator({
         dataAccessLayer,
-        databaseDocumentID,
+        originEventInfo,
         resolverComponentInstanceID,
         indices: [],
         shouldUpdate: false,
@@ -84,13 +84,13 @@ describe('Resolver: data loading and resolution states', () => {
   describe("When the entities request doesn't return any data", () => {
     beforeEach(() => {
       const {
-        metadata: { databaseDocumentID },
+        metadata: { originEventInfo },
         dataAccessLayer,
       } = emptifyMock(noAncestorsTwoChildren(), ['entities']);
 
       simulator = new Simulator({
         dataAccessLayer,
-        databaseDocumentID,
+        originEventInfo,
         resolverComponentInstanceID,
         indices: [],
         shouldUpdate: false,
@@ -116,13 +116,13 @@ describe('Resolver: data loading and resolution states', () => {
   describe("When the resolver tree request doesn't return any data", () => {
     beforeEach(() => {
       const {
-        metadata: { databaseDocumentID },
+        metadata: { originEventInfo },
         dataAccessLayer,
       } = emptifyMock(noAncestorsTwoChildren(), ['resolverTree']);
 
       simulator = new Simulator({
         dataAccessLayer,
-        databaseDocumentID,
+        originEventInfo,
         resolverComponentInstanceID,
         indices: [],
         shouldUpdate: false,
@@ -150,13 +150,13 @@ describe('Resolver: data loading and resolution states', () => {
   describe('When all resolver data requests successfully resolve', () => {
     beforeEach(async () => {
       const {
-        metadata: { databaseDocumentID },
+        metadata: { originEventInfo },
         dataAccessLayer,
       } = noAncestorsTwoChildren();
 
       simulator = new Simulator({
         dataAccessLayer,
-        databaseDocumentID,
+        originEventInfo,
         resolverComponentInstanceID,
         indices: [],
         shouldUpdate: false,

@@ -10,9 +10,10 @@ import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
 import { urlSearch } from '../test_utilities/url_search';
+import { OriginEventInfo } from '../types';
 
 let simulator: Simulator;
-let databaseDocumentID: string;
+let originEventInfo: OriginEventInfo;
 let entityIDs: { origin: string; firstChild: string; secondChild: string };
 
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
@@ -26,12 +27,12 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
     // save a reference to the entity IDs exposed by the mock data layer
     entityIDs = dataAccessLayerMetadata.entityIDs;
 
-    // save a reference to the `_id` supported by the mock data layer
-    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+    // save a reference to the `_id` `_index` supported by the mock data layer
+    originEventInfo = dataAccessLayerMetadata.originEventInfo;
 
     // create a resolver simulator, using the data access layer and an arbitrary component instance ID
     simulator = new Simulator({
-      databaseDocumentID,
+      originEventInfo,
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],

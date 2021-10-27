@@ -12,45 +12,111 @@ describe('TreeFetcherParameters#equal:', () => {
   const cases: Array<[TreeFetcherParameters, TreeFetcherParameters, boolean]> = [
     // different databaseDocumentID
     [
-      { databaseDocumentID: 'a', indices: [], filters: {} },
-      { databaseDocumentID: 'b', indices: [], filters: {} },
+      {
+        originEventInfo: { databaseDocumentID: 'a', databaseDocumentIndex: 'indexA' },
+        indices: [],
+        filters: {},
+      },
+      {
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexA' },
+        indices: [],
+        filters: {},
+      },
+      false,
+    ],
+    // different databaseDocumentIndex
+    [
+      {
+        originEventInfo: { databaseDocumentID: 'a', databaseDocumentIndex: 'indexA' },
+        indices: [],
+        filters: {},
+      },
+      {
+        originEventInfo: { databaseDocumentID: 'a', databaseDocumentIndex: 'indexB' },
+        indices: [],
+        filters: {},
+      },
       false,
     ],
     // different indices length
     [
-      { databaseDocumentID: 'a', indices: [''], filters: {} },
-      { databaseDocumentID: 'a', indices: [], filters: {} },
+      {
+        originEventInfo: { databaseDocumentID: 'a', databaseDocumentIndex: 'indexA' },
+        indices: [''],
+        filters: {},
+      },
+      {
+        originEventInfo: { databaseDocumentID: 'a', databaseDocumentIndex: 'indexA' },
+        indices: [],
+        filters: {},
+      },
       false,
     ],
     // same indices length, different databaseDocumentID
     [
-      { databaseDocumentID: 'a', indices: [''], filters: {} },
-      { databaseDocumentID: 'b', indices: [''], filters: {} },
+      {
+        originEventInfo: { databaseDocumentID: 'a', databaseDocumentIndex: 'indexA' },
+        indices: [''],
+        filters: {},
+      },
+      {
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexA' },
+        indices: [''],
+        filters: {},
+      },
       false,
     ],
     // 1 item in `indices`
     [
-      { databaseDocumentID: 'b', indices: [''], filters: {} },
-      { databaseDocumentID: 'b', indices: [''], filters: {} },
+      {
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
+        indices: [''],
+        filters: {},
+      },
+      {
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
+        indices: [''],
+        filters: {},
+      },
       true,
     ],
     // 2 item in `indices`
     [
-      { databaseDocumentID: 'b', indices: ['1', '2'], filters: {} },
-      { databaseDocumentID: 'b', indices: ['1', '2'], filters: {} },
+      {
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
+        indices: ['1', '2'],
+        filters: {},
+      },
+      {
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
+        indices: ['1', '2'],
+        filters: {},
+      },
       true,
     ],
-    // 2 item in `indices`, but order inversed
+    // 2 item in `indices`, but order reversed
     [
-      { databaseDocumentID: 'b', indices: ['2', '1'], filters: {} },
-      { databaseDocumentID: 'b', indices: ['1', '2'], filters: {} },
+      {
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
+        indices: ['2', '1'],
+        filters: {},
+      },
+      {
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
+        indices: ['1', '2'],
+        filters: {},
+      },
       true,
     ],
     // all parameters the same, except for the filters
     [
-      { databaseDocumentID: 'b', indices: [], filters: {} },
       {
-        databaseDocumentID: 'b',
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
+        indices: [],
+        filters: {},
+      },
+      {
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
         indices: [],
         filters: { to: 'to', from: 'from' },
       },
@@ -58,9 +124,13 @@ describe('TreeFetcherParameters#equal:', () => {
     ],
     // all parameters the same, except for the filters.to
     [
-      { databaseDocumentID: 'b', indices: [], filters: { to: '100' } },
       {
-        databaseDocumentID: 'b',
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
+        indices: [],
+        filters: { to: '100' },
+      },
+      {
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
         indices: [],
         filters: { to: 'to' },
       },
@@ -69,22 +139,26 @@ describe('TreeFetcherParameters#equal:', () => {
     // all parameters the same, except for the filters.to, parameters are swapped from the one above
     [
       {
-        databaseDocumentID: 'b',
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
         indices: [],
         filters: { to: 'to' },
       },
-      { databaseDocumentID: 'b', indices: [], filters: { to: '100' } },
+      {
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
+        indices: [],
+        filters: { to: '100' },
+      },
       false,
     ],
     // all parameters the same
     [
       {
-        databaseDocumentID: 'b',
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
         indices: [],
         filters: { to: 'to', from: 'from' },
       },
       {
-        databaseDocumentID: 'b',
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
         indices: [],
         filters: { to: 'to', from: 'from' },
       },
@@ -93,12 +167,12 @@ describe('TreeFetcherParameters#equal:', () => {
     // all parameters the same, only using the filters.to field
     [
       {
-        databaseDocumentID: 'b',
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
         indices: [],
         filters: { to: 'to' },
       },
       {
-        databaseDocumentID: 'b',
+        originEventInfo: { databaseDocumentID: 'b', databaseDocumentIndex: 'indexB' },
         indices: [],
         filters: { to: 'to' },
       },

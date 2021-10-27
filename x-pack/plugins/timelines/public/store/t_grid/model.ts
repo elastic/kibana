@@ -54,7 +54,7 @@ export interface TGridModel extends TGridModelSettings {
   expandedDetail: TimelineExpandedDetail;
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
-  graphEventId?: string;
+  graphEventInfo?: GraphEventInfo;
   /** the KQL query in the KQL bar */
   kqlQuery: {
     // TODO convert to nodebuilder
@@ -85,6 +85,12 @@ export interface TGridModel extends TGridModelSettings {
   initialized?: boolean;
 }
 
+// TODO: should this be defined inside of resolve/security solution instead?
+export interface GraphEventInfo {
+  id: string;
+  index: string;
+}
+
 export type TGridModelForTimeline = Pick<
   TGridModel,
   | 'columns'
@@ -98,7 +104,7 @@ export type TGridModelForTimeline = Pick<
   | 'filters'
   | 'filterManager'
   | 'footerText'
-  | 'graphEventId'
+  | 'graphEventInfo'
   | 'kqlQuery'
   | 'queryFields'
   | 'id'

@@ -119,7 +119,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const { setTimelineFullScreen } = useTimelineFullScreen();
   const handleClick = useCallback(() => {
     const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
-    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
+    dispatch(
+      updateTimelineGraphEventId({
+        id: timelineId,
+        graphEventInfo: { id: ecsData._id, index: ecsData._index },
+      })
+    );
     if (timelineId === TimelineId.active) {
       if (dataGridIsFullScreen) {
         setTimelineFullScreen(true);
@@ -130,7 +135,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
         setGlobalFullScreen(true);
       }
     }
-  }, [dispatch, ecsData._id, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
+  }, [
+    dispatch,
+    ecsData._id,
+    ecsData._index,
+    timelineId,
+    setGlobalFullScreen,
+    setTimelineFullScreen,
+  ]);
 
   return (
     <ActionsContainer>

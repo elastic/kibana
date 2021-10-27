@@ -19,7 +19,8 @@ export function equal(param1: TreeFetcherParameters, param2?: TreeFetcherParamet
     return true;
   }
   if (
-    param1.databaseDocumentID !== param2.databaseDocumentID ||
+    param1.originEventInfo.databaseDocumentID !== param2.originEventInfo.databaseDocumentID ||
+    param1.originEventInfo.databaseDocumentIndex !== param2.originEventInfo.databaseDocumentIndex ||
     param1.filters.from !== param2.filters.from ||
     param1.filters.to !== param2.filters.to
   ) {

@@ -24,7 +24,7 @@ import type {
   TimelinePersistInput,
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
-import { tGridActions } from '../../../../../timelines/public';
+import { GraphEventInfo, tGridActions } from '../../../../../timelines/public';
 import { ResolveTimelineConfig } from '../../components/open_timeline/types';
 export const {
   applyDeltaToColumnWidth,
@@ -78,9 +78,10 @@ export const removeProvider = actionCreator<{
   andProviderId?: string;
 }>('REMOVE_PROVIDER');
 
-export const updateTimelineGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
-  'UPDATE_TIMELINE_GRAPH_EVENT_ID'
-);
+export const updateTimelineGraphEventId = actionCreator<{
+  id: string;
+  graphEventInfo: GraphEventInfo;
+}>('UPDATE_TIMELINE_GRAPH_EVENT_INFO');
 
 export const unPinEvent = actionCreator<{ id: string; eventId: string }>('UN_PIN_EVENT');
 

@@ -29,7 +29,9 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       tree: {
         ...state.tree,
         currentParameters: {
-          databaseDocumentID: action.payload.databaseDocumentID,
+          originEventInfo: {
+            ...action.payload.originEventInfo,
+          },
           indices: action.payload.indices,
           filters: action.payload.filters,
         },
@@ -58,7 +60,9 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       tree: {
         ...state.tree,
         pendingRequestParameters: {
-          databaseDocumentID: action.payload.databaseDocumentID,
+          originEventInfo: {
+            ...action.payload.originEventInfo,
+          },
           indices: action.payload.indices,
           filters: action.payload.filters,
         },

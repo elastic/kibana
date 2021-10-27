@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
 import { ResolverEntityIndex } from '../../../../plugins/security_solution/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -28,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
         // this id is from the es archive
         const _id = 'sysmon-event';
         const { body }: { body: ResolverEntityIndex } = await supertest.get(
-          `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=winlogbeat-7.11.0-default`
+          `/api/endpoint/resolver/entity?_id=${_id}&_index=winlogbeat-7.11.0-default`
         );
         expect(body).eql([
           {
@@ -48,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
         // this id is from the es archive
         const _id = 'powershell-event';
         const { body }: { body: ResolverEntityIndex } = await supertest.get(
-          `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=winlogbeat-7.11.0-default`
+          `/api/endpoint/resolver/entity?_id=${_id}&_index=winlogbeat-7.11.0-default`
         );
         expect(body).to.be.empty();
       });
@@ -67,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
         // this id is from the es archive
         const _id = 'fa7eb1546f44fd47d8868be8d74e0082e19f22df493c67a7725457978eb648ab';
         const { body }: { body: ResolverEntityIndex } = await supertest.get(
-          `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=.siem-signals-default`
+          `/api/endpoint/resolver/entity?_id=${_id}&_index=.siem-signals-default`
         );
         expect(body).eql([
           {
@@ -88,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
         // this id is from the es archive
         const _id = 'no-entity-id-field';
         const { body }: { body: ResolverEntityIndex } = await supertest.get(
-          `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=.siem-signals-default`
+          `/api/endpoint/resolver/entity?_id=${_id}&_index=.siem-signals-default`
         );
         expect(body).to.be.empty();
       });
@@ -97,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
         // this id is from the es archive
         const _id = 'no-process-field';
         const { body }: { body: ResolverEntityIndex } = await supertest.get(
-          `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=.siem-signals-default`
+          `/api/endpoint/resolver/entity?_id=${_id}&_index=.siem-signals-default`
         );
         expect(body).to.be.empty();
       });

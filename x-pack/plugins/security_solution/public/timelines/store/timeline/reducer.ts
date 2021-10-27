@@ -142,9 +142,13 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
   }))
-  .case(updateTimelineGraphEventId, (state, { id, graphEventId }) => ({
+  .case(updateTimelineGraphEventId, (state, { id, graphEventInfo }) => ({
     ...state,
-    timelineById: updateGraphEventId({ id, graphEventId, timelineById: state.timelineById }),
+    timelineById: updateGraphEventId({
+      id,
+      graphEventInfo,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(pinEvent, (state, { id, eventId }) => ({
     ...state,

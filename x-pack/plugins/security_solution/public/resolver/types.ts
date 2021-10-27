@@ -200,9 +200,9 @@ export interface VisibleEntites {
 
 export interface TreeFetcherParameters {
   /**
-   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
+   * The `_id` and `_index` for an ES document. Used to select a process that we'll show the graph for.
    */
-  databaseDocumentID: string;
+  originEventInfo: OriginEventInfo;
 
   /**
    * The indices that the backend will use to search for the document ID.
@@ -257,9 +257,9 @@ export interface NodeEventsInCategoryState {
  */
 export interface GeneratedTreeMetadata {
   /**
-   * The `_id` of the document being analyzed.
+   * The `_id` and `_index` of the document being analyzed.
    */
-  databaseDocumentID: string;
+  originEventInfo: OriginEventInfo;
   /**
    * This field holds the nodes created by the resolver generator that make up a resolver graph.
    */
@@ -790,8 +790,8 @@ export interface DataAccessLayer {
   entities: (parameters: {
     /** _id of the document to find an entity in. */
     _id: string;
-    /** indices to search in */
-    indices: string[];
+    /** index to search in */
+    _index: string;
     /** signal to abort the request */
     signal: AbortSignal;
   }) => Promise<ResolverEntityIndex>;
@@ -802,6 +802,19 @@ export interface TimeFilters {
   to?: string;
 }
 
+export interface OriginEventInfo {
+  /**
+   * The `_id` value of an event in ES.
+   * Used as the origin of the Resolver graph.
+   */
+  databaseDocumentID: string;
+
+  /**
+   * The `_index` value of the origin event in ES.
+   */
+  databaseDocumentIndex: string;
+}
+
 /**
  * The externally provided React props.
  */
@@ -810,11 +823,8 @@ export interface ResolverProps {
    * Used by `styled-components`.
    */
   className?: string;
-  /**
-   * The `_id` value of an event in ES.
-   * Used as the origin of the Resolver graph.
-   */
-  databaseDocumentID: string;
+
+  originEventInfo: OriginEventInfo;
 
   /**
    * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.

@@ -70,12 +70,12 @@ export const validateEvents = {
 export const validateEntities = {
   query: schema.object({
     /**
-     * Return the process entities related to the document w/ the matching `_id`.
+     * Return the process entities related to the document w/ the matching `_id` in a specific `_index`.
      */
     _id: schema.string(),
     /**
-     * Indices to search in.
+     * Index to retrieve the entity id from.
      */
-    indices: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    _index: schema.string(),
   }),
 };

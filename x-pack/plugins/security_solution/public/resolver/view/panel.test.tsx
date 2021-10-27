@@ -62,7 +62,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         return simulatorInstance;
       } else {
         simulatorInstance = new Simulator({
-          databaseDocumentID: dataAccessLayerMetadata.databaseDocumentID,
+          originEventInfo: dataAccessLayerMetadata.originEventInfo,
           dataAccessLayer,
           resolverComponentInstanceID,
           history: memoryHistory,

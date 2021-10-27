@@ -12,7 +12,7 @@ import {
   SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import { mockTreeWithNoProcessEvents } from '../../mocks/resolver_tree';
-import { DataAccessLayer } from '../../types';
+import { DataAccessLayer, OriginEventInfo } from '../../types';
 
 type EmptiableRequests =
   | 'relatedEvents'
@@ -24,9 +24,9 @@ type EmptiableRequests =
 
 interface Metadata<T> {
   /**
-   * The `_id` of the document being analyzed.
+   * The `_id` and `_index` of the document being analyzed.
    */
-  databaseDocumentID: string;
+  originEventInfo: OriginEventInfo;
   /**
    * A record of entityIDs to be used in tests assertions.
    */

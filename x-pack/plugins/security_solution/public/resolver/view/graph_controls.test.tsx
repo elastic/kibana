@@ -27,13 +27,13 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   beforeEach(async () => {
     const {
-      metadata: { databaseDocumentID, entityIDs },
+      metadata: { originEventInfo, entityIDs },
       dataAccessLayer,
     } = noAncestorsTwoChildren();
 
     simulator = new Simulator({
       dataAccessLayer,
-      databaseDocumentID,
+      originEventInfo,
       resolverComponentInstanceID,
       indices: [],
       shouldUpdate: false,

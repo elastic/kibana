@@ -74,6 +74,11 @@ const AppRoot = React.memo(
       return storeFactory(dataAccessLayer);
     }, [storeFactory, dataAccessLayer]);
 
+    const originEventInfo = {
+      databaseDocumentID: '',
+      databaseDocumentIndex: '',
+    };
+
     return (
       <I18nProvider>
         <Router history={parameters.history}>
@@ -81,7 +86,7 @@ const AppRoot = React.memo(
             <Provider store={store}>
               <Wrapper>
                 <ResolverWithoutProviders
-                  databaseDocumentID=""
+                  originEventInfo={originEventInfo}
                   resolverComponentInstanceID="test"
                   indices={[]}
                   shouldUpdate={false}

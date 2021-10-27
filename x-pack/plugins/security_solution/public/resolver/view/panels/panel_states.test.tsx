@@ -50,7 +50,7 @@ describe('Resolver: panel loading and resolution states', () => {
       let resumeRequest: (pausableRequest: ['event']) => void;
       beforeEach(() => {
         const {
-          metadata: { databaseDocumentID },
+          metadata: { originEventInfo },
           dataAccessLayer,
           pause,
           resume,
@@ -62,7 +62,7 @@ describe('Resolver: panel loading and resolution states', () => {
 
         simulator = new Simulator({
           dataAccessLayer,
-          databaseDocumentID,
+          originEventInfo,
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
@@ -104,13 +104,13 @@ describe('Resolver: panel loading and resolution states', () => {
     describe('when the server fails to return event data on the event detail panel', () => {
       beforeEach(() => {
         const {
-          metadata: { databaseDocumentID },
+          metadata: { originEventInfo },
           dataAccessLayer,
         } = emptifyMock(noAncestorsTwoChildrenWithRelatedEventsOnOrigin(), ['event']);
         memoryHistory = createMemoryHistory();
         simulator = new Simulator({
           dataAccessLayer,
-          databaseDocumentID,
+          originEventInfo,
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
@@ -139,7 +139,7 @@ describe('Resolver: panel loading and resolution states', () => {
       let resumeRequest: (pausableRequest: ['eventsWithEntityIDAndCategory']) => void;
       beforeEach(() => {
         const {
-          metadata: { databaseDocumentID },
+          metadata: { originEventInfo },
           dataAccessLayer,
           pause,
           resume,
@@ -151,7 +151,7 @@ describe('Resolver: panel loading and resolution states', () => {
 
         simulator = new Simulator({
           dataAccessLayer,
-          databaseDocumentID,
+          originEventInfo,
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
@@ -198,7 +198,7 @@ describe('Resolver: panel loading and resolution states', () => {
       let resumeRequest: (pausableRequest: ['nodeData']) => void;
       beforeEach(() => {
         const {
-          metadata: { databaseDocumentID },
+          metadata: { originEventInfo },
           dataAccessLayer,
           pause,
           resume,
@@ -210,7 +210,7 @@ describe('Resolver: panel loading and resolution states', () => {
 
         simulator = new Simulator({
           dataAccessLayer,
-          databaseDocumentID,
+          originEventInfo,
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],

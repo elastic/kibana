@@ -9,9 +9,10 @@ import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
+import { OriginEventInfo } from '../types';
 
 let simulator: Simulator;
-let databaseDocumentID: string;
+let originEventInfo: OriginEventInfo;
 
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
@@ -21,12 +22,12 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
     // create a mock data access layer
     const { metadata: dataAccessLayerMetadata, dataAccessLayer } = noAncestorsTwoChildren();
 
-    // save a reference to the `_id` supported by the mock data layer
-    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+    // save a reference to the `_id` and `_index` supported by the mock data layer
+    originEventInfo = dataAccessLayerMetadata.originEventInfo;
 
     // create a resolver simulator, using the data access layer and an arbitrary component instance ID
     simulator = new Simulator({
-      databaseDocumentID,
+      originEventInfo,
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],

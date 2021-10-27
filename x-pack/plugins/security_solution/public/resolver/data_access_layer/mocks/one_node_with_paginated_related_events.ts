@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataAccessLayer, TimeRange } from '../../types';
+import { DataAccessLayer, OriginEventInfo, TimeRange } from '../../types';
 import { mockTreeWithOneNodeAndTwoPagesOfRelatedEvents } from '../../mocks/resolver_tree';
 import {
   ResolverRelatedEvents,
@@ -18,9 +18,9 @@ import * as eventModel from '../../../../common/endpoint/models/event';
 
 interface Metadata {
   /**
-   * The `_id` of the document being analyzed.
+   * The `_id` and `_index` of the document being analyzed.
    */
-  databaseDocumentID: string;
+  originEventInfo: OriginEventInfo;
   /**
    * A record of entityIDs to be used in tests assertions.
    */
@@ -36,7 +36,10 @@ export function oneNodeWithPaginatedEvents(): {
   metadata: Metadata;
 } {
   const metadata: Metadata = {
-    databaseDocumentID: '_id',
+    originEventInfo: {
+      databaseDocumentID: '_id',
+      databaseDocumentIndex: '_index',
+    },
     entityIDs: { origin: 'origin' },
   };
   const mockTree: {

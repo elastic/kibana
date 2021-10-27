@@ -14,13 +14,13 @@ import {
 } from '../../../../common/endpoint/types';
 import { mockEndpointEvent } from '../../mocks/endpoint_event';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
-import { DataAccessLayer, TimeRange } from '../../types';
+import { DataAccessLayer, OriginEventInfo, TimeRange } from '../../types';
 
 interface Metadata {
   /**
-   * The `_id` of the document being analyzed.
+   * The `_id` and `_index` of the document being analyzed.
    */
-  databaseDocumentID: string;
+  originEventInfo: OriginEventInfo;
   /**
    * A record of entityIDs to be used in tests assertions.
    */
@@ -49,7 +49,10 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
   metadata: Metadata;
 } {
   const metadata: Metadata = {
-    databaseDocumentID: '_id',
+    originEventInfo: {
+      databaseDocumentID: '_id',
+      databaseDocumentIndex: '_index',
+    },
     entityIDs: { origin: 'origin', firstChild: 'firstChild', secondChild: 'secondChild' },
   };
   return {
@@ -181,9 +184,9 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
       /**
        * Get entities matching a document.
        */
-      entities({ indices }): Promise<ResolverEntityIndex> {
-        // Only return values if the `indices` array contains exactly `'awesome_index'`
-        if (indices.length === 1 && indices[0] === 'awesome_index') {
+      entities({ _index }): Promise<ResolverEntityIndex> {
+        // Only return values if the `_index` field contains exactly `'awesome_index'`
+        if (_index === 'awesome_index') {
           return Promise.resolve([
             {
               name: 'endpoint',

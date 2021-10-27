@@ -10,7 +10,6 @@ import {
   entityIDSafeVersion,
   timestampAsDateSafeVersion,
 } from '../../../../plugins/security_solution/common/endpoint/models/event';
-import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
 import {
   ResolverEntityIndex,
   ResolverNode,
@@ -55,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body }: { body: ResolverEntityIndex } = await supertest.get(
           // using the same indices value here twice to force the query parameter to be an array
           // for some reason using supertest's query() function doesn't construct a parsable array
-          `/api/endpoint/resolver/entity?_id=${genData.eventsInfo[0]._id}&indices=${eventsIndexPattern}&indices=${eventsIndexPattern}`
+          `/api/endpoint/resolver/entity?_id=${genData.eventsInfo[0]._id}&_index=logs-endpoint.events.process-default`
         );
         expect(body).to.be.empty();
       });

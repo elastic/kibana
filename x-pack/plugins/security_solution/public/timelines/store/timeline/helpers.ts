@@ -48,6 +48,7 @@ import {
 } from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { ResolveTimelineConfig } from '../../components/open_timeline/types';
+import { GraphEventInfo } from '../../../../../timelines/public';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -265,21 +266,22 @@ export const updateTimelineShowTimeline = ({
 
 export const updateGraphEventId = ({
   id,
-  graphEventId,
+  graphEventInfo,
   timelineById,
 }: {
   id: string;
-  graphEventId: string;
+  graphEventInfo: GraphEventInfo;
   timelineById: TimelineById;
 }): TimelineById => {
   const timeline = timelineById[id];
+  const { id: graphEventId, index: graphEventIndex } = graphEventInfo;
 
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      graphEventId,
-      ...(graphEventId === '' && id === TimelineId.active
+      graphEventInfo,
+      ...(graphEventId === '' && graphEventIndex === '' && id === TimelineId.active
         ? { activeTab: timeline.prevActiveTab, prevActiveTab: timeline.activeTab }
         : {}),
     },

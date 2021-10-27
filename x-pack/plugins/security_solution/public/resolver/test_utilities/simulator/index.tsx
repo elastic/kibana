@@ -20,6 +20,7 @@ import {
   SpyMiddleware,
   SideEffectSimulator,
   TimeFilters,
+  OriginEventInfo,
 } from '../../types';
 import { ResolverAction } from '../../store/actions';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
@@ -79,7 +80,7 @@ export class Simulator {
   constructor({
     dataAccessLayer,
     resolverComponentInstanceID,
-    databaseDocumentID,
+    originEventInfo,
     indices,
     history,
     filters,
@@ -98,9 +99,9 @@ export class Simulator {
      */
     indices: string[];
     /**
-     * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
+     * The id and index for an event. Resolver will use this in requests to the mock data layer.
      */
-    databaseDocumentID: string;
+    originEventInfo: OriginEventInfo;
     history?: HistoryPackageHistoryInterface<never>;
     filters: TimeFilters;
     shouldUpdate: boolean;
@@ -140,7 +141,7 @@ export class Simulator {
         sideEffectSimulator={this.sideEffectSimulator}
         store={this.store}
         coreStart={coreStart}
-        databaseDocumentID={databaseDocumentID}
+        originEventInfo={originEventInfo}
         indices={indices}
         filters={filters}
         shouldUpdate={shouldUpdate}
@@ -181,6 +182,20 @@ export class Simulator {
    */
   public get indices(): string[] {
     return this.wrapper.prop('indices');
+  }
+
+  /**
+   * Change the originEventInfo (updates the React component props.)
+   */
+  public set originEventInfo(value: OriginEventInfo) {
+    this.wrapper.setProps({ originEventInfo: value });
+  }
+
+  /**
+   * Get the originEventInfo (updates the React component props.)
+   */
+  public get originEventInfo(): OriginEventInfo {
+    return this.wrapper.prop('originEventInfo');
   }
 
   /**

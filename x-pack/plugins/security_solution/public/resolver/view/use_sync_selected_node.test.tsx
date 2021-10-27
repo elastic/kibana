@@ -34,7 +34,7 @@ describe(`Resolver: when analyzing a tree with 0 ancestors, 2 children, 2 relate
     memoryHistory = createMemoryHistory();
 
     simulator = new Simulator({
-      databaseDocumentID: dataAccessLayerMetadata.databaseDocumentID,
+      originEventInfo: dataAccessLayerMetadata.originEventInfo,
       dataAccessLayer,
       resolverComponentInstanceID,
       history: memoryHistory,

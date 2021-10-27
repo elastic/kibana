@@ -48,7 +48,10 @@ export function generateTreeWithDAL(
   const { allNodes, generatedTree, formattedTree } = generateTree(treeOptions);
 
   const metadata: GeneratedTreeMetadata = {
-    databaseDocumentID: '_id',
+    originEventInfo: {
+      databaseDocumentID: '_id',
+      databaseDocumentIndex: '_index',
+    },
     generatedTree,
     formattedTree,
   };

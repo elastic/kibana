@@ -39,6 +39,7 @@ import {
   endSelector,
 } from '../../../common/components/super_date_picker/selectors';
 import * as i18n from './translations';
+import { OriginEventInfo } from '../../../resolver/types';
 
 const OverlayContainer = styled.div`
   display: flex;
@@ -121,10 +122,8 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
 
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const graphEventId = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
-  );
+  const originEventInfo = useGetOriginEventInfo(timelineId);
+
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
   const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
@@ -163,7 +162,12 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
     } else {
       setGlobalFullScreen(false);
     }
-    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
+    dispatch(
+      updateTimelineGraphEventId({
+        id: timelineId,
+        graphEventInfo: { id: '', index: '' },
+      })
+    );
   }, [dispatch, timelineId, setTimelineFullScreen, setGlobalFullScreen]);
 
   const toggleFullScreen = useCallback(() => {
@@ -202,9 +206,9 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="none" />
-        {graphEventId !== undefined ? (
+        {originEventInfo !== undefined ? (
           <StyledResolver
-            databaseDocumentID={graphEventId}
+            originEventInfo={originEventInfo}
             resolverComponentInstanceID={timelineId}
             indices={existingIndexNames}
             shouldUpdate={shouldUpdate}
@@ -234,9 +238,9 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="none" />
-        {graphEventId !== undefined ? (
+        {originEventInfo !== undefined ? (
           <StyledResolver
-            databaseDocumentID={graphEventId}
+            originEventInfo={originEventInfo}
             resolverComponentInstanceID={timelineId}
             indices={existingIndexNames}
             shouldUpdate={shouldUpdate}
@@ -250,6 +254,22 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
       </OverlayContainer>
     );
   }
+};
+
+const useGetOriginEventInfo = (timelineId: TimelineId): OriginEventInfo | undefined => {
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const graphEventInfo = useDeepEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventInfo
+  );
+
+  if (!graphEventInfo) {
+    return;
+  }
+
+  return {
+    databaseDocumentID: graphEventInfo.id,
+    databaseDocumentIndex: graphEventInfo.index,
+  };
 };
 
 export const GraphOverlay = React.memo(GraphOverlayComponent);

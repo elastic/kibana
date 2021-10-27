@@ -38,7 +38,7 @@ export const ResolverWithoutProviders = React.memo(
   React.forwardRef(function (
     {
       className,
-      databaseDocumentID,
+      originEventInfo,
       resolverComponentInstanceID,
       indices,
       shouldUpdate,
@@ -49,10 +49,10 @@ export const ResolverWithoutProviders = React.memo(
     useResolverQueryParamCleaner();
     /**
      * This is responsible for dispatching actions that include any external data.
-     * `databaseDocumentID`
+     * `databaseDocumentID` and `databaseDocumentIndex`
      */
     useStateSyncingActions({
-      databaseDocumentID,
+      originEventInfo,
       resolverComponentInstanceID,
       indices,
       shouldUpdate,

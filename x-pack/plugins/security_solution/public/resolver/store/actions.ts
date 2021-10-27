@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OriginEventInfo } from '../types';
 import { CameraAction } from './camera';
 import { DataAction } from './data/action';
 
@@ -71,9 +72,9 @@ interface AppReceivedNewExternalProperties {
    */
   payload: {
     /**
-     * the `_id` of an ES document. This defines the origin of the Resolver graph.
+     * the `_id` and `_index` of an ES document. This defines the origin of the Resolver graph.
      */
-    databaseDocumentID: string;
+    originEventInfo: OriginEventInfo;
     /**
      * An ID that uniquely identifies this Resolver instance from other concurrent Resolvers.
      */

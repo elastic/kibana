@@ -132,14 +132,18 @@ describe('data state', () => {
   });
 
   describe('when there are parameters to fetch but no pending request', () => {
-    const databaseDocumentID = 'databaseDocumentID';
+    const originEventInfo = {
+      databaseDocumentID: 'databaseDocumentID',
+      databaseDocumentIndex: 'index',
+    };
+
     const resolverComponentInstanceID = 'resolverComponentInstanceID';
     beforeEach(() => {
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
           payload: {
-            databaseDocumentID,
+            originEventInfo,
             resolverComponentInstanceID,
 
             // `locationSearch` doesn't matter for this test
@@ -152,7 +156,7 @@ describe('data state', () => {
       ];
     });
     it('should need to request the tree', () => {
-      expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(databaseDocumentID);
+      expect(selectors.treeParametersToFetch(state())?.originEventInfo).toEqual(originEventInfo);
     });
     it('should not be loading, have an error, have more children or ancestors, or have a pending request that needs to be aborted.', () => {
       expect(viewAsAString(state())).toMatchInlineSnapshot(`
@@ -160,18 +164,21 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
+        parameters to fetch: {\\"originEventInfo\\":{\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"databaseDocumentIndex\\":\\"index\\"},\\"indices\\":[],\\"filters\\":{}}
         requires a pending request to be aborted: null"
       `);
     });
   });
   describe('when there is a pending request but no current tree fetching parameters', () => {
-    const databaseDocumentID = 'databaseDocumentID';
+    const originEventInfo = {
+      databaseDocumentID: 'databaseDocumentID',
+      databaseDocumentIndex: 'index',
+    };
     beforeEach(() => {
       actions = [
         {
           type: 'appRequestedResolverData',
-          payload: { databaseDocumentID, indices: [], filters: {} },
+          payload: { originEventInfo, indices: [], filters: {} },
         },
       ];
     });
@@ -179,8 +186,8 @@ describe('data state', () => {
       expect(selectors.isTreeLoading(state())).toBe(true);
     });
     it('should have a request to abort', () => {
-      expect(selectors.treeRequestParametersToAbort(state())?.databaseDocumentID).toBe(
-        databaseDocumentID
+      expect(selectors.treeRequestParametersToAbort(state())?.originEventInfo).toEqual(
+        originEventInfo
       );
     });
     it('should not have an error, more children, more ancestors, or request to make.', () => {
@@ -190,19 +197,22 @@ describe('data state', () => {
         has more children: false
         has more ancestors: false
         parameters to fetch: null
-        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
+        requires a pending request to be aborted: {\\"originEventInfo\\":{\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"databaseDocumentIndex\\":\\"index\\"},\\"indices\\":[],\\"filters\\":{}}"
       `);
     });
   });
   describe('when there is a pending request that was made using the current parameters', () => {
-    const databaseDocumentID = 'databaseDocumentID';
+    const originEventInfo = {
+      databaseDocumentID: 'databaseDocumentID',
+      databaseDocumentIndex: 'index',
+    };
     const resolverComponentInstanceID = 'resolverComponentInstanceID';
     beforeEach(() => {
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
           payload: {
-            databaseDocumentID,
+            originEventInfo,
             resolverComponentInstanceID,
 
             // `locationSearch` doesn't matter for this test
@@ -214,7 +224,7 @@ describe('data state', () => {
         },
         {
           type: 'appRequestedResolverData',
-          payload: { databaseDocumentID, indices: [], filters: {} },
+          payload: { originEventInfo, indices: [], filters: {} },
         },
       ];
     });
@@ -238,7 +248,7 @@ describe('data state', () => {
       beforeEach(() => {
         actions.push({
           type: 'serverFailedToReturnResolverData',
-          payload: { databaseDocumentID, indices: [], filters: {} },
+          payload: { originEventInfo, indices: [], filters: {} },
         });
       });
       it('should not be loading', () => {
@@ -260,8 +270,16 @@ describe('data state', () => {
     });
   });
   describe('when there is a pending request that was made with parameters that are different than the current tree fetching parameters', () => {
-    const firstDatabaseDocumentID = 'first databaseDocumentID';
-    const secondDatabaseDocumentID = 'second databaseDocumentID';
+    const firstOriginEventInfo = {
+      databaseDocumentID: 'first databaseDocumentID',
+      databaseDocumentIndex: 'first index',
+    };
+
+    const secondOriginEventInfo = {
+      databaseDocumentID: 'second databaseDocumentID',
+      databaseDocumentIndex: 'second index',
+    };
+
     const resolverComponentInstanceID1 = 'resolverComponentInstanceID1';
     const resolverComponentInstanceID2 = 'resolverComponentInstanceID2';
     beforeEach(() => {
@@ -270,7 +288,7 @@ describe('data state', () => {
         {
           type: 'appReceivedNewExternalProperties',
           payload: {
-            databaseDocumentID: firstDatabaseDocumentID,
+            originEventInfo: firstOriginEventInfo,
             resolverComponentInstanceID: resolverComponentInstanceID1,
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
@@ -282,13 +300,13 @@ describe('data state', () => {
         // this happens when the middleware starts the request
         {
           type: 'appRequestedResolverData',
-          payload: { databaseDocumentID: firstDatabaseDocumentID, indices: [], filters: {} },
+          payload: { originEventInfo: firstOriginEventInfo, indices: [], filters: {} },
         },
         // receive a different databaseDocumentID. this should cause the middleware to abort the existing request and start a new one
         {
           type: 'appReceivedNewExternalProperties',
           payload: {
-            databaseDocumentID: secondDatabaseDocumentID,
+            originEventInfo: secondOriginEventInfo,
             resolverComponentInstanceID: resolverComponentInstanceID2,
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
@@ -303,13 +321,13 @@ describe('data state', () => {
       expect(selectors.isTreeLoading(state())).toBe(true);
     });
     it('should need to request the tree using the second set of parameters', () => {
-      expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(
-        secondDatabaseDocumentID
+      expect(selectors.treeParametersToFetch(state())?.originEventInfo).toEqual(
+        secondOriginEventInfo
       );
     });
     it('should need to abort the request for the databaseDocumentID', () => {
-      expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(
-        secondDatabaseDocumentID
+      expect(selectors.treeParametersToFetch(state())?.originEventInfo).toEqual(
+        secondOriginEventInfo
       );
     });
     it('should use the correct location for the second resolver', () => {
@@ -321,23 +339,23 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
-        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
+        parameters to fetch: {\\"originEventInfo\\":{\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"databaseDocumentIndex\\":\\"second index\\"},\\"indices\\":[],\\"filters\\":{}}
+        requires a pending request to be aborted: {\\"originEventInfo\\":{\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"databaseDocumentIndex\\":\\"first index\\"},\\"indices\\":[],\\"filters\\":{}}"
       `);
     });
     describe('and when the old request was aborted', () => {
       beforeEach(() => {
         actions.push({
           type: 'appAbortedResolverDataRequest',
-          payload: { databaseDocumentID: firstDatabaseDocumentID, indices: [], filters: {} },
+          payload: { originEventInfo: firstOriginEventInfo, indices: [], filters: {} },
         });
       });
       it('should not require a pending request to be aborted', () => {
         expect(selectors.treeRequestParametersToAbort(state())).toBe(null);
       });
       it('should have a document to fetch', () => {
-        expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(
-          secondDatabaseDocumentID
+        expect(selectors.treeParametersToFetch(state())?.originEventInfo).toEqual(
+          secondOriginEventInfo
         );
       });
       it('should not be loading', () => {
@@ -349,7 +367,7 @@ describe('data state', () => {
           has an error: false
           has more children: false
           has more ancestors: false
-          parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
+          parameters to fetch: {\\"originEventInfo\\":{\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"databaseDocumentIndex\\":\\"second index\\"},\\"indices\\":[],\\"filters\\":{}}
           requires a pending request to be aborted: null"
         `);
       });
@@ -357,7 +375,7 @@ describe('data state', () => {
         beforeEach(() => {
           actions.push({
             type: 'appRequestedResolverData',
-            payload: { databaseDocumentID: secondDatabaseDocumentID, indices: [], filters: {} },
+            payload: { originEventInfo: secondOriginEventInfo, indices: [], filters: {} },
           });
         });
         it('should not have a document ID to fetch', () => {
@@ -380,7 +398,11 @@ describe('data state', () => {
     });
   });
   describe('with a mock tree of no ancestors and two children', () => {
-    const databaseDocumentID = 'doc id';
+    const originEventInfo = {
+      databaseDocumentID: 'doc id',
+      databaseDocumentIndex: 'index',
+    };
+
     const resolverComponentInstanceID = 'instance';
     const originID = 'origin';
     const firstChildID = 'first';
@@ -397,7 +419,7 @@ describe('data state', () => {
           {
             type: 'appReceivedNewExternalProperties',
             payload: {
-              databaseDocumentID,
+              originEventInfo,
               resolverComponentInstanceID,
               locationSearch: '',
               indices: [],
@@ -407,7 +429,7 @@ describe('data state', () => {
           },
           {
             type: 'appRequestedResolverData',
-            payload: { databaseDocumentID, indices: [], filters: {} },
+            payload: { originEventInfo, indices: [], filters: {} },
           },
           {
             type: 'serverReturnedResolverData',
@@ -415,7 +437,7 @@ describe('data state', () => {
               result: resolverTree,
               dataSource,
               schema,
-              parameters: { databaseDocumentID, indices: [], filters: {} },
+              parameters: { originEventInfo, indices: [], filters: {} },
             },
           },
         ];
@@ -435,7 +457,7 @@ describe('data state', () => {
             {
               type: 'appReceivedNewExternalProperties',
               payload: {
-                databaseDocumentID,
+                originEventInfo,
                 resolverComponentInstanceID,
                 locationSearch: '',
                 indices: [],
@@ -446,7 +468,7 @@ describe('data state', () => {
             {
               type: 'appRequestedResolverData',
               payload: {
-                databaseDocumentID,
+                originEventInfo,
                 indices: [],
                 filters: timeRangeFilters,
               },
@@ -458,7 +480,7 @@ describe('data state', () => {
                 dataSource,
                 schema,
                 parameters: {
-                  databaseDocumentID,
+                  originEventInfo,
                   indices: [],
                   filters: timeRangeFilters,
                 },
@@ -680,7 +702,7 @@ describe('data state', () => {
             dataSource,
             schema,
             parameters: {
-              databaseDocumentID: '',
+              originEventInfo: { databaseDocumentID: '', databaseDocumentIndex: '' },
               indices: ['someNonDefaultIndex'],
               filters: {},
             },
@@ -711,7 +733,10 @@ describe('data state', () => {
             dataSource,
             schema,
             parameters: {
-              databaseDocumentID: '',
+              originEventInfo: {
+                databaseDocumentID: '',
+                databaseDocumentIndex: '',
+              },
               indices: ['defaultIndex'],
               filters: {},
             },
@@ -720,7 +745,10 @@ describe('data state', () => {
         {
           type: 'appReceivedNewExternalProperties',
           payload: {
-            databaseDocumentID: '',
+            originEventInfo: {
+              databaseDocumentID: '',
+              databaseDocumentIndex: '',
+            },
             resolverComponentInstanceID: '',
             locationSearch: '',
             indices: ['someNonDefaultIndex', 'someOtherIndex'],
@@ -731,7 +759,10 @@ describe('data state', () => {
         {
           type: 'appRequestedResolverData',
           payload: {
-            databaseDocumentID: '',
+            originEventInfo: {
+              databaseDocumentID: '',
+              databaseDocumentIndex: '',
+            },
             indices: ['someNonDefaultIndex', 'someOtherIndex'],
             filters: {},
           },

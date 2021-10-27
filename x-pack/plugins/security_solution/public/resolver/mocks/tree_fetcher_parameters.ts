@@ -12,7 +12,10 @@ import { TreeFetcherParameters } from '../types';
  */
 export function mockTreeFetcherParameters(): TreeFetcherParameters {
   return {
-    databaseDocumentID: '',
+    originEventInfo: {
+      databaseDocumentID: '',
+      databaseDocumentIndex: '',
+    },
     indices: [],
     filters: {},
   };
