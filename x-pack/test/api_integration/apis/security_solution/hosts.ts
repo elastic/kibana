@@ -27,7 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('hosts', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/104260
+  describe.skip('hosts', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts'));
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts'));
 
