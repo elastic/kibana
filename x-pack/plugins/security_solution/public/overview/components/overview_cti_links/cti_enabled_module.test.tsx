@@ -54,7 +54,7 @@ describe('CtiEnabledModule', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiEnabledModule {...mockProps} someIntegrationsIsDisabled={true} />
+            <CtiEnabledModule {...mockProps} isSomeIntegrationsDisabled={true} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>
@@ -69,7 +69,7 @@ describe('CtiEnabledModule', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiEnabledModule {...mockProps} someIntegrationsIsDisabled={true} />
+            <CtiEnabledModule {...mockProps} isSomeIntegrationsDisabled={true} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>
@@ -84,7 +84,7 @@ describe('CtiEnabledModule', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiEnabledModule {...mockProps} someIntegrationsIsDisabled={true} />
+            <CtiEnabledModule {...mockProps} isSomeIntegrationsDisabled={true} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>

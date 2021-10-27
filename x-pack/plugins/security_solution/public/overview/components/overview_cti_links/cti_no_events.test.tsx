@@ -44,7 +44,7 @@ describe('CtiNoEvents', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiNoEvents {...mockProps} someIntegrationsIsDisabled={true} />
+            <CtiNoEvents {...mockProps} isSomeIntegrationsDisabled={true} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>
@@ -59,7 +59,7 @@ describe('CtiNoEvents', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiNoEvents {...mockProps} someIntegrationsIsDisabled={true} />
+            <CtiNoEvents {...mockProps} isSomeIntegrationsDisabled={true} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>

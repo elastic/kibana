@@ -15,21 +15,21 @@ export const CtiWithEventsComponent = ({
   from,
   to,
   totalCount,
-  someIntegrationsIsDisabled,
-  installedIntegrationsId,
+  isSomeIntegrationsDisabled,
+  installedIntegrationIds,
 }: {
   eventCountsByDataset: { [key: string]: number };
   from: string;
   to: string;
   totalCount: number;
-  someIntegrationsIsDisabled: boolean;
-  installedIntegrationsId: string[];
+  isSomeIntegrationsDisabled: boolean;
+  installedIntegrationIds: string[];
 }) => {
   const { buttonHref, isPluginDisabled, listItems } = useCtiDashboardLinks(
     eventCountsByDataset,
     to,
     from,
-    installedIntegrationsId
+    installedIntegrationIds
   );
 
   return (
@@ -38,7 +38,7 @@ export const CtiWithEventsComponent = ({
       isPluginDisabled={isPluginDisabled}
       listItems={listItems}
       totalCount={totalCount}
-      someIntegrationsIsDisabled={someIntegrationsIsDisabled}
+      isSomeIntegrationsDisabled={isSomeIntegrationsDisabled}
     />
   );
 };

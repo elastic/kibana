@@ -31,7 +31,7 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
-import { useTIIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
+import { useTiIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { RiskyHostLinks } from '../components/overview_risky_host_links';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -77,7 +77,7 @@ const OverviewComponent = () => {
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
   const hasSomeThreatIntelData = useIsThreatIntelModuleEnabled();
-  const tiIntegrationStatus = useTIIntegrations();
+  const tiIntegrationStatus = useTiIntegrations();
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
@@ -155,13 +155,13 @@ const OverviewComponent = () => {
                         {tiIntegrationStatus && (
                           <ThreatIntelLinkPanel
                             hasSomeThreatIntelData={hasSomeThreatIntelData}
-                            someIntegrationsIsInstalled={
-                              tiIntegrationStatus.someIntegrationsIsInstalled
+                            isSomeIntegrationsInstalled={
+                              tiIntegrationStatus.isSomeIntegrationsInstalled
                             }
-                            someIntegrationsIsDisabled={
-                              tiIntegrationStatus.someIntegrationsIsDisabled
+                            isSomeIntegrationsDisabled={
+                              tiIntegrationStatus.isSomeIntegrationsDisabled
                             }
-                            installedIntegrationsId={tiIntegrationStatus.installedIntegrationsId}
+                            installedIntegrationIds={tiIntegrationStatus.installedIntegrationIds}
                             deleteQuery={deleteQuery}
                             from={from}
                             setQuery={setQuery}

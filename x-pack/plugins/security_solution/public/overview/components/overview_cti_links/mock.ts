@@ -63,8 +63,8 @@ export const mockProps = {
   from: '2020-01-21T20:49:57.080Z',
   setQuery: jest.fn(),
   deleteQuery: jest.fn(),
-  someIntegrationsIsDisabled: true,
-  installedIntegrationsId: [],
+  isSomeIntegrationsDisabled: true,
+  installedIntegrationIds: [],
 };
 
 export const mockCtiWithEventsProps = {
