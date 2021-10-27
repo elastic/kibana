@@ -414,14 +414,6 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
             };
           },
         } as unknown as IField;
-        const layer = {
-          getDataRequest: () => {
-            return null;
-          },
-          getStyle: () => {
-            return new MockStyle();
-          },
-        } as unknown as IVectorLayer;
         const options = {
           type: COLOR_MAP_TYPE.ORDINAL,
           color: 'Blues',
@@ -432,11 +424,18 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           options,
           VECTOR_STYLES.LINE_COLOR,
           field,
-          layer,
+          {} as unknown as IVectorLayer,
           () => {
             return (value: RawValue) => value + '_format';
           }
         );
+        colorProperty.getRangeFieldMeta = () => {
+          return {
+            min: 0,
+            max: 100,
+            delta: 100,
+          };
+        };
 
         expect(colorProperty._getMbColor()).toEqual([
           'interpolate',
