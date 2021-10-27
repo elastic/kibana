@@ -36,7 +36,6 @@ async function cypressStart(
   const config = getService('config');
 
   const archiveName = 'apm_8.0.0';
-  const { start, end } = archives_metadata[archiveName];
 
   const kibanaUrl = Url.format({
     protocol: config.get('servers.kibana.protocol'),
@@ -56,21 +55,30 @@ async function cypressStart(
     },
   });
 
+  // TODO: Remove archive in favor of synthtrace
   console.log('Loading esArchiver...');
-  await esArchiverLoad('apm_8.0.0');
+  // await esArchiverLoad('apm_8.0.0');
 
   const res = await cypressExecution({
     ...(spec !== undefined ? { spec } : {}),
     config: { baseUrl: kibanaUrl },
+
     env: {
-      START_DATE: start,
-      END_DATE: end,
+      ES_TARGET: Url.format({
+        protocol: config.get('servers.elasticsearch.protocol'),
+        host: config.get('servers.elasticsearch.hostname'),
+        port: config.get('servers.elasticsearch.port'),
+        auth: `${config.get('servers.elasticsearch.username')}:${config.get(
+          'servers.elasticsearch.password'
+        )}`,
+      }),
       KIBANA_URL: kibanaUrl,
     },
   });
 
+  // TODO: Remove archive in favor of synthtrace
   console.log('Removing esArchiver...');
-  await esArchiverUnload('apm_8.0.0');
+  // await esArchiverUnload('apm_8.0.0');
 
   return res;
 }

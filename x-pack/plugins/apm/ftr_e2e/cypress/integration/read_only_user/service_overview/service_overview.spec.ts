@@ -6,9 +6,18 @@
  */
 
 import url from 'url';
-import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
+import { service, timerange } from '@elastic/apm-synthtrace';
+import { getSynthtraceEsClient } from '../../../../synthtrace_es_client';
 
-const { start, end } = archives_metadata['apm_8.0.0'];
+const esTarget = Cypress.env('ES_TARGET');
+const synthtraceEsClient = getSynthtraceEsClient(esTarget);
+const serviceName = 'synth-go';
+const start = new Date('2021-01-01T00:00:00.000Z').getTime();
+const end = new Date('2021-01-01T00:15:00.000Z').getTime();
+const GO_PROD_RATE = 80;
+const GO_PROD_DURATION = 1000;
+
+console.log({ esTarget });
 
 const serviceOverviewPath = '/app/apm/services/opbeans-node/overview';
 const baseUrl = url.format({
@@ -20,6 +29,29 @@ describe('Service Overview', () => {
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
+
+  before(async () => {
+    const serviceGoProdInstance = service(
+      serviceName,
+      'production',
+      'go'
+    ).instance('instance-a');
+
+    await synthtraceEsClient.index([
+      ...timerange(start, end)
+        .interval('1m')
+        .rate(GO_PROD_RATE)
+        .flatMap((timestamp) =>
+          serviceGoProdInstance
+            .transaction('GET /api/product/list')
+            .duration(GO_PROD_DURATION)
+            .timestamp(timestamp)
+            .serialize()
+        ),
+    ]);
+  });
+
+  after(() => synthtraceEsClient.clean());
 
   it('persists transaction type selected when clicking on Transactions tab', () => {
     cy.visit(baseUrl);

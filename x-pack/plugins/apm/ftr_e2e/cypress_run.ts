@@ -8,7 +8,9 @@ import { argv } from 'yargs';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { cypressRunTests } from './cypress_start';
 
-const specArg = argv.spec as string | undefined;
+const specArg = (argv.spec ?? argv.grep) as string | undefined;
+
+console.log({ specArg });
 
 async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaConfig = await readConfigFile(require.resolve('./config.ts'));
