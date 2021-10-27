@@ -189,10 +189,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
 
     if (isRuleRegistryEnabled) {
-      // NOTE: this is not used yet
-      // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
-      // Split aliases by component template since we need to alias some fields in technical field mappings,
-      // some fields in security solution specific component template.
       const aliasesFieldMap: FieldMap = {};
       Object.entries(aadFieldConversion).forEach(([key, value]) => {
         aliasesFieldMap[key] = {
