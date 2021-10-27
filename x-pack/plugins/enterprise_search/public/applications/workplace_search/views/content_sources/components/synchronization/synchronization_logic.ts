@@ -20,10 +20,18 @@ import {
   BLOCKED_TIME_WINDOWS_PATH,
   getContentSourcePath,
 } from '../../../../routes';
-import { BlockedWindow, IndexingSchedule, SyncJobType, TimeUnit } from '../../../../types';
+import {
+  BlockedWindow,
+  DayOfWeek,
+  IndexingSchedule,
+  SyncJobType,
+  TimeUnit,
+} from '../../../../types';
 
 import { SYNC_SETTINGS_UPDATED_MESSAGE } from '../../constants';
 import { SourceLogic } from '../../source_logic';
+
+type BlockedWindowPropType = 'jobType' | 'day' | 'start' | 'end';
 
 interface ServerBlockedWindow {
   job_type: string;
@@ -55,6 +63,7 @@ interface SynchronizationActions {
   setNavigatingBetweenTabs(navigatingBetweenTabs: boolean): boolean;
   handleSelectedTabChanged(tabId: TabId): TabId;
   addBlockedWindow(): void;
+  removeBlockedWindow(index: number): number;
   updateFrequencySettings(): void;
   updateObjectsAndAssetsSettings(): void;
   resetSyncSettings(): void;
@@ -65,6 +74,15 @@ interface SynchronizationActions {
     value: string,
     unit: TimeUnit
   ): { type: SyncJobType; value: number; unit: TimeUnit };
+  setBlockedTimeWindow(
+    index: number,
+    prop: BlockedWindowPropType,
+    value: string
+  ): {
+    index: number;
+    prop: BlockedWindowPropType;
+    value: string;
+  };
   setContentExtractionChecked(checked: boolean): boolean;
   setServerSchedule(schedule: IndexingSchedule): IndexingSchedule;
   updateServerSettings(body: ServerSyncSettingsBody): ServerSyncSettingsBody;
@@ -76,7 +94,6 @@ interface SynchronizationValues {
   hasUnsavedObjectsAndAssetsChanges: boolean;
   thumbnailsChecked: boolean;
   contentExtractionChecked: boolean;
-  blockedWindows: BlockedWindow[];
   cachedSchedule: IndexingSchedule;
   schedule: IndexingSchedule;
 }
@@ -84,8 +101,12 @@ interface SynchronizationValues {
 export const emptyBlockedWindow: BlockedWindow = {
   jobType: 'full',
   day: 'monday',
-  start: moment().set('hour', 11).set('minutes', 0),
-  end: moment().set('hour', 13).set('minutes', 0),
+  start: '11:00:00Z',
+  end: '13:00:00Z',
+};
+
+type BlockedWindowMap = {
+  [prop in keyof BlockedWindow]: SyncJobType | DayOfWeek | 'all' | string;
 };
 
 export const SynchronizationLogic = kea<
@@ -102,9 +123,15 @@ export const SynchronizationLogic = kea<
       value,
       unit,
     }),
+    setBlockedTimeWindow: (index: number, prop: BlockedWindowPropType, value: string) => ({
+      index,
+      prop,
+      value,
+    }),
     setContentExtractionChecked: (checked: boolean) => checked,
     updateServerSettings: (body: ServerSyncSettingsBody) => body,
     setServerSchedule: (schedule: IndexingSchedule) => schedule,
+    removeBlockedWindow: (index: number) => index,
     updateFrequencySettings: true,
     updateObjectsAndAssetsSettings: true,
     resetSyncSettings: true,
@@ -115,12 +142,6 @@ export const SynchronizationLogic = kea<
       false,
       {
         setNavigatingBetweenTabs: (_, navigatingBetweenTabs) => navigatingBetweenTabs,
-      },
-    ],
-    blockedWindows: [
-      props.contentSource.indexing.schedule.blockedWindows || [],
-      {
-        addBlockedWindow: (state, _) => [...state, emptyBlockedWindow],
       },
     ],
     thumbnailsChecked: [
@@ -174,6 +195,33 @@ export const SynchronizationLogic = kea<
             .add(value, unit)
             .toISOString();
 
+          return schedule;
+        },
+        addBlockedWindow: (state, _) => {
+          const schedule = cloneDeep(state);
+          const blockedWindows = schedule.blockedWindows || [];
+          blockedWindows.push(emptyBlockedWindow);
+          schedule.blockedWindows = blockedWindows;
+          return schedule;
+        },
+        removeBlockedWindow: (state, index) => {
+          const schedule = cloneDeep(state);
+          const blockedWindows = schedule.blockedWindows;
+          blockedWindows!.splice(index, 1);
+          if (blockedWindows!.length > 0) {
+            schedule.blockedWindows = blockedWindows;
+          } else {
+            delete schedule.blockedWindows;
+          }
+          return schedule;
+        },
+        setBlockedTimeWindow: (state, { index, prop, value }) => {
+          const schedule = cloneDeep(state);
+          const blockedWindows = schedule.blockedWindows;
+          const blockedWindow = blockedWindows![index] as BlockedWindowMap;
+          blockedWindow[prop] = value;
+          (blockedWindows![index] as BlockedWindowMap) = blockedWindow;
+          schedule.blockedWindows = blockedWindows;
           return schedule;
         },
       },
@@ -254,6 +302,7 @@ export const SynchronizationLogic = kea<
               full: values.schedule.full,
               incremental: values.schedule.incremental,
               delete: values.schedule.delete,
+              blocked_windows: formatBlockedWindowsForServer(values.schedule.blockedWindows),
             },
           },
         },
@@ -295,4 +344,17 @@ export const stripScheduleSeconds = (schedule: IndexingSchedule): IndexingSchedu
   if (permissions) _schedule.permissions = getISOStringWithoutSeconds(permissions);
 
   return _schedule;
+};
+
+const formatBlockedWindowsForServer = (
+  blockedWindows?: BlockedWindow[]
+): ServerBlockedWindow[] | undefined => {
+  if (!blockedWindows || blockedWindows.length < 1) return [];
+
+  return blockedWindows.map(({ jobType, day, start, end }) => ({
+    job_type: jobType,
+    day,
+    start,
+    end,
+  }));
 };

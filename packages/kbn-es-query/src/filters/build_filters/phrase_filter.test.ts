@@ -13,16 +13,17 @@ import {
   PhraseFilter,
 } from './phrase_filter';
 import { fields, getField } from '../stubs';
-import { IndexPatternBase } from '../../es_query';
-import { estypes } from '@elastic/elasticsearch';
+import { DataViewBase } from '../../es_query';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 describe('Phrase filter builder', () => {
-  let indexPattern: IndexPatternBase;
+  let indexPattern: DataViewBase;
 
   beforeEach(() => {
     indexPattern = {
       id: 'id',
       fields,
+      title: 'dataView',
     };
   });
 
@@ -151,8 +152,9 @@ describe('buildInlineScriptForPhraseFilter', () => {
 });
 
 describe('getPhraseFilterField', function () {
-  const indexPattern: IndexPatternBase = {
+  const indexPattern: DataViewBase = {
     fields,
+    title: 'dataView',
   };
 
   it('should return the name of the field a phrase query is targeting', () => {

@@ -6,8 +6,10 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { INDICATOR_RULE_TYPE_ID } from '../../../../../common/constants';
-import { ThreatRuleParams, threatRuleParams } from '../../schemas/rule_schemas';
+import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
+
+import { CompleteRule, threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
 
@@ -44,7 +46,7 @@ export const createIndicatorMatchAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {
@@ -52,7 +54,7 @@ export const createIndicatorMatchAlertType = (
           bulkCreate,
           exceptionItems,
           listClient,
-          rule,
+          completeRule,
           searchAfterSize,
           tuple,
           wrapHits,
@@ -69,7 +71,7 @@ export const createIndicatorMatchAlertType = (
         eventsTelemetry: undefined,
         listClient,
         logger,
-        rule,
+        completeRule: completeRule as CompleteRule<ThreatRuleParams>,
         searchAfterSize,
         services,
         tuple,

@@ -36,11 +36,9 @@ export async function createOrUpdateIndex({
   delete settings?.index?.number_of_shards;
   delete settings?.index?.sort;
 
-  const indexExists = (
-    await client.indices.exists({
-      index: indexName,
-    })
-  ).body as unknown;
+  const indexExists = await client.indices.exists({
+    index: indexName,
+  });
 
   if (!indexExists) {
     await client.indices.create({

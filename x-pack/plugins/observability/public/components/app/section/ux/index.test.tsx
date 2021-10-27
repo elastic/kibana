@@ -67,7 +67,9 @@ describe('UXSection', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, getAllByText } = render(<UXSection bucketSize="60s" />);
+    const { getByText, getAllByText } = render(
+      <UXSection bucketSize={{ bucketSize: 60, intervalString: '60s' }} />
+    );
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getByText('View in app')).toBeInTheDocument();
@@ -99,7 +101,9 @@ describe('UXSection', () => {
       status: fetcherHook.FETCH_STATUS.LOADING,
       refetch: jest.fn(),
     });
-    const { getByText, queryAllByText, getAllByText } = render(<UXSection bucketSize="60s" />);
+    const { getByText, queryAllByText, getAllByText } = render(
+      <UXSection bucketSize={{ bucketSize: 60, intervalString: '60s' }} />
+    );
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getAllByText('--')).toHaveLength(3);
@@ -112,7 +116,9 @@ describe('UXSection', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, queryAllByText, getAllByText } = render(<UXSection bucketSize="60s" />);
+    const { getByText, queryAllByText, getAllByText } = render(
+      <UXSection bucketSize={{ bucketSize: 60, intervalString: '60s' }} />
+    );
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getAllByText('No data is available.')).toHaveLength(3);

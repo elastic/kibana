@@ -135,6 +135,8 @@ def functionalXpack(Map params = [:]) {
 
     whenChanged([
       'x-pack/plugins/security_solution/',
+      'x-pack/plugins/cases/',
+      'x-pack/plugins/timelines/',
       'x-pack/test/security_solution_cypress/',
       'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/',
       'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
@@ -146,14 +148,13 @@ def functionalXpack(Map params = [:]) {
       }
     }
 
-    //temporarily disable apm e2e test since it's breaking.
-    // whenChanged([
-    //   'x-pack/plugins/apm/',
-    // ]) {
-    //   if (githubPr.isPr()) {
-    //     task(kibanaPipeline.functionalTestProcess('xpack-APMCypress', './test/scripts/jenkins_apm_cypress.sh'))
-    //   }
-    // }
+    whenChanged([
+      'x-pack/plugins/apm/',
+    ]) {
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-APMCypress', './test/scripts/jenkins_apm_cypress.sh'))
+      }
+    }
 
     whenChanged([
       'x-pack/plugins/uptime/',

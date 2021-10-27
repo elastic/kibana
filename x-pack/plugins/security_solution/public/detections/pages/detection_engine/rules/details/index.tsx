@@ -89,7 +89,7 @@ import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
 import {
-  APP_ID,
+  APP_UI_ID,
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
 } from '../../../../../../common/constants';
@@ -300,9 +300,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   }, [rule, spacesApi]);
 
   const getLegacyUrlConflictCallout = useMemo(() => {
-    const outcome = rule?.outcome;
-    if (rule != null && spacesApi && outcome === 'conflict') {
-      const aliasTargetId = rule?.alias_target_id!; // This is always defined if outcome === 'conflict'
+    if (rule?.alias_target_id != null && spacesApi && rule.outcome === 'conflict') {
+      const aliasTargetId = rule.alias_target_id;
       // We have resolved to one rule, but there is another one with a legacy URL associated with this page. Display a
       // callout with a warning for the user, and provide a way for them to navigate to the other rule.
       const otherRulePath = `rules/id/${aliasTargetId}${window.location.search}${window.location.hash}`;
@@ -401,9 +400,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: Status) => {
       const timelineId = TimelineId.detectionsRulesDetailsPage;
-      clearEventsLoading!({ id: timelineId });
-      clearEventsDeleted!({ id: timelineId });
-      clearSelected!({ id: timelineId });
+      clearEventsLoading({ id: timelineId });
+      clearEventsDeleted({ id: timelineId });
+      clearSelected({ id: timelineId });
       setFilterGroup(newFilterGroup);
     },
     [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
@@ -575,7 +574,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const goToEditRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
         path: getEditRuleUrl(ruleId ?? ''),
       });
@@ -684,7 +683,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       needsListsConfiguration
     )
   ) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.alerts,
       path: getDetectionEngineUrl(),
     });

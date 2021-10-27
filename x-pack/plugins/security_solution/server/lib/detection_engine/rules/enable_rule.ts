@@ -44,6 +44,7 @@ export const enableRule = async ({
     const currentStatusToDisable = ruleCurrentStatus[0];
     await ruleStatusClient.update({
       id: currentStatusToDisable.id,
+      ruleId: rule.id,
       ruleName: rule.name,
       ruleType: rule.alertTypeId,
       attributes: {
