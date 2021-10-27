@@ -49,7 +49,7 @@ export const processDistributionData = (
 
     // Add in 0-5 and 95-100% if they don't add more
     // than 25% to the value range at either end.
-    const lastValue: number = (last(percentileBuckets) as any).value;
+    const lastValue: number = (last(percentileBuckets) as { value: number }).value;
     const maxDiff = 0.25 * (lastValue - lowerBound);
     if (lowerBound - dataMin < maxDiff) {
       percentileBuckets.splice(0, 0, percentiles[0]);

@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
+import { Query } from '@kbn/es-query';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
@@ -21,7 +22,7 @@ import { AggCardinality, Aggs } from '../../../../../common/types/field_stats';
 
 export const checkAggregatableFieldsExistRequest = (
   indexPatternTitle: string,
-  query: any,
+  query: Query['query'],
   aggregatableFields: string[],
   samplerShardSize: number,
   timeFieldName: string | undefined,
@@ -163,7 +164,7 @@ export const processAggregatableFieldsExistResponse = (
 
 export const checkNonAggregatableFieldExistsRequest = (
   indexPatternTitle: string,
-  query: any,
+  query: Query['query'],
   field: string,
   timeFieldName: string | undefined,
   earliestMs: number | undefined,

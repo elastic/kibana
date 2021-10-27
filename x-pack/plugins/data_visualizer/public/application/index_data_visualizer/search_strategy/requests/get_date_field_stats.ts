@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Observable, of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import {
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
@@ -71,8 +71,8 @@ export const fetchDateFieldStats = (
           error: extractErrorProperties(e),
         } as FieldStatsError)
       ),
-      switchMap((resp) => {
-        if (!isIKibanaSearchResponse(resp)) return of(resp);
+      map((resp) => {
+        if (!isIKibanaSearchResponse(resp)) return resp;
         const aggregations = resp.rawResponse.aggregations;
         const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
         const safeFieldName = field.safeFieldName;
@@ -86,12 +86,12 @@ export const fetchDateFieldStats = (
           [...aggsPath, `${safeFieldName}_field_stats`, 'actual_stats'],
           {}
         );
-        return of({
+        return {
           fieldName: field.fieldName,
           count: docCount,
           earliest: get(fieldStatsResp, 'min', 0),
           latest: get(fieldStatsResp, 'max', 0),
-        });
+        };
       })
     );
 };

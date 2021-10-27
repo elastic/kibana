@@ -7,7 +7,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Observable, of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { SAMPLER_TOP_TERMS_SHARD_SIZE, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import {
   buildSamplerAggregation,
@@ -94,8 +94,8 @@ export const fetchStringFieldStats = (
           error: extractErrorProperties(e),
         } as FieldStatsError)
       ),
-      switchMap((resp) => {
-        if (!isIKibanaSearchResponse(resp)) return of(resp);
+      map((resp) => {
+        if (!isIKibanaSearchResponse(resp)) return resp;
         const aggregations = resp.rawResponse.aggregations;
         const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
 
@@ -123,7 +123,7 @@ export const fetchStringFieldStats = (
               : samplerShardSize,
         };
 
-        return of(stats);
+        return stats;
       })
     );
 };

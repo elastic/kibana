@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable, of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import {
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
@@ -78,8 +78,8 @@ export const fetchBooleanFieldStats = (
           error: extractErrorProperties(e),
         } as FieldStatsError)
       ),
-      switchMap((resp) => {
-        if (!isIKibanaSearchResponse(resp)) return of(resp);
+      map((resp) => {
+        if (!isIKibanaSearchResponse(resp)) return resp;
 
         const aggregations = resp.rawResponse.aggregations;
         const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
@@ -100,7 +100,7 @@ export const fetchBooleanFieldStats = (
         valueBuckets.forEach((bucket) => {
           stats[`${bucket.key_as_string}Count`] = bucket.doc_count;
         });
-        return of(stats);
+        return stats;
       })
     );
 };

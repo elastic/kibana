@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { find, get } from 'lodash';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -129,8 +129,8 @@ export const fetchNumericFieldStats = (
           error: extractErrorProperties(e),
         } as FieldStatsError)
       ),
-      switchMap((resp) => {
-        if (!isIKibanaSearchResponse(resp)) return of(resp);
+      map((resp) => {
+        if (!isIKibanaSearchResponse(resp)) return resp;
 
         const aggregations = resp.rawResponse.aggregations;
         const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
@@ -185,7 +185,7 @@ export const fetchNumericFieldStats = (
           stats.median = medianPercentile !== undefined ? medianPercentile!.value : 0;
           stats.distribution = processDistributionData(percentiles, PERCENTILE_SPACING, stats.min);
         }
-        return of(stats);
+        return stats;
       })
     );
 };

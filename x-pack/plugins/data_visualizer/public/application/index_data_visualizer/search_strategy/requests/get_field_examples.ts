@@ -7,7 +7,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Observable, of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type {
@@ -76,8 +76,8 @@ export const fetchFieldExamples = (
           error: extractErrorProperties(e),
         } as FieldStatsError)
       ),
-      switchMap((resp) => {
-        if (!isIKibanaSearchResponse(resp)) return of(resp);
+      map((resp) => {
+        if (!isIKibanaSearchResponse(resp)) return resp;
         const body = resp.rawResponse;
         const stats = {
           fieldName: field.fieldName,
@@ -102,7 +102,7 @@ export const fetchFieldExamples = (
           }
         }
 
-        return of(stats);
+        return stats;
       })
     );
 };
