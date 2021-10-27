@@ -39,21 +39,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         }),
         apmApiClient.readUser({
-          endpoint: `GET /internal/apm/backends/{backendName}/charts/throughput`,
+          endpoint: `GET /internal/apm/backends/charts/throughput`,
           params: {
-            path: { backendName: overrides?.backendName || 'elasticsearch' },
             query: {
               ...commonQuery,
+              backendName: overrides?.backendName || 'elasticsearch',
               kuery: '',
             },
           },
         }),
         apmApiClient.readUser({
-          endpoint: `GET /internal/apm/backends/{backendName}/upstream_services`,
+          endpoint: `GET /internal/apm/backends/upstream_services`,
           params: {
-            path: { backendName: overrides?.backendName || 'elasticsearch' },
             query: {
               ...commonQuery,
+              backendName: overrides?.backendName || 'elasticsearch',
               numBuckets: 20,
               offset: '1d',
               kuery: '',
