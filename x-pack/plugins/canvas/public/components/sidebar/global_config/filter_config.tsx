@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
+import { WorkpadFilters } from '../../workpad_filters';
+// @ts-expect-error unconverted component
+import { SidebarSection } from '../sidebar_section';
 
 export const FilterConfig: FunctionComponent = () => {
-  return <Fragment>Filters</Fragment>;
+  return <WorkpadFilters />;
 };

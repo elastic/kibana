@@ -43,7 +43,6 @@ export const GlobalConfig: FunctionComponent = () => {
       name: strings.getFilterLabel(),
       content: (
         <div className="canvasSidebar__pop">
-          <EuiSpacer size="m" />
           <FilterConfig />
         </div>
       ),
