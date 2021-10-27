@@ -7,7 +7,7 @@
  */
 
 import { ReplacePanelAction } from './replace_panel_action';
-import { DashboardContainer } from '../embeddable';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';

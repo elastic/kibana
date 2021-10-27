@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ControlWidth } from '../types';
-import { ControlGroupStrings } from './control_group_strings';
-
-export const CONTROL_GROUP_TYPE = 'control_group';
+import { ControlWidth } from '../../types';
+import { ControlGroupStrings } from '../control_group_strings';
 
 export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'auto';
 

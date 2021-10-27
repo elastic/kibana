@@ -18,6 +18,8 @@ import { capabilitiesServiceFactory } from './capabilities';
 import { PresentationUtilServices } from '..';
 import { overlaysServiceFactory } from './overlays';
 import { controlsServiceFactory } from './controls';
+import { dataViewsServiceFactory } from './data_views';
+import { dataServiceFactory } from './data';
 
 export { PluginServiceProviders, PluginServiceProvider, PluginServiceRegistry } from '../create';
 export { PresentationUtilServices } from '..';
@@ -32,6 +34,8 @@ export interface StorybookParams {
 export const providers: PluginServiceProviders<PresentationUtilServices, StorybookParams> = {
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
   dashboards: new PluginServiceProvider(dashboardsServiceFactory),
+  dataViews: new PluginServiceProvider(dataViewsServiceFactory),
+  data: new PluginServiceProvider(dataServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   controls: new PluginServiceProvider(controlsServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),

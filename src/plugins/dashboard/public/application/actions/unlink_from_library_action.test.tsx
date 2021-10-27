@@ -17,8 +17,8 @@ import {
   SavedObjectEmbeddableInput,
 } from '../../services/embeddable';
 import { UnlinkFromLibraryAction } from '.';
-import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';

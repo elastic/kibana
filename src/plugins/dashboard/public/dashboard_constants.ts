@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { ControlStyle } from '../../presentation_util/public';
+
 export const DASHBOARD_STATE_STORAGE_KEY = '_a';
 
 export const DashboardConstants = {
@@ -20,6 +22,11 @@ export const DashboardConstants = {
   CHANGE_CHECK_DEBOUNCE: 100,
   CHANGE_APPLY_DEBOUNCE: 50,
 };
+
+export const getDefaultDashboardControlGroupInput = () => ({
+  controlStyle: 'oneLine' as ControlStyle,
+  panels: {},
+});
 
 export function createDashboardEditUrl(id?: string, editMode?: boolean) {
   if (!id) {

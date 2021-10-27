@@ -8,3 +8,4 @@
 
 export * from './utils';
 export * from './test_helpers';
+export * from '../controls';
