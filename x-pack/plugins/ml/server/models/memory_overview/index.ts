@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export * from './models_list';
-
-export const ModelsTableToConfigMapping = {
-  id: 'model_id',
-  description: 'description',
-  createdAt: 'create_time',
-  type: 'type',
-} as const;
+export { memoryOverviewServiceProvider } from './memory_overview_service';
