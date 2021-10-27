@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCurrentUser, useHttp } from '../../../lib/kibana';
 import { appRoutesService, CheckPermissionsResponse } from '../../../../../../fleet/common';
 import { useLicense } from '../../../hooks/use_license';
+import { Immutable } from '../../../../../common/endpoint/types';
 
 export interface EndpointPrivileges {
   loading: boolean;
@@ -30,7 +31,7 @@ export interface EndpointPrivileges {
  * **NOTE:** Consider using `usePrivileges().endpointPrivileges` instead of this hook in order
  * to keep API calls to a minimum.
  */
-export const useEndpointPrivileges = (): EndpointPrivileges => {
+export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const http = useHttp();
   const user = useCurrentUser();
   const isMounted = useRef<boolean>(true);
@@ -66,7 +67,7 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
   }, [user?.roles]);
 
   const privileges = useMemo(() => {
-    const privilegeList: EndpointPrivileges = {
+    const privilegeList: EndpointPrivileges = Object.freeze({
       loading: !fleetCheckDone || !user,
       canAccessFleet,
       canAccessEndpointManagement: canAccessFleet && isSuperUser,
@@ -75,7 +76,7 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
       // FIXME: Remove usages of the property below
       /** @deprecated */
       isPlatinumPlus: isPlatinumPlusLicense,
-    };
+    });
 
     return privilegeList;
   }, [canAccessFleet, fleetCheckDone, isSuperUser, user, isPlatinumPlusLicense]);
