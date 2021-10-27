@@ -33,7 +33,7 @@ export const PrecisionSlider: React.FC = () => {
     searchSettings: { precision },
   } = useValues(RelevanceTuningLogic);
 
-  const { updatePrecision } = useActions(RelevanceTuningLogic);
+  const { setPrecision } = useActions(RelevanceTuningLogic);
 
   const stepDescription = STEP_DESCRIPTIONS[precision];
 
@@ -102,7 +102,7 @@ export const PrecisionSlider: React.FC = () => {
         data-test-subj="PrecisionRange"
         value={precision}
         onChange={(e) => {
-          updatePrecision(parseInt((e.target as HTMLInputElement).value, 10));
+          setPrecision(parseInt((e.target as HTMLInputElement).value, 10));
         }}
         min={1}
         max={11}

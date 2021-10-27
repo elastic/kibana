@@ -184,6 +184,10 @@ export interface DataFrameAnalyticsQueryState {
   globalState?: MlCommonGlobalState;
 }
 
+export interface TrainedModelsQueryState {
+  modelId?: string;
+}
+
 export type DataFrameAnalyticsUrlState = MLPageState<
   | typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE
   | typeof ML_PAGES.DATA_FRAME_ANALYTICS_MAP
@@ -250,8 +254,14 @@ export type MlLocatorState =
   | DataFrameAnalyticsExplorationUrlState
   | CalendarEditUrlState
   | FilterEditUrlState
-  | MlGenericUrlState;
+  | MlGenericUrlState
+  | TrainedModelsUrlState;
 
 export type MlLocatorParams = MlLocatorState & SerializableRecord;
 
 export type MlLocator = LocatorPublic<MlLocatorParams>;
+
+export type TrainedModelsUrlState = MLPageState<
+  typeof ML_PAGES.TRAINED_MODELS_MANAGE,
+  TrainedModelsQueryState | undefined
+>;
