@@ -176,6 +176,8 @@ Array [
 
 exports[`index table show mappings button works from context menu 1`] = `"Mappings"`;
 
+exports[`index table show mappings button works from context menu 2`] = `"Mappings"`;
+
 exports[`index table show settings button works from context menu 1`] = `"Settings"`;
 
 exports[`index table show stats button works from context menu 1`] = `"Stats"`;
