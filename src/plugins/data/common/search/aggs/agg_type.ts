@@ -14,7 +14,7 @@ import { DatatableColumnType } from 'src/plugins/expressions/common';
 import type { RequestAdapter } from 'src/plugins/inspector/common';
 import type { SerializedFieldFormat } from 'src/plugins/field_formats/common';
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';
