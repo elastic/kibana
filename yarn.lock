@@ -2302,10 +2302,6 @@
     is-absolute "^1.0.0"
     is-negated-glob "^1.0.0"
 
-"@elastic/apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace":
-  version "0.0.0"
-  uid ""
-
 "@elastic/apm-rum-core@^5.12.1":
   version "5.12.1"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.12.1.tgz#ad78787876c68b9ce718d1c42b8e7b12b12eaa69"
@@ -2329,6 +2325,10 @@
   integrity sha512-NJAdzxXxf+LeCI0Dz3P+RMVY66C8sAztIg4tvnrhvBqxf8d7se+FpYw3oYjw3BZ8UDycmXEaIqEGcynUUndgqA==
   dependencies:
     "@elastic/apm-rum-core" "^5.12.1"
+
+"@elastic/apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace":
+  version "0.0.0"
+  uid ""
 
 "@elastic/app-search-javascript@^7.13.1":
   version "7.13.1"
@@ -2387,10 +2387,10 @@
     "@elastic/transport" "^0.0.15"
     tslib "^2.3.0"
 
-"@elastic/ems-client@7.16.0":
-  version "7.16.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.16.0.tgz#92db94126bac0b95fbf156fe609f68979e7af4b6"
-  integrity sha512-NgMB5vqj6I7lxVsysrz6eB1EW6gsZj7SWWs79WSiiKQeNuRg82tJhvbHQnWezjIS4UKOtoGxZsg475EHVZB46g==
+"@elastic/ems-client@8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.0.0.tgz#94f682298f39f19d14a1eca927a22508029671e1"
+  integrity sha512-0nIEu+PHkWmTZUI27J/6BCPyY7bsmNTbDRn9EHPyciWq487G7TWoocoZog/mj1DoP2bo/ZxA8dpTKf6bJpy2Rg==
   dependencies:
     "@types/geojson" "^7946.0.7"
     "@types/lru-cache" "^5.1.0"
@@ -3883,6 +3883,10 @@
   uid ""
 
 "@kbn/securitysolution-list-utils@link:bazel-bin/packages/kbn-securitysolution-list-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-rules@link:bazel-bin/packages/kbn-securitysolution-rules":
   version "0.0.0"
   uid ""
 
@@ -13165,10 +13169,10 @@ ejs@^3.1.2, ejs@^3.1.6:
   dependencies:
     jake "^10.6.1"
 
-elastic-apm-http-client@^10.0.0:
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-10.0.0.tgz#495651716c13a744544c4dc983107a948418d213"
-  integrity sha512-D0Frzaqo2h6RxrbxkwfTZSu7tKkmmP3UGYLCp2Fq25cGT/3px4hBWvTc+nV7iDwj2rwdQl7CNkcathYNkyHRWQ==
+elastic-apm-http-client@^10.1.0:
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-10.1.0.tgz#8fbfa3f026f40d82b22b77bf4ed539cc20623edb"
+  integrity sha512-G+UsOQS8+kTyjbZ9PBXgbN8RGgeTe3FfbVljiwuN+eIf0UwpSR8k5Oh+Z2BELTTVwTcit7NCH4+B4MPayYx1mw==
   dependencies:
     breadth-filter "^2.0.0"
     container-info "^1.0.1"
@@ -13179,10 +13183,10 @@ elastic-apm-http-client@^10.0.0:
     readable-stream "^3.4.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.21.1:
-  version "3.21.1"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.21.1.tgz#5f79cfc6ba60469e4ec83d176b3d28ddee78b530"
-  integrity sha512-qnYWvWXQx00pS98IFYxkRQ9+T+R8oh0KdsbCU8t1ouSozZI6l5frlwC9CVpsqakPnAuvWP/qIYJEKF3CkYPv0w==
+elastic-apm-node@^3.23.0:
+  version "3.23.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.23.0.tgz#e842aa505d576003579803e45fe91f572db74a72"
+  integrity sha512-yzdO/MwAcjT+TbcBQBKWbDb4beDVmmrIaFCu9VA+z6Ow9GKlQv7QaD9/cQjuN8/KI6ASiJfQI8cPgqy1SgSUuA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
@@ -13191,7 +13195,7 @@ elastic-apm-node@^3.21.1:
     basic-auth "^2.0.1"
     cookie "^0.4.0"
     core-util-is "^1.0.2"
-    elastic-apm-http-client "^10.0.0"
+    elastic-apm-http-client "^10.1.0"
     end-of-stream "^1.4.4"
     error-callsites "^2.0.4"
     error-stack-parser "^2.0.6"
@@ -24093,10 +24097,10 @@ react-popper@^2.2.4:
     react-fast-compare "^3.0.1"
     warning "^4.0.2"
 
-react-query@^3.27.0:
-  version "3.27.0"
-  resolved "https://registry.yarnpkg.com/react-query/-/react-query-3.27.0.tgz#77c76377ae41d180c4718da07ef72df82e07306b"
-  integrity sha512-2MR5LBXnR6OMXQVLcv/57x1zkDNj6gK5J5mtjGi6pu0aQ6Y4jGQysVvkrAErMKMZJVZELFcYGA8LsGIHzlo/zg==
+react-query@^3.28.0:
+  version "3.28.0"
+  resolved "https://registry.yarnpkg.com/react-query/-/react-query-3.28.0.tgz#1bfe12944860b2b773680054de37f19438f59d1d"
+  integrity sha512-OeX+nRqs7Zi0MvvtaKxKWE4N966UGtqSVuedOsz8cJh9eW195fgtYZ9nW3hZjIPPmeDY1PkArLUiV4wZvNRDPw==
   dependencies:
     "@babel/runtime" "^7.5.5"
     broadcast-channel "^3.4.1"
