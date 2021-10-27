@@ -1,0 +1,23 @@
+{
+  "logstash.put_pipeline": {
+    "data_autocomplete_rules": {
+      "description": "",
+      "last_modified": "",
+      "pipeline_metadata": {
+        "type": "",
+        "version": ""
+      },
+      "username": "",
+      "pipeline": "",
+      "pipeline_settings": {
+        "pipeline.workers": 0,
+        "pipeline.batch.size": 0,
+        "pipeline.batch.delay": 0,
+        "queue.type": "",
+        "queue.max_bytes.number": 0,
+        "queue.max_bytes.units": "",
+        "queue.checkpoint.writes": 0
+      }
+    }
+  }
+}
