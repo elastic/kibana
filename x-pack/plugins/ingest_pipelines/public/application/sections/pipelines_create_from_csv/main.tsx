@@ -43,7 +43,6 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
 
   const onFileUpload = async (action: FieldCopyAction) => {
     if (file != null && file.length > 0) {
-      setIsLoading(true);
       await processFile(file[0], action);
     }
   };
@@ -94,11 +93,18 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
       });
     } else {
       try {
+        setIsLoading(true);
+        setIsUploaded(false);
+
         const fileContents = await services.fileReader.readFile(csv, maxBytes);
-        await fetchPipelineFromMapping(fileContents, action);
+        const success = await fetchPipelineFromMapping(fileContents, action);
+
+        setIsLoading(false);
+        if (success) {
+          setIsUploaded(true);
+        }
       } catch (e) {
         setIsLoading(false);
-        setIsUploaded(false);
         setErrorInfo({
           title: i18n.translate(
             'xpack.ingestPipelines.createFromCsv.processFile.unexpectedErrorTitle',
@@ -123,8 +129,6 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
       copyAction: action,
     });
     setPipelineProcessors(processors);
-    setIsLoading(false);
-    setIsUploaded(true);
 
     if (!!error) {
       try {
@@ -146,9 +150,9 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           ),
         });
       }
-      setIsLoading(false);
-      setIsUploaded(false);
     }
+
+    return error === null;
   };
 
   return (

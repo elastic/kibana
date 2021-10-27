@@ -10,20 +10,19 @@ import React, { FC } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
 interface Props {
-  error: { title: string; message: string } | null;
+  error: { title: string; message: string };
 }
 
 export const Error: FC<Props> = ({ error }) => {
-  const title = error?.title;
-  const details = error?.message;
-
   return (
-    <EuiCallOut title={title} color="danger" iconType="alert" data-test-subj="errorCallout">
+    <EuiCallOut title={error.title} color="danger" iconType="alert" data-test-subj="errorCallout">
       <p>
         <FormattedMessage
           id="xpack.ingestPipelines.createFromCsv.errorMessage"
-          defaultMessage="{details}"
-          values={{ details }}
+          defaultMessage="{message}"
+          values={{
+            message: error.message,
+          }}
         />
       </p>
     </EuiCallOut>
