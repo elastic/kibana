@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getPathParts } from '../../archive';
@@ -71,12 +71,13 @@ async function handleMlModelInstall({
       model_id: mlModel.installationName,
       defer_definition_decompression: true,
       timeout: '45s',
+      // @ts-expect-error expects an object not a string
       body: mlModel.content,
     });
   } catch (err) {
     // swallow the error if the ml model already exists.
     const isAlreadyExistError =
-      err instanceof ResponseError &&
+      err instanceof errors.ResponseError &&
       err?.body?.error?.type === 'resource_already_exists_exception';
     if (!isAlreadyExistError) {
       throw err;
