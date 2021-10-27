@@ -6,50 +6,33 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 
 import {
   Chart,
-  Datum,
-  LayerValue,
-  Partition,
   Position,
   Settings,
   RenderChangeListener,
   TooltipProps,
   TooltipType,
-  SeriesIdentifier,
+  HeatmapElementEvent,
+  ElementClickListener,
+  BrushEndListener,
+  HeatmapBrushEvent,
+  Heatmap,
+  ScaleType,
+  HeatmapSpec,
 } from '@elastic/charts';
-import {
-  LegendToggle,
-  ClickTriggerEvent,
-  ChartsPluginSetup,
-  PaletteRegistry,
-} from '../../../charts/public';
+import { LegendToggle, ChartsPluginSetup, PaletteRegistry } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
+import type { IUiSettingsClient } from '../../../../core/public';
 import type { PersistedState } from '../../../visualizations/public';
-import {
-  Datatable,
-  DatatableColumn,
-  IInterpreterRenderHandlers,
-} from '../../../expressions/public';
-import type { FieldFormat } from '../../../field_formats/common';
-import { DEFAULT_PERCENT_DECIMALS } from '../common';
-import { HeatmapVisParams, HeatmapContainerDimensions } from './types';
-// import { PieVisParams, BucketColumns, ValueFormats, PieContainerDimensions } from './types';
-// import {
-//   getColorPicker,
-//   getLayers,
-//   getLegendActions,
-//   canFilter,
-//   getFilterClickData,
-//   getFilterEventData,
-//   getConfig,
-//   getColumns,
-//   getSplitDimensionAccessor,
-// } from './utils';
-// import { ChartSplit, SMALL_MULTIPLES_ID } from './components/chart_split';
-// import { VisualizationNoResults } from './components/visualization_noresults';
+import { Datatable, IInterpreterRenderHandlers } from '../../../expressions/public';
+// import type { FieldFormat } from '../../../field_formats/common';
+// import { DEFAULT_PERCENT_DECIMALS } from '../common';
+import { HeatmapVisParams } from './types';
+import { getTimeZone } from './utils/get_timezone';
+import { getStopsWithColorsFromColorsNumber } from './utils/palette';
 
 import './chart.scss';
 
@@ -71,28 +54,30 @@ export interface HeatmapComponentProps {
   chartsThemeService: ChartsPluginSetup['theme'];
   palettesRegistry: PaletteRegistry;
   services: DataPublicPluginStart;
+  uiSettings: IUiSettingsClient;
   syncColors: boolean;
 }
 
 const HeatmapComponent = (props: HeatmapComponentProps) => {
   const chartTheme = props.chartsThemeService.useChartsTheme();
-  const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
-  //   const [showLegend, setShowLegend] = useState<boolean>(() => {
-  //     const bwcLegendStateDefault =
-  //       props.visParams.addLegend == null ? false : props.visParams.addLegend;
-  //     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
-  //   });
-  const [dimensions, setDimensions] = useState<undefined | HeatmapContainerDimensions>();
+  const isDarkTheme = props.chartsThemeService.useDarkMode();
+  // const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
+  const [showLegend, setShowLegend] = useState<boolean>(() => {
+    // TODO: Check when this bwc can safely be removed
+    const bwcLegendStateDefault =
+      props.visParams.addLegend == null ? true : props.visParams.addLegend;
+    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
+  });
 
-  const parentRef = useRef<HTMLDivElement>(null);
+  // const parentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (parentRef && parentRef.current) {
-      const parentHeight = parentRef.current!.getBoundingClientRect().height;
-      const parentWidth = parentRef.current!.getBoundingClientRect().width;
-      setDimensions({ width: parentWidth, height: parentHeight });
-    }
-  }, [parentRef]);
+  // useEffect(() => {
+  //   if (parentRef && parentRef.current) {
+  //     const parentHeight = parentRef.current!.getBoundingClientRect().height;
+  //     const parentWidth = parentRef.current!.getBoundingClientRect().width;
+  //     setDimensions({ width: parentWidth, height: parentHeight });
+  //   }
+  // }, [parentRef]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -103,30 +88,68 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
     [props]
   );
 
-  // handles slice click event
-  //   const handleSliceClick = useCallback(
-  //     (
-  //       clickedLayers: LayerValue[],
-  //       bucketColumns: Array<Partial<BucketColumns>>,
-  //       visData: Datatable,
-  //       splitChartDimension?: DatatableColumn,
-  //       splitChartFormatter?: FieldFormat
-  //     ): void => {
-  //       const data = getFilterClickData(
-  //         clickedLayers,
-  //         bucketColumns,
-  //         visData,
-  //         splitChartDimension,
-  //         splitChartFormatter
-  //       );
-  //       const event = {
-  //         name: 'filterBucket',
-  //         data: { data },
-  //       };
-  //       props.fireEvent(event);
-  //     },
-  //     [props]
-  //   );
+  // handles cell click event
+  const handleCellClick = useCallback((e: HeatmapElementEvent[]): void => {
+    // const cell = e[0][0];
+    // const { x, y } = cell.datum;
+    // console.log('bom');
+    // const data = getFilterClickData(
+    //   clickedLayers,
+    //   bucketColumns,
+    //   visData,
+    //   splitChartDimension,
+    //   splitChartFormatter
+    // );
+    // const event = {
+    //   name: 'filterBucket',
+    //   data: { data },
+    // };
+    // props.fireEvent(event);
+  }, []) as ElementClickListener;
+
+  const onBrushEnd = useCallback((e: HeatmapBrushEvent) => {
+    // const { x, y } = e;
+    // console.log('brush');
+    // const xAxisFieldName = xAxisColumn.meta.field;
+    // const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
+    // if (isTimeBasedSwimLane) {
+    //   const context: LensBrushEvent['data'] = {
+    //     range: x as number[],
+    //     table,
+    //     column: xAxisColumnIndex,
+    //     timeFieldName,
+    //   };
+    //   onSelectRange(context);
+    // } else {
+    //   const points: Array<{ row: number; column: number; value: string | number }> = [];
+    //   if (yAxisColumn) {
+    //     (y as string[]).forEach((v) => {
+    //       points.push({
+    //         row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
+    //         column: yAxisColumnIndex,
+    //         value: v,
+    //       });
+    //     });
+    //   }
+    //   (x as string[]).forEach((v) => {
+    //     points.push({
+    //       row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
+    //       column: xAxisColumnIndex,
+    //       value: v,
+    //     });
+    //   });
+    //   const context: LensFilterEvent['data'] = {
+    //     data: points.map((point) => ({
+    //       row: point.row,
+    //       column: point.column,
+    //       value: point.value,
+    //       table,
+    //     })),
+    //     timeFieldName,
+    //   };
+    //   onClickValue(context);
+    // }
+  }, []);
 
   // handles legend action event data
   //   const getLegendActionEventData = useCallback(
@@ -158,18 +181,15 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
   //     [props]
   //   );
 
-  //   const toggleLegend = useCallback(() => {
-  //     setShowLegend((value) => {
-  //       const newValue = !value;
-  //       props.uiState?.set('vis.legendOpen', newValue);
-  //       return newValue;
-  //     });
-  //   }, [props.uiState]);
-
-  //   useEffect(() => {
-  //     setShowLegend(props.visParams.addLegend);
-  //     props.uiState?.set('vis.legendOpen', props.visParams.addLegend);
-  //   }, [props.uiState, props.visParams.addLegend]);
+  const toggleLegend = useCallback(() => {
+    setShowLegend((value) => {
+      const newValue = !value;
+      if (props.uiState?.set) {
+        props.uiState.set('vis.legendOpen', newValue);
+      }
+      return newValue;
+    });
+  }, [props.uiState]);
 
   //   const setColor = useCallback(
   //     (newColor: string | null, seriesLabel: string | number) => {
@@ -186,17 +206,12 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
   //     [props.uiState]
   //   );
 
-  //   const { visData, visParams, services, syncColors } = props;
-
-  //   function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
-  //     const value = d[metricColumn.id];
-  //     return Number.isFinite(value) && value >= 0 ? value : 0;
-  //   }
+  const { visData, visParams, services } = props;
+  // console.dir(visData);
+  // console.dir(visParams);
 
   // formatters
-  //   const metricFieldFormatter = services.fieldFormats.deserialize(
-  //     visParams.dimensions.metric.format
-  //   );
+  const metricFieldFormatter = services.fieldFormats.deserialize(visParams.dimensions?.y[0].format);
   //   const splitChartFormatter = visParams.dimensions.splitColumn
   //     ? services.fieldFormats.deserialize(visParams.dimensions.splitColumn[0].format)
   //     : visParams.dimensions.splitRow
@@ -214,27 +229,6 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
   //     [visData, visParams]
   //   );
 
-  //   const layers = useMemo(
-  //     () =>
-  //       getLayers(
-  //         bucketColumns,
-  //         visParams,
-  //         props.uiState?.get('vis.colors', {}),
-  //         visData.rows,
-  //         props.palettesRegistry,
-  //         services.fieldFormats,
-  //         syncColors
-  //       ),
-  //     [
-  //       bucketColumns,
-  //       visParams,
-  //       props.uiState,
-  //       props.palettesRegistry,
-  //       visData.rows,
-  //       services.fieldFormats,
-  //       syncColors,
-  //     ]
-  //   );
   //   const config = useMemo(
   //     () => getConfig(visParams, chartTheme, dimensions),
   //     [chartTheme, visParams, dimensions]
@@ -242,7 +236,7 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
   //   const tooltip: TooltipProps = {
   //     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
   //   };
-  //   const legendPosition = visParams.legendPosition ?? Position.Right;
+  const legendPosition = visParams.legendPosition ?? Position.Right;
 
   //   const legendColorPicker = useMemo(
   //     () =>
@@ -285,105 +279,164 @@ const HeatmapComponent = (props: HeatmapComponentProps) => {
   //     ? visData.columns[visParams.dimensions.splitRow[0].accessor]
   //     : undefined;
 
-  //   /**
-  //    * Checks whether data have all zero values.
-  //    * If so, the no data container is loaded.
-  //    */
-  //   const isAllZeros = useMemo(
-  //     () => visData.rows.every((row) => row[metricColumn.id] === 0),
-  //     [visData.rows, metricColumn]
-  //   );
+  // accessors
+  const xAccessorIdx = visParams.dimensions?.x?.accessor ?? 0;
+  const xAccessor = visData.columns[xAccessorIdx].id;
+  const valueAccessorIdx = visParams.dimensions?.y[0]?.accessor ?? 0;
+  const valueAccessor = visData.columns[valueAccessorIdx].id;
+  const yAccessorIdx = visParams.dimensions?.series?.[0]?.accessor;
+  const yAccessor = yAccessorIdx ? visData.columns[yAccessorIdx].id : 'unifiedY';
 
-  //   /**
-  //    * Checks whether data have negative values.
-  //    * If so, the no data container is loaded.
-  //    */
-  //   const hasNegative = useMemo(
-  //     () =>
-  //       visData.rows.some((row) => {
-  //         const value = row[metricColumn.id];
-  //         return typeof value === 'number' && value < 0;
-  //       }),
-  //     [visData.rows, metricColumn]
-  //   );
+  const chartData = visData.rows.filter((row) => typeof row[valueAccessor!] === 'number');
+  const isTimeBasedSwimLane = visData.columns[xAccessorIdx].meta.type === 'date';
+  const xScaleType =
+    isTimeBasedSwimLane && chartData.length > 1 ? ScaleType.Time : ScaleType.Ordinal;
+
+  // const bands = ranges.map((start, index, array) => {
+  //   return {
+  //     // with the default continuity:above the every range is left-closed
+  //     start,
+  //     // with the default continuity:above the last range is right-open
+  //     end: index === array.length - 1 ? Infinity : array[index + 1],
+  //     // the current colors array contains a duplicated color at the beginning that we need to skip
+  //     color: colors[index + 1],
+  //   };
+  // });
+  const tooltip: TooltipProps = {
+    type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
+  };
+  const timeZone = getTimeZone(props.uiSettings);
+
+  const labels = visParams.valueAxes[0].labels;
+  const config: HeatmapSpec['config'] = {
+    grid: {
+      stroke: {
+        width: 1,
+        color: '#D3DAE6',
+      },
+      cellHeight: {
+        max: 'fill',
+        min: 1,
+      },
+    },
+    cell: {
+      maxWidth: 'fill',
+      maxHeight: 'fill',
+      label: {
+        visible: labels.show ?? false,
+      },
+      border: {
+        strokeWidth: 0,
+      },
+    },
+    yAxisLabel: {
+      visible: true,
+      textColor: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
+      // padding: 0,
+      name: visParams.dimensions?.series?.[0]?.label ?? '',
+      ...(yAccessorIdx
+        ? {
+            formatter: (v: number | string) =>
+              services.fieldFormats
+                .deserialize(visData.columns[yAccessorIdx].meta.params)
+                .convert(v),
+          }
+        : {}),
+    },
+    xAxisLabel: {
+      visible: true,
+      // eui color subdued
+      textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
+      formatter: (v: number | string) =>
+        services.fieldFormats.deserialize(visData.columns[xAccessorIdx].meta.params).convert(v),
+      name: visParams.dimensions?.x?.label ?? '',
+    },
+    brushMask: {
+      fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
+    },
+    brushArea: {
+      stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
+    },
+    timeZone,
+  };
+
+  // const { percentageMode, palette } = visParams;
+  // const { stops = [] } = palette.params ?? {};
+  // const min = stops[0];
+  // const max = stops[stops.length - 1];
+
+  // const color = palette ? getColor(value, palette.params) : undefined;
+
+  // if (isPercentageMode && stops.length) {
+  //   value = (value - min) / (max - min);
+  // }
+  interface ColorStopsParams {
+    colors: string[];
+    stops: number[];
+  }
+  let params: ColorStopsParams;
+  if (visParams.setColorRange) {
+    params = visParams.palette.params as unknown as ColorStopsParams;
+  } else {
+    params = getStopsWithColorsFromColorsNumber(
+      visData.rows,
+      valueAccessor,
+      Number(visParams.colorsNumber),
+      visParams.colorSchema,
+      visParams.invertColors
+    );
+  }
+  const bands = params.stops.map((stop, index) => {
+    return {
+      start: stop ?? -Infinity,
+      end: params.stops[index + 1] ?? Infinity,
+      color: params.colors[index],
+    };
+  });
 
   return (
-    <div className="heatmap__container" data-test-subj="visTypeHeatmapChart">
-      <div className="heatmap__wrapper" ref={parentRef}>
-        Miaouuuuu
-        {/* <LegendToggle
-          onClick={toggleLegend}
+    <div className="heatmapChart__container" data-test-subj="visTypeHeatmapChart">
+      <LegendToggle
+        onClick={toggleLegend}
+        showLegend={showLegend}
+        legendPosition={legendPosition}
+      />
+      <Chart size="100%">
+        <Settings
+          onElementClick={handleCellClick}
+          onRenderChange={onRenderChange}
+          tooltip={tooltip}
           showLegend={showLegend}
           legendPosition={legendPosition}
+          debugState={window._echDebugStateFlag ?? false}
+          theme={{
+            ...chartTheme,
+            // legend: {
+            //   labelOptions: {
+            //     maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0,
+            //   },
+            // },
+          }}
+          onBrushEnd={onBrushEnd as BrushEndListener}
         />
-        <Chart size="100%">
-          <ChartSplit
-            splitColumnAccessor={splitChartColumnAccessor}
-            splitRowAccessor={splitChartRowAccessor}
-            splitDimension={splitChartDimension}
-          />
-          <Settings
-            debugState={window._echDebugStateFlag ?? false}
-            showLegend={showLegend}
-            legendPosition={legendPosition}
-            legendMaxDepth={visParams.nestedLegend ? undefined : 1}
-            legendColorPicker={legendColorPicker}
-            flatLegend={Boolean(splitChartDimension)}
-            tooltip={tooltip}
-            onElementClick={(args) => {
-              handleSliceClick(
-                args[0][0] as LayerValue[],
-                bucketColumns,
-                visData,
-                splitChartDimension,
-                splitChartFormatter
-              );
-            }}
-            legendAction={getLegendActions(
-              canFilter,
-              getLegendActionEventData(visData),
-              handleLegendAction,
-              visParams,
-              services.actions,
-              services.fieldFormats
-            )}
-            theme={[
-              chartTheme,
-              {
-                legend: {
-                  labelOptions: {
-                    maxLines: visParams.truncateLegend ? visParams.maxLegendLines ?? 1 : 0,
-                  },
-                },
-              },
-            ]}
-            baseTheme={chartBaseTheme}
-            onRenderChange={onRenderChange}
-          />
-          <Partition
-            id="pie"
-            smallMultiples={SMALL_MULTIPLES_ID}
-            data={visData.rows}
-            valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
-            percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
-            valueGetter={
-              !visParams.labels.show ||
-              visParams.labels.valuesFormat === ValueFormats.VALUE ||
-              !visParams.labels.values
-                ? undefined
-                : 'percent'
-            }
-            valueFormatter={(d: number) =>
-              !visParams.labels.show || !visParams.labels.values
-                ? ''
-                : metricFieldFormatter.convert(d)
-            }
-            layers={layers}
-            config={config}
-            topGroove={!visParams.labels.show ? 0 : undefined}
-          />
-        </Chart> */}
-      </div>
+        <Heatmap
+          id="heatmap"
+          name={visParams.dimensions?.y[0]?.label}
+          colorScale={{
+            type: 'bands',
+            bands,
+          }}
+          data={visData.rows}
+          xAccessor={xAccessor}
+          yAccessor={yAccessor}
+          valueAccessor={valueAccessor}
+          valueFormatter={(d: number) => metricFieldFormatter.convert(d)}
+          xScaleType={xScaleType}
+          ySortPredicate="dataIndex"
+          config={config}
+          xSortPredicate="dataIndex"
+        />
+      </Chart>
     </div>
   );
 };

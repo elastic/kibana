@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, DocLinksStart } from 'src/core/public';
+import { CoreSetup, DocLinksStart, IUiSettingsClient } from 'src/core/public';
 import { VisualizationsSetup } from '../../../visualizations/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import { ChartsPluginSetup } from '../../../charts/public';
@@ -34,7 +34,11 @@ export interface VisTypeHeatmapPluginStartDependencies {
 export interface VisTypeHeatmapDependencies {
   theme: ChartsPluginSetup['theme'];
   palettes: ChartsPluginSetup['palettes'];
-  getStartDeps: () => Promise<{ data: DataPublicPluginStart; docLinks: DocLinksStart }>;
+  getStartDeps: () => Promise<{
+    data: DataPublicPluginStart;
+    docLinks: DocLinksStart;
+    uiSettings: IUiSettingsClient;
+  }>;
 }
 
 export class VisTypePiePlugin {
@@ -48,6 +52,7 @@ export class VisTypePiePlugin {
         return {
           data: deps.data,
           docLinks: coreStart.docLinks,
+          uiSettings: coreStart.uiSettings,
         };
       };
       const trackUiMetric = usageCollection?.reportUiCounter.bind(

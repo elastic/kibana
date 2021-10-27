@@ -53,6 +53,7 @@ export const getHeatmapVisRenderer: (
             fireEvent={handlers.event}
             uiState={handlers.uiState as PersistedState}
             services={services.data}
+            uiSettings={services.uiSettings}
             syncColors={syncColors}
           />
         </VisualizationContainer>

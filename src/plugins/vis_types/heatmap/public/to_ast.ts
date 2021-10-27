@@ -12,6 +12,7 @@ import { VisToExpressionAst, getVisSchemas } from '../../../visualizations/publi
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 import type { DateHistogramParams, HistogramParams } from '../../../visualizations/public';
 import type { Labels } from '../../../charts/public';
+import { getStopsWithColorsFromRanges } from './utils/palette';
 
 import { BUCKET_TYPES } from '../../../data/public';
 
@@ -156,13 +157,27 @@ export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis,
     args
   );
 
-  if (vis.params.colorsRange) {
+  if (vis.params.setColorRange && vis.params.colorsRange && vis.params.colorsRange.length) {
+    const stopsWithColors = getStopsWithColorsFromRanges(
+      vis.params.colorsRange,
+      vis.params.colorSchema,
+      vis.params.invertColors
+    );
+    const palette = buildExpressionFunction('palette', {
+      ...stopsWithColors,
+      range: 'number',
+      continuity: 'none',
+    });
+
+    // ToDo Remove it
     vis.params.colorsRange.forEach((range: any) => {
       visTypeHeatmap.addArgument(
         'colorsRange',
         buildExpression(`range from=${range.from} to=${range.to}`)
       );
     });
+
+    visTypeHeatmap.addArgument('palette', buildExpression([palette]));
   }
 
   const ast = buildExpression([getEsaggsFn(vis), visTypeHeatmap]);

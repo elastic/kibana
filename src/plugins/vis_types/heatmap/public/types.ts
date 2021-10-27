@@ -82,17 +82,6 @@ export enum AxisMode {
   Silhouette = 'silhouette',
 }
 
-export enum ChartMode {
-  Normal = 'normal',
-  Stacked = 'stacked',
-}
-
-export enum InterpolationMode {
-  Linear = 'linear',
-  Cardinal = 'cardinal',
-  StepAfter = 'step-after',
-}
-
 export interface Scale {
   boundsMargin?: number | '';
   defaultYExtents?: boolean;
@@ -151,10 +140,10 @@ export interface ValueAxis extends CategoryAxis {
   name: string;
 }
 
-export interface HeatmapContainerDimensions {
-  width: number;
-  height: number;
-}
+// export interface HeatmapContainerDimensions {
+//   width: number;
+//   height: number;
+// }
 
 export type Dimension = Omit<SchemaConfig, 'params'> & {
   params: DateHistogramParams | HistogramParams | FakeParams | {};
