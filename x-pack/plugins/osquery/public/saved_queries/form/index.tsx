@@ -156,7 +156,12 @@ const SavedQueryFormComponent = forwardRef<SavedQueryFormRefObject, SavedQueryFo
             <CommonUseField path="platform" component={PlatformCheckBoxGroupField} />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {playgroundVisible && <PlaygroundFlyout enabled={isValid} onClose={handleHidePlayground} />}
+        {playgroundVisible && (
+          <PlaygroundFlyout
+            enabled={isValid !== undefined ? isValid : true}
+            onClose={handleHidePlayground}
+          />
+        )}
       </>
     );
   }
