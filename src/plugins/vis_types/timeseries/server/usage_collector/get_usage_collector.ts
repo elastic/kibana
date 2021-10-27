@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TIME_RANGE_DATA_MODES } from '../../common/enums';
+import { TIME_RANGE_DATA_MODES, PANEL_TYPES } from '../../common/enums';
 import { findByValueEmbeddables } from '../../../../dashboard/server';
 
 import type {
@@ -19,7 +19,9 @@ import type { Panel } from '../../common/types';
 
 export interface TimeseriesUsage {
   timeseries_use_last_value_mode_total: number;
+  timeseries_use_es_indices_total: number;
   timeseries_table_use_aggregate_function: number;
+  timeseries_types: { [key in PANEL_TYPES]: number };
 }
 
 const doTelemetryFoVisualizations = async (
@@ -64,7 +66,16 @@ export const getStats = async (
 ): Promise<TimeseriesUsage | undefined> => {
   const timeseriesUsage = {
     timeseries_use_last_value_mode_total: 0,
+    timeseries_use_es_indices_total: 0,
     timeseries_table_use_aggregate_function: 0,
+    timeseries_types: {
+      gauge: 0,
+      markdown: 0,
+      metric: 0,
+      table: 0,
+      timeseries: 0,
+      top_n: 0,
+    },
   };
 
   function telemetryUseLastValueMode(visState: SavedVisState<Panel>) {
@@ -75,6 +86,12 @@ export const getStats = async (
         visState.params.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE)
     ) {
       timeseriesUsage.timeseries_use_last_value_mode_total++;
+    }
+  }
+
+  function telemetryUseESIndices(visState: SavedVisState<Panel>) {
+    if (visState.type === 'metrics' && !visState.params.use_kibana_indexes) {
+      timeseriesUsage.timeseries_use_es_indices_total++;
     }
   }
 
@@ -94,16 +111,28 @@ export const getStats = async (
     }
   }
 
+  function telemetryPanelTypes(visState: SavedVisState<Panel>) {
+    if (visState.type === 'metrics') {
+      timeseriesUsage.timeseries_types[visState.params.type]++;
+    }
+  }
   await Promise.all([
     // last value usage telemetry
     doTelemetryFoVisualizations(soClient, telemetryUseLastValueMode),
     doTelemetryForByValueVisualizations(soClient, telemetryUseLastValueMode),
+    // elasticsearch indices usage telemetry
+    doTelemetryFoVisualizations(soClient, telemetryUseESIndices),
+    doTelemetryForByValueVisualizations(soClient, telemetryUseESIndices),
     //  table aggregate function telemetry
     doTelemetryFoVisualizations(soClient, telemetryTableAggFunction),
     doTelemetryForByValueVisualizations(soClient, telemetryTableAggFunction),
+    //  panel types usage telemetry
+    doTelemetryFoVisualizations(soClient, telemetryPanelTypes),
+    doTelemetryForByValueVisualizations(soClient, telemetryPanelTypes),
   ]);
 
   return timeseriesUsage.timeseries_use_last_value_mode_total ||
+    timeseriesUsage.timeseries_use_es_indices_total ||
     timeseriesUsage.timeseries_table_use_aggregate_function
     ? timeseriesUsage
     : undefined;
