@@ -7,7 +7,6 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as rt from 'io-ts';
-import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../../../../common/constants';
 import {
   LogEntryAfterCursor,
   logEntryAfterCursorRT,
@@ -27,6 +26,8 @@ export const createGetLogEntriesQuery = (
   endTimestamp: number,
   cursor: LogEntryBeforeCursor | LogEntryAfterCursor | null | undefined,
   size: number,
+  timestampField: string,
+  tiebreakerField: string,
   fields: string[],
   runtimeMappings?: estypes.MappingRuntimeFields,
   query?: JsonObject,
@@ -47,14 +48,14 @@ export const createGetLogEntriesQuery = (
           filter: [
             ...(query ? [query] : []),
             ...(highlightQuery ? [highlightQuery] : []),
-            ...createTimeRangeFilterClauses(startTimestamp, endTimestamp, TIMESTAMP_FIELD),
+            ...createTimeRangeFilterClauses(startTimestamp, endTimestamp, timestampField),
           ],
         },
       },
       fields,
       runtime_mappings: runtimeMappings,
       _source: false,
-      ...createSortClause(sortDirection, TIMESTAMP_FIELD, TIEBREAKER_FIELD),
+      ...createSortClause(sortDirection, timestampField, tiebreakerField),
       ...createSearchAfterClause(cursor),
       ...createHighlightClause(highlightQuery, fields),
     },

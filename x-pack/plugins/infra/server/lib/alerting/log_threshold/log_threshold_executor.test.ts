@@ -169,7 +169,7 @@ describe('Log threshold executor', () => {
         ...baseAlertParams,
         criteria: positiveCriteria,
       };
-      const filters = buildFiltersFromCriteria(alertParams);
+      const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
       expect(filters.mustFilters).toEqual(expectedPositiveFilterClauses);
     });
 
@@ -178,14 +178,14 @@ describe('Log threshold executor', () => {
         ...baseAlertParams,
         criteria: negativeCriteria,
       };
-      const filters = buildFiltersFromCriteria(alertParams);
+      const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
 
       expect(filters.mustNotFilters).toEqual(expectedNegativeFilterClauses);
     });
 
     test('Handles time range', () => {
       const alertParams: AlertParams = { ...baseAlertParams, criteria: [] };
-      const filters = buildFiltersFromCriteria(alertParams);
+      const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].gte).toBe('number');
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].lte).toBe('number');
       expect(filters.rangeFilter.range[TIMESTAMP_FIELD].format).toBe('epoch_millis');
@@ -203,7 +203,12 @@ describe('Log threshold executor', () => {
           ...baseAlertParams,
           criteria: [...positiveCriteria, ...negativeCriteria],
         };
-        const query = getUngroupedESQuery(alertParams, FILEBEAT_INDEX, runtimeMappings);
+        const query = getUngroupedESQuery(
+          alertParams,
+          TIMESTAMP_FIELD,
+          FILEBEAT_INDEX,
+          runtimeMappings
+        );
         expect(query).toEqual({
           index: 'filebeat-*',
           allow_no_indices: true,
@@ -248,7 +253,12 @@ describe('Log threshold executor', () => {
             groupBy: ['host.name'],
             criteria: [...positiveCriteria, ...negativeCriteria],
           };
-          const query = getGroupedESQuery(alertParams, FILEBEAT_INDEX, runtimeMappings);
+          const query = getGroupedESQuery(
+            alertParams,
+            TIMESTAMP_FIELD,
+            FILEBEAT_INDEX,
+            runtimeMappings
+          );
 
           expect(query).toEqual({
             index: 'filebeat-*',
@@ -313,7 +323,12 @@ describe('Log threshold executor', () => {
             criteria: [...positiveCriteria, ...negativeCriteria],
           };
 
-          const query = getGroupedESQuery(alertParams, FILEBEAT_INDEX, runtimeMappings);
+          const query = getGroupedESQuery(
+            alertParams,
+            TIMESTAMP_FIELD,
+            FILEBEAT_INDEX,
+            runtimeMappings
+          );
 
           expect(query).toEqual({
             index: 'filebeat-*',

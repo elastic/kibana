@@ -78,8 +78,19 @@ export const logEntrySearchStrategyProvider = ({
           concatMap(({ params }) =>
             resolvedSourceConfiguration$.pipe(
               map(
-                ({ indices, runtimeMappings }): IEsSearchRequest => ({
-                  params: createGetLogEntryQuery(indices, params.logEntryId, runtimeMappings),
+                ({
+                  indices,
+                  timestampField,
+                  tiebreakerField,
+                  runtimeMappings,
+                }): IEsSearchRequest => ({
+                  params: createGetLogEntryQuery(
+                    indices,
+                    params.logEntryId,
+                    timestampField,
+                    tiebreakerField,
+                    runtimeMappings
+                  ),
                 })
               )
             )

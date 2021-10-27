@@ -165,9 +165,10 @@ export async function getLogEntryCategoryExamples(
 
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
-  const { runtimeMappings } = resolvedSourceConfiguration;
+  const timestampField = customSettings?.logs_source_config?.timestampField;
+  const { tiebreakerField, runtimeMappings } = resolvedSourceConfiguration;
 
-  if (indices == null) {
+  if (indices == null || timestampField == null) {
     throw new InsufficientLogAnalysisMlJobConfigurationError(
       `Failed to find index configuration for ml job ${logEntryCategoriesCountJobId}`
     );
@@ -190,6 +191,8 @@ export async function getLogEntryCategoryExamples(
     context,
     indices,
     runtimeMappings,
+    timestampField,
+    tiebreakerField,
     startTime,
     endTime,
     category._source.terms,
@@ -401,6 +404,8 @@ async function fetchLogEntryCategoryExamples(
   requestContext: { core: { elasticsearch: { client: { asCurrentUser: ElasticsearchClient } } } },
   indices: string,
   runtimeMappings: estypes.MappingRuntimeFields,
+  timestampField: string,
+  tiebreakerField: string,
   startTime: number,
   endTime: number,
   categoryQuery: string,
@@ -416,6 +421,8 @@ async function fetchLogEntryCategoryExamples(
         createLogEntryCategoryExamplesQuery(
           indices,
           runtimeMappings,
+          timestampField,
+          tiebreakerField,
           startTime,
           endTime,
           categoryQuery,
