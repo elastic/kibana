@@ -83,7 +83,7 @@ export function MachineLearningForecastProvider({ getService }: FtrProviderConte
 
     async closeForecastModal() {
       await testSubjects.click('mlModalForecast > mlModalForecastButtonClose');
-      await testSubjects.missingOrFail('mlModalForecast');
+      await this.assertForecastModalMissing();
     },
 
     async assertForecastModalMissing() {
@@ -108,17 +108,18 @@ export function MachineLearningForecastProvider({ getService }: FtrProviderConte
 
     async clickForecastModalRunButton() {
       await testSubjects.click('mlModalForecast > mlModalForecastButtonRun');
+      await this.assertForecastModalMissing();
     },
 
     async getForecastTableRows() {
       return await testSubjects.findAll('mlModalForecastTable > ~mlForecastsListRow');
     },
 
-    async assertTableNotEmpty() {
+    async assertForecastTableNotEmpty() {
       const tableRows = await this.getForecastTableRows();
       expect(tableRows.length).to.be.greaterThan(
         0,
-        `Anomalies table should have at least one row (got '${tableRows.length}')`
+        `Forecast table should have at least one row (got '${tableRows.length}')`
       );
     },
   };

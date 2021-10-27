@@ -91,7 +91,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('should run the forecast and close the modal');
         await ml.forecast.clickForecastModalRunButton();
-        await ml.forecast.assertForecastModalMissing();
 
         await ml.testExecution.logTestStep('should display the forecasts toggle checkbox');
         await ml.forecast.assertForecastCheckboxExists();
@@ -110,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.forecast.assertForecastButtonEnabled(true);
         await ml.forecast.openForecastModal();
         await ml.forecast.assertForecastTableExists();
-        await ml.forecast.assertTableNotEmpty();
+        await ml.forecast.assertForecastTableNotEmpty();
       });
     });
   });
