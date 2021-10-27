@@ -6,7 +6,7 @@
  */
 
 import type { HttpHandler } from 'src/core/public';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { estypes } from '@elastic/elasticsearch';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
@@ -46,11 +46,13 @@ export interface ModuleDescriptor<JobType extends string> {
   ) => Promise<DeleteJobsResponsePayload>;
   validateSetupIndices: (
     indices: string[],
+    timestampField: string,
     runtimeMappings: estypes.MappingRuntimeFields,
     fetch: HttpHandler
   ) => Promise<ValidationIndicesResponsePayload>;
   validateSetupDatasets: (
     indices: string[],
+    timestampField: string,
     startTime: number,
     endTime: number,
     runtimeMappings: estypes.MappingRuntimeFields,
@@ -62,5 +64,6 @@ export interface ModuleSourceConfiguration {
   indices: string[];
   sourceId: string;
   spaceId: string;
+  timestampField: string;
   runtimeMappings: estypes.MappingRuntimeFields;
 }

@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/common';
 import { ObjectEntries } from '../utility_types';
+import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../constants';
 import { ResolveLogSourceConfigurationError } from './errors';
 import {
   LogSourceColumnConfiguration,
@@ -18,6 +19,8 @@ export interface ResolvedLogSourceConfiguration {
   name: string;
   description: string;
   indices: string;
+  timestampField: string;
+  tiebreakerField: string;
   messageField: string[];
   fields: DataView['fields'];
   runtimeMappings: estypes.MappingRuntimeFields;
@@ -59,6 +62,8 @@ const resolveLegacyReference = async (
 
   return {
     indices: sourceConfiguration.logIndices.indexName,
+    timestampField: TIMESTAMP_FIELD,
+    tiebreakerField: TIEBREAKER_FIELD,
     messageField: sourceConfiguration.fields.message,
     fields,
     runtimeMappings: {},
@@ -87,6 +92,8 @@ const resolveKibanaIndexPatternReference = async (
 
   return {
     indices: indexPattern.title,
+    timestampField: TIMESTAMP_FIELD,
+    tiebreakerField: TIEBREAKER_FIELD,
     messageField: ['message'],
     fields: indexPattern.fields,
     runtimeMappings: resolveRuntimeMappings(indexPattern),

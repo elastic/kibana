@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { HttpHandler } from 'src/core/public';
 import {
   bucketSpan,
@@ -16,7 +16,6 @@ import {
   logEntryRateJobTypes,
   partitionField,
 } from '../../../../../../common/log_analysis';
-import { TIMESTAMP_FIELD } from '../../../../../../common/constants';
 import { ModuleDescriptor, ModuleSourceConfiguration } from '../../log_analysis_module_types';
 import { cleanUpJobsAndDatafeeds } from '../../log_analysis_cleanup';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
@@ -63,7 +62,7 @@ const setUpModule = async (
   start: number | undefined,
   end: number | undefined,
   datasetFilter: DatasetFilter,
-  { spaceId, sourceId, indices, runtimeMappings }: ModuleSourceConfiguration,
+  { spaceId, sourceId, indices, timestampField, runtimeMappings }: ModuleSourceConfiguration,
   fetch: HttpHandler
 ) => {
   const indexNamePattern = indices.join(',');
@@ -74,12 +73,12 @@ const setUpModule = async (
         bucket_span: `${bucketSpan}ms`,
       },
       data_description: {
-        time_field: TIMESTAMP_FIELD,
+        time_field: timestampField,
       },
       custom_settings: {
         logs_source_config: {
           indexPattern: indexNamePattern,
-          timestampField: TIMESTAMP_FIELD,
+          timestampField,
           bucketSpan,
         },
       },
@@ -129,6 +128,7 @@ const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandl
 
 const validateSetupIndices = async (
   indices: string[],
+  timestampField: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   fetch: HttpHandler
 ) => {
@@ -137,7 +137,7 @@ const validateSetupIndices = async (
       indices,
       fields: [
         {
-          name: TIMESTAMP_FIELD,
+          name: timestampField,
           validTypes: ['date'],
         },
         {
@@ -153,12 +153,16 @@ const validateSetupIndices = async (
 
 const validateSetupDatasets = async (
   indices: string[],
+  timestampField: string,
   startTime: number,
   endTime: number,
   runtimeMappings: estypes.MappingRuntimeFields,
   fetch: HttpHandler
 ) => {
-  return await callValidateDatasetsAPI({ indices, startTime, endTime, runtimeMappings }, fetch);
+  return await callValidateDatasetsAPI(
+    { indices, timestampField, startTime, endTime, runtimeMappings },
+    fetch
+  );
 };
 
 export const logEntryRateModule: ModuleDescriptor<LogEntryRateJobType> = {

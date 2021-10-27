@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { HttpHandler } from 'src/core/public';
 import {
   LOG_ANALYSIS_VALIDATE_DATASETS_PATH,
@@ -16,13 +16,14 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
   indices: string[];
+  timestampField: string;
   startTime: number;
   endTime: number;
   runtimeMappings: estypes.MappingRuntimeFields;
 }
 
 export const callValidateDatasetsAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
-  const { indices, startTime, endTime, runtimeMappings } = requestArgs;
+  const { indices, timestampField, startTime, endTime, runtimeMappings } = requestArgs;
   const response = await fetch(LOG_ANALYSIS_VALIDATE_DATASETS_PATH, {
     method: 'POST',
     body: JSON.stringify(
@@ -31,6 +32,7 @@ export const callValidateDatasetsAPI = async (requestArgs: RequestArgs, fetch: H
           endTime,
           indices,
           startTime,
+          timestampField,
           runtimeMappings,
         },
       })
