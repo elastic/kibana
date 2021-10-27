@@ -132,21 +132,15 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
       [itemsList, onChangeSelection, isExcludePoliciesInFilterEnabled]
     );
 
-    const dropdownItems = useMemo(
-      () =>
-        itemsList.map((item, index) =>
-          item.name.match(new RegExp(query, 'i')) ? (
-            <EuiFilterSelectItem
-              checked={item.checked}
-              key={index}
-              onClick={() => updateItem(index)}
-            >
-              {item.name}
-            </EuiFilterSelectItem>
-          ) : null
-        ),
-      [itemsList, query, updateItem]
-    );
+    const dropdownItems = useMemo(() => {
+      return itemsList.map((item, index) =>
+        item.name.toLowerCase().includes(query.toLowerCase()) ? (
+          <EuiFilterSelectItem checked={item.checked} key={index} onClick={() => updateItem(index)}>
+            {item.name}
+          </EuiFilterSelectItem>
+        ) : null
+      );
+    }, [itemsList, query, updateItem]);
 
     const button = useMemo(
       () => (

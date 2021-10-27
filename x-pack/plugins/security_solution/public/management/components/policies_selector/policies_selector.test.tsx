@@ -124,5 +124,19 @@ describe('Policies selector', () => {
       expect(element.queryAllByText('Unassigned entries')).toStrictEqual([]);
       expect(element.queryAllByText(policy.name)).toStrictEqual([]);
     });
+    it('should filter with special chars', () => {
+      const element = getElement({});
+      act(() => {
+        fireEvent.click(element.getByTestId('policiesSelectorButton'));
+      });
+      act(() => {
+        fireEvent.change(element.getByTestId('policiesSelectorSearch'), {
+          target: { value: '*' },
+        });
+      });
+      expect(element.queryAllByText('Global entries')).toStrictEqual([]);
+      expect(element.queryAllByText('Unassigned entries')).toStrictEqual([]);
+      expect(element.queryAllByText(policy.name)).toStrictEqual([]);
+    });
   });
 });
