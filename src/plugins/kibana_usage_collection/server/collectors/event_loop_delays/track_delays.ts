@@ -52,6 +52,10 @@ export function startTrackingEventLoopDelaysUsage(
       if (shouldReset) {
         eventLoopDelaysMonitor.reset();
       }
-      await storeHistogram(histogram, internalRepository, instanceUuid);
+      try {
+        await storeHistogram(histogram, internalRepository, instanceUuid);
+      } catch (e) {
+        // do not crash if cannot store a histogram.
+      }
     });
 }
