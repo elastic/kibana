@@ -23,6 +23,11 @@ export const deprecatedMessage = i18n.translate(
   }
 );
 
+export const connectorDeprecatedMessage = i18n.translate(
+  'xpack.triggersActionsUI.sections.isDeprecatedDescription',
+  { defaultMessage: 'This connector is deprecated. Update it, or create a new one.' }
+);
+
 export const isDeprecatedConnector = (
   connector?: ActionConnector | ServiceNowActionConnector
 ): boolean => {

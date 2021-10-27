@@ -9,7 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { isDeprecatedConnector } from '../../../../common/connectors_dropdown';
+import {
+  connectorDeprecatedMessage,
+  isDeprecatedConnector,
+} from '../../../../common/connectors_dropdown';
 import { ActionConnector } from '../../../../types';
 import { deprecatedMessage, preconfiguredMessage } from '../../../../common/connectors_dropdown';
 
@@ -35,8 +38,7 @@ function ServiceNowSelectableRowComponent({
             size={'m'}
             type="alert"
             color="warning"
-            title={deprecatedTooltipTitle}
-            content={deprecatedTooltipContent}
+            content={connectorDeprecatedMessage}
             data-test-subj={`deprecated-connector-icon-${actionConnector?.id}`}
           />
         </EuiFlexItem>
@@ -68,12 +70,5 @@ const deprecatedTooltipTitle = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.deprecatedTooltipTitle',
   {
     defaultMessage: 'Deprecated connector',
-  }
-);
-
-const deprecatedTooltipContent = i18n.translate(
-  'xpack.triggersActionsUI.sections.actionForm.deprecatedTooltipContent',
-  {
-    defaultMessage: 'Please update your connector',
   }
 );

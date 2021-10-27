@@ -47,7 +47,11 @@ import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
 import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
-import { deprecatedMessage, isDeprecatedConnector } from '../../../../common/connectors_dropdown';
+import {
+  connectorDeprecatedMessage,
+  deprecatedMessage,
+  isDeprecatedConnector,
+} from '../../../../common/connectors_dropdown';
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
   return (
@@ -65,10 +69,7 @@ const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) =
           size="m"
           type="alert"
           color="warning"
-          content={i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isDeprecatedDescription',
-            { defaultMessage: 'This connector is deprecated. Update it, or create a new one.' }
-          )}
+          content={connectorDeprecatedMessage}
           position="right"
         />
       )}
