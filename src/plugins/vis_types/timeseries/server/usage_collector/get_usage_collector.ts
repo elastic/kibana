@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TIME_RANGE_DATA_MODES, PANEL_TYPES } from '../../common/enums';
+import { TIME_RANGE_DATA_MODES } from '../../common/enums';
 import { findByValueEmbeddables } from '../../../../dashboard/server';
 
 import type {
@@ -14,6 +14,7 @@ import type {
   ISavedObjectsRepository,
   SavedObjectsFindResult,
 } from '../../../../../core/server';
+import type { HomeServerPluginSetup } from '../../../../home/server';
 import type { SavedVisState } from '../../../../visualizations/common';
 import type { Panel } from '../../common/types';
 
@@ -68,8 +69,32 @@ const doTelemetryForByValueVisualizations = async (
   }
 };
 
+const getDefaultTSVBVisualizations = (home?: HomeServerPluginSetup) => {
+  const titles: string[] = [];
+  const sampleDataSets = home?.sampleData.getSampleDatasets() ?? [];
+
+  sampleDataSets.forEach((sampleDataSet) =>
+    sampleDataSet.savedObjects.forEach((savedObject) => {
+      try {
+        if (savedObject.type === 'visualization') {
+          const visState = JSON.parse(savedObject.attributes?.visState);
+
+          if (visState.type === 'metrics') {
+            titles.push(visState.title);
+          }
+        }
+      } catch (e) {
+        // Let it go, visState is invalid and we'll don't need to handle it
+      }
+    })
+  );
+
+  return titles;
+};
+
 export const getStats = async (
-  soClient: SavedObjectsClientContract | ISavedObjectsRepository
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository,
+  home?: HomeServerPluginSetup
 ): Promise<TimeseriesUsage | undefined> => {
   const timeseriesUsage = {
     timeseries_use_last_value_mode_total: 0,
@@ -85,19 +110,28 @@ export const getStats = async (
     },
   };
 
+  // we want to exclude the TSVB Sample Data visualizations from the stats
+  // in order to have more accurate results
+  const excludedFromStatsVisualizations = getDefaultTSVBVisualizations(home);
+
   function telemetryUseLastValueMode(visState: SavedVisState<Panel>) {
     if (
       visState.type === 'metrics' &&
       visState.params.type !== 'timeseries' &&
       (!visState.params.time_range_mode ||
-        visState.params.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE)
+        visState.params.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE) &&
+      !excludedFromStatsVisualizations.includes(visState.title)
     ) {
       timeseriesUsage.timeseries_use_last_value_mode_total++;
     }
   }
 
   function telemetryUseESIndices(visState: SavedVisState<Panel>) {
-    if (visState.type === 'metrics' && !visState.params.use_kibana_indexes) {
+    if (
+      visState.type === 'metrics' &&
+      !visState.params.use_kibana_indexes &&
+      !excludedFromStatsVisualizations.includes(visState.title)
+    ) {
       timeseriesUsage.timeseries_use_es_indices_total++;
     }
   }
@@ -107,7 +141,8 @@ export const getStats = async (
       visState.type === 'metrics' &&
       visState.params.type === 'table' &&
       visState.params.series &&
-      visState.params.series.length > 0
+      visState.params.series.length > 0 &&
+      !excludedFromStatsVisualizations.includes(visState.title)
     ) {
       const usesAggregateFunction = visState.params.series.some(
         (s) => s.aggregate_by && s.aggregate_function
@@ -119,7 +154,7 @@ export const getStats = async (
   }
 
   function telemetryPanelTypes(visState: SavedVisState<Panel>) {
-    if (visState.type === 'metrics') {
+    if (visState.type === 'metrics' && !excludedFromStatsVisualizations.includes(visState.title)) {
       timeseriesUsage.timeseries_types[visState.params.type]++;
     }
   }
@@ -140,7 +175,8 @@ export const getStats = async (
 
   return timeseriesUsage.timeseries_use_last_value_mode_total ||
     timeseriesUsage.timeseries_use_es_indices_total ||
-    timeseriesUsage.timeseries_table_use_aggregate_function
+    timeseriesUsage.timeseries_table_use_aggregate_function ||
+    Object.values(timeseriesUsage.timeseries_types).some((visualizationCount) => visualizationCount)
     ? timeseriesUsage
     : undefined;
 };

@@ -8,8 +8,12 @@
 
 import { getStats, TimeseriesUsage } from './get_usage_collector';
 import type { UsageCollectionSetup } from '../../../../usage_collection/server';
+import type { HomeServerPluginSetup } from '../../../../home/server';
 
-export function registerTimeseriesUsageCollector(collectorSet: UsageCollectionSetup) {
+export function registerTimeseriesUsageCollector(
+  collectorSet: UsageCollectionSetup,
+  home?: HomeServerPluginSetup
+) {
   const collector = collectorSet.makeUsageCollector<TimeseriesUsage | undefined>({
     type: 'vis_type_timeseries',
     isReady: () => true,
@@ -35,7 +39,7 @@ export function registerTimeseriesUsageCollector(collectorSet: UsageCollectionSe
         metric: { type: 'long' },
       },
     },
-    fetch: async ({ soClient }) => await getStats(soClient),
+    fetch: async ({ soClient }) => await getStats(soClient, home),
   });
 
   collectorSet.registerCollector(collector);
