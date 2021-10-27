@@ -85,7 +85,6 @@ import { RouterWrappers } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
-import { TelemetryReceiver } from './telemetry/receiver';
 import { TelemetryEventsSender } from './telemetry/sender';
 
 export interface FleetSetupDeps {
@@ -183,7 +182,6 @@ export class FleetPlugin
   private httpSetup?: HttpServiceSetup;
   private securitySetup?: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
-  private readonly telemetryReceiver: TelemetryReceiver;
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -193,8 +191,7 @@ export class FleetPlugin
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
     this.logger = this.initializerContext.logger.get();
     this.configInitialValue = this.initializerContext.config.get();
-    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
-    this.telemetryReceiver = new TelemetryReceiver();
+    this.telemetryEventsSender = new TelemetryEventsSender(this.logger.get('telemetry_events'));
   }
 
   public setup(core: CoreSetup, deps: FleetSetupDeps) {
@@ -340,9 +337,7 @@ export class FleetPlugin
 
     const fleetServerSetup = startFleetServerSetup();
 
-    this.telemetryReceiver.start(core);
-
-    this.telemetryEventsSender.start(plugins.telemetry, this.telemetryReceiver);
+    this.telemetryEventsSender.start(plugins.telemetry, core);
 
     return {
       fleetSetupCompleted: () =>

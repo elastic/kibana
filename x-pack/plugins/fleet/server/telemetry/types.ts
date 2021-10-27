@@ -5,28 +5,11 @@
  * 2.0.
  */
 
-type BaseSearchTypes = string | number | boolean | object;
-export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
+import type { PackagePolicyUpgradeUsage } from '../services/upgrade_usage';
 
-// For getting cluster info. Copied from telemetry_collection/get_cluster_info.ts
-export interface ESClusterInfo {
-  cluster_uuid: string;
-  cluster_name: string;
-  version?: {
-    number: string;
-    build_flavor: string;
-    build_type: string;
-    build_hash: string;
-    build_date: string;
-    build_snapshot?: boolean;
-    lucene_version: string;
-    minimum_wire_compatibility_version: string;
-    minimum_index_compatibility_version: string;
-  };
+export interface FleetTelemetryChannelEvents {
+  // channel name => event type
+  'fleet-upgrades': PackagePolicyUpgradeUsage;
 }
 
-export interface TelemetryEvent {
-  [key: string]: SearchTypes;
-  cluster_name?: string;
-  cluster_uuid?: string;
-}
+export type FleetTelemetryChannel = keyof FleetTelemetryChannelEvents;

@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import type { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 
 import { cloneDeep } from 'lodash';
 
 import axios from 'axios';
 
-import type { TelemetryReceiver } from './receiver';
+import type { InfoResponse } from '@elastic/elasticsearch/api/types';
+
 import { TelemetryQueue } from './queue';
 
-import type { ESClusterInfo, TelemetryEvent } from './types';
+import type { FleetTelemetryChannel, FleetTelemetryChannelEvents } from './types';
 
 /**
  * Simplified version of https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/server/lib/telemetry/sender.ts
@@ -30,21 +31,21 @@ export class TelemetryEventsSender {
   private telemetrySetup?: TelemetryPluginSetup;
   private intervalId?: NodeJS.Timeout;
   private isSending = false;
-  private receiver: TelemetryReceiver | undefined;
-  private queuesPerChannel: { [channel: string]: TelemetryQueue } = {};
+  private queuesPerChannel: { [channel: string]: TelemetryQueue<any> } = {};
   private isOptedIn?: boolean = true; // Assume true until the first check
+  private esClient?: ElasticsearchClient;
 
   constructor(logger: Logger) {
-    this.logger = logger.get('telemetry_events');
+    this.logger = logger;
   }
 
   public setup(telemetrySetup?: TelemetryPluginSetup) {
     this.telemetrySetup = telemetrySetup;
   }
 
-  public start(telemetryStart?: TelemetryPluginStart, receiver?: TelemetryReceiver) {
+  public async start(telemetryStart?: TelemetryPluginStart, core?: CoreStart) {
     this.telemetryStart = telemetryStart;
-    this.receiver = receiver;
+    this.esClient = core?.elasticsearch.client.asInternalUser;
 
     this.logger.debug(`Starting local task`);
     setTimeout(() => {
@@ -59,11 +60,14 @@ export class TelemetryEventsSender {
     }
   }
 
-  public queueTelemetryEvents(events: TelemetryEvent[], channel: string) {
+  public queueTelemetryEvents<T extends FleetTelemetryChannel>(
+    channel: T,
+    events: Array<FleetTelemetryChannelEvents[T]>
+  ) {
     if (!this.queuesPerChannel[channel]) {
-      this.queuesPerChannel[channel] = new TelemetryQueue();
+      this.queuesPerChannel[channel] = new TelemetryQueue<FleetTelemetryChannelEvents[T]>();
     }
-    this.queuesPerChannel[channel].addEvents(events);
+    this.queuesPerChannel[channel].addEvents(cloneDeep(events));
   }
 
   public async isTelemetryOptedIn() {
@@ -88,7 +92,7 @@ export class TelemetryEventsSender {
       return;
     }
 
-    const clusterInfo = await this.receiver?.fetchClusterInfo();
+    const clusterInfo = await this.fetchClusterInfo();
 
     for (const channel of Object.keys(this.queuesPerChannel)) {
       await this.sendEvents(
@@ -101,10 +105,19 @@ export class TelemetryEventsSender {
     this.isSending = false;
   }
 
+  private async fetchClusterInfo(): Promise<InfoResponse> {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
+    }
+
+    const { body } = await this.esClient.info();
+    return body;
+  }
+
   public async sendEvents(
     telemetryUrl: string,
-    clusterInfo: ESClusterInfo | undefined,
-    queue: TelemetryQueue
+    clusterInfo: InfoResponse | undefined,
+    queue: TelemetryQueue<any>
   ) {
     const events = queue.getEvents();
     if (events.length === 0) {
@@ -114,17 +127,12 @@ export class TelemetryEventsSender {
     try {
       this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
 
-      const toSend: TelemetryEvent[] = cloneDeep(events).map((event) => ({
-        ...event,
-        cluster_uuid: clusterInfo?.cluster_uuid,
-        cluster_name: clusterInfo?.cluster_name,
-      }));
       queue.clearEvents();
 
-      this.logger.debug(JSON.stringify(toSend));
+      this.logger.debug(JSON.stringify(events));
 
       await this.send(
-        toSend,
+        events,
         telemetryUrl,
         clusterInfo?.cluster_uuid,
         clusterInfo?.version?.number

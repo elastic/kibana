@@ -38,31 +38,25 @@ describe('sendTelemetryEvents', () => {
 
     sendTelemetryEvents(loggerMock, eventsTelemetryMock, upgardeMessage);
 
-    expect(eventsTelemetryMock.queueTelemetryEvents).toHaveBeenCalledWith(
-      [
-        {
-          id: 'aws_0.6.1_1.3.0_failure_true',
-          package_policy_upgrade: {
-            current_version: '0.6.1',
-            error: [
-              {
-                key: 'fieldX',
-                message: ['Field is required'],
-              },
-              {
-                key: 'fieldX',
-                message: 'Invalid format',
-              },
-            ],
-            new_version: '1.3.0',
-            package_name: 'aws',
-            status: 'failure',
-            dryRun: true,
+    expect(eventsTelemetryMock.queueTelemetryEvents).toHaveBeenCalledWith('fleet-upgrades', [
+      {
+        current_version: '0.6.1',
+        error: [
+          {
+            key: 'fieldX',
+            message: ['Field is required'],
           },
-        },
-      ],
-      'fleet-upgrades'
-    );
+          {
+            key: 'fieldX',
+            message: 'Invalid format',
+          },
+        ],
+        new_version: '1.3.0',
+        package_name: 'aws',
+        status: 'failure',
+        dryRun: true,
+      },
+    ]);
   });
 
   it('should cap error size', () => {

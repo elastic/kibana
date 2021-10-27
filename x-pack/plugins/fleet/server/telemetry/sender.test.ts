@@ -12,8 +12,9 @@ import { loggingSystemMock } from 'src/core/server/mocks';
 
 import axios from 'axios';
 
+import type { InfoResponse } from '@elastic/elasticsearch/api/types';
+
 import { TelemetryEventsSender } from './sender';
-import type { ESClusterInfo } from './types';
 
 jest.mock('axios', () => {
   return {
@@ -23,20 +24,25 @@ jest.mock('axios', () => {
 
 describe('TelemetryEventsSender', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let sender: TelemetryEventsSender;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
+    sender = new TelemetryEventsSender(logger);
+    sender.start(undefined, {
+      elasticsearch: { client: { asInternalUser: { info: jest.fn(async () => ({})) } } },
+    } as any);
   });
 
   describe('queueTelemetryEvents', () => {
     it('queues two events', () => {
-      const sender = new TelemetryEventsSender(logger);
-      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }], 'my-channel');
-      expect(sender['queuesPerChannel']['my-channel']).toBeDefined();
+      sender.queueTelemetryEvents('fleet-upgrades', [
+        { package_name: 'system', current_version: '0.3', new_version: '1.0', status: 'success' },
+      ]);
+      expect(sender['queuesPerChannel']['fleet-upgrades']).toBeDefined();
     });
 
     it('should send events when due', async () => {
-      const sender = new TelemetryEventsSender(logger);
       sender['telemetryStart'] = {
         getIsOptedIn: jest.fn(async () => true),
       };
@@ -46,26 +52,29 @@ describe('TelemetryEventsSender', () => {
         ),
       };
 
-      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }], 'my-channel');
+      sender.queueTelemetryEvents('fleet-upgrades', [
+        { package_name: 'apache', current_version: '0.3', new_version: '1.0', status: 'success' },
+      ]);
       sender['sendEvents'] = jest.fn();
 
       await sender['sendIfDue']();
 
       expect(sender['sendEvents']).toHaveBeenCalledWith(
-        'https://telemetry-staging.elastic.co/v3/send/my-channel',
+        'https://telemetry-staging.elastic.co/v3/send/fleet-upgrades',
         undefined,
         expect.anything()
       );
     });
 
     it("shouldn't send when telemetry is disabled", async () => {
-      const sender = new TelemetryEventsSender(logger);
       const telemetryStart = {
         getIsOptedIn: jest.fn(async () => false),
       };
       sender['telemetryStart'] = telemetryStart;
 
-      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }], 'my-channel');
+      sender.queueTelemetryEvents('fleet-upgrades', [
+        { package_name: 'system', current_version: '0.3', new_version: '1.0', status: 'success' },
+      ]);
       sender['sendEvents'] = jest.fn();
 
       await sender['sendIfDue']();
@@ -74,7 +83,6 @@ describe('TelemetryEventsSender', () => {
     });
 
     it('should send events to separate channels', async () => {
-      const sender = new TelemetryEventsSender(logger);
       sender['telemetryStart'] = {
         getIsOptedIn: jest.fn(async () => true),
       };
@@ -83,27 +91,27 @@ describe('TelemetryEventsSender', () => {
           async () => new URL('https://telemetry.elastic.co/v3/send/snapshot')
         ),
       };
-      sender['receiver'] = {
-        start: jest.fn(),
-        fetchClusterInfo: jest.fn(async () => {
-          return {
-            cluster_uuid: '1',
-            cluster_name: 'name',
-            version: {
-              number: '8.0.0',
-            },
-          } as ESClusterInfo;
-        }),
-      };
+
+      sender['fetchClusterInfo'] = jest.fn(async () => {
+        return {
+          cluster_uuid: '1',
+          cluster_name: 'name',
+          version: {
+            number: '8.0.0',
+          },
+        } as InfoResponse;
+      });
 
       const myChannelEvents = [{ 'event.kind': '1' }, { 'event.kind': '2' }];
-      sender.queueTelemetryEvents(myChannelEvents, 'my-channel');
+      // @ts-ignore
+      sender.queueTelemetryEvents('my-channel', myChannelEvents);
       sender['queuesPerChannel']['my-channel']['getEvents'] = jest.fn(() => myChannelEvents);
 
       expect(sender['queuesPerChannel']['my-channel']['queue'].length).toBe(2);
 
       const myChannel2Events = [{ 'event.kind': '3' }];
-      sender.queueTelemetryEvents(myChannel2Events, 'my-channel2');
+      // @ts-ignore
+      sender.queueTelemetryEvents('my-channel2', myChannel2Events);
       sender['queuesPerChannel']['my-channel2']['getEvents'] = jest.fn(() => myChannel2Events);
 
       expect(sender['queuesPerChannel']['my-channel2']['queue'].length).toBe(1);
@@ -121,12 +129,12 @@ describe('TelemetryEventsSender', () => {
       };
       expect(axios.post).toHaveBeenCalledWith(
         'https://telemetry.elastic.co/v3/send/my-channel',
-        '{"event.kind":"1","cluster_uuid":"1","cluster_name":"name"}\n{"event.kind":"2","cluster_uuid":"1","cluster_name":"name"}\n',
+        '{"event.kind":"1"}\n{"event.kind":"2"}\n',
         headers
       );
       expect(axios.post).toHaveBeenCalledWith(
         'https://telemetry.elastic.co/v3/send/my-channel2',
-        '{"event.kind":"3","cluster_uuid":"1","cluster_name":"name"}\n',
+        '{"event.kind":"3"}\n',
         headers
       );
     });

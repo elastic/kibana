@@ -68,6 +68,7 @@ import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
+import type { PackagePolicyUpgradeUsage } from './upgrade_usage';
 import { sendTelemetryEvents } from './upgrade_usage';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
@@ -436,18 +437,20 @@ class PackagePolicyService {
       });
 
       if (packagePolicy.package.version !== currentVersion) {
-        appContextService.getLogger().info(`Package policy upgraded successfully`);
+        const upgradeTelemetry: PackagePolicyUpgradeUsage = {
+          package_name: packagePolicy.package.name,
+          current_version: currentVersion || 'unknown',
+          new_version: packagePolicy.package.version,
+          status: 'success',
+          dryRun: false,
+        };
         sendTelemetryEvents(
           appContextService.getLogger(),
           appContextService.getTelemetryEventsSender(),
-          {
-            package_name: packagePolicy.package.name,
-            current_version: currentVersion || 'unknown',
-            new_version: packagePolicy.package.version,
-            status: 'success',
-            dryRun: false,
-          }
+          upgradeTelemetry
         );
+        appContextService.getLogger().info(`Package policy upgraded successfully`);
+        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
       }
     }
 
@@ -686,6 +689,19 @@ class PackagePolicyService {
       const hasErrors = 'errors' in updatedPackagePolicy;
 
       if (packagePolicy.package.version !== packageInfo.version) {
+        const upgradeTelemetry: PackagePolicyUpgradeUsage = {
+          package_name: packageInfo.name,
+          current_version: packagePolicy.package.version,
+          new_version: packageInfo.version,
+          status: hasErrors ? 'failure' : 'success',
+          error: hasErrors ? updatedPackagePolicy.errors : undefined,
+          dryRun: true,
+        };
+        sendTelemetryEvents(
+          appContextService.getLogger(),
+          appContextService.getTelemetryEventsSender(),
+          upgradeTelemetry
+        );
         appContextService
           .getLogger()
           .info(
@@ -693,18 +709,7 @@ class PackagePolicyService {
               hasErrors ? 'resulted in errors' : 'ran successfully'
             }`
           );
-        sendTelemetryEvents(
-          appContextService.getLogger(),
-          appContextService.getTelemetryEventsSender(),
-          {
-            package_name: packageInfo.name,
-            current_version: packagePolicy.package.version,
-            new_version: packageInfo.version,
-            status: hasErrors ? 'failure' : 'success',
-            error: hasErrors ? updatedPackagePolicy.errors : undefined,
-            dryRun: true,
-          }
-        );
+        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
       }
 
       return {

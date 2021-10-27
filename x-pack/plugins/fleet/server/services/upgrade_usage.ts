@@ -36,20 +36,14 @@ export function sendTelemetryEvents(
   }
 
   try {
-    eventsTelemetry.queueTelemetryEvents(
-      [
-        {
-          package_policy_upgrade: {
-            ...upgradeUsage,
-            error: upgradeUsage.error
-              ? makeErrorGeneric(capErrorSize(upgradeUsage.error, MAX_ERROR_SIZE))
-              : undefined,
-          },
-          id: `${upgradeUsage.package_name}_${upgradeUsage.current_version}_${upgradeUsage.new_version}_${upgradeUsage.status}_${upgradeUsage.dryRun}`,
-        },
-      ],
-      FLEET_UPGRADES_CHANNEL_NAME
-    );
+    eventsTelemetry.queueTelemetryEvents(FLEET_UPGRADES_CHANNEL_NAME, [
+      {
+        ...upgradeUsage,
+        error: upgradeUsage.error
+          ? makeErrorGeneric(capErrorSize(upgradeUsage.error, MAX_ERROR_SIZE))
+          : undefined,
+      },
+    ]);
   } catch (exc) {
     logger.error(`queing telemetry events failed ${exc}`);
   }

@@ -5,25 +5,18 @@
  * 2.0.
  */
 
-import type { TelemetryEvent } from './types';
-
 export const TELEMETRY_MAX_BUFFER_SIZE = 100;
 
-export class TelemetryQueue {
+export class TelemetryQueue<T> {
   private maxQueueSize = TELEMETRY_MAX_BUFFER_SIZE;
-  private queue: TelemetryEvent[] = [];
+  private queue: T[] = [];
 
-  public addEvents(events: TelemetryEvent[]) {
+  public addEvents(events: T[]) {
     const qlength = this.queue.length;
 
     if (events.length === 0) {
       return;
     }
-
-    // do not add events with same id
-    events = events.filter(
-      (event) => !this.queue.find((qItem) => qItem.id && event.id && qItem.id === event.id)
-    );
 
     if (qlength >= this.maxQueueSize) {
       // we're full already
@@ -41,7 +34,7 @@ export class TelemetryQueue {
     this.queue = [];
   }
 
-  public getEvents(): TelemetryEvent[] {
+  public getEvents(): T[] {
     return this.queue;
   }
 }
