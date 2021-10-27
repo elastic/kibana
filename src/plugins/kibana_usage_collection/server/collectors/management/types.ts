@@ -126,4 +126,5 @@ export interface UsageStats {
   'labs:presentation:timeToPresent': boolean;
   'labs:dashboard:enable_ui': boolean;
   'labs:dashboard:deferBelowFold': boolean;
+  'labs:dashboard:dashboardControls': boolean;
 }
