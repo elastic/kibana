@@ -27,7 +27,7 @@ export interface StepDetailsExposedState {
   transformSettingsDocsPerSecond?: number;
   valid: boolean;
   indexPatternTimeField?: string | undefined;
-  _meta?: Record<string, object>;
+  _meta?: Record<string, unknown>;
 }
 
 const defaultContinuousModeDelay = '60s';

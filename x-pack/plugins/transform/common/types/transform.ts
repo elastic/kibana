@@ -24,7 +24,7 @@ export type TransformBaseConfig = PutTransformsRequestSchema & {
   create_time?: number;
   version?: string;
   alerting_rules?: TransformHealthAlertRule[];
-  _meta?: Record<string, object>;
+  _meta?: Record<string, unknown>;
 };
 
 export interface PivotConfigDefinition {
