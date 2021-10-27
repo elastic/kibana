@@ -26,6 +26,7 @@ import {
   formatEditCalendarUrl,
   formatEditFilterUrl,
 } from './formatters';
+import { formatTrainedModelsManagementUrl } from './formatters/trained_models';
 
 export { MlLocatorParams, MlLocator };
 
@@ -65,6 +66,9 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
         break;
       case ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION:
         path = formatDataFrameAnalyticsExplorationUrl('', params.pageState);
+        break;
+      case ML_PAGES.TRAINED_MODELS_MANAGE:
+        path = formatTrainedModelsManagementUrl('', params.pageState);
         break;
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB:
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED:
