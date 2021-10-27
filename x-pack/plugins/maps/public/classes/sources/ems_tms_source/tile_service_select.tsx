@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { getEmsTmsServices } from '../../../util';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 
-export const AUTO_SELECT = 'auto_select';
+const AUTO_SELECT = 'auto_select';
 
 export interface EmsTmsSourceConfig {
   id: string | null;
