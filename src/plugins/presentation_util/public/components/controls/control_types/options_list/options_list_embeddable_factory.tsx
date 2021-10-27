@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import deepEqual from 'fast-deep-equal';
 
-import {
-  ControlEditorProps,
-  GetControlEditorComponentProps,
-  IEditableControlFactory,
-} from '../../types';
 import { OptionsListEditor } from './options_list_editor';
+import { ControlEmbeddable, IEditableControlFactory } from '../../types';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
 import { EmbeddableFactoryDefinition, IContainer } from '../../../../../../embeddable/public';
 import {
@@ -22,7 +18,7 @@ import {
 } from '../../../../../common/controls/control_types/options_list/options_list_persistable_state';
 
 export class OptionsListEmbeddableFactory
-  implements EmbeddableFactoryDefinition, IEditableControlFactory
+  implements EmbeddableFactoryDefinition, IEditableControlFactory<OptionsListEmbeddableInput>
 {
   public type = OPTIONS_LIST_CONTROL;
   public canCreateNew = () => false;
@@ -34,19 +30,22 @@ export class OptionsListEmbeddableFactory
     return Promise.resolve(new OptionsListEmbeddable(initialInput, {}, parent));
   }
 
-  public getControlEditor = ({
-    onChange,
-    initialInput,
-  }: GetControlEditorComponentProps<OptionsListEmbeddableInput>) => {
-    return ({ setValidState, setDefaultTitle }: ControlEditorProps) => (
-      <OptionsListEditor
-        setDefaultTitle={setDefaultTitle}
-        setValidState={setValidState}
-        initialInput={initialInput}
-        onChange={onChange}
-      />
-    );
+  public presaveTransformFunction = (
+    newInput: Partial<OptionsListEmbeddableInput>,
+    embeddable?: ControlEmbeddable<OptionsListEmbeddableInput>
+  ) => {
+    if (
+      embeddable &&
+      (!deepEqual(newInput.fieldName, embeddable.getInput().fieldName) ||
+        !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId))
+    ) {
+      // if the field name or data view id has changed in this editing session, selected options are invalid, so reset them.
+      newInput.selectedOptions = [];
+    }
+    return newInput;
   };
+
+  public controlEditorComponent = OptionsListEditor;
 
   public isEditable = () => Promise.resolve(false);
 

@@ -29,20 +29,15 @@ export type ControlEmbeddable<
  * Control embeddable editor types
  */
 export interface IEditableControlFactory<T extends ControlInput = ControlInput> {
-  getControlEditor?: GetControlEditorComponent<T>;
+  controlEditorComponent?: (props: ControlEditorProps<T>) => JSX.Element;
+  presaveTransformFunction?: (
+    newState: Partial<T>,
+    embeddable?: ControlEmbeddable<T>
+  ) => Partial<T>;
 }
-
-export type GetControlEditorComponent<T extends ControlInput = ControlInput> = (
-  props: GetControlEditorComponentProps<T>
-) => ControlEditorComponent;
-export interface GetControlEditorComponentProps<T extends ControlInput = ControlInput> {
-  onChange: (partial: Partial<T>) => void;
+export interface ControlEditorProps<T extends ControlInput = ControlInput> {
   initialInput?: Partial<T>;
-}
-
-export type ControlEditorComponent = (props: ControlEditorProps) => JSX.Element;
-
-export interface ControlEditorProps {
+  onChange: (partial: Partial<T>) => void;
   setValidState: (valid: boolean) => void;
   setDefaultTitle: (defaultTitle: string) => void;
 }

@@ -20,13 +20,13 @@ import { ControlGroupInput } from '../types';
 import { ControlEditor } from './control_editor';
 import { pluginServices } from '../../../../services';
 import { forwardAllContext } from './forward_all_context';
+import { DEFAULT_CONTROL_WIDTH } from './editor_constants';
 import { OverlayRef } from '../../../../../../../core/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlWidth, IEditableControlFactory, ControlInput } from '../../types';
 import { EmbeddableFactoryNotFoundError } from '../../../../../../embeddable/public';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
-import { DEFAULT_CONTROL_WIDTH } from './editor_constants';
 
 export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean }) => {
   // Presentation Services Context
@@ -77,19 +77,23 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
         });
       };
 
+      const editableFactory = factory as IEditableControlFactory;
+
       const flyoutInstance = openFlyout(
         forwardAllContext(
           <ControlEditor
             isCreate={true}
+            factory={editableFactory}
             width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
             updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
             updateWidth={(newWidth) => dispatch(setDefaultControlWidth(newWidth as ControlWidth))}
-            controlEditorComponent={(factory as IEditableControlFactory).getControlEditor?.({
-              onChange: (partialInput) => {
-                inputToReturn = { ...inputToReturn, ...partialInput };
-              },
-            })}
+            onTypeEditorChange={(partialInput) =>
+              (inputToReturn = { ...inputToReturn, ...partialInput })
+            }
             onSave={() => {
+              if (editableFactory.presaveTransformFunction) {
+                inputToReturn = editableFactory.presaveTransformFunction(inputToReturn);
+              }
               resolve(inputToReturn);
               flyoutInstance.close();
             }}
@@ -102,6 +106,7 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
         }
       );
     });
+
     initialInputPromise.then(
       async (explicitInput) => {
         await addNewEmbeddable(type, explicitInput);

@@ -81,16 +81,11 @@ export const syncDashboardIndexPatterns = ({
     })
   );
 
-  if (dashboardContainer.controlGroup) {
-    return combineLatest([
-      dashboardContainer.getOutput$(),
-      dashboardContainer.controlGroup.getOutput$(),
-    ])
-      .pipe(mapTo(dashboardContainer), updateIndexPatternsOperator)
-      .subscribe();
-  }
-  return dashboardContainer
-    .getOutput$()
+  const indexPatternSources = [dashboardContainer.getOutput$()];
+  if (dashboardContainer.controlGroup)
+    indexPatternSources.push(dashboardContainer.controlGroup.getOutput$());
+
+  return combineLatest(indexPatternSources)
     .pipe(mapTo(dashboardContainer), updateIndexPatternsOperator)
     .subscribe();
 };

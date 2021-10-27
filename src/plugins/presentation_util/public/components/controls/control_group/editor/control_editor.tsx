@@ -32,37 +32,48 @@ import {
 } from '@elastic/eui';
 
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlEditorComponent, ControlWidth } from '../../types';
+import {
+  ControlEmbeddable,
+  ControlInput,
+  ControlWidth,
+  IEditableControlFactory,
+} from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 
-interface ManageControlProps {
-  title?: string;
-  isCreate: boolean;
-  onSave: () => void;
+interface EditControlProps {
+  factory: IEditableControlFactory;
+  embeddable?: ControlEmbeddable;
   width: ControlWidth;
+  isCreate: boolean;
+  title?: string;
+  onSave: () => void;
   onCancel: () => void;
   removeControl?: () => void;
-  controlEditorComponent?: ControlEditorComponent;
   updateTitle: (title?: string) => void;
   updateWidth: (newWidth: ControlWidth) => void;
+  onTypeEditorChange: (partial: Partial<ControlInput>) => void;
 }
 
 export const ControlEditor = ({
-  controlEditorComponent,
+  onTypeEditorChange,
   removeControl,
   updateTitle,
   updateWidth,
+  embeddable,
   isCreate,
   onCancel,
+  factory,
   onSave,
   title,
   width,
-}: ManageControlProps) => {
+}: EditControlProps) => {
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentWidth, setCurrentWidth] = useState(width);
 
   const [controlEditorValid, setControlEditorValid] = useState(false);
   const [defaultTitle, setDefaultTitle] = useState<string>();
+
+  const ControlTypeEditor = factory.controlEditorComponent;
 
   return (
     <>
@@ -91,17 +102,20 @@ export const ControlEditor = ({
           </EuiFormRow>
 
           <EuiSpacer size="l" />
-          {controlEditorComponent &&
-            controlEditorComponent({
-              setValidState: setControlEditorValid,
-              setDefaultTitle: (newDefaultTitle) => {
+          {ControlTypeEditor && (
+            <ControlTypeEditor
+              onChange={onTypeEditorChange}
+              setValidState={setControlEditorValid}
+              initialInput={embeddable?.getInput()}
+              setDefaultTitle={(newDefaultTitle) => {
                 if (!currentTitle || currentTitle === defaultTitle) {
                   setCurrentTitle(newDefaultTitle);
                   updateTitle(newDefaultTitle);
                 }
                 setDefaultTitle(newDefaultTitle);
-              },
-            })}
+              }}
+            />
+          )}
           <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
             <EuiFieldText
               placeholder={defaultTitle}
@@ -148,9 +162,7 @@ export const ControlEditor = ({
               iconType="check"
               color="primary"
               disabled={!controlEditorValid}
-              onClick={() => {
-                onSave();
-              }}
+              onClick={() => onSave()}
             >
               {ControlGroupStrings.manageControl.getSaveChangesTitle()}
             </EuiButton>

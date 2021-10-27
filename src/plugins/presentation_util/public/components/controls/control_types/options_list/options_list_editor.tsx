@@ -10,18 +10,13 @@ import useMount from 'react-use/lib/useMount';
 import React, { useEffect, useState } from 'react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
-import { ControlEditorProps, GetControlEditorComponentProps } from '../../types';
+import { ControlEditorProps } from '../../types';
 import { DataViewListItem, DataView } from '../../../../../../data_views/common';
 import { DataViewPicker } from '../../../data_view_picker/data_view_picker';
 import { OptionsListStrings } from './options_list_strings';
 import { pluginServices } from '../../../../services';
 import { OptionsListEmbeddableInput } from './types';
 import { FieldPicker } from '../../../field_picker/field_picker';
-
-interface OptionsListEditorProps extends ControlEditorProps {
-  onChange: GetControlEditorComponentProps<OptionsListEmbeddableInput>['onChange'];
-  initialInput?: Partial<OptionsListEmbeddableInput>;
-}
 
 interface OptionsListEditorState {
   singleSelect?: boolean;
@@ -37,7 +32,7 @@ export const OptionsListEditor = ({
   initialInput,
   setValidState,
   setDefaultTitle,
-}: OptionsListEditorProps) => {
+}: ControlEditorProps<OptionsListEmbeddableInput>) => {
   // Presentation Services Context
   const { dataViews } = pluginServices.getHooks();
   const { getIdsWithTitle, getDefaultId, get } = dataViews.useService();

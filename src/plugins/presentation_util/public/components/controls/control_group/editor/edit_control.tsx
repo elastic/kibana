@@ -84,12 +84,29 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
       });
     };
 
+    const editableFactory = factory as IEditableControlFactory;
+
     const flyoutInstance = openFlyout(
       forwardAllContext(
         <ControlEditor
           isCreate={false}
           width={panel.width}
+          embeddable={embeddable}
+          factory={editableFactory}
           title={embeddable.getTitle()}
+          onCancel={() => onCancel(flyoutInstance)}
+          updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
+          updateWidth={(newWidth) => dispatch(setControlWidth({ width: newWidth, embeddableId }))}
+          onTypeEditorChange={(partialInput) =>
+            (inputToReturn = { ...inputToReturn, ...partialInput })
+          }
+          onSave={() => {
+            if (editableFactory.presaveTransformFunction) {
+              inputToReturn = editableFactory.presaveTransformFunction(inputToReturn, embeddable);
+            }
+            updateInputForChild(embeddableId, inputToReturn);
+            flyoutInstance.close();
+          }}
           removeControl={() => {
             openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
               confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
@@ -104,19 +121,6 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
               }
             });
           }}
-          updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
-          controlEditorComponent={(factory as IEditableControlFactory).getControlEditor?.({
-            onChange: (partialInput) => {
-              inputToReturn = { ...inputToReturn, ...partialInput };
-            },
-            initialInput: embeddable.getInput(),
-          })}
-          onCancel={() => onCancel(flyoutInstance)}
-          onSave={() => {
-            updateInputForChild(embeddableId, inputToReturn);
-            flyoutInstance.close();
-          }}
-          updateWidth={(newWidth) => dispatch(setControlWidth({ width: newWidth, embeddableId }))}
         />,
         reduxContainerContext
       ),

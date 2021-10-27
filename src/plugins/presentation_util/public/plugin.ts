@@ -15,8 +15,10 @@ import {
   ControlGroupContainerFactory,
   PresentationUtilPluginSetup,
   PresentationUtilPluginStart,
-  GetControlEditorComponent,
   IEditableControlFactory,
+  ControlEditorProps,
+  ControlInput,
+  ControlEmbeddable,
 } from './types';
 import { OptionsListEmbeddableFactory } from './components/controls/control_types/options_list';
 import { CONTROL_GROUP_TYPE, OPTIONS_LIST_CONTROL } from '.';
@@ -30,7 +32,15 @@ export class PresentationUtilPlugin
       PresentationUtilPluginStartDeps
     >
 {
-  private inlineEditors: { [key: string]: GetControlEditorComponent | undefined } = {};
+  private inlineEditors: {
+    [key: string]: {
+      controlEditorComponent?: (props: ControlEditorProps) => JSX.Element;
+      presaveTransformFunction?: (
+        newInput: Partial<ControlInput>,
+        embeddable?: ControlEmbeddable
+      ) => Partial<ControlInput>;
+    };
+  } = {};
 
   public setup(
     _coreSetup: CoreSetup<PresentationUtilPluginStartDeps, PresentationUtilPluginStart>,
@@ -48,9 +58,11 @@ export class PresentationUtilPlugin
 
     // create control type embeddable factories.
     const optionsListFactory = new OptionsListEmbeddableFactory();
-    this.inlineEditors[OPTIONS_LIST_CONTROL] = (
-      optionsListFactory as IEditableControlFactory
-    ).getControlEditor;
+    const editableOptionsListFactory = optionsListFactory as IEditableControlFactory;
+    this.inlineEditors[OPTIONS_LIST_CONTROL] = {
+      controlEditorComponent: editableOptionsListFactory.controlEditorComponent,
+      presaveTransformFunction: editableOptionsListFactory.presaveTransformFunction,
+    };
     embeddable.registerEmbeddableFactory(OPTIONS_LIST_CONTROL, optionsListFactory);
 
     return {};
@@ -67,8 +79,14 @@ export class PresentationUtilPlugin
     // register control types with controls service.
     const optionsListFactory = embeddable.getEmbeddableFactory(OPTIONS_LIST_CONTROL);
     // Temporarily pass along inline editors - inline editing should be made a first-class feature of embeddables
-    (optionsListFactory as IEditableControlFactory).getControlEditor =
-      this.inlineEditors[OPTIONS_LIST_CONTROL];
+    const editableOptionsListFactory = optionsListFactory as IEditableControlFactory;
+    const {
+      controlEditorComponent: optionsListControlEditor,
+      presaveTransformFunction: optionsListPresaveTransform,
+    } = this.inlineEditors[OPTIONS_LIST_CONTROL];
+    editableOptionsListFactory.controlEditorComponent = optionsListControlEditor;
+    editableOptionsListFactory.presaveTransformFunction = optionsListPresaveTransform;
+
     if (optionsListFactory) controlsService.registerControlType(optionsListFactory);
 
     return {

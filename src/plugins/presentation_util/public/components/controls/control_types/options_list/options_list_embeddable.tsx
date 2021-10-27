@@ -109,18 +109,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       debounceTime(100)
     );
 
-    // clear all selections when field or index pattern change
-    this.subscriptions.add(
-      this.getInput$()
-        .pipe(
-          distinctUntilChanged(
-            (a, b) => isEqual(a.fieldName, b.fieldName) && isEqual(a.dataViewId, b.dataViewId)
-          ),
-          skip(1) // skip the first input update to preserve initial filters.
-        )
-        .subscribe(() => this.updateInput({ selectedOptions: [] }))
-    );
-
     // fetch available options when input changes or when search string has changed
     this.subscriptions.add(
       merge(dataFetchPipe, typeaheadPipe).subscribe(this.fetchAvailableOptions)
