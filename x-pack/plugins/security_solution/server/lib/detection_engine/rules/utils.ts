@@ -334,18 +334,30 @@ export const legacyMigrate = async ({
     }),
   ]);
 
+  console.error(
+    "HOW MANY LEGACY ACTION SO'S ARE THERE?",
+    JSON.stringify(legacyRuleActionsSO, null, 2)
+  );
+
   if (siemNotification != null && siemNotification.data.length > 0) {
-    await Promise.all([
-      rulesClient.delete({ id: siemNotification.data[0].id }),
-      legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0
-        ? savedObjectsClient.delete(
-            legacyRuleActionsSavedObjectType,
-            legacyRuleActionsSO.saved_objects[0].id
-          )
-        : null,
-    ]);
+    console.error('BEFORE DELETE');
+    try {
+      await Promise.all([
+        rulesClient.delete({ id: siemNotification.data[0].id }),
+        legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0
+          ? savedObjectsClient.delete(
+              legacyRuleActionsSavedObjectType,
+              legacyRuleActionsSO.saved_objects[0].id
+            )
+          : null,
+      ]);
+    } catch (exc) {
+      console.error('there was an exception', exc);
+    }
+    console.error('AFTER DELETE');
+    const { id, ...restOfRule } = rule;
     const migratedRule = {
-      ...rule,
+      ...restOfRule,
       actions: siemNotification.data[0].actions,
       throttle: siemNotification.data[0].schedule.interval,
       notifyWhen: transformToNotifyWhen(siemNotification.data[0].throttle),
@@ -354,7 +366,7 @@ export const legacyMigrate = async ({
       id: rule.id,
       data: migratedRule,
     });
-    return migratedRule;
+    return { id: rule.id, ...migratedRule };
   }
   return rule;
 };

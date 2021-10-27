@@ -48,6 +48,7 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
   INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
+  updateOrCreateLegacyActions,
 } from '../../plugins/security_solution/common/constants';
 import { RACAlert } from '../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
 
@@ -444,6 +445,8 @@ export const deleteAllAlerts = async (
   );
 };
 
+export const deleteAllLegacyActions = async (soClient: unknown): Promise<void> => {};
+
 export const downgradeImmutableRule = async (es: Client, ruleId: string): Promise<void> => {
   return countDownES(async () => {
     return es.updateByQuery(
@@ -516,6 +519,29 @@ export const createSignalsIndex = async (
   }, 'createSignalsIndex');
 };
 
+export const createLegacyRuleAction = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  alertId: string,
+  connectorId: string
+): Promise<unknown> =>
+  supertest
+    .post(`${updateOrCreateLegacyActions}`)
+    .set('kbn-xsrf', 'true')
+    .query({ alert_id: alertId })
+    .send({
+      name: 'Legacy notification with one action',
+      interval: '1m',
+      actions: [
+        {
+          id: connectorId,
+          group: 'default',
+          params: {
+            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          actionTypeId: '.slack',
+        },
+      ],
+    });
 /**
  * Deletes the signals index for use inside of afterEach blocks of tests
  * @param supertest The supertest client library
