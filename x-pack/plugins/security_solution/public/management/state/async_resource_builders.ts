@@ -19,7 +19,7 @@ export const createUninitialisedResourceState = (): UninitialisedResourceState =
 };
 
 export const createLoadingResourceState = <Data, Error = ServerApiError>(
-  previousState: StaleResourceState<Data, Error>
+  previousState?: StaleResourceState<Data, Error>
 ): LoadingResourceState<Data, Error> => {
   return {
     type: 'LoadingResourceState',
@@ -61,8 +61,8 @@ export const asStaleResourceState = <Data, Error = ServerApiError>(resource: {
       return resource as LoadedResourceState<Data>;
     case 'FailedResourceState':
       return resource as FailedResourceState<Data, Error>;
-    case 'LoadingResourceState':
     case 'UninitialisedResourceState':
+    case 'LoadingResourceState':
       return createUninitialisedResourceState();
   }
 };
