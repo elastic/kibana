@@ -507,7 +507,7 @@ export class DocLinksService {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/index.html`,
           goOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/overview.html`,
           javaIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/index.html`,
-          jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/7.x/introduction.html`,
+          jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/introduction.html`,
           netGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/7.x/index.html`,
           perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/current/index.html`,
           phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/7.x/index.html`,
