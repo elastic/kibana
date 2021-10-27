@@ -52,8 +52,7 @@ export default function () {
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
         `--newsfeed.service.urlRoot=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
         `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
-        // TMP
-        '--verbose',
+
         // code coverage reporting plugin
         ...(!!process.env.CODE_COVERAGE
           ? [`--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'coverage')}`]
