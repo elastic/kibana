@@ -25,7 +25,7 @@ const MOCK_VALUES = {
 
 const MOCK_ACTIONS = {
   // RelevanceTuningLogic
-  updatePrecision: jest.fn(),
+  setPrecision: jest.fn(),
 };
 
 describe('PrecisionSlider', () => {
@@ -49,12 +49,12 @@ describe('PrecisionSlider', () => {
       expect(wrapper.find('[data-test-subj="PrecisionRange"]').prop('value')).toEqual(2);
     });
 
-    it('calls updatePrecision on change', () => {
+    it('updates the precision on change', () => {
       wrapper
         .find('[data-test-subj="PrecisionRange"]')
         .simulate('change', { target: { value: 10 } });
 
-      expect(MOCK_ACTIONS.updatePrecision).toHaveBeenCalledWith(10);
+      expect(MOCK_ACTIONS.setPrecision).toHaveBeenCalledWith(10);
     });
   });
 
