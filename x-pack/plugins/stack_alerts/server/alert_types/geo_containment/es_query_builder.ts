@@ -7,7 +7,8 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { Logger } from 'src/core/server';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
 import {
   fromKueryExpression,
   toElasticsearchQuery,
@@ -49,7 +50,7 @@ export async function getShapesFilters(
   const shapesIdsNamesMap: Record<string, unknown> = {};
   // Get all shapes in index
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { body: boundaryData }: ApiResponse<Record<string, any>> = await esClient.search({
+  const { body: boundaryData }: TransportResult<Record<string, any>> = await esClient.search({
     index: boundaryIndexTitle,
     body: {
       size: MAX_SHAPES_QUERY_SIZE,
