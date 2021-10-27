@@ -7,31 +7,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ObservabilityPublicPluginsStart } from '../..';
 import { getMappedNonEcsValue } from './render_cell_value';
 import FilterForValueButton from './filter_for_value';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { TimelineNonEcsData } from '../../../../timelines/common/search_strategy';
 import { TGridCellAction } from '../../../../timelines/common/types/timeline';
-import { getPageRowIndex, TimelinesUIStart } from '../../../../timelines/public';
+import { getPageRowIndex } from '../../../../timelines/public';
 
 export const FILTER_FOR_VALUE = i18n.translate('xpack.observability.hoverActions.filterForValue', {
   defaultMessage: 'Filter for value',
 });
-
-/** a hook to eliminate the verbose boilerplate required to use common services */
-const useKibanaServices = () => {
-  const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
-  const {
-    services: {
-      data: {
-        query: { filterManager },
-      },
-    },
-  } = useKibana<ObservabilityPublicPluginsStart>();
-
-  return { timelines, filterManager };
-};
 
 /** actions for adding filters to the search bar */
 const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellAction[] => [
