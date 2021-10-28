@@ -241,7 +241,7 @@ describe('CurationSuggestionLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions/foo-query',
+          '/internal/app_search/engines/some-engine/search_relevance_suggestions/query/foo-query',
           {
             query: {
               type: 'curation',
