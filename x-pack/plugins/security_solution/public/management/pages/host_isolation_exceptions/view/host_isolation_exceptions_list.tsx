@@ -139,7 +139,7 @@ export const HostIsolationExceptionsList = () => {
         />
       }
       actions={
-        privileges.canIsolateHost ? (
+        privileges.canIsolateHost && listItems.length > 0 ? (
           <EuiButton
             fill
             iconType="plusInCircle"
