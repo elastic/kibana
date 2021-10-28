@@ -10,9 +10,11 @@ import React, { lazy } from 'react';
 import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient } from 'kibana/public';
 
+import { EuiLoadingChart } from '@elastic/eui';
 import { fetchIndexPattern } from '../common/index_patterns_utils';
 import { VisualizationContainer, PersistedState } from '../../../visualizations/public';
 
@@ -65,7 +67,8 @@ export const getTimeseriesVisRenderer: (deps: {
       servicesLoaded = true;
 
       unmountComponentAtNode(domNode);
-    const isModelInvalid = 'isModelInvalid' in visData && visData.isModelInvalid;
+
+      const isModelInvalid = 'isModelInvalid' in visData && visData.isModelInvalid;
 
       render(
         <I18nProvider>
