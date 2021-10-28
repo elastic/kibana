@@ -23,6 +23,7 @@ export type {
   JobParamsDownloadCSV,
   JobParamsPNG,
   JobParamsPNGV2,
+  JobAppParamsPDFV2,
   JobParamsPDF,
   JobParamsPDFV2,
 } from '../common/types';

@@ -21,6 +21,8 @@ interface BaseParamsPDFV2 {
 // Job params: structure of incoming user request data, after being parsed from RISON
 export type JobParamsPDFV2 = BaseParamsPDFV2 & BaseParams;
 
+export type JobAppParamsPDFV2 = Omit<JobParamsPDFV2, 'browserTimezone' | 'version'>;
+
 // Job payload: structure of stored job data provided by create_job
 export interface TaskPayloadPDFV2 extends BasePayload, BaseParamsPDFV2 {
   layout: LayoutParams;
