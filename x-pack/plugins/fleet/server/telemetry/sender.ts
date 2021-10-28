@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash';
 
 import axios from 'axios';
 
-import type { InfoResponse } from '@elastic/elasticsearch/api/types';
+import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { TelemetryQueue } from './queue';
 

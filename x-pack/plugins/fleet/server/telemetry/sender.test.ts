@@ -12,7 +12,7 @@ import { loggingSystemMock } from 'src/core/server/mocks';
 
 import axios from 'axios';
 
-import type { InfoResponse } from '@elastic/elasticsearch/api/types';
+import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { TelemetryEventsSender } from './sender';
 
