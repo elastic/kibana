@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { KbnServerError } from '../../../../../kibana_utils/server';
-import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import * as xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
 import { SearchStrategyDependencies } from '../../types';
@@ -191,7 +191,7 @@ describe('ES search strategy', () => {
     });
 
     it('throws normalized error if ResponseError is thrown', async () => {
-      const errResponse = new ResponseError({
+      const errResponse = new errors.ResponseError({
         body: indexNotFoundException,
         statusCode: 404,
         headers: {},
@@ -254,7 +254,7 @@ describe('ES search strategy', () => {
     });
 
     it('throws normalized error on ResponseError', async () => {
-      const errResponse = new ResponseError({
+      const errResponse = new errors.ResponseError({
         body: xContentParseException,
         statusCode: 400,
         headers: {},
@@ -297,7 +297,7 @@ describe('ES search strategy', () => {
     });
 
     it('throws normalized error on ElasticsearchClientError', async () => {
-      const errResponse = new ElasticsearchClientError('something is wrong with EsClient');
+      const errResponse = new errors.ElasticsearchClientError('something is wrong with EsClient');
       mockGetCaller.mockRejectedValue(errResponse);
 
       const id = 'some_other_id';
