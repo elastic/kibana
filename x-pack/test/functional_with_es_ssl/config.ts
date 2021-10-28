@@ -18,6 +18,7 @@ const enabledActionTypes = [
   '.pagerduty',
   '.swimlane',
   '.servicenow',
+  '.server-log',
   '.slack',
   '.webhook',
   'test.authorization',
@@ -48,6 +49,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       resolve(__dirname, './apps/triggers_actions_ui'),
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/ml'),
+      resolve(__dirname, './apps/monitoring'),
     ],
     apps: {
       ...xpackFunctionalConfig.get('apps'),
