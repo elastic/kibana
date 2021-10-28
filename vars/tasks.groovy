@@ -137,6 +137,7 @@ def functionalXpack(Map params = [:]) {
       'x-pack/plugins/security_solution/',
       'x-pack/plugins/cases/',
       'x-pack/plugins/timelines/',
+      'x-pack/plugins/lists/',
       'x-pack/test/security_solution_cypress/',
       'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/',
       'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
