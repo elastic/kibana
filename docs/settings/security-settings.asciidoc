@@ -324,7 +324,7 @@ For more details and a reference of audit events, refer to <<xpack-security-audi
 [cols="2*<"]
 |======
 | `xpack.security.audit.enabled` {ess-icon}
-| Set to `true` _and_ configure an appender with `xpack.security.audit.appender` to enable audit logging`. *Default:* `false`
+| Set to `true` to enable audit logging`. *Default:* `false`
 
 2+a| For example:
 [source,yaml]
@@ -345,17 +345,6 @@ xpack.security.audit.appender: <1>
 <1> This appender is the default and will be used if no `appender.*` config options are specified.
 <2> Rotates log files every 24 hours.
 <3> Keeps maximum of 10 log files before deleting older ones.
-
-[NOTE]
-============
-{ess} does not support custom log file policies. To enable audit logging on {ess} only specify:
-
-[source,yaml]
-----------------------------------------
-xpack.security.audit.enabled: true
-xpack.security.audit.appender.type: rolling-file
-----------------------------------------
-============
 
 | `xpack.security.audit.appender`
 | Optional. Specifies where audit logs should be written to and how they should be formatted. If no appender is specified, a default appender will be used (see above).

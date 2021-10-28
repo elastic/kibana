@@ -158,30 +158,6 @@ describe('license features', function () {
     });
   });
 
-  it('should allow all basic features for standard license', () => {
-    const mockRawLicense = licenseMock.createLicense({
-      license: { mode: 'standard', type: 'standard' },
-      features: { security: { isEnabled: true, isAvailable: true } },
-    });
-
-    const serviceSetup = new SecurityLicenseService().setup({
-      license$: of(mockRawLicense),
-    });
-    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
-    expect(serviceSetup.license.getFeatures()).toEqual({
-      showLogin: true,
-      allowLogin: true,
-      showLinks: true,
-      showRoleMappingsManagement: false,
-      allowAccessAgreement: false,
-      allowRoleDocumentLevelSecurity: false,
-      allowRoleFieldLevelSecurity: false,
-      allowRbac: true,
-      allowSubFeaturePrivileges: false,
-      allowAuditLogging: false,
-    });
-  });
-
   it('should allow role mappings, access agreement, sub-feature privileges and audit logging, but not DLS/FLS if license = gold', () => {
     const mockRawLicense = licenseMock.createLicense({
       license: { mode: 'gold', type: 'gold' },

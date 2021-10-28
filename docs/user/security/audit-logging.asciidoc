@@ -15,22 +15,12 @@ by cluster-wide privileges. For more information on enabling audit logging in
 [NOTE]
 ============================================================================
 Audit logs are **disabled** by default. To enable this functionality, you must
-set `xpack.security.audit.enabled` to `true` in `kibana.yml`, and configure
+set `xpack.security.audit.enabled` to `true` in `kibana.yml`, and optionally configure
 an <<audit-logging-settings, appender>> to write the audit log to a location of your choosing.
 ============================================================================
 
-The <<xpack-security-ecs-audit-logging, audit logger>> uses a separate logger and can be configured using
-the options in <<audit-logging-settings>>. 
-
 [[xpack-security-ecs-audit-logging]]
 ==== Audit events
-
-[IMPORTANT]
-============================================================================
-The following events are only logged if the audit logger is enabled.
-For information on how to configure `xpack.security.audit.appender`, refer to
-<<audit-logging-settings>>.
-============================================================================
 
 Refer to the table of events that can be logged for auditing purposes. 
 
@@ -59,6 +49,9 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `user_login`
 | `success` | User has logged in successfully.
 | `failure` | Failed login attempt (e.g. due to invalid credentials).
+
+.2+| `access_agreement_acknowledged`
+| | User has acknowledged the access agreement.
 
 3+a|
 ===== Category: database

@@ -190,7 +190,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
       try {
         await this.ensureAuthorizedGlobally(
           this.authorization.actions.space.manage,
-          'create',
           'Unauthorized to create spaces'
         );
       } catch (error) {
@@ -221,7 +220,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
       try {
         await this.ensureAuthorizedGlobally(
           this.authorization.actions.space.manage,
-          'update',
           'Unauthorized to update spaces'
         );
       } catch (error) {
@@ -252,7 +250,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
       try {
         await this.ensureAuthorizedGlobally(
           this.authorization.actions.space.manage,
-          'delete',
           'Unauthorized to delete spaces'
         );
       } catch (error) {
@@ -356,7 +353,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return ensureAuthorized(ensureAuthorizedDependencies, types, actions, namespaces, options);
   }
 
-  private async ensureAuthorizedGlobally(action: string, method: string, forbiddenMessage: string) {
+  private async ensureAuthorizedGlobally(action: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
     const { hasAllRequested } = await checkPrivileges.globally({ kibana: action });
 
