@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
@@ -40,16 +41,18 @@ export function createUninstallRoute(
         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
 
         try {
-          await context.core.elasticsearch.client.asCurrentUser.indices.delete({
-            index,
-          });
+          // TODO: don't delete the index if sample data exists in other spaces (#116677)
+          await context.core.elasticsearch.client.asCurrentUser.indices.delete({ index });
         } catch (err) {
-          return response.customError({
-            statusCode: err.body.status,
-            body: {
-              message: `Unable to delete sample data index "${index}", error: ${err.body.error.type}`,
-            },
-          });
+          // if the index doesn't exist, ignore the error and proceed
+          if (err.body.status !== 404) {
+            return response.customError({
+              statusCode: err.body.status,
+              body: {
+                message: `Unable to delete sample data index "${index}", error: ${err.body.error.type}`,
+              },
+            });
+          }
         }
       }
 
@@ -60,7 +63,13 @@ export function createUninstallRoute(
 
       const objectsToDelete = findSampleObjectsResult.filter(({ foundObjectId }) => foundObjectId);
       const deletePromises = objectsToDelete.map(({ type, foundObjectId }) =>
-        client.delete(type, foundObjectId!)
+        client.delete(type, foundObjectId!).catch((err) => {
+          // if the object doesn't exist, ignore the error and proceed
+          if (isBoom(err) && err.output.statusCode === 404) {
+            return;
+          }
+          throw err;
+        })
       );
 
       try {

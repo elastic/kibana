@@ -87,6 +87,7 @@ async function findExistingSampleObjects(
   }, new Map());
 }
 
+// TODO: introduce PARTIALLY_INSTALLED status (#116677)
 async function getSampleDatasetStatus(
   context: RequestHandlerContext,
   existingSampleObjects: ExistingSampleObjects,

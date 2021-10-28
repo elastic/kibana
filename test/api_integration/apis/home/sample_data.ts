@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { Response } from 'superagent';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -31,33 +32,14 @@ export default function ({ getService }: FtrProviderContext) {
     for (const space of SPACES) {
       const apiPath = `/s/${space}/api/sample_data`;
 
-      describe(`uninstall in the ${space} space (before install)`, () => {
-        it('should fail to uninstall sample data', async () => {
-          const resp = await supertest
-            .delete(`${apiPath}/flights`)
-            .set('kbn-xsrf', 'kibana')
-            .expect(404);
-          expect(resp.body.message).to.be(
-            `Unable to delete sample data index "kibana_sample_data_flights", error: index_not_found_exception`
-          );
-        });
-      });
-    }
-
-    for (const space of SPACES) {
-      const apiPath = `/s/${space}/api/sample_data`;
-
       describe(`list in the ${space} space (before install)`, () => {
         it('should return list of sample data sets with installed status', async () => {
           const resp = await supertest.get(apiPath).set('kbn-xsrf', 'kibana').expect(200);
 
-          expect(resp.body).to.be.an('array');
-          expect(resp.body.length).to.be.above(0);
-          const [flightsData] = resp.body;
-          expect(flightsData.id).to.be('flights');
+          const flightsData = findFlightsData(resp);
           expect(flightsData.status).to.be('not_installed');
           // Check and make sure the sample dataset reflects the default object IDs, because no sample data objects exist.
-          // Instead of checking each object ID, we check the dashboard as a representative.
+          // Instead of checking each object ID, we check the dashboard and canvas app link as representatives.
           expect(flightsData.overviewDashboard).to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
           expect(flightsData.appLinks[0].path).to.be(FLIGHTS_CANVAS_APPLINK_PATH);
         });
@@ -114,13 +96,10 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return list of sample data sets with installed status', async () => {
           const resp = await supertest.get(apiPath).set('kbn-xsrf', 'kibana').expect(200);
 
-          expect(resp.body).to.be.an('array');
-          expect(resp.body.length).to.be.above(0);
-          const [flightsData] = resp.body;
-          expect(flightsData.id).to.be('flights');
+          const flightsData = findFlightsData(resp);
           expect(flightsData.status).to.be('installed');
           // Check and make sure the sample dataset reflects the existing object IDs in each space.
-          // Instead of checking each object ID, we check the dashboard as a representative.
+          // Instead of checking each object ID, we check the dashboard and canvas app link as representatives.
           if (space === 'default') {
             expect(flightsData.overviewDashboard).to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
             expect(flightsData.appLinks[0].path).to.be(FLIGHTS_CANVAS_APPLINK_PATH);
@@ -138,10 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe(`uninstall in the ${space} space`, () => {
         it('should uninstall sample data', async () => {
-          if (space === 'other') {
-            // the ES index was deleted in the test for the default space; recreate it so the second uninstall doesn't fail
-            await es.indices.create({ index: 'kibana_sample_data_flights' });
-          }
+          // Note: the second time this happens, the index has already been removed, but the uninstall works anyway
           await supertest.delete(`${apiPath}/flights`).set('kbn-xsrf', 'kibana').expect(204);
         });
 
@@ -157,17 +133,25 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return list of sample data sets with installed status', async () => {
           const resp = await supertest.get(apiPath).set('kbn-xsrf', 'kibana').expect(200);
 
-          expect(resp.body).to.be.an('array');
-          expect(resp.body.length).to.be.above(0);
-          const [flightsData] = resp.body;
-          expect(flightsData.id).to.be('flights');
+          const flightsData = findFlightsData(resp);
           expect(flightsData.status).to.be('not_installed');
           // Check and make sure the sample dataset reflects the default object IDs, because no sample data objects exist.
-          // Instead of checking each object ID, we check the dashboard as a representative.
+          // Instead of checking each object ID, we check the dashboard and canvas app link as representatives.
           expect(flightsData.overviewDashboard).to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
           expect(flightsData.appLinks[0].path).to.be(FLIGHTS_CANVAS_APPLINK_PATH);
         });
       });
     }
   });
+}
+
+function findFlightsData(response: Response) {
+  expect(response.body).to.be.an('array');
+  expect(response.body.length).to.be.above(0);
+  // @ts-expect-error Binding element 'id' implicitly has an 'any' type.
+  const flightsData = response.body.find(({ id }) => id === 'flights');
+  if (!flightsData) {
+    throw new Error('Could not find flights data');
+  }
+  return flightsData;
 }

@@ -105,7 +105,7 @@ describe('findSampleObjects', () => {
         { type: obj1.type, id: 'obj-id-x', originId: obj1.id }, // find success for obj4
         { type: obj1.type, id: 'obj-id-y', originId: obj1.id }, // find success for obj4
       ],
-      total: 101,
+      total: 10001,
     } as SavedObjectsFindResponse);
     const result = await findSampleObjects(params);
     expect(result).toEqual([{ ...obj1, foundObjectId: 'obj-id-x' }]); // obj-id-y is ignored
@@ -116,7 +116,7 @@ describe('findSampleObjects', () => {
     expect(client.find).toHaveBeenCalledWith(expect.objectContaining({ type: ['obj-type-1'] }));
     expect(logger.warn).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalledWith(
-      'findSampleObjects got 101 results, only using the first 100'
+      'findSampleObjects got 10001 results, only using the first 10000'
     );
     expect(logger.warn).toHaveBeenCalledWith(
       'Found two sample objects with the same origin "obj-id-1" (previously found "obj-id-x", ignoring "obj-id-y")'

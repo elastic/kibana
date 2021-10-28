@@ -9,7 +9,7 @@
 import * as esKuery from '@kbn/es-query';
 import type { Logger, SavedObjectsClientContract } from 'src/core/server';
 
-const MAX_OBJECTS_TO_FIND = 100; // we only expect up to a few dozen, search for 100 to be safe; anything over this is ignored
+const MAX_OBJECTS_TO_FIND = 10000; // we only expect up to a few dozen, search for 10k to be safe; anything over this is ignored
 
 export interface FindSampleObjectsParams {
   client: SavedObjectsClientContract;
@@ -58,6 +58,10 @@ export async function findSampleObjects({ client, logger, objects }: FindSampleO
     };
     const findResponse = await client.find(options);
     if (findResponse.total > MAX_OBJECTS_TO_FIND) {
+      // As of this writing, it is not possible to encounter this scenario when using Kibana import or copy-to-space, because at most one
+      // object can exist in a given space. However, as of today, when objects are shareable you _could_ get Kibana into a state where
+      // multiple objects of the same origin exist in the same space.
+      // #116677 describes solutions to fully mitigate this edge case in the future.
       logger.warn(
         `findSampleObjects got ${findResponse.total} results, only using the first ${MAX_OBJECTS_TO_FIND}`
       );
@@ -66,6 +70,10 @@ export async function findSampleObjects({ client, logger, objects }: FindSampleO
       const key = getObjKey(type, originId!);
       const existing = acc.get(key);
       if (existing) {
+        // As of this writing, it is not possible to encounter this scenario when using Kibana import or copy-to-space, because at most one
+        // object can exist in a given space. However, as of today, when objects are shareable you _could_ get Kibana into a state where
+        // multiple objects of the same origin exist in the same space.
+        // #116677 describes solutions to fully mitigate this edge case in the future.
         logger.warn(
           `Found two sample objects with the same origin "${originId}" (previously found "${existing}", ignoring "${id}")`
         );
