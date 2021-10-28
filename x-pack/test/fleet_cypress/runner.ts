@@ -12,36 +12,24 @@ import { withProcRunner } from '@kbn/dev-utils';
 
 import { FtrProviderContext } from './ftr_provider_context';
 
-import { ArtifactManager } from './artifact_manager';
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
 
-interface SetupParams {
-  artifacts: string[];
-}
-
 async function withFleetAgent(
   { getService }: FtrProviderContext,
-  params: SetupParams,
   runner: (runnerEnv: Record<string, string>) => Promise<void>
 ) {
   const log = getService('log');
   const config = getService('config');
-
-  const artifactManager = new ArtifactManager(params.artifacts, log);
-  await artifactManager.fetchArtifacts();
 
   const esHost = Url.format(config.get('servers.elasticsearch'));
   const esConfig = {
     user: config.get('servers.elasticsearch.username'),
     password: config.get('servers.elasticsearch.password'),
     esHost,
+    port: config.get('servers.elasticsearch.port'),
   };
-  const fleetManager = new FleetManager(
-    artifactManager.getArtifactDirectory('fleet-server'),
-    esConfig,
-    log
-  );
+  const fleetManager = new FleetManager(esConfig, log);
 
   const agentManager = new AgentManager(
     {
@@ -71,7 +59,6 @@ async function withFleetAgent(
   } finally {
     fleetManager.cleanup();
     agentManager.cleanup();
-    artifactManager.cleanup();
   }
 }
 
@@ -86,40 +73,35 @@ export async function FleetCypressVisualTestRunner(context: FtrProviderContext) 
 function startFleetAgent(context: FtrProviderContext, cypressCommand: string) {
   const log = context.getService('log');
   const config = context.getService('config');
-  return withFleetAgent(
-    context,
-    {
-      artifacts: ['fleet-server'],
-    },
-    (runnerEnv) =>
-      withProcRunner(log, async (procs) => {
-        await procs.run('cypress', {
-          cmd: 'yarn',
-          args: [`cypress:${cypressCommand}`],
-          cwd: resolve(__dirname, '../../plugins/fleet'),
-          env: {
-            FORCE_COLOR: '1',
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            CYPRESS_baseUrl: Url.format(config.get('servers.kibana')),
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            CYPRESS_protocol: config.get('servers.kibana.protocol'),
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            CYPRESS_hostname: config.get('servers.kibana.hostname'),
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            CYPRESS_configport: config.get('servers.kibana.port'),
-            CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-            CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-            CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
-            CYPRESS_KIBANA_URL: Url.format({
-              protocol: config.get('servers.kibana.protocol'),
-              hostname: config.get('servers.kibana.hostname'),
-              port: config.get('servers.kibana.port'),
-            }),
-            ...runnerEnv,
-            ...process.env,
-          },
-          wait: true,
-        });
-      })
+  return withFleetAgent(context, (runnerEnv) =>
+    withProcRunner(log, async (procs) => {
+      await procs.run('cypress', {
+        cmd: 'yarn',
+        args: [`cypress:${cypressCommand}`],
+        cwd: resolve(__dirname, '../../plugins/fleet'),
+        env: {
+          FORCE_COLOR: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          CYPRESS_baseUrl: Url.format(config.get('servers.kibana')),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          CYPRESS_protocol: config.get('servers.kibana.protocol'),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          CYPRESS_hostname: config.get('servers.kibana.hostname'),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          CYPRESS_configport: config.get('servers.kibana.port'),
+          CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
+          CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
+          CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+          CYPRESS_KIBANA_URL: Url.format({
+            protocol: config.get('servers.kibana.protocol'),
+            hostname: config.get('servers.kibana.hostname'),
+            port: config.get('servers.kibana.port'),
+          }),
+          ...runnerEnv,
+          ...process.env,
+        },
+        wait: true,
+      });
+    })
   );
 }

@@ -8,7 +8,6 @@
 import { ToolingLog } from '@kbn/dev-utils';
 import axios, { AxiosRequestConfig } from 'axios';
 import { ChildProcess, spawn } from 'child_process';
-import { networkInterfaces } from 'os';
 import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
 
@@ -65,27 +64,22 @@ export class AgentManager extends Manager {
 
     this.log.info('Running the agent');
 
-    const nis = networkInterfaces();
-    const ipAddress = Object.values(nis)
-      .flatMap((x) => x)
-      .find((inf: any) => inf.family === 'IPv4' && inf.address !== '127.0.0.1')?.address;
-
-    const fleetUrl = `http://${ipAddress}:8220`;
-    this.log.info('Fleet url: ' + fleetUrl);
-
     const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
     this.log.info(artifact);
 
     const args = [
       'run',
+      '--add-host',
+      'host.docker.internal:host-gateway',
       '--env',
       'FLEET_ENROLL=1',
       '--env',
-      `FLEET_URL=${fleetUrl}`,
+      `FLEET_URL=http://host.docker.internal:8220`,
       '--env',
       `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
       '--env',
       'FLEET_INSECURE=true',
+      '--rm',
       artifact,
     ];
 
