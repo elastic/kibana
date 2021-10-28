@@ -37,7 +37,7 @@ const formatAlertsForNotificationActions = (alerts: unknown[]) => {
           ...expandDottedObject(convertToLegacyAlert(alert)),
           ...expandDottedObject(alert),
         }
-      : alerts
+      : alert
   );
 };
 
