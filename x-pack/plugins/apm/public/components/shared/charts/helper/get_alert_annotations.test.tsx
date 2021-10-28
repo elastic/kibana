@@ -5,7 +5,24 @@
  * 2.0.
  */
 
-import { ALERT_SEVERITY_LEVEL } from '@kbn/rule-data-utils/target/technical_field_names';
+import {
+  ALERT_DURATION,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_RULE_TYPE_ID,
+  ALERT_EVALUATION_VALUE,
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_CONSUMER,
+  ALERT_SEVERITY,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_UUID,
+  SPACE_IDS,
+  ALERT_RULE_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_CATEGORY,
+} from '@kbn/rule-data-utils';
 import { ValuesType } from 'utility-types';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ObservabilityRuleTypeRegistry } from '../../../../../../observability/public';
@@ -13,42 +30,43 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { getAlertAnnotations } from './get_alert_annotations';
 
 type Alert = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
+  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
 >;
 
 const euiColorDanger = 'red';
 const euiColorWarning = 'yellow';
-const theme = ({
+const theme = {
   eui: { euiColorDanger, euiColorWarning },
-} as unknown) as EuiTheme;
+} as unknown as EuiTheme;
 const alert: Alert = {
-  'rule.id': ['apm.transaction_duration'],
-  'kibana.rac.alert.evaluation.value': [2057657.39],
+  [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
+  [ALERT_EVALUATION_VALUE]: [2057657.39],
   'service.name': ['frontend-rum'],
-  'rule.name': ['Latency threshold | frontend-rum'],
-  'kibana.rac.alert.duration.us': [62879000],
-  'kibana.rac.alert.status': ['open'],
+  [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
+  [ALERT_DURATION]: [62879000],
+  [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
+  [SPACE_IDS]: ['myfakespaceid'],
   tags: ['apm', 'service.name:frontend-rum'],
   'transaction.type': ['page-load'],
-  'kibana.rac.alert.producer': ['apm'],
-  'kibana.rac.alert.uuid': ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
-  'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
+  [ALERT_RULE_PRODUCER]: ['apm'],
+  [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
+  [ALERT_RULE_CONSUMER]: ['apm'],
+  [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
   'event.action': ['active'],
   '@timestamp': ['2021-06-01T16:16:05.183Z'],
-  'kibana.rac.alert.id': ['apm.transaction_duration_All'],
+  [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
   'processor.event': ['transaction'],
-  'kibana.rac.alert.evaluation.threshold': [500000],
-  'kibana.rac.alert.start': ['2021-06-01T16:15:02.304Z'],
+  [ALERT_EVALUATION_THRESHOLD]: [500000],
+  [ALERT_START]: ['2021-06-01T16:15:02.304Z'],
   'event.kind': ['state'],
-  'rule.category': ['Latency threshold'],
+  [ALERT_RULE_CATEGORY]: ['Latency threshold'],
 };
-const chartStartTime = new Date(
-  alert['kibana.rac.alert.start']![0] as string
-).getTime();
-const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () => () => ({
-  link: '/',
-  reason: 'a good reason',
-});
+const chartStartTime = new Date(alert[ALERT_START]![0] as string).getTime();
+const getFormatter: ObservabilityRuleTypeRegistry['getFormatter'] =
+  () => () => ({
+    link: '/',
+    reason: 'a good reason',
+  });
 const selectedAlertId = undefined;
 const setSelectedAlertId = jest.fn();
 
@@ -92,7 +110,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
-      ).toEqual('Alert');
+      ).toEqual('Alert - Experimental');
     });
 
     it('uses the reason in the annotation details', () => {
@@ -105,13 +123,13 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].details
-      ).toEqual('a good reason');
+      ).toEqual('a good reason. Click to see more details.');
     });
 
     describe('with no formatter', () => {
       it('uses the rule type', () => {
-        const getNoFormatter: ObservabilityRuleTypeRegistry['getFormatter'] = () =>
-          undefined;
+        const getNoFormatter: ObservabilityRuleTypeRegistry['getFormatter'] =
+          () => undefined;
 
         expect(
           getAlertAnnotations({
@@ -122,7 +140,7 @@ describe('getAlertAnnotations', () => {
             setSelectedAlertId,
             theme,
           })![0].props.dataValues[0].details
-        ).toEqual(alert['rule.name']![0]);
+        ).toEqual(`${alert[ALERT_RULE_NAME]![0]}. Click to see more details.`);
       });
     });
 
@@ -147,7 +165,7 @@ describe('getAlertAnnotations', () => {
   describe('with an alert with a warning severity', () => {
     const warningAlert: Alert = {
       ...alert,
-      [ALERT_SEVERITY_LEVEL]: ['warning'],
+      [ALERT_SEVERITY]: ['warning'],
     };
 
     it('uses the warning color', () => {
@@ -173,14 +191,14 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
-      ).toEqual('Warning Alert');
+      ).toEqual('Warning Alert - Experimental');
     });
   });
 
   describe('with an alert with a critical severity', () => {
     const criticalAlert: Alert = {
       ...alert,
-      [ALERT_SEVERITY_LEVEL]: ['critical'],
+      [ALERT_SEVERITY]: ['critical'],
     };
 
     it('uses the critical color', () => {
@@ -206,7 +224,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
-      ).toEqual('Critical Alert');
+      ).toEqual('Critical Alert - Experimental');
     });
   });
 });

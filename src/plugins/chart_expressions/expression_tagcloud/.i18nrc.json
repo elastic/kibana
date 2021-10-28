@@ -1,0 +1,6 @@
+{
+  "prefix": "expressionTagcloud",
+  "paths": {
+    "expressionTagcloud": "."
+  }
+}

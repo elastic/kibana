@@ -12,6 +12,7 @@ describe('getJourneyScreenshot', () => {
   it('returns screenshot data', async () => {
     const screenshotResult = {
       _id: 'id',
+      _index: 'index',
       _source: {
         synthetics: {
           blob_mime: 'image/jpeg',
@@ -26,8 +27,14 @@ describe('getJourneyScreenshot', () => {
     expect(
       await getJourneyScreenshot({
         uptimeEsClient: mockSearchResult([], {
-          // @ts-expect-error incomplete search result
-          step: { image: { hits: { hits: [screenshotResult] } } },
+          step: {
+            image: {
+              hits: {
+                total: 1,
+                hits: [screenshotResult],
+              },
+            },
+          },
         }),
         checkGroup: 'checkGroup',
         stepIndex: 0,
@@ -48,6 +55,7 @@ describe('getJourneyScreenshot', () => {
   it('returns ref data', async () => {
     const screenshotRefResult = {
       _id: 'id',
+      _index: 'index',
       _source: {
         '@timestamp': '123',
         monitor: {
@@ -86,8 +94,7 @@ describe('getJourneyScreenshot', () => {
     expect(
       await getJourneyScreenshot({
         uptimeEsClient: mockSearchResult([], {
-          // @ts-expect-error incomplete search result
-          step: { image: { hits: { hits: [screenshotRefResult] } } },
+          step: { image: { hits: { hits: [screenshotRefResult], total: 1 } } },
         }),
         checkGroup: 'checkGroup',
         stepIndex: 0,

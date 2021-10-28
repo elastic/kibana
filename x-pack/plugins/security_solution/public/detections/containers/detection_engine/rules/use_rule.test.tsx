@@ -54,6 +54,7 @@ describe('useRule', () => {
           immutable: false,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',

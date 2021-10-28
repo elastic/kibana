@@ -7,9 +7,7 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import Util from 'util';
-import glob from 'glob';
+import del from 'del';
 import { kibanaServerTestUser } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
@@ -18,15 +16,8 @@ import { Root } from '../../../root';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_es_nodes';
 
-const asyncUnlink = Util.promisify(Fs.unlink);
-
 async function removeLogFile() {
-  glob(Path.join(__dirname, `${LOG_FILE_PREFIX}_*.log`), (err, files) => {
-    files.forEach(async (file) => {
-      // ignore errors if it doesn't exist
-      await asyncUnlink(file).catch(() => void 0);
-    });
-  });
+  await del([Path.join(__dirname, `${LOG_FILE_PREFIX}_*.log`)], { force: true });
 }
 
 function extractSortNumberFromId(id: string): number {
@@ -76,7 +67,6 @@ function createRoot({ logFileName, hosts }: RootConfig) {
     },
     migrations: {
       skip: false,
-      enableV2: true,
       batchSize: 100, // fixture contains 5000 docs
     },
     logging: {
@@ -157,6 +147,7 @@ describe('migration v2', () => {
       hosts: esServer.hosts,
     });
 
+    await root.preboot();
     const setup = await root.setup();
     setup.savedObjects.registerType({
       name: 'foo',
@@ -188,7 +179,7 @@ describe('migration v2', () => {
     });
 
     await root.start();
-    const esClient = esServer.es.getClient();
+    const esClient = esServer.es.getKibanaEsClient();
 
     const migratedFooDocs = await fetchDocs(esClient, migratedIndex, 'foo');
     expect(migratedFooDocs.length).toBe(2500);

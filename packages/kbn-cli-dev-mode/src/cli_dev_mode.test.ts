@@ -34,8 +34,8 @@ const { DevServer } = jest.requireMock('./dev_server');
 jest.mock('./base_path_proxy_server');
 const { BasePathProxyServer } = jest.requireMock('./base_path_proxy_server');
 
-jest.mock('@kbn/dev-utils/target/ci_stats_reporter');
-const { CiStatsReporter } = jest.requireMock('@kbn/dev-utils/target/ci_stats_reporter');
+jest.mock('@kbn/dev-utils/ci_stats_reporter');
+const { CiStatsReporter } = jest.requireMock('@kbn/dev-utils/ci_stats_reporter');
 
 jest.mock('./get_server_watch_paths', () => ({
   getServerWatchPaths: jest.fn(() => ({
@@ -74,7 +74,6 @@ const createCliArgs = (parts: Partial<SomeCliArgs> = {}): SomeCliArgs => ({
   runExamples: false,
   watch: true,
   silent: false,
-  quiet: false,
   ...parts,
 });
 

@@ -9,10 +9,9 @@ import type { InfraPluginRequestHandlerContext } from '../types';
 import { CallWithRequestParams, InfraDatabaseSearchResponse } from './adapters/framework';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 
-export const createSearchClient = (
-  requestContext: InfraPluginRequestHandlerContext,
-  framework: KibanaFramework
-) => <Hit = {}, Aggregation = undefined>(
-  opts: CallWithRequestParams
-): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
-  framework.callWithRequest(requestContext, 'search', opts);
+export const createSearchClient =
+  (requestContext: InfraPluginRequestHandlerContext, framework: KibanaFramework) =>
+  <Hit = {}, Aggregation = undefined>(
+    opts: CallWithRequestParams
+  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
+    framework.callWithRequest(requestContext, 'search', opts);

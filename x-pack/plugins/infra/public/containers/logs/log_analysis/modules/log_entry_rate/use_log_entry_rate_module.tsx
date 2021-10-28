@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import createContainer from 'constate';
 import { useMemo } from 'react';
 import { ModuleSourceConfiguration } from '../../log_analysis_module_types';
@@ -80,6 +80,5 @@ export const useLogEntryRateModule = ({
   };
 };
 
-export const [LogEntryRateModuleProvider, useLogEntryRateModuleContext] = createContainer(
-  useLogEntryRateModule
-);
+export const [LogEntryRateModuleProvider, useLogEntryRateModuleContext] =
+  createContainer(useLogEntryRateModule);

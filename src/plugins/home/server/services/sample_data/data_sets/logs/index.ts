@@ -20,6 +20,7 @@ const logsDescription = i18n.translate('home.sampleData.logsSpecDescription', {
 });
 const initialAppLinks = [] as AppLinkSchema[];
 
+export const GLOBE_ICON_PATH = '/plugins/home/assets/sample_data_resources/logs/icon.svg';
 export const logsSpecProvider = function (): SampleDatasetSchema {
   return {
     id: 'logs',
@@ -42,5 +43,6 @@ export const logsSpecProvider = function (): SampleDatasetSchema {
       },
     ],
     status: 'not_installed',
+    iconPath: GLOBE_ICON_PATH,
   };
 };

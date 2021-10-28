@@ -10,6 +10,7 @@ $ilmTimelineBarHeight: $euiSizeS;
     */
     display: inline-block;
     width: 100%;
+    margin-top: $euiSizeS;
 
     &__phase:first-child {
       padding-left: 0;

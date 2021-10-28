@@ -18,6 +18,10 @@ import {
 } from '../../../common';
 import { ActionResult, ActionTypeExecutorResult } from '../../../../actions/common';
 import { ContextTypeGeneratedAlertType, createAlertsString } from '../../connectors';
+import {
+  getCreateConnectorUrl,
+  getExecuteConnectorUrl,
+} from '../../../common/utils/connectors_api';
 
 main();
 
@@ -71,7 +75,7 @@ async function handleGenGroupAlerts(argv: any) {
 
   try {
     const createdAction = await client.request<ActionResult>({
-      path: '/api/actions/action',
+      path: getCreateConnectorUrl(),
       method: 'POST',
       body: {
         name: 'A case connector',
@@ -121,7 +125,7 @@ async function handleGenGroupAlerts(argv: any) {
     };
 
     const executeResp = await client.request<ActionTypeExecutorResult<CaseResponse>>({
-      path: `/api/actions/action/${createdAction.data.id}/_execute`,
+      path: getExecuteConnectorUrl(createdAction.data.id),
       method: 'POST',
       body: {
         params: {

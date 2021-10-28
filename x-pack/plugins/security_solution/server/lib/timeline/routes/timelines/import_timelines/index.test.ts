@@ -59,12 +59,12 @@ describe('import timelines', () => {
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
 
     mockGetTimeline = jest.fn();
     mockGetTemplateTimeline = jest.fn();
@@ -88,9 +88,11 @@ describe('import timelines', () => {
 
     jest.doMock('./get_timelines_from_stream', () => {
       return {
-        getTupleDuplicateErrorsAndUniqueTimeline: mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue(
-          [mockDuplicateIdErrors, mockUniqueParsedObjects]
-        ),
+        getTupleDuplicateErrorsAndUniqueTimeline:
+          mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
+            mockDuplicateIdErrors,
+            mockUniqueParsedObjects,
+          ]),
       };
     });
   });
@@ -257,25 +259,13 @@ describe('import timelines', () => {
     test('should provide no noteSavedObjectId when Creating notes for a timeline', async () => {
       const mockRequest = await getImportTimelinesRequest();
       await server.inject(mockRequest, context);
-      expect(mockPersistNote.mock.calls[0][1]).toBeNull();
-    });
-
-    test('should provide new timeline version when Creating notes for a timeline', async () => {
-      const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
-      expect(mockPersistNote.mock.calls[0][1]).toBeNull();
-    });
-
-    test('should provide note content when Creating notes for a timeline', async () => {
-      const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
-      expect(mockPersistNote.mock.calls[0][2]).toEqual(mockCreatedTimeline.version);
+      expect(mockPersistNote.mock.calls[0][0].noteId).toBeNull();
     });
 
     test('should provide new notes with original author info when Creating notes for a timeline', async () => {
       const mockRequest = await getImportTimelinesRequest();
       await server.inject(mockRequest, context);
-      expect(mockPersistNote.mock.calls[0][3]).toEqual({
+      expect(mockPersistNote.mock.calls[0][0].note).toEqual({
         eventId: undefined,
         note: 'original note',
         created: '1584830796960',
@@ -284,7 +274,7 @@ describe('import timelines', () => {
         updatedBy: 'original author A',
         timelineId: mockCreatedTimeline.savedObjectId,
       });
-      expect(mockPersistNote.mock.calls[1][3]).toEqual({
+      expect(mockPersistNote.mock.calls[1][0].note).toEqual({
         eventId: mockUniqueParsedObjects[0].eventNotes[0].eventId,
         note: 'original event note',
         created: '1584830796960',
@@ -293,7 +283,7 @@ describe('import timelines', () => {
         updatedBy: 'original author B',
         timelineId: mockCreatedTimeline.savedObjectId,
       });
-      expect(mockPersistNote.mock.calls[2][3]).toEqual({
+      expect(mockPersistNote.mock.calls[2][0].note).toEqual({
         eventId: mockUniqueParsedObjects[0].eventNotes[1].eventId,
         note: 'event note2',
         created: '1584830796960',
@@ -310,7 +300,7 @@ describe('import timelines', () => {
 
       const mockRequest = await getImportTimelinesRequest();
       await server.inject(mockRequest, context);
-      expect(mockPersistNote.mock.calls[0][3]).toEqual({
+      expect(mockPersistNote.mock.calls[0][0].note).toEqual({
         created: mockUniqueParsedObjects[0].globalNotes[0].created,
         createdBy: mockUniqueParsedObjects[0].globalNotes[0].createdBy,
         updated: mockUniqueParsedObjects[0].globalNotes[0].updated,
@@ -319,7 +309,7 @@ describe('import timelines', () => {
         note: mockUniqueParsedObjects[0].globalNotes[0].note,
         timelineId: mockCreatedTimeline.savedObjectId,
       });
-      expect(mockPersistNote.mock.calls[1][3]).toEqual({
+      expect(mockPersistNote.mock.calls[1][0].note).toEqual({
         created: mockUniqueParsedObjects[0].eventNotes[0].created,
         createdBy: mockUniqueParsedObjects[0].eventNotes[0].createdBy,
         updated: mockUniqueParsedObjects[0].eventNotes[0].updated,
@@ -328,7 +318,7 @@ describe('import timelines', () => {
         note: mockUniqueParsedObjects[0].eventNotes[0].note,
         timelineId: mockCreatedTimeline.savedObjectId,
       });
-      expect(mockPersistNote.mock.calls[2][3]).toEqual({
+      expect(mockPersistNote.mock.calls[2][0].note).toEqual({
         created: mockUniqueParsedObjects[0].eventNotes[1].created,
         createdBy: mockUniqueParsedObjects[0].eventNotes[1].createdBy,
         updated: mockUniqueParsedObjects[0].eventNotes[1].updated,
@@ -517,12 +507,12 @@ describe('import timeline templates', () => {
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
 
     mockGetTimeline = jest.fn();
     mockGetTemplateTimeline = jest.fn();
@@ -548,9 +538,11 @@ describe('import timeline templates', () => {
 
     jest.doMock('./get_timelines_from_stream', () => {
       return {
-        getTupleDuplicateErrorsAndUniqueTimeline: mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue(
-          [mockDuplicateIdErrors, mockUniqueParsedTemplateTimelineObjects]
-        ),
+        getTupleDuplicateErrorsAndUniqueTimeline:
+          mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
+            mockDuplicateIdErrors,
+            mockUniqueParsedTemplateTimelineObjects,
+          ]),
       };
     });
 
@@ -640,19 +632,13 @@ describe('import timeline templates', () => {
     test('should provide no noteSavedObjectId when Creating notes for a timeline', async () => {
       const mockRequest = await getImportTimelinesRequest();
       await server.inject(mockRequest, context);
-      expect(mockPersistNote.mock.calls[0][1]).toBeNull();
-    });
-
-    test('should provide new timeline version when Creating notes for a timeline', async () => {
-      const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
-      expect(mockPersistNote.mock.calls[0][2]).toEqual(mockCreatedTemplateTimeline.version);
+      expect(mockPersistNote.mock.calls[0][0].noteId).toBeNull();
     });
 
     test('should exclude event notes when creating notes', async () => {
       const mockRequest = await getImportTimelinesRequest();
       await server.inject(mockRequest, context);
-      expect(mockPersistNote.mock.calls[0][3]).toEqual({
+      expect(mockPersistNote.mock.calls[0][0].note).toEqual({
         eventId: undefined,
         note: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].note,
         created: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].created,
@@ -792,19 +778,13 @@ describe('import timeline templates', () => {
     test('should provide noteSavedObjectId when Creating notes for a timeline', async () => {
       const mockRequest = await getImportTimelinesRequest();
       await server.inject(mockRequest, context);
-      expect(mockPersistNote.mock.calls[0][1]).toBeNull();
-    });
-
-    test('should provide new timeline version when Creating notes for a timeline', async () => {
-      const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
-      expect(mockPersistNote.mock.calls[0][2]).toEqual(mockCreatedTemplateTimeline.version);
+      expect(mockPersistNote.mock.calls[0][0].noteId).toBeNull();
     });
 
     test('should exclude event notes when creating notes', async () => {
       const mockRequest = await getImportTimelinesRequest();
       await server.inject(mockRequest, context);
-      expect(mockPersistNote.mock.calls[0][3]).toEqual({
+      expect(mockPersistNote.mock.calls[0][0].note).toEqual({
         eventId: undefined,
         note: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].note,
         created: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].created,

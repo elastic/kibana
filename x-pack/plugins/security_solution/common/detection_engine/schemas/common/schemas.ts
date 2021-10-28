@@ -7,15 +7,15 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import * as t from 'io-ts';
-
 import {
-  UUID,
-  NonEmptyString,
+  enumeration,
   IsoDateString,
-  PositiveIntegerGreaterThanZero,
+  NonEmptyString,
   PositiveInteger,
+  PositiveIntegerGreaterThanZero,
+  UUID,
 } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
 export const author = t.array(t.string);
 export type Author = t.TypeOf<typeof author>;
@@ -34,6 +34,18 @@ export type Description = t.TypeOf<typeof description>;
 
 export const descriptionOrUndefined = t.union([description, t.undefined]);
 export type DescriptionOrUndefined = t.TypeOf<typeof descriptionOrUndefined>;
+
+// outcome is a property of the saved object resolve api
+// will tell us info about the rule after 8.0 migrations
+export const outcome = t.union([
+  t.literal('exactMatch'),
+  t.literal('aliasMatch'),
+  t.literal('conflict'),
+]);
+export type Outcome = t.TypeOf<typeof outcome>;
+
+export const alias_target_id = t.string;
+export type AliasTargetId = t.TypeOf<typeof alias_target_id>;
 
 export const enabled = t.boolean;
 export type Enabled = t.TypeOf<typeof enabled>;
@@ -58,6 +70,9 @@ export type FileName = t.TypeOf<typeof file_name>;
 
 export const exclude_export_details = t.boolean;
 export type ExcludeExportDetails = t.TypeOf<typeof exclude_export_details>;
+
+export const namespace = t.string;
+export type Namespace = t.TypeOf<typeof namespace>;
 
 /**
  * TODO: Right now the filters is an "unknown", when it could more than likely
@@ -170,17 +185,26 @@ export type RuleNameOverride = t.TypeOf<typeof rule_name_override>;
 export const ruleNameOverrideOrUndefined = t.union([rule_name_override, t.undefined]);
 export type RuleNameOverrideOrUndefined = t.TypeOf<typeof ruleNameOverrideOrUndefined>;
 
-export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
+export const status = t.keyof({
+  open: null,
+  closed: null,
+  acknowledged: null,
+  'in-progress': null, // TODO: Remove after `acknowledged` migrations
+});
 export type Status = t.TypeOf<typeof status>;
 
-export const job_status = t.keyof({
-  succeeded: null,
-  failed: null,
-  'going to run': null,
-  'partial failure': null,
-  warning: null,
-});
-export type JobStatus = t.TypeOf<typeof job_status>;
+export enum RuleExecutionStatus {
+  'succeeded' = 'succeeded',
+  'failed' = 'failed',
+  'going to run' = 'going to run',
+  'partial failure' = 'partial failure',
+  /**
+   * @deprecated 'partial failure' status should be used instead
+   */
+  'warning' = 'warning',
+}
+
+export const ruleExecutionStatus = enumeration('RuleExecutionStatus', RuleExecutionStatus);
 
 export const conflicts = t.keyof({ abort: null, proceed: null });
 export type Conflicts = t.TypeOf<typeof conflicts>;
@@ -343,6 +367,9 @@ export const timelines_not_updated = PositiveInteger;
 export const note = t.string;
 export type Note = t.TypeOf<typeof note>;
 
+export const namespaceOrUndefined = t.union([namespace, t.undefined]);
+export type NamespaceOrUndefined = t.TypeOf<typeof namespaceOrUndefined>;
+
 export const noteOrUndefined = t.union([note, t.undefined]);
 export type NoteOrUndefined = t.TypeOf<typeof noteOrUndefined>;
 
@@ -419,4 +446,4 @@ export enum BulkAction {
   'duplicate' = 'duplicate',
 }
 
-export const bulkAction = t.keyof(BulkAction);
+export const bulkAction = enumeration('BulkAction', BulkAction);

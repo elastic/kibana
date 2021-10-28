@@ -107,7 +107,7 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
               defaultMessage="If you know something about this data, such as the file format or timestamp format, adding initial overrides may help us to infer the rest of the structure."
             />
             <br />
-            <EuiButtonEmpty onClick={showEditFlyout} flush="left" size="xs">
+            <EuiButtonEmpty onClick={showEditFlyout} flush="left" size="s">
               <FormattedMessage
                 id="xpack.dataVisualizer.file.fileErrorCallouts.overrideButton"
                 defaultMessage="Apply override settings"

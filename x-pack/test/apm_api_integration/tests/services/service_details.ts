@@ -12,7 +12,7 @@ import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('handles the empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/metadata/details`,
+            pathname: `/internal/apm/services/opbeans-java/metadata/details`,
             query: { start, end },
           })
         );
@@ -42,7 +42,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns java service details', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/metadata/details`,
+            pathname: `/internal/apm/services/opbeans-java/metadata/details`,
             query: { start, end },
           })
         );
@@ -51,6 +51,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(response.body).toMatchInline(`
           Object {
+            "cloud": Object {
+              "availabilityZones": Array [
+                "europe-west1-c",
+              ],
+              "machineTypes": Array [
+                "n1-standard-4",
+              ],
+              "projectName": "elastic-observability",
+              "provider": "gcp",
+            },
             "container": Object {
               "isContainerized": true,
               "os": "Linux",
@@ -59,16 +69,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             "service": Object {
               "agent": Object {
-                "ephemeral_id": "d27b2271-06b4-48c8-a02a-cfd963c0b4d0",
+                "ephemeral_id": "2745d454-f57f-4473-a09b-fe6bef295860",
                 "name": "java",
-                "version": "1.19.1-SNAPSHOT.null",
+                "version": "1.25.1-SNAPSHOT.UNKNOWN",
               },
               "runtime": Object {
                 "name": "Java",
-                "version": "11.0.9.1",
+                "version": "11.0.11",
               },
               "versions": Array [
-                "2020-12-08 03:35:36",
+                "2021-08-03 04:26:27",
               ],
             },
           }
@@ -78,7 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns python service details', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-python/metadata/details`,
+            pathname: `/internal/apm/services/opbeans-python/metadata/details`,
             query: { start, end },
           })
         );
@@ -106,15 +116,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "service": Object {
               "agent": Object {
                 "name": "python",
-                "version": "5.10.0",
+                "version": "6.3.3",
               },
               "framework": "django",
               "runtime": Object {
                 "name": "CPython",
-                "version": "3.8.6",
+                "version": "3.9.6",
               },
               "versions": Array [
-                "2020-12-08 03:35:35",
+                "2021-08-03 04:26:25",
               ],
             },
           }

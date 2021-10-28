@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import { configureStore, DeepPartial, getDefaultMiddleware } from '@reduxjs/toolkit';
-import logger from 'redux-logger';
+import { configureStore, getDefaultMiddleware, PreloadedState } from '@reduxjs/toolkit';
+import { createLogger } from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import { lensSlice, initialState } from './lens_slice';
+import { makeLensReducer, lensActions } from './lens_slice';
 import { timeRangeMiddleware } from './time_range_middleware';
 import { optimizingMiddleware } from './optimizing_middleware';
-import { externalContextMiddleware } from './external_context_middleware';
-
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { LensAppState, LensState } from './types';
+import { LensState, LensStoreDeps } from './types';
+import { initMiddleware } from './init_middleware';
 export * from './types';
-
-export const reducer = {
-  lens: lensSlice.reducer,
-};
+export * from './selectors';
 
 export const {
-  setState,
+  loadInitial,
   navigateAway,
+  setState,
   setSaveable,
   onActiveDataChange,
   updateState,
@@ -31,41 +27,38 @@ export const {
   updateVisualizationState,
   updateLayer,
   switchVisualization,
-  selectSuggestion,
   rollbackSuggestion,
   submitSuggestion,
   switchDatasource,
   setToggleFullscreen,
-} = lensSlice.actions;
-
-export const getPreloadedState = (initializedState: Partial<LensAppState>) => {
-  const state = {
-    lens: {
-      ...initialState,
-      ...initializedState,
-    },
-  } as DeepPartial<LensState>;
-  return state;
-};
-
-type PreloadedState = ReturnType<typeof getPreloadedState>;
+  initEmpty,
+} = lensActions;
 
 export const makeConfigureStore = (
-  preloadedState: PreloadedState,
-  { data }: { data: DataPublicPluginStart }
+  storeDeps: LensStoreDeps,
+  preloadedState: PreloadedState<LensState>
 ) => {
   const middleware = [
     ...getDefaultMiddleware({
       serializableCheck: false,
     }),
+    initMiddleware(storeDeps),
     optimizingMiddleware(),
-    timeRangeMiddleware(data),
-    externalContextMiddleware(data),
+    timeRangeMiddleware(storeDeps.lensServices.data),
   ];
-  if (process.env.NODE_ENV === 'development') middleware.push(logger);
+  if (process.env.NODE_ENV === 'development') {
+    middleware.push(
+      createLogger({
+        // @ts-ignore
+        predicate: () => window.ELASTIC_LENS_LOGGER,
+      })
+    );
+  }
 
   return configureStore({
-    reducer,
+    reducer: {
+      lens: makeLensReducer(storeDeps),
+    },
     middleware,
     preloadedState,
   });

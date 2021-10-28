@@ -40,7 +40,7 @@ interface SetupOpts {
 const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) => {
   const core = coreMock.createSetup();
   const { status } = core;
-  status.core$ = (new Rx.BehaviorSubject({
+  status.core$ = new Rx.BehaviorSubject({
     elasticsearch: {
       level: elasticsearchStatus,
       summary: '',
@@ -49,7 +49,7 @@ const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) 
       level: savedObjectsStatus,
       summary: '',
     },
-  }) as unknown) as Rx.Observable<CoreStatus>;
+  }) as unknown as Rx.Observable<CoreStatus>;
 
   const { savedObjects } = coreMock.createStart();
   const repository = savedObjects.createInternalRepository() as jest.Mocked<SavedObjectsRepository>;
@@ -73,7 +73,7 @@ const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) 
   });
 
   return {
-    coreStatus: (status as unknown) as { core$: Rx.BehaviorSubject<CoreStatus> },
+    coreStatus: status as unknown as { core$: Rx.BehaviorSubject<CoreStatus> },
     serviceStatus$,
     logger,
     license$,
@@ -127,7 +127,7 @@ test(`does not initialize if savedObjects is unavailable`, async () => {
 
 test(`does not initialize if the license is unavailable`, async () => {
   const license = licensingMock.createLicense({
-    license: ({ type: ' ', status: ' ' } as unknown) as ILicense,
+    license: { type: ' ', status: ' ' } as unknown as ILicense,
   }) as Writable<ILicense>;
   license.isAvailable = false;
 

@@ -21,20 +21,18 @@ import { schema, FormProps } from './schema';
 import { TestProviders } from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
+import { useKibana } from '../../common/lib/kibana';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
+
+const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       notifications: {},
       http: {},
-      triggersActionsUi: {
-        actionTypeRegistry: {
-          get: jest.fn().mockReturnValue({
-            actionTypeTitle: 'test',
-            iconClass: 'logoSecurity',
-          }),
-        },
-      },
+      triggersActionsUi: mockTriggersActionsUiService,
     },
   }),
 }));
@@ -48,6 +46,7 @@ const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const useGetIncidentTypesResponse = {
   isLoading: false,
@@ -86,6 +85,12 @@ describe('Connector', () => {
 
     return <Form form={form}>{children}</Form>;
   };
+
+  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
+
+  beforeAll(() => {
+    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
+  });
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -163,9 +168,11 @@ describe('Connector', () => {
     });
 
     act(() => {
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ value: '19', label: 'Denial of Service' }]);
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ value: '19', label: 'Denial of Service' }]);
     });
 
     act(() => {

@@ -6,13 +6,11 @@
  */
 
 /* eslint-disable max-classes-per-file */
+import type { ElasticsearchErrorDetails } from 'src/core/server';
+
 import { isESClientError } from './utils';
 
-export {
-  defaultIngestErrorHandler,
-  ingestErrorToResponseOptions,
-  isLegacyESClientError,
-} from './handlers';
+export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
 
 export { isESClientError } from './utils';
 
@@ -42,6 +40,8 @@ export class PackageCacheError extends IngestManagerError {}
 export class PackageOperationNotSupportedError extends IngestManagerError {}
 export class ConcurrentInstallOperationError extends IngestManagerError {}
 export class AgentReassignmentError extends IngestManagerError {}
+export class PackagePolicyIneligibleForUpgradeError extends IngestManagerError {}
+export class PackagePolicyValidationError extends IngestManagerError {}
 export class HostedAgentPolicyRestrictionRelatedError extends IngestManagerError {
   constructor(message = 'Cannot perform that action') {
     super(
@@ -67,8 +67,8 @@ export class ArtifactsElasticsearchError extends IngestManagerError {
   constructor(public readonly meta: Error) {
     super(
       `${
-        isESClientError(meta) && meta.meta.body?.error?.reason
-          ? meta.meta.body?.error?.reason
+        isESClientError(meta) && (meta.meta.body as ElasticsearchErrorDetails)?.error?.reason
+          ? (meta.meta.body as ElasticsearchErrorDetails)?.error?.reason
           : `Elasticsearch error while working with artifacts: ${meta.message}`
       }`
     );

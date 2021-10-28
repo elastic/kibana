@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RuleDataClient } from '../../../../../../rule_registry/server';
+import { Logger } from 'src/core/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -19,12 +19,14 @@ import { getIdError, transform } from './utils';
 import { buildSiemResponse } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
-import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetRuleActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
 export const readRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: RuleDataClient | null
+  logger: Logger,
+  isRuleRegistryEnabled: boolean
 ) => {
   router.get(
     {
@@ -47,40 +49,47 @@ export const readRulesRoute = (
 
       const { id, rule_id: ruleId } = request.query;
 
-      const alertsClient = context.alerting?.getAlertsClient();
-      const savedObjectsClient = context.core.savedObjects.client;
+      const rulesClient = context.alerting?.getRulesClient();
 
       try {
-        if (!alertsClient) {
+        if (!rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        const savedObjectsClient = context.core.savedObjects.client;
         const rule = await readRules({
-          alertsClient,
           id,
+          isRuleRegistryEnabled,
+          rulesClient,
           ruleId,
         });
         if (rule != null) {
-          const ruleActions = await getRuleActionsSavedObject({
+          const legacyRuleActions = await legacyGetRuleActionsSavedObject({
             savedObjectsClient,
             ruleAlertId: rule.id,
+            logger,
           });
           const ruleStatuses = await ruleStatusClient.find({
-            perPage: 1,
-            sortField: 'statusDate',
-            sortOrder: 'desc',
-            search: rule.id,
-            searchFields: ['alertId'],
+            logsCount: 1,
+            ruleId: rule.id,
+            spaceId: context.securitySolution.getSpaceId(),
           });
-          const [currentStatus] = ruleStatuses.saved_objects;
+          const [currentStatus] = ruleStatuses;
           if (currentStatus != null && rule.executionStatus.status === 'error') {
             currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
-            currentStatus.attributes.lastFailureAt = rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.statusDate = rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.status = 'failed';
+            currentStatus.attributes.lastFailureAt =
+              rule.executionStatus.lastExecutionDate.toISOString();
+            currentStatus.attributes.statusDate =
+              rule.executionStatus.lastExecutionDate.toISOString();
+            currentStatus.attributes.status = RuleExecutionStatus.failed;
           }
-          const transformed = transform(rule, ruleActions, currentStatus);
+          const transformed = transform(
+            rule,
+            currentStatus,
+            isRuleRegistryEnabled,
+            legacyRuleActions
+          );
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {

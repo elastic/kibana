@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  getTimeRangeComparison,
-  TimeRangeComparisonType,
-} from './get_time_range_comparison';
+import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
+import { getTimeRangeComparison } from './get_time_range_comparison';
 
 describe('getTimeRangeComparison', () => {
   describe('return empty object', () => {
@@ -16,7 +14,7 @@ describe('getTimeRangeComparison', () => {
       const result = getTimeRangeComparison({
         start: undefined,
         end,
-        comparisonType: TimeRangeComparisonType.DayBefore,
+        comparisonType: TimeRangeComparisonEnum.DayBefore,
         comparisonEnabled: false,
       });
       expect(result).toEqual({});
@@ -26,7 +24,7 @@ describe('getTimeRangeComparison', () => {
       const result = getTimeRangeComparison({
         start: undefined,
         end,
-        comparisonType: TimeRangeComparisonType.DayBefore,
+        comparisonType: TimeRangeComparisonEnum.DayBefore,
         comparisonEnabled: true,
       });
       expect(result).toEqual({});
@@ -37,7 +35,7 @@ describe('getTimeRangeComparison', () => {
       const result = getTimeRangeComparison({
         start,
         end: undefined,
-        comparisonType: TimeRangeComparisonType.DayBefore,
+        comparisonType: TimeRangeComparisonEnum.DayBefore,
         comparisonEnabled: true,
       });
       expect(result).toEqual({});
@@ -50,13 +48,14 @@ describe('getTimeRangeComparison', () => {
         const start = '2021-01-28T14:45:00.000Z';
         const end = '2021-01-28T15:00:00.000Z';
         const result = getTimeRangeComparison({
-          comparisonType: TimeRangeComparisonType.DayBefore,
+          comparisonType: TimeRangeComparisonEnum.DayBefore,
           comparisonEnabled: true,
           start,
           end,
         });
         expect(result.comparisonStart).toEqual('2021-01-27T14:45:00.000Z');
         expect(result.comparisonEnd).toEqual('2021-01-27T15:00:00.000Z');
+        expect(result.offset).toEqual('1d');
       });
     });
     describe('when a week before is selected', () => {
@@ -64,13 +63,14 @@ describe('getTimeRangeComparison', () => {
         const start = '2021-01-28T14:45:00.000Z';
         const end = '2021-01-28T15:00:00.000Z';
         const result = getTimeRangeComparison({
-          comparisonType: TimeRangeComparisonType.WeekBefore,
+          comparisonType: TimeRangeComparisonEnum.WeekBefore,
           comparisonEnabled: true,
           start,
           end,
         });
         expect(result.comparisonStart).toEqual('2021-01-21T14:45:00.000Z');
         expect(result.comparisonEnd).toEqual('2021-01-21T15:00:00.000Z');
+        expect(result.offset).toEqual('1w');
       });
     });
     describe('when previous period is selected', () => {
@@ -80,12 +80,13 @@ describe('getTimeRangeComparison', () => {
         const result = getTimeRangeComparison({
           start,
           end,
-          comparisonType: TimeRangeComparisonType.PeriodBefore,
+          comparisonType: TimeRangeComparisonEnum.PeriodBefore,
           comparisonEnabled: true,
         });
         expect(result).toEqual({
           comparisonStart: '2021-02-09T14:24:02.174Z',
           comparisonEnd: '2021-02-09T14:40:01.087Z',
+          offset: '958913ms',
         });
       });
     });
@@ -97,13 +98,14 @@ describe('getTimeRangeComparison', () => {
         const start = '2021-01-26T15:00:00.000Z';
         const end = '2021-01-28T15:00:00.000Z';
         const result = getTimeRangeComparison({
-          comparisonType: TimeRangeComparisonType.WeekBefore,
+          comparisonType: TimeRangeComparisonEnum.WeekBefore,
           comparisonEnabled: true,
           start,
           end,
         });
         expect(result.comparisonStart).toEqual('2021-01-19T15:00:00.000Z');
         expect(result.comparisonEnd).toEqual('2021-01-21T15:00:00.000Z');
+        expect(result.offset).toEqual('1w');
       });
     });
   });
@@ -113,26 +115,28 @@ describe('getTimeRangeComparison', () => {
       const start = '2021-01-10T15:00:00.000Z';
       const end = '2021-01-18T15:00:00.000Z';
       const result = getTimeRangeComparison({
-        comparisonType: TimeRangeComparisonType.PeriodBefore,
+        comparisonType: TimeRangeComparisonEnum.PeriodBefore,
         comparisonEnabled: true,
         start,
         end,
       });
       expect(result.comparisonStart).toEqual('2021-01-02T15:00:00.000Z');
       expect(result.comparisonEnd).toEqual('2021-01-10T15:00:00.000Z');
+      expect(result.offset).toEqual('691200000ms');
     });
 
     it('uses the date difference to calculate the time range - 30 days', () => {
       const start = '2021-01-01T15:00:00.000Z';
       const end = '2021-01-31T15:00:00.000Z';
       const result = getTimeRangeComparison({
-        comparisonType: TimeRangeComparisonType.PeriodBefore,
+        comparisonType: TimeRangeComparisonEnum.PeriodBefore,
         comparisonEnabled: true,
         start,
         end,
       });
       expect(result.comparisonStart).toEqual('2020-12-02T15:00:00.000Z');
       expect(result.comparisonEnd).toEqual('2021-01-01T15:00:00.000Z');
+      expect(result.offset).toEqual('2592000000ms');
     });
   });
 });

@@ -8,7 +8,7 @@
 import { fromExpression, getType } from '@kbn/interpreter/common';
 import { pluck } from 'rxjs/operators';
 import { ExpressionValue, ExpressionAstExpression } from 'src/plugins/expressions/public';
-import { pluginServices, expressionsService } from '../services';
+import { pluginServices } from '../services';
 
 interface Options {
   castToRender?: boolean;
@@ -22,12 +22,8 @@ export async function interpretAst(
   variables: Record<string, any>
 ): Promise<ExpressionValue> {
   const context = { variables };
-  return await expressionsService
-    .getService()
-    .execute(ast, null, context)
-    .getData()
-    .pipe(pluck('result'))
-    .toPromise();
+  const { execute } = pluginServices.getServices().expressions;
+  return await execute(ast, null, context).getData().pipe(pluck('result')).toPromise();
 }
 
 /**
@@ -49,9 +45,8 @@ export async function runInterpreter(
   const context = { variables };
 
   try {
-    const renderable = await expressionsService
-      .getService()
-      .execute(ast, input, context)
+    const { execute } = pluginServices.getServices().expressions;
+    const renderable = await execute(ast, input, context)
       .getData()
       .pipe(pluck('result'))
       .toPromise();

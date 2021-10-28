@@ -5,14 +5,23 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import Url from 'url';
 import cypress from 'cypress';
-import childProcess from 'child_process';
 import { FtrProviderContext } from './ftr_provider_context';
 import archives_metadata from './cypress/fixtures/es_archiver/archives_metadata';
+import { createApmUsersAndRoles } from '../scripts/create-apm-users-and-roles/create_apm_users_and_roles';
+import { esArchiverLoad, esArchiverUnload } from './cypress/tasks/es_archiver';
 
-export async function cypressRunTests({ getService }: FtrProviderContext) {
-  await cypressStart(getService, cypress.run);
+export function cypressRunTests(spec?: string) {
+  return async ({ getService }: FtrProviderContext) => {
+    const result = await cypressStart(getService, cypress.run, spec);
+
+    if (result && (result.status === 'failed' || result.totalFailed > 0)) {
+      throw new Error(`APM Cypress tests failed`);
+    }
+  };
 }
 
 export async function cypressOpenTests({ getService }: FtrProviderContext) {
@@ -21,7 +30,8 @@ export async function cypressOpenTests({ getService }: FtrProviderContext) {
 
 async function cypressStart(
   getService: FtrProviderContext['getService'],
-  cypressExecution: typeof cypress.run | typeof cypress.open
+  cypressExecution: typeof cypress.run | typeof cypress.open,
+  spec?: string
 ) {
   const config = getService('config');
 
@@ -35,21 +45,32 @@ async function cypressStart(
   });
 
   // Creates APM users
-  childProcess.execSync(
-    `node ../scripts/setup-kibana-security.js --role-suffix e2e_tests --username ${config.get(
-      'servers.elasticsearch.username'
-    )} --password ${config.get(
-      'servers.elasticsearch.password'
-    )} --kibana-url ${kibanaUrl}`
-  );
+  await createApmUsersAndRoles({
+    elasticsearch: {
+      username: config.get('servers.elasticsearch.username'),
+      password: config.get('servers.elasticsearch.password'),
+    },
+    kibana: {
+      hostname: kibanaUrl,
+      roleSuffix: 'e2e_tests',
+    },
+  });
 
-  await cypressExecution({
+  console.log('Loading esArchiver...');
+  await esArchiverLoad('apm_8.0.0');
+
+  const res = await cypressExecution({
+    ...(spec !== undefined ? { spec } : {}),
     config: { baseUrl: kibanaUrl },
     env: {
       START_DATE: start,
       END_DATE: end,
-      ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
       KIBANA_URL: kibanaUrl,
     },
   });
+
+  console.log('Removing esArchiver...');
+  await esArchiverUnload('apm_8.0.0');
+
+  return res;
 }

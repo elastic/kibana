@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
+import useDebounce from 'react-use/lib/useDebounce';
 import 'brace/theme/tomorrow';
 
 import './osquery_mode.ts';
@@ -22,27 +23,31 @@ const EDITOR_PROPS = {
 
 interface OsqueryEditorProps {
   defaultValue: string;
-  disabled?: boolean;
   onChange: (newValue: string) => void;
 }
 
-const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
-  defaultValue,
-  // disabled,
-  onChange,
-}) => (
-  <EuiCodeEditor
-    value={defaultValue}
-    mode="osquery"
-    // isReadOnly={disabled}
-    theme="tomorrow"
-    onChange={onChange}
-    name="osquery_editor"
-    setOptions={EDITOR_SET_OPTIONS}
-    editorProps={EDITOR_PROPS}
-    height="150px"
-    width="100%"
-  />
-);
+const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, onChange }) => {
+  const [editorValue, setEditorValue] = useState(defaultValue ?? '');
+
+  useDebounce(() => onChange(editorValue.replaceAll('\n', ' ').replaceAll('  ', ' ')), 500, [
+    editorValue,
+  ]);
+
+  useEffect(() => setEditorValue(defaultValue), [defaultValue]);
+
+  return (
+    <EuiCodeEditor
+      value={editorValue}
+      mode="osquery"
+      onChange={setEditorValue}
+      theme="tomorrow"
+      name="osquery_editor"
+      setOptions={EDITOR_SET_OPTIONS}
+      editorProps={EDITOR_PROPS}
+      height="100px"
+      width="100%"
+    />
+  );
+};
 
 export const OsqueryEditor = React.memo(OsqueryEditorComponent);

@@ -8,7 +8,7 @@
 import { each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -368,7 +368,7 @@ export function mlFunctionToESAggregation(
   }
 
   if (functionName === ML_JOB_AGGREGATION.MIN || functionName === ML_JOB_AGGREGATION.MAX) {
-    return (functionName as unknown) as ES_AGGREGATION;
+    return functionName as unknown as ES_AGGREGATION;
   }
 
   if (functionName === ML_JOB_AGGREGATION.RARE) {

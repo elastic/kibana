@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
+import { SecurityHasPrivilegesIndexPrivilegesCheck } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { RequestHandler } from 'src/core/server';
 import {
   API_MIGRATE_ILM_POLICY_URL,
   API_GET_ILM_POLICY_STATUS,
@@ -18,42 +20,84 @@ import { IlmPolicyManager, LevelLogger as Logger } from '../lib';
 export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
 
+  const authzWrapper = <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> => {
+    return async (ctx, req, res) => {
+      const { security } = reporting.getPluginSetupDeps();
+      if (!security?.license.isEnabled()) {
+        return handler(ctx, req, res);
+      }
+
+      const {
+        core: { elasticsearch },
+      } = ctx;
+
+      const store = await reporting.getStore();
+
+      try {
+        const { body } = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
+          body: {
+            index: [
+              {
+                privileges: ['manage'], // required to do anything with the reporting indices
+                names: [store.getReportingIndexPattern()],
+                allow_restricted_indices: true,
+              } as unknown as SecurityHasPrivilegesIndexPrivilegesCheck, // TODO: Needed until `allow_restricted_indices` is added to the types.
+            ],
+          },
+        });
+
+        if (!body.has_all_requested) {
+          return res.notFound();
+        }
+      } catch (e) {
+        return res.customError({ statusCode: e.statusCode, body: e.message });
+      }
+
+      return handler(ctx, req, res);
+    };
+  };
+
   router.get(
     {
       path: API_GET_ILM_POLICY_STATUS,
       validate: false,
     },
-    async (
-      {
-        core: {
-          elasticsearch: { client: scopedClient },
+    authzWrapper(
+      async (
+        {
+          core: {
+            elasticsearch: { client: scopedClient },
+          },
         },
-      },
-      req,
-      res
-    ) => {
-      const checkIlmMigrationStatus = () => {
-        return deprecations.checkIlmMigrationStatus({
-          reportingCore: reporting,
-          // We want to make the current status visible to all reporting users
-          elasticsearchClient: scopedClient.asInternalUser,
-        });
-      };
-
-      try {
-        const response: IlmPolicyStatusResponse = {
-          status: await checkIlmMigrationStatus(),
+        req,
+        res
+      ) => {
+        const checkIlmMigrationStatus = () => {
+          return deprecations.checkIlmMigrationStatus({
+            reportingCore: reporting,
+            // We want to make the current status visible to all reporting users
+            elasticsearchClient: scopedClient.asInternalUser,
+          });
         };
-        return res.ok({ body: response });
-      } catch (e) {
-        return res.customError({ statusCode: e?.statusCode ?? 500, body: { message: e.message } });
+
+        try {
+          const response: IlmPolicyStatusResponse = {
+            status: await checkIlmMigrationStatus(),
+          };
+          return res.ok({ body: response });
+        } catch (e) {
+          return res.customError({
+            statusCode: e?.statusCode ?? 500,
+            body: { message: e.message },
+          });
+        }
       }
-    }
+    )
   );
 
   router.put(
     { path: API_MIGRATE_ILM_POLICY_URL, validate: false },
-    async ({ core: { elasticsearch } }, req, res) => {
+    authzWrapper(async ({ core: { elasticsearch } }, req, res) => {
       const store = await reporting.getStore();
       const {
         client: { asCurrentUser: client },
@@ -105,6 +149,6 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
 
         throw err;
       }
-    }
+    })
   );
 };

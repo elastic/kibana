@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { NumberFormatEditor } from '../number';
+import { NumberFormatEditor } from '../number/number';
 import { defaultState } from '../default';
+import { formatId } from './constants';
 
 export class BytesFormatEditor extends NumberFormatEditor {
-  static formatId = 'bytes';
+  static formatId = formatId;
   state = {
     ...defaultState,
     sampleInputs: [256, 1024, 5150000, 1990000000],

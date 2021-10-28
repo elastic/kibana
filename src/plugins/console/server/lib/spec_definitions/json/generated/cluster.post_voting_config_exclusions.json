@@ -1,0 +1,16 @@
+{
+  "cluster.post_voting_config_exclusions": {
+    "url_params": {
+      "node_ids": "",
+      "node_names": "",
+      "timeout": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_cluster/voting_config_exclusions"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/voting-config-exclusions.html"
+  }
+}

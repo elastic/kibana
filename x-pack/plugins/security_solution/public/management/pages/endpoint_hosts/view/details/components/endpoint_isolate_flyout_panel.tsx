@@ -9,8 +9,8 @@ import React, { memo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { i18n } from '@kbn/i18n';
 import { EuiForm } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { HostMetadata } from '../../../../../../../common/endpoint/types';
 import { BackToEndpointDetailsFlyoutSubHeader } from './back_to_endpoint_details_flyout_subheader';
 import {
@@ -18,6 +18,7 @@ import {
   EndpointIsolateForm,
   EndpointIsolateSuccess,
   EndpointUnisolateForm,
+  ActionCompletionReturnButton,
 } from '../../../../../../common/components/endpoint/host_isolation';
 import { FlyoutBodyNoTopPadding } from './flyout_body_no_top_padding';
 import { getEndpointDetailsPath } from '../../../../../common/routing';
@@ -88,16 +89,20 @@ export const EndpointIsolationFlyoutPanel = memo<{
     <>
       <BackToEndpointDetailsFlyoutSubHeader endpointId={hostMeta.agent.id} />
 
+      {wasSuccessful && (
+        <EndpointIsolateSuccess
+          hostName={hostMeta.host.name}
+          isolateAction={isCurrentlyIsolated ? 'unisolateHost' : 'isolateHost'}
+        />
+      )}
       <FlyoutBodyNoTopPadding>
         {wasSuccessful ? (
-          <EndpointIsolateSuccess
-            hostName={hostMeta.host.name}
-            isolateAction={isCurrentlyIsolated ? 'unisolateHost' : 'isolateHost'}
-            completeButtonLabel={i18n.translate(
+          <ActionCompletionReturnButton
+            onClick={handleCancel}
+            buttonText={i18n.translate(
               'xpack.securitySolution.endpoint.hostIsolation.successProceedButton',
               { defaultMessage: 'Return to endpoint details' }
             )}
-            onComplete={handleCancel}
           />
         ) : (
           <EuiForm

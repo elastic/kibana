@@ -8,13 +8,13 @@
 import { AlertingAuthorizationAuditLogger } from './audit_logger';
 
 const createAlertingAuthorizationAuditLoggerMock = () => {
-  const mocked = ({
+  const mocked = {
     getAuthorizationMessage: jest.fn(),
     logAuthorizationFailure: jest.fn(),
     logUnscopedAuthorizationFailure: jest.fn(),
     logAuthorizationSuccess: jest.fn(),
     logBulkAuthorizationSuccess: jest.fn(),
-  } as unknown) as jest.Mocked<AlertingAuthorizationAuditLogger>;
+  } as unknown as jest.Mocked<AlertingAuthorizationAuditLogger>;
   return mocked;
 };
 

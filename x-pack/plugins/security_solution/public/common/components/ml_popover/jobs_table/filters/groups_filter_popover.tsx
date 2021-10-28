@@ -59,6 +59,7 @@ export const GroupsFilterPopoverComponent = ({
           iconType="arrowDown"
           onClick={() => setIsGroupPopoverOpen(!isGroupPopoverOpen)}
           isSelected={isGroupPopoverOpen}
+          numFilters={uniqueGroups.length}
           hasActiveFilters={selectedGroups.length > 0}
           numActiveFilters={selectedGroups.length}
         >

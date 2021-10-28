@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import { RULES_MONIROTING_TABLE, RULE_NAME } from '../../screens/alerts_detection_rules';
 import { goToManageAlertsDetectionRules, waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
@@ -19,7 +19,7 @@ describe('Rules talbes links', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     goToManageAlertsDetectionRules();
     waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(newRule, 'rule1');
+    createCustomRuleActivated(getNewRule(), 'rule1');
 
     reload();
   });

@@ -6,81 +6,87 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { FilterExpanded } from './filter_expanded';
-import { mockAppIndexPattern, mockUseValuesList, render } from '../../rtl_helpers';
+import { mockUxSeries, mockAppIndexPattern, mockUseValuesList, render } from '../../rtl_helpers';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('FilterExpanded', function () {
-  it('should render properly', async function () {
-    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
+  const filters = [{ field: USER_AGENT_NAME, values: ['Chrome'] }];
+
+  const mockSeries = { ...mockUxSeries, filters };
+
+  it('render', async () => {
+    const initSeries = { filters };
     mockAppIndexPattern();
 
     render(
       <FilterExpanded
-        seriesId={'series-id'}
+        seriesId={0}
+        series={mockSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
-        goBack={jest.fn()}
-        filters={[]}
+        baseFilters={[]}
       />,
       { initSeries }
     );
 
-    screen.getByText('Browser Family');
+    await waitFor(() => {
+      screen.getByText('Browser Family');
+    });
   });
+
   it('should call go back on click', async function () {
-    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
-    const goBack = jest.fn();
+    const initSeries = { filters };
 
     render(
       <FilterExpanded
-        seriesId={'series-id'}
+        seriesId={0}
+        series={mockSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
-        goBack={goBack}
-        filters={[]}
+        baseFilters={[]}
       />,
       { initSeries }
     );
 
-    fireEvent.click(screen.getByText('Browser Family'));
-
-    expect(goBack).toHaveBeenCalledTimes(1);
-    expect(goBack).toHaveBeenCalledWith();
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Browser Family'));
+    });
   });
 
-  it('should call useValuesList on load', async function () {
-    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
+  it('calls useValuesList on load', async () => {
+    const initSeries = { filters };
 
     const { spy } = mockUseValuesList([
       { label: 'Chrome', count: 10 },
       { label: 'Firefox', count: 5 },
     ]);
 
-    const goBack = jest.fn();
-
     render(
       <FilterExpanded
-        seriesId={'series-id'}
+        seriesId={0}
+        series={mockSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
-        goBack={goBack}
-        filters={[]}
+        baseFilters={[]}
       />,
       { initSeries }
     );
 
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toBeCalledWith(
-      expect.objectContaining({
-        time: { from: 'now-15m', to: 'now' },
-        sourceField: USER_AGENT_NAME,
-      })
-    );
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toBeCalledWith(
+        expect.objectContaining({
+          time: { from: 'now-15m', to: 'now' },
+          sourceField: USER_AGENT_NAME,
+        })
+      );
+    });
   });
-  it('should filter display values', async function () {
-    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
+
+  it('filters display values', async () => {
+    const initSeries = { filters };
 
     mockUseValuesList([
       { label: 'Chrome', count: 10 },
@@ -89,20 +95,24 @@ describe('FilterExpanded', function () {
 
     render(
       <FilterExpanded
-        seriesId={'series-id'}
+        seriesId={0}
+        series={mockUxSeries}
         label={'Browser Family'}
         field={USER_AGENT_NAME}
-        goBack={jest.fn()}
-        filters={[]}
+        baseFilters={[]}
       />,
       { initSeries }
     );
 
-    expect(screen.queryByText('Firefox')).toBeTruthy();
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Browser Family'));
 
-    fireEvent.input(screen.getByRole('searchbox'), { target: { value: 'ch' } });
+      expect(screen.queryByText('Firefox')).toBeTruthy();
 
-    expect(screen.queryByText('Firefox')).toBeFalsy();
-    expect(screen.getByText('Chrome')).toBeTruthy();
+      fireEvent.input(screen.getByRole('searchbox'), { target: { value: 'ch' } });
+
+      expect(screen.queryByText('Firefox')).toBeFalsy();
+      expect(screen.getByText('Chrome')).toBeTruthy();
+    });
   });
 });

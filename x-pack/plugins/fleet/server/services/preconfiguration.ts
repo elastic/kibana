@@ -8,40 +8,137 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
+import { safeDump } from 'js-yaml';
 
 import type {
   NewPackagePolicy,
   AgentPolicy,
   Installation,
   Output,
-  NewPackagePolicyInput,
-  NewPackagePolicyInputStream,
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
   PreconfigurationError,
+  PreconfiguredOutput,
 } from '../../common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, normalizeHostsForAgents } from '../../common';
 import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_LATEST_KEYWORD,
 } from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
-
 import { pkgToPkgKey } from './epm/registry';
-import { getInstallation } from './epm/packages';
+import { getInstallation, getPackageInfo } from './epm/packages';
 import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
+import type { InputsOverride } from './package_policy';
+import { overridePackageInputs } from './package_policy';
+import { appContextService } from './app_context';
+import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
+import { upgradeManagedPackagePolicies } from './managed_package_policies';
+import { outputService } from './output';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
   packages: string[];
-  nonFatalErrors?: PreconfigurationError[];
+  nonFatalErrors: Array<PreconfigurationError | UpgradeManagedPackagePoliciesResult>;
 }
 
-export type InputsOverride = Partial<NewPackagePolicyInput> & {
-  vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
-};
+function isPreconfiguredOutputDifferentFromCurrent(
+  existingOutput: Output,
+  preconfiguredOutput: Partial<Output>
+): boolean {
+  return (
+    existingOutput.is_default !== preconfiguredOutput.is_default ||
+    existingOutput.name !== preconfiguredOutput.name ||
+    existingOutput.type !== preconfiguredOutput.type ||
+    (preconfiguredOutput.hosts &&
+      !isEqual(
+        existingOutput.hosts?.map(normalizeHostsForAgents),
+        preconfiguredOutput.hosts.map(normalizeHostsForAgents)
+      )) ||
+    existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
+    existingOutput.config_yaml !== preconfiguredOutput.config_yaml
+  );
+}
+
+export async function ensurePreconfiguredOutputs(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  outputs: PreconfiguredOutput[]
+) {
+  if (outputs.length === 0) {
+    return;
+  }
+
+  const existingOutputs = await outputService.bulkGet(
+    soClient,
+    outputs.map(({ id }) => id),
+    { ignoreNotFound: true }
+  );
+
+  await Promise.all(
+    outputs.map(async (output) => {
+      const existingOutput = existingOutputs.find((o) => o.id === output.id);
+
+      const { id, config, ...outputData } = output;
+
+      const configYaml = config ? safeDump(config) : undefined;
+
+      const data = {
+        ...outputData,
+        config_yaml: configYaml,
+        is_preconfigured: true,
+      };
+
+      if (!data.hosts || data.hosts.length === 0) {
+        data.hosts = outputService.getDefaultESHosts();
+      }
+
+      const isCreate = !existingOutput;
+      const isUpdateWithNewData =
+        existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
+      // If a default output already exists, delete it in favor of the preconfigured one
+      if (isCreate || isUpdateWithNewData) {
+        const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+
+        if (defaultOutputId && defaultOutputId !== output.id) {
+          await outputService.delete(soClient, defaultOutputId);
+        }
+      }
+
+      if (isCreate) {
+        await outputService.create(soClient, data, { id, overwrite: true });
+      } else if (isUpdateWithNewData) {
+        await outputService.update(soClient, id, data);
+        // Bump revision of all policies using that output
+        if (outputData.is_default) {
+          await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+        } else {
+          await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
+        }
+      }
+    })
+  );
+}
+
+export async function cleanPreconfiguredOutputs(
+  soClient: SavedObjectsClientContract,
+  outputs: PreconfiguredOutput[]
+) {
+  const existingPreconfiguredOutput = (await outputService.list(soClient)).items.filter(
+    (o) => o.is_preconfigured === true
+  );
+  const logger = appContextService.getLogger();
+
+  for (const output of existingPreconfiguredOutput) {
+    if (!outputs.find(({ id }) => output.id === id)) {
+      logger.info(`Deleting preconfigured output ${output.id}`);
+      await outputService.delete(soClient, output.id);
+    }
+  }
+}
 
 export async function ensurePreconfiguredPackagesAndPolicies(
   soClient: SavedObjectsClientContract,
@@ -50,6 +147,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   packages: PreconfiguredPackage[] = [],
   defaultOutput: Output
 ): Promise<PreconfigurationResult> {
+  const logger = appContextService.getLogger();
+
   // Validate configured packages to ensure there are no version conflicts
   const packageNames = groupBy(packages, (pkg) => pkg.name);
   const duplicatePackages = Object.entries(packageNames).filter(
@@ -84,15 +183,20 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   });
 
   const fulfilledPackages = [];
-  const rejectedPackages = [];
+  const rejectedPackages: PreconfigurationError[] = [];
   for (let i = 0; i < preconfiguredPackages.length; i++) {
     const packageResult = preconfiguredPackages[i];
-    if ('error' in packageResult)
+    if ('error' in packageResult) {
+      logger.warn(
+        `Failed installing package [${packages[i].name}] due to error: [${packageResult.error}]`
+      );
       rejectedPackages.push({
         package: { name: packages[i].name, version: packages[i].version },
         error: packageResult.error,
-      } as PreconfigurationError);
-    else fulfilledPackages.push(packageResult);
+      });
+    } else {
+      fulfilledPackages.push(packageResult);
+    }
   }
 
   // Keeping this outside of the Promise.all because it introduces a race condition.
@@ -157,73 +261,103 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         }
         return { created, policy };
       }
-      const { package_policies: packagePolicies } = preconfiguredAgentPolicy;
-
-      const installedPackagePolicies = await Promise.all(
-        packagePolicies.map(async ({ package: pkg, name, ...newPackagePolicy }) => {
-          const installedPackage = await getInstallation({
-            savedObjectsClient: soClient,
-            pkgName: pkg.name,
-          });
-          if (!installedPackage) {
-            throw new Error(
-              i18n.translate('xpack.fleet.preconfiguration.packageMissingError', {
-                defaultMessage:
-                  '{agentPolicyName} could not be added. {pkgName} is not installed, add {pkgName} to `{packagesConfigValue}` or remove it from {packagePolicyName}.',
-                values: {
-                  agentPolicyName: preconfiguredAgentPolicy.name,
-                  packagePolicyName: name,
-                  pkgName: pkg.name,
-                  packagesConfigValue: 'xpack.fleet.packages',
-                },
-              })
-            );
-          }
-          return { name, installedPackage, ...newPackagePolicy };
-        })
-      );
 
       return {
         created,
         policy,
-        installedPackagePolicies,
         shouldAddIsManagedFlag: preconfiguredAgentPolicy.is_managed,
       };
     })
   );
 
   const fulfilledPolicies = [];
-  const rejectedPolicies = [];
+  const rejectedPolicies: PreconfigurationError[] = [];
   for (let i = 0; i < preconfiguredPolicies.length; i++) {
     const policyResult = preconfiguredPolicies[i];
     if (policyResult.status === 'rejected') {
       rejectedPolicies.push({
         error: policyResult.reason as Error,
         agentPolicy: { name: policies[i].name },
-      } as PreconfigurationError);
+      });
       continue;
     }
     fulfilledPolicies.push(policyResult.value);
-    const {
-      created,
-      policy,
-      installedPackagePolicies,
-      shouldAddIsManagedFlag,
-    } = policyResult.value;
+    const { created, policy, shouldAddIsManagedFlag } = policyResult.value;
     if (created) {
-      await addPreconfiguredPolicyPackages(
-        soClient,
-        esClient,
-        policy!,
-        installedPackagePolicies!,
-        defaultOutput
-      );
+      try {
+        const preconfiguredAgentPolicy = policies[i];
+        const { package_policies: packagePolicies } = preconfiguredAgentPolicy;
+
+        const installedPackagePolicies = await Promise.all(
+          packagePolicies.map(async ({ package: pkg, name, ...newPackagePolicy }) => {
+            const installedPackage = await getInstallation({
+              savedObjectsClient: soClient,
+              pkgName: pkg.name,
+            });
+            if (!installedPackage) {
+              const rejectedPackage = rejectedPackages.find((rp) => rp.package?.name === pkg.name);
+
+              if (rejectedPackage) {
+                throw new Error(
+                  i18n.translate('xpack.fleet.preconfiguration.packageRejectedError', {
+                    defaultMessage: `[{agentPolicyName}] could not be added. [{pkgName}] could not be installed due to error: [{errorMessage}]`,
+                    values: {
+                      agentPolicyName: preconfiguredAgentPolicy.name,
+                      pkgName: pkg.name,
+                      errorMessage: rejectedPackage.error.toString(),
+                    },
+                  })
+                );
+              }
+
+              throw new Error(
+                i18n.translate('xpack.fleet.preconfiguration.packageMissingError', {
+                  defaultMessage:
+                    '[{agentPolicyName}] could not be added. [{pkgName}] is not installed, add [{pkgName}] to [{packagesConfigValue}] or remove it from [{packagePolicyName}].',
+                  values: {
+                    agentPolicyName: preconfiguredAgentPolicy.name,
+                    packagePolicyName: name,
+                    pkgName: pkg.name,
+                    packagesConfigValue: 'xpack.fleet.packages',
+                  },
+                })
+              );
+            }
+            return { name, installedPackage, ...newPackagePolicy };
+          })
+        );
+        await addPreconfiguredPolicyPackages(
+          soClient,
+          esClient,
+          policy!,
+          installedPackagePolicies!,
+          defaultOutput
+        );
+        // If ann error happens while adding a package to the policy we will delete the policy so the setup can be retried later
+      } catch (err) {
+        await soClient
+          .delete(AGENT_POLICY_SAVED_OBJECT_TYPE, policy!.id)
+          // swallow error
+          .catch((deleteErr) => appContextService.getLogger().error(deleteErr));
+
+        throw err;
+      }
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {
-        agentPolicyService.update(soClient, esClient, policy!.id, { is_managed: true });
+        await agentPolicyService.update(soClient, esClient, policy!.id, { is_managed: true });
       }
     }
   }
+
+  const fulfilledPolicyPackagePolicyIds = fulfilledPolicies
+    .filter(({ policy }) => policy?.package_policies)
+    .flatMap<string>(({ policy }) => policy?.package_policies as string[]);
+
+  const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
+    soClient,
+    esClient,
+    fulfilledPolicyPackagePolicyIds
+  );
 
   return {
     policies: fulfilledPolicies.map((p) =>
@@ -241,7 +375,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           }
     ),
     packages: fulfilledPackages.map((pkg) => pkgToPkgKey(pkg)),
-    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
+    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies, ...packagePolicyUpgradeResults],
   };
 }
 
@@ -273,6 +407,12 @@ async function addPreconfiguredPolicyPackages(
 ) {
   // Add packages synchronously to avoid overwriting
   for (const { installedPackage, name, description, inputs } of installedPackagePolicies) {
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: installedPackage.name,
+      pkgVersion: installedPackage.version,
+    });
+
     await addPackageToAgentPolicy(
       soClient,
       esClient,
@@ -281,132 +421,7 @@ async function addPreconfiguredPolicyPackages(
       defaultOutput,
       name,
       description,
-      (policy) => overridePackageInputs(policy, inputs)
+      (policy) => overridePackageInputs(policy, packageInfo, inputs)
     );
-  }
-}
-
-function overridePackageInputs(
-  basePackagePolicy: NewPackagePolicy,
-  inputsOverride?: InputsOverride[]
-) {
-  if (!inputsOverride) return basePackagePolicy;
-
-  const inputs = [...basePackagePolicy.inputs];
-  const packageName = basePackagePolicy.package!.name;
-
-  for (const override of inputsOverride) {
-    const originalInput = inputs.find((i) => i.type === override.type);
-    if (!originalInput) {
-      const e = {
-        error: new Error(
-          i18n.translate('xpack.fleet.packagePolicyInputOverrideError', {
-            defaultMessage: 'Input type {inputType} does not exist on package {packageName}',
-            values: {
-              inputType: override.type,
-              packageName,
-            },
-          })
-        ),
-        package: { name: packageName, version: basePackagePolicy.package!.version },
-      };
-      throw e;
-    }
-
-    if (typeof override.enabled !== 'undefined') originalInput.enabled = override.enabled;
-    if (typeof override.keep_enabled !== 'undefined')
-      originalInput.keep_enabled = override.keep_enabled;
-
-    if (override.vars) {
-      try {
-        deepMergeVars(override, originalInput);
-      } catch (e) {
-        const err = {
-          error: new Error(
-            i18n.translate('xpack.fleet.packagePolicyVarOverrideError', {
-              defaultMessage:
-                'Var {varName} does not exist on {inputType} of package {packageName}',
-              values: {
-                varName: e.message,
-                inputType: override.type,
-                packageName,
-              },
-            })
-          ),
-          package: { name: packageName, version: basePackagePolicy.package!.version },
-        };
-        throw err;
-      }
-    }
-
-    if (override.streams) {
-      for (const stream of override.streams) {
-        const originalStream = originalInput.streams.find(
-          (s) => s.data_stream.dataset === stream.data_stream.dataset
-        );
-        if (!originalStream) {
-          const e = {
-            error: new Error(
-              i18n.translate('xpack.fleet.packagePolicyStreamOverrideError', {
-                defaultMessage:
-                  'Data stream {streamSet} does not exist on {inputType} of package {packageName}',
-                values: {
-                  streamSet: stream.data_stream.dataset,
-                  inputType: override.type,
-                  packageName,
-                },
-              })
-            ),
-            package: { name: packageName, version: basePackagePolicy.package!.version },
-          };
-          throw e;
-        }
-
-        if (typeof stream.enabled !== 'undefined') originalStream.enabled = stream.enabled;
-
-        if (stream.vars) {
-          try {
-            deepMergeVars(stream as InputsOverride, originalStream);
-          } catch (e) {
-            const err = {
-              error: new Error(
-                i18n.translate('xpack.fleet.packagePolicyStreamVarOverrideError', {
-                  defaultMessage:
-                    'Var {varName} does not exist on {streamSet} for {inputType} of package {packageName}',
-                  values: {
-                    varName: e.message,
-                    streamSet: stream.data_stream.dataset,
-                    inputType: override.type,
-                    packageName,
-                  },
-                })
-              ),
-              package: { name: packageName, version: basePackagePolicy.package!.version },
-            };
-            throw err;
-          }
-        }
-      }
-    }
-  }
-
-  return { ...basePackagePolicy, inputs };
-}
-
-function deepMergeVars(
-  override: InputsOverride,
-  original: NewPackagePolicyInput | NewPackagePolicyInputStream
-) {
-  for (const { name, ...val } of override.vars!) {
-    if (!original.vars || !Reflect.has(original.vars, name)) {
-      throw new Error(name);
-    }
-    const originalVar = original.vars[name];
-    const newVar =
-      // If a single value was passed in to a multi field, ensure it gets converted to a multi
-      Array.isArray(originalVar.value) && !Array.isArray(val.value)
-        ? { ...val, value: [val.value] }
-        : val;
-    Reflect.set(original.vars, name, { ...originalVar, ...newVar });
   }
 }

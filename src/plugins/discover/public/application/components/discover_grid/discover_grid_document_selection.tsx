@@ -31,9 +31,8 @@ export const getDocId = (doc: ElasticSearchHit & { _routing?: string }) => {
   return [doc._index, doc._id, routing].join('::');
 };
 export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
-  const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } = useContext(
-    DiscoverGridContext
-  );
+  const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } =
+    useContext(DiscoverGridContext);
   const doc = useMemo(() => rows[rowIndex], [rows, rowIndex]);
   const id = useMemo(() => getDocId(doc), [doc]);
   const checked = useMemo(() => selectedDocs.includes(id), [selectedDocs, id]);

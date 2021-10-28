@@ -10,7 +10,7 @@ export interface SearchBarFilter {
   value: string;
 }
 
-export const hostIpFilter: SearchBarFilter = {
+export const getHostIpFilter = (): SearchBarFilter => ({
   key: 'host.ip',
   value: '1.1.1.1',
-};
+});

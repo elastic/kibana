@@ -1,1 +1,0 @@
-The deprecated dashboard only mode.

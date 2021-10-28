@@ -47,7 +47,7 @@ import { formatRule, stepIsValid } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
-import { APP_ID } from '../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
@@ -97,10 +97,8 @@ const CreateRulePageComponent: React.FC = () => {
       canUserCRUD,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const { navigateToApp } = useKibana().services.application;
   const loading = userInfoLoading || listsConfigLoading;
   const [, dispatchToaster] = useStateToaster();
@@ -271,7 +269,7 @@ const CreateRulePageComponent: React.FC = () => {
 
   if (ruleName && ruleId) {
     displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId),
     });
@@ -286,13 +284,13 @@ const CreateRulePageComponent: React.FC = () => {
       needsListsConfiguration
     )
   ) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.alerts,
       path: getDetectionEngineUrl(),
     });
     return null;
   } else if (!userHasPermissions(canUserCRUD)) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRulesUrl(),
     });
@@ -403,6 +401,7 @@ const CreateRulePageComponent: React.FC = () => {
               >
                 <EuiHorizontalRule margin="m" />
                 <StepScheduleRule
+                  ruleType={ruleType}
                   addPadding={true}
                   defaultValues={stepsData.current[RuleStep.scheduleRule].data}
                   descriptionColumns="singleSplit"

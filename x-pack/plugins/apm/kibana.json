@@ -1,13 +1,18 @@
 {
   "id": "apm",
+  "owner": {
+    "name": "APM UI",
+    "githubTeam": "apm-ui"
+  },
+  "description": "The user interface for Elastic APM",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": [
-    "apmOss",
     "data",
     "embeddable",
     "features",
     "infra",
+    "inspector",
     "licensing",
     "observability",
     "ruleRegistry",
@@ -28,10 +33,7 @@
   ],
   "server": true,
   "ui": true,
-  "configPath": [
-    "xpack",
-    "apm"
-  ],
+  "configPath": ["xpack", "apm"],
   "requiredBundles": [
     "fleet",
     "home",

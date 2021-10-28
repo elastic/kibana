@@ -41,14 +41,13 @@ Additionally, in order to migrate into project refs, you also need to make sure 
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true
   },
   "include": [
-    // add all the folders containg files to be compiled
+    // add all the folders containing files to be compiled
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },

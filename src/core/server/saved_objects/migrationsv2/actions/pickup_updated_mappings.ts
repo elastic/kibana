@@ -31,27 +31,29 @@ export interface UpdateByQueryResponse {
  * This action uses `conflicts: 'proceed'` allowing several Kibana instances
  * to run this in parallel.
  */
-export const pickupUpdatedMappings = (
-  client: ElasticsearchClient,
-  index: string
-): TaskEither.TaskEither<RetryableEsClientError, UpdateByQueryResponse> => () => {
-  return client
-    .updateByQuery({
-      // Ignore version conflicts that can occur from parallel update by query operations
-      conflicts: 'proceed',
-      // Return an error when targeting missing or closed indices
-      allow_no_indices: false,
-      index,
-      // How many documents to update per batch
-      scroll_size: BATCH_SIZE,
-      // force a refresh so that we can query the updated index immediately
-      // after the operation completes
-      refresh: true,
-      // Create a task and return task id instead of blocking until complete
-      wait_for_completion: false,
-    })
-    .then(({ body: { task: taskId } }) => {
-      return Either.right({ taskId: String(taskId!) });
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+export const pickupUpdatedMappings =
+  (
+    client: ElasticsearchClient,
+    index: string
+  ): TaskEither.TaskEither<RetryableEsClientError, UpdateByQueryResponse> =>
+  () => {
+    return client
+      .updateByQuery({
+        // Ignore version conflicts that can occur from parallel update by query operations
+        conflicts: 'proceed',
+        // Return an error when targeting missing or closed indices
+        allow_no_indices: false,
+        index,
+        // How many documents to update per batch
+        scroll_size: BATCH_SIZE,
+        // force a refresh so that we can query the updated index immediately
+        // after the operation completes
+        refresh: true,
+        // Create a task and return task id instead of blocking until complete
+        wait_for_completion: false,
+      })
+      .then(({ body: { task: taskId } }) => {
+        return Either.right({ taskId: String(taskId!) });
+      })
+      .catch(catchRetryableEsClientErrors);
+  };

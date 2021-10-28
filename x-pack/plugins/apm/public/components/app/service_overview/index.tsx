@@ -5,22 +5,29 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
+import { useHistory } from 'react-router-dom';
 import { isRumAgentName, isIosAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
-import { useBreakPoints } from '../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { LatencyChart } from '../../shared/charts/latency_chart';
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
-import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
+import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
-import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
+import { TransactionsTable } from '../../shared/transactions_table';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { replace } from '../../shared/Links/url_helpers';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -28,30 +35,72 @@ import { ServiceOverviewTransactionsTable } from './service_overview_transaction
  */
 export const chartHeight = 288;
 
-interface ServiceOverviewProps {
-  serviceName: string;
-}
+export function ServiceOverview() {
+  const { agentName, serviceName, transactionType } = useApmServiceContext();
+  const {
+    query,
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      transactionType: transactionTypeFromUrl,
+    },
+  } = useApmParams('/services/{serviceName}/overview');
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
-  const { agentName } = useApmServiceContext();
+  const history = useHistory();
 
-  useTrackPageview({ app: 'apm', path: 'service_overview' });
-  useTrackPageview({ app: 'apm', path: 'service_overview', delay: 15000 });
+  // redirect to first transaction type
+  if (!transactionTypeFromUrl && transactionType) {
+    replace(history, { query: { transactionType } });
+  }
 
-  // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
+  const latencyChartHeight = 200;
+
+  // The default EuiFlexGroup breaks at 768, but we want to break at 1200, so we
   // observe the window width and set the flex directions of rows accordingly
-  const { isMedium } = useBreakPoints();
-  const rowDirection = isMedium ? 'column' : 'row';
+  const { isLarge } = useBreakpoints();
+  const isSingleColumn = isLarge;
+  const nonLatencyChartHeight = isSingleColumn
+    ? latencyChartHeight
+    : chartHeight;
+  const rowDirection = isSingleColumn ? 'column' : 'row';
   const isRumAgent = isRumAgentName(agentName);
   const isIosAgent = isIosAgentName(agentName);
 
+  const router = useApmRouter();
+  const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
+    path: {
+      serviceName,
+    },
+    query,
+  });
+
   return (
-    <AnnotationsContextProvider>
+    <AnnotationsContextProvider
+      serviceName={serviceName}
+      environment={environment}
+      start={start}
+      end={end}
+    >
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
+          {fallbackToTransactions && (
+            <EuiFlexItem>
+              <AggregatedTransactionsBadge />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <LatencyChart height={200} />
+              <LatencyChart
+                height={latencyChartHeight}
+                environment={environment}
+                kuery={kuery}
+              />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -61,11 +110,22 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
               responsive={false}
             >
               <EuiFlexItem grow={3}>
-                <ServiceOverviewThroughputChart height={chartHeight} />
+                <ServiceOverviewThroughputChart
+                  height={nonLatencyChartHeight}
+                  environment={environment}
+                  kuery={kuery}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
-                  <ServiceOverviewTransactionsTable serviceName={serviceName} />
+                  <TransactionsTable
+                    kuery={kuery}
+                    environment={environment}
+                    fixedHeight={true}
+                    isSingleColumn={isSingleColumn}
+                    start={start}
+                    end={end}
+                  />
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -78,9 +138,11 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
             >
               {!isRumAgent && (
                 <EuiFlexItem grow={3}>
-                  <TransactionErrorRateChart
-                    height={chartHeight}
+                  <FailedTransactionRateChart
+                    height={nonLatencyChartHeight}
                     showAnnotations={false}
+                    kuery={kuery}
+                    environment={environment}
                   />
                 </EuiFlexItem>
               )}
@@ -98,13 +160,26 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
               responsive={false}
             >
               <EuiFlexItem grow={3}>
-                <TransactionBreakdownChart showAnnotations={false} />
+                <TransactionBreakdownChart
+                  showAnnotations={false}
+                  environment={environment}
+                  kuery={kuery}
+                />
               </EuiFlexItem>
               {!isRumAgent && (
                 <EuiFlexItem grow={7}>
                   <EuiPanel hasBorder={true}>
                     <ServiceOverviewDependenciesTable
-                      serviceName={serviceName}
+                      fixedHeight={true}
+                      isSingleColumn={isSingleColumn}
+                      link={
+                        <EuiLink href={dependenciesLink}>
+                          {i18n.translate(
+                            'xpack.apm.serviceOverview.dependenciesTableTabLink',
+                            { defaultMessage: 'View dependencies' }
+                          )}
+                        </EuiLink>
+                      }
                     />
                   </EuiPanel>
                 </EuiFlexItem>
@@ -119,7 +194,7 @@ export function ServiceOverview({ serviceName }: ServiceOverviewProps) {
                 responsive={false}
               >
                 <ServiceOverviewInstancesChartAndTable
-                  chartHeight={chartHeight}
+                  chartHeight={nonLatencyChartHeight}
                   serviceName={serviceName}
                 />
               </EuiFlexGroup>

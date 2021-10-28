@@ -118,7 +118,7 @@ describe('SecurityLogic', () => {
         SecurityLogic.actions.initializeSourceRestrictions();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/security/source_restrictions'
+          '/internal/workplace_search/org/security/source_restrictions'
         );
         await nextTick();
         expect(setServerPropsSpy).toHaveBeenCalledWith(serverProps);
@@ -143,7 +143,7 @@ describe('SecurityLogic', () => {
         SecurityLogic.actions.saveSourceRestrictions();
 
         expect(http.patch).toHaveBeenCalledWith(
-          '/api/workplace_search/org/security/source_restrictions',
+          '/internal/workplace_search/org/security/source_restrictions',
           {
             body: JSON.stringify(serverProps),
           }

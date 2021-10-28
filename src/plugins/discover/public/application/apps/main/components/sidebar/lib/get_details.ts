@@ -13,11 +13,11 @@ import { ElasticSearchHit } from '../../../../../doc_views/doc_views_types';
 
 export function getDetails(
   field: IndexPatternField,
-  hits: ElasticSearchHit[],
+  hits: ElasticSearchHit[] | undefined,
   columns: string[],
   indexPattern?: IndexPattern
 ) {
-  if (!indexPattern) {
+  if (!indexPattern || !hits) {
     return {};
   }
   const details = {

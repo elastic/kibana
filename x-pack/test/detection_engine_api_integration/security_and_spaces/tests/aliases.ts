@@ -28,15 +28,21 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('Tests involving aliases of source indexes and the signals index', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
+    });
+
     beforeEach(async () => {
       await createSignalsIndex(supertest);
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
     });
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
     });
 
     it('should keep the original alias value such as "host_alias" from a source index when the value is indexed', async () => {
@@ -45,9 +51,9 @@ export default ({ getService }: FtrProviderContext) => {
       await waitForRuleSuccessOrStatus(supertest, id);
       await waitForSignalsToBePresent(supertest, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, id);
-      const hits = signalsOpen.hits.hits.map(
-        (signal) => (signal._source.host_alias as HostAlias).name
-      );
+      const hits = signalsOpen.hits.hits
+        .map((signal) => (signal._source?.host_alias as HostAlias).name)
+        .sort();
       expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
     });
 
@@ -57,7 +63,9 @@ export default ({ getService }: FtrProviderContext) => {
       await waitForRuleSuccessOrStatus(supertest, id);
       await waitForSignalsToBePresent(supertest, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, id);
-      const hits = signalsOpen.hits.hits.map((signal) => (signal._source.host as HostAlias).name);
+      const hits = signalsOpen.hits.hits
+        .map((signal) => (signal._source?.host as HostAlias).name)
+        .sort();
       expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
     });
   });

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export const getAsLocalDateTimeString = (str: string) => {
-  const dateValue = Date.parse(str);
+import { CustomAPIFieldValue } from '../types';
+
+export const getAsLocalDateTimeString = (maybeDate: CustomAPIFieldValue) => {
+  if (typeof maybeDate !== 'string') return null;
+
+  const dateValue = Date.parse(maybeDate);
   return dateValue ? new Date(dateValue).toLocaleString() : null;
 };

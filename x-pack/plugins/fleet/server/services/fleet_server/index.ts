@@ -50,10 +50,20 @@ export async function startFleetServerSetup() {
     _onResolve = resolve;
   });
   const logger = appContextService.getLogger();
+
+  // Check for security
   if (!appContextService.hasSecurity()) {
     // Fleet will not work if security is not enabled
     logger?.warn('Fleet requires the security plugin to be enabled.');
     return;
+  }
+
+  // Log information about custom registry URL
+  const customUrl = appContextService.getConfig()?.registryUrl;
+  if (customUrl) {
+    logger.info(
+      `Custom registry url is an experimental feature and is unsupported. Using custom registry at ${customUrl}`
+    );
   }
 
   try {

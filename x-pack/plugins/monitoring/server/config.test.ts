@@ -7,8 +7,7 @@
 
 import fs from 'fs';
 import { when } from 'jest-when';
-
-import { createConfig, configSchema } from './config';
+import { configSchema, createConfig } from './config';
 
 const MOCKED_PATHS = [
   '/proc/self/cgroup',
@@ -41,7 +40,6 @@ describe('config schema', () => {
           },
           "enabled": true,
         },
-        "enabled": true,
         "kibana": Object {
           "collection": Object {
             "enabled": true,
@@ -71,6 +69,8 @@ describe('config schema', () => {
               "enabled": false,
             },
           },
+          "debug_log_path": "",
+          "debug_mode": false,
           "elasticsearch": Object {
             "apiVersion": "master",
             "customHeaders": Object {},
@@ -86,6 +86,7 @@ describe('config schema', () => {
             ],
             "requestTimeout": "PT30S",
             "shardTimeout": "PT30S",
+            "skipStartupConnectionCheck": false,
             "sniffInterval": false,
             "sniffOnConnectionFault": false,
             "sniffOnStart": false,

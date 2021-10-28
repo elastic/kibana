@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
-  stepName?: string;
+  stepName: string;
   stepIndex: number;
   totalSteps: number;
   hasPreviousStep: boolean;
@@ -18,8 +18,8 @@ interface Props {
   handlePreviousStep: () => void;
   handleNextStep: () => void;
 }
-export const StepPageTitle = ({
-  stepName,
+
+export const StepPageTitleContent = ({
   stepIndex,
   totalSteps,
   handleNextStep,
@@ -29,11 +29,6 @@ export const StepPageTitle = ({
 }: Props) => {
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          <h1>{stepName}</h1>
-        </EuiTitle>
-      </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>

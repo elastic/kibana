@@ -6,26 +6,32 @@
  */
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import ReactRouterDom, { Route } from 'react-router-dom';
 import { fireEvent, screen } from '@testing-library/dom';
-import { EuiButtonIcon } from '@elastic/eui';
+import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
-
-import { useExpandedRow } from './use_expanded_row';
+import { EuiButtonIcon } from '@elastic/eui';
+import { getExpandedStepCallback, useExpandedRow } from './use_expanded_row';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { JourneyStep } from '../../../../common/runtime_types';
 import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../../common/constants';
 import { COLLAPSE_LABEL, EXPAND_LABEL } from '../translations';
 import { act } from 'react-dom/test-utils';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn(),
+}));
+
 describe('useExpandedROw', () => {
   let expandedRowsObj = {};
+  const checkGroup = 'fake-group';
   const TEST_ID = 'uptimeStepListExpandBtn';
 
   const history = createMemoryHistory({
-    initialEntries: ['/journey/fake-group/steps'],
+    initialEntries: [`/journey/${checkGroup}/steps`],
   });
-  const steps: JourneyStep[] = [
+  const defaultSteps: JourneyStep[] = [
     {
       _id: '1',
       '@timestamp': '123',
@@ -74,8 +80,8 @@ describe('useExpandedROw', () => {
 
   const Component = () => {
     const { expandedRows, toggleExpand } = useExpandedRow({
-      steps,
-      allSteps: steps,
+      steps: defaultSteps,
+      allSteps: defaultSteps,
       loading: false,
     });
 
@@ -84,7 +90,7 @@ describe('useExpandedROw', () => {
     return (
       <Route path={SYNTHETIC_CHECK_STEPS_ROUTE}>
         Step list
-        {steps.map((journeyStep, index) => (
+        {defaultSteps.map((journeyStep, index) => (
           <EuiButtonIcon
             key={index}
             data-test-subj={TEST_ID + index}
@@ -115,6 +121,10 @@ describe('useExpandedROw', () => {
     expect(Object.keys(expandedRowsObj)).toStrictEqual([]);
   });
 
+  beforeEach(() => {
+    jest.spyOn(ReactRouterDom, 'useParams').mockReturnValue({ checkGroupId: checkGroup });
+  });
+
   it('it can expand both rows at same time', async () => {
     render(<Component />, {
       history,
@@ -138,8 +148,8 @@ describe('useExpandedROw', () => {
 
     const newFakeGroup = 'new-fake-group-1';
 
-    steps[0].monitor.check_group = newFakeGroup;
-    steps[1].monitor.check_group = newFakeGroup;
+    defaultSteps[0].monitor.check_group = newFakeGroup;
+    defaultSteps[1].monitor.check_group = newFakeGroup;
 
     act(() => {
       history.push(`/journey/${newFakeGroup}/steps`);
@@ -147,4 +157,110 @@ describe('useExpandedROw', () => {
 
     expect(JSON.stringify(expandedRowsObj)).toContain(newFakeGroup);
   });
+
+  it('handles unequal amount of steps when navigating to new check group', async () => {
+    const { result, rerender } = renderHook(
+      ({
+        steps,
+        allSteps,
+        loading,
+      }: {
+        steps: JourneyStep[];
+        allSteps: JourneyStep[];
+        loading: boolean;
+      }) =>
+        useExpandedRow({
+          steps,
+          allSteps,
+          loading,
+        }),
+      { initialProps: { steps: defaultSteps, allSteps: defaultSteps, loading: false } }
+    );
+
+    // check group, with two steps
+    // let's expand both rows
+    hooksAct(() => {
+      result.current.toggleExpand({ journeyStep: defaultSteps[0] });
+    });
+    hooksAct(() => {
+      result.current.toggleExpand({ journeyStep: defaultSteps[1] });
+    });
+
+    // expect two open rows
+    expect(Object.keys(result.current.expandedRows)).toEqual(['0', '1']);
+
+    // change checkGroupId to ensure that useEffect runs
+    jest.spyOn(ReactRouterDom, 'useParams').mockReturnValue({ checkGroupId: 'new-fake-group' });
+
+    // rerender with new check group, with one step
+    rerender({ steps: [defaultSteps[0]], allSteps: [defaultSteps[0]], loading: false });
+
+    // expect only one accordion to be expanded
+    expect(Object.keys(result.current.expandedRows)).toEqual(['0']);
+  });
+
+  it('returns expected browser consoles', async () => {
+    const { result } = renderHook(() =>
+      useExpandedRow({
+        steps: defaultSteps,
+        allSteps: [...defaultSteps, browserConsoleStep],
+        loading: false,
+      })
+    );
+
+    result.current.toggleExpand({ journeyStep: defaultSteps[0] });
+
+    expect(result.current.expandedRows[0].props.browserConsoles).toEqual([
+      browserConsoleStep.synthetics.payload.text,
+    ]);
+  });
+
+  describe('getExpandedStepCallback', () => {
+    it('matches step index to key', () => {
+      const callback = getExpandedStepCallback(2);
+      expect(callback(defaultSteps[0])).toBe(false);
+      expect(callback(defaultSteps[1])).toBe(true);
+    });
+  });
 });
+
+const browserConsoleStep = {
+  _id: 'IvT1oXwB5ds00bB_FVXP',
+  observer: {
+    hostname: '16Elastic',
+  },
+  agent: {
+    name: '16Elastic',
+    id: '77def92c-1a78-4353-b9e5-45d31920b1b7',
+    type: 'heartbeat',
+    ephemeral_id: '3a9ca86c-08d0-4f3f-b857-aeef540b3cac',
+    version: '8.0.0',
+  },
+  '@timestamp': '2021-10-21T08:25:25.221Z',
+  package: { name: '@elastic/synthetics', version: '1.0.0-beta.14' },
+  ecs: { version: '1.12.0' },
+  os: { platform: 'darwin' },
+  synthetics: {
+    package_version: '1.0.0-beta.14',
+    journey: { name: 'inline', id: 'inline' },
+    payload: {
+      text: "Refused to execute inline script because it violates the following Content Security Policy directive: \"script-src 'unsafe-eval' 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE='), or a nonce ('nonce-...') is required to enable inline execution.\n",
+      type: 'error',
+    },
+    index: 755,
+    step: { duration: { us: 0 }, name: 'goto kibana', index: 1, status: '' },
+    type: 'journey/browserconsole',
+    isFullScreenshot: false,
+    isScreenshotRef: true,
+  },
+  monitor: {
+    name: 'cnn-monitor - inline',
+    timespan: { lt: '2021-10-21T08:27:04.662Z', gte: '2021-10-21T08:26:04.662Z' },
+    check_group: '70acec60-3248-11ec-9921-acde48001122',
+    id: 'cnn-monitor-inline',
+    type: 'browser',
+    status: 'up',
+  },
+  event: { dataset: 'browser' },
+  timestamp: '2021-10-21T08:25:25.221Z',
+};

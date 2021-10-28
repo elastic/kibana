@@ -7,8 +7,6 @@
 
 export const ML_ANNOTATIONS_INDEX_ALIAS_READ = '.ml-annotations-read';
 export const ML_ANNOTATIONS_INDEX_ALIAS_WRITE = '.ml-annotations-write';
-export const ML_ANNOTATIONS_INDEX_PATTERN = '.ml-annotations-6';
 
 export const ML_RESULTS_INDEX_PATTERN = '.ml-anomalies-*';
 export const ML_NOTIFICATION_INDEX_PATTERN = '.ml-notifications*';
-export const ML_NOTIFICATION_INDEX_02 = '.ml-notifications-000002';

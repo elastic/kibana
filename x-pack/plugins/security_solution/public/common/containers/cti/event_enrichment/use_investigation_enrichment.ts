@@ -7,11 +7,11 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
+import usePrevious from 'react-use/lib/usePrevious';
 
 import { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
 import {
-  DEFAULT_CTI_SOURCE_INDEX,
   DEFAULT_EVENT_ENRICHMENT_FROM,
   DEFAULT_EVENT_ENRICHMENT_TO,
 } from '../../../../../common/cti/constants';
@@ -20,18 +20,24 @@ import { useKibana } from '../../../lib/kibana';
 import { inputsActions } from '../../../store/actions';
 import * as i18n from './translations';
 import { useEventEnrichmentComplete } from '.';
+import { DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
 
 export const QUERY_ID = 'investigation_time_enrichment';
 const noop = () => {};
+const noEnrichments = { enrichments: [] };
 
 export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   const { addError } = useAppToasts();
-  const kibana = useKibana();
+  const { data, uiSettings } = useKibana().services;
+  const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
+
   const dispatch = useDispatch();
-  const [{ from, to }, setRange] = useState({
+
+  const [range, setRange] = useState({
     from: DEFAULT_EVENT_ENRICHMENT_FROM,
     to: DEFAULT_EVENT_ENRICHMENT_TO,
   });
+
   const { error, loading, result, start } = useEventEnrichmentComplete();
 
   const deleteQuery = useCallback(() => {
@@ -63,21 +69,28 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
     }
   }, [addError, error]);
 
+  const prevEventFields = usePrevious(eventFields);
+  const prevRange = usePrevious(range);
+
   useEffect(() => {
-    if (!isEmpty(eventFields)) {
+    if (
+      !isEmpty(eventFields) &&
+      (!isEqual(eventFields, prevEventFields) || !isEqual(range, prevRange))
+    ) {
       start({
-        data: kibana.services.data,
-        timerange: { from, to, interval: '' },
-        defaultIndex: DEFAULT_CTI_SOURCE_INDEX,
+        data,
+        timerange: { ...range, interval: '' },
+        defaultIndex: defaultThreatIndices,
         eventFields,
         filterQuery: '',
       });
     }
-  }, [from, start, kibana.services.data, to, eventFields]);
+  }, [start, data, eventFields, prevEventFields, range, prevRange, defaultThreatIndices]);
 
   return {
-    loading,
-    result,
+    result: isEmpty(eventFields) ? noEnrichments : result,
+    range,
     setRange,
+    loading,
   };
 };

@@ -7,17 +7,15 @@
  */
 
 import { each, cloneDeep } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
 import realHits from '../../../../../__fixtures__/real_hits.js';
-// @ts-expect-error
-import stubbedLogstashFields from '../../../../../__fixtures__/logstash_fields';
+import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { coreMock } from '../../../../../../../../core/public/mocks';
-import { IndexPatternAttributes } from '../../../../../../../data/common';
-import { getStubIndexPattern } from '../../../../../../../data/public/test_utils';
+import { flattenHit, IndexPatternAttributes } from '../../../../../../../data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import {
   DiscoverSidebarResponsive,
@@ -25,8 +23,12 @@ import {
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../../build_services';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
+import { FetchStatus } from '../../../../types';
+import { DataDocuments$ } from '../../services/use_saved_search';
+import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
+import { VIEW_MODE } from '../view_mode_toggle';
 
-const mockServices = ({
+const mockServices = {
   history: () => ({
     location: {
       search: '',
@@ -47,29 +49,33 @@ const mockServices = ({
       }
     },
   },
-} as unknown) as DiscoverServices;
+} as unknown as DiscoverServices;
+
+const mockfieldCounts: Record<string, number> = {};
+const mockCalcFieldCounts = jest.fn(() => {
+  return mockfieldCounts;
+});
 
 jest.mock('../../../../../kibana_services', () => ({
+  getUiActions: jest.fn(() => {
+    return {
+      getTriggerCompatibleActions: jest.fn(() => []),
+    };
+  }),
   getServices: () => mockServices,
 }));
 
-jest.mock('./lib/get_index_pattern_field_list', () => ({
-  getIndexPatternFieldList: jest.fn((indexPattern) => indexPattern.fields),
+jest.mock('../../utils/calc_field_counts', () => ({
+  calcFieldCounts: () => mockCalcFieldCounts(),
 }));
 
 function getCompProps(): DiscoverSidebarResponsiveProps {
-  const indexPattern = getStubIndexPattern(
-    'logstash-*',
-    (cfg: unknown) => cfg,
-    'time',
-    stubbedLogstashFields(),
-    coreMock.createSetup()
-  );
+  const indexPattern = stubLogstashIndexPattern;
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = (each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
+  const hits = each(cloneDeep(realHits), (hit) => flattenHit(hit, indexPattern)) as Array<
     Record<string, unknown>
-  >) as ElasticSearchHit[];
+  > as ElasticSearchHit[];
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
@@ -77,17 +83,17 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
   ];
 
-  const fieldCounts: Record<string, number> = {};
-
   for (const hit of hits) {
-    for (const key of Object.keys(indexPattern.flattenHit(hit))) {
-      fieldCounts[key] = (fieldCounts[key] || 0) + 1;
+    for (const key of Object.keys(flattenHit(hit, indexPattern))) {
+      mockfieldCounts[key] = (mockfieldCounts[key] || 0) + 1;
     }
   }
   return {
     columns: ['extension'],
-    fieldCounts,
-    hits,
+    documents$: new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: hits as ElasticSearchHit[],
+    }) as DataDocuments$,
     indexPatternList,
     onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),
@@ -98,6 +104,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     state: {},
     trackUiMetric: jest.fn(),
     onEditRuntimeField: jest.fn(),
+    viewMode: VIEW_MODE.DOCUMENT_LEVEL,
   };
 }
 
@@ -117,6 +124,7 @@ describe('discover responsive sidebar', function () {
     expect(popular.children().length).toBe(1);
     expect(unpopular.children().length).toBe(7);
     expect(selected.children().length).toBe(1);
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
   it('should allow selecting fields', function () {
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
@@ -130,5 +138,16 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'field-extension-showDetails').simulate('click');
     findTestSubject(comp, 'plus-extension-gif').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalled();
+  });
+  it('should allow filtering by string, and calcFieldCount should just be executed once', function () {
+    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(7);
+    act(() => {
+      findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
+        target: { value: 'abc' },
+      });
+    });
+    comp.update();
+    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(4);
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
 });

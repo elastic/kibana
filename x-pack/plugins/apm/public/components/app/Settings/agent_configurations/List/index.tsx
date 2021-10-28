@@ -12,26 +12,24 @@ import {
   EuiEmptyPrompt,
   EuiHealth,
   EuiToolTip,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../../hooks/use_theme';
-import {
-  createAgentConfigurationHref,
-  editAgentConfigurationHref,
-} from '../../../../shared/Links/apm/agentConfigurationLinks';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
 import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
-type Config = APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
+type Config =
+  APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
 
 interface Props {
   status: FETCH_STATUS;
@@ -46,11 +44,15 @@ export function AgentConfigurationList({
 }: Props) {
   const { core } = useApmPluginContext();
   const canSave = core.application.capabilities.apm.save;
-  const { basePath } = core.http;
-  const { search } = useLocation();
   const theme = useTheme();
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
     null
+  );
+
+  const apmRouter = useApmRouter();
+
+  const createAgentConfigurationHref = apmRouter.link(
+    '/settings/agent-configuration/create'
   );
 
   const emptyStatePrompt = (
@@ -80,7 +82,7 @@ export function AgentConfigurationList({
           <EuiButton
             color="primary"
             fill
-            href={createAgentConfigurationHref(search, basePath)}
+            href={createAgentConfigurationHref}
             isDisabled={!canSave}
           >
             {i18n.translate(
@@ -127,10 +129,10 @@ export function AgentConfigurationList({
       width: theme.eui.euiSizeXL,
       name: '',
       sortable: true,
-      render: (isApplied: boolean) => (
+      render: (_, { applied_by_agent: appliedByAgent }) => (
         <EuiToolTip
           content={
-            isApplied
+            appliedByAgent
               ? i18n.translate(
                   'xpack.apm.agentConfig.configTable.appliedTooltipMessage',
                   { defaultMessage: 'Applied by at least one agent' }
@@ -142,7 +144,7 @@ export function AgentConfigurationList({
           }
         >
           <EuiHealth
-            color={isApplied ? 'success' : theme.eui.euiColorLightShade}
+            color={appliedByAgent ? 'success' : theme.eui.euiColorLightShade}
           />
         </EuiToolTip>
       ),
@@ -159,7 +161,12 @@ export function AgentConfigurationList({
           flush="left"
           size="s"
           color="primary"
-          href={editAgentConfigurationHref(config.service, search, basePath)}
+          href={apmRouter.link('/settings/agent-configuration/edit', {
+            query: {
+              name: config.service.name,
+              environment: config.service.environment,
+            },
+          })}
         >
           {getOptionLabel(config.service.name)}
         </EuiButtonEmpty>
@@ -172,18 +179,18 @@ export function AgentConfigurationList({
         { defaultMessage: 'Service environment' }
       ),
       sortable: true,
-      render: (environment: string) => getOptionLabel(environment),
+      render: (_, { service }) => getOptionLabel(service.environment),
     },
     {
-      align: 'right',
+      align: RIGHT_ALIGNMENT,
       field: '@timestamp',
       name: i18n.translate(
         'xpack.apm.agentConfig.configTable.lastUpdatedColumnLabel',
         { defaultMessage: 'Last updated' }
       ),
       sortable: true,
-      render: (value: number) => (
-        <TimestampTooltip time={value} timeUnit="minutes" />
+      render: (_, item) => (
+        <TimestampTooltip time={item['@timestamp']} timeUnit="minutes" />
       ),
     },
     ...(canSave
@@ -195,11 +202,12 @@ export function AgentConfigurationList({
               <EuiButtonIcon
                 aria-label="Edit"
                 iconType="pencil"
-                href={editAgentConfigurationHref(
-                  config.service,
-                  search,
-                  basePath
-                )}
+                href={apmRouter.link('/settings/agent-configuration/edit', {
+                  query: {
+                    name: config.service.name,
+                    environment: config.service.environment,
+                  },
+                })}
               />
             ),
           },

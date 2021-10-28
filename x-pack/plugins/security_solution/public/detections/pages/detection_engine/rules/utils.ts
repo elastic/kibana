@@ -11,14 +11,12 @@ import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import {
   getRulesUrl,
   getRuleDetailsUrl,
-  getCreateRuleUrl,
-  getEditRuleUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import * as i18nRules from './translations';
 import { RouteSpyState } from '../../../../common/utils/route/types';
 import { GetUrlForApp } from '../../../../common/components/navigation/types';
 import { SecurityPageName } from '../../../../app/types';
-import { APP_ID, RULES_PATH } from '../../../../../common/constants';
+import { APP_UI_ID, RULES_PATH } from '../../../../../common/constants';
 import { RuleStep, RuleStepsOrder } from './types';
 
 export const ruleStepsOrder: RuleStepsOrder = [
@@ -34,7 +32,7 @@ const getRulesBreadcrumb = (pathname: string, search: string[], getUrlForApp: Ge
   if (tabPath === 'rules') {
     return {
       text: i18nRules.PAGE_TITLE,
-      href: getUrlForApp(APP_ID, {
+      href: getUrlForApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
         path: getRulesUrl(!isEmpty(search[0]) ? search[0] : ''),
       }),
@@ -66,7 +64,7 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: params.state.ruleName,
-        href: getUrlForApp(APP_ID, {
+        href: getUrlForApp(APP_UI_ID, {
           deepLinkId: SecurityPageName.rules,
           path: getRuleDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
         }),
@@ -79,10 +77,7 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: i18nRules.ADD_PAGE_TITLE,
-        href: getUrlForApp(APP_ID, {
-          deepLinkId: SecurityPageName.rules,
-          path: getCreateRuleUrl(!isEmpty(search[0]) ? search[0] : ''),
-        }),
+        href: '',
       },
     ];
   }
@@ -92,10 +87,7 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: i18nRules.EDIT_PAGE_TITLE,
-        href: getUrlForApp(APP_ID, {
-          deepLinkId: SecurityPageName.rules,
-          path: getEditRuleUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
-        }),
+        href: '',
       },
     ];
   }

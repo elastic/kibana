@@ -48,12 +48,12 @@ export const PaletteArgInput: FC<Props> = ({ onValueChange, argId, argValue, ren
         return palette;
       }
 
-      return ({
+      return {
         id: 'custom',
         label: strings.getCustomPaletteLabel(),
         colors,
         gradient,
-      } as any) as ColorPalette;
+      } as any as ColorPalette;
     } catch (e) {
       renderError();
     }

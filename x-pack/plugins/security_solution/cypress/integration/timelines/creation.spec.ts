@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import { timeline } from '../../objects/timeline';
+import { getTimeline } from '../../objects/timeline';
 
 import {
   LOCKED_ICON,
   NOTES_TEXT,
   PIN_EVENT,
   SERVER_SIDE_EVENT_COUNT,
+  TIMELINE_DESCRIPTION,
   TIMELINE_FILTER,
   TIMELINE_FLYOUT_WRAPPER,
+  TIMELINE_QUERY,
   TIMELINE_PANEL,
   TIMELINE_TAB_CONTENT_EQL,
+  TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
 } from '../../screens/timeline';
 import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../tasks/common';
-
 import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
+import { selectCustomTemplates } from '../../tasks/templates';
 import {
   addEqlToTimeline,
   addFilter,
@@ -64,7 +67,7 @@ describe('Timelines', (): void => {
 
     before(() => {
       openTimelineUsingToggle();
-      addNameAndDescriptionToTimeline(timeline);
+      addNameAndDescriptionToTimeline(getTimeline());
       populateTimeline();
     });
 
@@ -73,8 +76,8 @@ describe('Timelines', (): void => {
     });
 
     it('can be added filter', () => {
-      addFilter(timeline.filter);
-      cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
+      addFilter(getTimeline().filter);
+      cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
     });
 
     it('pins an event', () => {
@@ -89,8 +92,10 @@ describe('Timelines', (): void => {
     });
 
     it('can be added notes', () => {
-      addNotesToTimeline(timeline.notes);
-      cy.get(NOTES_TEXT).should('have.text', timeline.notes);
+      addNotesToTimeline(getTimeline().notes);
+      cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
+        .find(NOTES_TEXT)
+        .should('have.text', getTimeline().notes);
     });
 
     it('should update timeline after adding eql', () => {
@@ -110,27 +115,22 @@ describe('Timelines', (): void => {
 
 describe('Create a timeline from a template', () => {
   before(() => {
+    cy.intercept('/api/timeline*').as('timeline');
     cleanKibana();
+    createTimelineTemplate(getTimeline());
     loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
     waitForTimelinesPanelToBeLoaded();
   });
 
   it('Should have the same query and open the timeline modal', () => {
-    createTimelineTemplate(timeline).then(() => {
-      expandEventAction();
-      cy.intercept('/api/timeline').as('timeline');
+    selectCustomTemplates();
+    cy.wait('@timeline', { timeout: 100000 });
+    expandEventAction();
+    clickingOnCreateTimelineFormTemplateBtn();
+    cy.wait('@timeline', { timeout: 100000 });
 
-      clickingOnCreateTimelineFormTemplateBtn();
-      cy.wait('@timeline', { timeout: 100000 }).then(({ request }) => {
-        if (request.body && request.body.timeline) {
-          expect(request.body.timeline).to.haveOwnProperty('description', timeline.description);
-          expect(request.body.timeline.kqlQuery.filterQuery.kuery).to.haveOwnProperty(
-            'expression',
-            timeline.query
-          );
-          cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
-        }
-      });
-    });
+    cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
+    cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
+    cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
   });
 });

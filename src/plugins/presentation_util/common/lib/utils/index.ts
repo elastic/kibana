@@ -7,9 +7,14 @@
  */
 
 export * from './dataurl';
-export * from './elastic_logo';
-export * from './elastic_outline';
 export * from './httpurl';
-export * from './missing_asset';
 export * from './resolve_dataurl';
 export * from './url';
+
+export async function getElasticLogo() {
+  return await import('./elastic_logo');
+}
+
+export async function getElasticOutline() {
+  return await import('./elastic_outline');
+}

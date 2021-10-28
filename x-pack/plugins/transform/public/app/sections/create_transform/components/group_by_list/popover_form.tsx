@@ -13,7 +13,7 @@ import {
   htmlIdGenerator,
   EuiButton,
   EuiCheckbox,
-  EuiCodeEditor,
+  EuiCodeBlock,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -298,16 +298,17 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       {isUnsupportedAgg && (
         <>
           <EuiSpacer size="m" />
-          <EuiCodeEditor
-            mode="json"
-            theme="textmate"
-            width="100%"
-            height="200px"
-            value={JSON.stringify(getEsAggFromGroupByConfig(defaultData), null, 2)}
-            setOptions={{ fontSize: '12px', showLineNumbers: false }}
-            isReadOnly
-            aria-label="Read only code editor"
-          />
+          <EuiCodeBlock
+            aria-label={i18n.translate('xpack.transform.agg.popoverForm.codeBlock', {
+              defaultMessage: 'JSON of transform aggregation',
+            })}
+            fontSize="s"
+            language="json"
+            paddingSize="s"
+            style={{ width: '100%', height: '200px' }}
+          >
+            {JSON.stringify(getEsAggFromGroupByConfig(defaultData), null, 2)}
+          </EuiCodeBlock>
         </>
       )}
       <EuiFormRow hasEmptyLabelSpace>

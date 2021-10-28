@@ -258,7 +258,7 @@ export function getMlClient(
       // this should use DataFrameAnalyticsStats, but needs a refactor to move DataFrameAnalyticsStats to common
       await jobIdsCheck('data-frame-analytics', p, true);
       try {
-        const { body } = ((await mlClient.getDataFrameAnalyticsStats(...p)) as unknown) as {
+        const { body } = (await mlClient.getDataFrameAnalyticsStats(...p)) as unknown as {
           body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
         };
         const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
@@ -380,6 +380,17 @@ export function getMlClient(
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
       return mlClient.getTrainedModelsStats(...p);
     },
+    async getTrainedModelDeploymentStats(
+      ...p: Parameters<MlClient['getTrainedModelDeploymentStats']>
+    ) {
+      return mlClient.getTrainedModelDeploymentStats(...p);
+    },
+    async startTrainedModelDeployment(...p: Parameters<MlClient['startTrainedModelDeployment']>) {
+      return mlClient.startTrainedModelDeployment(...p);
+    },
+    async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
+      return mlClient.stopTrainedModelDeployment(...p);
+    },
     async info(...p: Parameters<MlClient['info']>) {
       return mlClient.info(...p);
     },
@@ -473,6 +484,10 @@ export function getMlClient(
     async updateJob(...p: Parameters<MlClient['updateJob']>) {
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.updateJob(...p);
+    },
+    async resetJob(...p: Parameters<MlClient['resetJob']>) {
+      await jobIdsCheck('anomaly-detector', p);
+      return mlClient.resetJob(...p);
     },
     async updateModelSnapshot(...p: Parameters<MlClient['updateModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);

@@ -13,54 +13,73 @@ import {
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
-import { useUrlParams } from '../url_params_context/use_url_params';
-import { useServiceAgentNameFetcher } from './use_service_agent_name_fetcher';
-import { IUrlParams } from '../url_params_context/types';
+import { useServiceAgentFetcher } from './use_service_agent_fetcher';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
-import { useServiceName } from '../../hooks/use_service_name';
+import { useApmParams } from '../../hooks/use_apm_params';
+import { useTimeRange } from '../../hooks/use_time_range';
 
 export type APMServiceAlert = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
+  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
 >;
 
 export const APMServiceContext = createContext<{
+  serviceName: string;
   agentName?: string;
   transactionType?: string;
   transactionTypes: string[];
   alerts: APMServiceAlert[];
-  serviceName?: string;
-}>({ transactionTypes: [], alerts: [] });
+  runtimeName?: string;
+}>({ serviceName: '', transactionTypes: [], alerts: [] });
 
 export function ApmServiceContextProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const { urlParams } = useUrlParams();
+  const {
+    path: { serviceName },
+    query,
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}');
 
-  const serviceName = useServiceName();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { agentName } = useServiceAgentNameFetcher(serviceName);
+  const { agentName, runtimeName } = useServiceAgentFetcher({
+    serviceName,
+    start,
+    end,
+  });
 
-  const transactionTypes = useServiceTransactionTypesFetcher(serviceName);
+  const transactionTypes = useServiceTransactionTypesFetcher({
+    serviceName,
+    start,
+    end,
+  });
 
   const transactionType = getTransactionType({
-    urlParams,
+    transactionType: query.transactionType,
     transactionTypes,
     agentName,
   });
 
-  const { alerts } = useServiceAlertsFetcher({ serviceName, transactionType });
+  const { alerts } = useServiceAlertsFetcher({
+    serviceName,
+    transactionType,
+    environment: query.environment,
+    start,
+    end,
+  });
 
   return (
     <APMServiceContext.Provider
       value={{
+        serviceName,
         agentName,
         transactionType,
         transactionTypes,
         alerts,
-        serviceName,
+        runtimeName,
       }}
       children={children}
     />
@@ -68,16 +87,16 @@ export function ApmServiceContextProvider({
 }
 
 export function getTransactionType({
-  urlParams,
+  transactionType,
   transactionTypes,
   agentName,
 }: {
-  urlParams: IUrlParams;
+  transactionType?: string;
   transactionTypes: string[];
   agentName?: string;
 }) {
-  if (urlParams.transactionType) {
-    return urlParams.transactionType;
+  if (transactionType) {
+    return transactionType;
   }
 
   if (!agentName || transactionTypes.length === 0) {

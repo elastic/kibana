@@ -10,48 +10,35 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
 import { Logger, LogMeta } from '../../logging';
 import type { ElasticsearchClient } from '../../elasticsearch';
+import { getErrorMessage, getRequestDebugMeta } from '../../elasticsearch';
 import { Model, Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
-import { State } from './types';
+import { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './types';
+import { SavedObjectsRawDoc } from '../serialization';
 
-interface StateLogMeta extends LogMeta {
+interface StateTransitionLogMeta extends LogMeta {
   kibana: {
-    migrationState: State;
+    migrations: {
+      state: State;
+      duration: number;
+    };
   };
 }
-
-/** @internal */
-export type ExecutionLog = Array<
-  | {
-      type: 'transition';
-      prevControlState: State['controlState'];
-      controlState: State['controlState'];
-      state: State;
-    }
-  | {
-      type: 'response';
-      controlState: State['controlState'];
-      res: unknown;
-    }
-  | {
-      type: 'cleanup';
-      state: State;
-      message: string;
-    }
->;
 
 const logStateTransition = (
   logger: Logger,
   logMessagePrefix: string,
-  oldState: State,
-  newState: State,
+  prevState: State,
+  currState: State,
   tookMs: number
 ) => {
-  if (newState.logs.length > oldState.logs.length) {
-    newState.logs.slice(oldState.logs.length).forEach(({ message, level }) => {
+  if (currState.logs.length > prevState.logs.length) {
+    currState.logs.slice(prevState.logs.length).forEach(({ message, level }) => {
       switch (level) {
         case 'error':
           return logger.error(logMessagePrefix + message);
+        case 'warning':
+          return logger.warn(logMessagePrefix + message);
         case 'info':
           return logger.info(logMessagePrefix + message);
         default:
@@ -61,7 +48,18 @@ const logStateTransition = (
   }
 
   logger.info(
-    logMessagePrefix + `${oldState.controlState} -> ${newState.controlState}. took: ${tookMs}ms.`
+    logMessagePrefix + `${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`
+  );
+  logger.debug<StateTransitionLogMeta>(
+    logMessagePrefix + `${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`,
+    {
+      kibana: {
+        migrations: {
+          state: currState,
+          duration: tookMs,
+        },
+      },
+    }
   );
 };
 
@@ -72,24 +70,6 @@ const logActionResponse = (
   res: unknown
 ) => {
   logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`, res as LogMeta);
-};
-const dumpExecutionLog = (logger: Logger, logMessagePrefix: string, executionLog: ExecutionLog) => {
-  logger.error(logMessagePrefix + 'migration failed, dumping execution log:');
-  executionLog.forEach((log) => {
-    if (log.type === 'transition') {
-      logger.info<StateLogMeta>(
-        logMessagePrefix + `${log.prevControlState} -> ${log.controlState}`,
-        {
-          kibana: {
-            migrationState: log.state,
-          },
-        }
-      );
-    }
-    if (log.type === 'response') {
-      logger.info(logMessagePrefix + `${log.controlState} RESPONSE`, log.res as LogMeta);
-    }
-  });
 };
 
 /**
@@ -114,7 +94,6 @@ export async function migrationStateActionMachine({
   model: Model<State>;
   client: ElasticsearchClient;
 }) {
-  const executionLog: ExecutionLog = [];
   const startTime = Date.now();
   // Since saved object index names usually start with a `.` and can be
   // configured by users to include several `.`'s we can't use a logger tag to
@@ -128,27 +107,30 @@ export async function migrationStateActionMachine({
       (state) => next(state),
       (state, res) => {
         lastState = state;
-        executionLog.push({
-          type: 'response',
-          res,
-          controlState: state.controlState,
-        });
         logActionResponse(logger, logMessagePrefix, state, res);
         const newState = model(state, res);
         // Redact the state to reduce the memory consumption and so that we
         // don't log sensitive information inside documents by only keeping
-        // the _id's of outdatedDocuments
+        // the _id's of documents
         const redactedNewState = {
           ...newState,
-          // @ts-expect-error outdatedDocuments don't exist in all states
-          ...{ outdatedDocuments: (newState.outdatedDocuments ?? []).map((doc) => doc._id) },
+          ...{
+            outdatedDocuments: (
+              (newState as ReindexSourceToTempTransform).outdatedDocuments ?? []
+            ).map(
+              (doc) =>
+                ({
+                  _id: doc._id,
+                } as SavedObjectsRawDoc)
+            ),
+          },
+          ...{
+            transformedDocBatches: (
+              (newState as ReindexSourceToTempIndexBulk).transformedDocBatches ?? []
+            ).map((batches) => batches.map((doc) => ({ _id: doc._id }))) as [SavedObjectsRawDoc[]],
+          },
         };
-        executionLog.push({
-          type: 'transition',
-          state: redactedNewState,
-          controlState: newState.controlState,
-          prevControlState: state.controlState,
-        });
+
         const now = Date.now();
         logStateTransition(
           logger,
@@ -180,8 +162,11 @@ export async function migrationStateActionMachine({
         };
       }
     } else if (finalState.controlState === 'FATAL') {
-      await cleanup(client, executionLog, finalState);
-      dumpExecutionLog(logger, logMessagePrefix, executionLog);
+      try {
+        await cleanup(client, finalState);
+      } catch (e) {
+        logger.warn('Failed to cleanup after migrations:', e.message);
+      }
       return Promise.reject(
         new Error(
           `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index: ` +
@@ -192,23 +177,27 @@ export async function migrationStateActionMachine({
       throw new Error('Invalid terminating control state');
     }
   } catch (e) {
-    await cleanup(client, executionLog, lastState);
+    try {
+      await cleanup(client, lastState);
+    } catch (err) {
+      logger.warn('Failed to cleanup after migrations:', err.message);
+    }
     if (e instanceof EsErrors.ResponseError) {
-      logger.error(
-        logMessagePrefix + `[${e.body?.error?.type}]: ${e.body?.error?.reason ?? e.message}`
-      );
-      dumpExecutionLog(logger, logMessagePrefix, executionLog);
+      // Log the failed request. This is very similar to the
+      // elasticsearch-service's debug logs, but we log everything in single
+      // line until we have sub-ms resolution in our cloud logs. Because this
+      // is error level logs, we're also more careful and don't log the request
+      // body since this can very likely have sensitive saved objects.
+      const req = getRequestDebugMeta(e.meta);
+      const failedRequestMessage = `Unexpected Elasticsearch ResponseError: statusCode: ${
+        req.statusCode
+      }, method: ${req.method}, url: ${req.url} error: ${getErrorMessage(e)},`;
+      logger.error(logMessagePrefix + failedRequestMessage);
       throw new Error(
-        `Unable to complete saved object migrations for the [${
-          initialState.indexPrefix
-        }] index. Please check the health of your Elasticsearch cluster and try again. Error: [${
-          e.body?.error?.type
-        }]: ${e.body?.error?.reason ?? e.message}`
+        `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. Please check the health of your Elasticsearch cluster and try again. ${failedRequestMessage}`
       );
     } else {
       logger.error(e);
-
-      dumpExecutionLog(logger, logMessagePrefix, executionLog);
 
       const newError = new Error(
         `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. ${e}`

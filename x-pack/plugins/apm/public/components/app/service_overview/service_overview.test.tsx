@@ -8,14 +8,14 @@
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from 'src/core/public';
+import { isEqual } from 'lodash';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
-import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
+import * as useDynamicDataViewHooks from '../../../hooks/use_dynamic_data_view';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import * as useAnnotationsHooks from '../../../context/annotations/use_annotations_context';
 import * as useTransactionBreakdownHooks from '../../shared/charts/transaction_breakdown_chart/use_transaction_breakdown';
@@ -28,13 +28,31 @@ import {
   getCallApmApiSpy,
   getCreateCallApmApiSpy,
 } from '../../../services/rest/callApmApiSpy';
+import { fromQuery } from '../../shared/Links/url_helpers';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
+import { uiSettingsServiceMock } from '../../../../../../../src/core/public/mocks';
+
+const uiSettings = uiSettingsServiceMock.create().setup({} as any);
 
 const KibanaReactContext = createKibanaReactContext({
+  notifications: { toasts: { add: () => {} } },
+  uiSettings,
   usageCollection: { reportUiCounter: () => {} },
-} as Partial<CoreStart>);
+} as unknown as Partial<CoreStart>);
+
+const mockParams = {
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  latencyAggregationType: LatencyAggregationType.avg,
+};
+
+const location = {
+  pathname: '/services/test%20service%20name/overview',
+  search: fromQuery(mockParams),
+};
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  const value = ({
+  const value = {
     ...mockApmPluginContextValue,
     core: {
       ...mockApmPluginContextValue.core,
@@ -43,19 +61,13 @@ function Wrapper({ children }: { children?: ReactNode }) {
         get: () => {},
       },
     },
-  } as unknown) as ApmPluginContextValue;
+  } as unknown as ApmPluginContextValue;
 
   return (
-    <MemoryRouter keyLength={0}>
+    <MemoryRouter initialEntries={[location]}>
       <KibanaReactContext.Provider>
         <MockApmPluginContextWrapper value={value}>
-          <MockUrlParamsContextProvider
-            params={{
-              rangeFrom: 'now-15m',
-              rangeTo: 'now',
-              latencyAggregationType: LatencyAggregationType.avg,
-            }}
-          >
+          <MockUrlParamsContextProvider params={mockParams}>
             {children}
           </MockUrlParamsContextProvider>
         </MockApmPluginContextWrapper>
@@ -69,6 +81,7 @@ describe('ServiceOverview', () => {
     jest
       .spyOn(useApmServiceContextHooks, 'useApmServiceContext')
       .mockReturnValue({
+        serviceName: 'test service name',
         agentName: 'java',
         transactionType: 'request',
         transactionTypes: ['request'],
@@ -78,24 +91,61 @@ describe('ServiceOverview', () => {
       .spyOn(useAnnotationsHooks, 'useAnnotationsContext')
       .mockReturnValue({ annotations: [] });
     jest
-      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPatternFetcher')
+      .spyOn(useDynamicDataViewHooks, 'useDynamicDataViewFetcher')
       .mockReturnValue({
-        indexPattern: undefined,
+        dataView: undefined,
         status: FETCH_STATUS.SUCCESS,
       });
 
     /* eslint-disable @typescript-eslint/naming-convention */
     const calls = {
-      'GET /api/apm/services/{serviceName}/error_groups/main_statistics': {
+      'GET /internal/apm/services/{serviceName}/error_groups/main_statistics': {
         error_groups: [] as any[],
       },
-      'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics': {
-        transactionGroups: [] as any[],
-        totalTransactionGroups: 0,
-        isAggregationAccurate: true,
+      'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics':
+        {
+          transactionGroups: [] as any[],
+          totalTransactionGroups: 0,
+          isAggregationAccurate: true,
+        },
+      'GET /internal/apm/services/{serviceName}/dependencies': {
+        serviceDependencies: [],
       },
-      'GET /api/apm/services/{serviceName}/dependencies': [],
-      'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics': [],
+      'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics':
+        [],
+      'GET /internal/apm/services/{serviceName}/transactions/charts/latency': {
+        currentPeriod: {
+          overallAvgDuration: null,
+          latencyTimeseries: [],
+        },
+        previousPeriod: {
+          overallAvgDuration: null,
+          latencyTimeseries: [],
+        },
+      },
+      'GET /internal/apm/services/{serviceName}/throughput': {
+        currentPeriod: [],
+        previousPeriod: [],
+      },
+      'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate':
+        {
+          currentPeriod: {
+            transactionErrorRate: [],
+            noHits: true,
+            average: null,
+          },
+          previousPeriod: {
+            transactionErrorRate: [],
+            noHits: true,
+            average: null,
+          },
+        },
+      'GET /api/apm/services/{serviceName}/annotation/search': {
+        annotations: [],
+      },
+      'GET /internal/apm/fallback_to_transactions': {
+        fallbackToTransactions: false,
+      },
     };
     /* eslint-enable @typescript-eslint/naming-convention */
 
@@ -118,16 +168,16 @@ describe('ServiceOverview', () => {
         status: FETCH_STATUS.SUCCESS,
       });
 
-    const { findAllByText } = renderWithTheme(
-      <ServiceOverview serviceName="test service name" />,
-      {
-        wrapper: Wrapper,
-      }
-    );
+    const { findAllByText } = renderWithTheme(<ServiceOverview />, {
+      wrapper: Wrapper,
+    });
 
-    await waitFor(() =>
-      expect(callApmApiSpy).toHaveBeenCalledTimes(Object.keys(calls).length)
-    );
+    await waitFor(() => {
+      const endpoints = callApmApiSpy.mock.calls.map(
+        (call) => call[0].endpoint
+      );
+      return isEqual(endpoints.sort(), Object.keys(calls).sort());
+    });
 
     expect((await findAllByText('Latency')).length).toBeGreaterThan(0);
   });

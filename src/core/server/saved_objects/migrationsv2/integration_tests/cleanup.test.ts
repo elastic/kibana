@@ -13,7 +13,7 @@ import JSON5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { Root } from '../../../root';
 
-const logFilePath = Path.join(__dirname, 'cleanup_test.log');
+const logFilePath = Path.join(__dirname, 'cleanup.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 const asyncReadFile = Util.promisify(Fs.readFile);
@@ -28,7 +28,6 @@ function createRoot() {
     {
       migrations: {
         skip: false,
-        enableV2: true,
       },
       logging: {
         appenders: {
@@ -44,6 +43,7 @@ function createRoot() {
           {
             name: 'root',
             appenders: ['file'],
+            level: 'debug', // DEBUG logs are required to retrieve the PIT _id from the action response logs
           },
         ],
       },
@@ -98,6 +98,7 @@ describe('migration v2', () => {
     root = createRoot();
 
     esServer = await startES();
+    await root.preboot();
     const coreSetup = await root.setup();
 
     coreSetup.savedObjects.registerType({
@@ -132,7 +133,7 @@ describe('migration v2', () => {
     const pitId = logRecordWithPit.right.pitId;
     expect(pitId).toBeTruthy();
 
-    const client = esServer.es.getClient();
+    const client = esServer.es.getKibanaEsClient();
     await expect(
       client.search({
         body: {

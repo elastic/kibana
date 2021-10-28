@@ -10,10 +10,10 @@ import { setupGetConjunctionSuggestions } from './conjunction';
 import { QuerySuggestionGetFnArgs, KueryNode } from '../../../../../../../src/plugins/data/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 
-const mockKueryNode = (kueryNode: Partial<KueryNode>) => (kueryNode as unknown) as KueryNode;
+const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 
 describe('Kuery conjunction suggestions', () => {
-  const querySuggestionsArgs = (null as unknown) as QuerySuggestionGetFnArgs;
+  const querySuggestionsArgs = null as unknown as QuerySuggestionGetFnArgs;
   let getSuggestions: ReturnType<typeof setupGetConjunctionSuggestions>;
 
   beforeEach(() => {

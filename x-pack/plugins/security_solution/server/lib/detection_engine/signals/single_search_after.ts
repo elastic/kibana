@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { performance } from 'perf_hooks';
 import {
   AlertInstanceContext,
@@ -16,10 +16,7 @@ import type { SignalSearchResponse, SignalSource } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
-import {
-  SortOrderOrUndefined,
-  TimestampOverrideOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
@@ -30,10 +27,11 @@ interface SingleSearchAfterParams {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   pageSize: number;
-  sortOrder?: SortOrderOrUndefined;
+  sortOrder?: estypes.SearchSortOrder;
   filter: estypes.QueryDslQueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
+  trackTotalHits?: boolean;
 }
 
 // utilize search_after for paging results into bulk.
@@ -50,6 +48,7 @@ export const singleSearchAfter = async ({
   sortOrder,
   timestampOverride,
   buildRuleMessage,
+  trackTotalHits,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -66,18 +65,20 @@ export const singleSearchAfter = async ({
       sortOrder,
       searchAfterSortIds,
       timestampOverride,
+      trackTotalHits,
     });
 
     const start = performance.now();
-    const {
-      body: nextSearchAfterResult,
-    } = await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
-      searchAfterQuery as estypes.SearchRequest
-    );
+    const { body: nextSearchAfterResult } =
+      await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
+        searchAfterQuery as estypes.SearchRequest
+      );
     const end = performance.now();
+
     const searchErrors = createErrorsFromShard({
       errors: nextSearchAfterResult._shards.failures ?? [],
     });
+
     return {
       searchResult: nextSearchAfterResult,
       searchDuration: makeFloatString(end - start),

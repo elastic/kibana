@@ -8,7 +8,6 @@
 
 export * from './query/types';
 export * from './kbn_field_types/types';
-export * from './index_patterns/types';
 
 /**
  * If a service is being shared on both the client and the server, and
@@ -21,3 +20,9 @@ export * from './index_patterns/types';
  * not possible.
  */
 export type GetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+
+type FilterFormatterFunction = (value: any) => string;
+export interface FilterValueFormatter {
+  convert: FilterFormatterFunction;
+  getConverterFor: (type: string) => FilterFormatterFunction;
+}

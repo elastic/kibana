@@ -15,7 +15,8 @@ import {
 import { InstanceDetails } from './intance_details';
 import * as useInstanceDetailsFetcher from './use_instance_details_fetcher';
 
-type ServiceInstanceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
+type ServiceInstanceDetails =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 describe('InstanceDetails', () => {
   it('renders loading spinner when data is being fetched', () => {
@@ -23,7 +24,7 @@ describe('InstanceDetails', () => {
       .spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher')
       .mockReturnValue({ data: undefined, status: FETCH_STATUS.LOADING });
     const { getByTestId } = renderWithTheme(
-      <InstanceDetails serviceName="foo" serviceNodeName="bar" />
+      <InstanceDetails serviceName="foo" serviceNodeName="bar" kuery="" />
     );
     expect(getByTestId('loadingSpinner')).toBeInTheDocument();
   });
@@ -40,7 +41,7 @@ describe('InstanceDetails', () => {
         status: FETCH_STATUS.SUCCESS,
       });
     const component = renderWithTheme(
-      <InstanceDetails serviceName="foo" serviceNodeName="bar" />
+      <InstanceDetails serviceName="foo" serviceNodeName="bar" kuery="" />
     );
     expectTextsInDocument(component, ['Service', 'Container', 'Cloud']);
   });
@@ -56,7 +57,7 @@ describe('InstanceDetails', () => {
         status: FETCH_STATUS.SUCCESS,
       });
     const component = renderWithTheme(
-      <InstanceDetails serviceName="foo" serviceNodeName="bar" />
+      <InstanceDetails serviceName="foo" serviceNodeName="bar" kuery="" />
     );
     expectTextsInDocument(component, ['Container', 'Cloud']);
     expectTextsNotInDocument(component, ['Service']);
@@ -73,7 +74,7 @@ describe('InstanceDetails', () => {
         status: FETCH_STATUS.SUCCESS,
       });
     const component = renderWithTheme(
-      <InstanceDetails serviceName="foo" serviceNodeName="bar" />
+      <InstanceDetails serviceName="foo" serviceNodeName="bar" kuery="" />
     );
     expectTextsInDocument(component, ['Service', 'Cloud']);
     expectTextsNotInDocument(component, ['Container']);
@@ -90,7 +91,7 @@ describe('InstanceDetails', () => {
         status: FETCH_STATUS.SUCCESS,
       });
     const component = renderWithTheme(
-      <InstanceDetails serviceName="foo" serviceNodeName="bar" />
+      <InstanceDetails serviceName="foo" serviceNodeName="bar" kuery="" />
     );
     expectTextsInDocument(component, ['Service', 'Container']);
     expectTextsNotInDocument(component, ['Cloud']);

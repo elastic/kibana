@@ -7,14 +7,15 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { Logger } from 'src/core/server';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
 import {
-  Query,
-  IIndexPattern,
   fromKueryExpression,
   toElasticsearchQuery,
   luceneStringToDsl,
-} from '../../../../../../src/plugins/data/common';
+  IndexPatternBase,
+  Query,
+} from '@kbn/es-query';
 
 export const OTHER_CATEGORY = 'other';
 // Consider dynamically obtaining from config?
@@ -22,7 +23,7 @@ const MAX_TOP_LEVEL_QUERY_SIZE = 0;
 const MAX_SHAPES_QUERY_SIZE = 10000;
 const MAX_BUCKETS_LIMIT = 65535;
 
-export const getEsFormattedQuery = (query: Query, indexPattern?: IIndexPattern) => {
+export const getEsFormattedQuery = (query: Query, indexPattern?: IndexPatternBase) => {
   let esFormattedQuery;
 
   const queryLanguage = query.language;
@@ -49,7 +50,7 @@ export async function getShapesFilters(
   const shapesIdsNamesMap: Record<string, unknown> = {};
   // Get all shapes in index
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { body: boundaryData }: ApiResponse<Record<string, any>> = await esClient.search({
+  const { body: boundaryData }: TransportResult<Record<string, any>> = await esClient.search({
     index: boundaryIndexTitle,
     body: {
       size: MAX_SHAPES_QUERY_SIZE,
@@ -151,7 +152,14 @@ export async function executeEsQueryFactory(
                           },
                         },
                       ],
-                      docvalue_fields: [entity, dateField, geoField],
+                      docvalue_fields: [
+                        entity,
+                        {
+                          field: dateField,
+                          format: 'strict_date_optional_time',
+                        },
+                        geoField,
+                      ],
                       _source: false,
                     },
                   },

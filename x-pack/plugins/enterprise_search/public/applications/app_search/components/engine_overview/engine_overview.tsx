@@ -20,10 +20,10 @@ export const EngineOverview: React.FC = () => {
   const {
     myRole: { canManageEngineDocuments, canViewEngineCredentials },
   } = useValues(AppLogic);
-  const { isEngineEmpty, isMetaEngine } = useValues(EngineLogic);
+  const { hasNoDocuments, isMetaEngine } = useValues(EngineLogic);
 
   const canAddDocuments = canManageEngineDocuments && canViewEngineCredentials;
-  const showEngineOverview = !isEngineEmpty || !canAddDocuments || isMetaEngine;
+  const showEngineOverview = !hasNoDocuments || !canAddDocuments || isMetaEngine;
 
   return showEngineOverview ? <EngineOverviewMetrics /> : <EmptyEngineOverview />;
 };

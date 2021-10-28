@@ -9,26 +9,46 @@ import React, { memo, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useTestIdGenerator } from '../../../../management/components/hooks/use_test_id_generator';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 export interface EndpointHostIsolationStatusProps {
   isIsolated: boolean;
   /** the count of pending isolate actions */
   pendingIsolate?: number;
-  /** the count of pending unisoalte actions */
+  /** the count of pending unisolate actions */
   pendingUnIsolate?: number;
   'data-test-subj'?: string;
 }
 
 /**
- * Component will display a host isoaltion status based on whether it is currently isolated or there are
+ * Component will display a host isolation status based on whether it is currently isolated or there are
  * isolate/unisolate actions pending. If none of these are applicable, no UI component will be rendered
  * (`null` is returned)
  */
 export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps>(
   ({ isIsolated, pendingIsolate = 0, pendingUnIsolate = 0, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const isPendingStatuseDisabled = useIsExperimentalFeatureEnabled(
+      'disableIsolationUIPendingStatuses'
+    );
 
     return useMemo(() => {
+      if (isPendingStatuseDisabled) {
+        // If nothing is pending and host is not currently isolated, then render nothing
+        if (!isIsolated) {
+          return null;
+        }
+
+        return (
+          <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.hostIsolationStatus.isolated"
+              defaultMessage="Isolated"
+            />
+          </EuiBadge>
+        );
+      }
+
       // If nothing is pending and host is not currently isolated, then render nothing
       if (!isIsolated && !pendingIsolate && !pendingUnIsolate) {
         return null;
@@ -112,7 +132,14 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
           </EuiTextColor>
         </EuiBadge>
       );
-    }, [dataTestSubj, getTestId, isIsolated, pendingIsolate, pendingUnIsolate]);
+    }, [
+      dataTestSubj,
+      getTestId,
+      isIsolated,
+      isPendingStatuseDisabled,
+      pendingIsolate,
+      pendingUnIsolate,
+    ]);
   }
 );
 

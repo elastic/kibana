@@ -9,7 +9,7 @@ export function getYRange(chartData?: any[]) {
   const fit = false;
 
   if (chartData === undefined) {
-    return { fit };
+    return { fit, min: NaN, max: NaN };
   }
 
   if (chartData.length === 0) {

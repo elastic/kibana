@@ -48,9 +48,11 @@ export const OverviewPageFooter: FC<Props> = ({
         className="kbnOverviewPageFooter__button"
         flush="both"
         iconType="home"
-        size="xs"
+        size="s"
         onClick={(event: MouseEvent) => {
-          application.navigateToUrl(addBasePath('/app/management/kibana/settings#defaultRoute'));
+          application.navigateToUrl(
+            addBasePath('/app/management/kibana/settings?query=default+route')
+          );
           if (onChangeDefaultRoute) {
             onChangeDefaultRoute(event);
           }
@@ -78,7 +80,7 @@ export const OverviewPageFooter: FC<Props> = ({
           onSetDefaultRoute(event);
         }
       }}
-      size="xs"
+      size="s"
     >
       <FormattedMessage
         id="kibana-react.pageFooter.makeDefaultRouteLink"

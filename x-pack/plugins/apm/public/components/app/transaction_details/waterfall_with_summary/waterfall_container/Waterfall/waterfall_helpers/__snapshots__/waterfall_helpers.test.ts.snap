@@ -912,11 +912,7 @@ Object {
       "skew": 0,
     },
   ],
-  "errorsCount": 1,
-  "errorsPerTransaction": Object {
-    "myTransactionId1": 2,
-    "myTransactionId2": 3,
-  },
+  "getErrorCount": [Function],
   "items": Array [
     Object {
       "color": "",
@@ -2188,11 +2184,7 @@ Object {
     "skew": 0,
   },
   "errorItems": Array [],
-  "errorsCount": 0,
-  "errorsPerTransaction": Object {
-    "myTransactionId1": 2,
-    "myTransactionId2": 3,
-  },
+  "getErrorCount": [Function],
   "items": Array [
     Object {
       "color": "",

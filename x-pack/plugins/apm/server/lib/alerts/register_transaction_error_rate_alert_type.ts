@@ -7,10 +7,17 @@
 
 import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
+import type {
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
+  ALERT_REASON as ALERT_REASON_TYPED,
+} from '@kbn/rule-data-utils';
 import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+  ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
+  ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
+  ALERT_REASON as ALERT_REASON_NON_TYPED,
+  // @ts-expect-error
+} from '@kbn/rule-data-utils/target_node/technical_field_names';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -21,6 +28,7 @@ import {
   AlertType,
   ALERT_TYPES_CONFIG,
   APM_SERVER_FEATURE_ID,
+  formatTransactionErrorRateReason,
 } from '../../../common/alert_types';
 import {
   EVENT_OUTCOME,
@@ -32,11 +40,20 @@ import {
 import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { asDecimalOrInteger } from '../../../common/utils/formatters';
-import { environmentQuery } from '../../../server/utils/queries';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
+import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
+import { getDocumentTypeFilterForTransactions } from '../helpers/transactions';
+import { asPercent } from '../../../../observability/common/utils/formatters';
+
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
+  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
+  ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -89,9 +106,20 @@ export function registerTransactionErrorRateAlertType({
           savedObjectsClient: services.savedObjectsClient,
         });
 
+        // only query transaction events when set to 'never',
+        // to prevent (likely) unnecessary blocking request
+        // in rule execution
+        const searchAggregatedTransactions =
+          config.searchAggregatedTransactions !==
+          SearchAggregatedTransactionSetting.never;
+
+        const index = searchAggregatedTransactions
+          ? indices.metric
+          : indices.transaction;
+
         const searchParams = {
-          index: indices['apm_oss.transactionIndices'],
-          size: 1,
+          index,
+          size: 0,
           body: {
             query: {
               bool: {
@@ -103,7 +131,9 @@ export function registerTransactionErrorRateAlertType({
                       },
                     },
                   },
-                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+                  ...getDocumentTypeFilterForTransactions(
+                    searchAggregatedTransactions
+                  ),
                   {
                     terms: {
                       [EVENT_OUTCOME]: [
@@ -185,12 +215,8 @@ export function registerTransactionErrorRateAlertType({
           .filter((result) => result.errorRate >= alertParams.threshold);
 
         results.forEach((result) => {
-          const {
-            serviceName,
-            environment,
-            transactionType,
-            errorRate,
-          } = result;
+          const { serviceName, environment, transactionType, errorRate } =
+            result;
 
           services
             .alertWithLifecycle({
@@ -209,6 +235,12 @@ export function registerTransactionErrorRateAlertType({
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
                 [ALERT_EVALUATION_VALUE]: errorRate,
                 [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
+                [ALERT_REASON]: formatTransactionErrorRateReason({
+                  threshold: alertParams.threshold,
+                  measured: errorRate,
+                  asPercent,
+                  serviceName,
+                }),
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {

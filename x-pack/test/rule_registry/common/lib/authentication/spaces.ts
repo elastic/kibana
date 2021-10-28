@@ -19,7 +19,13 @@ const space2: Space = {
   disabledFeatures: [],
 };
 
-export const spaces: Space[] = [space1, space2];
+const other: Space = {
+  id: 'other',
+  name: 'Other Space',
+  disabledFeatures: [],
+};
+
+export const spaces: Space[] = [space1, space2, other];
 
 export const getSpaceUrlPrefix = (spaceId?: string) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;

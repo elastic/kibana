@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -15,31 +16,28 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
-import {
-  environmentQuery,
-  kqlQuery,
-  rangeQuery,
-} from '../../../../server/utils/queries';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../../helpers/transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
-import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import {
-  calculateTransactionErrorPercentage,
+  calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
 
 interface AggregationParams {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   maxNumServices: number;
+  start: number;
+  end: number;
 }
 
 export async function getServiceTransactionStats({
@@ -48,15 +46,17 @@ export async function getServiceTransactionStats({
   setup,
   searchAggregatedTransactions,
   maxNumServices,
+  start,
+  end,
 }: AggregationParams) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
 
   const outcomes = getOutcomeAggregation();
 
   const metrics = {
     avg_duration: {
       avg: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
+        field: getTransactionDurationFieldForTransactions(
           searchAggregatedTransactions
         ),
       },
@@ -69,9 +69,7 @@ export async function getServiceTransactionStats({
     {
       apm: {
         events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
+          getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
       body: {
@@ -79,7 +77,7 @@ export async function getServiceTransactionStats({
         query: {
           bool: {
             filter: [
-              ...getDocumentTypeFilterForAggregatedTransactions(
+              ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
               ...rangeQuery(start, end),
@@ -114,20 +112,6 @@ export async function getServiceTransactionStats({
                       },
                     },
                   },
-                  timeseries: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: getBucketSizeForAggregatedTransactions({
-                        start,
-                        end,
-                        numBuckets: 20,
-                        searchAggregatedTransactions,
-                      }).intervalString,
-                      min_doc_count: 0,
-                      extended_bounds: { min: start, max: end },
-                    },
-                    aggs: metrics,
-                  },
                 },
               },
             },
@@ -154,43 +138,15 @@ export async function getServiceTransactionStats({
         agentName: topTransactionTypeBucket.sample.top[0].metrics[
           AGENT_NAME
         ] as AgentName,
-        avgResponseTime: {
-          value: topTransactionTypeBucket.avg_duration.value,
-          timeseries: topTransactionTypeBucket.timeseries.buckets.map(
-            (dateBucket) => ({
-              x: dateBucket.key,
-              y: dateBucket.avg_duration.value,
-            })
-          ),
-        },
-        transactionErrorRate: {
-          value: calculateTransactionErrorPercentage(
-            topTransactionTypeBucket.outcomes
-          ),
-          timeseries: topTransactionTypeBucket.timeseries.buckets.map(
-            (dateBucket) => ({
-              x: dateBucket.key,
-              y: calculateTransactionErrorPercentage(dateBucket.outcomes),
-            })
-          ),
-        },
-        transactionsPerMinute: {
-          value: calculateThroughput({
-            start,
-            end,
-            value: topTransactionTypeBucket.doc_count,
-          }),
-          timeseries: topTransactionTypeBucket.timeseries.buckets.map(
-            (dateBucket) => ({
-              x: dateBucket.key,
-              y: calculateThroughput({
-                start,
-                end,
-                value: dateBucket.doc_count,
-              }),
-            })
-          ),
-        },
+        latency: topTransactionTypeBucket.avg_duration.value,
+        transactionErrorRate: calculateFailedTransactionRate(
+          topTransactionTypeBucket.outcomes
+        ),
+        throughput: calculateThroughput({
+          start,
+          end,
+          value: topTransactionTypeBucket.doc_count,
+        }),
       };
     }) ?? []
   );

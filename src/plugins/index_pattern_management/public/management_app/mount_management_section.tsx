@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route, Redirect } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -20,7 +20,6 @@ import {
   IndexPatternTableWithRouter,
   EditIndexPatternContainer,
   CreateEditFieldContainer,
-  CreateIndexPatternWizardWithRouter,
 } from '../components';
 import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
 import { IndexPatternManagmentContext } from '../types';
@@ -29,8 +28,8 @@ const readOnlyBadge = {
   text: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.text', {
     defaultMessage: 'Read only',
   }),
-  tooltip: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.tooltip', {
-    defaultMessage: 'Unable to save index patterns',
+  tooltip: i18n.translate('indexPatternManagement.dataViews.badge.readOnly.tooltip', {
+    defaultMessage: 'Unable to save data views',
   }),
   iconType: 'glasses',
 };
@@ -41,7 +40,7 @@ export async function mountManagementSection(
 ) {
   const [
     { chrome, application, uiSettings, notifications, overlays, http, docLinks },
-    { data, indexPatternFieldEditor },
+    { data, indexPatternFieldEditor, indexPatternEditor },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
@@ -63,6 +62,7 @@ export async function mountManagementSection(
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
     fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
+    IndexPatternEditor: indexPatternEditor.IndexPatternEditorComponent,
   };
 
   ReactDOM.render(
@@ -71,14 +71,15 @@ export async function mountManagementSection(
         <Router history={params.history}>
           <Switch>
             <Route path={['/create']}>
-              <CreateIndexPatternWizardWithRouter />
+              <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
             </Route>
-            <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
+            <Route path={['/dataView/:id/field/:fieldName', '/dataView/:id/create-field/']}>
               <CreateEditFieldContainer />
             </Route>
-            <Route path={['/patterns/:id']}>
+            <Route path={['/dataView/:id']}>
               <EditIndexPatternContainer />
             </Route>
+            <Redirect path={'/patterns*'} to={'dataView*'} />
             <Route path={['/']}>
               <IndexPatternTableWithRouter canSave={canSave} />
             </Route>

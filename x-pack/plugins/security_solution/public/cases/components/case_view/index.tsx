@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { SearchResponse } from 'elasticsearch';
-import { isEmpty } from 'lodash';
-
 import {
   getCaseDetailsUrl,
   getCaseDetailsUrlWithCommentId,
@@ -18,21 +15,19 @@ import {
   getRuleDetailsUrl,
   useFormatUrl,
 } from '../../../common/components/link_to';
-import { Ecs } from '../../../../common/ecs';
 import { Case, CaseViewRefreshPropInterface } from '../../../../../cases/common';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
-import { KibanaServices, useKibana } from '../../../common/lib/kibana';
-import { APP_ID, DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
-import { buildAlertsQuery, formatAlertToEcsSignal, useFetchAlertData } from './helpers';
+import { useFetchAlertData } from './helpers';
 import { SEND_ALERT_TO_TIMELINE } from './translations';
 import { useInsertTimeline } from '../use_insert_timeline';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 import { CaseDetailsRefreshContext } from '../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { getEndpointDetailsPath } from '../../../management/common/routing';
@@ -41,6 +36,7 @@ interface Props {
   caseId: string;
   subCaseId?: string;
   userCanCrud: boolean;
+  onCaseDataSuccess: (data: Case) => void;
 }
 
 export interface OnUpdateFields {
@@ -63,6 +59,7 @@ const TimelineDetailsPanel = () => {
     <DetailsPanel
       browserFields={browserFields}
       docValueFields={docValueFields}
+      entityType="events"
       isFlyoutView
       timelineId={TimelineId.casePage}
     />
@@ -70,213 +67,174 @@ const TimelineDetailsPanel = () => {
 };
 
 const InvestigateInTimelineActionComponent = (alertIds: string[]) => {
-  const fetchEcsAlertsData = async (fetchAlertIds?: string[]): Promise<Ecs[]> => {
-    if (isEmpty(fetchAlertIds)) {
-      return [];
-    }
-    const alertResponse = await KibanaServices.get().http.fetch<
-      SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
-    >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
-      method: 'POST',
-      body: JSON.stringify(buildAlertsQuery(fetchAlertIds ?? [])),
-    });
-    return (
-      alertResponse?.hits.hits.reduce<Ecs[]>(
-        (acc, { _id, _index, _source }) => [
-          ...acc,
-          {
-            ...formatAlertToEcsSignal(_source as {}),
-            _id,
-            _index,
-            timestamp: _source['@timestamp'],
-          },
-        ],
-        []
-      ) ?? []
-    );
-  };
-
   return (
     <InvestigateInTimelineAction
       ariaLabel={SEND_ALERT_TO_TIMELINE}
       alertIds={alertIds}
       key="investigate-in-timeline"
       ecsRowData={null}
-      fetchEcsAlertsData={fetchEcsAlertsData}
       nonEcsRowData={[]}
     />
   );
 };
 
-export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
-  const [spyState, setSpyState] = useState<{ caseTitle: string | undefined }>({
-    caseTitle: undefined,
-  });
+export const CaseView = React.memo(
+  ({ caseId, subCaseId, userCanCrud, onCaseDataSuccess }: Props) => {
+    const {
+      cases: casesUi,
+      application: { navigateToApp },
+    } = useKibana().services;
+    const dispatch = useDispatch();
+    const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
+    const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
+      SecurityPageName.rules
+    );
 
-  const onCaseDataSuccess = useCallback(
-    (data: Case) => {
-      if (spyState.caseTitle === undefined) {
-        setSpyState({ caseTitle: data.title });
-      }
-    },
-    [spyState.caseTitle]
-  );
+    const allCasesLink = getCaseUrl(search);
+    const formattedAllCasesLink = formatUrl(allCasesLink);
+    const configureCasesHref = formatUrl(getConfigureCasesUrl());
 
-  const {
-    cases: casesUi,
-    application: { navigateToApp },
-  } = useKibana().services;
-  const dispatch = useDispatch();
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
-  const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
-    SecurityPageName.rules
-  );
+    const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
+    const getCaseDetailHrefWithCommentId = (commentId: string) =>
+      formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId, subCaseId }), {
+        absolute: true,
+      });
 
-  const allCasesLink = getCaseUrl(search);
-  const formattedAllCasesLink = formatUrl(allCasesLink);
-  const configureCasesHref = formatUrl(getConfigureCasesUrl());
+    const getDetectionsRuleDetailsHref = useCallback(
+      (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
+      [detectionsFormatUrl, detectionsUrlSearch]
+    );
 
-  const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
-  const getCaseDetailHrefWithCommentId = (commentId: string) =>
-    formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId, subCaseId }), {
-      absolute: true,
-    });
+    const showAlertDetails = useCallback(
+      (alertId: string, index: string) => {
+        dispatch(
+          timelineActions.toggleDetailPanel({
+            panelView: 'eventDetail',
+            timelineId: TimelineId.casePage,
+            params: {
+              eventId: alertId,
+              indexName: index,
+            },
+          })
+        );
+      },
+      [dispatch]
+    );
 
-  const getDetectionsRuleDetailsHref = useCallback(
-    (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
-    [detectionsFormatUrl, detectionsUrlSearch]
-  );
-
-  const showAlertDetails = useCallback(
-    (alertId: string, index: string) => {
-      dispatch(
-        timelineActions.toggleDetailPanel({
-          panelView: 'eventDetail',
-          timelineId: TimelineId.casePage,
-          params: {
-            eventId: alertId,
-            indexName: index,
-          },
+    const endpointDetailsHref = (endpointId: string) =>
+      formatUrl(
+        getEndpointDetailsPath({
+          name: 'endpointActivityLog',
+          selected_endpoint: endpointId,
         })
       );
-    },
-    [dispatch]
-  );
 
-  const endpointDetailsHref = (endpointId: string) =>
-    formatUrl(
-      getEndpointDetailsPath({
-        name: 'endpointActivityLog',
-        selected_endpoint: endpointId,
-      })
+    const onComponentInitialized = useCallback(() => {
+      dispatch(
+        timelineActions.createTimeline({
+          id: TimelineId.casePage,
+          columns: [],
+          indexNames: [],
+          expandedDetail: {},
+          show: false,
+        })
+      );
+    }, [dispatch]);
+
+    const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
+
+    return (
+      <CaseDetailsRefreshContext.Provider value={refreshRef}>
+        {casesUi.getCaseView({
+          refreshRef,
+          allCasesNavigation: {
+            href: formattedAllCasesLink,
+            onClick: async (e) => {
+              if (e) {
+                e.preventDefault();
+              }
+              return navigateToApp(APP_UI_ID, {
+                deepLinkId: SecurityPageName.case,
+                path: allCasesLink,
+              });
+            },
+          },
+          caseDetailsNavigation: {
+            href: caseDetailsLink,
+            onClick: async (e) => {
+              if (e) {
+                e.preventDefault();
+              }
+              return navigateToApp(APP_UI_ID, {
+                deepLinkId: SecurityPageName.case,
+                path: getCaseDetailsUrl({ id: caseId }),
+              });
+            },
+          },
+          caseId,
+          configureCasesNavigation: {
+            href: configureCasesHref,
+            onClick: async (e) => {
+              if (e) {
+                e.preventDefault();
+              }
+              return navigateToApp(APP_UI_ID, {
+                deepLinkId: SecurityPageName.case,
+                path: getConfigureCasesUrl(search),
+              });
+            },
+          },
+          getCaseDetailHrefWithCommentId,
+          onCaseDataSuccess,
+          onComponentInitialized,
+          actionsNavigation: {
+            href: endpointDetailsHref,
+            onClick: (endpointId: string, e) => {
+              if (e) {
+                e.preventDefault();
+              }
+              return navigateToApp(APP_UI_ID, {
+                path: getEndpointDetailsPath({
+                  name: 'endpointActivityLog',
+                  selected_endpoint: endpointId,
+                }),
+              });
+            },
+          },
+          ruleDetailsNavigation: {
+            href: getDetectionsRuleDetailsHref,
+            onClick: async (ruleId: string | null | undefined, e) => {
+              if (e) {
+                e.preventDefault();
+              }
+              return navigateToApp(APP_UI_ID, {
+                deepLinkId: SecurityPageName.rules,
+                path: getRuleDetailsUrl(ruleId ?? ''),
+              });
+            },
+          },
+          showAlertDetails,
+          subCaseId,
+          timelineIntegration: {
+            editor_plugins: {
+              parsingPlugin: timelineMarkdownPlugin.parser,
+              processingPluginRenderer: timelineMarkdownPlugin.renderer,
+              uiPlugin: timelineMarkdownPlugin.plugin,
+            },
+            hooks: {
+              useInsertTimeline,
+            },
+            ui: {
+              renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
+              renderTimelineDetailsPanel: TimelineDetailsPanel,
+            },
+          },
+          useFetchAlertData,
+          userCanCrud,
+        })}
+      </CaseDetailsRefreshContext.Provider>
     );
-
-  const onComponentInitialized = useCallback(() => {
-    dispatch(
-      timelineActions.createTimeline({
-        id: TimelineId.casePage,
-        columns: [],
-        indexNames: [],
-        expandedDetail: {},
-        show: false,
-      })
-    );
-  }, [dispatch]);
-
-  const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
-
-  return (
-    <CaseDetailsRefreshContext.Provider value={refreshRef}>
-      {casesUi.getCaseView({
-        refreshRef,
-        allCasesNavigation: {
-          href: formattedAllCasesLink,
-          onClick: async (e) => {
-            if (e) {
-              e.preventDefault();
-            }
-            return navigateToApp(APP_ID, {
-              deepLinkId: SecurityPageName.case,
-              path: allCasesLink,
-            });
-          },
-        },
-        caseDetailsNavigation: {
-          href: caseDetailsLink,
-          onClick: async (e) => {
-            if (e) {
-              e.preventDefault();
-            }
-            return navigateToApp(APP_ID, {
-              deepLinkId: SecurityPageName.case,
-              path: getCaseDetailsUrl({ id: caseId }),
-            });
-          },
-        },
-        caseId,
-        configureCasesNavigation: {
-          href: configureCasesHref,
-          onClick: async (e) => {
-            if (e) {
-              e.preventDefault();
-            }
-            return navigateToApp(APP_ID, {
-              deepLinkId: SecurityPageName.case,
-              path: getConfigureCasesUrl(search),
-            });
-          },
-        },
-        getCaseDetailHrefWithCommentId,
-        onCaseDataSuccess,
-        onComponentInitialized,
-        actionsNavigation: {
-          href: endpointDetailsHref,
-          onClick: (endpointId: string, e) => {
-            if (e) {
-              e.preventDefault();
-            }
-            return navigateToApp(APP_ID, {
-              path: getEndpointDetailsPath({
-                name: 'endpointActivityLog',
-                selected_endpoint: endpointId,
-              }),
-            });
-          },
-        },
-        ruleDetailsNavigation: {
-          href: getDetectionsRuleDetailsHref,
-          onClick: async (ruleId: string | null | undefined, e) => {
-            if (e) {
-              e.preventDefault();
-            }
-            return navigateToApp(APP_ID, {
-              deepLinkId: SecurityPageName.rules,
-              path: getRuleDetailsUrl(ruleId ?? ''),
-            });
-          },
-        },
-        showAlertDetails,
-        subCaseId,
-        timelineIntegration: {
-          editor_plugins: {
-            parsingPlugin: timelineMarkdownPlugin.parser,
-            processingPluginRenderer: timelineMarkdownPlugin.renderer,
-            uiPlugin: timelineMarkdownPlugin.plugin,
-          },
-          hooks: {
-            useInsertTimeline,
-          },
-          ui: {
-            renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
-            renderTimelineDetailsPanel: TimelineDetailsPanel,
-          },
-        },
-        useFetchAlertData,
-        userCanCrud,
-      })}
-      <SpyRoute state={spyState} pageName={SecurityPageName.case} />
-    </CaseDetailsRefreshContext.Provider>
-  );
-});
+  }
+);
 
 CaseView.displayName = 'CaseView';

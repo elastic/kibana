@@ -219,7 +219,7 @@ export const ROLE_MAPPINGS_HEADING_BUTTON = i18n.translate(
 
 export const ROLE_MAPPINGS_NO_RESULTS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.noResults.message',
-  { defaultMessage: 'Create a new role mapping' }
+  { defaultMessage: 'No matching role mappings found' }
 );
 
 export const ROLES_DISABLED_TITLE = i18n.translate(
@@ -318,7 +318,7 @@ export const USERS_HEADING_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.usersHeadingDescription',
   {
     defaultMessage:
-      'User management provides granular access for individual or special permission needs. Users from federated sources such as SAML are managed by role mappings, and excluded from this list.',
+      'User management provides granular access for individual or special permission needs. Some users may be excluded from this list. These include users from federated sources such as SAML, which are managed by role mappings, and built-in user accounts such as the “elastic” or “enterprise_search” users.',
   }
 );
 
@@ -448,3 +448,25 @@ export const SMTP_CALLOUT_LABEL = i18n.translate(
 export const SMTP_LINK_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.smtpLinkLabel', {
   defaultMessage: 'SMTP configuration is provided',
 });
+
+export const KIBANA_ACCESS_WARNING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.kibanaAccessWarningTitle',
+  {
+    defaultMessage: 'Kibana access warning',
+  }
+);
+
+export const KIBANA_ACCESS_WARNING_ERROR_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.kibanaAccessWarningErrorMessage',
+  {
+    defaultMessage:
+      'This Elasticsearch user does not have an Enterprise Search role in Elasticsearch. They may not have access to Kibana.',
+  }
+);
+
+export const KIBANA_ACCESS_WARNING_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.kibanaAccessWarningDescription',
+  {
+    defaultMessage: 'Consider giving them the "enterprise-search-user" role.',
+  }
+);

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useShowCharts, CheckboxShowCharts } from './checkbox_showcharts';
+export { CheckboxShowCharts } from './checkbox_showcharts';

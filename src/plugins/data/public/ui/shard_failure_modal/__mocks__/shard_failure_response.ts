@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export const shardFailureResponse: SearchResponse<any> = {
+export const shardFailureResponse: estypes.SearchResponse<any> = {
   _shards: {
     total: 2,
     successful: 1,

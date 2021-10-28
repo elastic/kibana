@@ -6,10 +6,11 @@
  */
 
 import _ from 'lodash';
+import { Ecs } from '../../../common/ecs';
 import { generateMockDetailItemData } from '../mock';
-import { endpointAlertCheck } from './endpoint_alert_check';
+import { isAlertFromEndpointAlert, isAlertFromEndpointEvent } from './endpoint_alert_check';
 
-describe('Endpoint Alert Check Utility', () => {
+describe('isAlertFromEndpointEvent', () => {
   let mockDetailItemData: ReturnType<typeof generateMockDetailItemData>;
 
   beforeEach(() => {
@@ -21,8 +22,8 @@ describe('Endpoint Alert Check Utility', () => {
     mockDetailItemData.push(
       // Must be an Alert
       {
-        field: 'signal.rule.id',
-        category: 'signal',
+        field: 'kibana.alert.rule.uuid',
+        category: 'kibana',
         originalValue: 'endpoint',
         values: ['endpoint'],
         isObjectArray: false,
@@ -38,16 +39,47 @@ describe('Endpoint Alert Check Utility', () => {
   });
 
   it('should return true if detections data comes from an endpoint rule', () => {
-    expect(endpointAlertCheck({ data: mockDetailItemData })).toBe(true);
+    expect(isAlertFromEndpointEvent({ data: mockDetailItemData })).toBe(true);
   });
 
   it('should return false if it is not an Alert (ex. maybe an event)', () => {
-    _.remove(mockDetailItemData, { field: 'signal.rule.id' });
-    expect(endpointAlertCheck({ data: mockDetailItemData })).toBeFalsy();
+    _.remove(mockDetailItemData, { field: 'kibana.alert.rule.uuid' });
+    expect(isAlertFromEndpointEvent({ data: mockDetailItemData })).toBeFalsy();
   });
 
   it('should return false if it is not an endpoint agent', () => {
     _.remove(mockDetailItemData, { field: 'agent.type' });
-    expect(endpointAlertCheck({ data: mockDetailItemData })).toBeFalsy();
+    expect(isAlertFromEndpointEvent({ data: mockDetailItemData })).toBeFalsy();
+  });
+});
+
+describe('isAlertFromEndpointAlert', () => {
+  it('should return true if detections data comes from an endpoint rule', () => {
+    const mockEcsData = {
+      _id: 'mockId',
+      'kibana.alert.original_event.module': ['endpoint'],
+      'kibana.alert.original_event.kind': ['alert'],
+    } as Ecs;
+    expect(isAlertFromEndpointAlert({ ecsData: mockEcsData })).toBe(true);
+  });
+
+  it('should return false if ecsData is undefined', () => {
+    expect(isAlertFromEndpointAlert({ ecsData: undefined })).toBeFalsy();
+  });
+
+  it('should return false if it is not an Alert', () => {
+    const mockEcsData = {
+      _id: 'mockId',
+      'kibana.alert.original_event.module': ['endpoint'],
+    } as Ecs;
+    expect(isAlertFromEndpointAlert({ ecsData: mockEcsData })).toBeFalsy();
+  });
+
+  it('should return false if it is not an endpoint module', () => {
+    const mockEcsData = {
+      _id: 'mockId',
+      'kibana.alert.original_event.kind': ['alert'],
+    } as Ecs;
+    expect(isAlertFromEndpointAlert({ ecsData: mockEcsData })).toBeFalsy();
   });
 });

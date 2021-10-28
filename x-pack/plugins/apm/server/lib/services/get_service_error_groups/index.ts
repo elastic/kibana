@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { ValuesType } from 'utility-types';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_GROUP_ID,
@@ -22,10 +16,12 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getErrorName } from '../../helpers/get_error_name';
-import { withApmSpan } from '../../../utils/with_apm_span';
+import { Setup } from '../../helpers/setup_request';
 
 export type ServiceErrorGroupItem = ValuesType<
   PromiseReturnType<typeof getServiceErrorGroups>
@@ -42,20 +38,24 @@ export async function getServiceErrorGroups({
   sortDirection,
   sortField,
   transactionType,
+  start,
+  end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   size: number;
   pageIndex: number;
   numBuckets: number;
   sortDirection: 'asc' | 'desc';
-  sortField: 'name' | 'last_seen' | 'occurrences';
+  sortField: 'name' | 'lastSeen' | 'occurrences';
   transactionType: string;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_service_error_groups', async () => {
-    const { apmEventClient, start, end } = setup;
+    const { apmEventClient } = setup;
 
     const { intervalString } = getBucketSize({ start, end, numBuckets });
 
@@ -91,11 +91,11 @@ export async function getServiceErrorGroups({
                 sample: {
                   top_hits: {
                     size: 1,
-                    _source: ([
+                    _source: [
                       ERROR_LOG_MESSAGE,
                       ERROR_EXC_MESSAGE,
                       '@timestamp',
-                    ] as any) as string,
+                    ] as any as string,
                     sort: {
                       '@timestamp': 'desc',
                     },
@@ -111,10 +111,8 @@ export async function getServiceErrorGroups({
     const errorGroups =
       response.aggregations?.error_groups.buckets.map((bucket) => ({
         group_id: bucket.key as string,
-        name:
-          getErrorName(bucket.sample.hits.hits[0]._source) ??
-          NOT_AVAILABLE_LABEL,
-        last_seen: new Date(
+        name: getErrorName(bucket.sample.hits.hits[0]._source),
+        lastSeen: new Date(
           bucket.sample.hits.hits[0]?._source['@timestamp']
         ).getTime(),
         occurrences: {

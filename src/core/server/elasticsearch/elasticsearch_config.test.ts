@@ -41,7 +41,9 @@ test('set correct defaults', () => {
         "authorization",
       ],
       "requestTimeout": "PT30S",
+      "serviceAccountToken": undefined,
       "shardTimeout": "PT30S",
+      "skipStartupConnectionCheck": false,
       "sniffInterval": false,
       "sniffOnConnectionFault": false,
       "sniffOnStart": false,
@@ -320,7 +322,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'elastic' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.username] to \\"elastic\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
+        "Kibana is configured to authenticate to Elasticsearch with the \\"elastic\\" user. Use a service account token instead.",
       ]
     `);
   });
@@ -329,7 +331,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'kibana' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.username] to \\"kibana\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
+        "Kibana is configured to authenticate to Elasticsearch with the \\"kibana\\" user. Use a service account token instead.",
       ]
     `);
   });
@@ -348,7 +350,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ ssl: { key: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.ssl.key] without [${CONFIG_PATH}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
+        "Use both \\"elasticsearch.ssl.key\\" and \\"elasticsearch.ssl.certificate\\" to enable Kibana to use Mutual TLS authentication with Elasticsearch.",
       ]
     `);
   });
@@ -357,7 +359,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ ssl: { certificate: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.ssl.certificate] without [${CONFIG_PATH}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
+        "Use both \\"elasticsearch.ssl.certificate\\" and \\"elasticsearch.ssl.key\\" to enable Kibana to use Mutual TLS authentication with Elasticsearch.",
       ]
     `);
   });
@@ -376,4 +378,53 @@ test('#username throws if equal to "elastic", only while running from source', (
     `"[username]: value of \\"elastic\\" is forbidden. This is a superuser account that can obfuscate privilege-related issues. You should use the \\"kibana_system\\" user instead."`
   );
   expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
+});
+
+test('serviceAccountToken throws if username is also set', () => {
+  const obj = {
+    username: 'elastic',
+    serviceAccountToken: 'abc123',
+  };
+
+  expect(() => config.schema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[serviceAccountToken]: serviceAccountToken cannot be specified when \\"username\\" is also set."`
+  );
+});
+
+test('serviceAccountToken does not throw if username is not set', () => {
+  const obj = {
+    serviceAccountToken: 'abc123',
+  };
+
+  expect(() => config.schema.validate(obj)).not.toThrow();
+});
+
+describe('skipStartupConnectionCheck', () => {
+  test('defaults to `false`', () => {
+    const obj = {};
+    expect(() => config.schema.validate(obj)).not.toThrow();
+    expect(config.schema.validate(obj)).toEqual(
+      expect.objectContaining({
+        skipStartupConnectionCheck: false,
+      })
+    );
+  });
+
+  test('accepts `false` on both prod and dev mode', () => {
+    const obj = {
+      skipStartupConnectionCheck: false,
+    };
+    expect(() => config.schema.validate(obj, { dist: false })).not.toThrow();
+    expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
+  });
+
+  test('accepts `true` only when running from source to allow integration tests to run without an ES server', () => {
+    const obj = {
+      skipStartupConnectionCheck: true,
+    };
+    expect(() => config.schema.validate(obj, { dist: false })).not.toThrow();
+    expect(() => config.schema.validate(obj, { dist: true })).toThrowErrorMatchingInlineSnapshot(
+      `"[skipStartupConnectionCheck]: \\"skipStartupConnectionCheck\\" can only be set to true when running from source to allow integration tests to run without an ES server"`
+    );
+  });
 });

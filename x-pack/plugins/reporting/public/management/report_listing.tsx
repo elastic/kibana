@@ -9,66 +9,32 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { get } from 'lodash';
-import moment from 'moment';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
-import { ApplicationStart, ToastsSetup } from 'src/core/public';
-import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
-import { JOB_STATUSES as JobStatuses } from '../../common/constants';
+import { ILicense } from '../../../licensing/public';
+import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
+import { useIlmPolicyStatus } from '../lib/ilm_policy_status_context';
+import { Job } from '../lib/job';
 import { checkLicense } from '../lib/license_check';
-import {
-  JobQueueEntry,
-  ReportingAPIClient,
-  useInternalApiClient,
-} from '../lib/reporting_api_client';
-import { useIlmPolicyStatus, UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
-import type { SharePluginSetup } from '../shared_imports';
-import { ClientConfigType } from '../plugin';
-import { ReportDeleteButton, ReportDownloadButton, ReportErrorButton, ReportInfoButton } from './';
-import { ReportDiagnostic } from './report_diagnostic';
-import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
+import { useInternalApiClient } from '../lib/reporting_api_client';
+import { useKibana } from '../shared_imports';
 import { IlmPolicyLink } from './ilm_policy_link';
-
-export interface Job {
-  id: string;
-  type: string;
-  object_type: string;
-  object_title: string;
-  created_by?: string | false;
-  created_at: string;
-  started_at?: string;
-  completed_at?: string;
-  status: string;
-  statusLabel: string;
-  max_size_reached?: boolean;
-  attempts: number;
-  max_attempts: number;
-  csv_contains_formulas: boolean;
-  warnings?: string[];
-}
-
-export interface Props {
-  intl: InjectedIntl;
-  apiClient: ReportingAPIClient;
-  license$: LicensingPluginSetup['license$'];
-  pollConfig: ClientConfigType['poll'];
-  redirect: ApplicationStart['navigateToApp'];
-  navigateToUrl: ApplicationStart['navigateToUrl'];
-  toasts: ToastsSetup;
-  urlService: SharePluginSetup['url'];
-  ilmPolicyContextValue: UseIlmPolicyStatusReturn;
-}
+import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
+import { ReportDeleteButton } from './report_delete_button';
+import { ReportDiagnostic } from './report_diagnostic';
+import { ReportDownloadButton } from './report_download_button';
+import { ReportInfoButton } from './report_info_button';
+import { ListingProps as Props } from './';
 
 interface State {
   page: number;
@@ -81,50 +47,11 @@ interface State {
   badLicenseMessage: string;
 }
 
-const jobStatusLabelsMap = new Map<JobStatuses, string>([
-  [
-    JobStatuses.PENDING,
-    i18n.translate('xpack.reporting.jobStatuses.pendingText', {
-      defaultMessage: 'Pending',
-    }),
-  ],
-  [
-    JobStatuses.PROCESSING,
-    i18n.translate('xpack.reporting.jobStatuses.processingText', {
-      defaultMessage: 'Processing',
-    }),
-  ],
-  [
-    JobStatuses.COMPLETED,
-    i18n.translate('xpack.reporting.jobStatuses.completedText', {
-      defaultMessage: 'Completed',
-    }),
-  ],
-  [
-    JobStatuses.WARNINGS,
-    i18n.translate('xpack.reporting.jobStatuses.warningText', {
-      defaultMessage: 'Completed with warnings',
-    }),
-  ],
-  [
-    JobStatuses.FAILED,
-    i18n.translate('xpack.reporting.jobStatuses.failedText', {
-      defaultMessage: 'Failed',
-    }),
-  ],
-  [
-    JobStatuses.CANCELLED,
-    i18n.translate('xpack.reporting.jobStatuses.cancelledText', {
-      defaultMessage: 'Cancelled',
-    }),
-  ],
-]);
-
 class ReportListingUi extends Component<Props, State> {
   private isInitialJobsFetch: boolean;
   private licenseSubscription?: Subscription;
   private mounted?: boolean;
-  private poller?: any;
+  private poller?: Poller;
 
   constructor(props: Props) {
     super(props);
@@ -144,7 +71,7 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   public render() {
-    const { ilmPolicyContextValue, urlService, navigateToUrl } = this.props;
+    const { ilmPolicyContextValue, urlService, navigateToUrl, capabilities } = this.props;
     const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
     const hasIlmPolicy = ilmPolicyContextValue.status !== 'policy-not-found';
     const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
@@ -167,19 +94,21 @@ class ReportListingUi extends Component<Props, State> {
         <MigrateIlmPolicyCallOut toasts={this.props.toasts} />
 
         <EuiSpacer size={'l'} />
-        {this.renderTable()}
+        <div>{this.renderTable()}</div>
 
         <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            {ilmPolicyContextValue.isLoading ? (
-              <EuiLoadingSpinner />
-            ) : (
-              showIlmPolicyLink && (
-                <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
-              )
-            )}
-          </EuiFlexItem>
+          {capabilities?.management?.data?.index_lifecycle_management && (
+            <EuiFlexItem grow={false}>
+              {ilmPolicyContextValue.isLoading ? (
+                <EuiLoadingSpinner />
+              ) : (
+                showIlmPolicyLink && (
+                  <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
+                )
+              )}
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <ReportDiagnostic apiClient={this.props.apiClient} />
           </EuiFlexItem>
@@ -190,7 +119,7 @@ class ReportListingUi extends Component<Props, State> {
 
   public componentWillUnmount() {
     this.mounted = false;
-    this.poller.stop();
+    this.poller?.stop();
 
     if (this.licenseSubscription) {
       this.licenseSubscription.unsubscribe();
@@ -215,9 +144,11 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   private licenseHandler = (license: ILicense) => {
-    const { enableLinks, showLinks, message: badLicenseMessage } = checkLicense(
-      license.check('reporting', 'basic')
-    );
+    const {
+      enableLinks,
+      showLinks,
+      message: badLicenseMessage,
+    } = checkLicense(license.check('reporting', 'basic'));
 
     this.setState({
       enableLinks,
@@ -230,9 +161,9 @@ class ReportListingUi extends Component<Props, State> {
     this.setState((current) => ({ ...current, selectedJobs: jobs }));
   };
 
-  private removeRecord = (record: Job) => {
+  private removeJob = (job: Job) => {
     const { jobs } = this.state;
-    const filtered = jobs.filter((j) => j.id !== record.id);
+    const filtered = jobs.filter((j) => j.id !== job.id);
     this.setState((current) => ({ ...current, jobs: filtered }));
   };
 
@@ -241,17 +172,17 @@ class ReportListingUi extends Component<Props, State> {
     if (selectedJobs.length === 0) return undefined;
 
     const performDelete = async () => {
-      for (const record of selectedJobs) {
+      for (const job of selectedJobs) {
         try {
-          await this.props.apiClient.deleteReport(record.id);
-          this.removeRecord(record);
+          await this.props.apiClient.deleteReport(job.id);
+          this.removeJob(job);
           this.props.toasts.addSuccess(
             this.props.intl.formatMessage(
               {
                 id: 'xpack.reporting.listing.table.deleteConfim',
                 defaultMessage: `The {reportTitle} report was deleted`,
               },
-              { reportTitle: record.object_title }
+              { reportTitle: job.title }
             )
           );
         } catch (error) {
@@ -293,7 +224,7 @@ class ReportListingUi extends Component<Props, State> {
       this.setState(() => ({ isLoading: true }));
     }
 
-    let jobs: JobQueueEntry[];
+    let jobs: Job[];
     let total: number;
     try {
       jobs = await this.props.apiClient.list(this.state.page);
@@ -325,28 +256,7 @@ class ReportListingUi extends Component<Props, State> {
       this.setState(() => ({
         isLoading: false,
         total,
-        jobs: jobs.map(
-          (job: JobQueueEntry): Job => {
-            const { _source: source } = job;
-            return {
-              id: job._id,
-              type: source.jobtype,
-              object_type: source.payload.objectType,
-              object_title: source.payload.title,
-              created_by: source.created_by,
-              created_at: source.created_at,
-              started_at: source.started_at,
-              completed_at: source.completed_at,
-              status: source.status,
-              statusLabel: jobStatusLabelsMap.get(source.status as JobStatuses) || source.status,
-              max_size_reached: source.output ? source.output.max_size_reached : false,
-              attempts: source.attempts,
-              max_attempts: source.max_attempts,
-              csv_contains_formulas: get(source, 'output.csv_contains_formulas'),
-              warnings: source.output ? source.output.warnings : undefined,
-            };
-          }
-        ),
+        jobs,
       }));
     }
   };
@@ -355,31 +265,22 @@ class ReportListingUi extends Component<Props, State> {
     return this.state.showLinks && this.state.enableLinks;
   };
 
-  private formatDate(timestamp: string) {
-    try {
-      return moment(timestamp).format('YYYY-MM-DD @ hh:mm A');
-    } catch (error) {
-      // ignore parse error and display unformatted value
-      return timestamp;
-    }
-  }
-
   private renderTable() {
     const { intl } = this.props;
 
     const tableColumns = [
       {
-        field: 'object_title',
+        field: 'title',
         name: intl.formatMessage({
           id: 'xpack.reporting.listing.tableColumns.reportTitle',
           defaultMessage: 'Report',
         }),
-        render: (objectTitle: string, record: Job) => {
+        render: (objectTitle: string, job: Job) => {
           return (
             <div data-test-subj="reportingListItemObjectTitle">
               <div>{objectTitle}</div>
               <EuiText size="s">
-                <EuiTextColor color="subdued">{record.object_type}</EuiTextColor>
+                <EuiTextColor color="subdued">{job.objectType}</EuiTextColor>
               </EuiText>
             </div>
           );
@@ -391,17 +292,9 @@ class ReportListingUi extends Component<Props, State> {
           id: 'xpack.reporting.listing.tableColumns.createdAtTitle',
           defaultMessage: 'Created at',
         }),
-        render: (createdAt: string, record: Job) => {
-          if (record.created_by) {
-            return (
-              <div>
-                <div>{this.formatDate(createdAt)}</div>
-                <span>{record.created_by}</span>
-              </div>
-            );
-          }
-          return this.formatDate(createdAt);
-        },
+        render: (_createdAt: string, job: Job) => (
+          <div data-test-subj="reportJobCreatedAt">{job.getCreatedAtLabel()}</div>
+        ),
       },
       {
         field: 'status',
@@ -409,89 +302,9 @@ class ReportListingUi extends Component<Props, State> {
           id: 'xpack.reporting.listing.tableColumns.statusTitle',
           defaultMessage: 'Status',
         }),
-        render: (status: string, record: Job) => {
-          if (status === 'pending') {
-            return (
-              <div>
-                <FormattedMessage
-                  id="xpack.reporting.listing.tableValue.statusDetail.pendingStatusReachedText"
-                  defaultMessage="Pending - waiting for job to be processed"
-                />
-              </div>
-            );
-          }
-
-          let maxSizeReached;
-          if (record.max_size_reached) {
-            maxSizeReached = (
-              <span>
-                <FormattedMessage
-                  id="xpack.reporting.listing.tableValue.statusDetail.maxSizeReachedText"
-                  defaultMessage=" - Max size reached"
-                />
-              </span>
-            );
-          }
-
-          let warnings;
-          if (record.warnings) {
-            warnings = (
-              <EuiText size="s">
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.reporting.listing.tableValue.statusDetail.warningsText"
-                    defaultMessage="Errors occurred: see job info for details."
-                  />
-                </EuiTextColor>
-              </EuiText>
-            );
-          }
-
-          let statusTimestamp;
-          if (status === JobStatuses.PROCESSING && record.started_at) {
-            statusTimestamp = this.formatDate(record.started_at);
-          } else if (
-            record.completed_at &&
-            ([
-              JobStatuses.COMPLETED,
-              JobStatuses.FAILED,
-              JobStatuses.WARNINGS,
-            ] as string[]).includes(status)
-          ) {
-            statusTimestamp = this.formatDate(record.completed_at);
-          }
-
-          let statusLabel = jobStatusLabelsMap.get(status as JobStatuses) || status;
-
-          if (status === JobStatuses.PROCESSING) {
-            statusLabel = statusLabel + ` (attempt ${record.attempts} of ${record.max_attempts})`;
-          }
-
-          if (statusTimestamp) {
-            return (
-              <div>
-                <FormattedMessage
-                  id="xpack.reporting.listing.tableValue.statusDetail.statusTimestampText"
-                  defaultMessage="{statusLabel} at {statusTimestamp}"
-                  values={{
-                    statusLabel,
-                    statusTimestamp: <span className="eui-textNoWrap">{statusTimestamp}</span>,
-                  }}
-                />
-                {maxSizeReached}
-                {warnings}
-              </div>
-            );
-          }
-
-          // unknown status
-          return (
-            <div>
-              {statusLabel}
-              {maxSizeReached}
-            </div>
-          );
-        },
+        render: (_status: string, job: Job) => (
+          <div data-test-subj="reportJobStatus">{job.getStatusLabel()}</div>
+        ),
       },
       {
         name: intl.formatMessage({
@@ -500,12 +313,11 @@ class ReportListingUi extends Component<Props, State> {
         }),
         actions: [
           {
-            render: (record: Job) => {
+            render: (job: Job) => {
               return (
-                <div>
-                  <ReportDownloadButton {...this.props} record={record} />
-                  <ReportErrorButton {...this.props} record={record} />
-                  <ReportInfoButton {...this.props} jobId={record.id} />
+                <div data-test-subj="reportJobActions">
+                  <ReportDownloadButton {...this.props} job={job} />
+                  <ReportInfoButton {...this.props} job={job} />
                 </div>
               );
             },
@@ -528,6 +340,14 @@ class ReportListingUi extends Component<Props, State> {
 
     return (
       <Fragment>
+        {this.state.selectedJobs.length > 0 && (
+          <Fragment>
+            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
+              <EuiFlexItem grow={false}>{this.renderDeleteButton()}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+          </Fragment>
+        )}
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.reporting.listing.table.captionDescription', {
             defaultMessage: 'Reports generated in Kibana applications',
@@ -551,9 +371,9 @@ class ReportListingUi extends Component<Props, State> {
           selection={selection}
           isSelectable={true}
           onChange={this.onTableChange}
-          data-test-subj="reportJobListing"
+          data-test-subj={REPORT_TABLE_ID}
+          rowProps={() => ({ 'data-test-subj': REPORT_TABLE_ROW_ID })}
         />
-        {this.state.selectedJobs.length > 0 ? this.renderDeleteButton() : null}
       </Fragment>
     );
   }
@@ -562,14 +382,20 @@ class ReportListingUi extends Component<Props, State> {
 const PrivateReportListing = injectI18n(ReportListingUi);
 
 export const ReportListing = (
-  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient'>
+  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities'>
 ) => {
   const ilmPolicyStatusValue = useIlmPolicyStatus();
   const { apiClient } = useInternalApiClient();
+  const {
+    services: {
+      application: { capabilities },
+    },
+  } = useKibana();
   return (
     <PrivateReportListing
       {...props}
       apiClient={apiClient}
+      capabilities={capabilities}
       ilmPolicyContextValue={ilmPolicyStatusValue}
     />
   );

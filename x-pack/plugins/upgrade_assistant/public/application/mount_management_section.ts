@@ -11,16 +11,17 @@ import { renderApp } from './render_app';
 import { KibanaVersionContext } from './app_context';
 import { apiService } from './lib/api';
 import { breadcrumbService } from './lib/breadcrumbs';
+import { AppServicesContext } from '../types';
 
 export async function mountManagementSection(
   coreSetup: CoreSetup,
   params: ManagementAppMountParams,
   kibanaVersionInfo: KibanaVersionContext,
-  readonly: boolean
+  readonly: boolean,
+  services: AppServicesContext
 ) {
-  const [
-    { i18n, docLinks, notifications, application, deprecations },
-  ] = await coreSetup.getStartServices();
+  const [{ i18n, docLinks, notifications, application, deprecations }] =
+    await coreSetup.getStartServices();
 
   const { element, history, setBreadcrumbs } = params;
   const { http } = coreSetup;
@@ -41,5 +42,7 @@ export async function mountManagementSection(
     breadcrumbs: breadcrumbService,
     getUrlForApp: application.getUrlForApp,
     deprecations,
+    application,
+    services,
   });
 }

@@ -106,7 +106,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
         ? i18n.translate('xpack.maps.fileUpload.trimmedResultsMsg', {
             defaultMessage: `Results limited to {numFeatures} features, {previewCoverage}% of file.`,
             values: {
-              numFeatures: geojsonFile.features.length,
+              numFeatures: geojsonFile.features.length.toLocaleString(),
               previewCoverage,
             },
           })

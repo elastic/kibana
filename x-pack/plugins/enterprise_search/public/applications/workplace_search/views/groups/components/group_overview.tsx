@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { TruncatedContent } from '../../../../shared/truncate';
-import noSharedSourcesIcon from '../../../assets/share_circle.svg';
+import noOrgSourcesIcon from '../../../assets/share_circle.svg';
 import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourcesTable } from '../../../components/shared/sources_table';
@@ -33,30 +33,29 @@ import { NAV, CANCEL_BUTTON } from '../../../constants';
 import { USERS_AND_ROLES_PATH } from '../../../routes';
 import { GroupLogic, MAX_NAME_LENGTH } from '../group_logic';
 
-import { GroupUsersTable } from './group_users_table';
-
 export const EMPTY_SOURCES_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.emptySourcesDescription',
   {
     defaultMessage: 'No content sources are shared with this group.',
   }
 );
+const USERS_SECTION_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.overview.usersSectionTitle',
+  {
+    defaultMessage: 'Group users',
+  }
+);
 const GROUP_USERS_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.groupUsersDescription',
   {
-    defaultMessage: 'Members will be able to search over the group’s sources.',
-  }
-);
-export const EMPTY_USERS_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.overview.emptyUsersDescription',
-  {
-    defaultMessage: 'There are no users in this group.',
+    defaultMessage:
+      "Users assigned to this group gain access to the sources' data and content defined above. User assignments for this group can be managed in the Users and Roles area.",
   }
 );
 const MANAGE_SOURCES_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.manageSourcesButtonText',
   {
-    defaultMessage: 'Manage shared content sources',
+    defaultMessage: 'Manage organizational content sources',
   }
 );
 const MANAGE_USERS_BUTTON_TEXT = i18n.translate(
@@ -111,14 +110,14 @@ const CONFIRM_TITLE_TEXT = i18n.translate(
 export const GroupOverview: React.FC = () => {
   const {
     deleteGroup,
-    showSharedSourcesModal,
+    showOrgSourcesModal,
     showConfirmDeleteModal,
     hideConfirmDeleteModal,
     updateGroupName,
     onGroupNameInputChange,
   } = useActions(GroupLogic);
   const {
-    group: { name, contentSources, users, canDeleteGroup },
+    group: { name, contentSources, canDeleteGroup },
     groupNameInputValue,
     dataLoading,
     confirmDeleteModalVisible,
@@ -158,10 +157,9 @@ export const GroupOverview: React.FC = () => {
   );
 
   const hasContentSources = contentSources?.length > 0;
-  const hasUsers = users?.length > 0;
 
   const manageSourcesButton = (
-    <EuiButton color="primary" onClick={showSharedSourcesModal}>
+    <EuiButton color="primary" onClick={showOrgSourcesModal}>
       {MANAGE_SOURCES_BUTTON_TEXT}
     </EuiButton>
   );
@@ -187,7 +185,7 @@ export const GroupOverview: React.FC = () => {
     <>
       <EuiPanel paddingSize="none" color="subdued">
         <EuiEmptyPrompt
-          iconType={noSharedSourcesIcon}
+          iconType={noOrgSourcesIcon}
           title={<h2>{GROUP_SOURCES_TITLE}</h2>}
           body={<p>{EMPTY_SOURCES_DESCRIPTION}</p>}
           actions={manageSourcesButton}
@@ -199,12 +197,11 @@ export const GroupOverview: React.FC = () => {
 
   const usersSection = (
     <ContentSection
-      title="Group users"
-      description={hasUsers ? GROUP_USERS_DESCRIPTION : EMPTY_USERS_DESCRIPTION}
-      action={manageUsersButton}
+      title={USERS_SECTION_TITLE}
+      description={GROUP_USERS_DESCRIPTION}
       data-test-subj="GroupUsersSection"
     >
-      {hasUsers && <GroupUsersTable />}
+      {manageUsersButton}
     </ContentSection>
   );
 

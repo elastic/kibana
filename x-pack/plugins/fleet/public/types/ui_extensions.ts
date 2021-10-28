@@ -22,7 +22,8 @@ export interface UIExtensionsStorage {
  * UI Component Extension is used on the pages displaying the ability to edit an
  * Integration Policy
  */
-export type PackagePolicyEditExtensionComponent = ComponentType<PackagePolicyEditExtensionComponentProps>;
+export type PackagePolicyEditExtensionComponent =
+  ComponentType<PackagePolicyEditExtensionComponentProps>;
 
 export interface PackagePolicyEditExtensionComponentProps {
   /** The current integration policy being edited */
@@ -49,14 +50,26 @@ export interface PackagePolicyEditExtensionComponentProps {
 export interface PackagePolicyEditExtension {
   package: string;
   view: 'package-policy-edit';
+  useLatestPackageVersion?: boolean;
   Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
+}
+
+/** Extension point registration contract for Integration Policy Edit tabs views */
+export interface PackagePolicyEditTabsExtension {
+  package: string;
+  view: 'package-policy-edit-tabs';
+  tabs: Array<{
+    title: EuiStepProps['title'];
+    Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
+  }>;
 }
 
 /**
  * UI Component Extension is used on the pages displaying the ability to Create an
  * Integration Policy
  */
-export type PackagePolicyCreateExtensionComponent = ComponentType<PackagePolicyCreateExtensionComponentProps>;
+export type PackagePolicyCreateExtensionComponent =
+  ComponentType<PackagePolicyCreateExtensionComponentProps>;
 
 export interface PackagePolicyCreateExtensionComponentProps {
   /** The integration policy being created */
@@ -120,6 +133,7 @@ export interface AgentEnrollmentFlyoutFinalStepExtension {
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
   | PackagePolicyEditExtension
+  | PackagePolicyEditTabsExtension
   | PackageCustomExtension
   | PackagePolicyCreateExtension
   | PackageAssetsExtension

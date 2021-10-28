@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 
 import { CoreSetup } from 'kibana/public';
@@ -54,11 +54,18 @@ export class ThemeService {
   /** A React hook for consuming the charts theme */
   public useChartsTheme = (): PartialTheme => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [value, update] = useState(this.chartsDefaultTheme);
+    const [value, update] = useState(this._chartsTheme$.getValue());
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const ref = useRef(value);
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
-      const s = this.chartsTheme$.subscribe(update);
+      const s = this.chartsTheme$.subscribe((val) => {
+        if (val !== ref.current) {
+          ref.current = val;
+          update(val);
+        }
+      });
       return () => s.unsubscribe();
     }, []);
 
@@ -68,11 +75,18 @@ export class ThemeService {
   /** A React hook for consuming the charts theme */
   public useChartsBaseTheme = (): Theme => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [value, update] = useState(this.chartsDefaultBaseTheme);
+    const [value, update] = useState(this._chartsBaseTheme$.getValue());
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const ref = useRef(value);
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
-      const s = this.chartsBaseTheme$.subscribe(update);
+      const s = this.chartsBaseTheme$.subscribe((val) => {
+        if (val !== ref.current) {
+          ref.current = val;
+          update(val);
+        }
+      });
       return () => s.unsubscribe();
     }, []);
 

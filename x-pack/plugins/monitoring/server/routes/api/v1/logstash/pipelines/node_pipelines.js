@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { getNodeInfo } from '../../../../../lib/logstash/get_node_info';
 import { handleError } from '../../../../../lib/errors';
-import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../../common/ccs_utils';
 import { INDEX_PATTERN_LOGSTASH } from '../../../../../../common/constants';
 import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
 
@@ -64,15 +64,16 @@ export function logstashNodePipelinesRoute(server) {
       }
 
       try {
-        const response = await getPaginatedPipelines(
+        const response = await getPaginatedPipelines({
           req,
           lsIndexPattern,
-          { clusterUuid, logstashUuid },
-          { throughputMetric, nodesCountMetric },
+          clusterUuid,
+          logstashUuid,
+          metrics: { throughputMetric, nodesCountMetric },
           pagination,
           sort,
-          queryText
-        );
+          queryText,
+        });
 
         return {
           ...response,

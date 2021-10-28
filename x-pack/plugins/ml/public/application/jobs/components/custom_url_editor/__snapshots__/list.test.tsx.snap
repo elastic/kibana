@@ -110,6 +110,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             />
           }
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <EuiButtonIcon
@@ -143,6 +144,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             />
           }
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <EuiButtonIcon
@@ -263,6 +265,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             />
           }
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <EuiButtonIcon
@@ -296,6 +299,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             />
           }
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <EuiButtonIcon
@@ -416,6 +420,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             />
           }
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <EuiButtonIcon
@@ -449,6 +454,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             />
           }
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <EuiButtonIcon

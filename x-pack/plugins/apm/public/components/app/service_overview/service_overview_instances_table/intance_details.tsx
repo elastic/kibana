@@ -24,7 +24,6 @@ import {
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
@@ -34,11 +33,13 @@ import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
 import { getCloudIcon, getContainerIcon } from '../../../shared/service_icons';
 import { useInstanceDetailsFetcher } from './use_instance_details_fetcher';
 
-type ServiceInstanceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
+type ServiceInstanceDetails =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 interface Props {
   serviceName: string;
   serviceNodeName: string;
+  kuery: string;
 }
 
 function toKeyValuePairs(keys: string[], data: ServiceInstanceDetails) {
@@ -60,12 +61,13 @@ const cloudDetailsKeys = [
   CLOUD_PROVIDER,
 ];
 
-export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
+export function InstanceDetails({
+  serviceName,
+  serviceNodeName,
+  kuery,
+}: Props) {
   const theme = useTheme();
   const history = useHistory();
-  const {
-    urlParams: { kuery },
-  } = useUrlParams();
 
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,

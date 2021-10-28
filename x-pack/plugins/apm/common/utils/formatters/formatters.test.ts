@@ -36,19 +36,40 @@ describe('formatters', () => {
   });
 
   describe('asDecimalOrInteger', () => {
-    it('formats as integer when number equals to 0 ', () => {
-      expect(asDecimalOrInteger(0)).toEqual('0');
+    describe('with default threshold of 10', () => {
+      it('formats as integer when number equals to 0 ', () => {
+        expect(asDecimalOrInteger(0)).toEqual('0');
+      });
+      it('formats as integer when number is above or equals 10 ', () => {
+        expect(asDecimalOrInteger(10.123)).toEqual('10');
+        expect(asDecimalOrInteger(15.123)).toEqual('15');
+      });
+      it('formats as decimal when number is below 10 ', () => {
+        expect(asDecimalOrInteger(0.25435632645)).toEqual('0.3');
+        expect(asDecimalOrInteger(1)).toEqual('1.0');
+        expect(asDecimalOrInteger(3.374329704990765)).toEqual('3.4');
+        expect(asDecimalOrInteger(5)).toEqual('5.0');
+        expect(asDecimalOrInteger(9)).toEqual('9.0');
+      });
     });
-    it('formats as integer when number is above or equals 10 ', () => {
-      expect(asDecimalOrInteger(10.123)).toEqual('10');
-      expect(asDecimalOrInteger(15.123)).toEqual('15');
-    });
-    it('formats as decimal when number is below 10 ', () => {
-      expect(asDecimalOrInteger(0.25435632645)).toEqual('0.3');
-      expect(asDecimalOrInteger(1)).toEqual('1.0');
-      expect(asDecimalOrInteger(3.374329704990765)).toEqual('3.4');
-      expect(asDecimalOrInteger(5)).toEqual('5.0');
-      expect(asDecimalOrInteger(9)).toEqual('9.0');
+
+    describe('with custom threshold of 1', () => {
+      it('formats as integer when number equals to 0 ', () => {
+        expect(asDecimalOrInteger(0, 1)).toEqual('0');
+      });
+      it('formats as integer when number is above or equals 1 ', () => {
+        expect(asDecimalOrInteger(1, 1)).toEqual('1');
+        expect(asDecimalOrInteger(1.123, 1)).toEqual('1');
+        expect(asDecimalOrInteger(3.374329704990765, 1)).toEqual('3');
+        expect(asDecimalOrInteger(5, 1)).toEqual('5');
+        expect(asDecimalOrInteger(9, 1)).toEqual('9');
+        expect(asDecimalOrInteger(10, 1)).toEqual('10');
+        expect(asDecimalOrInteger(10.123, 1)).toEqual('10');
+        expect(asDecimalOrInteger(15.123, 1)).toEqual('15');
+      });
+      it('formats as decimal when number is below 1 ', () => {
+        expect(asDecimalOrInteger(0.25435632645, 1)).toEqual('0.3');
+      });
     });
   });
 });

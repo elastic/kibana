@@ -12,7 +12,7 @@ import type {
   ReindexSourceToTempOpenPit,
   ReindexSourceToTempRead,
   ReindexSourceToTempClosePit,
-  ReindexSourceToTempIndex,
+  ReindexSourceToTempTransform,
   MarkVersionIndexReady,
   InitState,
   LegacyCreateReindexTargetState,
@@ -40,6 +40,7 @@ import type {
   RefreshTarget,
   OutdatedDocumentsRefresh,
   CheckUnknownDocumentsState,
+  CalculateExcludeFiltersState,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -71,6 +72,11 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       }),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
       Actions.setWriteBlock({ client, index: state.sourceIndex.value }),
+    CALCULATE_EXCLUDE_FILTERS: (state: CalculateExcludeFiltersState) =>
+      Actions.calculateExcludeFilters({
+        client,
+        excludeFromUpgradeFilterHooks: state.excludeFromUpgradeFilterHooks,
+      }),
     CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
       Actions.createIndex({
         client,
@@ -99,13 +105,13 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       }),
     REINDEX_SOURCE_TO_TEMP_CLOSE_PIT: (state: ReindexSourceToTempClosePit) =>
       Actions.closePit({ client, pitId: state.sourceIndexPitId }),
-    REINDEX_SOURCE_TO_TEMP_INDEX: (state: ReindexSourceToTempIndex) =>
+    REINDEX_SOURCE_TO_TEMP_TRANSFORM: (state: ReindexSourceToTempTransform) =>
       Actions.transformDocs({ transformRawDocs, outdatedDocuments: state.outdatedDocuments }),
     REINDEX_SOURCE_TO_TEMP_INDEX_BULK: (state: ReindexSourceToTempIndexBulk) =>
       Actions.bulkOverwriteTransformedDocuments({
         client,
         index: state.tempIndex,
-        transformedDocs: state.transformedDocs,
+        transformedDocs: state.transformedDocBatches[state.currentBatch],
         /**
          * Since we don't run a search against the target index, we disable "refresh" to speed up
          * the migration process.
@@ -154,7 +160,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.bulkOverwriteTransformedDocuments({
         client,
         index: state.targetIndex,
-        transformedDocs: state.transformedDocs,
+        transformedDocs: state.transformedDocBatches[state.currentBatch],
         /**
          * Since we don't run a search against the target index, we disable "refresh" to speed up
          * the migration process.

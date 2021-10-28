@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { API_BASE_PATH } from '../../common/constants';
@@ -56,7 +56,7 @@ const verifySnapshotUpgrade = async (
   snapshot: { snapshotId: string; jobId: string }
 ): Promise<{
   isSuccessful: boolean;
-  error?: ResponseError;
+  error?: errors.ResponseError;
 }> => {
   const { snapshotId, jobId } = snapshot;
 
@@ -238,13 +238,11 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
               });
             } else {
               // The task ID was not found; verify the deprecation was resolved
-              const {
-                isSuccessful: isSnapshotDeprecationResolved,
-                error: upgradeSnapshotError,
-              } = await verifySnapshotUpgrade(esClient, {
-                snapshotId,
-                jobId,
-              });
+              const { isSuccessful: isSnapshotDeprecationResolved, error: upgradeSnapshotError } =
+                await verifySnapshotUpgrade(esClient, {
+                  snapshotId,
+                  jobId,
+                });
 
               // Delete the SO; if it's complete, no need to store it anymore. If there's an error, this will give the user a chance to retry
               await deleteMlOperation(savedObjectsClient, snapshotOp.id);
@@ -259,7 +257,7 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
               }
 
               return response.customError({
-                statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode : 500,
+                statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode! : 500,
                 body: {
                   message:
                     upgradeSnapshotError?.body?.error?.reason ||
@@ -269,13 +267,11 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
             }
           } else {
             // No tasks found; verify the deprecation was resolved
-            const {
-              isSuccessful: isSnapshotDeprecationResolved,
-              error: upgradeSnapshotError,
-            } = await verifySnapshotUpgrade(esClient, {
-              snapshotId,
-              jobId,
-            });
+            const { isSuccessful: isSnapshotDeprecationResolved, error: upgradeSnapshotError } =
+              await verifySnapshotUpgrade(esClient, {
+                snapshotId,
+                jobId,
+              });
 
             // Delete the SO; if it's complete, no need to store it anymore. If there's an error, this will give the user a chance to retry
             await deleteMlOperation(savedObjectsClient, snapshotOp.id);
@@ -290,7 +286,7 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
             }
 
             return response.customError({
-              statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode : 500,
+              statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode! : 500,
               body: {
                 message:
                   upgradeSnapshotError?.body?.error?.reason ||
@@ -329,12 +325,11 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
         try {
           const { snapshotId, jobId } = request.params;
 
-          const {
-            body: deleteSnapshotResponse,
-          } = await client.asCurrentUser.ml.deleteModelSnapshot({
-            job_id: jobId,
-            snapshot_id: snapshotId,
-          });
+          const { body: deleteSnapshotResponse } =
+            await client.asCurrentUser.ml.deleteModelSnapshot({
+              job_id: jobId,
+              snapshot_id: snapshotId,
+            });
 
           return response.ok({
             body: deleteSnapshotResponse,

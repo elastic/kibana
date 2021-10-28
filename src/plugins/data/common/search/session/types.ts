@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
 import { SearchSessionStatus } from './status';
 
 export const SEARCH_SESSION_TYPE = 'search-session';
@@ -43,19 +44,19 @@ export interface SearchSessionSavedObjectAttributes {
    */
   status: SearchSessionStatus;
   /**
-   * urlGeneratorId
+   * locatorId (see share.url.locators service)
    */
-  urlGeneratorId?: string;
+  locatorId?: string;
   /**
    * The application state that was used to create the session.
    * Should be used, for example, to re-load an expired search session.
    */
-  initialState?: Record<string, unknown>;
+  initialState?: SerializableRecord;
   /**
    * Application state that should be used to restore the session.
    * For example, relative dates are conveted to absolute ones.
    */
-  restoreState?: Record<string, unknown>;
+  restoreState?: SerializableRecord;
   /**
    * Mapping of search request hashes to their corresponsing info (async search id, etc.)
    */
@@ -71,6 +72,10 @@ export interface SearchSessionSavedObjectAttributes {
   realmType?: string;
   realmName?: string;
   username?: string;
+  /**
+   * Version information to display warnings when trying to restore a session from a different version
+   */
+  version: string;
 }
 
 export interface SearchSessionRequestInfo {

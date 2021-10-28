@@ -93,6 +93,22 @@ const numberOfShardsField = {
   label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
     defaultMessage: 'Number of primary shards',
   }),
+  defaultValue: 1,
+  validations: [
+    {
+      validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+    },
+    {
+      validator: numberGreaterThanField({
+        message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
+        than: 0,
+      }),
+    },
+  ],
+  serializer: serializers.stringToNumber,
+};
+const shardSizeField = {
+  label: i18nTexts.editPolicy.maxPrimaryShardSizeLabel,
   validations: [
     {
       validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
@@ -173,6 +189,14 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         defaultValue: false,
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
+      shrink: {
+        isUsingShardSize: {
+          defaultValue: false,
+        },
+        maxPrimaryShardSizeUnits: {
+          defaultValue: 'gb',
+        },
+      },
     },
     warm: {
       enabled: {
@@ -207,6 +231,14 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         defaultValue: false,
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
+      shrink: {
+        isUsingShardSize: {
+          defaultValue: false,
+        },
+        maxPrimaryShardSizeUnits: {
+          defaultValue: 'gb',
+        },
+      },
     },
     cold: {
       enabled: {
@@ -215,12 +247,6 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           'xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseSwitchLabel',
           { defaultMessage: 'Activate cold phase' }
         ),
-      },
-      freezeEnabled: {
-        defaultValue: false,
-        label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
-          defaultMessage: 'Freeze index',
-        }),
       },
       readonlyEnabled: {
         defaultValue: false,
@@ -251,12 +277,6 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.activateFrozenPhaseSwitchLabel',
           { defaultMessage: 'Activate frozen phase' }
         ),
-      },
-      freezeEnabled: {
-        defaultValue: false,
-        label: i18n.translate('xpack.indexLifecycleMgmt.frozePhase.freezeIndexLabel', {
-          defaultMessage: 'Freeze index',
-        }),
       },
       minAgeUnit: {
         defaultValue: 'd',
@@ -334,12 +354,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
             fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_primary_shard_size: {
-            label: i18n.translate(
-              'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardSizeLabel',
-              {
-                defaultMessage: 'Maximum primary shard size',
-              }
-            ),
+            label: i18nTexts.editPolicy.maxPrimaryShardSizeLabel,
             validations: [
               {
                 validator: rolloverThresholdsValidator,
@@ -370,6 +385,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         },
         shrink: {
           number_of_shards: numberOfShardsField,
+          max_primary_shard_size: shardSizeField,
         },
         set_priority: {
           priority: getPriorityField('hot'),
@@ -385,6 +401,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         },
         shrink: {
           number_of_shards: numberOfShardsField,
+          max_primary_shard_size: shardSizeField,
         },
         forcemerge: {
           max_num_segments: maxNumSegmentsField,

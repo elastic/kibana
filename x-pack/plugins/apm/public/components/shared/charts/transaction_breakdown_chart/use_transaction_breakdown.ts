@@ -5,24 +5,41 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
-export function useTransactionBreakdown() {
-  const { serviceName } = useParams<{ serviceName?: string }>();
+export function useTransactionBreakdown({
+  kuery,
+  environment,
+}: {
+  kuery: string;
+  environment: string;
+}) {
   const {
-    urlParams: { environment, kuery, start, end, transactionName },
+    urlParams: { transactionName },
   } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
 
-  const { data = { timeseries: undefined }, error, status } = useFetcher(
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { transactionType, serviceName } = useApmServiceContext();
+
+  const {
+    data = { timeseries: undefined },
+    error,
+    status,
+  } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transaction/charts/breakdown',
+            'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
           params: {
             path: { serviceName },
             query: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { errors } from 'elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -18,6 +18,7 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import { AuthenticationResult } from '../../authentication';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import { securityMock } from '../../mocks';
 import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
@@ -109,9 +110,9 @@ describe('Change password', () => {
     });
 
     it('returns 403 if old password is wrong.', async () => {
-      const changePasswordFailure = new (errors.AuthenticationException as any)('Unauthorized', {
-        body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
-      });
+      const changePasswordFailure = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 401, body: {} })
+      );
       mockContext.core.elasticsearch.client.asCurrentUser.security.changePassword.mockRejectedValue(
         changePasswordFailure
       );

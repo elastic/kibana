@@ -5,19 +5,10 @@
  * 2.0.
  */
 
+import type { FieldSpec } from 'src/plugins/data/common';
 import { BaseParams, BasePayload } from '../../types';
 
 export type RawValue = string | object | null | undefined;
-
-export interface IndexPatternSavedObjectDeprecatedCSV {
-  title: string;
-  timeFieldName: string;
-  fields?: any[];
-  attributes: {
-    fields: string;
-    fieldFormatMap: string;
-  };
-}
 
 interface BaseParamsDeprecatedCSV {
   searchRequest: SearchRequestDeprecatedCSV;
@@ -31,10 +22,9 @@ export type JobParamsDeprecatedCSV = BaseParamsDeprecatedCSV &
     indexPatternId: string;
   };
 
-// CSV create job method converts indexPatternID to indexPatternSavedObject
 export type TaskPayloadDeprecatedCSV = BaseParamsDeprecatedCSV &
   BasePayload & {
-    indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV;
+    indexPatternId: string;
   };
 
 export interface SearchRequestDeprecatedCSV {
@@ -78,8 +68,6 @@ type FormatsMapDeprecatedCSV = Map<
 >;
 
 export interface SavedSearchGeneratorResultDeprecatedCSV {
-  content: string;
-  size: number;
   maxSizeReached: boolean;
   csvContainsFormulas?: boolean;
   warnings: string[];

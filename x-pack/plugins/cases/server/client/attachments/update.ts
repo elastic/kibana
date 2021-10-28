@@ -9,6 +9,7 @@ import { pick } from 'lodash/fp';
 import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
+import { LensServerPluginSetup } from '../../../../lens/server';
 import { checkEnabledCaseConnectorOrThrow, CommentableCase, createCaseError } from '../../common';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 import {
@@ -16,6 +17,7 @@ import {
   SUB_CASE_SAVED_OBJECT,
   CaseResponse,
   CommentPatchRequest,
+  CommentRequest,
 } from '../../../common';
 import { AttachmentService, CasesService } from '../../services';
 import { CasesClientArgs } from '..';
@@ -46,6 +48,7 @@ interface CombinedCaseParams {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   caseID: string;
   logger: Logger;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   subCaseId?: string;
 }
 
@@ -56,6 +59,7 @@ async function getCommentableCase({
   caseID,
   subCaseId,
   logger,
+  lensEmbeddableFactory,
 }: CombinedCaseParams) {
   if (subCaseId) {
     const [caseInfo, subCase] = await Promise.all([
@@ -75,6 +79,7 @@ async function getCommentableCase({
       subCase,
       unsecuredSavedObjectsClient,
       logger,
+      lensEmbeddableFactory,
     });
   } else {
     const caseInfo = await caseService.getCase({
@@ -87,6 +92,7 @@ async function getCommentableCase({
       collection: caseInfo,
       unsecuredSavedObjectsClient,
       logger,
+      lensEmbeddableFactory,
     });
   }
 }
@@ -105,6 +111,7 @@ export async function update(
     caseService,
     unsecuredSavedObjectsClient,
     logger,
+    lensEmbeddableFactory,
     user,
     userActionService,
     authorization,
@@ -128,6 +135,7 @@ export async function update(
       caseID,
       subCaseId: subCaseID,
       logger,
+      lensEmbeddableFactory,
     });
 
     const myComment = await attachmentService.get({
@@ -168,14 +176,12 @@ export async function update(
     }
 
     const updatedDate = new Date().toISOString();
-    const {
-      comment: updatedComment,
-      commentableCase: updatedCase,
-    } = await commentableCase.updateComment({
-      updateRequest: queryParams,
-      updatedAt: updatedDate,
-      user,
-    });
+    const { comment: updatedComment, commentableCase: updatedCase } =
+      await commentableCase.updateComment({
+        updateRequest: queryParams,
+        updatedAt: updatedDate,
+        user,
+      });
 
     await userActionService.bulkCreate({
       unsecuredSavedObjectsClient,
@@ -188,12 +194,12 @@ export async function update(
           subCaseId: subCaseID,
           commentId: updatedComment.id,
           fields: ['comment'],
-          newValue: JSON.stringify(queryRestAttributes),
-          oldValue: JSON.stringify(
+          // casting because typescript is complaining that it's not a Record<string, unknown> even though it is
+          newValue: queryRestAttributes as CommentRequest,
+          oldValue:
             // We are interested only in ContextBasicRt attributes
             // myComment.attribute contains also CommentAttributesBasicRt attributes
-            pick(Object.keys(queryRestAttributes), myComment.attributes)
-          ),
+            pick(Object.keys(queryRestAttributes), myComment.attributes),
           owner: myComment.attributes.owner,
         }),
       ],

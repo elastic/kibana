@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import * as Option from 'fp-ts/Option';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
@@ -18,10 +19,11 @@ describe('createInitialState', () => {
     typeRegistry = new SavedObjectTypeRegistry();
   });
 
-  const migrationsConfig = ({
+  const migrationsConfig = {
     retryAttempts: 15,
     batchSize: 1000,
-  } as unknown) as SavedObjectsMigrationConfigType;
+    maxBatchSizeBytes: ByteSizeValue.parse('100mb'),
+  } as unknown as SavedObjectsMigrationConfigType;
   it('creates the initial state for the model based on the passed in parameters', () => {
     expect(
       createInitialState({
@@ -37,8 +39,10 @@ describe('createInitialState', () => {
       })
     ).toEqual({
       batchSize: 1000,
+      maxBatchSizeBytes: ByteSizeValue.parse('100mb').getValueInBytes(),
       controlState: 'INIT',
       currentAlias: '.kibana_task_manager',
+      excludeFromUpgradeFilterHooks: {},
       indexPrefix: '.kibana_task_manager',
       kibanaVersion: '8.1.0',
       knownTypes: [],
@@ -134,6 +138,31 @@ describe('createInitialState', () => {
     });
 
     expect(initialState.knownTypes).toEqual(['foo', 'bar']);
+  });
+
+  it('returns state with the correct `excludeFromUpgradeFilterHooks`', () => {
+    const fooExcludeOnUpgradeHook = jest.fn();
+    typeRegistry.registerType({
+      name: 'foo',
+      namespaceType: 'single',
+      hidden: false,
+      mappings: { properties: {} },
+      excludeOnUpgrade: fooExcludeOnUpgradeHook,
+    });
+
+    const initialState = createInitialState({
+      kibanaVersion: '8.1.0',
+      targetMappings: {
+        dynamic: 'strict',
+        properties: { my_type: { properties: { title: { type: 'text' } } } },
+      },
+      migrationVersionPerType: {},
+      indexPrefix: '.kibana_task_manager',
+      migrationsConfig,
+      typeRegistry,
+    });
+
+    expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ foo: fooExcludeOnUpgradeHook });
   });
 
   it('returns state with a preMigration script', () => {

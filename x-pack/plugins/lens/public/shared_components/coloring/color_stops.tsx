@@ -22,7 +22,7 @@ import useUnmount from 'react-use/lib/useUnmount';
 import { DEFAULT_COLOR } from './constants';
 import { getDataMinMax, getStepValue, isValidColor } from './utils';
 import { TooltipWrapper, useDebouncedValue } from '../index';
-import { ColorStop, CustomPaletteParams } from './types';
+import type { ColorStop, CustomPaletteParams } from '../../../common';
 
 const idGeneratorFn = htmlIdGenerator();
 

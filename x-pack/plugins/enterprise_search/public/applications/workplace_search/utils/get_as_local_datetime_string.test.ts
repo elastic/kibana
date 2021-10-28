@@ -14,6 +14,12 @@ describe('getAsLocalDateTimeString', () => {
     expect(getAsLocalDateTimeString(date)).toEqual(new Date(Date.parse(date)).toLocaleString());
   });
 
+  it('returns null if passed value is not a string', () => {
+    const date = ['1', '2'];
+
+    expect(getAsLocalDateTimeString(date)).toEqual(null);
+  });
+
   it('returns null if string cannot be parsed as date', () => {
     const date = 'foo';
 

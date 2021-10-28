@@ -2,7 +2,7 @@
 == Linting
 
 A note about linting: We use http://eslint.org[eslint] to check that the
-link:STYLEGUIDE.md[styleguide] is being followed. It runs in a
+link:STYLEGUIDE.mdx[styleguide] is being followed. It runs in a
 pre-commit hook and as a part of the tests, but most contributors
 integrate it with their code editors for real-time feedback.
 
@@ -47,17 +47,21 @@ file types.
 "eslint.validate": [
   "javascript",
   "javascriptreact",
-  { "language": "typescript", "autoFix": true },
-  { "language": "typescriptreact", "autoFix": true }
+  "typescript",
+  "typescriptreact",
 ]
 ----
+
+Although, starting with https://github.com/microsoft/vscode-eslint#version-204[ESLint v2.0.4], there is no need to use `eslint.validate` to parse typescript files as it works out of the box.
 
 `eslint` can automatically fix trivial lint errors when you save a
 file by adding this line in your setting.
 
 [source,json]
 ----
-  "eslint.autoFixOnSave": true,
+"editor.codeActionsOnSave": {
+   "source.fixAll.eslint": true
+}
 ----
 
 :warning: It is *not* recommended to use the

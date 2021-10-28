@@ -6,21 +6,17 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonProps,
-  EuiLink,
-  EuiLinkProps,
-  EuiToolTip,
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  PropsForAnchor,
-  PropsForButton,
+  EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, SyntheticEvent } from 'react';
 import { isNil } from 'lodash/fp';
-import styled from 'styled-components';
 
-import { IP_REPUTATION_LINKS_SETTING, APP_ID } from '../../../../common/constants';
+import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import {
   DefaultFieldRendererOverflow,
   DEFAULT_MORE_MAX_HEIGHT,
@@ -42,38 +38,27 @@ import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
+import { getUebaDetailsUrl } from '../link_to/redirect_to_ueba';
+import { LinkButton, LinkAnchor, GenericLinkButton, PortContainer, Comma } from './helpers';
+
+export { LinkButton, LinkAnchor } from './helpers';
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
-export const LinkButton: React.FC<
-  PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>
-> = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
-
-export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
-  <EuiLink {...props}>{children}</EuiLink>
-);
-
-export const PortContainer = styled.div`
-  & svg {
-    position: relative;
-    top: -1px;
-  }
-`;
-
 // Internal Links
-const HostDetailsLinkComponent: React.FC<{
+const UebaDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   hostName: string;
   isButton?: boolean;
 }> = ({ children, hostName, isButton }) => {
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.ueba);
   const { navigateToApp } = useKibana().services.application;
-  const goToHostDetails = useCallback(
+  const goToUebaDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
-        deepLinkId: SecurityPageName.hosts,
-        path: getHostDetailsUrl(encodeURIComponent(hostName), search),
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.ueba,
+        path: getUebaDetailsUrl(encodeURIComponent(hostName), search),
       });
     },
     [hostName, navigateToApp, search]
@@ -81,15 +66,66 @@ const HostDetailsLinkComponent: React.FC<{
 
   return isButton ? (
     <LinkButton
-      onClick={goToHostDetails}
-      href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+      data-test-subj={'ueba-link-button'}
+      onClick={goToUebaDetails}
+      href={formatUrl(getUebaDetailsUrl(encodeURIComponent(hostName)))}
     >
       {children ? children : hostName}
     </LinkButton>
   ) : (
     <LinkAnchor
-      onClick={goToHostDetails}
-      href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+      data-test-subj={'ueba-link-anchor'}
+      onClick={goToUebaDetails}
+      href={formatUrl(getUebaDetailsUrl(encodeURIComponent(hostName)))}
+    >
+      {children ? children : hostName}
+    </LinkAnchor>
+  );
+};
+
+export const UebaDetailsLink = React.memo(UebaDetailsLinkComponent);
+
+const HostDetailsLinkComponent: React.FC<{
+  children?: React.ReactNode;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  hostName: string;
+  isButton?: boolean;
+  onClick?: (e: SyntheticEvent) => void;
+  title?: string;
+}> = ({ children, Component, hostName, isButton, onClick, title }) => {
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
+  const { navigateToApp } = useKibana().services.application;
+  const goToHostDetails = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.hosts,
+        path: getHostDetailsUrl(encodeURIComponent(hostName), search),
+      });
+    },
+    [hostName, navigateToApp, search]
+  );
+  const href = useMemo(
+    () => formatUrl(getHostDetailsUrl(encodeURIComponent(hostName))),
+    [formatUrl, hostName]
+  );
+  return isButton ? (
+    <GenericLinkButton
+      Component={Component}
+      dataTestSubj="data-grid-host-details"
+      href={href}
+      iconType="expand"
+      onClick={onClick ?? goToHostDetails}
+      title={title ?? hostName}
+    >
+      {children}
+    </GenericLinkButton>
+  ) : (
+    <LinkAnchor
+      onClick={onClick ?? goToHostDetails}
+      href={href}
+      data-test-subj="host-details-button"
     >
       {children ? children : hostName}
     </LinkAnchor>
@@ -134,34 +170,46 @@ ExternalLink.displayName = 'ExternalLink';
 
 const NetworkDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   ip: string;
   flowTarget?: FlowTarget | FlowTargetSourceDest;
   isButton?: boolean;
-}> = ({ children, ip, flowTarget = FlowTarget.source, isButton }) => {
+  onClick?: (e: SyntheticEvent) => void | undefined;
+  title?: string;
+}> = ({ Component, children, ip, flowTarget = FlowTarget.source, isButton, onClick, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
   const { navigateToApp } = useKibana().services.application;
   const goToNetworkDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.network,
         path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget, search),
       });
     },
     [flowTarget, ip, navigateToApp, search]
   );
+  const href = useMemo(
+    () => formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)))),
+    [formatUrl, ip]
+  );
 
   return isButton ? (
-    <LinkButton
-      href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
-      onClick={goToNetworkDetails}
+    <GenericLinkButton
+      Component={Component}
+      dataTestSubj="data-grid-network-details"
+      onClick={onClick ?? goToNetworkDetails}
+      href={href}
+      title={title ?? ip}
     >
-      {children ? children : ip}
-    </LinkButton>
+      {children}
+    </GenericLinkButton>
   ) : (
     <LinkAnchor
-      onClick={goToNetworkDetails}
-      href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
+      onClick={onClick ?? goToNetworkDetails}
+      href={href}
+      data-test-subj="network-details"
     >
       {children ? children : ip}
     </LinkAnchor>
@@ -181,7 +229,7 @@ const CaseDetailsLinkComponent: React.FC<{
   const goToCaseDetails = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(APP_ID, {
+      return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
       });
@@ -209,7 +257,7 @@ export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ child
   const goToCreateCase = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(APP_ID, {
+      return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: getCreateCaseUrl(search),
       });
@@ -227,63 +275,84 @@ CreateCaseLink.displayName = 'CreateCaseLink';
 
 // External Links
 export const GoogleLink = React.memo<{ children?: React.ReactNode; link: string }>(
-  ({ children, link }) => (
-    <ExternalLink url={`https://www.google.com/search?q=${encodeURIComponent(link)}`}>
-      {children ? children : link}
-    </ExternalLink>
-  )
+  ({ children, link }) => {
+    const url = useMemo(
+      () => `https://www.google.com/search?q=${encodeURIComponent(link)}`,
+      [link]
+    );
+    return <ExternalLink url={url}>{children ? children : link}</ExternalLink>;
+  }
 );
 
 GoogleLink.displayName = 'GoogleLink';
 
 export const PortOrServiceNameLink = React.memo<{
   children?: React.ReactNode;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   portOrServiceName: number | string;
-}>(({ children, portOrServiceName }) => (
-  <PortContainer>
-    <EuiLink
-      data-test-subj="port-or-service-name-link"
-      href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
+  onClick?: (e: SyntheticEvent) => void | undefined;
+  title?: string;
+}>(({ Component, title, children, portOrServiceName }) => {
+  const href = useMemo(
+    () =>
+      `https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
         String(portOrServiceName)
-      )}`}
-      target="_blank"
+      )}`,
+    [portOrServiceName]
+  );
+  return Component ? (
+    <Component
+      href={href}
+      data-test-subj="data-grid-port-or-service-name-link"
+      title={title}
+      iconType="link"
     >
-      {children ? children : portOrServiceName}
-    </EuiLink>
-  </PortContainer>
-));
+      {title ?? children ?? portOrServiceName}
+    </Component>
+  ) : (
+    <PortContainer>
+      <EuiLink data-test-subj="port-or-service-name-link" href={href} target="_blank">
+        {children ? children : portOrServiceName}
+      </EuiLink>
+    </PortContainer>
+  );
+});
 
 PortOrServiceNameLink.displayName = 'PortOrServiceNameLink';
 
 export const Ja3FingerprintLink = React.memo<{
   children?: React.ReactNode;
   ja3Fingerprint: string;
-}>(({ children, ja3Fingerprint }) => (
-  <EuiLink
-    data-test-subj="ja3-fingerprint-link"
-    href={`https://sslbl.abuse.ch/ja3-fingerprints/${encodeURIComponent(ja3Fingerprint)}`}
-    target="_blank"
-  >
-    {children ? children : ja3Fingerprint}
-  </EuiLink>
-));
+}>(({ children, ja3Fingerprint }) => {
+  const href = useMemo(
+    () => `https://sslbl.abuse.ch/ja3-fingerprints/${encodeURIComponent(ja3Fingerprint)}`,
+    [ja3Fingerprint]
+  );
+  return (
+    <EuiLink data-test-subj="ja3-fingerprint-link" href={href} target="_blank">
+      {children ? children : ja3Fingerprint}
+    </EuiLink>
+  );
+});
 
 Ja3FingerprintLink.displayName = 'Ja3FingerprintLink';
 
 export const CertificateFingerprintLink = React.memo<{
   children?: React.ReactNode;
   certificateFingerprint: string;
-}>(({ children, certificateFingerprint }) => (
-  <EuiLink
-    data-test-subj="certificate-fingerprint-link"
-    href={`https://sslbl.abuse.ch/ssl-certificates/sha1/${encodeURIComponent(
-      certificateFingerprint
-    )}`}
-    target="_blank"
-  >
-    {children ? children : certificateFingerprint}
-  </EuiLink>
-));
+}>(({ children, certificateFingerprint }) => {
+  const href = useMemo(
+    () =>
+      `https://sslbl.abuse.ch/ssl-certificates/sha1/${encodeURIComponent(certificateFingerprint)}`,
+    [certificateFingerprint]
+  );
+  return (
+    <EuiLink data-test-subj="certificate-fingerprint-link" href={href} target="_blank">
+      {children ? children : certificateFingerprint}
+    </EuiLink>
+  );
+});
 
 CertificateFingerprintLink.displayName = 'CertificateFingerprintLink';
 
@@ -308,16 +377,6 @@ const isReputationLink = (
 ): rowItem is ReputationLinkSetting =>
   (rowItem as ReputationLinkSetting).url_template !== undefined &&
   (rowItem as ReputationLinkSetting).name !== undefined;
-
-export const Comma = styled('span')`
-  margin-right: 5px;
-  margin-left: 5px;
-  &::after {
-    content: ' ,';
-  }
-`;
-
-Comma.displayName = 'Comma';
 
 const defaultNameMapping: Record<DefaultReputationLink, string> = {
   [DefaultReputationLink['virustotal.com']]: i18n.VIEW_VIRUS_TOTAL,
@@ -418,11 +477,13 @@ ReputationLinkComponent.displayName = 'ReputationLinkComponent';
 export const ReputationLink = React.memo(ReputationLinkComponent);
 
 export const WhoIsLink = React.memo<{ children?: React.ReactNode; domain: string }>(
-  ({ children, domain }) => (
-    <ExternalLink url={`https://www.iana.org/whois?q=${encodeURIComponent(domain)}`}>
-      {children ? children : domain}
-    </ExternalLink>
-  )
+  ({ children, domain }) => {
+    const url = useMemo(
+      () => `https://www.iana.org/whois?q=${encodeURIComponent(domain)}`,
+      [domain]
+    );
+    return <ExternalLink url={url}>{children ? children : domain}</ExternalLink>;
+  }
 );
 
 WhoIsLink.displayName = 'WhoIsLink';

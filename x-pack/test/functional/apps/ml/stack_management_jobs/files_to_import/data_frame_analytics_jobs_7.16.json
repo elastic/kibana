@@ -1,0 +1,60 @@
+[
+  {
+    "id": "dfa-test1",
+    "description": "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
+    "source": {
+      "index": [
+        "ft_bank_marketing"
+      ],
+      "query": {
+        "match_all": {}
+      }
+    },
+    "dest": {
+      "index": "user-dfa-test1",
+      "results_field": "ml"
+    },
+    "analysis": {
+      "classification": {
+        "prediction_field_name": "user-test",
+        "dependent_variable": "y",
+        "training_percent": 20
+      }
+    },
+    "analyzed_fields": {
+      "includes": [],
+      "excludes": []
+    },
+    "model_memory_limit": "60mb",
+    "allow_lazy_start": false
+  },
+  {
+    "id": "dfa-test2",
+    "description": "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
+    "source": {
+      "index": [
+        "missing-index"
+      ],
+      "query": {
+        "match_all": {}
+      }
+    },
+    "dest": {
+      "index": "user-dfa-test2",
+      "results_field": "ml"
+    },
+    "analysis": {
+      "classification": {
+        "prediction_field_name": "test",
+        "dependent_variable": "y",
+        "training_percent": 20
+      }
+    },
+    "analyzed_fields": {
+      "includes": [],
+      "excludes": []
+    },
+    "model_memory_limit": "60mb",
+    "allow_lazy_start": false
+  }
+]

@@ -14,10 +14,23 @@ import { CoreContext } from '../core_context';
 const pluginDependencies = new Map<PluginOpaqueId, PluginOpaqueId[]>();
 
 describe('ContextService', () => {
+  describe('#preboot()', () => {
+    test('createContextContainer returns a new container configured with pluginDependencies', () => {
+      const coreId = Symbol();
+      const service = new ContextService({ coreId } as CoreContext);
+      const preboot = service.preboot({ pluginDependencies });
+      expect(preboot.createContextContainer()).toBeDefined();
+      expect(MockContextConstructor).toHaveBeenCalledWith(pluginDependencies, coreId);
+    });
+  });
+
   describe('#setup()', () => {
     test('createContextContainer returns a new container configured with pluginDependencies', () => {
       const coreId = Symbol();
       const service = new ContextService({ coreId } as CoreContext);
+
+      service.preboot({ pluginDependencies: new Map() });
+
       const setup = service.setup({ pluginDependencies });
       expect(setup.createContextContainer()).toBeDefined();
       expect(MockContextConstructor).toHaveBeenCalledWith(pluginDependencies, coreId);

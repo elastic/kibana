@@ -113,7 +113,6 @@ export const logEntriesSearchStrategyProvider = ({
                   messageFormattingRules,
                 ]): IEsSearchRequest => {
                   return {
-                    // @ts-expect-error @elastic/elasticsearch declares indices_boost as Record<string, number>
                     params: createGetLogEntriesQuery(
                       indices,
                       params.startTimestamp,
@@ -197,17 +196,18 @@ const { asyncInitialRequestRT, asyncRecoveredRequestRT, asyncRequestRT } = creat
   logEntriesSearchRequestParamsRT
 );
 
-const getLogEntryFromHit = (
-  columnDefinitions: LogSourceColumnConfiguration[],
-  messageFormattingRules: CompiledLogMessageFormattingRule
-) => (hit: LogEntryHit): LogEntry => {
-  const cursor = getLogEntryCursorFromHit(hit);
-  return {
-    id: hit._id,
-    index: hit._index,
-    cursor,
-    columns: columnDefinitions.map(
-      (column): LogColumn => {
+const getLogEntryFromHit =
+  (
+    columnDefinitions: LogSourceColumnConfiguration[],
+    messageFormattingRules: CompiledLogMessageFormattingRule
+  ) =>
+  (hit: LogEntryHit): LogEntry => {
+    const cursor = getLogEntryCursorFromHit(hit);
+    return {
+      id: hit._id,
+      index: hit._index,
+      cursor,
+      columns: columnDefinitions.map((column): LogColumn => {
         if ('timestampColumn' in column) {
           return {
             columnId: column.timestampColumn.id,
@@ -226,11 +226,10 @@ const getLogEntryFromHit = (
             highlights: hit.highlight?.[column.fieldColumn.field] ?? [],
           };
         }
-      }
-    ),
-    context: getContextFromHit(hit),
+      }),
+      context: getContextFromHit(hit),
+    };
   };
-};
 
 const pickRequestCursor = (
   params: LogEntriesSearchRequestParams

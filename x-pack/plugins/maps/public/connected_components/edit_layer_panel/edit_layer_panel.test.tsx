@@ -48,12 +48,16 @@ jest.mock('../../kibana_services', () => {
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { LAYER_TYPE } from '../../../common/constants';
 import { ILayer } from '../../classes/layers/layer';
 import { EditLayerPanel } from './edit_layer_panel';
 
-const mockLayer = ({
+const mockLayer = {
   getId: () => {
     return '1';
+  },
+  getType: () => {
+    return LAYER_TYPE.VECTOR;
   },
   getDisplayName: () => {
     return 'layer 1';
@@ -62,6 +66,9 @@ const mockLayer = ({
     return [{ label: 'source prop1', value: 'you get one chance to set me' }];
   },
   showJoinEditor: () => {
+    return true;
+  },
+  canShowTooltip: () => {
     return true;
   },
   supportsElasticsearchFilters: () => {
@@ -76,12 +83,19 @@ const mockLayer = ({
   hasErrors: () => {
     return false;
   },
-} as unknown) as ILayer;
+  hasJoins: () => {
+    return false;
+  },
+  supportsFitToBounds: () => {
+    return true;
+  },
+} as unknown as ILayer;
 
 const defaultProps = {
   selectedLayer: mockLayer,
   fitToBounds: () => {},
-  updateSourceProp: () => {},
+  updateSourceProps: async () => {},
+  clearJoins: () => {},
 };
 
 describe('EditLayerPanel', () => {

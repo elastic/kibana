@@ -23,6 +23,7 @@ import { Immutable } from '../../../plugins/security_solution/common/endpoint/ty
 
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pkgKeyFromPackageInfo } from '../../../plugins/fleet/public/services/pkg_key_from_package_info';
+import { EndpointError } from '../../../plugins/security_solution/server';
 
 const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
@@ -120,6 +121,19 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     },
 
     /**
+     * Retrieves the currently installed endpoint package
+     */
+    async getEndpointPackage(): Promise<Immutable<GetPackagesResponse['response'][0]>> {
+      const endpointPackage = await retrieveEndpointPackageInfo();
+
+      if (!endpointPackage) {
+        throw new EndpointError(`endpoint package not instealled`);
+      }
+
+      return endpointPackage;
+    },
+
+    /**
      * Retrieves the full Agent policy, which mirrors what the Elastic Agent would get
      * once they checkin.
      */
@@ -192,9 +206,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
             version: endpointPackageInfo?.version ?? '',
           },
         };
-        const {
-          body: createResponse,
-        }: { body: CreatePackagePolicyResponse } = await supertest
+        const { body: createResponse }: { body: CreatePackagePolicyResponse } = await supertest
           .post(INGEST_API_PACKAGE_POLICIES)
           .set('kbn-xsrf', 'xxx')
           .send(newPackagePolicyData)
@@ -247,14 +259,13 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     async deletePolicyByName(name: string) {
       let packagePolicyList: GetPackagePoliciesResponse['items'];
       try {
-        const {
-          body: packagePoliciesResponse,
-        }: { body: GetPackagePoliciesResponse } = await supertest
-          .get(INGEST_API_PACKAGE_POLICIES)
-          .set('kbn-xsrf', 'xxx')
-          .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
-          .send()
-          .expect(200);
+        const { body: packagePoliciesResponse }: { body: GetPackagePoliciesResponse } =
+          await supertest
+            .get(INGEST_API_PACKAGE_POLICIES)
+            .set('kbn-xsrf', 'xxx')
+            .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
+            .send()
+            .expect(200);
         packagePolicyList = packagePoliciesResponse.items;
       } catch (error) {
         return logSupertestApiErrorAndThrow(

@@ -13,6 +13,7 @@ import {
   AlertTaskState,
   AlertInstanceSummary,
   AlertingFrameworkHealth,
+  ResolvedRule,
 } from '../../../../types';
 import {
   deleteAlerts,
@@ -31,6 +32,7 @@ import {
   loadAlertInstanceSummary,
   loadAlertTypes,
   alertingFrameworkHealth,
+  resolveRule,
 } from '../../../lib/alert_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -39,9 +41,7 @@ export interface ComponentOpts {
   unmuteAlerts: (alerts: Alert[]) => Promise<void>;
   enableAlerts: (alerts: Alert[]) => Promise<void>;
   disableAlerts: (alerts: Alert[]) => Promise<void>;
-  deleteAlerts: (
-    alerts: Alert[]
-  ) => Promise<{
+  deleteAlerts: (alerts: Alert[]) => Promise<{
     successes: string[];
     errors: string[];
   }>;
@@ -51,9 +51,7 @@ export interface ComponentOpts {
   unmuteAlertInstance: (alert: Alert, alertInstanceId: string) => Promise<void>;
   enableAlert: (alert: Alert) => Promise<void>;
   disableAlert: (alert: Alert) => Promise<void>;
-  deleteAlert: (
-    alert: Alert
-  ) => Promise<{
+  deleteAlert: (alert: Alert) => Promise<{
     successes: string[];
     errors: string[];
   }>;
@@ -62,6 +60,7 @@ export interface ComponentOpts {
   loadAlertInstanceSummary: (id: Alert['id']) => Promise<AlertInstanceSummary>;
   loadAlertTypes: () => Promise<AlertType[]>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
+  resolveRule: (id: Alert['id']) => Promise<ResolvedRule>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -132,6 +131,7 @@ export function withBulkAlertOperations<T>(
           loadAlertInstanceSummary({ http, alertId })
         }
         loadAlertTypes={async () => loadAlertTypes({ http })}
+        resolveRule={async (ruleId: Alert['id']) => resolveRule({ http, ruleId })}
         getHealth={async () => alertingFrameworkHealth({ http })}
       />
     );

@@ -9,23 +9,10 @@
 import type { ElasticsearchClient } from '../../elasticsearch';
 import * as Actions from './actions';
 import type { State } from './types';
-import type { ExecutionLog } from './migrations_state_action_machine';
 
-export async function cleanup(
-  client: ElasticsearchClient,
-  executionLog: ExecutionLog,
-  state?: State
-) {
+export async function cleanup(client: ElasticsearchClient, state?: State) {
   if (!state) return;
   if ('sourceIndexPitId' in state) {
-    try {
-      await Actions.closePit({ client, pitId: state.sourceIndexPitId })();
-    } catch (e) {
-      executionLog.push({
-        type: 'cleanup',
-        state,
-        message: e.message,
-      });
-    }
+    await Actions.closePit({ client, pitId: state.sourceIndexPitId })();
   }
 }

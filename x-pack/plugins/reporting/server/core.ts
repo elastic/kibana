@@ -13,6 +13,7 @@ import {
   BasePath,
   IClusterClient,
   KibanaRequest,
+  PackageInfo,
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
@@ -29,7 +30,6 @@ import { ReportingConfig, ReportingSetup } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
-import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import { ReportingPluginRouter } from './types';
@@ -58,6 +58,7 @@ export interface ReportingInternalStart {
 }
 
 export class ReportingCore {
+  private packageInfo: PackageInfo;
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
@@ -72,6 +73,7 @@ export class ReportingCore {
   public getContract: () => ReportingSetup;
 
   constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
+    this.packageInfo = context.env.packageInfo;
     const syncConfig = context.config.get<ReportingConfigType>();
     this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
@@ -82,6 +84,10 @@ export class ReportingCore {
     });
 
     this.executing = new Set();
+  }
+
+  public getKibanaPackageInfo() {
+    return this.packageInfo;
   }
 
   /*
@@ -231,12 +237,6 @@ export class ReportingCore {
       .toPromise();
   }
 
-  public async getScreenshotsObservable(): Promise<ScreenshotsObservableFn> {
-    const config = this.getConfig();
-    const { browserDriverFactory } = await this.getPluginStartDeps();
-    return screenshotsObservableFactory(config.get('capture'), browserDriverFactory);
-  }
-
   public getEnableScreenshotMode() {
     const { screenshotMode } = this.getPluginSetupDeps();
     return screenshotMode.setScreenshotModeEnabled;
@@ -305,6 +305,16 @@ export class ReportingCore {
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
+  }
+
+  public async getDataViewsService(request: KibanaRequest) {
+    const { savedObjects } = await this.getPluginStartDeps();
+    const savedObjectsClient = savedObjects.getScopedClient(request);
+    const { indexPatterns } = await this.getDataService();
+    const { asCurrentUser: esClient } = (await this.getEsClient()).asScoped(request);
+    const dataViews = await indexPatterns.dataViewsServiceFactory(savedObjectsClient, esClient);
+
+    return dataViews;
   }
 
   public async getDataService() {

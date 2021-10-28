@@ -14,6 +14,7 @@ import { AnomaliesActionGroupData, AnomalyHit } from './anomalies';
 import { DnsHistogramGroupData } from './dns';
 import { AuthenticationsActionGroupData } from './authentications';
 import { EventsActionGroupData, EventHit } from './events';
+import { PreviewHistogramGroupData } from './preview';
 
 export * from './alerts';
 export * from './anomalies';
@@ -21,6 +22,7 @@ export * from './authentications';
 export * from './common';
 export * from './dns';
 export * from './events';
+export * from './preview';
 
 export const MatrixHistogramQuery = 'matrixHistogram';
 export const MatrixHistogramQueryEntities = 'matrixHistogramEntities';
@@ -32,7 +34,18 @@ export enum MatrixHistogramType {
   events = 'events',
   alerts = 'alerts',
   dns = 'dns',
+  preview = 'preview',
 }
+
+export const MatrixHistogramTypeToAggName = {
+  [MatrixHistogramType.alerts]: 'aggregations.alertsGroup.buckets',
+  [MatrixHistogramType.anomalies]: 'aggregations.anomalyActionGroup.buckets',
+  [MatrixHistogramType.authentications]: 'aggregations.eventActionGroup.buckets',
+  [MatrixHistogramType.authenticationsEntities]: 'aggregations.events.buckets',
+  [MatrixHistogramType.dns]: 'aggregations.dns_name_query_count.buckets',
+  [MatrixHistogramType.events]: 'aggregations.eventActionGroup.buckets',
+  [MatrixHistogramType.preview]: 'aggregations.preview.buckets',
+};
 
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
@@ -87,18 +100,20 @@ export type MatrixHistogramParseData<T> = T extends MatrixHistogramType.alerts
   ? AuthenticationsActionGroupData[]
   : T extends MatrixHistogramType.events
   ? EventsActionGroupData[]
+  : T extends MatrixHistogramType.preview
+  ? PreviewHistogramGroupData[]
   : never;
 
-export type MatrixHistogramHit<T> = T extends MatrixHistogramType.alerts
+export type MatrixHistogramHit<T> = T extends
+  | MatrixHistogramType.alerts
+  | MatrixHistogramType.dns
+  | MatrixHistogramType.events
+  | MatrixHistogramType.preview
   ? EventHit
   : T extends MatrixHistogramType.anomalies
   ? AnomalyHit
-  : T extends MatrixHistogramType.dns
-  ? EventHit
   : T extends MatrixHistogramType.authentications
   ? AuthenticationHit
-  : T extends MatrixHistogramType.events
-  ? EventHit
   : never;
 
 export type MatrixHistogramDataConfig = Record<

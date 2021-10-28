@@ -21,7 +21,6 @@ import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { LegacyService } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -37,19 +36,26 @@ import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
-import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
-import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
+import {
+  InternalCorePreboot,
+  InternalCoreSetup,
+  InternalCoreStart,
+  ServiceConfigDescriptor,
+} from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
-import { DeprecationsService } from './deprecations';
+import { DeprecationsService, config as deprecationConfig } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
 import { config as executionContextConfig } from './execution_context';
+import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
+import { PrebootService } from './preboot';
+import { DiscoveredPlugins } from './plugins';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -61,7 +67,6 @@ export class Server {
   private readonly elasticsearch: ElasticsearchService;
   private readonly http: HttpService;
   private readonly rendering: RenderingService;
-  private readonly legacy: LegacyService;
   private readonly log: Logger;
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
@@ -76,12 +81,14 @@ export class Server {
   private readonly i18n: I18nService;
   private readonly deprecations: DeprecationsService;
   private readonly executionContext: ExecutionContextService;
+  private readonly prebootService: PrebootService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
+  private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
 
   constructor(
@@ -98,7 +105,6 @@ export class Server {
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
     this.plugins = new PluginsService(core);
-    this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
@@ -113,27 +119,79 @@ export class Server {
     this.i18n = new I18nService(core);
     this.deprecations = new DeprecationsService(core);
     this.executionContext = new ExecutionContextService(core);
+    this.prebootService = new PrebootService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
     });
   }
 
+  public async preboot() {
+    this.log.debug('prebooting server');
+    const prebootTransaction = apm.startTransaction('server_preboot', 'kibana_platform');
+
+    const environmentPreboot = await this.environment.preboot();
+
+    // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
+    this.discoveredPlugins = await this.plugins.discover({ environment: environmentPreboot });
+
+    // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also
+    // silent deprecation warnings until `setup` stage where we'll validate config once again.
+    await ensureValidConfiguration(this.configService, { logDeprecations: false });
+
+    const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
+    const contextServicePreboot = this.context.preboot({
+      pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
+    });
+    const httpPreboot = await this.http.preboot({ context: contextServicePreboot });
+
+    // setup i18n prior to any other service, to have translations ready
+    await this.i18n.preboot({ http: httpPreboot, pluginPaths });
+
+    this.capabilities.preboot({ http: httpPreboot });
+    const elasticsearchServicePreboot = await this.elasticsearch.preboot();
+    const uiSettingsPreboot = await this.uiSettings.preboot();
+
+    const renderingPreboot = await this.rendering.preboot({ http: httpPreboot, uiPlugins });
+    const httpResourcesPreboot = this.httpResources.preboot({
+      http: httpPreboot,
+      rendering: renderingPreboot,
+    });
+
+    const loggingPreboot = this.logging.preboot({ loggingSystem: this.loggingSystem });
+
+    const corePreboot: InternalCorePreboot = {
+      context: contextServicePreboot,
+      elasticsearch: elasticsearchServicePreboot,
+      http: httpPreboot,
+      uiSettings: uiSettingsPreboot,
+      httpResources: httpResourcesPreboot,
+      logging: loggingPreboot,
+      preboot: this.prebootService.preboot(),
+    };
+
+    await this.plugins.preboot(corePreboot);
+
+    httpPreboot.registerRouteHandlerContext(coreId, 'core', (() => {
+      return new PrebootCoreRouteHandlerContext(corePreboot);
+    }) as any);
+
+    this.coreApp.preboot(corePreboot, uiPlugins);
+
+    prebootTransaction?.end();
+    return corePreboot;
+  }
+
   public async setup() {
     this.log.debug('setting up server');
     const setupTransaction = apm.startTransaction('server_setup', 'kibana_platform');
 
-    const environmentSetup = await this.environment.setup();
+    const environmentSetup = this.environment.setup();
 
-    // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    const { pluginTree, pluginPaths, uiPlugins } = await this.plugins.discover({
-      environment: environmentSetup,
-    });
-
-    // Immediately terminate in case of invalid configuration
-    // This needs to be done after plugin discovery
+    // Configuration could have changed after preboot.
     await ensureValidConfiguration(this.configService);
 
+    const { uiPlugins, pluginPaths, pluginTree } = this.discoveredPlugins!.standard;
     const contextServiceSetup = this.context.setup({
       pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
@@ -142,6 +200,10 @@ export class Server {
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
       executionContext: executionContextSetup,
+    });
+
+    const deprecationsSetup = await this.deprecations.setup({
+      http: httpSetup,
     });
 
     // setup i18n prior to any other service, to have translations ready
@@ -166,6 +228,7 @@ export class Server {
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
+      deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
     });
 
@@ -181,6 +244,7 @@ export class Server {
       environment: environmentSetup,
       http: httpSetup,
       metrics: metricsSetup,
+      coreUsageData: coreUsageDataSetup,
     });
 
     const renderingSetup = await this.rendering.setup({
@@ -194,13 +258,7 @@ export class Server {
       rendering: renderingSetup,
     });
 
-    const loggingSetup = this.logging.setup({
-      loggingSystem: this.loggingSystem,
-    });
-
-    const deprecationsSetup = this.deprecations.setup({
-      http: httpSetup,
-    });
+    const loggingSetup = this.logging.setup();
 
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
@@ -218,14 +276,11 @@ export class Server {
       logging: loggingSetup,
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
+      coreUsageData: coreUsageDataSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
-
-    await this.legacy.setup({
-      http: httpSetup,
-    });
 
     this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup, uiPlugins);
@@ -240,6 +295,7 @@ export class Server {
 
     const executionContextStart = this.executionContext.start();
     const elasticsearchStart = await this.elasticsearch.start();
+    const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
@@ -257,6 +313,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
+
     this.status.start();
 
     this.coreStart = {
@@ -268,6 +325,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
       coreUsageData: coreUsageDataStart,
+      deprecations: deprecationsStart,
     };
 
     await this.plugins.start(this.coreStart);
@@ -282,7 +340,6 @@ export class Server {
   public async stop() {
     this.log.debug('stopping server');
 
-    await this.legacy.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
     await this.savedObjects.stop();
@@ -315,7 +372,6 @@ export class Server {
       loggingConfig,
       httpConfig,
       pluginsConfig,
-      kibanaConfig,
       savedObjectsConfig,
       savedObjectsMigrationConfig,
       uiSettingsConfig,
@@ -323,6 +379,7 @@ export class Server {
       statusConfig,
       pidConfig,
       i18nConfig,
+      deprecationConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

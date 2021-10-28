@@ -77,7 +77,7 @@ describe('EngineOverviewLogic', () => {
         EngineOverviewLogic.actions.loadOverviewMetrics();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/overview');
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines/some-engine/overview');
         expect(EngineOverviewLogic.actions.onOverviewMetricsLoad).toHaveBeenCalledWith(
           mockEngineMetrics
         );

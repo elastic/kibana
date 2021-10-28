@@ -10,14 +10,11 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { EuiContextMenuPanel, EuiPopover, EuiContextMenuItem } from '@elastic/eui';
 import { findTestSubject } from '@kbn/test/jest';
-import { getStubIndexPattern } from '../../../../../../../data/public/index_patterns/index_pattern.stub';
-import { coreMock } from '../../../../../../../../core/public/mocks';
 import { DiscoverServices } from '../../../../../build_services';
-// @ts-expect-error
-import stubbedLogstashFields from '../../../../../__fixtures__/logstash_fields';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
+import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
 
-const mockServices = ({
+const mockServices = {
   history: () => ({
     location: {
       search: '',
@@ -51,16 +48,10 @@ const mockServices = ({
       },
     },
   },
-} as unknown) as DiscoverServices;
+} as unknown as DiscoverServices;
 
 describe('Discover IndexPattern Management', () => {
-  const indexPattern = getStubIndexPattern(
-    'logstash-*',
-    (cfg: unknown) => cfg,
-    'time',
-    stubbedLogstashFields(),
-    coreMock.createSetup()
-  );
+  const indexPattern = stubLogstashIndexPattern;
 
   const editField = jest.fn();
 

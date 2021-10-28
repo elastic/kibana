@@ -13,13 +13,16 @@ import { DashboardContainer, DashboardReactContextValue } from '../dashboard_con
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
+import { ControlGroupContainer } from '../../../../../presentation_util/public';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
+  controlGroup?: ControlGroupContainer;
 }
 
 interface State {
   isFullScreenMode: boolean;
+  controlGroupReady: boolean;
   useMargins: boolean;
   title: string;
   description?: string;
@@ -29,21 +32,21 @@ interface State {
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;
-
   public readonly context!: DashboardReactContextValue;
+
+  private controlsRoot: React.RefObject<HTMLDivElement>;
+
   private subscription?: Subscription;
   private mounted: boolean = false;
   constructor(props: DashboardViewportProps) {
     super(props);
-    const {
-      isFullScreenMode,
-      panels,
-      useMargins,
-      title,
-      isEmbeddedExternally,
-    } = this.props.container.getInput();
+    const { isFullScreenMode, panels, useMargins, title, isEmbeddedExternally } =
+      this.props.container.getInput();
+
+    this.controlsRoot = React.createRef();
 
     this.state = {
+      controlGroupReady: !this.props.controlGroup,
       isFullScreenMode,
       panels,
       useMargins,
@@ -55,13 +58,8 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public componentDidMount() {
     this.mounted = true;
     this.subscription = this.props.container.getInput$().subscribe(() => {
-      const {
-        isFullScreenMode,
-        useMargins,
-        title,
-        description,
-        isEmbeddedExternally,
-      } = this.props.container.getInput();
+      const { isFullScreenMode, useMargins, title, description, isEmbeddedExternally } =
+        this.props.container.getInput();
       if (this.mounted) {
         this.setState({
           isFullScreenMode,
@@ -72,6 +70,12 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
         });
       }
     });
+    if (this.props.controlGroup && this.controlsRoot.current) {
+      this.props.controlGroup.render(this.controlsRoot.current);
+    }
+    if (this.props.controlGroup) {
+      this.props.controlGroup?.untilReady().then(() => this.setState({ controlGroupReady: true }));
+    }
   }
 
   public componentWillUnmount() {
@@ -90,16 +94,11 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public render() {
     const { container } = this.props;
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
-    const {
-      isEmbeddedExternally,
-      isFullScreenMode,
-      panels,
-      title,
-      description,
-      useMargins,
-    } = this.state;
+    const { isEmbeddedExternally, isFullScreenMode, panels, title, description, useMargins } =
+      this.state;
     return (
-      <React.Fragment>
+      <>
+        <div className="dshDashboardViewport-controlGroup" ref={this.controlsRoot} />
         <div
           data-shared-items-count={Object.values(panels).length}
           data-shared-items-container
@@ -117,7 +116,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
             <div className="dshDashboardEmptyScreen">
               <DashboardEmptyScreen
                 isReadonlyMode={
-                  this.props.container.getInput().dashboardCapabilities?.hideWriteControls
+                  !this.props.container.getInput().dashboardCapabilities?.showWriteControls
                 }
                 isEditMode={isEditMode}
                 uiSettings={this.context.services.uiSettings}
@@ -125,9 +124,9 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
               />
             </div>
           )}
-          <DashboardGrid container={container} />
+          {this.state.controlGroupReady && <DashboardGrid container={container} />}
         </div>
-      </React.Fragment>
+      </>
     );
   }
 }

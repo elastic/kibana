@@ -131,7 +131,7 @@ export class BasePathProxyServer {
           agent: this.httpsAgent,
           passThrough: true,
           xforward: true,
-          mapUri: async (request) => {
+          mapUri: async (request: Request) => {
             return {
               // Passing in this header to merge it is a workaround until this is fixed:
               // https://github.com/hapijs/h2o2/issues/124

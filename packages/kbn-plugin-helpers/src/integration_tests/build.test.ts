@@ -101,9 +101,14 @@ it('builds a generated plugin into a viable archive', async () => {
   expect(loadJsonFile.sync(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json')))
     .toMatchInlineSnapshot(`
     Object {
+      "description": "",
       "id": "fooTestPlugin",
       "kibanaVersion": "7.5.0",
       "optionalPlugins": Array [],
+      "owner": Object {
+        "githubTeam": "",
+        "name": "",
+      },
       "requiredPlugins": Array [
         "navigation",
       ],

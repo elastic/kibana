@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiLink,
@@ -23,6 +22,7 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormErrorText,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
@@ -32,7 +32,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DownloadStep } from '../../../../components';
 import {
   useStartServices,
-  useGetOutputs,
+  useDefaultOutput,
   sendGenerateServiceToken,
   usePlatform,
   PLATFORM_OPTIONS,
@@ -186,7 +186,7 @@ export const FleetServerCommandStep = ({
                 >
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.setupGuideLink"
-                    defaultMessage="Fleet User Guide"
+                    defaultMessage="Fleet and Elastic Agent Guide"
                   />
                 </EuiLink>
               ),
@@ -194,19 +194,11 @@ export const FleetServerCommandStep = ({
           />
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiSelect
-          prepend={
-            <EuiText>
-              <FormattedMessage
-                id="xpack.fleet.fleetServerSetup.platformSelectLabel"
-                defaultMessage="Platform"
-              />
-            </EuiText>
-          }
+        <EuiButtonGroup
           options={PLATFORM_OPTIONS}
-          value={platform}
-          onChange={(e) => setPlatform(e.target.value as PLATFORM_TYPE)}
-          aria-label={i18n.translate('xpack.fleet.fleetServerSetup.platformSelectAriaLabel', {
+          idSelected={platform}
+          onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
+          legend={i18n.translate('xpack.fleet.fleetServerSetup.platformSelectAriaLabel', {
             defaultMessage: 'Platform',
           })}
         />
@@ -243,7 +235,7 @@ export const FleetServerCommandStep = ({
 };
 
 export const useFleetServerInstructions = (policyId?: string) => {
-  const outputsRequest = useGetOutputs();
+  const { output, refresh: refreshOutputs } = useDefaultOutput();
   const { notifications } = useStartServices();
   const [serviceToken, setServiceToken] = useState<string>();
   const [isLoadingServiceToken, setIsLoadingServiceToken] = useState<boolean>(false);
@@ -251,9 +243,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const [deploymentMode, setDeploymentMode] = useState<DeploymentMode>('production');
   const { data: settings, resendRequest: refreshSettings } = useGetSettings();
   const fleetServerHost = settings?.item.fleet_server_hosts?.[0];
-  const output = outputsRequest.data?.items?.[0];
   const esHost = output?.hosts?.[0];
-  const refreshOutputs = outputsRequest.resendRequest;
 
   const installCommand = useMemo((): string => {
     if (!serviceToken || !esHost) {
@@ -737,9 +727,8 @@ export const OnPremInstructions: React.FC = () => {
   }, [notifications.toasts]);
 
   return (
-    <EuiPanel paddingSize="l" grow={false} hasShadow={false} hasBorder={true}>
-      <EuiSpacer size="s" />
-      <EuiText className="eui-textCenter">
+    <>
+      <EuiText>
         <h2>
           <FormattedMessage
             id="xpack.fleet.fleetServerSetup.setupTitle"
@@ -759,7 +748,7 @@ export const OnPremInstructions: React.FC = () => {
               >
                 <FormattedMessage
                   id="xpack.fleet.fleetServerSetup.setupGuideLink"
-                  defaultMessage="Fleet User Guide"
+                  defaultMessage="Fleet and Elastic Agent Guide"
                 />
               </EuiLink>
             ),
@@ -788,6 +777,6 @@ export const OnPremInstructions: React.FC = () => {
             : CompleteStep(),
         ]}
       />
-    </EuiPanel>
+    </>
   );
 };

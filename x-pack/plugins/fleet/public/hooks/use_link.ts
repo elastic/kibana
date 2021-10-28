@@ -23,11 +23,14 @@ export const useLink = () => {
     getPath: (page: StaticPage | DynamicPage, values: DynamicPagePathValues = {}): string => {
       return getSeparatePaths(page, values)[1];
     },
+    getAbsolutePath: (path: string): string => {
+      return core.http.basePath.prepend(`${path}`);
+    },
     getAssetsPath: (path: string) =>
       core.http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${path}`),
     getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => {
       const [basePath, path] = getSeparatePaths(page, values);
-      return core.http.basePath.prepend(`${basePath}#${path}`);
+      return core.http.basePath.prepend(`${basePath}${path}`);
     },
   };
 };

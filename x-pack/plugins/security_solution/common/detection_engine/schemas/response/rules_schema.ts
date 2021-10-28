@@ -62,7 +62,7 @@ import {
   timeline_id,
   timeline_title,
   threshold,
-  job_status,
+  ruleExecutionStatus,
   status_date,
   last_success_at,
   last_success_message,
@@ -70,11 +70,14 @@ import {
   last_failure_message,
   filters,
   meta,
+  outcome,
+  alias_target_id,
   note,
   building_block_type,
   license,
   rule_name_override,
   timestamp_override,
+  namespace,
 } from '../common/schemas';
 
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
@@ -164,7 +167,7 @@ export const partialRulesSchema = t.partial({
   license,
   throttle,
   rule_name_override,
-  status: job_status,
+  status: ruleExecutionStatus,
   status_date,
   timestamp_override,
   last_success_at,
@@ -173,8 +176,12 @@ export const partialRulesSchema = t.partial({
   last_failure_message,
   filters,
   meta,
+  outcome,
+  alias_target_id,
   index,
+  namespace,
   note,
+  uuid: id, // Move to 'required' post-migration
 });
 
 /**

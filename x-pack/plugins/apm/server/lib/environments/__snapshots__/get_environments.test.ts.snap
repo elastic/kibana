@@ -15,7 +15,7 @@ Object {
         "terms": Object {
           "field": "service.environment",
           "missing": "ENVIRONMENT_NOT_DEFINED",
-          "size": 100,
+          "size": 50,
         },
       },
     },
@@ -26,8 +26,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -59,7 +59,7 @@ Object {
         "terms": Object {
           "field": "service.environment",
           "missing": "ENVIRONMENT_NOT_DEFINED",
-          "size": 100,
+          "size": 50,
         },
       },
     },
@@ -70,8 +70,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },

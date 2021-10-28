@@ -7,11 +7,8 @@
  */
 
 import { IUiSettingsClient } from 'kibana/server';
-import {
-  AsyncSearchGet,
-  AsyncSearchSubmit,
-  Search,
-} from '@elastic/elasticsearch/api/requestParams';
+import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions, UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
 import { SearchSessionsConfigSchema } from '../../../../config';
@@ -20,22 +17,22 @@ import { SearchSessionsConfigSchema } from '../../../../config';
  * @internal
  */
 export async function getIgnoreThrottled(
-  uiSettingsClient: IUiSettingsClient
-): Promise<Pick<Search, 'ignore_throttled'>> {
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>
+): Promise<{ ignore_throttled?: boolean }> {
   const includeFrozen = await uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
-  return { ignore_throttled: !includeFrozen };
+  return includeFrozen ? { ignore_throttled: false } : {};
 }
 
 /**
  @internal
  */
 export async function getDefaultAsyncSubmitParams(
-  uiSettingsClient: IUiSettingsClient,
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
 ): Promise<
   Pick<
-    AsyncSearchSubmit,
+    AsyncSearchSubmitRequest,
     | 'batched_reduce_size'
     | 'keep_alive'
     | 'wait_for_completion_timeout'
@@ -46,21 +43,26 @@ export async function getDefaultAsyncSubmitParams(
     | 'keep_on_completion'
   >
 > {
+  const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
+
+  // TODO: searchSessionsConfig could be "null" if we are running without x-pack which happens only in tests.
+  // This can be cleaned up when we completely stop separating basic and oss
+  const keepAlive = useSearchSessions
+    ? `${searchSessionsConfig!.defaultExpiration.asMilliseconds()}ms`
+    : '1m';
+
   return {
+    // TODO: adjust for partial results
     batched_reduce_size: 64,
-    keep_on_completion: !!options.sessionId, // Always return an ID, even if the request completes quickly
-    ...getDefaultAsyncGetParams(options),
+    // Wait up to 100ms for the response to return
+    wait_for_completion_timeout: '100ms',
+    // If search sessions are used, store and get an async ID even for short running requests.
+    keep_on_completion: useSearchSessions,
+    // The initial keepalive is as defined in defaultExpiration if search sessions are used or 1m otherwise.
+    keep_alive: keepAlive,
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
-    ...(options.sessionId
-      ? {
-          // TODO: searchSessionsConfig could be "null" if we are running without x-pack which happens only in tests.
-          // This can be cleaned up when we completely stop separating basic and oss
-          keep_alive: searchSessionsConfig
-            ? `${searchSessionsConfig.defaultExpiration.asMilliseconds()}ms`
-            : '1m',
-        }
-      : {}),
+    // If search sessions are used, set the initial expiration time.
   };
 }
 
@@ -68,15 +70,20 @@ export async function getDefaultAsyncSubmitParams(
  @internal
  */
 export function getDefaultAsyncGetParams(
+  searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
-): Pick<AsyncSearchGet, 'keep_alive' | 'wait_for_completion_timeout'> {
+): Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
+  const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
+
   return {
-    wait_for_completion_timeout: '100ms', // Wait up to 100ms for the response to return
-    ...(options.sessionId
-      ? undefined
+    // Wait up to 100ms for the response to return
+    wait_for_completion_timeout: '100ms',
+    ...(useSearchSessions
+      ? // Don't change the expiration of search requests that are tracked in a search session
+        undefined
       : {
+          // We still need to do polling for searches not within the context of a search session or when search session disabled
           keep_alive: '1m',
-          // We still need to do polling for searches not within the context of a search session
         }),
   };
 }

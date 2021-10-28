@@ -51,3 +51,8 @@ export const getGetErrorMessage = (getError: ServerApiError) => {
     values: { error: getError.message },
   });
 };
+
+export const ABOUT_EVENT_FILTERS = i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
+  defaultMessage:
+    'Add an event filter to exclude high volume or unwanted events from being written to Elasticsearch.',
+});

@@ -27,8 +27,12 @@ describe('AppContainer', () => {
   });
 
   const flushPromises = async () => {
-    await new Promise<void>(async (resolve) => {
-      setImmediate(() => resolve());
+    await new Promise<void>(async (resolve, reject) => {
+      try {
+        setImmediate(() => resolve());
+      } catch (error) {
+        reject(error);
+      }
     });
   };
 

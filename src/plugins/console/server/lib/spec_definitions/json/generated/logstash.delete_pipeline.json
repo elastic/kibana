@@ -1,0 +1,11 @@
+{
+  "logstash.delete_pipeline": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_logstash/pipeline/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/logstash-api-delete-pipeline.html"
+  }
+}

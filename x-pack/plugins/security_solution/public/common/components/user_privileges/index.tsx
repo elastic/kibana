@@ -5,34 +5,60 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { DeepReadonly } from 'utility-types';
+
+import { Capabilities } from '../../../../../../../src/core/public';
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
 import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
-import { EndpointPrivileges, useEndpointPrivileges } from './use_endpoint_privileges';
+import { EndpointPrivileges, useEndpointPrivileges } from './endpoint';
 
+import { SERVER_APP_ID } from '../../../../common/constants';
+import { getEndpointPrivilegesInitialState } from './endpoint/utils';
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
   detectionEnginePrivileges: ReturnType<typeof useFetchDetectionEnginePrivileges>;
   endpointPrivileges: EndpointPrivileges;
+  kibanaSecuritySolutionsPrivileges: { crud: boolean; read: boolean };
 }
 
 export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   listPrivileges: { loading: false, error: undefined, result: undefined },
   detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
-  endpointPrivileges: { loading: true, canAccessEndpointManagement: false, canAccessFleet: false },
+  endpointPrivileges: getEndpointPrivilegesInitialState(),
+  kibanaSecuritySolutionsPrivileges: { crud: false, read: false },
 });
 
 const UserPrivilegesContext = createContext<UserPrivilegesState>(initialUserPrivilegesState());
 
 interface UserPrivilegesProviderProps {
+  kibanaCapabilities: Capabilities;
   children: React.ReactNode;
 }
 
-export const UserPrivilegesProvider = ({ children }: UserPrivilegesProviderProps) => {
-  const listPrivileges = useFetchListPrivileges();
-  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges();
+export const UserPrivilegesProvider = ({
+  kibanaCapabilities,
+  children,
+}: UserPrivilegesProviderProps) => {
+  const crud: boolean = kibanaCapabilities[SERVER_APP_ID].crud === true;
+  const read: boolean = kibanaCapabilities[SERVER_APP_ID].show === true;
+  const [kibanaSecuritySolutionsPrivileges, setKibanaSecuritySolutionsPrivileges] = useState({
+    crud,
+    read,
+  });
+
+  const listPrivileges = useFetchListPrivileges(read);
+  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges(read);
   const endpointPrivileges = useEndpointPrivileges();
+
+  useEffect(() => {
+    setKibanaSecuritySolutionsPrivileges((currPrivileges) => {
+      if (currPrivileges.read !== read || currPrivileges.crud !== crud) {
+        return { read, crud };
+      }
+      return currPrivileges;
+    });
+  }, [crud, read]);
 
   return (
     <UserPrivilegesContext.Provider
@@ -40,6 +66,7 @@ export const UserPrivilegesProvider = ({ children }: UserPrivilegesProviderProps
         listPrivileges,
         detectionEnginePrivileges,
         endpointPrivileges,
+        kibanaSecuritySolutionsPrivileges,
       }}
     >
       {children}

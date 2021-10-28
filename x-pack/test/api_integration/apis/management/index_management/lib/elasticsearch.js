@@ -13,7 +13,7 @@ import { getRandomString } from './random';
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
 export const initElasticsearchHelpers = (getService) => {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   let indicesCreated = [];
@@ -29,24 +29,24 @@ export const initElasticsearchHelpers = (getService) => {
     indicesCreated = [];
   };
 
-  const catIndex = (index, h) => es.cat.indices({ index, format: 'json', h });
+  const catIndex = (index, h) => es.cat.indices({ index, format: 'json', h }, { meta: true });
 
-  const indexStats = (index, metric) => es.indices.stats({ index, metric });
+  const indexStats = (index, metric) => es.indices.stats({ index, metric }, { meta: true });
 
   const cleanUp = () => deleteAllIndices();
 
-  const catTemplate = (name) => es.cat.templates({ name, format: 'json' });
+  const catTemplate = (name) => es.cat.templates({ name, format: 'json' }, { meta: true });
 
   const createComponentTemplate = (componentTemplate, shouldCacheTemplate) => {
     if (shouldCacheTemplate) {
       componentTemplatesCreated.push(componentTemplate.name);
     }
 
-    return es.dataManagement.saveComponentTemplate(componentTemplate);
+    return es.cluster.putComponentTemplate(componentTemplate, { meta: true });
   };
 
   const deleteComponentTemplate = (componentTemplateName) => {
-    return es.dataManagement.deleteComponentTemplate({ name: componentTemplateName });
+    return es.cluster.deleteComponentTemplate({ name: componentTemplateName }, { meta: true });
   };
 
   const cleanUpComponentTemplates = () =>

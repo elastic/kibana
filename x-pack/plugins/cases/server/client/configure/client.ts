@@ -20,13 +20,13 @@ import {
   CaseConfigurationsResponseRt,
   CaseConfigureResponseRt,
   CasesConfigurationsResponse,
+  CasesConfigureAttributes,
   CasesConfigurePatch,
   CasesConfigurePatchRt,
   CasesConfigureRequest,
   CasesConfigureResponse,
   ConnectorMappings,
   ConnectorMappingsAttributes,
-  ESCasesConfigureAttributes,
   excess,
   GetConfigureFindRequest,
   GetConfigureFindRequestRt,
@@ -34,11 +34,7 @@ import {
   SUPPORTED_CONNECTORS,
   throwErrors,
 } from '../../../common';
-import {
-  createCaseError,
-  transformCaseConnectorToEsConnector,
-  transformESConnectorToCaseConnector,
-} from '../../common';
+import { createCaseError } from '../../common';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
@@ -148,10 +144,8 @@ async function get(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const {
-      filter: authorizationFilter,
-      ensureSavedObjectsAreAuthorized,
-    } = await authorization.getAuthorizationFilter(Operations.findConfigurations);
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.findConfigurations);
 
     const filter = combineAuthorizedAndOwnerFilter(
       queryParams.owner,
@@ -174,7 +168,7 @@ async function get(
 
     const configurations = await pMap(
       myCaseConfigure.saved_objects,
-      async (configuration: SavedObject<ESCasesConfigureAttributes>) => {
+      async (configuration: SavedObject<CasesConfigureAttributes>) => {
         const { connector, ...caseConfigureWithoutConnector } = configuration?.attributes ?? {
           connector: null,
         };
@@ -184,7 +178,7 @@ async function get(
         if (connector != null) {
           try {
             mappings = await casesClientInternal.configuration.getMappings({
-              connector: transformESConnectorToCaseConnector(connector),
+              connector,
             });
           } catch (e) {
             error = e.isBoom
@@ -195,7 +189,7 @@ async function get(
 
         return {
           ...caseConfigureWithoutConnector,
-          connector: transformESConnectorToCaseConnector(connector),
+          connector,
           mappings: mappings.length > 0 ? mappings[0].attributes.mappings : [],
           version: configuration.version ?? '',
           error,
@@ -241,13 +235,8 @@ async function update(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const {
-    caseConfigureService,
-    logger,
-    unsecuredSavedObjectsClient,
-    user,
-    authorization,
-  } = clientArgs;
+  const { caseConfigureService, logger, unsecuredSavedObjectsClient, user, authorization } =
+    clientArgs;
 
   try {
     const request = pipe(
@@ -292,11 +281,9 @@ async function update(
 
     try {
       const resMappings = await casesClientInternal.configuration.getMappings({
-        connector:
-          connector != null
-            ? connector
-            : transformESConnectorToCaseConnector(configuration.attributes.connector),
+        connector: connector != null ? connector : configuration.attributes.connector,
       });
+
       mappings = resMappings.length > 0 ? resMappings[0].attributes.mappings : [];
 
       if (connector != null) {
@@ -325,18 +312,17 @@ async function update(
       configurationId: configuration.id,
       updatedAttributes: {
         ...queryWithoutVersionAndConnector,
-        ...(connector != null ? { connector: transformCaseConnectorToEsConnector(connector) } : {}),
+        ...(connector != null && { connector }),
         updated_at: updateDate,
         updated_by: user,
       },
+      originalConfiguration: configuration,
     });
 
     return CaseConfigureResponseRt.encode({
       ...configuration.attributes,
       ...patch.attributes,
-      connector: transformESConnectorToCaseConnector(
-        patch.attributes.connector ?? configuration.attributes.connector
-      ),
+      connector: patch.attributes.connector ?? configuration.attributes.connector,
       mappings,
       version: patch.version ?? '',
       error,
@@ -356,27 +342,20 @@ async function create(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const {
-    unsecuredSavedObjectsClient,
-    caseConfigureService,
-    logger,
-    user,
-    authorization,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseConfigureService, logger, user, authorization } =
+    clientArgs;
   try {
     let error = null;
 
-    const {
-      filter: authorizationFilter,
-      ensureSavedObjectsAreAuthorized,
-    } = await authorization.getAuthorizationFilter(
-      /**
-       * The operation is createConfiguration because the procedure is part of
-       * the create route. The user should have all
-       * permissions to delete the results.
-       */
-      Operations.createConfiguration
-    );
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(
+        /**
+         * The operation is createConfiguration because the procedure is part of
+         * the create route. The user should have all
+         * permissions to delete the results.
+         */
+        Operations.createConfiguration
+      );
 
     const filter = combineAuthorizedAndOwnerFilter(
       configuration.owner,
@@ -397,7 +376,7 @@ async function create(
     );
 
     if (myCaseConfigure.saved_objects.length > 0) {
-      const deleteConfigurationMapper = async (c: SavedObject<ESCasesConfigureAttributes>) =>
+      const deleteConfigurationMapper = async (c: SavedObject<CasesConfigureAttributes>) =>
         caseConfigureService.delete({ unsecuredSavedObjectsClient, configurationId: c.id });
 
       // Ensuring we don't too many concurrent deletions running.
@@ -431,7 +410,7 @@ async function create(
       unsecuredSavedObjectsClient,
       attributes: {
         ...configuration,
-        connector: transformCaseConnectorToEsConnector(configuration.connector),
+        connector: configuration.connector,
         created_at: creationDate,
         created_by: user,
         updated_at: null,
@@ -443,7 +422,7 @@ async function create(
     return CaseConfigureResponseRt.encode({
       ...post.attributes,
       // Reserve for future implementations
-      connector: transformESConnectorToCaseConnector(post.attributes.connector),
+      connector: post.attributes.connector,
       mappings,
       version: post.version ?? '',
       error,

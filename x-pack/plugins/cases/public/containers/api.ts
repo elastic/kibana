@@ -8,13 +8,13 @@
 import { assign, omit } from 'lodash';
 
 import {
-  ACTION_TYPES_URL,
   CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
+  CaseResolveResponse,
   CASES_URL,
   CasesFindResponse,
   CasesResponse,
@@ -36,7 +36,10 @@ import {
   SubCaseResponse,
   SubCasesResponse,
   User,
+  ResolvedCase,
 } from '../../common';
+
+import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
 
@@ -60,6 +63,7 @@ import {
   decodeCasesFindResponse,
   decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
+  decodeCaseResolveResponse,
 } from './utils';
 
 export const getCase = async (
@@ -75,6 +79,24 @@ export const getCase = async (
     signal,
   });
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
+};
+
+export const resolveCase = async (
+  caseId: string,
+  includeComments: boolean = true,
+  signal: AbortSignal
+): Promise<ResolvedCase> => {
+  const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
+    getCaseDetailsUrl(caseId) + '/resolve',
+    {
+      method: 'GET',
+      query: {
+        includeComments,
+      },
+      signal,
+    }
+  );
+  return convertToCamelCase<CaseResolveResponse, ResolvedCase>(decodeCaseResolveResponse(response));
 };
 
 export const getSubCase = async (
@@ -351,9 +373,13 @@ export const pushCase = async (
 };
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> => {
-  const response = await KibanaServices.get().http.fetch<ActionLicense[]>(ACTION_TYPES_URL, {
-    method: 'GET',
-    signal,
-  });
-  return response;
+  const response = await KibanaServices.get().http.fetch<ActionLicense[]>(
+    getAllConnectorTypesUrl(),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+  return convertArrayToCamelCase(response) as ActionLicense[];
 };

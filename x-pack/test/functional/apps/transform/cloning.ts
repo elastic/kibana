@@ -238,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowActions(testData.originalConfig.id, false);
 
           await transform.testExecution.logTestStep('should display the define pivot step');
-          await transform.table.clickTransformRowAction('Clone');
+          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Clone');
           await transform.wizard.assertSelectedTransformFunction(testData.type);
           await transform.wizard.assertDefineStepActive();
         });
@@ -322,9 +322,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
-          await transform.testExecution.logTestStep(
-            'should display the create index pattern switch'
-          );
+          await transform.testExecution.logTestStep('should display the create data view switch');
           await transform.wizard.assertCreateIndexPatternSwitchExists();
           await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
 

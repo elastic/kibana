@@ -14,7 +14,11 @@ import {
 import { EndpointAppContext } from '../../types';
 import { getArtifactId, reportErrors } from './common';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
-import { isEmptyManifestDiff } from './manifest';
+import { isEmptyManifestDiff, Manifest } from './manifest';
+import { InvalidInternalManifestError } from '../../services/artifacts/errors';
+import { ManifestManager } from '../../services';
+import { wrapErrorIfNeeded } from '../../utils';
+import { EndpointError } from '../../errors';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
@@ -87,7 +91,7 @@ export class ManifestTask {
         params: { version: ManifestTaskConstants.VERSION },
       });
     } catch (e) {
-      this.logger.debug(`Error scheduling task, received ${e.message}`);
+      this.logger.error(new EndpointError(`Error scheduling task, received ${e.message}`, e));
     }
   };
 
@@ -112,15 +116,28 @@ export class ManifestTask {
     const manifestManager = this.endpointAppContext.service.getManifestManager();
 
     if (manifestManager === undefined) {
-      this.logger.debug('Manifest Manager not available.');
+      this.logger.error('Manifest Manager not available.');
       return;
     }
 
     try {
-      // Last manifest we computed, which was saved to ES
-      const oldManifest = await manifestManager.getLastComputedManifest();
-      if (oldManifest == null) {
-        this.logger.debug('User manifest not available yet.');
+      let oldManifest: Manifest | null;
+
+      try {
+        // Last manifest we computed, which was saved to ES
+        oldManifest = await manifestManager.getLastComputedManifest();
+      } catch (e) {
+        // Lets recover from a failure in getting the internal manifest map by creating an empty default manifest
+        if (e instanceof InvalidInternalManifestError) {
+          this.logger.error(e);
+          this.logger.info('recovering from invalid internal manifest');
+          oldManifest = ManifestManager.createDefaultManifest();
+        }
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      if (oldManifest! == null) {
+        this.logger.debug('Last computed manifest not available yet');
         return;
       }
 
@@ -158,8 +175,9 @@ export class ManifestTask {
       if (deleteErrors.length) {
         reportErrors(this.logger, deleteErrors);
       }
+      await manifestManager.cleanup(newManifest);
     } catch (err) {
-      this.logger.error(err);
+      this.logger.error(wrapErrorIfNeeded(err));
     }
   };
 }

@@ -1,10 +1,7 @@
 {
-  "job_id": "auth_rare_source_ip_for_a_user",
+  "job_id": "JOB_ID",
   "indices": [
-    "auditbeat-*",
-    "logs-*",
-    "filebeat-*",
-    "winlogbeat-*"
+    "INDEX_PATTERN_NAME"
   ],
   "max_empty_searches": 10,
   "query": {

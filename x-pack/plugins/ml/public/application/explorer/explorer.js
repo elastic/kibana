@@ -86,7 +86,6 @@ const ExplorerPage = ({
   filterPlaceHolder,
   indexPattern,
   queryString,
-  filterIconTriggeredQuery,
   updateLanguage,
 }) => (
   <div data-test-subj="mlPageAnomalyExplorer">
@@ -121,7 +120,6 @@ const ExplorerPage = ({
                       filterPlaceHolder={filterPlaceHolder}
                       indexPattern={indexPattern}
                       queryString={queryString}
-                      filterIconTriggeredQuery={filterIconTriggeredQuery}
                       updateLanguage={updateLanguage}
                     />
                   </div>
@@ -151,7 +149,7 @@ export class ExplorerUI extends React.Component {
     selectedJobsRunning: PropTypes.bool.isRequired,
   };
 
-  state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
+  state = { language: DEFAULT_QUERY_LANG };
   htmlIdGen = htmlIdGenerator();
 
   componentDidMount() {
@@ -199,8 +197,6 @@ export class ExplorerUI extends React.Component {
         );
       }
     }
-
-    this.setState({ filterIconTriggeredQuery: `${newQueryString}` });
 
     try {
       const { clearSettings, settings } = getKqlQueryValues({
@@ -259,7 +255,27 @@ export class ExplorerUI extends React.Component {
       tableData,
       swimLaneSeverity,
     } = this.props.explorerState;
-    const { annotationsData, aggregations, error: annotationsError } = annotations;
+    const { annotationsData, totalCount: allAnnotationsCnt, error: annotationsError } = annotations;
+
+    const annotationsCnt = Array.isArray(annotationsData) ? annotationsData.length : 0;
+    const badge =
+      allAnnotationsCnt > annotationsCnt ? (
+        <EuiBadge color={'hollow'}>
+          <FormattedMessage
+            id="xpack.ml.explorer.annotationsOutOfTotalCountTitle"
+            defaultMessage="First {visibleCount} out of a total of {totalCount}"
+            values={{ visibleCount: annotationsCnt, totalCount: allAnnotationsCnt }}
+          />
+        </EuiBadge>
+      ) : (
+        <EuiBadge color={'hollow'}>
+          <FormattedMessage
+            id="xpack.ml.explorer.annotationsTitleTotalCount"
+            defaultMessage="Total: {count}"
+            values={{ count: annotationsCnt }}
+          />
+        </EuiBadge>
+      );
 
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
@@ -303,7 +319,6 @@ export class ExplorerUI extends React.Component {
         influencers={influencers}
         filterActive={filterActive}
         filterPlaceHolder={filterPlaceHolder}
-        filterIconTriggeredQuery={this.state.filterIconTriggeredQuery}
         indexPattern={indexPattern}
         queryString={queryString}
         updateLanguage={this.updateLanguage}
@@ -404,27 +419,22 @@ export class ExplorerUI extends React.Component {
             {loading === false && tableData.anomalies?.length ? (
               <AnomaliesMap anomalies={tableData.anomalies} jobIds={selectedJobIds} />
             ) : null}
-            {annotationsData.length > 0 && (
+            {annotationsCnt > 0 && (
               <>
                 <EuiPanel data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded">
                   <EuiAccordion
                     id={this.htmlIdGen()}
                     buttonContent={
-                      <EuiTitle className="panel-title">
+                      <EuiTitle
+                        className="panel-title"
+                        data-test-subj="mlAnomalyExplorerAnnotationsPanelButton"
+                      >
                         <h2>
                           <FormattedMessage
                             id="xpack.ml.explorer.annotationsTitle"
                             defaultMessage="Annotations {badge}"
                             values={{
-                              badge: (
-                                <EuiBadge color={'hollow'}>
-                                  <FormattedMessage
-                                    id="xpack.ml.explorer.annotationsTitleTotalCount"
-                                    defaultMessage="Total: {count}"
-                                    values={{ count: annotationsData.length }}
-                                  />
-                                </EuiBadge>
-                              ),
+                              badge,
                             }}
                           />
                         </h2>
@@ -435,7 +445,6 @@ export class ExplorerUI extends React.Component {
                       <AnnotationsTable
                         jobIds={selectedJobIds}
                         annotations={annotationsData}
-                        aggregations={aggregations}
                         drillDown={true}
                         numberBadge={false}
                       />
@@ -484,7 +493,10 @@ export class ExplorerUI extends React.Component {
                   </EuiFlexItem>
                   {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
                     <EuiFlexItem grow={false}>
-                      <CheckboxShowCharts />
+                      <CheckboxShowCharts
+                        showCharts={showCharts}
+                        setShowCharts={explorerService.setShowCharts}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>

@@ -12,7 +12,7 @@ import { get } from 'lodash';
 import { AssetPicker } from '../../../../public/components/asset_picker';
 import {
   encode,
-  elasticOutline,
+  getElasticOutline,
   isValidHttpUrl,
   resolveFromArgs,
 } from '../../../../../../../src/plugins/presentation_util/public';
@@ -29,13 +29,13 @@ class ImageUpload extends React.Component {
     onValueChange: PropTypes.func.isRequired,
     typeInstance: PropTypes.object.isRequired,
     resolvedArgValue: PropTypes.string,
+    argValue: PropTypes.string,
     assets: PropTypes.object.isRequired,
   };
 
   constructor(props) {
     super(props);
-
-    const url = props.resolvedArgValue || null;
+    const url = props.resolvedArgValue || props.argValue || null;
 
     let urlType = Object.keys(props.assets).length ? 'asset' : 'file';
     // if not a valid base64 string, will show as missing asset icon
@@ -143,7 +143,7 @@ class ImageUpload extends React.Component {
       file: <FileForm loading={loading} onChange={this.handleUpload} />,
       link: (
         <LinkForm
-          url={url}
+          url={selectedAsset.id ? '' : url}
           inputRef={(ref) => (this.inputRefs.srcUrlText = ref)}
           onSubmit={this.setSrcUrl}
         />
@@ -168,13 +168,16 @@ class ImageUpload extends React.Component {
   }
 }
 
-export const imageUpload = () => ({
-  name: 'imageUpload',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelp(),
-  resolveArgValue: true,
-  template: templateFromReactComponent(ImageUpload),
-  resolve({ args }) {
-    return { dataurl: resolveFromArgs(args, elasticOutline) };
-  },
-});
+export const imageUpload = () => {
+  return {
+    name: 'imageUpload',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelp(),
+    resolveArgValue: true,
+    template: templateFromReactComponent(ImageUpload),
+    resolve: async ({ args }) => {
+      const { elasticOutline } = await getElasticOutline();
+      return { dataurl: resolveFromArgs(args, elasticOutline) };
+    },
+  };
+};

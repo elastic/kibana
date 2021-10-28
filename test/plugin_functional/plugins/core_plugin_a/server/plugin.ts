@@ -22,8 +22,10 @@ export class CorePluginAPlugin implements Plugin {
       'pluginA',
       (context) => {
         return {
-          ping: () =>
-            context.core.elasticsearch.legacy.client.callAsInternalUser('ping') as Promise<string>,
+          ping: async () => {
+            const { body } = await context.core.elasticsearch.client.asInternalUser.ping();
+            return String(body);
+          },
         };
       }
     );

@@ -7,7 +7,7 @@
 
 import type { EuiStepProps } from '@elastic/eui';
 
-import type { AgentPolicy } from '../../types';
+import type { AgentPolicy, Settings } from '../../types';
 
 export interface BaseProps {
   /**
@@ -27,4 +27,10 @@ export interface BaseProps {
    * in some way. This is an area for consumers to render a button and text explaining how data can be viewed.
    */
   viewDataStep?: EuiStepProps;
+
+  settings?: Settings;
+
+  setSelectedPolicyId?: (policyId?: string) => void;
+
+  isFleetServerPolicySelected?: boolean;
 }

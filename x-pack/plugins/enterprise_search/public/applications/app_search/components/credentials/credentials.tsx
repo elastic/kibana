@@ -31,9 +31,8 @@ import { CredentialsList } from './credentials_list';
 import { CredentialsLogic } from './credentials_logic';
 
 export const Credentials: React.FC = () => {
-  const { fetchCredentials, fetchDetails, resetCredentials, showCredentialsForm } = useActions(
-    CredentialsLogic
-  );
+  const { fetchCredentials, fetchDetails, resetCredentials, showCredentialsForm } =
+    useActions(CredentialsLogic);
 
   const { meta, dataLoading, shouldShowCredentialsForm } = useValues(CredentialsLogic);
 
@@ -91,7 +90,7 @@ export const Credentials: React.FC = () => {
           <EuiTitle size="m">
             <h2>
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.apiKeys', {
-                defaultMessage: 'API Keys',
+                defaultMessage: 'API keys',
               })}
             </h2>
           </EuiTitle>
@@ -105,7 +104,7 @@ export const Credentials: React.FC = () => {
               onClick={() => showCredentialsForm()}
             >
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.createKey', {
-                defaultMessage: 'Create a key',
+                defaultMessage: 'Create key',
               })}
             </EuiButton>
           )}

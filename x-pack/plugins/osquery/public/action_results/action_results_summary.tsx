@@ -8,15 +8,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { i18n } from '@kbn/i18n';
-import { EuiLink, EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
+import { EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { PLUGIN_ID } from '../../../fleet/common';
-import { pagePathGetters } from '../../../fleet/public';
+import { AgentIdToName } from '../agents/agent_id_to_name';
 import { useActionResults } from './use_action_results';
 import { useAllResults } from '../results/use_all_results';
 import { Direction } from '../../common/search_strategy';
-import { useKibana } from '../common/lib/kibana';
+import { useActionResultsPrivileges } from './use_action_privileges';
 
 interface ActionResultsSummaryProps {
   actionId: string;
@@ -35,15 +34,16 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   expirationDate,
   agentIds,
 }) => {
-  const getUrlForApp = useKibana().services.application.getUrlForApp;
   // @ts-expect-error update types
   const [pageIndex, setPageIndex] = useState(0);
   // @ts-expect-error update types
   const [pageSize, setPageSize] = useState(50);
-  const expired = useMemo(() => (!expirationDate ? false : new Date(expirationDate) < new Date()), [
-    expirationDate,
-  ]);
+  const expired = useMemo(
+    () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
+    [expirationDate]
+  );
   const [isLive, setIsLive] = useState(true);
+  const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
   const {
     // @ts-expect-error update types
     data: { aggregations, edges },
@@ -55,7 +55,20 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
+    skip: !hasActionResultsPrivileges,
   });
+  if (expired) {
+    // @ts-expect-error update types
+    edges.forEach((edge) => {
+      if (!edge.fields.completed_at) {
+        edge.fields['error.keyword'] = edge.fields.error = [
+          i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredErrorText', {
+            defaultMessage: 'The action request timed out.',
+          }),
+        ];
+      }
+    });
+  }
 
   const { data: logsResults } = useAllResults({
     actionId,
@@ -68,22 +81,10 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
       },
     ],
     isLive,
+    skip: !hasActionResultsPrivileges,
   });
 
-  const renderAgentIdColumn = useCallback(
-    (agentId) => (
-      <EuiLink
-        className="eui-textTruncate"
-        href={getUrlForApp(PLUGIN_ID, {
-          path: `#` + pagePathGetters.agent_details({ agentId })[1],
-        })}
-        target="_blank"
-      >
-        {agentId}
-      </EuiLink>
-    ),
-    [getUrlForApp]
-  );
+  const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
 
   const renderRowsColumn = useCallback(
     (_, item) => {

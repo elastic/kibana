@@ -11,12 +11,9 @@ import {
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { rangeQuery, kqlQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { Setup } from '../../helpers/setup_request';
 
 export async function getBuckets({
   environment,
@@ -25,15 +22,19 @@ export async function getBuckets({
   groupId,
   bucketSize,
   setup,
+  start,
+  end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   groupId?: string;
   bucketSize: number;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...rangeQuery(start, end),
@@ -85,7 +86,6 @@ export async function getBuckets({
   );
 
   return {
-    noHits: resp.hits.total.value === 0,
     buckets: resp.hits.total.value > 0 ? buckets : [],
   };
 }

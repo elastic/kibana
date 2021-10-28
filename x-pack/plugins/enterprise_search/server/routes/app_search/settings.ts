@@ -15,7 +15,7 @@ export function registerSettingsRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/log_settings',
+      path: '/internal/app_search/log_settings',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -25,7 +25,7 @@ export function registerSettingsRoutes({
 
   router.put(
     {
-      path: '/api/app_search/log_settings',
+      path: '/internal/app_search/log_settings',
       validate: {
         body: schema.object({
           api: schema.maybe(
@@ -34,6 +34,11 @@ export function registerSettingsRoutes({
             })
           ),
           analytics: schema.maybe(
+            schema.object({
+              enabled: schema.boolean(),
+            })
+          ),
+          crawler: schema.maybe(
             schema.object({
               enabled: schema.boolean(),
             })

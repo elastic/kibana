@@ -24,12 +24,12 @@ export function cefLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'cefLogs',
     name: i18n.translate('home.tutorials.cefLogs.nameTitle', {
-      defaultMessage: 'CEF logs',
+      defaultMessage: 'CEF Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.cefLogs.shortDescription', {
-      defaultMessage: 'Collect Common Event Format (CEF) log data over syslog.',
+      defaultMessage: 'Collect and parse logs from Common Event Format (CEF) with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.cefLogs.longDescription', {
       defaultMessage:
@@ -63,5 +63,6 @@ export function cefLogsSpecProvider(context: TutorialContext): TutorialSchema {
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['network', 'security'],
   };
 }

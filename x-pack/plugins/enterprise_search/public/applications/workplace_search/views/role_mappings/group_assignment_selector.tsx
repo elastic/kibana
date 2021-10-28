@@ -25,13 +25,11 @@ import {
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 export const GroupAssignmentSelector: React.FC = () => {
-  const { handleAllGroupsSelectionChange, handleGroupSelectionChange } = useActions(
-    RoleMappingsLogic
-  );
+  const { handleAllGroupsSelectionChange, handleGroupSelectionChange } =
+    useActions(RoleMappingsLogic);
 
-  const { includeInAllGroups, availableGroups, selectedGroups, selectedOptions } = useValues(
-    RoleMappingsLogic
-  );
+  const { includeInAllGroups, availableGroups, selectedGroups, selectedOptions } =
+    useValues(RoleMappingsLogic);
 
   const hasGroupAssignment = selectedGroups.size > 0 || includeInAllGroups;
 

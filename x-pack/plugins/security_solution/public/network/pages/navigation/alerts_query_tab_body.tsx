@@ -65,6 +65,7 @@ export const filterNetworkData: Filter[] = [
 
 export const NetworkAlertsQueryTabBody = React.memo((alertsProps: NetworkComponentQueryProps) => (
   <AlertsView
+    entityType="events"
     timelineId={TimelineId.networkPageExternalAlerts}
     {...alertsProps}
     pageFilters={filterNetworkData}

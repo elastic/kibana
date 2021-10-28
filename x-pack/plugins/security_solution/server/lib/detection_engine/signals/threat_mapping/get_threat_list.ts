@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import {
   GetSortWithTieBreakerOptions,
@@ -54,7 +54,6 @@ export const getThreatList = async ({
   );
   const { body: response } = await esClient.search<ThreatListDoc>({
     body: {
-      // @ts-expect-error ESBoolQuery is not assignale to QueryDslQueryContainer
       query: queryFilter,
       fields: [
         {
@@ -70,6 +69,7 @@ export const getThreatList = async ({
         listItemIndex: listClient.getListItemIndex(),
       }),
     },
+    track_total_hits: false,
     ignore_unavailable: true,
     index,
     size: calculatedPerPage,
@@ -101,9 +101,9 @@ export const getSortWithTieBreaker = ({
     }
   } else {
     if (sortField != null) {
-      return [{ [sortField]: ascOrDesc, '@timestamp': 'asc' }];
+      return [{ [sortField]: ascOrDesc, '@timestamp': 'desc' }];
     } else {
-      return [{ '@timestamp': 'asc' }];
+      return [{ '@timestamp': 'desc' }];
     }
   }
 };
@@ -125,7 +125,6 @@ export const getThreatListCount = async ({
   );
   const { body: response } = await esClient.count({
     body: {
-      // @ts-expect-error ESBoolQuery is not assignale to QueryDslQueryContainer
       query: queryFilter,
     },
     ignore_unavailable: true,

@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { OVERVIEW_PATH } from '../../common/constants';
+import { Route, Switch } from 'react-router-dom';
 
-import { NotFoundPage } from '../app/404';
+import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
 import { RenderAppProps } from './types';
 
@@ -22,7 +21,7 @@ export const renderApp = ({
   services,
   store,
   usageCollection,
-  subPlugins,
+  subPluginRoutes,
 }: RenderAppProps): (() => void) => {
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
@@ -36,23 +35,9 @@ export const renderApp = ({
     >
       <ApplicationUsageTrackingProvider>
         <Switch>
-          {[
-            ...subPlugins.overview.routes,
-            ...subPlugins.alerts.routes,
-            ...subPlugins.rules.routes,
-            ...subPlugins.exceptions.routes,
-            ...subPlugins.hosts.routes,
-            ...subPlugins.network.routes,
-            ...subPlugins.timelines.routes,
-            ...subPlugins.cases.routes,
-            ...subPlugins.management.routes,
-          ].map((route, index) => (
-            <Route key={`route-${index}`} {...route} />
-          ))}
-
-          <Route path="" exact>
-            <Redirect to={OVERVIEW_PATH} />
-          </Route>
+          {subPluginRoutes.map((route, index) => {
+            return <Route key={`route-${index}`} {...route} />;
+          })}
           <Route>
             <NotFoundPage />
           </Route>

@@ -7,6 +7,7 @@
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -40,14 +41,16 @@ export function migrateAppState(
     );
   }
 
-  const panelNeedsMigration = (appState.panels as Array<
-    | SavedDashboardPanelTo60
-    | SavedDashboardPanel610
-    | SavedDashboardPanel620
-    | SavedDashboardPanel630
-    | SavedDashboardPanel640To720
-    | SavedDashboardPanel730ToLatest
-  >).some((panel) => {
+  const panelNeedsMigration = (
+    appState.panels as Array<
+      | SavedDashboardPanelTo60
+      | SavedDashboardPanel610
+      | SavedDashboardPanel620
+      | SavedDashboardPanel630
+      | SavedDashboardPanel640To720
+      | SavedDashboardPanel730ToLatest
+    >
+  ).some((panel) => {
     if ((panel as { version?: string }).version === undefined) return true;
 
     const version = (panel as SavedDashboardPanel730ToLatest).version;
@@ -75,7 +78,7 @@ export function migrateAppState(
       >,
       kibanaVersion,
       appState.useMargins as boolean,
-      appState.uiState as Record<string, Record<string, unknown>>
+      appState.uiState as { [key: string]: SerializableRecord }
     ) as SavedDashboardPanel[];
     delete appState.uiState;
   }

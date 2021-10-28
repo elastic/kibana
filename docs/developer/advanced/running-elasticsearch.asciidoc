@@ -25,7 +25,7 @@ See all available options, like how to specify a specific license, with the `--h
 yarn es snapshot --help
 ----
 
-`trial` will give you access to all capabilities.
+`--license trial` will give you access to all capabilities.
 
 **Keeping data between snapshots**
 
@@ -76,7 +76,6 @@ If many other users will be interacting with your remote cluster, you'll want to
 [source,bash]
 ----
 kibana.index: '.{YourGitHubHandle}-kibana'
-xpack.task_manager.index: '.{YourGitHubHandle}-task-manager-kibana'
 ----
 
 ==== Running remote clusters

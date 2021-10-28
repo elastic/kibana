@@ -38,6 +38,9 @@ import { NoOverallData } from './components/no_overall_data';
 import { SeverityControl } from '../components/severity_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
 import { isDefined } from '../../../common/types/guards';
+import { MlTooltipComponent } from '../components/chart_tooltip';
+import { SwimlaneAnnotationContainer } from './swimlane_annotation_container';
+import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -92,6 +95,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       swimLaneSeverity,
       overallSwimlaneData,
       viewBySwimlaneData,
+      swimlaneContainerWidth,
     } = explorerState;
 
     const [severityUpdate, setSeverityUpdate] = useState(swimLaneSeverity);
@@ -139,6 +143,18 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         times: selectedCells.times,
       };
     }, [selectedCells]);
+
+    const annotationXDomain = useMemo(
+      () =>
+        AnomalyTimelineService.isOverallSwimlaneData(overallSwimlaneData)
+          ? {
+              min: overallSwimlaneData.earliest * 1000,
+              max: overallSwimlaneData.latest * 1000,
+              minInterval: overallSwimlaneData.interval * 1000,
+            }
+          : undefined,
+      [overallSwimlaneData]
+    );
 
     return (
       <>
@@ -259,6 +275,21 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
+          {annotationXDomain && Array.isArray(annotations) && annotations.length > 0 ? (
+            <>
+              <MlTooltipComponent>
+                {(tooltipService) => (
+                  <SwimlaneAnnotationContainer
+                    chartWidth={swimlaneContainerWidth}
+                    domain={annotationXDomain}
+                    annotationsData={annotations}
+                    tooltipService={tooltipService}
+                  />
+                )}
+              </MlTooltipComponent>
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
 
           <SwimlaneContainer
             id="overall"
@@ -279,7 +310,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           />
 
           <EuiSpacer size="m" />
-
           {viewBySwimlaneOptions.length > 0 && (
             <SwimlaneContainer
               id="view_by"

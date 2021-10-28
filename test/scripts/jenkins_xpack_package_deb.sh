@@ -4,6 +4,7 @@ set -e
 
 source src/dev/ci_setup/setup_env.sh
 
+mkdir -p target
 gsutil -q -m cp "gs://ci-artifacts.kibana.dev/package-testing/$GIT_COMMIT/kibana-*.deb" ./target
 
 export VAGRANT_CWD=test/package

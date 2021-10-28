@@ -6,23 +6,20 @@
  */
 
 import React from 'react';
-import { uniq } from 'lodash';
+import { groupBy, uniq } from 'lodash';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { getSuggestions } from './xy_suggestions';
-import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import {
-  Visualization,
-  OperationMetadata,
-  VisualizationType,
-  AccessorConfig,
-  DatasourcePublicAPI,
-} from '../types';
-import { State, SeriesType, visualizationTypes, XYLayerConfig, XYState } from './types';
+import { XyToolbar, DimensionEditor } from './xy_config_panel';
+import { LayerHeader } from './xy_config_panel/layer_header';
+import type { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
+import { State, visualizationTypes } from './types';
+import { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { LayerType, layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
@@ -30,6 +27,20 @@ import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
+import { LensIconChartBarReferenceLine } from '../assets/chart_bar_reference_line';
+import { generateId } from '../id_generator';
+import {
+  getGroupsAvailableInData,
+  getGroupsRelatedToData,
+  getGroupsToShow,
+  getStaticValue,
+} from './reference_line_helpers';
+import {
+  checkScaleOperation,
+  checkXAccessorCompatibility,
+  getAxisName,
+} from './visualization_helpers';
+import { groupAxesByType } from './axes_configuration';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
@@ -86,10 +97,10 @@ function getDescription(state?: State) {
 
 export const getXyVisualization = ({
   paletteService,
-  data,
+  fieldFormats,
 }: {
   paletteService: PaletteRegistry;
-  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
 }): Visualization<State> => ({
   id: 'lnsXY',
 
@@ -100,7 +111,12 @@ export const getXyVisualization = ({
   },
 
   getLayerIds(state) {
-    return state.layers.map((l) => l.layerId);
+    return getLayersByType(state).map((l) => l.layerId);
+  },
+
+  getRemoveOperation(state, layerId) {
+    const dataLayers = getLayersByType(state, layerTypes.DATA).map((l) => l.layerId);
+    return dataLayers.includes(layerId) && dataLayers.length === 1 ? 'clear' : 'remove';
   },
 
   removeLayer(state, layerId) {
@@ -110,7 +126,7 @@ export const getXyVisualization = ({
     };
   },
 
-  appendLayer(state, layerId) {
+  appendLayer(state, layerId, layerType) {
     const usedSeriesTypes = uniq(state.layers.map((layer) => layer.seriesType));
     return {
       ...state,
@@ -118,7 +134,8 @@ export const getXyVisualization = ({
         ...state.layers,
         newLayerState(
           usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
-          layerId
+          layerId,
+          layerType
         ),
       ],
     };
@@ -166,16 +183,98 @@ export const getXyVisualization = ({
             position: Position.Top,
             seriesType: defaultSeriesType,
             showGridlines: false,
+            layerType: layerTypes.DATA,
           },
         ],
       }
     );
   },
 
+  getLayerType(layerId, state) {
+    return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
+  },
+
+  getSupportedLayers(state, frame) {
+    const referenceLineGroupIds = [
+      {
+        id: 'yReferenceLineLeft',
+        label: 'yLeft' as const,
+      },
+      {
+        id: 'yReferenceLineRight',
+        label: 'yRight' as const,
+      },
+      {
+        id: 'xReferenceLine',
+        label: 'x' as const,
+      },
+    ];
+
+    const dataLayers =
+      state?.layers.filter(({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA) ||
+      [];
+    const filledDataLayers = dataLayers.filter(
+      ({ accessors, xAccessor }) => accessors.length || xAccessor
+    );
+    const layerHasNumberHistogram = checkScaleOperation(
+      'interval',
+      'number',
+      frame?.datasourceLayers || {}
+    );
+    const referenceLineGroups = getGroupsRelatedToData(
+      referenceLineGroupIds,
+      state,
+      frame?.datasourceLayers || {},
+      frame?.activeData
+    );
+
+    const layers = [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.xyChart.addDataLayerLabel', {
+          defaultMessage: 'Add visualization layer',
+        }),
+        icon: LensIconChartMixedXy,
+      },
+      {
+        type: layerTypes.REFERENCELINE,
+        label: i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabel', {
+          defaultMessage: 'Add reference layer',
+        }),
+        icon: LensIconChartBarReferenceLine,
+        disabled:
+          !filledDataLayers.length ||
+          (!dataLayers.some(layerHasNumberHistogram) &&
+            dataLayers.every(({ accessors }) => !accessors.length)),
+        tooltipContent: filledDataLayers.length
+          ? undefined
+          : i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabelDisabledHelp', {
+              defaultMessage: 'Add some data to enable reference layer',
+            }),
+        initialDimensions: state
+          ? referenceLineGroups.map(({ id, label }) => ({
+              groupId: id,
+              columnId: generateId(),
+              dataType: 'number',
+              label: getAxisName(label, { isHorizontal: isHorizontalChart(state?.layers || []) }),
+              staticValue: getStaticValue(
+                dataLayers,
+                label,
+                { activeData: frame?.activeData },
+                layerHasNumberHistogram
+              ),
+            }))
+          : undefined,
+      },
+    ];
+
+    return layers;
+  },
+
   getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
     if (!layer) {
-      return { groups: [] };
+      return { groups: [], supportStaticValue: true };
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
@@ -189,7 +288,7 @@ export const getXyVisualization = ({
       const colorAssignments = getColorAssignments(
         state.layers,
         { tables: frame.activeData },
-        data.fieldFormats.deserialize
+        fieldFormats.deserialize
       );
       mappedAccessors = getAccessorColorConfig(
         colorAssignments,
@@ -203,6 +302,117 @@ export const getXyVisualization = ({
     }
 
     const isHorizontal = isHorizontalChart(state.layers);
+    const isDataLayer = !layer.layerType || layer.layerType === layerTypes.DATA;
+
+    if (!isDataLayer) {
+      const idToIndex = sortedAccessors.reduce<Record<string, number>>((memo, id, index) => {
+        memo[id] = index;
+        return memo;
+      }, {});
+      const { bottom, left, right } = groupBy(
+        [...(layer.yConfig || [])].sort(
+          ({ forAccessor: forA }, { forAccessor: forB }) => idToIndex[forA] - idToIndex[forB]
+        ),
+        ({ axisMode }) => {
+          return axisMode;
+        }
+      );
+      const groupsToShow = getGroupsToShow(
+        [
+          // When a reference layer panel is added, a static reference line should automatically be included by default
+          // in the first available axis, in the following order: vertical left, vertical right, horizontal.
+          {
+            config: left,
+            id: 'yReferenceLineLeft',
+            label: 'yLeft',
+            dataTestSubj: 'lnsXY_yReferenceLineLeftPanel',
+          },
+          {
+            config: right,
+            id: 'yReferenceLineRight',
+            label: 'yRight',
+            dataTestSubj: 'lnsXY_yReferenceLineRightPanel',
+          },
+          {
+            config: bottom,
+            id: 'xReferenceLine',
+            label: 'x',
+            dataTestSubj: 'lnsXY_xReferenceLinePanel',
+          },
+        ],
+        state,
+        frame.datasourceLayers,
+        frame?.activeData
+      );
+      return {
+        supportFieldFormat: false,
+        supportStaticValue: true,
+        // Each reference lines layer panel will have sections for each available axis
+        // (horizontal axis, vertical axis left, vertical axis right).
+        // Only axes that support numeric reference lines should be shown
+        groups: groupsToShow.map(({ config = [], id, label, dataTestSubj, valid }) => ({
+          groupId: id,
+          groupLabel: getAxisName(label, { isHorizontal }),
+          accessors: config.map(({ forAccessor, color }) => ({
+            columnId: forAccessor,
+            color: color || mappedAccessors.find(({ columnId }) => columnId === forAccessor)?.color,
+            triggerIcon: 'color',
+          })),
+          filterOperations: isNumericMetric,
+          supportsMoreColumns: true,
+          required: false,
+          enableDimensionEditor: true,
+          dataTestSubj,
+          invalid: !valid,
+          invalidMessage:
+            label === 'x'
+              ? i18n.translate('xpack.lens.configure.invalidBottomReferenceLineDimension', {
+                  defaultMessage:
+                    'This reference line is assigned to an axis that no longer exists or is no longer valid. You may move this reference line to another available axis or remove it.',
+                })
+              : i18n.translate('xpack.lens.configure.invalidReferenceLineDimension', {
+                  defaultMessage:
+                    'This reference line is assigned to an axis that no longer exists. You may move this reference line to another available axis or remove it.',
+                }),
+          requiresPreviousColumnOnDuplicate: true,
+        })),
+      };
+    }
+
+    const { left, right } = groupAxesByType([layer], frame.activeData);
+    // Check locally if it has one accessor OR one accessor per axis
+    const layerHasOnlyOneAccessor = Boolean(
+      layer.accessors.length < 2 ||
+        (left.length && left.length < 2) ||
+        (right.length && right.length < 2)
+    );
+    // Check also for multiple layers that can stack for percentage charts
+    // Make sure that if multiple dimensions are defined for a single layer, they should belong to the same axis
+    const hasOnlyOneAccessor =
+      layerHasOnlyOneAccessor &&
+      getLayersByType(state, layerTypes.DATA).filter(
+        // check that the other layers are compatible with this one
+        (dataLayer) => {
+          if (
+            dataLayer.seriesType === layer.seriesType &&
+            Boolean(dataLayer.xAccessor) === Boolean(layer.xAccessor) &&
+            Boolean(dataLayer.splitAccessor) === Boolean(layer.splitAccessor)
+          ) {
+            const { left: localLeft, right: localRight } = groupAxesByType(
+              [dataLayer],
+              frame.activeData
+            );
+            // return true only if matching axis are found
+            return (
+              dataLayer.accessors.length &&
+              (Boolean(localLeft.length) === Boolean(left.length) ||
+                Boolean(localRight.length) === Boolean(right.length))
+            );
+          }
+          return false;
+        }
+      ).length < 2;
+
     return {
       groups: [
         {
@@ -242,7 +452,7 @@ export const getXyVisualization = ({
           filterOperations: isBucketed,
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
-          required: layer.seriesType.includes('percentage'),
+          required: layer.seriesType.includes('percentage') && hasOnlyOneAccessor,
           enableDimensionEditor: true,
         },
       ],
@@ -254,13 +464,12 @@ export const getXyVisualization = ({
     return state.layers[0].palette;
   },
 
-  setDimension({ prevState, layerId, columnId, groupId }) {
+  setDimension({ prevState, layerId, columnId, groupId, previousColumn }) {
     const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {
       return prevState;
     }
     const newLayer = { ...foundLayer };
-
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
     }
@@ -271,13 +480,38 @@ export const getXyVisualization = ({
       newLayer.splitAccessor = columnId;
     }
 
+    if (newLayer.layerType === layerTypes.REFERENCELINE) {
+      newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
+      const hasYConfig = newLayer.yConfig?.some(({ forAccessor }) => forAccessor === columnId);
+      const previousYConfig = previousColumn
+        ? newLayer.yConfig?.find(({ forAccessor }) => forAccessor === previousColumn)
+        : false;
+      if (!hasYConfig) {
+        newLayer.yConfig = [
+          ...(newLayer.yConfig || []),
+          {
+            // override with previous styling,
+            ...previousYConfig,
+            // but keep the new group & id config
+            forAccessor: columnId,
+            axisMode:
+              groupId === 'xReferenceLine'
+                ? 'bottom'
+                : groupId === 'yReferenceLineRight'
+                ? 'right'
+                : 'left',
+          },
+        ];
+      }
+    }
+
     return {
       ...prevState,
       layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
     };
   },
 
-  removeDimension({ prevState, layerId, columnId }) {
+  removeDimension({ prevState, layerId, columnId, frame }) {
     const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {
       return prevState;
@@ -297,25 +531,35 @@ export const getXyVisualization = ({
       newLayer.yConfig = newLayer.yConfig.filter(({ forAccessor }) => forAccessor !== columnId);
     }
 
+    let newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
+    // check if there's any reference layer and pull it off if all data layers have no dimensions set
+    const layersByType = groupBy(newLayers, ({ layerType }) => layerType);
+    // check for data layers if they all still have xAccessors
+    const groupsAvailable = getGroupsAvailableInData(
+      layersByType[layerTypes.DATA],
+      frame.datasourceLayers,
+      frame?.activeData
+    );
+    if (
+      (Object.keys(groupsAvailable) as Array<'x' | 'yLeft' | 'yRight'>).every(
+        (id) => !groupsAvailable[id]
+      )
+    ) {
+      newLayers = newLayers.filter(
+        ({ layerType, accessors }) => layerType === layerTypes.DATA || accessors.length
+      );
+    }
+
     return {
       ...prevState,
-      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
+      layers: newLayers,
     };
   },
 
-  getLayerContextMenuIcon({ state, layerId }) {
-    const layer = state.layers.find((l) => l.layerId === layerId);
-    const visualizationType = visualizationTypes.find((t) => t.id === layer?.seriesType);
-    return {
-      icon: visualizationType?.icon || 'gear',
-      label: visualizationType?.label || '',
-    };
-  },
-
-  renderLayerContextMenu(domElement, props) {
+  renderLayerHeader(domElement, props) {
     render(
       <I18nProvider>
-        <LayerContextMenu {...props} />
+        <LayerHeader {...props} />
       </I18nProvider>,
       domElement
     );
@@ -335,7 +579,7 @@ export const getXyVisualization = ({
       <I18nProvider>
         <DimensionEditor
           {...props}
-          formatFactory={data.fieldFormats.deserialize}
+          formatFactory={fieldFormats.deserialize}
           paletteService={paletteService}
         />
       </I18nProvider>,
@@ -356,7 +600,7 @@ export const getXyVisualization = ({
 
     const errors: Array<{
       shortMessage: string;
-      longMessage: string;
+      longMessage: React.ReactNode;
     }> = [];
 
     // check if the layers in the state are compatible with this type of chart
@@ -369,8 +613,9 @@ export const getXyVisualization = ({
 
       // filter out those layers with no accessors at all
       const filteredLayers = state.layers.filter(
-        ({ accessors, xAccessor, splitAccessor }: XYLayerConfig) =>
-          accessors.length > 0 || xAccessor != null || splitAccessor != null
+        ({ accessors, xAccessor, splitAccessor, layerType }: XYLayerConfig) =>
+          layerType === layerTypes.DATA &&
+          (accessors.length > 0 || xAccessor != null || splitAccessor != null)
       );
       for (const [dimension, criteria] of checks) {
         const result = validateLayersForDimension(dimension, filteredLayers, criteria);
@@ -460,7 +705,7 @@ function validateLayersForDimension(
   | { valid: true }
   | {
       valid: false;
-      payload: { shortMessage: string; longMessage: string };
+      payload: { shortMessage: string; longMessage: React.ReactNode };
     } {
   // Multiple layers must be consistent:
   // * either a dimension is missing in ALL of them
@@ -480,19 +725,6 @@ function validateLayersForDimension(
     valid: false,
     payload: getMessageIdsForDimension(dimension, layerMissingAccessors, isHorizontalChart(layers)),
   };
-}
-
-function getAxisName(axis: 'x' | 'y', { isHorizontal }: { isHorizontal: boolean }) {
-  const vertical = i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
-    defaultMessage: 'Vertical axis',
-  });
-  const horizontal = i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
-    defaultMessage: 'Horizontal axis',
-  });
-  if (axis === 'x') {
-    return isHorizontal ? vertical : horizontal;
-  }
-  return isHorizontal ? horizontal : vertical;
 }
 
 // i18n ids cannot be dynamically generated, hence the function below
@@ -525,80 +757,21 @@ function getMessageIdsForDimension(dimension: string, layers: number[], isHorizo
   return { shortMessage: '', longMessage: '' };
 }
 
-function newLayerState(seriesType: SeriesType, layerId: string): XYLayerConfig {
+function newLayerState(
+  seriesType: SeriesType,
+  layerId: string,
+  layerType: LayerType = layerTypes.DATA
+): XYLayerConfig {
   return {
     layerId,
     seriesType,
     accessors: [],
+    layerType,
   };
 }
 
-// min requirement for the bug:
-// * 2 or more layers
-// * at least one with date histogram
-// * at least one with interval function
-function checkXAccessorCompatibility(
-  state: XYState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
-) {
-  const errors = [];
-  const hasDateHistogramSet = state.layers.some(
-    checkScaleOperation('interval', 'date', datasourceLayers)
+function getLayersByType(state: State, byType?: string) {
+  return state.layers.filter(({ layerType = layerTypes.DATA }) =>
+    byType ? layerType === byType : true
   );
-  const hasNumberHistogram = state.layers.some(
-    checkScaleOperation('interval', 'number', datasourceLayers)
-  );
-  const hasOrdinalAxis = state.layers.some(
-    checkScaleOperation('ordinal', undefined, datasourceLayers)
-  );
-  if (state.layers.length > 1 && hasDateHistogramSet && hasNumberHistogram) {
-    errors.push({
-      shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
-        defaultMessage: `Wrong data type for {axis}.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-      longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXLong', {
-        defaultMessage: `Data type mismatch for the {axis}. Cannot mix date and number interval types.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-    });
-  }
-  if (state.layers.length > 1 && (hasDateHistogramSet || hasNumberHistogram) && hasOrdinalAxis) {
-    errors.push({
-      shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
-        defaultMessage: `Wrong data type for {axis}.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-      longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXOrdinalLong', {
-        defaultMessage: `Data type mismatch for the {axis}, use a different function.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-    });
-  }
-  return errors;
-}
-
-function checkScaleOperation(
-  scaleType: 'ordinal' | 'interval' | 'ratio',
-  dataType: 'date' | 'number' | 'string' | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
-) {
-  return (layer: XYLayerConfig) => {
-    const datasourceAPI = datasourceLayers[layer.layerId];
-    if (!layer.xAccessor) {
-      return false;
-    }
-    const operation = datasourceAPI?.getOperationForColumnId(layer.xAccessor);
-    return Boolean(
-      operation && (!dataType || operation.dataType === dataType) && operation.scale === scaleType
-    );
-  };
 }

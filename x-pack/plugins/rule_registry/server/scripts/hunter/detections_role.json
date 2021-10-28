@@ -6,12 +6,7 @@
   "kibana": [
     {
       "feature": {
-        "ml": ["read"],
-        "siem": ["all"],
-        "actions": ["read"],
-        "ruleRegistry": ["all"],
-        "builtInAlerts": ["all"],
-        "alerting": ["all"]
+        "siem": ["all"]
       },
       "spaces": ["*"]
     }

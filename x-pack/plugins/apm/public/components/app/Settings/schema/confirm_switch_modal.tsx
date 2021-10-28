@@ -15,6 +15,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useUiTracker } from '../../../../../../observability/public';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 
 interface Props {
@@ -27,6 +28,7 @@ export function ConfirmSwitchModal({
   onCancel,
   unsupportedConfigs,
 }: Props) {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const [isConfirmChecked, setIsConfirmChecked] = useState(false);
   const hasUnsupportedConfigs = !!unsupportedConfigs.length;
   return (
@@ -44,11 +46,16 @@ export function ConfirmSwitchModal({
       confirmButtonText={i18n.translate(
         'xpack.apm.settings.schema.confirm.switchButtonText',
         {
-          defaultMessage: 'Switch to data streams',
+          defaultMessage: 'Switch to Elastic Agent',
         }
       )}
       defaultFocusedButton="confirm"
-      onConfirm={onConfirm}
+      onConfirm={() => {
+        trackApmEvent({
+          metric: 'confirm_data_stream_switch',
+        });
+        onConfirm();
+      }}
       confirmButtonDisabled={!isConfirmChecked}
     >
       <p>
@@ -71,7 +78,7 @@ export function ConfirmSwitchModal({
         title={i18n.translate(
           'xpack.apm.settings.schema.confirm.irreversibleWarning.title',
           {
-            defaultMessage: `Switching to data streams is an irreversible action`,
+            defaultMessage: `Switching to Elastic Agent is an irreversible action`,
           }
         )}
         color="warning"
@@ -125,7 +132,7 @@ export function ConfirmSwitchModal({
           label={i18n.translate(
             'xpack.apm.settings.schema.confirm.checkboxLabel',
             {
-              defaultMessage: `I confirm that I wish to switch to data streams`,
+              defaultMessage: `I confirm that I wish to switch to Elastic Agent`,
             }
           )}
           checked={isConfirmChecked}

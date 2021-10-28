@@ -17,7 +17,7 @@ describe('dashboard locator', () => {
     hashedItemStore.storage = mockStorage;
   });
 
-  test('creates a link to a saved dashboard', async () => {
+  test('creates a link to an unsaved dashboard', async () => {
     const definition = new DashboardAppLocatorDefinition({
       useHashedUrl: false,
       getDashboardFilterFields: async (dashboardId: string) => [],
@@ -26,7 +26,7 @@ describe('dashboard locator', () => {
 
     expect(location).toMatchObject({
       app: 'dashboards',
-      path: '#/create?_a=()&_g=()',
+      path: '#/create?_g=()',
       state: {},
     });
   });
@@ -42,8 +42,14 @@ describe('dashboard locator', () => {
 
     expect(location).toMatchObject({
       app: 'dashboards',
-      path: '#/create?_a=()&_g=(time:(from:now-15m,mode:relative,to:now))',
-      state: {},
+      path: '#/create?_g=(time:(from:now-15m,mode:relative,to:now))',
+      state: {
+        timeRange: {
+          from: 'now-15m',
+          mode: 'relative',
+          to: 'now',
+        },
+      },
     });
   });
 
@@ -82,8 +88,47 @@ describe('dashboard locator', () => {
 
     expect(location).toMatchObject({
       app: 'dashboards',
-      path: `#/view/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))`,
-      state: {},
+      path: `#/view/123?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))`,
+      state: {
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'hi',
+            },
+          },
+          {
+            $state: {
+              store: 'globalState',
+            },
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'hi',
+            },
+          },
+        ],
+        query: {
+          language: 'kuery',
+          query: 'bye',
+        },
+        refreshInterval: {
+          pause: false,
+          value: 300,
+        },
+        timeRange: {
+          from: 'now-15m',
+          mode: 'relative',
+          to: 'now',
+        },
+      },
     });
   });
 
@@ -103,8 +148,23 @@ describe('dashboard locator', () => {
 
     expect(location).toMatchObject({
       app: 'dashboards',
-      path: `#/view/123?_a=(filters:!(),query:(language:kuery,query:bye))&_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&searchSessionId=__sessionSearchId__`,
-      state: {},
+      path: `#/view/123?_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&searchSessionId=__sessionSearchId__`,
+      state: {
+        filters: [],
+        query: {
+          language: 'kuery',
+          query: 'bye',
+        },
+        refreshInterval: {
+          pause: false,
+          value: 300,
+        },
+        timeRange: {
+          from: 'now-15m',
+          mode: 'relative',
+          to: 'now',
+        },
+      },
     });
   });
 
@@ -119,10 +179,11 @@ describe('dashboard locator', () => {
 
     expect(location).toMatchObject({
       app: 'dashboards',
-      path: `#/create?_a=(savedQuery:__savedQueryId__)&_g=()`,
-      state: {},
+      path: `#/create?_g=()`,
+      state: {
+        savedQuery: '__savedQueryId__',
+      },
     });
-    expect(location.path).toContain('__savedQueryId__');
   });
 
   test('panels', async () => {
@@ -136,8 +197,10 @@ describe('dashboard locator', () => {
 
     expect(location).toMatchObject({
       app: 'dashboards',
-      path: `#/create?_a=(panels:!((fakePanelContent:fakePanelContent)))&_g=()`,
-      state: {},
+      path: `#/create?_g=()`,
+      state: {
+        panels: [{ fakePanelContent: 'fakePanelContent' }],
+      },
     });
   });
 
@@ -224,16 +287,62 @@ describe('dashboard locator', () => {
         filters: [appliedFilter],
       });
 
-      expect(location1.path).toEqual(expect.stringContaining('query:savedfilter1'));
-      expect(location1.path).toEqual(expect.stringContaining('query:appliedfilter'));
+      expect(location1.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
+      expect(location1.state).toMatchObject({
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'savedfilter1',
+            },
+          },
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'appliedfilter',
+            },
+          },
+        ],
+      });
 
       const location2 = await definition.getLocation({
         dashboardId: 'dashboard2',
         filters: [appliedFilter],
       });
 
-      expect(location2.path).toEqual(expect.stringContaining('query:savedfilter2'));
-      expect(location2.path).toEqual(expect.stringContaining('query:appliedfilter'));
+      expect(location2.path).toMatchInlineSnapshot(`"#/view/dashboard2?_g=(filters:!())"`);
+      expect(location2.state).toMatchObject({
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'savedfilter2',
+            },
+          },
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'appliedfilter',
+            },
+          },
+        ],
+      });
     });
 
     test("doesn't fail if can't retrieve filters from destination dashboard", async () => {
@@ -252,8 +361,21 @@ describe('dashboard locator', () => {
         filters: [appliedFilter],
       });
 
-      expect(location.path).not.toEqual(expect.stringContaining('query:savedfilter1'));
-      expect(location.path).toEqual(expect.stringContaining('query:appliedfilter'));
+      expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
+      expect(location.state).toMatchObject({
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'appliedfilter',
+            },
+          },
+        ],
+      });
     });
 
     test('can enforce empty filters', async () => {
@@ -273,11 +395,10 @@ describe('dashboard locator', () => {
         preserveSavedFilters: false,
       });
 
-      expect(location.path).not.toEqual(expect.stringContaining('query:savedfilter1'));
-      expect(location.path).not.toEqual(expect.stringContaining('query:appliedfilter'));
-      expect(location.path).toMatchInlineSnapshot(
-        `"#/view/dashboard1?_a=(filters:!())&_g=(filters:!())"`
-      );
+      expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
+      expect(location.state).toMatchObject({
+        filters: [],
+      });
     });
 
     test('no filters in result url if no filters applied', async () => {
@@ -295,8 +416,8 @@ describe('dashboard locator', () => {
         dashboardId: 'dashboard1',
       });
 
-      expect(location.path).not.toEqual(expect.stringContaining('filters'));
-      expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_a=()&_g=()"`);
+      expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=()"`);
+      expect(location.state).toMatchObject({});
     });
 
     test('can turn off preserving filters', async () => {
@@ -316,8 +437,21 @@ describe('dashboard locator', () => {
         preserveSavedFilters: false,
       });
 
-      expect(location.path).not.toEqual(expect.stringContaining('query:savedfilter1'));
-      expect(location.path).toEqual(expect.stringContaining('query:appliedfilter'));
+      expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
+      expect(location.state).toMatchObject({
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'appliedfilter',
+            },
+          },
+        ],
+      });
     });
   });
 });

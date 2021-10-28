@@ -11,6 +11,7 @@ import ReactDOM from 'react-dom';
 
 import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
 
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import {
@@ -19,13 +20,18 @@ import {
 } from '../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
-import { MlSetupDependencies, MlStartDependencies } from '../plugin';
+import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
+import { mlUsageCollectionProvider } from './services/usage_collection';
 
 import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
-export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'indexPatternManagement'> &
+
+export type MlDependencies = Omit<
+  MlSetupDependencies,
+  'share' | 'indexPatternManagement' | 'fieldFormats'
+> &
   MlStartDependencies;
 
 interface AppProps {
@@ -39,11 +45,12 @@ const localStorage = new Storage(window.localStorage);
 /**
  * Provides global services available across the entire ML app.
  */
-export function getMlGlobalServices(httpStart: HttpStart) {
+export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: UsageCollectionSetup) {
   const httpService = new HttpService(httpStart);
   return {
     httpService,
     mlApiServices: mlApiServicesProvider(httpService),
+    mlUsageCollection: mlUsageCollectionProvider(usageCollection),
   };
 }
 
@@ -68,8 +75,8 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
     redirectToMlAccessDeniedPage,
   };
+
   const services = {
-    appName: 'ML',
     kibanaVersion: deps.kibanaVersion,
     share: deps.share,
     data: deps.data,
@@ -80,6 +87,8 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     maps: deps.maps,
     triggersActionsUi: deps.triggersActionsUi,
     dataVisualizer: deps.dataVisualizer,
+    usageCollection: deps.usageCollection,
+    fieldFormats: deps.fieldFormats,
     ...coreStart,
   };
 
@@ -94,7 +103,10 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
       <ApplicationUsageTrackingProvider>
         <I18nContext>
           <KibanaContextProvider
-            services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
+            services={{
+              ...services,
+              mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
+            }}
           >
             <MlRouter pageDeps={pageDeps} />
           </KibanaContextProvider>
@@ -128,6 +140,7 @@ export const renderApp = (
     urlGenerators: deps.share.urlGenerators,
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
+    dataViews: deps.data.dataViews,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());

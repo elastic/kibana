@@ -9,10 +9,11 @@ import React, { memo } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
 import { SyntheticsPolicyCreateExtension } from './synthetics_policy_create_extension';
 import {
-  MonitorTypeContextProvider,
+  PolicyConfigContextProvider,
   TCPContextProvider,
   ICMPSimpleFieldsContextProvider,
   HTTPContextProvider,
+  BrowserContextProvider,
   TLSFieldsContextProvider,
 } from './contexts';
 
@@ -20,21 +21,22 @@ import {
  * Exports Synthetics-specific package policy instructions
  * for use in the Ingest app create / edit package policy
  */
-export const SyntheticsPolicyCreateExtensionWrapper = memo<PackagePolicyCreateExtensionComponentProps>(
-  ({ newPolicy, onChange }) => {
+export const SyntheticsPolicyCreateExtensionWrapper =
+  memo<PackagePolicyCreateExtensionComponentProps>(({ newPolicy, onChange }) => {
     return (
-      <MonitorTypeContextProvider>
+      <PolicyConfigContextProvider>
         <HTTPContextProvider>
           <TCPContextProvider>
             <TLSFieldsContextProvider>
               <ICMPSimpleFieldsContextProvider>
-                <SyntheticsPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />
+                <BrowserContextProvider>
+                  <SyntheticsPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />
+                </BrowserContextProvider>
               </ICMPSimpleFieldsContextProvider>
             </TLSFieldsContextProvider>
           </TCPContextProvider>
         </HTTPContextProvider>
-      </MonitorTypeContextProvider>
+      </PolicyConfigContextProvider>
     );
-  }
-);
+  });
 SyntheticsPolicyCreateExtensionWrapper.displayName = 'SyntheticsPolicyCreateExtensionWrapper';

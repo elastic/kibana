@@ -6,8 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '../../services';
@@ -15,8 +18,6 @@ import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
-import type { KueryNode } from '../../../../../../src/plugins/data/server';
-import { esKuery } from '../../../../../../src/plugins/data/server';
 import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
@@ -28,27 +29,29 @@ function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode
   try {
     return filters
       .filter((filter) => filter !== undefined)
-      .reduce((acc: KueryNode | undefined, kuery: string | KueryNode | undefined):
-        | KueryNode
-        | undefined => {
-        if (kuery === undefined) {
-          return acc;
-        }
-        const kueryNode: KueryNode =
-          typeof kuery === 'string'
-            ? esKuery.fromKueryExpression(removeSOAttributes(kuery))
-            : kuery;
+      .reduce(
+        (
+          acc: KueryNode | undefined,
+          kuery: string | KueryNode | undefined
+        ): KueryNode | undefined => {
+          if (kuery === undefined) {
+            return acc;
+          }
+          const kueryNode: KueryNode =
+            typeof kuery === 'string' ? fromKueryExpression(removeSOAttributes(kuery)) : kuery;
 
-        if (!acc) {
-          return kueryNode;
-        }
+          if (!acc) {
+            return kueryNode;
+          }
 
-        return {
-          type: 'function',
-          function: 'and',
-          arguments: [acc, kueryNode],
-        };
-      }, undefined as KueryNode | undefined);
+          return {
+            type: 'function',
+            function: 'and',
+            arguments: [acc, kueryNode],
+          };
+        },
+        undefined as KueryNode | undefined
+      );
   } catch (err) {
     throw new IngestManagerError(`Kuery is malformed: ${err.message}`);
   }
@@ -118,15 +121,17 @@ export async function getAgentsByKuery(
   }
 
   const kueryNode = _joinFilters(filters);
-  const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
+  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const res = await esClient.search<FleetServerAgent, {}>({
     index: AGENTS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
-    sort: `${sortField}:${sortOrder}`,
     track_total_hits: true,
     ignore_unavailable: true,
-    body,
+    body: {
+      ...body,
+      sort: [{ [sortField]: { order: sortOrder } }],
+    },
   });
 
   let agents = res.body.hits.hits.map(searchHitToAgent);
@@ -175,7 +180,7 @@ export async function countInactiveAgents(
   }
 
   const kueryNode = _joinFilters(filters);
-  const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
+  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
 
   const res = await esClient.search({
     index: AGENTS_INDEX,
@@ -199,9 +204,8 @@ export async function getAgentById(esClient: ElasticsearchClient, agentId: strin
     if (agentHit.body.found === false) {
       throw agentNotFoundError;
     }
-    const agent = searchHitToAgent(agentHit.body);
 
-    return agent;
+    return searchHitToAgent(agentHit.body);
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {
       throw agentNotFoundError;
@@ -217,6 +221,7 @@ export function isAgentDocument(
 }
 
 export type ESAgentDocumentResult = estypes.MgetHit<FleetServerAgent>;
+
 export async function getAgentDocuments(
   esClient: ElasticsearchClient,
   agentIds: string[]
@@ -313,10 +318,9 @@ export async function bulkUpdateAgents(
   });
 
   return {
-    items: res.body.items.map((item: estypes.BulkResponseItemContainer) => ({
+    items: res.body.items.map((item) => ({
       id: item.update!._id as string,
       success: !item.update!.error,
-      // @ts-expect-error ErrorCause is not assignable to Error
       error: item.update!.error as Error,
     })),
   };

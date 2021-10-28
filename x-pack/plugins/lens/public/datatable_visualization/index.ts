@@ -5,44 +5,35 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
-import { EditorFrameSetup, FormatFactory } from '../types';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { CoreSetup } from 'kibana/public';
+import type { ChartsPluginSetup } from 'src/plugins/charts/public';
+import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import type { EditorFrameSetup } from '../types';
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { FormatFactory } from '../../common';
 
 interface DatatableVisualizationPluginStartPlugins {
   data: DataPublicPluginStart;
 }
 export interface DatatableVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
 }
 
 export class DatatableVisualization {
-  constructor() {}
-
   setup(
     core: CoreSetup<DatatableVisualizationPluginStartPlugins, void>,
     { expressions, formatFactory, editorFrame, charts }: DatatableVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const {
-        getDatatable,
-        datatableColumn,
-        getDatatableRenderer,
-        getDatatableVisualization,
-      } = await import('../async_services');
+      const { getDatatableRenderer, getDatatableVisualization } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
-      const resolvedFormatFactory = await formatFactory;
 
-      expressions.registerFunction(() => datatableColumn);
-      expressions.registerFunction(() => getDatatable({ formatFactory: resolvedFormatFactory }));
       expressions.registerRenderer(() =>
         getDatatableRenderer({
-          formatFactory: resolvedFormatFactory,
+          formatFactory,
           getType: core
             .getStartServices()
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),
@@ -50,6 +41,7 @@ export class DatatableVisualization {
           uiSettings: core.uiSettings,
         })
       );
+
       return getDatatableVisualization({ paletteService: palettes });
     });
   }

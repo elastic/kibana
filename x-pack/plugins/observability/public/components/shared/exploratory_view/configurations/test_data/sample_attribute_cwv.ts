@@ -5,7 +5,7 @@
  * 2.0.
  */
 export const sampleAttributeCoreWebVital = {
-  description: '',
+  description: 'undefined',
   references: [
     {
       id: 'apm-*',
@@ -77,7 +77,8 @@ export const sampleAttributeCoreWebVital = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query: 'transaction.type: page-load and processor.event: transaction',
+                  query:
+                    'transaction.type: page-load and processor.event: transaction and transaction.marks.agent.largestContentfulPaint < 2500',
                 },
                 isBucketed: false,
                 label: 'Good',
@@ -94,7 +95,7 @@ export const sampleAttributeCoreWebVital = {
     filters: [],
     query: {
       language: 'kuery',
-      query: '',
+      query: 'transaction.type: "page-load"',
     },
     visualization: {
       axisTitlesVisibilitySettings: {
@@ -113,6 +114,7 @@ export const sampleAttributeCoreWebVital = {
         {
           accessors: ['y-axis-column-layer0', 'y-axis-column-1', 'y-axis-column-2'],
           layerId: 'layer0',
+          layerType: 'data',
           seriesType: 'bar_horizontal_percentage_stacked',
           xAccessor: 'x-axis-column-layer0',
           yConfig: [
@@ -133,6 +135,7 @@ export const sampleAttributeCoreWebVital = {
       ],
       legend: {
         isVisible: true,
+        showSingleSeries: true,
         position: 'right',
       },
       preferredSeriesType: 'line',

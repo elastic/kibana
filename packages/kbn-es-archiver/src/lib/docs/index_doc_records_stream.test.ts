@@ -101,7 +101,6 @@ const testRecords = [
 
 it('indexes documents using the bulk client helper', async () => {
   const client = new MockClient();
-  client.helpers.bulk.mockImplementation(async () => {});
 
   const progress = new Progress();
   const stats = createStats('test', log);
@@ -185,11 +184,11 @@ it('indexes documents using the bulk client helper', async () => {
       "results": Array [
         Object {
           "type": "return",
-          "value": Promise {},
+          "value": undefined,
         },
         Object {
           "type": "return",
-          "value": Promise {},
+          "value": undefined,
         },
       ],
     }

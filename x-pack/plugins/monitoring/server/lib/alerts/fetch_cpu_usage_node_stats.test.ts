@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { fetchCpuUsageNodeStats } from './fetch_cpu_usage_node_stats';
@@ -201,7 +201,9 @@ describe('fetchCpuUsageNodeStats', () => {
         {} as estypes.SearchResponse
       );
     });
-    await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size);
+    const filterQuery =
+      '{"bool":{"should":[{"exists":{"field":"cluster_uuid"}}],"minimum_should_match":1}}';
+    await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size, filterQuery);
     expect(params).toStrictEqual({
       index: '.monitoring-es-*',
       filter_path: ['aggregations'],
@@ -213,6 +215,9 @@ describe('fetchCpuUsageNodeStats', () => {
               { terms: { cluster_uuid: ['abc123'] } },
               { term: { type: 'node_stats' } },
               { range: { timestamp: { format: 'epoch_millis', gte: 0, lte: 0 } } },
+              {
+                bool: { should: [{ exists: { field: 'cluster_uuid' } }], minimum_should_match: 1 },
+              },
             ],
           },
         },

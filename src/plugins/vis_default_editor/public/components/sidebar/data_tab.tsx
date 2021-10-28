@@ -73,9 +73,10 @@ function DefaultEditorDataTab({
     [dispatch, schemas]
   );
 
-  const onReorderAggs: ReorderAggs = useCallback((...props) => dispatch(reorderAggs(...props)), [
-    dispatch,
-  ]);
+  const onReorderAggs: ReorderAggs = useCallback(
+    (...props) => dispatch(reorderAggs(...props)),
+    [dispatch]
+  );
 
   const onAggParamValueChange: DefaultEditorAggCommonProps['setAggParamValue'] = useCallback(
     (...props) => dispatch(setAggParamValue(...props)),

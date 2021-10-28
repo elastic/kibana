@@ -1,0 +1,11 @@
+{
+  "ml.delete_calendar_job": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_ml/calendars/{calendar_id}/jobs/{job_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-delete-calendar-job.html"
+  }
+}

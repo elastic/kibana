@@ -119,12 +119,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
-    signalIndexName,
-  ]);
-  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
-    memoSignalIndexName
+  const memoSignalIndexName = useMemo(
+    () => (signalIndexName !== null ? [signalIndexName] : []),
+    [signalIndexName]
   );
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] =
+    useFetchIndex(memoSignalIndexName);
 
   const memoMlJobIds = useMemo(() => maybeRule?.machine_learning_job_id ?? [], [maybeRule]);
   const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);

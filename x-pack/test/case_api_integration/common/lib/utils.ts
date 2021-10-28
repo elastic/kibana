@@ -6,12 +6,15 @@
  */
 
 import { omit } from 'lodash';
-import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import getPort from 'get-port';
+import http from 'http';
 
-import * as st from 'supertest';
-import supertestAsPromised from 'supertest-as-promised';
+import expect from '@kbn/expect';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
+
+import type SuperTest from 'supertest';
 import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
 import {
   CASES_URL,
@@ -48,6 +51,7 @@ import {
   AlertResponse,
   ConnectorMappings,
   CasesByAlertId,
+  CaseResolveResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -56,6 +60,9 @@ import { SignalHit } from '../../../../plugins/security_solution/server/lib/dete
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
+import { ESCasesConfigureAttributes } from '../../../../plugins/cases/server/services/configure/types';
+import { ESCaseAttributes } from '../../../../plugins/cases/server/services/cases/types';
+import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -67,32 +74,36 @@ function toArray<T>(input: T | T[]): T[] {
 /**
  * Query Elasticsearch for a set of signals within a set of indices
  */
+// TODO: fix this to use new API/schema
 export const getSignalsWithES = async ({
   es,
   indices,
   ids,
 }: {
-  es: KibanaClient;
+  es: Client;
   indices: string | string[];
   ids: string | string[];
 }): Promise<Map<string, Map<string, estypes.SearchHit<SignalHit>>>> => {
-  const signals: ApiResponse<estypes.SearchResponse<SignalHit>> = await es.search({
-    index: indices,
-    body: {
-      size: 10000,
-      query: {
-        bool: {
-          filter: [
-            {
-              ids: {
-                values: toArray(ids),
+  const signals: TransportResult<estypes.SearchResponse<SignalHit>, unknown> = await es.search(
+    {
+      index: indices,
+      body: {
+        size: 10000,
+        query: {
+          bool: {
+            filter: [
+              {
+                ids: {
+                  values: toArray(ids),
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     },
-  });
+    { meta: true }
+  );
 
   return signals.body.hits.hits.reduce((acc, hit) => {
     let indexMap = acc.get(hit._index);
@@ -120,7 +131,7 @@ export const setStatus = async ({
   cases,
   type,
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   cases: SetStatusCasesParams[];
   type: 'case' | 'sub_case';
 }): Promise<CasesResponse | SubCasesResponse> => {
@@ -158,7 +169,7 @@ export interface CreateSubCaseResp {
  * generated alert style comment which can be overridden.
  */
 export const createSubCase = async (args: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   comment?: ContextTypeGeneratedAlertType;
   caseID?: string;
   caseInfo?: CasePostRequest;
@@ -170,7 +181,7 @@ export const createSubCase = async (args: {
 /**
  * Add case as a connector
  */
-export const createCaseAction = async (supertest: st.SuperTest<supertestAsPromised.Test>) => {
+export const createCaseAction = async (supertest: SuperTest.SuperTest<SuperTest.Test>) => {
   const { body: createdAction } = await supertest
     .post('/api/actions/connector')
     .set('kbn-xsrf', 'foo')
@@ -187,7 +198,7 @@ export const createCaseAction = async (supertest: st.SuperTest<supertestAsPromis
  * Remove a connector
  */
 export const deleteCaseAction = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   id: string
 ) => {
   await supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo');
@@ -206,7 +217,7 @@ export const createSubCaseComment = async ({
   forceNewSubCase = false,
   actionID,
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   comment?: ContextTypeGeneratedAlertType;
   caseID?: string;
   caseInfo?: CasePostRequest;
@@ -323,6 +334,7 @@ export const getServiceNowConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
+    usesTableApi: false,
   },
 });
 
@@ -379,6 +391,7 @@ export const getServiceNowSIRConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
+    usesTableApi: false,
   },
 });
 
@@ -462,7 +475,7 @@ export const removeServerGeneratedPropertiesFromComments = (
   });
 };
 
-export const deleteAllCaseItems = async (es: KibanaClient) => {
+export const deleteAllCaseItems = async (es: Client) => {
   await Promise.all([
     deleteCasesByESQuery(es),
     deleteSubCases(es),
@@ -473,7 +486,7 @@ export const deleteAllCaseItems = async (es: KibanaClient) => {
   ]);
 };
 
-export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> => {
+export const deleteCasesUserActions = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-user-actions',
@@ -484,7 +497,7 @@ export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> =>
   });
 };
 
-export const deleteCasesByESQuery = async (es: KibanaClient): Promise<void> => {
+export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases',
@@ -499,7 +512,7 @@ export const deleteCasesByESQuery = async (es: KibanaClient): Promise<void> => {
  * Deletes all sub cases in the .kibana index. This uses ES to perform the delete and does
  * not go through the case API.
  */
-export const deleteSubCases = async (es: KibanaClient): Promise<void> => {
+export const deleteSubCases = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-sub-case',
@@ -510,7 +523,7 @@ export const deleteSubCases = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const deleteComments = async (es: KibanaClient): Promise<void> => {
+export const deleteComments = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-comments',
@@ -521,7 +534,7 @@ export const deleteComments = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
+export const deleteConfiguration = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-configure',
@@ -532,7 +545,7 @@ export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const deleteMappings = async (es: KibanaClient): Promise<void> => {
+export const deleteMappings = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-connector-mappings',
@@ -549,9 +562,10 @@ export const superUserSpace1Auth = getAuthWithSuperUser();
  * Returns an auth object with the specified space and user set as super user. The result can be passed to other utility
  * functions.
  */
-export function getAuthWithSuperUser(
-  space: string | null = 'space1'
-): { user: User; space: string | null } {
+export function getAuthWithSuperUser(space: string | null = 'space1'): {
+  user: User;
+  space: string | null;
+} {
   return { user: superUser, space };
 }
 
@@ -586,35 +600,92 @@ interface ConnectorMappingsSavedObject {
 /**
  * Returns connector mappings saved objects from Elasticsearch directly.
  */
-export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) => {
-  const mappings: ApiResponse<
-    estypes.SearchResponse<ConnectorMappingsSavedObject>
-  > = await es.search({
-    index: '.kibana',
-    body: {
-      query: {
-        term: {
-          type: {
-            value: 'cases-connector-mappings',
+export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
+  const mappings: TransportResult<
+    estypes.SearchResponse<ConnectorMappingsSavedObject>,
+    unknown
+  > = await es.search(
+    {
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases-connector-mappings',
+            },
           },
         },
       },
     },
-  });
+    { meta: true }
+  );
 
   return mappings;
+};
+
+interface ConfigureSavedObject {
+  'cases-configure': ESCasesConfigureAttributes;
+}
+
+/**
+ * Returns configure saved objects from Elasticsearch directly.
+ */
+export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => {
+  const configure: TransportResult<
+    estypes.SearchResponse<ConfigureSavedObject>,
+    unknown
+  > = await es.search(
+    {
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases-configure',
+            },
+          },
+        },
+      },
+    },
+    { meta: true }
+  );
+
+  return configure;
+};
+
+export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
+  const configure: TransportResult<
+    estypes.SearchResponse<{ cases: ESCaseAttributes }>,
+    unknown
+  > = await es.search(
+    {
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases',
+            },
+          },
+        },
+      },
+    },
+    { meta: true }
+  );
+
+  return configure;
 };
 
 export const createCaseWithConnector = async ({
   supertest,
   configureReq = {},
-  servicenowSimulatorURL,
+  serviceNowSimulatorURL,
   actionsRemover,
   auth = { user: superUser, space: null },
   createCaseReq = getPostCaseRequest(),
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
-  servicenowSimulatorURL: string;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  serviceNowSimulatorURL: string;
   actionsRemover: ActionsRemover;
   configureReq?: Record<string, unknown>;
   auth?: { user: User; space: string | null };
@@ -627,7 +698,7 @@ export const createCaseWithConnector = async ({
     supertest,
     req: {
       ...getServiceNowConnector(),
-      config: { apiUrl: servicenowSimulatorURL },
+      config: { apiUrl: serviceNowSimulatorURL },
     },
     auth,
   });
@@ -672,7 +743,7 @@ export const createCaseWithConnector = async ({
 };
 
 export const createCase = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   params: CasePostRequest,
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } = { user: superUser, space: null }
@@ -696,7 +767,7 @@ export const deleteCases = async ({
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseIDs: string[];
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -721,7 +792,7 @@ export const createComment = async ({
   auth = { user: superUser, space: null },
   expectedHttpCode = 200,
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   params: CommentRequest;
   auth?: { user: User; space: string | null };
@@ -743,7 +814,7 @@ export const updateCase = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   params: CasesPatchRequest;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -764,7 +835,7 @@ export const getCaseUserActions = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseID: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -783,7 +854,7 @@ export const deleteComment = async ({
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   commentId: string;
   expectedHttpCode?: number;
@@ -805,7 +876,7 @@ export const deleteAllComments = async ({
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -826,7 +897,7 @@ export const getAllComments = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
@@ -846,7 +917,7 @@ export const getComment = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   commentId: string;
   expectedHttpCode?: number;
@@ -867,7 +938,7 @@ export const updateComment = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   req: CommentPatchRequest;
   expectedHttpCode?: number;
@@ -889,7 +960,7 @@ export const getConfiguration = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -905,7 +976,7 @@ export const getConfiguration = async ({
 };
 
 export const createConfiguration = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   req: CasesConfigureRequest = getConfigurationRequest(),
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } = { user: superUser, space: null }
@@ -930,7 +1001,7 @@ export const createConnector = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   req: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -950,7 +1021,7 @@ export const getCaseConnectors = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<FindActionResult[]> => {
@@ -963,7 +1034,7 @@ export const getCaseConnectors = async ({
 };
 
 export const updateConfiguration = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   id: string,
   req: CasesConfigurePatch,
   expectedHttpCode: number = 200,
@@ -985,7 +1056,7 @@ export const getAllCasesStatuses = async ({
   auth = { user: superUser, space: null },
   query = {},
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
   query?: Record<string, unknown>;
@@ -1006,7 +1077,7 @@ export const getCase = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   includeComments?: boolean;
   expectedHttpCode?: number;
@@ -1023,13 +1094,39 @@ export const getCase = async ({
   return theCase;
 };
 
+export const resolveCase = async ({
+  supertest,
+  caseId,
+  includeComments = false,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  includeComments?: boolean;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResolveResponse> => {
+  const { body: theResolvedCase } = await supertest
+    .get(
+      `${getSpaceUrlPrefix(
+        auth?.space
+      )}${CASES_URL}/${caseId}/resolve?includeComments=${includeComments}`
+    )
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return theResolvedCase;
+};
+
 export const findCases = async ({
   supertest,
   query = {},
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -1052,7 +1149,7 @@ export const getCasesByAlert = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   alertID: string;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
@@ -1073,7 +1170,7 @@ export const getTags = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -1094,7 +1191,7 @@ export const getReporters = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -1116,7 +1213,7 @@ export const pushCase = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   connectorId: string;
   expectedHttpCode?: number;
@@ -1138,7 +1235,7 @@ export const getAlertsAttachedToCase = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -1149,4 +1246,18 @@ export const getAlertsAttachedToCase = async ({
     .expect(expectedHttpCode);
 
   return theCase;
+};
+
+export const getServiceNowSimulationServer = async (): Promise<{
+  server: http.Server;
+  url: string;
+}> => {
+  const server = await getServiceNowServer();
+  const port = await getPort({ port: getPort.makeRange(9000, 9100) });
+  if (!server.listening) {
+    server.listen(port);
+  }
+  const url = `http://localhost:${port}`;
+
+  return { server, url };
 };

@@ -7,7 +7,7 @@
 
 import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Margins } from '../../../../../shared/charts/Timeline';
 import { WaterfallItem } from './waterfall_item';
@@ -22,9 +22,8 @@ interface AccordionWaterfallProps {
   level: number;
   duration: IWaterfall['duration'];
   waterfallItemId?: string;
-  errorsPerTransaction: IWaterfall['errorsPerTransaction'];
-  childrenByParentId: Record<string, IWaterfallSpanOrTransaction[]>;
-  onToggleEntryTransaction?: () => void;
+  setMaxLevel: Dispatch<SetStateAction<number>>;
+  waterfall: IWaterfall;
   timelineMargins: Margins;
   onClickWaterfallItem: (item: IWaterfallSpanOrTransaction) => void;
 }
@@ -96,22 +95,18 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     item,
     level,
     duration,
-    childrenByParentId,
+    waterfall,
     waterfallItemId,
-    errorsPerTransaction,
+    setMaxLevel,
     timelineMargins,
     onClickWaterfallItem,
-    onToggleEntryTransaction,
   } = props;
 
   const nextLevel = level + 1;
+  setMaxLevel(nextLevel);
 
-  const errorCount =
-    item.docType === 'transaction'
-      ? errorsPerTransaction[item.doc.transaction.id]
-      : 0;
-
-  const children = childrenByParentId[item.id] || [];
+  const children = waterfall.childrenByParentId[item.id] || [];
+  const errorCount = waterfall.getErrorCount(item.id);
 
   // To indent the items creating the parent/child tree
   const marginLeftLevel = 8 * level;
@@ -121,7 +116,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
       buttonClassName={`button_${item.id}`}
       key={item.id}
       id={item.id}
-      hasError={errorCount > 0}
+      hasError={item.doc.event?.outcome === 'failure'}
       marginLeftLevel={marginLeftLevel}
       childrenCount={children.length}
       buttonContent={
@@ -145,23 +140,15 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={() => {
         setIsOpen((isCurrentOpen) => !isCurrentOpen);
-        if (onToggleEntryTransaction) {
-          onToggleEntryTransaction();
-        }
       }}
     >
       {children.map((child) => (
         <AccordionWaterfall
+          {...props}
           key={child.id}
           isOpen={isOpen}
-          item={child}
           level={nextLevel}
-          waterfallItemId={waterfallItemId}
-          errorsPerTransaction={errorsPerTransaction}
-          duration={duration}
-          childrenByParentId={childrenByParentId}
-          timelineMargins={timelineMargins}
-          onClickWaterfallItem={onClickWaterfallItem}
+          item={child}
         />
       ))}
     </StyledAccordion>

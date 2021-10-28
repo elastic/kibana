@@ -19,17 +19,21 @@ import {
   LEGEND_FUNCTION,
 } from './constants';
 import { Position } from '@elastic/charts';
-import { HeatmapVisualizationState } from './types';
-import { DatasourcePublicAPI, Operation } from '../types';
+import type { HeatmapVisualizationState } from './types';
+import type { DatasourcePublicAPI, Operation } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { layerTypes } from '../../common';
 
 function exampleState(): HeatmapVisualizationState {
   return {
     layerId: 'test-layer',
+    layerType: layerTypes.DATA,
     legend: {
       isVisible: true,
       position: Position.Right,
       type: LEGEND_FUNCTION,
+      maxLines: 1,
+      shouldTruncate: true,
     },
     gridConfig: {
       type: HEATMAP_GRID_FUNCTION,
@@ -54,12 +58,15 @@ describe('heatmap', () => {
     test('returns a default state', () => {
       expect(getHeatmapVisualization({ paletteService }).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
+        layerType: layerTypes.DATA,
         title: 'Empty Heatmap chart',
         shape: CHART_SHAPES.HEATMAP,
         legend: {
           isVisible: true,
           position: Position.Right,
           type: LEGEND_FUNCTION,
+          maxLines: 1,
+          shouldTruncate: true,
         },
         gridConfig: {
           type: HEATMAP_GRID_FUNCTION,
@@ -91,7 +98,12 @@ describe('heatmap', () => {
       };
     });
 
-    test('resolves configuration from complete state', () => {
+    afterEach(() => {
+      // some tests manipulate it, so restore a pristine version
+      frame = createMockFramePublicAPI();
+    });
+
+    test('resolves configuration from complete state and available data', () => {
       const state: HeatmapVisualizationState = {
         ...exampleState(),
         layerId: 'first',
@@ -99,6 +111,8 @@ describe('heatmap', () => {
         yAccessor: 'y-accessor',
         valueAccessor: 'v-accessor',
       };
+
+      frame.activeData = { first: { type: 'datatable', columns: [], rows: [] } };
 
       expect(
         getHeatmapVisualization({
@@ -197,6 +211,63 @@ describe('heatmap', () => {
         ],
       });
     });
+
+    test("resolves configuration when there's no access to active data in frame", () => {
+      const state: HeatmapVisualizationState = {
+        ...exampleState(),
+        layerId: 'first',
+        xAccessor: 'x-accessor',
+        yAccessor: 'y-accessor',
+        valueAccessor: 'v-accessor',
+      };
+
+      frame.activeData = undefined;
+
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).getConfiguration({ state, frame, layerId: 'first' })
+      ).toEqual({
+        groups: [
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.X,
+            groupLabel: 'Horizontal axis',
+            accessors: [{ columnId: 'x-accessor' }],
+            filterOperations: filterOperationsAxis,
+            supportsMoreColumns: false,
+            required: true,
+            dataTestSubj: 'lnsHeatmap_xDimensionPanel',
+          },
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.Y,
+            groupLabel: 'Vertical axis',
+            accessors: [{ columnId: 'y-accessor' }],
+            filterOperations: filterOperationsAxis,
+            supportsMoreColumns: false,
+            required: false,
+            dataTestSubj: 'lnsHeatmap_yDimensionPanel',
+          },
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.CELL,
+            groupLabel: 'Cell value',
+            accessors: [
+              {
+                columnId: 'v-accessor',
+                triggerIcon: 'none',
+              },
+            ],
+            filterOperations: isCellValueSupported,
+            supportsMoreColumns: false,
+            required: true,
+            dataTestSubj: 'lnsHeatmap_cellPanel',
+            enableDimensionEditor: true,
+          },
+        ],
+      });
+    });
   });
 
   describe('#setDimension', () => {
@@ -214,6 +285,7 @@ describe('heatmap', () => {
           layerId: 'first',
           columnId: 'new-x-accessor',
           groupId: 'x',
+          frame,
         })
       ).toEqual({
         ...prevState,
@@ -236,11 +308,37 @@ describe('heatmap', () => {
           prevState,
           layerId: 'first',
           columnId: 'x-accessor',
+          frame,
         })
       ).toEqual({
         ...exampleState(),
         yAccessor: 'y-accessor',
       });
+    });
+  });
+
+  describe('#getSupportedLayers', () => {
+    it('should return a single layer type', () => {
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+        }).getSupportedLayers()
+      ).toHaveLength(1);
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      const state: HeatmapVisualizationState = {
+        ...exampleState(),
+        xAccessor: 'x-accessor',
+        valueAccessor: 'value-accessor',
+      };
+      const instance = getHeatmapVisualization({
+        paletteService,
+      });
+      expect(instance.getLayerType('test-layer', state)).toEqual(layerTypes.DATA);
+      expect(instance.getLayerType('foo', state)).toBeUndefined();
     });
   });
 

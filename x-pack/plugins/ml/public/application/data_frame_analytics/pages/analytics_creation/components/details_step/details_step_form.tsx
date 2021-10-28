@@ -83,8 +83,8 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const debouncedIndexCheck = debounce(async () => {
     try {
-      const { exists } = await ml.checkIndexExists({ index: destinationIndex });
-      setFormState({ destinationIndexNameExists: exists });
+      const resp = await ml.checkIndicesExists({ indices: [destinationIndex] });
+      setFormState({ destinationIndexNameExists: resp[destinationIndex].exists });
     } catch (e) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.ml.dataframe.analytics.create.errorCheckingIndexExists', {
@@ -99,8 +99,8 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     () =>
       debounce(async () => {
         try {
-          const { results } = await ml.dataFrameAnalytics.jobsExists([jobId], true);
-          setFormState({ jobIdExists: results[jobId] });
+          const results = await ml.dataFrameAnalytics.jobsExist([jobId], true);
+          setFormState({ jobIdExists: results[jobId].exists });
         } catch (e) {
           notifications.toasts.addDanger(
             i18n.translate('xpack.ml.dataframe.analytics.create.errorCheckingJobIdExists', {
@@ -308,7 +308,12 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
             values: { defaultValue: DEFAULT_RESULTS_FIELD },
           })}
           checked={useResultsFieldDefault === true}
-          onChange={() => setUseResultsFieldDefault(!useResultsFieldDefault)}
+          onChange={() => {
+            if (!useResultsFieldDefault === true) {
+              setFormState({ resultsField: undefined });
+            }
+            setUseResultsFieldDefault(!useResultsFieldDefault);
+          }}
           data-test-subj="mlAnalyticsCreateJobWizardUseResultsFieldDefault"
         />
       </EuiFormRow>
@@ -347,8 +352,8 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
         error={[
           ...(createIndexPattern && destinationIndexPatternTitleExists
             ? [
-                i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternExistsError', {
-                  defaultMessage: 'An index pattern with this title already exists.',
+                i18n.translate('xpack.ml.dataframe.analytics.create.dataViewExistsError', {
+                  defaultMessage: 'A data view with this title already exists.',
                 }),
               ]
             : []),
@@ -356,10 +361,10 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
             ? [
                 <EuiText size="xs" color="warning">
                   {i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.shouldCreateIndexPatternMessage',
+                    'xpack.ml.dataframe.analytics.create.shouldCreateDataViewMessage',
                     {
                       defaultMessage:
-                        'You may not be able to view job results if an index pattern is not created for the destination index.',
+                        'You may not be able to view job results if a data view is not created for the destination index.',
                     }
                   )}
                 </EuiText>,
@@ -370,8 +375,8 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
         <EuiSwitch
           disabled={isJobCreated}
           name="mlDataFrameAnalyticsCreateIndexPattern"
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.createIndexPatternLabel', {
-            defaultMessage: 'Create index pattern',
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.createDataViewLabel', {
+            defaultMessage: 'Create data view',
           })}
           checked={createIndexPattern === true}
           onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}

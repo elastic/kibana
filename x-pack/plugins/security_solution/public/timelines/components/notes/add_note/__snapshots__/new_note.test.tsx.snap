@@ -6,6 +6,7 @@ exports[`NewNote renders correctly 1`] = `
 >
   <Memo(MarkdownEditorComponent)
     ariaLabel="Note"
+    autoFocusDisabled={false}
     dataTestSubj="add-a-note"
     height={200}
     onChange={[MockFunction]}

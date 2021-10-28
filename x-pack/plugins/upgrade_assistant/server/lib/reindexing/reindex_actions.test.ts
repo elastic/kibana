@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
+import { TransportResult } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -19,7 +19,7 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { mockKibanaVersion } from '../../../common/constants';
+import { MAJOR_VERSION } from '../../../common/constants';
 import { versionService } from '../version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
 import { getMockVersionInfo } from '../__fixtures__/version';
@@ -54,7 +54,7 @@ describe('ReindexActions', () => {
 
   describe('createReindexOp', () => {
     beforeEach(() => {
-      versionService.setup(mockKibanaVersion);
+      versionService.setup(MAJOR_VERSION);
       client.create.mockResolvedValue();
     });
 
@@ -251,35 +251,16 @@ describe('ReindexActions', () => {
 
       // Really prettier??
       await expect(actions.findAllByStatus(ReindexStatus.completed)).resolves.toEqual([
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
       ]);
     });
   });
 
   describe('getFlatSettings', () => {
-    const asApiResponse = <T>(body: T): RequestEvent<T> =>
+    const asApiResponse = <T>(body: T): TransportResult<T> =>
       ({
         body,
-      } as RequestEvent<T>);
+      } as TransportResult<T>);
 
     it('returns flat settings', async () => {
       clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(

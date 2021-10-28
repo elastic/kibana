@@ -10,6 +10,7 @@ import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { asyncForEach } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { NotificationsStart } from 'src/core/public';
 
@@ -81,7 +82,7 @@ export class ConfirmDeleteUsers extends Component<Props, unknown> {
   private deleteUsers = () => {
     const { usersToDelete, callback, userAPIClient, notifications } = this.props;
     const errors: string[] = [];
-    usersToDelete.forEach(async (username) => {
+    asyncForEach(usersToDelete, async (username) => {
       try {
         await userAPIClient.deleteUser(username);
         notifications.toasts.addSuccess(
@@ -99,6 +100,7 @@ export class ConfirmDeleteUsers extends Component<Props, unknown> {
           )
         );
       }
+    }).then(() => {
       if (callback) {
         callback(usersToDelete, errors);
       }

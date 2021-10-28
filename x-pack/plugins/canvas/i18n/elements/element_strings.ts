@@ -222,4 +222,12 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'Displays progress as a portion of a vertical pill',
     }),
   },
+  tagCloud: {
+    displayName: i18n.translate('xpack.canvas.elements.tagCloudDisplayName', {
+      defaultMessage: 'Tag Cloud',
+    }),
+    help: i18n.translate('xpack.canvas.elements.tagCloudHelpText', {
+      defaultMessage: 'Tagcloud visualization',
+    }),
+  },
 });

@@ -55,8 +55,8 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
       },
     });
 
-    triggersActionsUi.alertTypeRegistry.register(getAlwaysFiringAlertType());
-    triggersActionsUi.alertTypeRegistry.register(getPeopleInSpaceAlertType());
+    triggersActionsUi.ruleTypeRegistry.register(getAlwaysFiringAlertType());
+    triggersActionsUi.ruleTypeRegistry.register(getPeopleInSpaceAlertType());
 
     registerNavigation(alerting);
 

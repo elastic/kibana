@@ -17,7 +17,7 @@ interface NestedFields {
 }
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-source.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-source.html
  *
  * @internal
  */

@@ -5,6 +5,10 @@
   "configPath": ["ui_actions_enhanced_examples"],
   "server": false,
   "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
   "requiredPlugins": [
     "uiActions",
     "uiActionsEnhanced",
@@ -15,10 +19,5 @@
     "developerExamples"
   ],
   "optionalPlugins": [],
-  "requiredBundles": [
-    "dashboardEnhanced",
-    "embeddable",
-    "kibanaUtils",
-    "kibanaReact"
-  ]
+  "requiredBundles": ["dashboardEnhanced", "embeddable", "kibanaUtils", "kibanaReact"]
 }

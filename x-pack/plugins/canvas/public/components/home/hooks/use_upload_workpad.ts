@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { CANVAS, JSON as JSONString } from '../../../../i18n/constants';
 import { useNotifyService } from '../../../services';
 import { getId } from '../../../lib/get_id';
+
 import { useCreateWorkpad } from './use_create_workpad';
 import type { CanvasWorkpad } from '../../../../types';
 

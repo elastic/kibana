@@ -10,10 +10,12 @@ import {
   pointInTimeFinderMock,
   mockCollectMultiNamespaceReferences,
   mockGetBulkOperationError,
+  mockInternalBulkResolve,
   mockUpdateObjectsSpaces,
+  mockGetCurrentTime,
+  mockPreflightCheckForCreate,
 } from './repository.test.mock';
 
-import { CORE_USAGE_STATS_TYPE, REPOSITORY_RESOLVE_OUTCOME_STATS } from '../../../core_usage_data';
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
@@ -23,11 +25,11 @@ import { loggerMock } from '../../../logging/logger.mock';
 import { SavedObjectsSerializer } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
+import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import { esKuery } from '../../es_query';
+import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
 const { nodeTypes } = esKuery;
@@ -196,7 +198,16 @@ describe('SavedObjectsRepository', () => {
     { type, id, references, namespace: objectNamespace, originId },
     namespace
   ) => {
-    const namespaceId = objectNamespace === 'default' ? undefined : objectNamespace ?? namespace;
+    let namespaces;
+    if (objectNamespace) {
+      namespaces = [objectNamespace];
+    } else if (namespace) {
+      namespaces = Array.isArray(namespace) ? namespace : [namespace];
+    } else {
+      namespaces = ['default'];
+    }
+    const namespaceId = namespaces[0] === 'default' ? undefined : namespaces[0];
+
     return {
       // NOTE: Elasticsearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
       found: true,
@@ -206,7 +217,7 @@ describe('SavedObjectsRepository', () => {
       ...mockVersionProps,
       _source: {
         ...(registry.isSingleNamespace(type) && { namespace: namespaceId }),
-        ...(registry.isMultiNamespace(type) && { namespaces: [namespaceId ?? 'default'] }),
+        ...(registry.isMultiNamespace(type) && { namespaces }),
         ...(originId && { originId }),
         type,
         [type]: { title: 'Testing' },
@@ -218,7 +229,9 @@ describe('SavedObjectsRepository', () => {
   };
 
   const getMockMgetResponse = (objects, namespace) => ({
-    docs: objects.map((obj) => (obj.found === false ? obj : getMockGetResponse(obj, namespace))),
+    docs: objects.map((obj) =>
+      obj.found === false ? obj : getMockGetResponse(obj, obj.initialNamespaces ?? namespace)
+    ),
   });
 
   expect.extend({
@@ -286,7 +299,7 @@ describe('SavedObjectsRepository', () => {
       logger,
     });
 
-    savedObjectsRepository._getCurrentTime = jest.fn(() => mockTimestamp);
+    mockGetCurrentTime.mockReturnValue(mockTimestamp);
     getSearchDslNS.getSearchDsl.mockClear();
   });
 
@@ -302,6 +315,13 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#bulkCreate', () => {
+    beforeEach(() => {
+      mockPreflightCheckForCreate.mockReset();
+      mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
+        return objects.map(({ type, id }) => ({ type, id })); // respond with no errors by default
+      });
+    });
+
     const obj1 = {
       type: 'config',
       id: '6.0.0-alpha1',
@@ -338,21 +358,11 @@ describe('SavedObjectsRepository', () => {
     };
 
     const bulkCreateSuccess = async (objects, options) => {
-      const multiNamespaceObjects = objects.filter(
-        ({ type, id }) => registry.isMultiNamespace(type) && id
-      );
-      if (multiNamespaceObjects?.length) {
-        const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
-        client.mget.mockResolvedValue(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-        );
-      }
       const response = getMockBulkCreateResponse(objects, options?.namespace);
       client.bulk.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(response)
       );
       const result = await savedObjectsRepository.bulkCreate(objects, options);
-      expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
       return result;
     };
 
@@ -406,15 +416,23 @@ describe('SavedObjectsRepository', () => {
         expect(client.bulk).toHaveBeenCalledTimes(1);
       });
 
-      it(`should use the ES mget action before bulk action for any types that are multi-namespace, when id is defined`, async () => {
+      it(`should use the preflightCheckForCreate action before bulk action for any types that are multi-namespace, when id is defined`, async () => {
         const objects = [obj1, { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE }];
         await bulkCreateSuccess(objects);
         expect(client.bulk).toHaveBeenCalledTimes(1);
-        expect(client.mget).toHaveBeenCalledTimes(1);
-        const docs = [
-          expect.objectContaining({ _id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${obj2.id}` }),
-        ];
-        expect(client.mget.mock.calls[0][0].body).toEqual({ docs });
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            objects: [
+              {
+                type: MULTI_NAMESPACE_ISOLATED_TYPE,
+                id: obj2.id,
+                overwrite: false,
+                namespaces: ['default'],
+              },
+            ],
+          })
+        );
       });
 
       it(`should use the ES create method if ID is undefined and overwrite=true`, async () => {
@@ -506,16 +524,25 @@ describe('SavedObjectsRepository', () => {
       it(`adds namespaces to request body for any types that are multi-namespace`, async () => {
         const test = async (namespace) => {
           const objects = [obj1, obj2].map((x) => ({ ...x, type: MULTI_NAMESPACE_ISOLATED_TYPE }));
-          const namespaces = [namespace ?? 'default'];
+          const [o1, o2] = objects;
+          mockPreflightCheckForCreate.mockResolvedValueOnce([
+            { type: o1.type, id: o1.id }, // first object does not have an existing document to overwrite
+            {
+              type: o2.type,
+              id: o2.id,
+              existingDocument: { _source: { namespaces: ['*'] } }, // second object does have an existing document to overwrite
+            },
+          ]);
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
-          const expected = expect.objectContaining({ namespaces });
-          const body = [expect.any(Object), expected, expect.any(Object), expected];
+          const expected1 = expect.objectContaining({ namespaces: [namespace ?? 'default'] });
+          const expected2 = expect.objectContaining({ namespaces: ['*'] });
+          const body = [expect.any(Object), expected1, expect.any(Object), expected2];
           expect(client.bulk).toHaveBeenCalledWith(
             expect.objectContaining({ body }),
             expect.anything()
           );
           client.bulk.mockClear();
-          client.mget.mockClear();
+          mockPreflightCheckForCreate.mockReset();
         };
         await test(undefined);
         await test(namespace);
@@ -530,25 +557,64 @@ describe('SavedObjectsRepository', () => {
             { ...obj1, type: MULTI_NAMESPACE_ISOLATED_TYPE, initialNamespaces: [ns2] },
             { ...obj1, type: MULTI_NAMESPACE_TYPE, initialNamespaces: [ns2, ns3] },
           ];
+          const [o1, o2, o3] = objects;
+          mockPreflightCheckForCreate.mockResolvedValueOnce([
+            // first object does not get passed in to preflightCheckForCreate at all
+            { type: o2.type, id: o2.id }, // second object does not have an existing document to overwrite
+            {
+              type: o3.type,
+              id: o3.id,
+              existingDocument: {
+                _source: { namespaces: [namespace ?? 'default', 'something-else'] }, // third object does have an existing document to overwrite
+              },
+            },
+          ]);
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
           const body = [
-            { index: expect.objectContaining({ _id: `${ns2}:dashboard:${obj1.id}` }) },
+            { index: expect.objectContaining({ _id: `${ns2}:dashboard:${o1.id}` }) },
             expect.objectContaining({ namespace: ns2 }),
             {
               index: expect.objectContaining({
-                _id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${obj1.id}`,
+                _id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${o2.id}`,
               }),
             },
             expect.objectContaining({ namespaces: [ns2] }),
-            { index: expect.objectContaining({ _id: `${MULTI_NAMESPACE_TYPE}:${obj1.id}` }) },
+            { index: expect.objectContaining({ _id: `${MULTI_NAMESPACE_TYPE}:${o3.id}` }) },
             expect.objectContaining({ namespaces: [ns2, ns3] }),
+          ];
+          expect(mockPreflightCheckForCreate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              objects: [
+                // assert that the initialNamespaces fields were passed into preflightCheckForCreate instead of the current namespace
+                { type: o2.type, id: o2.id, overwrite: true, namespaces: o2.initialNamespaces },
+                { type: o3.type, id: o3.id, overwrite: true, namespaces: o3.initialNamespaces },
+              ],
+            })
+          );
+          expect(client.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({ body }),
+            expect.anything()
+          );
+          client.bulk.mockClear();
+          mockPreflightCheckForCreate.mockReset();
+        };
+        await test(undefined);
+        await test(namespace);
+      });
+
+      it(`normalizes initialNamespaces from 'default' to undefined`, async () => {
+        const test = async (namespace) => {
+          const objects = [{ ...obj1, type: 'dashboard', initialNamespaces: ['default'] }];
+          await bulkCreateSuccess(objects, { namespace, overwrite: true });
+          const body = [
+            { index: expect.objectContaining({ _id: `dashboard:${obj1.id}` }) },
+            expect.not.objectContaining({ namespace: 'default' }),
           ];
           expect(client.bulk).toHaveBeenCalledWith(
             expect.objectContaining({ body }),
             expect.anything()
           );
           client.bulk.mockClear();
-          client.mget.mockClear();
         };
         await test(undefined);
         await test(namespace);
@@ -580,12 +646,18 @@ describe('SavedObjectsRepository', () => {
 
       it(`should use default index`, async () => {
         await bulkCreateSuccess([obj1, obj2]);
-        expectClientCallArgsAction([obj1, obj2], { method: 'create', _index: '.kibana-test' });
+        expectClientCallArgsAction([obj1, obj2], {
+          method: 'create',
+          _index: '.kibana-test_8.0.0-testing',
+        });
       });
 
       it(`should use custom index`, async () => {
         await bulkCreateSuccess([obj1, obj2].map((x) => ({ ...x, type: CUSTOM_INDEX_TYPE })));
-        expectClientCallArgsAction([obj1, obj2], { method: 'create', _index: 'custom' });
+        expectClientCallArgsAction([obj1, obj2], {
+          method: 'create',
+          _index: 'custom_8.0.0-testing',
+        });
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
@@ -711,46 +783,60 @@ describe('SavedObjectsRepository', () => {
         await bulkCreateError(obj, undefined, expectErrorInvalidType(obj));
       });
 
-      it(`returns error when there is a conflict with an existing multi-namespace saved object (get)`, async () => {
-        const obj = { ...obj3, type: MULTI_NAMESPACE_ISOLATED_TYPE };
-        const response1 = {
-          status: 200,
-          docs: [
-            {
-              found: true,
-              _source: {
-                type: obj.type,
-                namespaces: ['bar-namespace'],
-              },
-            },
-          ],
-        };
-        client.mget.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response1)
-        );
-        const response2 = getMockBulkCreateResponse([obj1, obj2]);
+      it(`returns error when there is a conflict from preflightCheckForCreate`, async () => {
+        const objects = [
+          // only the second, third, and fourth objects are passed to preflightCheckForCreate and result in errors
+          obj1,
+          { ...obj1, type: MULTI_NAMESPACE_TYPE },
+          { ...obj2, type: MULTI_NAMESPACE_TYPE },
+          { ...obj3, type: MULTI_NAMESPACE_TYPE },
+          obj2,
+        ];
+        const [o1, o2, o3, o4, o5] = objects;
+        mockPreflightCheckForCreate.mockResolvedValueOnce([
+          // first and last objects do not get passed in to preflightCheckForCreate at all
+          { type: o2.type, id: o2.id, error: { type: 'conflict' } },
+          {
+            type: o3.type,
+            id: o3.id,
+            error: { type: 'unresolvableConflict', metadata: { isNotOverwritable: true } },
+          },
+          {
+            type: o4.type,
+            id: o4.id,
+            error: { type: 'aliasConflict', metadata: { spacesWithConflictingAliases: ['foo'] } },
+          },
+        ]);
+        const bulkResponse = getMockBulkCreateResponse([o1, o5]);
         client.bulk.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response2)
+          elasticsearchClientMock.createSuccessTransportRequestPromise(bulkResponse)
         );
 
         const options = { overwrite: true };
-        const result = await savedObjectsRepository.bulkCreate([obj1, obj, obj2], options);
+        const result = await savedObjectsRepository.bulkCreate(objects, options);
+        expect(mockPreflightCheckForCreate).toHaveBeenCalled();
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            objects: [
+              { type: o2.type, id: o2.id, overwrite: true, namespaces: ['default'] },
+              { type: o3.type, id: o3.id, overwrite: true, namespaces: ['default'] },
+              { type: o4.type, id: o4.id, overwrite: true, namespaces: ['default'] },
+            ],
+          })
+        );
         expect(client.bulk).toHaveBeenCalled();
-        expect(client.mget).toHaveBeenCalled();
-
-        const body1 = { docs: [expect.objectContaining({ _id: `${obj.type}:${obj.id}` })] };
-        expect(client.mget).toHaveBeenCalledWith(
-          expect.objectContaining({ body: body1 }),
-          expect.anything()
-        );
-        const body2 = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body: body2 }),
+          expect.objectContaining({ body: [...expectObjArgs(o1), ...expectObjArgs(o5)] }),
           expect.anything()
         );
-        const expectedError = expectErrorConflict(obj, { metadata: { isNotOverwritable: true } });
         expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectedError, expectSuccess(obj2)],
+          saved_objects: [
+            expectSuccess(o1),
+            expectErrorConflict(o2),
+            expectErrorConflict(o3, { metadata: { isNotOverwritable: true } }),
+            expectErrorConflict(o4, { metadata: { spacesWithConflictingAliases: ['foo'] } }),
+            expectSuccess(o5),
+          ],
         });
       });
 
@@ -922,7 +1008,7 @@ describe('SavedObjectsRepository', () => {
 
     const bulkGet = async (objects, options) =>
       savedObjectsRepository.bulkGet(
-        objects.map(({ type, id }) => ({ type, id })), // bulkGet only uses type and id
+        objects.map(({ type, id, namespaces }) => ({ type, id, namespaces })), // bulkGet only uses type, id, and optionally namespaces
         options
       );
     const bulkGetSuccess = async (objects, options) => {
@@ -961,6 +1047,13 @@ describe('SavedObjectsRepository', () => {
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
+      it(`prepends namespace to the id when providing namespaces for single-namespace type`, async () => {
+        const getId = (type, id) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
+        const objects = [obj1, obj2].map((obj) => ({ ...obj, namespaces: [namespace] }));
+        await bulkGetSuccess(objects, { namespace: 'some-other-ns' });
+        _expectClientCallArgs([obj1, obj2], { getId });
+      });
+
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
         const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkGetSuccess([obj1, obj2]);
@@ -980,33 +1073,35 @@ describe('SavedObjectsRepository', () => {
         _expectClientCallArgs(objects, { getId });
 
         client.mget.mockClear();
-        objects = [obj1, obj2].map((obj) => ({ ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE }));
+        objects = [obj1, { ...obj2, namespaces: ['some-other-ns'] }].map((obj) => ({
+          ...obj,
+          type: MULTI_NAMESPACE_ISOLATED_TYPE,
+        }));
         await bulkGetSuccess(objects, { namespace });
         _expectClientCallArgs(objects, { getId });
       });
     });
 
     describe('errors', () => {
-      const bulkGetErrorInvalidType = async ([obj1, obj, obj2]) => {
-        const response = getMockMgetResponse([obj1, obj2]);
+      const bulkGetError = async (obj, isBulkError, expectedErrorResult) => {
+        let response;
+        if (isBulkError) {
+          // mock the bulk error for only the second object
+          mockGetBulkOperationError.mockReturnValueOnce(undefined);
+          mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error);
+          response = getMockMgetResponse([obj1, obj, obj2]);
+        } else {
+          response = getMockMgetResponse([obj1, obj2]);
+        }
         client.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
-        const result = await bulkGet([obj1, obj, obj2]);
-        expect(client.mget).toHaveBeenCalled();
-        expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectErrorInvalidType(obj), expectSuccess(obj2)],
-        });
-      };
 
-      const bulkGetErrorNotFound = async ([obj1, obj, obj2], options, response) => {
-        client.mget.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-        );
-        const result = await bulkGet([obj1, obj, obj2], options);
+        const objects = [obj1, obj, obj2];
+        const result = await bulkGet(objects);
         expect(client.mget).toHaveBeenCalled();
         expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectErrorNotFound(obj), expectSuccess(obj2)],
+          saved_objects: [expectSuccess(obj1), expectedErrorResult, expectSuccess(obj2)],
         });
       };
 
@@ -1017,33 +1112,65 @@ describe('SavedObjectsRepository', () => {
         ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
       });
 
+      it(`returns error when namespaces is used with a space-agnostic object`, async () => {
+        const obj = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'three', namespaces: [] };
+        await bulkGetError(
+          obj,
+          undefined,
+          expectErrorResult(
+            obj,
+            createBadRequestError('"namespaces" cannot be used on space-agnostic types')
+          )
+        );
+      });
+
+      it(`returns error when namespaces is used with a space-isolated object and does not specify a single space`, async () => {
+        const doTest = async (objType, namespaces) => {
+          const obj = { type: objType, id: 'three', namespaces };
+          await bulkGetError(
+            obj,
+            undefined,
+            expectErrorResult(
+              obj,
+              createBadRequestError(
+                '"namespaces" can only specify a single space when used with space-isolated types'
+              )
+            )
+          );
+        };
+        await doTest('dashboard', ['spacex', 'spacey']);
+        await doTest('dashboard', ['*']);
+        await doTest(MULTI_NAMESPACE_ISOLATED_TYPE, ['spacex', 'spacey']);
+        await doTest(MULTI_NAMESPACE_ISOLATED_TYPE, ['*']);
+      });
+
       it(`returns error when type is invalid`, async () => {
         const obj = { type: 'unknownType', id: 'three' };
-        await bulkGetErrorInvalidType([obj1, obj, obj2]);
+        await bulkGetError(obj, undefined, expectErrorInvalidType(obj));
       });
 
       it(`returns error when type is hidden`, async () => {
         const obj = { type: HIDDEN_TYPE, id: 'three' };
-        await bulkGetErrorInvalidType([obj1, obj, obj2]);
+        await bulkGetError(obj, undefined, expectErrorInvalidType(obj));
       });
 
       it(`returns error when document is not found`, async () => {
         const obj = { type: 'dashboard', id: 'three', found: false };
-        const response = getMockMgetResponse([obj1, obj, obj2]);
-        await bulkGetErrorNotFound([obj1, obj, obj2], undefined, response);
+        await bulkGetError(obj, true, expectErrorNotFound(obj));
       });
 
       it(`handles missing ids gracefully`, async () => {
         const obj = { type: 'dashboard', id: undefined, found: false };
-        const response = getMockMgetResponse([obj1, obj, obj2]);
-        await bulkGetErrorNotFound([obj1, obj, obj2], undefined, response);
+        await bulkGetError(obj, true, expectErrorNotFound(obj));
       });
 
       it(`returns error when type is multi-namespace and the document exists, but not in this namespace`, async () => {
-        const obj = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: 'three' };
-        const response = getMockMgetResponse([obj1, obj, obj2]);
-        response.docs[1].namespaces = ['bar-namespace'];
-        await bulkGetErrorNotFound([obj1, obj, obj2], { namespace }, response);
+        const obj = {
+          type: MULTI_NAMESPACE_ISOLATED_TYPE,
+          id: 'three',
+          namespace: 'bar-namespace',
+        };
+        await bulkGetError(obj, true, expectErrorNotFound(obj));
       });
     });
 
@@ -1108,6 +1235,59 @@ describe('SavedObjectsRepository', () => {
           ],
         });
       });
+    });
+  });
+
+  describe('#bulkResolve', () => {
+    afterEach(() => {
+      mockInternalBulkResolve.mockReset();
+    });
+
+    it('passes arguments to the internalBulkResolve module and returns the expected results', async () => {
+      mockInternalBulkResolve.mockResolvedValue({
+        resolved_objects: [
+          { saved_object: 'mock-object', outcome: 'exactMatch' },
+          {
+            type: 'obj-type',
+            id: 'obj-id-2',
+            error: SavedObjectsErrorHelpers.createGenericNotFoundError('obj-type', 'obj-id-2'),
+          },
+        ],
+      });
+
+      const objects = [
+        { type: 'obj-type', id: 'obj-id-1' },
+        { type: 'obj-type', id: 'obj-id-2' },
+      ];
+      await expect(savedObjectsRepository.bulkResolve(objects)).resolves.toEqual({
+        resolved_objects: [
+          {
+            saved_object: 'mock-object',
+            outcome: 'exactMatch',
+          },
+          {
+            saved_object: {
+              type: 'obj-type',
+              id: 'obj-id-2',
+              error: {
+                error: 'Not Found',
+                message: 'Saved object [obj-type/obj-id-2] not found',
+                statusCode: 404,
+              },
+            },
+            outcome: 'exactMatch',
+          },
+        ],
+      });
+      expect(mockInternalBulkResolve).toHaveBeenCalledTimes(1);
+      expect(mockInternalBulkResolve).toHaveBeenCalledWith(expect.objectContaining({ objects }));
+    });
+
+    it('throws when internalBulkResolve throws', async () => {
+      const error = new Error('Oh no!');
+      mockInternalBulkResolve.mockRejectedValue(error);
+
+      await expect(savedObjectsRepository.resolve()).rejects.toEqual(error);
     });
   });
 
@@ -1700,6 +1880,10 @@ describe('SavedObjectsRepository', () => {
 
   describe('#create', () => {
     beforeEach(() => {
+      mockPreflightCheckForCreate.mockReset();
+      mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
+        return objects.map(({ type, id }) => ({ type, id })); // respond with no errors by default
+      });
       client.create.mockImplementation((params) =>
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           _id: params.id,
@@ -1723,27 +1907,26 @@ describe('SavedObjectsRepository', () => {
 
     const createSuccess = async (type, attributes, options) => {
       const result = await savedObjectsRepository.create(type, attributes, options);
-      expect(client.get).toHaveBeenCalledTimes(
-        registry.isMultiNamespace(type) && options.overwrite ? 1 : 0
-      );
       return result;
     };
 
     describe('client calls', () => {
-      it(`should use the ES index action if overwrite=true`, async () => {
+      it(`should use the ES index action if ID is not defined and overwrite=true`, async () => {
         await createSuccess(type, attributes, { overwrite: true });
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalled();
       });
 
-      it(`should use the ES create action if overwrite=false`, async () => {
+      it(`should use the ES create action if ID is not defined and overwrite=false`, async () => {
         await createSuccess(type, attributes);
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.create).toHaveBeenCalled();
       });
 
       it(`should use the ES index with version if ID and version are defined and overwrite=true`, async () => {
         await createSuccess(type, attributes, { id, overwrite: true, version: mockVersion });
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalled();
-
         expect(client.index.mock.calls[0][0]).toMatchObject({
           if_seq_no: mockVersionProps._seq_no,
           if_primary_term: mockVersionProps._primary_term,
@@ -1752,12 +1935,33 @@ describe('SavedObjectsRepository', () => {
 
       it(`should use the ES create action if ID is defined and overwrite=false`, async () => {
         await createSuccess(type, attributes, { id });
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.create).toHaveBeenCalled();
       });
 
-      it(`should use the ES get action then index action if type is multi-namespace, ID is defined, and overwrite=true`, async () => {
+      it(`should use the preflightCheckForCreate action then create action if type is multi-namespace, ID is defined, and overwrite=false`, async () => {
+        await createSuccess(MULTI_NAMESPACE_TYPE, attributes, { id });
+        expect(mockPreflightCheckForCreate).toHaveBeenCalled();
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            objects: [
+              { type: MULTI_NAMESPACE_TYPE, id, overwrite: false, namespaces: ['default'] },
+            ],
+          })
+        );
+        expect(client.create).toHaveBeenCalled();
+      });
+
+      it(`should use the preflightCheckForCreate action then index action if type is multi-namespace, ID is defined, and overwrite=true`, async () => {
         await createSuccess(MULTI_NAMESPACE_ISOLATED_TYPE, attributes, { id, overwrite: true });
-        expect(client.get).toHaveBeenCalled();
+        expect(mockPreflightCheckForCreate).toHaveBeenCalled();
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            objects: [
+              { type: MULTI_NAMESPACE_ISOLATED_TYPE, id, overwrite: true, namespaces: ['default'] },
+            ],
+          })
+        );
         expect(client.index).toHaveBeenCalled();
       });
 
@@ -1820,7 +2024,7 @@ describe('SavedObjectsRepository', () => {
       it(`should use default index`, async () => {
         await createSuccess(type, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({ index: '.kibana-test' }),
+          expect.objectContaining({ index: '.kibana-test_8.0.0-testing' }),
           expect.anything()
         );
       });
@@ -1828,7 +2032,7 @@ describe('SavedObjectsRepository', () => {
       it(`should use custom index`, async () => {
         await createSuccess(CUSTOM_INDEX_TYPE, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({ index: 'custom' }),
+          expect.objectContaining({ index: 'custom_8.0.0-testing' }),
           expect.anything()
         );
       });
@@ -1877,11 +2081,52 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't prepend namespace to the id and adds namespaces to body when using multi-namespace type`, async () => {
-        await createSuccess(MULTI_NAMESPACE_ISOLATED_TYPE, attributes, { id, namespace });
+        // first object does not have an existing document to overwrite
+        await createSuccess(MULTI_NAMESPACE_TYPE, attributes, { id, namespace });
+        mockPreflightCheckForCreate.mockResolvedValueOnce([
+          {
+            type: MULTI_NAMESPACE_TYPE,
+            id,
+            existingDocument: { _source: { namespaces: ['*'] } }, // second object does have an existing document to overwrite
+          },
+        ]);
+        await createSuccess(MULTI_NAMESPACE_ISOLATED_TYPE, attributes, {
+          id,
+          namespace,
+          overwrite: true,
+        });
+
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(2);
+        expect(mockPreflightCheckForCreate).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            objects: [
+              { type: MULTI_NAMESPACE_TYPE, id, overwrite: false, namespaces: [namespace] },
+            ],
+          })
+        );
+        expect(mockPreflightCheckForCreate).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            objects: [
+              { type: MULTI_NAMESPACE_ISOLATED_TYPE, id, overwrite: true, namespaces: [namespace] },
+            ],
+          })
+        );
+
+        expect(client.create).toHaveBeenCalledTimes(1);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${id}`,
+            id: `${MULTI_NAMESPACE_TYPE}:${id}`,
             body: expect.objectContaining({ namespaces: [namespace] }),
+          }),
+          expect.anything()
+        );
+        expect(client.index).toHaveBeenCalledTimes(1);
+        expect(client.index).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${id}`,
+            body: expect.objectContaining({ namespaces: ['*'] }),
           }),
           expect.anything()
         );
@@ -1890,23 +2135,49 @@ describe('SavedObjectsRepository', () => {
       it(`adds initialNamespaces instead of namespace`, async () => {
         const ns2 = 'bar-namespace';
         const ns3 = 'baz-namespace';
+        // first object does not get passed in to preflightCheckForCreate at all
         await savedObjectsRepository.create('dashboard', attributes, {
           id,
           namespace,
           initialNamespaces: [ns2],
         });
-        await savedObjectsRepository.create(MULTI_NAMESPACE_ISOLATED_TYPE, attributes, {
-          id,
-          namespace,
-          initialNamespaces: [ns2],
-        });
+        // second object does not have an existing document to overwrite
         await savedObjectsRepository.create(MULTI_NAMESPACE_TYPE, attributes, {
           id,
           namespace,
           initialNamespaces: [ns2, ns3],
         });
+        mockPreflightCheckForCreate.mockResolvedValueOnce([
+          {
+            type: MULTI_NAMESPACE_ISOLATED_TYPE,
+            id,
+            existingDocument: { _source: { namespaces: ['something-else'] } }, // third object does have an existing document to overwrite
+          },
+        ]);
+        await savedObjectsRepository.create(MULTI_NAMESPACE_ISOLATED_TYPE, attributes, {
+          id,
+          namespace,
+          initialNamespaces: [ns2],
+          overwrite: true,
+        });
 
-        expect(client.create).toHaveBeenCalledTimes(3);
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(2);
+        expect(mockPreflightCheckForCreate).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            objects: [{ type: MULTI_NAMESPACE_TYPE, id, overwrite: false, namespaces: [ns2, ns3] }],
+          })
+        );
+        expect(mockPreflightCheckForCreate).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            objects: [
+              { type: MULTI_NAMESPACE_ISOLATED_TYPE, id, overwrite: true, namespaces: [ns2] },
+            ],
+          })
+        );
+
+        expect(client.create).toHaveBeenCalledTimes(2);
         expect(client.create).toHaveBeenNthCalledWith(
           1,
           expect.objectContaining({
@@ -1918,16 +2189,34 @@ describe('SavedObjectsRepository', () => {
         expect(client.create).toHaveBeenNthCalledWith(
           2,
           expect.objectContaining({
+            id: `${MULTI_NAMESPACE_TYPE}:${id}`,
+            body: expect.objectContaining({ namespaces: [ns2, ns3] }),
+          }),
+          expect.anything()
+        );
+        expect(client.index).toHaveBeenCalledTimes(1);
+        expect(client.index).toHaveBeenCalledWith(
+          expect.objectContaining({
             id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${id}`,
             body: expect.objectContaining({ namespaces: [ns2] }),
           }),
           expect.anything()
         );
+      });
+
+      it(`normalizes initialNamespaces from 'default' to undefined`, async () => {
+        await savedObjectsRepository.create('dashboard', attributes, {
+          id,
+          namespace,
+          initialNamespaces: ['default'],
+        });
+
+        expect(client.create).toHaveBeenCalledTimes(1);
         expect(client.create).toHaveBeenNthCalledWith(
-          3,
+          1,
           expect.objectContaining({
-            id: `${MULTI_NAMESPACE_TYPE}:${id}`,
-            body: expect.objectContaining({ namespaces: [ns2, ns3] }),
+            id: `dashboard:${id}`,
+            body: expect.not.objectContaining({ namespace: 'default' }),
           }),
           expect.anything()
         );
@@ -2003,14 +2292,10 @@ describe('SavedObjectsRepository', () => {
         expect(client.create).not.toHaveBeenCalled();
       });
 
-      it(`throws when there is a conflict with an existing multi-namespace saved object (get)`, async () => {
-        const response = getMockGetResponse(
-          { type: MULTI_NAMESPACE_ISOLATED_TYPE, id },
-          'bar-namespace'
-        );
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-        );
+      it(`throws when there is a conflict from preflightCheckForCreate`, async () => {
+        mockPreflightCheckForCreate.mockResolvedValueOnce([
+          { type: MULTI_NAMESPACE_ISOLATED_TYPE, id, error: { type: 'unresolvableConflict' } }, // error type and metadata dont matter
+        ]);
         await expect(
           savedObjectsRepository.create(MULTI_NAMESPACE_ISOLATED_TYPE, attributes, {
             id,
@@ -2018,7 +2303,7 @@ describe('SavedObjectsRepository', () => {
             namespace,
           })
         ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_ISOLATED_TYPE, id));
-        expect(client.get).toHaveBeenCalled();
+        expect(mockPreflightCheckForCreate).toHaveBeenCalled();
       });
 
       it.todo(`throws when automatic index creation fails`);
@@ -2222,7 +2507,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false }, undefined)
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -2351,7 +2636,9 @@ describe('SavedObjectsRepository', () => {
       it(`should use all indices for types that are not namespace-agnostic`, async () => {
         await deleteByNamespaceSuccess(namespace);
         expect(client.updateByQuery).toHaveBeenCalledWith(
-          expect.objectContaining({ index: ['.kibana-test', 'custom'] }),
+          expect.objectContaining({
+            index: ['.kibana-test_8.0.0-testing', 'custom_8.0.0-testing'],
+          }),
           expect.anything()
         );
       });
@@ -2386,7 +2673,11 @@ describe('SavedObjectsRepository', () => {
         const allTypes = registry.getAllTypes().map((type) => type.name);
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           namespaces: [namespace],
-          type: allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
+          type: [
+            ...allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
+            LEGACY_URL_ALIAS_TYPE,
+          ],
+          kueryNode: expect.anything(),
         });
       });
     });
@@ -2441,7 +2732,7 @@ describe('SavedObjectsRepository', () => {
         await removeReferencesToSuccess();
         expect(client.updateByQuery).toHaveBeenCalledWith(
           expect.objectContaining({
-            index: ['.kibana-test', 'custom'],
+            index: ['.kibana-test_8.0.0-testing', 'custom_8.0.0-testing'],
           }),
           expect.anything()
         );
@@ -3190,7 +3481,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false }, undefined)
         );
         await expectNotFoundError(type, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -3254,258 +3545,36 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#resolve', () => {
-    const type = 'index-pattern';
-    const id = 'logstash-*';
-    const aliasTargetId = 'some-other-id'; // only used for 'aliasMatch' and 'conflict' outcomes
-    const namespace = 'foo-namespace';
-
-    const getMockAliasDocument = (resolveCounter) => ({
-      body: {
-        get: {
-          _source: {
-            [LEGACY_URL_ALIAS_TYPE]: {
-              targetId: aliasTargetId,
-              ...(resolveCounter && { resolveCounter }),
-              // other fields are not used by the repository
-            },
-          },
-        },
-      },
+    afterEach(() => {
+      mockInternalBulkResolve.mockReset();
     });
 
-    /** Each time resolve is called, usage stats are incremented depending upon the outcome. */
-    const expectIncrementCounter = (n, outcomeStatString) => {
-      expect(client.update).toHaveBeenNthCalledWith(
-        n,
-        expect.objectContaining({
-          body: expect.objectContaining({
-            upsert: expect.objectContaining({
-              [CORE_USAGE_STATS_TYPE]: {
-                [outcomeStatString]: 1,
-                [REPOSITORY_RESOLVE_OUTCOME_STATS.TOTAL]: 1,
-              },
-            }),
-          }),
-        }),
-        expect.anything()
+    it('passes arguments to the internalBulkResolve module and returns the result', async () => {
+      const expectedResult = { saved_object: 'mock-object', outcome: 'exactMatch' };
+      mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
+
+      await expect(savedObjectsRepository.resolve('obj-type', 'obj-id')).resolves.toEqual(
+        expectedResult
       );
-    };
+      expect(mockInternalBulkResolve).toHaveBeenCalledTimes(1);
+      expect(mockInternalBulkResolve).toHaveBeenCalledWith(
+        expect.objectContaining({ objects: [{ type: 'obj-type', id: 'obj-id' }] })
+      );
+    });
 
-    describe('outcomes', () => {
-      describe('error', () => {
-        const expectNotFoundError = async (type, id, options) => {
-          await expect(savedObjectsRepository.resolve(type, id, options)).rejects.toThrowError(
-            createGenericNotFoundError(type, id)
-          );
-        };
+    it('throws when internalBulkResolve result is an error', async () => {
+      const error = new Error('Oh no!');
+      const expectedResult = { type: 'obj-type', id: 'obj-id', error };
+      mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
 
-        it('because type is invalid', async () => {
-          await expectNotFoundError('unknownType', id);
-          expect(client.update).not.toHaveBeenCalled();
-          expect(client.get).not.toHaveBeenCalled();
-          expect(client.mget).not.toHaveBeenCalled();
-        });
+      await expect(savedObjectsRepository.resolve()).rejects.toEqual(error);
+    });
 
-        it('because type is hidden', async () => {
-          await expectNotFoundError(HIDDEN_TYPE, id);
-          expect(client.update).not.toHaveBeenCalled();
-          expect(client.get).not.toHaveBeenCalled();
-          expect(client.mget).not.toHaveBeenCalled();
-        });
+    it('throws when internalBulkResolve throws', async () => {
+      const error = new Error('Oh no!');
+      mockInternalBulkResolve.mockRejectedValue(error);
 
-        it('because alias is not used and actual object is not found', async () => {
-          const options = { namespace: undefined };
-          const response = { found: false };
-          client.get.mockResolvedValueOnce(
-            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
-          );
-
-          await expectNotFoundError(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(1); // incremented stats
-          expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
-          expect(client.mget).not.toHaveBeenCalled();
-          expectIncrementCounter(1, REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
-        });
-
-        it('because actual object and alias object are both not found', async () => {
-          const options = { namespace };
-          const objectResults = [
-            { type, id, found: false },
-            { type, id: aliasTargetId, found: false },
-          ];
-          client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
-          const response = getMockMgetResponse(objectResults, options.namespace);
-          client.mget.mockResolvedValueOnce(
-            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
-          );
-
-          await expectNotFoundError(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
-          expect(client.get).not.toHaveBeenCalled();
-          expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
-          expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
-        });
-      });
-
-      describe('exactMatch', () => {
-        it('because namespace is undefined', async () => {
-          const options = { namespace: undefined };
-          const response = getMockGetResponse({ type, id });
-          client.get.mockResolvedValueOnce(
-            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
-          );
-
-          const result = await savedObjectsRepository.resolve(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(1); // incremented stats
-          expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
-          expect(client.mget).not.toHaveBeenCalled();
-          expectIncrementCounter(1, REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-          expect(result).toEqual({
-            saved_object: expect.objectContaining({ type, id }),
-            outcome: 'exactMatch',
-          });
-        });
-
-        describe('because alias is not used', () => {
-          const expectExactMatchResult = async (aliasResult) => {
-            const options = { namespace };
-            client.update.mockResolvedValueOnce(aliasResult); // for alias object
-            const response = getMockGetResponse({ type, id }, options.namespace);
-            client.get.mockResolvedValueOnce(
-              elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
-            );
-
-            const result = await savedObjectsRepository.resolve(type, id, options);
-            expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
-            expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
-            expect(client.mget).not.toHaveBeenCalled();
-            expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-            expect(result).toEqual({
-              saved_object: expect.objectContaining({ type, id }),
-              outcome: 'exactMatch',
-            });
-          };
-
-          it('since alias call resulted in 404', async () => {
-            await expectExactMatchResult({ statusCode: 404 });
-          });
-
-          it('since alias is not found', async () => {
-            await expectExactMatchResult({ body: { get: { found: false } } });
-          });
-
-          it('since alias is disabled', async () => {
-            await expectExactMatchResult({
-              body: { get: { _source: { [LEGACY_URL_ALIAS_TYPE]: { disabled: true } } } },
-            });
-          });
-        });
-
-        describe('because alias is used', () => {
-          const expectExactMatchResult = async (objectResults) => {
-            const options = { namespace };
-            client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
-            const response = getMockMgetResponse(objectResults, options.namespace);
-            client.mget.mockResolvedValueOnce(
-              elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target and alias target
-            );
-
-            const result = await savedObjectsRepository.resolve(type, id, options);
-            expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
-            expect(client.get).not.toHaveBeenCalled();
-            expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
-            expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-            expect(result).toEqual({
-              saved_object: expect.objectContaining({ type, id }),
-              outcome: 'exactMatch',
-            });
-          };
-
-          it('but alias target is not found', async () => {
-            const objects = [
-              { type, id },
-              { type, id: aliasTargetId, found: false },
-            ];
-            await expectExactMatchResult(objects);
-          });
-
-          it('but alias target does not exist in this namespace', async () => {
-            const objects = [
-              { type: MULTI_NAMESPACE_ISOLATED_TYPE, id }, // correct namespace field is added by getMockMgetResponse
-              {
-                type: MULTI_NAMESPACE_ISOLATED_TYPE,
-                id: aliasTargetId,
-                namespace: `not-${namespace}`,
-              }, // overrides namespace field that would otherwise be added by getMockMgetResponse
-            ];
-            await expectExactMatchResult(objects);
-          });
-        });
-      });
-
-      describe('aliasMatch', () => {
-        const expectAliasMatchResult = async (objectResults) => {
-          const options = { namespace };
-          client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
-          const response = getMockMgetResponse(objectResults, options.namespace);
-          client.mget.mockResolvedValueOnce(
-            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target and alias target
-          );
-
-          const result = await savedObjectsRepository.resolve(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
-          expect(client.get).not.toHaveBeenCalled();
-          expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
-          expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
-          expect(result).toEqual({
-            saved_object: expect.objectContaining({ type, id: aliasTargetId }),
-            outcome: 'aliasMatch',
-            aliasTargetId,
-          });
-        };
-
-        it('because actual target is not found', async () => {
-          const objects = [
-            { type, id, found: false },
-            { type, id: aliasTargetId },
-          ];
-          await expectAliasMatchResult(objects);
-        });
-
-        it('because actual target does not exist in this namespace', async () => {
-          const objects = [
-            { type: MULTI_NAMESPACE_ISOLATED_TYPE, id, namespace: `not-${namespace}` }, // overrides namespace field that would otherwise be added by getMockMgetResponse
-            { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: aliasTargetId }, // correct namespace field is added by getMockMgetResponse
-          ];
-          await expectAliasMatchResult(objects);
-        });
-      });
-
-      describe('conflict', () => {
-        it('because actual target and alias target are both found', async () => {
-          const options = { namespace };
-          const objectResults = [
-            { type, id }, // correct namespace field is added by getMockMgetResponse
-            { type, id: aliasTargetId }, // correct namespace field is added by getMockMgetResponse
-          ];
-          client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
-          const response = getMockMgetResponse(objectResults, options.namespace);
-          client.mget.mockResolvedValueOnce(
-            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target and alias target
-          );
-
-          const result = await savedObjectsRepository.resolve(type, id, options);
-          expect(client.update).toHaveBeenCalledTimes(2); // retrieved alias object, then incremented stats
-          expect(client.get).not.toHaveBeenCalled();
-          expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
-          expectIncrementCounter(2, REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
-          expect(result).toEqual({
-            saved_object: expect.objectContaining({ type, id }),
-            outcome: 'conflict',
-            aliasTargetId,
-          });
-        });
-      });
+      await expect(savedObjectsRepository.resolve()).rejects.toEqual(error);
     });
   });
 
@@ -3516,10 +3585,12 @@ describe('SavedObjectsRepository', () => {
     const namespace = 'foo-namespace';
     const originId = 'some-origin-id';
 
-    const incrementCounterSuccess = async (type, id, fields, options) => {
+    const incrementCounterSuccess = async (type, id, fields, options, internalOptions = {}) => {
+      const { mockGetResponseValue } = internalOptions;
       const isMultiNamespace = registry.isMultiNamespace(type);
       if (isMultiNamespace) {
-        const response = getMockGetResponse({ type, id }, options?.namespace);
+        const response =
+          mockGetResponseValue ?? getMockGetResponse({ type, id }, options?.namespace);
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
@@ -3551,9 +3622,18 @@ describe('SavedObjectsRepository', () => {
       return result;
     };
 
+    beforeEach(() => {
+      mockPreflightCheckForCreate.mockReset();
+      mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
+        return objects.map(({ type, id }) => ({ type, id })); // respond with no errors by default
+      });
+    });
+
     describe('client calls', () => {
       it(`should use the ES update action if type is not multi-namespace`, async () => {
         await incrementCounterSuccess(type, id, counterFields, { namespace });
+        expect(client.get).not.toHaveBeenCalled();
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.update).toHaveBeenCalledTimes(1);
       });
 
@@ -3562,6 +3642,20 @@ describe('SavedObjectsRepository', () => {
           namespace,
         });
         expect(client.get).toHaveBeenCalledTimes(1);
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        expect(client.update).toHaveBeenCalledTimes(1);
+      });
+
+      it(`should check for alias conflicts if a new multi-namespace object would be created`, async () => {
+        await incrementCounterSuccess(
+          MULTI_NAMESPACE_ISOLATED_TYPE,
+          id,
+          counterFields,
+          { namespace },
+          { mockGetResponseValue: { found: false } }
+        );
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
         expect(client.update).toHaveBeenCalledTimes(1);
       });
 
@@ -3730,6 +3824,43 @@ describe('SavedObjectsRepository', () => {
           )
         ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_ISOLATED_TYPE, id));
         expect(client.get).toHaveBeenCalledTimes(1);
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
+      it(`throws when there is an alias conflict from preflightCheckForCreate`, async () => {
+        client.get.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+        );
+        mockPreflightCheckForCreate.mockResolvedValue([{ error: { type: 'aliasConflict' } }]);
+        await expect(
+          savedObjectsRepository.incrementCounter(
+            MULTI_NAMESPACE_ISOLATED_TYPE,
+            id,
+            counterFields,
+            { namespace }
+          )
+        ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
+      it(`does not throw when there is a different error from preflightCheckForCreate`, async () => {
+        client.get.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+        );
+        mockPreflightCheckForCreate.mockResolvedValue([{ error: { type: 'something-else' } }]);
+        await incrementCounterSuccess(
+          MULTI_NAMESPACE_ISOLATED_TYPE,
+          id,
+          counterFields,
+          { namespace },
+          { mockGetResponseValue: { found: false } }
+        );
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
+        expect(client.update).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -3815,6 +3946,25 @@ describe('SavedObjectsRepository', () => {
           expect.anything()
         );
       });
+
+      it('does not increment counter when incrementBy is 0', async () => {
+        await incrementCounterSuccess(type, id, [{ fieldName: counterFields[0], incrementBy: 0 }]);
+
+        expect(client.update).toBeCalledTimes(1);
+        expect(client.update).toBeCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              script: expect.objectContaining({
+                params: expect.objectContaining({
+                  counterFieldNames: [counterFields[0]],
+                  counts: [0],
+                }),
+              }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
     });
   });
 
@@ -3832,45 +3982,80 @@ describe('SavedObjectsRepository', () => {
     ];
     const originId = 'some-origin-id';
 
-    const updateSuccess = async (type, id, attributes, options, includeOriginId) => {
-      if (registry.isMultiNamespace(type)) {
-        const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace);
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(mockGetResponse)
-        );
-      }
+    const mockUpdateResponse = (type, id, options, includeOriginId) => {
       client.update.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
-          _id: `${type}:${id}`,
-          ...mockVersionProps,
-          result: 'updated',
-          // don't need the rest of the source for test purposes, just the namespace and namespaces attributes
-          get: {
-            _source: {
-              namespaces: [options?.namespace ?? 'default'],
-              namespace: options?.namespace,
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          {
+            _id: `${type}:${id}`,
+            ...mockVersionProps,
+            result: 'updated',
+            // don't need the rest of the source for test purposes, just the namespace and namespaces attributes
+            get: {
+              _source: {
+                namespaces: [options?.namespace ?? 'default'],
+                namespace: options?.namespace,
 
-              // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
-              // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
-              ...(includeOriginId && { originId }),
+                // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
+                // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
+                ...(includeOriginId && { originId }),
+              },
             },
           },
-        })
+          { statusCode: 200 }
+        )
       );
+    };
+
+    const updateSuccess = async (type, id, attributes, options, internalOptions = {}) => {
+      const { mockGetResponseValue, includeOriginId } = internalOptions;
+      if (registry.isMultiNamespace(type)) {
+        const mockGetResponse =
+          mockGetResponseValue ?? getMockGetResponse({ type, id }, options?.namespace);
+        client.get.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { ...mockGetResponse },
+            { statusCode: 200 }
+          )
+        );
+      }
+      mockUpdateResponse(type, id, options, includeOriginId);
       const result = await savedObjectsRepository.update(type, id, attributes, options);
       expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
       return result;
     };
 
+    beforeEach(() => {
+      mockPreflightCheckForCreate.mockReset();
+      mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
+        return objects.map(({ type, id }) => ({ type, id })); // respond with no errors by default
+      });
+    });
+
     describe('client calls', () => {
-      it(`should use the ES get action then update action when type is multi-namespace`, async () => {
-        await updateSuccess(MULTI_NAMESPACE_ISOLATED_TYPE, id, attributes);
-        expect(client.get).toHaveBeenCalledTimes(1);
+      it(`should use the ES update action when type is not multi-namespace`, async () => {
+        await updateSuccess(type, id, attributes);
+        expect(client.get).not.toHaveBeenCalled();
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.update).toHaveBeenCalledTimes(1);
       });
 
-      it(`should use the ES update action when type is not multi-namespace`, async () => {
-        await updateSuccess(type, id, attributes);
+      it(`should use the ES get action then update action when type is multi-namespace`, async () => {
+        await updateSuccess(MULTI_NAMESPACE_ISOLATED_TYPE, id, attributes);
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        expect(client.update).toHaveBeenCalledTimes(1);
+      });
+
+      it(`should check for alias conflicts if a new multi-namespace object would be created`, async () => {
+        await updateSuccess(
+          MULTI_NAMESPACE_ISOLATED_TYPE,
+          id,
+          attributes,
+          { upsert: true },
+          { mockGetResponseValue: { found: false } }
+        );
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
         expect(client.update).toHaveBeenCalledTimes(1);
       });
 
@@ -3900,7 +4085,7 @@ describe('SavedObjectsRepository', () => {
         await test([]);
       });
 
-      it(`uses the 'upsertAttributes' option when specified`, async () => {
+      it(`uses the 'upsertAttributes' option when specified for a single-namespace type`, async () => {
         await updateSuccess(type, id, attributes, {
           upsert: {
             title: 'foo',
@@ -3918,6 +4103,42 @@ describe('SavedObjectsRepository', () => {
                   description: 'bar',
                 },
               }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`uses the 'upsertAttributes' option when specified for a multi-namespace type that does not exist`, async () => {
+        const options = { upsert: { title: 'foo', description: 'bar' } };
+        mockUpdateResponse(MULTI_NAMESPACE_ISOLATED_TYPE, id, options);
+        await savedObjectsRepository.update(MULTI_NAMESPACE_ISOLATED_TYPE, id, attributes, options);
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:logstash-*`,
+            body: expect.objectContaining({
+              upsert: expect.objectContaining({
+                type: MULTI_NAMESPACE_ISOLATED_TYPE,
+                [MULTI_NAMESPACE_ISOLATED_TYPE]: {
+                  title: 'foo',
+                  description: 'bar',
+                },
+              }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`ignores use the 'upsertAttributes' option when specified for a multi-namespace type that already exists`, async () => {
+        const options = { upsert: { title: 'foo', description: 'bar' } };
+        await updateSuccess(MULTI_NAMESPACE_ISOLATED_TYPE, id, attributes, options);
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:logstash-*`,
+            body: expect.not.objectContaining({
+              upsert: expect.anything(),
             }),
           }),
           expect.anything()
@@ -4060,7 +4281,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false }, undefined)
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -4083,6 +4304,33 @@ describe('SavedObjectsRepository', () => {
           namespace: 'bar-namespace',
         });
         expect(client.get).toHaveBeenCalledTimes(1);
+      });
+
+      it(`throws when there is an alias conflict from preflightCheckForCreate`, async () => {
+        client.get.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+        );
+        mockPreflightCheckForCreate.mockResolvedValue([{ error: { type: 'aliasConflict' } }]);
+        await expect(
+          savedObjectsRepository.update(MULTI_NAMESPACE_ISOLATED_TYPE, id, {}, { upsert: true })
+        ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
+      it(`does not throw when there is a different error from preflightCheckForCreate`, async () => {
+        mockPreflightCheckForCreate.mockResolvedValue([{ error: { type: 'something-else' } }]);
+        await updateSuccess(
+          MULTI_NAMESPACE_ISOLATED_TYPE,
+          id,
+          attributes,
+          { upsert: true },
+          { mockGetResponseValue: { found: false } }
+        );
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
+        expect(client.update).toHaveBeenCalledTimes(1);
       });
 
       it(`throws when ES is unable to find the document during update`, async () => {
@@ -4132,7 +4380,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`includes originId property if present in cluster call response`, async () => {
-        const result = await updateSuccess(type, id, attributes, {}, true);
+        const result = await updateSuccess(type, id, attributes, {}, { includeOriginId: true });
         expect(result).toMatchObject({ originId });
       });
     });

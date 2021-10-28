@@ -265,18 +265,17 @@ const withNextSuggestionSelected = (
       : 0,
 });
 
-const withSuggestionAtIndexSelected = (suggestionIndex: number) => (
-  state: AutocompleteFieldState,
-  props: AutocompleteFieldProps
-): AutocompleteFieldState => ({
-  ...state,
-  selectedIndex:
-    props.suggestions.length === 0
-      ? null
-      : suggestionIndex >= 0 && suggestionIndex < props.suggestions.length
-      ? suggestionIndex
-      : 0,
-});
+const withSuggestionAtIndexSelected =
+  (suggestionIndex: number) =>
+  (state: AutocompleteFieldState, props: AutocompleteFieldProps): AutocompleteFieldState => ({
+    ...state,
+    selectedIndex:
+      props.suggestions.length === 0
+        ? null
+        : suggestionIndex >= 0 && suggestionIndex < props.suggestions.length
+        ? suggestionIndex
+        : 0,
+  });
 
 const withSuggestionsVisible = (state: AutocompleteFieldState) => ({
   ...state,

@@ -9,18 +9,36 @@ import {
   getAlertMock,
   getFindResultWithSingleHit,
   FindHit,
+  getEmptySavedObjectsResponse,
 } from '../routes/__mocks__/request_responses';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getExportAll } from './get_export_all';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
-import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
-describe('getExportAll', () => {
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { requestContextMock } from '../routes/__mocks__/request_context';
+
+const exceptionsClient = getExceptionListClientMock();
+
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('getExportAll - %s', (_, isRuleRegistryEnabled) => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  const { clients } = requestContextMock.createTools();
+
+  beforeEach(async () => {
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
+  });
+
   test('it exports everything from the alerts client', async () => {
-    const alertsClient = alertsClientMock.create();
-    const result = getFindResultWithSingleHit();
-    const alert = getAlertMock(getQueryRuleParams());
+    const rulesClient = rulesClientMock.create();
+    const result = getFindResultWithSingleHit(isRuleRegistryEnabled);
+    const alert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+
     alert.params = {
       ...alert.params,
       filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
@@ -30,9 +48,15 @@ describe('getExportAll', () => {
       timelineTitle: 'some-timeline-title',
     };
     result.data = [alert];
-    alertsClient.find.mockResolvedValue(result);
+    rulesClient.find.mockResolvedValue(result);
 
-    const exports = await getExportAll(alertsClient);
+    const exports = await getExportAll(
+      rulesClient,
+      exceptionsClient,
+      clients.savedObjectsClient,
+      logger,
+      isRuleRegistryEnabled
+    );
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
     expect(rulesJson).toEqual({
@@ -77,14 +101,20 @@ describe('getExportAll', () => {
       exceptions_list: getListArrayMock(),
     });
     expect(detailsJson).toEqual({
-      exported_count: 1,
+      exported_exception_list_count: 0,
+      exported_exception_list_item_count: 0,
+      exported_rules_count: 1,
+      missing_exception_list_item_count: 0,
+      missing_exception_list_items: [],
+      missing_exception_lists: [],
+      missing_exception_lists_count: 0,
       missing_rules: [],
       missing_rules_count: 0,
     });
   });
 
   test('it will export empty rules', async () => {
-    const alertsClient = alertsClientMock.create();
+    const rulesClient = rulesClientMock.create();
     const findResult: FindHit = {
       page: 1,
       perPage: 1,
@@ -92,12 +122,20 @@ describe('getExportAll', () => {
       data: [],
     };
 
-    alertsClient.find.mockResolvedValue(findResult);
+    rulesClient.find.mockResolvedValue(findResult);
 
-    const exports = await getExportAll(alertsClient);
+    const exports = await getExportAll(
+      rulesClient,
+      exceptionsClient,
+      clients.savedObjectsClient,
+      logger,
+      isRuleRegistryEnabled
+    );
     expect(exports).toEqual({
       rulesNdjson: '',
-      exportDetails: '{"exported_count":0,"missing_rules":[],"missing_rules_count":0}\n',
+      exportDetails:
+        '{"exported_rules_count":0,"missing_rules":[],"missing_rules_count":0,"exported_exception_list_count":0,"exported_exception_list_item_count":0,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}\n',
+      exceptionLists: '',
     });
   });
 });

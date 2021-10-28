@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, getOr } from 'lodash/fp';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
@@ -22,13 +22,13 @@ import { buildFieldsRequest, formatTimelineData } from './helpers';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 
 export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
-  buildDsl: (options: TimelineEventsAllRequestOptions) => {
+  buildDsl: ({ authFilter, ...options }: TimelineEventsAllRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     const { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
-    return buildTimelineEventsAllQuery(queryOptions);
+    return buildTimelineEventsAllQuery({ ...queryOptions, authFilter });
   },
   parse: async (
     options: TimelineEventsAllRequestOptions,
@@ -38,11 +38,13 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     let { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
     const { activePage, querySize } = options.pagination;
+    const producerBuckets = getOr([], 'aggregations.producers.buckets', response.rawResponse);
     const totalCount = response.rawResponse.hits.total || 0;
     const hits = response.rawResponse.hits.hits;
 
     if (fieldRequested.includes('*') && hits.length > 0) {
-      fieldRequested = Object.keys(hits[0]?.fields ?? {}).reduce((acc, f) => {
+      const fieldsReturned = hits.flatMap((hit) => Object.keys(hit.fields ?? {}));
+      fieldRequested = fieldsReturned.reduce((acc, f) => {
         if (!acc.includes(f)) {
           return [...acc, f];
         }
@@ -59,12 +61,22 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
         )
       )
     );
+
+    const consumers: Record<string, number> = producerBuckets.reduce(
+      (acc: Record<string, number>, b: { key: string; doc_count: number }) => ({
+        ...acc,
+        [b.key]: b.doc_count,
+      }),
+      {}
+    );
+
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineEventsAllQuery(queryOptions))],
     };
 
     return {
       ...response,
+      consumers,
       inspect,
       edges,
       // @ts-expect-error code doesn't handle TotalHits

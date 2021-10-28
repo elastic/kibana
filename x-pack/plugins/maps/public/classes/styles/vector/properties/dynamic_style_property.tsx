@@ -27,7 +27,6 @@ import {
   OrdinalDataMappingPopover,
 } from '../components/data_mapping';
 import {
-  Category,
   CategoryFieldMeta,
   FieldMetaOptions,
   PercentilesFieldMeta,
@@ -40,16 +39,12 @@ import { IVectorLayer } from '../../../layers/vector_layer';
 import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
-import { pluckRangeFieldMeta } from '../../../../../common/pluck_range_field_meta';
-import {
-  pluckCategoryFieldMeta,
-  trimCategories,
-} from '../../../../../common/pluck_category_field_meta';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
   getField(): IField | null;
   getFieldName(): string;
+  getMbFieldName(): string;
   getFieldOrigin(): FIELD_ORIGIN | null;
   getRangeFieldMeta(): RangeFieldMeta | null;
   getCategoryFieldMeta(): CategoryFieldMeta | null;
@@ -63,7 +58,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaRequest(): Promise<unknown | null>;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
-  pluckOrdinalStyleMetaFromTileMetaFeatures(features: TileMetaFeature[]): RangeFieldMeta | null;
+  pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures: TileMetaFeature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromTileMetaFeatures(
     features: TileMetaFeature[]
   ): CategoryFieldMeta | null;
@@ -77,7 +72,8 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
 
 export class DynamicStyleProperty<T>
   extends AbstractStyleProperty<T>
-  implements IDynamicStyleProperty<T> {
+  implements IDynamicStyleProperty<T>
+{
   static type = STYLE_TYPE.DYNAMIC;
 
   protected readonly _field: IField | null;
@@ -212,6 +208,10 @@ export class DynamicStyleProperty<T>
     return this._field ? this._field.getName() : '';
   }
 
+  getMbFieldName() {
+    return this._field ? this._field.getMbFieldName() : '';
+  }
+
   isDynamic() {
     return true;
   }
@@ -313,54 +313,36 @@ export class DynamicStyleProperty<T>
       return null;
     }
 
-    const name = this.getFieldName();
+    const mbFieldName = this.getMbFieldName();
     let min = Infinity;
     let max = -Infinity;
     for (let i = 0; i < metaFeatures.length; i++) {
-      const fieldMeta = metaFeatures[i].properties.fieldMeta;
-      if (fieldMeta && fieldMeta[name] && fieldMeta[name].range) {
-        min = Math.min(fieldMeta[name].range?.min as number, min);
-        max = Math.max(fieldMeta[name].range?.max as number, max);
+      const fieldMeta = metaFeatures[i].properties;
+      const minField = `aggregations.${mbFieldName}.min`;
+      const maxField = `aggregations.${mbFieldName}.max`;
+      if (
+        fieldMeta &&
+        typeof fieldMeta[minField] === 'number' &&
+        typeof fieldMeta[maxField] === 'number'
+      ) {
+        min = Math.min(fieldMeta[minField] as number, min);
+        max = Math.max(fieldMeta[maxField] as number, max);
       }
     }
-    return {
-      min,
-      max,
-      delta: max - min,
-    };
+
+    return min === Infinity || max === -Infinity
+      ? null
+      : {
+          min,
+          max,
+          delta: max - min,
+        };
   }
 
   pluckCategoricalStyleMetaFromTileMetaFeatures(
     metaFeatures: TileMetaFeature[]
   ): CategoryFieldMeta | null {
-    const size = this.getNumberOfCategories();
-    if (!this.isCategorical() || size <= 0) {
-      return null;
-    }
-
-    const name = this.getFieldName();
-
-    const counts = new Map<string, number>();
-    for (let i = 0; i < metaFeatures.length; i++) {
-      const fieldMeta = metaFeatures[i].properties.fieldMeta;
-      if (fieldMeta && fieldMeta[name] && fieldMeta[name].categories) {
-        const categoryFieldMeta: CategoryFieldMeta = fieldMeta[name]
-          .categories as CategoryFieldMeta;
-        for (let c = 0; c < categoryFieldMeta.categories.length; c++) {
-          const category: Category = categoryFieldMeta.categories[c];
-          // properties object may be sparse, so need to check if the field is effectively present
-          if (typeof category.key !== undefined) {
-            if (counts.has(category.key)) {
-              counts.set(category.key, (counts.get(category.key) as number) + category.count);
-            } else {
-              counts.set(category.key, category.count);
-            }
-          }
-        }
-      }
-    }
-
-    return trimCategories(counts, size);
+    return null;
   }
 
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null {
@@ -369,9 +351,24 @@ export class DynamicStyleProperty<T>
     }
 
     const name = this.getFieldName();
-    return pluckRangeFieldMeta(features, name, (rawValue: unknown) => {
-      return parseFloat(rawValue as string);
-    });
+    let min = Infinity;
+    let max = -Infinity;
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i];
+      const newValue = feature.properties ? parseFloat(feature.properties[name]) : NaN;
+      if (!isNaN(newValue)) {
+        min = Math.min(min, newValue);
+        max = Math.max(max, newValue);
+      }
+    }
+
+    return min === Infinity || max === -Infinity
+      ? null
+      : {
+          min,
+          max,
+          delta: max - min,
+        };
   }
 
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null {
@@ -380,7 +377,32 @@ export class DynamicStyleProperty<T>
       return null;
     }
 
-    return pluckCategoryFieldMeta(features, this.getFieldName(), size);
+    const counts = new Map();
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i];
+      const term = feature.properties ? feature.properties[this.getFieldName()] : undefined;
+      // properties object may be sparse, so need to check if the field is effectively present
+      if (typeof term !== undefined) {
+        if (counts.has(term)) {
+          counts.set(term, counts.get(term) + 1);
+        } else {
+          counts.set(term, 1);
+        }
+      }
+    }
+
+    const ordered = [];
+    for (const [key, value] of counts) {
+      ordered.push({ key, count: value });
+    }
+
+    ordered.sort((a, b) => {
+      return b.count - a.count;
+    });
+    const truncated = ordered.slice(0, size);
+    return {
+      categories: truncated,
+    } as CategoryFieldMeta;
   }
 
   _pluckOrdinalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData): RangeFieldMeta | null {
@@ -486,7 +508,7 @@ export class DynamicStyleProperty<T>
         targetName = getComputedFieldName(this.getStyleName(), this._field.getName());
       } else {
         // Non-geojson sources (e.g. 3rd party mvt or ES-source as mvt)
-        targetName = this._field.getName();
+        targetName = this._field.getMbFieldName();
       }
     }
     return targetName;

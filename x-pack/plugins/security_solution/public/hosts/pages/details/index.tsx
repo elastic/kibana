@@ -74,9 +74,10 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const capabilities = useMlCapabilities();
   const kibana = useKibana();
-  const hostDetailsPageFilters: Filter[] = useMemo(() => getHostDetailsPageFilters(detailName), [
-    detailName,
-  ]);
+  const hostDetailsPageFilters: Filter[] = useMemo(
+    () => getHostDetailsPageFilters(detailName),
+    [detailName]
+  );
   const getFilters = () => [...hostDetailsPageFilters, ...filters];
 
   const narrowDateRange = useCallback<UpdateDateRange>(
@@ -126,7 +127,10 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
-          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
+          <SecuritySolutionPageWrapper
+            noPadding={globalFullScreen}
+            data-test-subj="hostDetailsPage"
+          >
             <Display show={!globalFullScreen}>
               <HeaderPage
                 border
@@ -215,8 +219,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         </>
       ) : (
         <SecuritySolutionPageWrapper>
-          <HeaderPage border title={detailName} />
-
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}

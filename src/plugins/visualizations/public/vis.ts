@@ -21,20 +21,22 @@ import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
 import { PersistedState } from './persisted_state';
-import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
+import { getTypes, getAggs, getSearch, getSavedObjects, getSpaces } from './services';
 import {
   IAggConfigs,
   IndexPattern,
   ISearchSource,
-  AggConfigOptions,
+  AggConfigSerialized,
   SearchSourceFields,
-} from '../../../plugins/data/public';
+} from '../../data/public';
 import { BaseVisType } from './vis_types';
 import { VisParams } from '../common/types';
 
+import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '../../discover/public';
+
 export interface SerializedVisData {
   expression?: string;
-  aggs: AggConfigOptions[];
+  aggs: AggConfigSerialized[];
   searchSource: SearchSourceFields;
   savedSearchId?: string;
 }
@@ -58,14 +60,20 @@ export interface VisData {
 }
 
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
-  const searchSource = inputSearchSource.createCopy();
   if (savedSearchId) {
-    const savedSearch = await getSavedSearchLoader().get(savedSearchId);
+    const savedSearch = await getSavedSearch(savedSearchId, {
+      search: getSearch(),
+      savedObjectsClient: getSavedObjects().client,
+      spaces: getSpaces(),
+    });
 
-    searchSource.setParent(savedSearch.searchSource);
+    await throwErrorOnSavedSearchUrlConflict(savedSearch);
+
+    if (savedSearch?.searchSource) {
+      inputSearchSource.setParent(savedSearch.searchSource);
+    }
   }
-  searchSource.setField('size', 0);
-  return searchSource;
+  return inputSearchSource;
 };
 
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
@@ -194,7 +202,7 @@ export class Vis<TVisParams = VisParams> {
     }
   }
 
-  private initializeDefaultsFromSchemas(configStates: AggConfigOptions[], schemas: any) {
+  private initializeDefaultsFromSchemas(configStates: AggConfigSerialized[], schemas: any) {
     // Set the defaults for any schema which has them. If the defaults
     // for some reason has more then the max only set the max number
     // of defaults (not sure why a someone define more...

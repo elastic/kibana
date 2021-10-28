@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
+import { SetupUX } from '../routes/rum_client';
 import {
   AGENT_NAME,
   TRANSACTION_TYPE,
   SERVICE_LANGUAGE_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../server/utils/queries';
+import { rangeQuery } from '../../../observability/server';
 import { ProcessorEvent } from '../../common/processor_event';
 import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
 import { getEsFilter } from '../lib/rum_client/ui_filters/get_es_filter';
@@ -20,12 +20,16 @@ export function getRumPageLoadTransactionsProjection({
   setup,
   urlQuery,
   checkFetchStartFieldExists = true,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   urlQuery?: string;
   checkFetchStartFieldExists?: boolean;
+  start: number;
+  end: number;
 }) {
-  const { start, end, uiFilters } = setup;
+  const { uiFilters } = setup;
 
   const bool = {
     filter: [
@@ -71,11 +75,15 @@ export function getRumPageLoadTransactionsProjection({
 export function getRumErrorsProjection({
   setup,
   urlQuery,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   urlQuery?: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end, uiFilters } = setup;
+  const { uiFilters } = setup;
 
   const bool = {
     filter: [

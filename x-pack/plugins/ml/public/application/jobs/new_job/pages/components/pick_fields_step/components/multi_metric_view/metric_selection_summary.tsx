@@ -16,9 +16,12 @@ import { ChartGrid } from './chart_grid';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 export const MultiMetricDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    chartLoader,
+    resultsLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
 
   const jobCreator = jc as MultiMetricJobCreator;
 

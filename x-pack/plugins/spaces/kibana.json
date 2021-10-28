@@ -8,13 +8,12 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "spaces"],
-  "requiredPlugins": ["features", "licensing", "spacesOss"],
+  "requiredPlugins": ["features", "licensing"],
   "optionalPlugins": [
     "advancedSettings",
     "home",
     "management",
-    "usageCollection",
-    "savedObjectsManagement"
+    "usageCollection"
   ],
   "server": true,
   "ui": true,
@@ -22,7 +21,6 @@
   "requiredBundles": [
     "esUiShared",
     "kibanaReact",
-    "savedObjectsManagement",
     "home"
   ]
 }

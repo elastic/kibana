@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { SearchHit } from '../../../../../../src/core/types/elasticsearch';
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
+import { getAgentStatus } from '../../../common/services/agent_status';
 
 type FleetServerAgentESResponse =
   | estypes.MgetHit<FleetServerAgent>
@@ -17,7 +18,7 @@ type FleetServerAgentESResponse =
 
 export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
   // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
-  return {
+  const agent: Agent = {
     id: hit._id,
     ...hit._source,
     policy_revision: hit._source?.policy_revision_idx,
@@ -25,6 +26,9 @@ export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
     status: undefined,
     packages: hit._source?.packages ?? [],
   };
+
+  agent.status = getAgentStatus(agent);
+  return agent;
 }
 
 export function agentSOAttributesToFleetServerAgentDoc(
@@ -36,6 +40,10 @@ export function agentSOAttributesToFleetServerAgentDoc(
 
   if (policyRevison !== undefined) {
     doc.policy_revision_idx = policyRevison;
+  }
+
+  if (!doc.updated_at) {
+    doc.updated_at = new Date().toISOString();
   }
 
   return doc;

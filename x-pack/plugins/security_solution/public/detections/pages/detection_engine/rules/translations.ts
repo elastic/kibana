@@ -13,11 +13,16 @@ export const BACK_TO_DETECTIONS = i18n.translate(
     defaultMessage: 'Back to detections',
   }
 );
+export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
+    defaultMessage: 'Tooltip for column: {columnName}',
+    values: { columnName },
+  });
 
 export const IMPORT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.importRuleTitle',
   {
-    defaultMessage: 'Import rule',
+    defaultMessage: 'Import rules',
   }
 );
 
@@ -364,10 +369,24 @@ export const COLUMN_INDEXING_TIMES = i18n.translate(
   }
 );
 
+export const COLUMN_INDEXING_TIMES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.indexingTimesTooltip',
+  {
+    defaultMessage: 'Total time spent indexing alerts during last Rule execution',
+  }
+);
+
 export const COLUMN_QUERY_TIMES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimes',
   {
     defaultMessage: 'Query Time (ms)',
+  }
+);
+
+export const COLUMN_QUERY_TIMES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimesTooltip',
+  {
+    defaultMessage: 'Total time spent querying source indices during last Rule execution',
   }
 );
 
@@ -532,7 +551,7 @@ export const IMPORT_RULE_BTN_TITLE = i18n.translate(
 export const SELECT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription',
   {
-    defaultMessage: 'Select a Security rule (as exported from the Detection Engine view) to import',
+    defaultMessage: 'Select Security rules (as exported from the Detection Rules page) to import',
   }
 );
 
@@ -546,7 +565,7 @@ export const INITIAL_PROMPT_TEXT = i18n.translate(
 export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteDescription',
   {
-    defaultMessage: 'Automatically overwrite saved objects with the same rule ID',
+    defaultMessage: 'Overwrite existing detection rules with conflicting Rule ID',
   }
 );
 

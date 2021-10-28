@@ -17,7 +17,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
 import { Query, Filter } from '../../../../../src/plugins/data/public';
@@ -28,7 +28,7 @@ import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export interface FieldItemSharedProps {
   core: DatasourceDataPanelProps['core'];
-  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   chartsThemeService: ChartsPluginSetup['theme'];
   indexPattern: IndexPattern;
   highlight?: string;

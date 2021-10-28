@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectedExportedRule, newRule } from '../../objects/rule';
+import { expectedExportedRule, getNewRule } from '../../objects/rule';
 import {
   goToManageAlertsDetectionRules,
   waitForAlertsIndexToBeCreated,
@@ -28,14 +28,14 @@ describe('Export rules', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule).as('ruleResponse');
+    createCustomRule(getNewRule()).as('ruleResponse');
   });
 
   it('Exports a custom rule', function () {
     goToManageAlertsDetectionRules();
     exportFirstRule();
     cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.body).should('eql', expectedExportedRule(this.ruleResponse));
+      cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));
     });
   });
 });

@@ -66,6 +66,8 @@ export function question(question, options = {}) {
           break;
         default:
           if (options.mask) {
+            const cursorPos = rl.getCursorPos();
+            output.moveCursor(0, -cursorPos.rows);
             output.cursorTo(questionPrompt.length);
             output.write(Array(rl.line.length + 1).join(options.mask || '*'));
           }

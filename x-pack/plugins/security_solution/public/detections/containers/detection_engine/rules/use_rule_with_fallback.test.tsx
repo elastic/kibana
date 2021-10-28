@@ -62,6 +62,7 @@ describe('useRuleWithFallback', () => {
             "immutable": false,
             "index": Array [
               "apm-*-transaction*",
+              "traces-apm*",
               "auditbeat-*",
               "endgame-*",
               "filebeat-*",
@@ -125,6 +126,7 @@ describe('useRuleWithFallback', () => {
             "immutable": false,
             "index": Array [
               "apm-*-transaction*",
+              "traces-apm*",
               "auditbeat-*",
               "endgame-*",
               "filebeat-*",

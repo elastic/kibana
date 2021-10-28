@@ -10,7 +10,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import {
   ValidationResult,
   Alert,
@@ -24,7 +24,7 @@ import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '../../../../../alerting
 import { useKibana } from '../../../common/lib/kibana';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 jest.mock('../../lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
 }));
@@ -159,16 +159,16 @@ describe('alert_form', () => {
           delete: true,
         },
       };
-      alertTypeRegistry.list.mockReturnValue([
+      ruleTypeRegistry.list.mockReturnValue([
         alertType,
         alertTypeNonEditable,
         disabledByLicenseAlertType,
       ]);
-      alertTypeRegistry.has.mockReturnValue(true);
+      ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
-      const initialAlert = ({
+      const initialAlert = {
         name: 'test',
         params: {},
         consumer: ALERTS_FEATURE_ID,
@@ -180,7 +180,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Alert;
 
       wrapper = mountWithIntl(
         <AlertForm
@@ -189,7 +189,7 @@ describe('alert_form', () => {
           errors={{ name: [], interval: [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
-          alertTypeRegistry={alertTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
         />
       );
 
@@ -313,7 +313,7 @@ describe('alert_form', () => {
           delete: true,
         },
       };
-      alertTypeRegistry.list.mockReturnValue([
+      ruleTypeRegistry.list.mockReturnValue([
         {
           id: 'same-consumer-producer-alert-type',
           iconClass: 'test',
@@ -337,10 +337,10 @@ describe('alert_form', () => {
           requiresAppContext: false,
         },
       ]);
-      alertTypeRegistry.has.mockReturnValue(true);
+      ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
 
-      const initialAlert = ({
+      const initialAlert = {
         name: 'non alerting consumer test',
         params: {},
         consumer: 'test',
@@ -352,7 +352,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Alert;
 
       wrapper = mountWithIntl(
         <AlertForm
@@ -361,7 +361,7 @@ describe('alert_form', () => {
           errors={{ name: [], interval: [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
-          alertTypeRegistry={alertTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
         />
       );
 
@@ -394,14 +394,14 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      alertTypeRegistry.list.mockReturnValue([alertType]);
-      alertTypeRegistry.get.mockReturnValue(alertType);
-      alertTypeRegistry.has.mockReturnValue(true);
+      ruleTypeRegistry.list.mockReturnValue([alertType]);
+      ruleTypeRegistry.get.mockReturnValue(alertType);
+      ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
 
-      const initialAlert = ({
+      const initialAlert = {
         name: 'test',
         alertTypeId: alertType.id,
         params: {},
@@ -414,7 +414,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Alert;
 
       wrapper = mountWithIntl(
         <AlertForm
@@ -423,7 +423,7 @@ describe('alert_form', () => {
           errors={{ name: [], interval: [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
-          alertTypeRegistry={alertTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
         />
       );
 

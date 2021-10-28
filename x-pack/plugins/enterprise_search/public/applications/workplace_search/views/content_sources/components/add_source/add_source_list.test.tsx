@@ -58,6 +58,13 @@ describe('AddSourceList', () => {
     expect(wrapper.find(AvailableSourcesList)).toHaveLength(1);
   });
 
+  it('does not render header when loading', () => {
+    setMockValues({ ...mockValues, dataLoading: true });
+    const wrapper = shallow(<AddSourceList />);
+
+    expect(wrapper.prop('pageHeader')).toBe(undefined);
+  });
+
   describe('layout', () => {
     it('renders the default workplace search layout when on an organization view', () => {
       setMockValues({ ...mockValues, isOrganization: true });

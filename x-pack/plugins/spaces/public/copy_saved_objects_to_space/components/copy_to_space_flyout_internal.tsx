@@ -24,31 +24,26 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { processImportResponse } from '../../../../../../src/plugins/saved_objects_management/public';
 import { useSpaces } from '../../spaces_context';
-import type { CopyOptions, ImportRetry, SavedObjectTarget } from '../types';
+import type { SpacesDataEntry } from '../../types';
+import { processImportResponse } from '../lib';
+import type { ProcessedImportResponse } from '../lib';
+import type { CopyOptions, CopyToSpaceFlyoutProps, ImportRetry } from '../types';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
-
-export interface CopyToSpaceFlyoutProps {
-  onClose: () => void;
-  savedObjectTarget: SavedObjectTarget;
-}
 
 const INCLUDE_RELATED_DEFAULT = true;
 const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
 export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
-  const { spacesManager, services } = useSpaces();
+  const { spacesManager, spacesDataPromise, services } = useSpaces();
   const { notifications } = services;
   const toastNotifications = notifications!.toasts;
 
-  const { onClose, savedObjectTarget: object } = props;
+  const { onClose = () => null, savedObjectTarget: object } = props;
   const savedObjectTarget = useMemo(
     () => ({
       type: object.type,
@@ -66,22 +61,21 @@ export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
     selectedSpaceIds: [],
   });
 
-  const [{ isLoading, spaces }, setSpacesState] = useState<{ isLoading: boolean; spaces: Space[] }>(
-    {
-      isLoading: true,
-      spaces: [],
-    }
-  );
+  const [{ isLoading, spaces }, setSpacesState] = useState<{
+    isLoading: boolean;
+    spaces: SpacesDataEntry[];
+  }>({
+    isLoading: true,
+    spaces: [],
+  });
   useEffect(() => {
-    const getSpaces = spacesManager.getSpaces({ includeAuthorizedPurposes: true });
-    const getActiveSpace = spacesManager.getActiveSpace();
-    Promise.all([getSpaces, getActiveSpace])
-      .then(([allSpaces, activeSpace]) => {
+    spacesDataPromise
+      .then(({ spacesMap }) => {
         setSpacesState({
           isLoading: false,
-          spaces: allSpaces.filter(
-            ({ id, authorizedPurposes }) =>
-              id !== activeSpace.id && authorizedPurposes?.copySavedObjectsIntoSpace !== false
+          spaces: [...spacesMap.values()].filter(
+            ({ isActiveSpace, isAuthorizedForPurpose }) =>
+              isActiveSpace || isAuthorizedForPurpose('copySavedObjectsIntoSpace')
           ),
         });
       })
@@ -92,7 +86,7 @@ export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
           }),
         });
       });
-  }, [spacesManager, toastNotifications]);
+  }, [spacesDataPromise, toastNotifications]);
 
   const [copyInProgress, setCopyInProgress] = useState(false);
   const [conflictResolutionInProgress, setConflictResolutionInProgress] = useState(false);

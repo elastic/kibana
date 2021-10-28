@@ -5,49 +5,207 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Observable } from 'rxjs';
-import { UnwrapPromise } from '@kbn/utility-types';
-
-import { act } from 'react-dom/test-utils';
-
 import { registerTestBed } from '@kbn/test/jest';
-
-import type { SharePluginSetup, LocatorPublic } from '../../../../../src/plugins/share/public';
+import type { SerializableRecord, UnwrapPromise } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import type { Observable } from 'rxjs';
+import { ListingProps as Props, ReportListing } from '.';
 import type { NotificationsSetup } from '../../../../../src/core/public';
-import { httpServiceMock, notificationServiceMock } from '../../../../../src/core/public/mocks';
-
+import {
+  applicationServiceMock,
+  httpServiceMock,
+  notificationServiceMock,
+} from '../../../../../src/core/public/mocks';
+import type { LocatorPublic, SharePluginSetup } from '../../../../../src/plugins/share/public';
 import type { ILicense } from '../../../licensing/public';
-
-import { IlmPolicyMigrationStatus } from '../../common/types';
-
-import { ReportingAPIClient, InternalApiClientClientProvider } from '../lib/reporting_api_client';
+import type { IlmPolicyMigrationStatus, ReportApiJSON } from '../../common/types';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
+import { Job } from '../lib/job';
+import { InternalApiClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
+import { KibanaContextProvider } from '../shared_imports';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
+interface PayloadMock {
+  payload: Omit<ReportApiJSON['payload'], 'browserTimezone' | 'version' | 'layout'>;
+}
+type ReportMock = Omit<
+  ReportApiJSON,
+  | 'index'
+  | 'migration_version'
+  | 'browser_type'
+  | 'max_attempts'
+  | 'timeout'
+  | 'created_by'
+  | 'payload'
+> &
+  PayloadMock;
+
+const buildMockReport = (baseObj: ReportMock) => ({
+  index: '.reporting-2020.04.12',
+  migration_version: '7.15.0',
+  browser_type: 'chromium',
+  max_attempts: 1,
+  timeout: 300000,
+  created_by: 'elastic',
+  kibana_id: '5b2de169-2785-441b-ae8c-186a1936b17d',
+  kibana_name: 'spicy.local',
+  ...baseObj,
+  payload: {
+    browserTimezone: 'America/Phoenix',
+    layout: { dimensions: { height: 720, width: 1080 }, id: 'preserve_layout' },
+    version: '7.14.0',
+    isDeprecated: baseObj.payload.isDeprecated === true,
+    ...baseObj.payload,
+  },
 });
 
-import { ReportListing, Props } from './report_listing';
+const mockJobs: ReportApiJSON[] = [
+  buildMockReport({
+    id: 'k90e51pk1ieucbae0c3t8wo2',
+    attempts: 0,
+    created_at: '2020-04-14T21:01:13.064Z',
+    jobtype: 'printable_pdf',
+    meta: { layout: 'preserve_layout', objectType: 'canvas workpad' },
+    payload: {
+      objectType: 'canvas workpad',
+      title: 'My Canvas Workpad',
+    },
+    status: 'pending',
+  }),
+  buildMockReport({
+    id: 'k90e51pk1ieucbae0c3t8wo1',
+    attempts: 1,
+    created_at: '2020-04-14T21:01:13.064Z',
+    jobtype: 'printable_pdf',
+    meta: { layout: 'preserve_layout', objectType: 'canvas workpad' },
+    payload: {
+      objectType: 'canvas workpad',
+      title: 'My Canvas Workpad',
+    },
+    started_at: '2020-04-14T21:01:14.526Z',
+    status: 'processing',
+  }),
+  buildMockReport({
+    id: 'k90cmthd1gv8cbae0c2le8bo',
+    attempts: 1,
+    completed_at: '2020-04-14T20:19:14.748Z',
+    created_at: '2020-04-14T20:19:02.977Z',
+    jobtype: 'printable_pdf',
+    meta: { layout: 'preserve_layout', objectType: 'canvas workpad' },
+    output: { content_type: 'application/pdf', size: 80262 },
+    payload: {
+      objectType: 'canvas workpad',
+      title: 'My Canvas Workpad',
+    },
+    started_at: '2020-04-14T20:19:04.073Z',
+    status: 'completed',
+  }),
+  buildMockReport({
+    id: 'k906958e1d4wcbae0c9hip1a',
+    attempts: 1,
+    completed_at: '2020-04-14T17:21:08.223Z',
+    created_at: '2020-04-14T17:20:27.326Z',
+    jobtype: 'printable_pdf',
+    meta: { layout: 'preserve_layout', objectType: 'canvas workpad' },
+    output: {
+      content_type: 'application/pdf',
+      size: 49468,
+      warnings: [
+        'An error occurred when trying to read the page for visualization panel info. You may need to increase \'xpack.reporting.capture.timeouts.waitForElements\'. TimeoutError: waiting for selector "[data-shared-item],[data-shared-items-count]" failed: timeout 30000ms exceeded',
+      ],
+    },
+    payload: {
+      objectType: 'canvas workpad',
+      title: 'My Canvas Workpad',
+    },
+    started_at: '2020-04-14T17:20:29.444Z',
+    status: 'completed_with_warnings',
+  }),
+  buildMockReport({
+    id: 'k9067y2a1d4wcbae0cad38n0',
+    attempts: 1,
+    completed_at: '2020-04-14T17:19:53.244Z',
+    created_at: '2020-04-14T17:19:31.379Z',
+    jobtype: 'printable_pdf',
+    meta: { layout: 'preserve_layout', objectType: 'canvas workpad' },
+    output: { content_type: 'application/pdf', size: 80262 },
+    payload: {
+      objectType: 'canvas workpad',
+      title: 'My Canvas Workpad',
+    },
+    started_at: '2020-04-14T17:19:39.883Z',
+    status: 'completed',
+  }),
+  buildMockReport({
+    id: 'k9067s1m1d4wcbae0cdnvcms',
+    attempts: 1,
+    completed_at: '2020-04-14T17:19:36.822Z',
+    created_at: '2020-04-14T17:19:23.578Z',
+    jobtype: 'printable_pdf',
+    meta: { layout: 'preserve_layout', objectType: 'canvas workpad' },
+    output: { content_type: 'application/pdf', size: 80262 },
+    payload: {
+      objectType: 'canvas workpad',
+      title: 'My Canvas Workpad',
+    },
+    started_at: '2020-04-14T17:19:25.247Z',
+    status: 'completed',
+  }),
+  buildMockReport({
+    id: 'k9065q3s1d4wcbae0c00fxlh',
+    attempts: 1,
+    completed_at: '2020-04-14T17:18:03.910Z',
+    created_at: '2020-04-14T17:17:47.752Z',
+    jobtype: 'printable_pdf',
+    meta: { layout: 'preserve_layout', objectType: 'canvas workpad' },
+    output: { content_type: 'application/pdf', size: 80262 },
+    payload: {
+      objectType: 'canvas workpad',
+      title: 'My Canvas Workpad',
+    },
+    started_at: '2020-04-14T17:17:50.379Z',
+    status: 'completed',
+  }),
+  buildMockReport({
+    id: 'k905zdw11d34cbae0c3y6tzh',
+    attempts: 1,
+    completed_at: '2020-04-14T17:13:03.719Z',
+    created_at: '2020-04-14T17:12:51.985Z',
+    jobtype: 'printable_pdf',
+    meta: { layout: 'preserve_layout', objectType: 'canvas workpad' },
+    output: { content_type: 'application/pdf', size: 80262 },
+    payload: {
+      objectType: 'canvas workpad',
+      title: 'My Canvas Workpad',
+      isDeprecated: true,
+    },
+    started_at: '2020-04-14T17:12:52.431Z',
+    status: 'completed',
+  }),
+  buildMockReport({
+    id: 'k8t4ylcb07mi9d006214ifyg',
+    attempts: 1,
+    completed_at: '2020-04-09T19:10:10.049Z',
+    created_at: '2020-04-09T19:09:52.139Z',
+    jobtype: 'PNG',
+    meta: { layout: 'png', objectType: 'visualization' },
+    output: { content_type: 'image/png', size: 123456789 },
+    payload: {
+      objectType: 'visualization',
+      title: 'count',
+      isDeprecated: true,
+    },
+    started_at: '2020-04-09T19:09:54.570Z',
+    status: 'completed',
+  }),
+];
 
 const reportingAPIClient = {
-  list: () =>
-    Promise.resolve([
-      { _id: 'k90e51pk1ieucbae0c3t8wo2', _index: '.reporting-2020.04.12', _score: null, _source: { attempts: 0, browser_type: 'chromium', created_at: '2020-04-14T21:01:13.064Z', created_by: 'elastic', jobtype: 'printable_pdf', max_attempts: 1, meta: { layout: 'preserve_layout', objectType: 'canvas workpad', }, payload: { basePath: '/kbn', browserTimezone: 'America/Phoenix', forceNow: '2020-04-14T21:01:13.062Z', layout: { dimensions: { height: 720, width: 1080, }, id: 'preserve_layout', }, objectType: 'canvas workpad', relativeUrls: [ '/s/hsyjklk/app/canvas#/export/workpad/pdf/workpad-53d38306-eda4-410f-b5e7-efbeca1a8c63/page/1', ], title: 'My Canvas Workpad', }, priority: 10, process_expiration: '1970-01-01T00:00:00.000Z', status: 'pending', timeout: 300000, }, sort: [1586898073064], }, // prettier-ignore
-      { _id: 'k90e51pk1ieucbae0c3t8wo1', _index: '.reporting-2020.04.12', _score: null, _source: { attempts: 1, browser_type: 'chromium', created_at: '2020-04-14T21:01:13.064Z', created_by: 'elastic', jobtype: 'printable_pdf', kibana_id: '5b2de169-2785-441b-ae8c-186a1936b17d', kibana_name: 'spicy.local', max_attempts: 1, meta: { layout: 'preserve_layout', objectType: 'canvas workpad', }, payload: { basePath: '/kbn', browserTimezone: 'America/Phoenix', forceNow: '2020-04-14T21:01:13.062Z', layout: { dimensions: { height: 720, width: 1080, }, id: 'preserve_layout', }, objectType: 'canvas workpad', relativeUrls: [ '/s/hsyjklk/app/canvas#/export/workpad/pdf/workpad-53d38306-eda4-410f-b5e7-efbeca1a8c63/page/1', ], title: 'My Canvas Workpad', }, priority: 10, process_expiration: '2020-04-14T21:06:14.526Z', started_at: '2020-04-14T21:01:14.526Z', status: 'processing', timeout: 300000, }, sort: [1586898073064], },
-      { _id: 'k90cmthd1gv8cbae0c2le8bo', _index: '.reporting-2020.04.12', _score: null, _source: { attempts: 1, browser_type: 'chromium', completed_at: '2020-04-14T20:19:14.748Z', created_at: '2020-04-14T20:19:02.977Z', created_by: 'elastic', jobtype: 'printable_pdf', kibana_id: '5b2de169-2785-441b-ae8c-186a1936b17d', kibana_name: 'spicy.local', max_attempts: 1, meta: { layout: 'preserve_layout', objectType: 'canvas workpad', }, output: { content_type: 'application/pdf', size: 80262, }, payload: { basePath: '/kbn', browserTimezone: 'America/Phoenix', forceNow: '2020-04-14T20:19:02.976Z', layout: { dimensions: { height: 720, width: 1080, }, id: 'preserve_layout', }, objectType: 'canvas workpad', relativeUrls: [ '/s/hsyjklk/app/canvas#/export/workpad/pdf/workpad-53d38306-eda4-410f-b5e7-efbeca1a8c63/page/1', ], title: 'My Canvas Workpad', }, priority: 10, process_expiration: '2020-04-14T20:24:04.073Z', started_at: '2020-04-14T20:19:04.073Z', status: 'completed', timeout: 300000, }, sort: [1586895542977], },
-      { _id: 'k906958e1d4wcbae0c9hip1a', _index: '.reporting-2020.04.12', _score: null, _source: { attempts: 1, browser_type: 'chromium', completed_at: '2020-04-14T17:21:08.223Z', created_at: '2020-04-14T17:20:27.326Z', created_by: 'elastic', jobtype: 'printable_pdf', kibana_id: '5b2de169-2785-441b-ae8c-186a1936b17d', kibana_name: 'spicy.local', max_attempts: 1, meta: { layout: 'preserve_layout', objectType: 'canvas workpad', }, output: { content_type: 'application/pdf', size: 49468, warnings: [ 'An error occurred when trying to read the page for visualization panel info. You may need to increase \'xpack.reporting.capture.timeouts.waitForElements\'. TimeoutError: waiting for selector "[data-shared-item],[data-shared-items-count]" failed: timeout 30000ms exceeded', ], }, payload: { basePath: '/kbn', browserTimezone: 'America/Phoenix', forceNow: '2020-04-14T17:20:27.326Z', layout: { dimensions: { height: 720, width: 1080, }, id: 'preserve_layout', }, objectType: 'canvas workpad', relativeUrls: [ '/s/hsyjklk/app/canvas#/export/workpad/pdf/workpad-53d38306-eda4-410f-b5e8-efbeca1a8c63/page/1', ], title: 'My Canvas Workpad', }, priority: 10, process_expiration: '2020-04-14T17:25:29.444Z', started_at: '2020-04-14T17:20:29.444Z', status: 'completed_with_warnings', timeout: 300000, }, sort: [1586884827326], },
-      { _id: 'k9067y2a1d4wcbae0cad38n0', _index: '.reporting-2020.04.12', _score: null, _source: { attempts: 1, browser_type: 'chromium', completed_at: '2020-04-14T17:19:53.244Z', created_at: '2020-04-14T17:19:31.379Z', created_by: 'elastic', jobtype: 'printable_pdf', kibana_id: '5b2de169-2785-441b-ae8c-186a1936b17d', kibana_name: 'spicy.local', max_attempts: 1, meta: { layout: 'preserve_layout', objectType: 'canvas workpad', }, output: { content_type: 'application/pdf', size: 80262, }, payload: { basePath: '/kbn', browserTimezone: 'America/Phoenix', forceNow: '2020-04-14T17:19:31.378Z', layout: { dimensions: { height: 720, width: 1080, }, id: 'preserve_layout', }, objectType: 'canvas workpad', relativeUrls: [ '/s/hsyjklk/app/canvas#/export/workpad/pdf/workpad-53d38306-eda4-410f-b5e7-efbeca1a8c63/page/1', ], title: 'My Canvas Workpad', }, priority: 10, process_expiration: '2020-04-14T17:24:39.883Z', started_at: '2020-04-14T17:19:39.883Z', status: 'completed', timeout: 300000, }, sort: [1586884771379], },
-      { _id: 'k9067s1m1d4wcbae0cdnvcms', _index: '.reporting-2020.04.12', _score: null, _source: { attempts: 1, browser_type: 'chromium', completed_at: '2020-04-14T17:19:36.822Z', created_at: '2020-04-14T17:19:23.578Z', created_by: 'elastic', jobtype: 'printable_pdf', kibana_id: '5b2de169-2785-441b-ae8c-186a1936b17d', kibana_name: 'spicy.local', max_attempts: 1, meta: { layout: 'preserve_layout', objectType: 'canvas workpad', }, output: { content_type: 'application/pdf', size: 80262, }, payload: { basePath: '/kbn', browserTimezone: 'America/Phoenix', forceNow: '2020-04-14T17:19:23.578Z', layout: { dimensions: { height: 720, width: 1080, }, id: 'preserve_layout', }, objectType: 'canvas workpad', relativeUrls: [ '/s/hsyjklk/app/canvas#/export/workpad/pdf/workpad-53d38306-eda4-410f-b5e7-efbeca1a8c63/page/1', ], title: 'My Canvas Workpad', }, priority: 10, process_expiration: '2020-04-14T17:24:25.247Z', started_at: '2020-04-14T17:19:25.247Z', status: 'completed', timeout: 300000, }, sort: [1586884763578], },
-      { _id: 'k9065q3s1d4wcbae0c00fxlh', _index: '.reporting-2020.04.12', _score: null, _source: { attempts: 1, browser_type: 'chromium', completed_at: '2020-04-14T17:18:03.910Z', created_at: '2020-04-14T17:17:47.752Z', created_by: 'elastic', jobtype: 'printable_pdf', kibana_id: '5b2de169-2785-441b-ae8c-186a1936b17d', kibana_name: 'spicy.local', max_attempts: 1, meta: { layout: 'preserve_layout', objectType: 'canvas workpad', }, output: { content_type: 'application/pdf', size: 80262, }, payload: { basePath: '/kbn', browserTimezone: 'America/Phoenix', forceNow: '2020-04-14T17:17:47.750Z', layout: { dimensions: { height: 720, width: 1080, }, id: 'preserve_layout', }, objectType: 'canvas workpad', relativeUrls: [ '/s/hsyjklk/app/canvas#/export/workpad/pdf/workpad-53d38306-eda4-410f-b5e7-efbeca1a8c63/page/1', ], title: 'My Canvas Workpad', }, priority: 10, process_expiration: '2020-04-14T17:22:50.379Z', started_at: '2020-04-14T17:17:50.379Z', status: 'completed', timeout: 300000, }, sort: [1586884667752], },
-      { _id: 'k905zdw11d34cbae0c3y6tzh', _index: '.reporting-2020.04.12', _score: null, _source: { attempts: 1, browser_type: 'chromium', completed_at: '2020-04-14T17:13:03.719Z', created_at: '2020-04-14T17:12:51.985Z', created_by: 'elastic', jobtype: 'printable_pdf', kibana_id: '5b2de169-2785-441b-ae8c-186a1936b17d', kibana_name: 'spicy.local', max_attempts: 1, meta: { layout: 'preserve_layout', objectType: 'canvas workpad', }, output: { content_type: 'application/pdf', size: 80262, }, payload: { basePath: '/kbn', browserTimezone: 'America/Phoenix', forceNow: '2020-04-14T17:12:51.984Z', layout: { dimensions: { height: 720, width: 1080, }, id: 'preserve_layout', }, objectType: 'canvas workpad', relativeUrls: [ '/s/hsyjklk/app/canvas#/export/workpad/pdf/workpad-53d38306-eda4-410f-b5e7-efbeca1a8c63/page/1', ], title: 'My Canvas Workpad', }, priority: 10, process_expiration: '2020-04-14T17:17:52.431Z', started_at: '2020-04-14T17:12:52.431Z', status: 'completed', timeout: 300000, }, sort: [1586884371985], },
-      { _id: 'k8t4ylcb07mi9d006214ifyg', _index: '.reporting-2020.04.05', _score: null, _source: { attempts: 1, browser_type: 'chromium', completed_at: '2020-04-09T19:10:10.049Z', created_at: '2020-04-09T19:09:52.139Z', created_by: 'elastic', jobtype: 'PNG', kibana_id: 'f2e59b4e-f79b-4a48-8a7d-6d50a3c1d914', kibana_name: 'spicy.local', max_attempts: 1, meta: { layout: 'png', objectType: 'visualization', }, output: { content_type: 'image/png', }, payload: { basePath: '/kbn', browserTimezone: 'America/Phoenix', forceNow: '2020-04-09T19:09:52.137Z', layout: { dimensions: { height: 1575, width: 1423, }, id: 'png', }, objectType: 'visualization', relativeUrl: "/s/hsyjklk/app/visualize#/edit/94d1fe40-7a94-11ea-b373-0749f92ad295?_a=(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!((enabled:!t,id:'1',params:(),schema:metric,type:count)),params:(addLegend:!f,addTooltip:!t,metric:(colorSchema:'Green%20to%20Red',colorsRange:!((from:0,to:10000)),invertColors:!f,labels:(show:!t),metricColorMode:None,percentageMode:!f,style:(bgColor:!f,bgFill:%23000,fontSize:60,labelColor:!f,subText:''),useRanges:!f),type:metric),title:count,type:metric))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15y,to:now))&indexPattern=d81752b0-7434-11ea-be36-1f978cda44d4&type=metric", title: 'count', }, priority: 10, process_expiration: '2020-04-09T19:14:54.570Z', started_at: '2020-04-09T19:09:54.570Z', status: 'completed', timeout: 300000, }, sort: [1586459392139], },
-    ]), // prettier-ignore
-  total: () => Promise.resolve(18),
+  list: jest.fn(() => Promise.resolve(mockJobs.map((j) => new Job(j)))),
+  total: jest.fn(() => Promise.resolve(18)),
   migrateReportingIndicesIlmPolicy: jest.fn(),
-} as any;
+} as unknown as DeeplyMockedKeys<ReportingAPIClient>;
 
 const validCheck = {
   check: () => ({
@@ -57,8 +215,8 @@ const validCheck = {
 };
 
 const license$ = {
-  subscribe: (handler: any) => {
-    return handler(validCheck);
+  subscribe: (handler: unknown) => {
+    return (handler as Function)(validCheck);
   },
 } as Observable<ILicense>;
 
@@ -75,29 +233,29 @@ const mockPollConfig = {
 
 describe('ReportListing', () => {
   let httpService: ReturnType<typeof httpServiceMock.createSetupContract>;
-  let ilmLocator: undefined | LocatorPublic<any>;
+  let applicationService: ReturnType<typeof applicationServiceMock.createStartContract>;
+  let ilmLocator: undefined | LocatorPublic<SerializableRecord>;
   let urlService: SharePluginSetup['url'];
   let testBed: UnwrapPromise<ReturnType<typeof setup>>;
   let toasts: NotificationsSetup['toasts'];
 
   const createTestBed = registerTestBed(
     (props?: Partial<Props>) => (
-      <InternalApiClientClientProvider
-        apiClient={reportingAPIClient as ReportingAPIClient}
-        http={httpService}
-      >
-        <IlmPolicyStatusContextProvider>
-          <ReportListing
-            license$={license$}
-            pollConfig={mockPollConfig}
-            redirect={jest.fn()}
-            navigateToUrl={jest.fn()}
-            urlService={urlService}
-            toasts={toasts}
-            {...props}
-          />
-        </IlmPolicyStatusContextProvider>
-      </InternalApiClientClientProvider>
+      <KibanaContextProvider services={{ http: httpService, application: applicationService }}>
+        <InternalApiClientProvider apiClient={reportingAPIClient as ReportingAPIClient}>
+          <IlmPolicyStatusContextProvider>
+            <ReportListing
+              license$={license$}
+              pollConfig={mockPollConfig}
+              redirect={jest.fn()}
+              navigateToUrl={jest.fn()}
+              urlService={urlService}
+              toasts={toasts}
+              {...props}
+            />
+          </IlmPolicyStatusContextProvider>
+        </InternalApiClientProvider>
+      </KibanaContextProvider>
     ),
     { memoryRouter: { wrapComponent: false } }
   );
@@ -132,15 +290,21 @@ describe('ReportListing', () => {
   beforeEach(async () => {
     toasts = notificationServiceMock.createSetupContract().toasts;
     httpService = httpServiceMock.createSetupContract();
-    ilmLocator = ({
+    applicationService = applicationServiceMock.createStartContract();
+    applicationService.capabilities = {
+      catalogue: {},
+      navLinks: {},
+      management: { data: { index_lifecycle_management: true } },
+    };
+    ilmLocator = {
       getUrl: jest.fn(),
-    } as unknown) as LocatorPublic<any>;
+    } as unknown as LocatorPublic<SerializableRecord>;
 
-    urlService = ({
+    urlService = {
       locators: {
         get: () => ilmLocator,
       },
-    } as unknown) as SharePluginSetup['url'];
+    } as unknown as SharePluginSetup['url'];
     await runSetup();
   });
 
@@ -160,7 +324,7 @@ describe('ReportListing', () => {
       subscribe: jest.fn().mockReturnValue({
         unsubscribe: unsubscribeMock,
       }),
-    } as any;
+    } as unknown as Observable<ILicense>;
 
     await runSetup({ license$: subMock });
 
@@ -173,15 +337,15 @@ describe('ReportListing', () => {
   describe('ILM policy', () => {
     beforeEach(async () => {
       httpService = httpServiceMock.createSetupContract();
-      ilmLocator = ({
+      ilmLocator = {
         getUrl: jest.fn(),
-      } as unknown) as LocatorPublic<any>;
+      } as unknown as LocatorPublic<SerializableRecord>;
 
-      urlService = ({
+      urlService = {
         locators: {
           get: () => ilmLocator,
         },
-      } as unknown) as SharePluginSetup['url'];
+      } as unknown as SharePluginSetup['url'];
 
       await runSetup();
     });
@@ -259,6 +423,27 @@ describe('ReportListing', () => {
       expect(toasts.addError).toHaveBeenCalledTimes(1);
       expect(actions.hasIlmMigrationBanner()).toBe(true);
       expect(actions.hasIlmPolicyLink()).toBe(true);
+    });
+
+    it('only shows the link to the ILM policy if UI capabilities allow it', async () => {
+      applicationService.capabilities = {
+        catalogue: {},
+        navLinks: {},
+        management: { data: { index_lifecycle_management: false } },
+      };
+      await runSetup();
+
+      expect(testBed.actions.hasIlmPolicyLink()).toBe(false);
+
+      applicationService.capabilities = {
+        catalogue: {},
+        navLinks: {},
+        management: { data: { index_lifecycle_management: true } },
+      };
+
+      await runSetup();
+
+      expect(testBed.actions.hasIlmPolicyLink()).toBe(true);
     });
   });
 });

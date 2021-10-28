@@ -18,35 +18,39 @@ interface HookProps {
 
 type ExpandRowType = Record<string, JSX.Element>;
 
+export function getExpandedStepCallback(key: number) {
+  return (step: JourneyStep) => step.synthetics?.step?.index === key;
+}
+
 export const useExpandedRow = ({ loading, steps, allSteps }: HookProps) => {
   const [expandedRows, setExpandedRows] = useState<ExpandRowType>({});
   // eui table uses index from 0, synthetics uses 1
 
   const { checkGroupId } = useParams<{ checkGroupId: string }>();
 
-  const getBrowserConsole = useCallback(
+  const getBrowserConsoles = useCallback(
     (index: number) => {
-      return allSteps.find(
-        (stepF) =>
-          stepF.synthetics?.type === 'journey/browserconsole' &&
-          stepF.synthetics?.step?.index! === index
-      )?.synthetics?.payload?.text;
+      return allSteps
+        .filter(
+          (stepF) =>
+            stepF.synthetics?.type === 'journey/browserconsole' &&
+            stepF.synthetics?.step?.index! === index
+        )
+        .map((stepF) => stepF.synthetics?.payload?.text!);
     },
     [allSteps]
   );
 
   useEffect(() => {
     const expandedRowsN: ExpandRowType = {};
-    for (const expandedRowKeyStr in expandedRows) {
-      if (expandedRows.hasOwnProperty(expandedRowKeyStr)) {
-        const expandedRowKey = Number(expandedRowKeyStr);
+    for (const expandedRowKey of Object.keys(expandedRows).map((key) => Number(key))) {
+      const step = steps.find(getExpandedStepCallback(expandedRowKey + 1));
 
-        const step = steps.find((stepF) => stepF.synthetics?.step?.index !== expandedRowKey)!;
-
+      if (step) {
         expandedRowsN[expandedRowKey] = (
           <ExecutedStep
             step={step}
-            browserConsole={getBrowserConsole(expandedRowKey)}
+            browserConsoles={getBrowserConsoles(expandedRowKey)}
             index={step.synthetics?.step?.index!}
             loading={loading}
           />
@@ -75,7 +79,7 @@ export const useExpandedRow = ({ loading, steps, allSteps }: HookProps) => {
         [stepIndex]: (
           <ExecutedStep
             step={journeyStep}
-            browserConsole={getBrowserConsole(stepIndex)}
+            browserConsoles={getBrowserConsoles(stepIndex + 1)}
             index={journeyStep.synthetics?.step?.index!}
             loading={loading}
           />

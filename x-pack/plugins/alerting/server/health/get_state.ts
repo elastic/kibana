@@ -73,9 +73,7 @@ const getHealthServiceStatus = async (
   const level =
     doc.state?.health_status === HealthStatus.OK
       ? ServiceStatusLevels.available
-      : doc.state?.health_status === HealthStatus.Warning
-      ? ServiceStatusLevels.degraded
-      : ServiceStatusLevels.unavailable;
+      : ServiceStatusLevels.degraded;
   return {
     level,
     summary: LEVEL_SUMMARY[level.toString()],
@@ -102,10 +100,10 @@ export const getHealthServiceStatusWithRetryAndErrorHandling = (
       );
     }),
     catchError((error) => {
-      logger.warn(`Alerting framework is unavailable due to the error: ${error}`);
+      logger.warn(`Alerting framework is degraded due to the error: ${error}`);
       return of({
-        level: ServiceStatusLevels.unavailable,
-        summary: LEVEL_SUMMARY[ServiceStatusLevels.unavailable.toString()],
+        level: ServiceStatusLevels.degraded,
+        summary: LEVEL_SUMMARY[ServiceStatusLevels.degraded.toString()],
         meta: { error },
       });
     })

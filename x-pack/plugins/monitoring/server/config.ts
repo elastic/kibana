@@ -22,9 +22,10 @@ export const monitoringElasticsearchConfigSchema = elasticsearchConfigSchema.ext
 });
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
+    debug_mode: schema.boolean({ defaultValue: false }),
+    debug_log_path: schema.string({ defaultValue: '' }),
     ccs: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),

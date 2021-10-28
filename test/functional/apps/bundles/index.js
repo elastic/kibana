@@ -14,7 +14,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('bundle compression', function () {
-    this.tags(['ciGroup12', 'skipCoverage']);
+    this.tags(['ciGroup11', 'skipCoverage']);
 
     let buildNum;
     before(async () => {
@@ -26,28 +26,28 @@ export default function ({ getService }) {
       supertest
         // We use the kbn-ui-shared-deps for these tests since they are always built with br compressed outputs,
         // even in dev. Bundles built by @kbn/optimizer are only built with br compression in dist mode.
-        .get(`/${buildNum}/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.js`)
+        .get(`/${buildNum}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
         .set('Accept-Encoding', 'gzip')
         .expect(200)
         .expect('Content-Encoding', 'gzip'));
 
     it('returns br files when client only supports br', () =>
       supertest
-        .get(`/${buildNum}/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.js`)
+        .get(`/${buildNum}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
         .set('Accept-Encoding', 'br')
         .expect(200)
         .expect('Content-Encoding', 'br'));
 
     it('returns br files when client only supports gzip and br', () =>
       supertest
-        .get(`/${buildNum}/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.js`)
+        .get(`/${buildNum}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
         .set('Accept-Encoding', 'gzip, br')
         .expect(200)
         .expect('Content-Encoding', 'br'));
 
     it('returns gzip files when client prefers gzip', () =>
       supertest
-        .get(`/${buildNum}/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.js`)
+        .get(`/${buildNum}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
         .set('Accept-Encoding', 'gzip;q=1.0, br;q=0.5')
         .expect(200)
         .expect('Content-Encoding', 'gzip'));

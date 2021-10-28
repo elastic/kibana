@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '../../../../';
 import { InternalCoreStart } from '../../../../internal_types';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
@@ -32,6 +32,7 @@ describe('Elasticsearch Errors', () => {
       },
     });
 
+    await root.preboot();
     await root.setup();
     start = await root.start();
     client = start.elasticsearch.client.asInternalUser;
@@ -63,6 +64,7 @@ describe('Elasticsearch Errors', () => {
         { ignore: [403] }
       );
 
+      // @ts-expect-error @elastic/elasticsearch doesn't declare error on IndexResponse
       expect(isWriteBlockException(res.body.error!)).toEqual(true);
     });
 
@@ -78,6 +80,7 @@ describe('Elasticsearch Errors', () => {
         { ignore: [403] }
       );
 
+      // @ts-expect-error @elastic/elasticsearch doesn't declare error on IndexResponse
       expect(isWriteBlockException(res.body.error!)).toEqual(true);
     });
 
@@ -97,7 +100,7 @@ describe('Elasticsearch Errors', () => {
         ],
       });
 
-      const cause = res.body.items[0].index!.error!;
+      const cause = res.body.items[0].index!.error! as estypes.ErrorCause;
 
       expect(isWriteBlockException(cause)).toEqual(true);
     });
@@ -119,7 +122,7 @@ describe('Elasticsearch Errors', () => {
         ],
       });
 
-      const cause = res.body.items[0].create!.error!;
+      const cause = res.body.items[0].create!.error! as estypes.ErrorCause;
 
       expect(isWriteBlockException(cause)).toEqual(true);
     });

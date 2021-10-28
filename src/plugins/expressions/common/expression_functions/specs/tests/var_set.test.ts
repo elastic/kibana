@@ -17,18 +17,19 @@ describe('expression_functions', () => {
     const fn = functionWrapper(variableSet);
     let input: Partial<ReturnType<ExecutionContext['getSearchContext']>>;
     let context: ExecutionContext;
-    let variables: Record<string, any>;
+    let variables: Record<string, unknown>;
 
     beforeEach(() => {
       input = { timeRange: { from: '0', to: '1' } };
       context = {
         getSearchContext: () => input,
         getSearchSessionId: () => undefined,
+        getExecutionContext: () => undefined,
         types: {},
         variables: { test: 1 },
-        abortSignal: {} as any,
-        inspectorAdapters: {} as any,
-      };
+        abortSignal: {},
+        inspectorAdapters: {},
+      } as unknown as typeof context;
 
       variables = context.variables;
     });

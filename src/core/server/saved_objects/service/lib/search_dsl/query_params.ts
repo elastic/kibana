@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error no ts
-import { esKuery } from '../../../es_query';
+import * as esKuery from '@kbn/es-query';
 type KueryNode = any;
 
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
@@ -184,7 +183,7 @@ export function getClauseForReference(reference: HasReferenceQueryParams) {
   };
 }
 
-// A de-duplicated set of namespaces makes for a more effecient query.
+// A de-duplicated set of namespaces makes for a more efficient query.
 const uniqNamespaces = (namespacesToNormalize?: string[]) =>
   namespacesToNormalize ? Array.from(new Set(namespacesToNormalize)) : undefined;
 

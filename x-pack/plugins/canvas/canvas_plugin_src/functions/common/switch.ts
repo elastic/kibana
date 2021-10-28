@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Observable, defer, from, of } from 'rxjs';
-import { concatMap, filter, merge, pluck, take } from 'rxjs/operators';
+import { Observable, combineLatest, defer, of } from 'rxjs';
+import { concatMap } from 'rxjs/operators';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Case } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
-  case?: Array<() => Observable<Case>>;
+  case: Array<() => Observable<Case>>;
   default?(): Observable<any>;
 }
 
@@ -43,12 +43,13 @@ export function switchFn(): ExpressionFunctionDefinition<
       },
     },
     fn(input, args) {
-      return from(args.case ?? []).pipe(
-        concatMap((item) => item()),
-        filter(({ matches }) => matches),
-        pluck('result'),
-        merge(defer(() => args.default?.() ?? of(input))),
-        take(1)
+      return combineLatest(args.case.map((item) => defer(() => item()))).pipe(
+        concatMap((items) => {
+          const item = items.find(({ matches }) => matches);
+          const item$ = item && of(item.result);
+
+          return item$ ?? args.default?.() ?? of(input);
+        })
       );
     },
   };

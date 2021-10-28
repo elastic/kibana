@@ -12,7 +12,7 @@ Object {
   "body": Object {
     "size": 0,
   },
-  "terminateAfter": 1,
+  "terminate_after": 1,
 }
 `;
 
@@ -39,8 +39,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 1,
+                "lte": 50000,
               },
             },
           },
@@ -49,7 +49,7 @@ Object {
     },
     "size": 0,
   },
-  "terminateAfter": 1,
+  "terminate_after": 1,
 }
 `;
 
@@ -63,14 +63,10 @@ Object {
     ],
   },
   "body": Object {
-    "aggs": Object {
-      "agents": Object {
-        "terms": Object {
-          "field": "agent.name",
-          "size": 1,
-        },
-      },
-    },
+    "_source": Array [
+      "agent.name",
+      "service.runtime.name",
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -83,17 +79,27 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
+          Object {
+            "exists": Object {
+              "field": "agent.name",
+            },
+          },
         ],
+        "should": Object {
+          "exists": Object {
+            "field": "service.runtime.name",
+          },
+        },
       },
     },
-    "size": 0,
+    "size": 1,
   },
-  "terminateAfter": 1,
+  "terminate_after": 1,
 }
 `;
 
@@ -142,33 +148,6 @@ Array [
                     },
                   },
                 },
-                "timeseries": Object {
-                  "aggs": Object {
-                    "avg_duration": Object {
-                      "avg": Object {
-                        "field": "transaction.duration.us",
-                      },
-                    },
-                    "outcomes": Object {
-                      "terms": Object {
-                        "field": "event.outcome",
-                        "include": Array [
-                          "failure",
-                          "success",
-                        ],
-                      },
-                    },
-                  },
-                  "date_histogram": Object {
-                    "extended_bounds": Object {
-                      "max": 1528977600000,
-                      "min": 1528113600000,
-                    },
-                    "field": "@timestamp",
-                    "fixed_interval": "43200s",
-                    "min_doc_count": 0,
-                  },
-                },
               },
               "terms": Object {
                 "field": "transaction.type",
@@ -188,8 +167,8 @@ Array [
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
+                  "gte": 0,
+                  "lte": 50000,
                 },
               },
             },
@@ -240,8 +219,8 @@ Array [
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
+                  "gte": 0,
+                  "lte": 50000,
                 },
               },
             },
@@ -282,8 +261,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },

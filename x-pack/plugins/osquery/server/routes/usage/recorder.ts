@@ -18,30 +18,28 @@ export type RouteString = 'live_query';
 
 export const routeStrings: RouteString[] = ['live_query'];
 
-export async function createMetricObjects(soClient: SavedObjectsClientContract) {
-  const res = await Promise.allSettled(
-    routeStrings.map(async (route) => {
-      try {
-        await soClient.get(usageMetricSavedObjectType, route);
-      } catch (e) {
-        await soClient.create(
-          usageMetricSavedObjectType,
-          {
-            errors: 0,
-            count: 0,
-          },
-          {
-            id: route,
-          }
-        );
+export async function getOrCreateMetricObject<T>(
+  soClient: SavedObjectsClientContract,
+  route: string
+) {
+  try {
+    return await soClient.get<T>(usageMetricSavedObjectType, route);
+  } catch (e) {
+    return await soClient.create(
+      usageMetricSavedObjectType,
+      {
+        errors: 0,
+        count: 0,
+      },
+      {
+        id: route,
       }
-    })
-  );
-  return !res.some((e) => e.status === 'rejected');
+    );
+  }
 }
 
 export async function getCount(soClient: SavedObjectsClientContract, route: RouteString) {
-  return await soClient.get<LiveQuerySessionUsage>(usageMetricSavedObjectType, route);
+  return await getOrCreateMetricObject<LiveQuerySessionUsage>(soClient, route);
 }
 
 export interface CounterValue {
@@ -55,7 +53,7 @@ export async function incrementCount(
   key: keyof CounterValue = 'count',
   increment = 1
 ) {
-  const metric = await soClient.get<CounterValue>(usageMetricSavedObjectType, route);
+  const metric = await getOrCreateMetricObject<CounterValue>(soClient, route);
   metric.attributes[key] += increment;
   await soClient.update(usageMetricSavedObjectType, route, metric.attributes);
 }

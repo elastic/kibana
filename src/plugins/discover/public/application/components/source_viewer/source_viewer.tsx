@@ -12,16 +12,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { monaco } from '@kbn/monaco';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useEsDocSearch } from '../doc/use_es_doc_search';
 import { JSONCodeEditorCommonMemoized } from '../json_code_editor/json_code_editor_common';
-import { ElasticRequestState } from '../doc/elastic_request_state';
-import { getServices } from '../../../../public/kibana_services';
+import { getServices } from '../../../kibana_services';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import { ElasticRequestState } from '../../apps/doc/types';
+import { useEsDocSearch } from '../../services/use_es_doc_search';
+import { IndexPattern } from '../../../../../data_views/common';
 
 interface SourceViewerProps {
   id: string;
   index: string;
-  indexPatternId: string;
+  indexPattern: IndexPattern;
   hasLineNumbers: boolean;
   width?: number;
 }
@@ -29,19 +30,17 @@ interface SourceViewerProps {
 export const SourceViewer = ({
   id,
   index,
-  indexPatternId,
+  indexPattern,
   width,
   hasLineNumbers,
 }: SourceViewerProps) => {
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [jsonValue, setJsonValue] = useState<string>('');
-  const indexPatternService = getServices().data.indexPatterns;
   const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-  const [reqState, hit, , requestData] = useEsDocSearch({
+  const [reqState, hit, requestData] = useEsDocSearch({
     id,
     index,
-    indexPatternId,
-    indexPatternService,
+    indexPattern,
     requestSource: useNewFieldsApi,
   });
 
@@ -106,11 +105,7 @@ export const SourceViewer = ({
     <EuiEmptyPrompt iconType="alert" title={errorMessageTitle} body={errorMessage} />
   );
 
-  if (
-    reqState === ElasticRequestState.Error ||
-    reqState === ElasticRequestState.NotFound ||
-    reqState === ElasticRequestState.NotFoundIndexPattern
-  ) {
+  if (reqState === ElasticRequestState.Error || reqState === ElasticRequestState.NotFound) {
     return errorState;
   }
 
@@ -127,3 +122,7 @@ export const SourceViewer = ({
     />
   );
 };
+
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default SourceViewer;

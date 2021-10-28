@@ -101,7 +101,7 @@ export const AgentPolicyActionMenu = memo<{
                 >
                   <FormattedMessage
                     id="xpack.fleet.agentPolicyActionMenu.copyPolicyActionText"
-                    defaultMessage="Copy policy"
+                    defaultMessage="Duplicate policy"
                   />
                 </EuiContextMenuItem>,
               ];

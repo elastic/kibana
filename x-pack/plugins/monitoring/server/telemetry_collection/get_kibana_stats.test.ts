@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   getUsageStats,
   combineStats,
@@ -12,12 +12,11 @@ import {
   ensureTimeSpan,
   KibanaUsageStats,
 } from './get_kibana_stats';
-import { SearchResponse } from 'elasticsearch';
 
 describe('Get Kibana Stats', () => {
   describe('Make a map of usage stats for each cluster', () => {
     test('passes through if there are no kibana instances', () => {
-      const rawStats = {} as SearchResponse<KibanaUsageStats>;
+      const rawStats = {} as estypes.SearchResponse<KibanaUsageStats>;
       expect(getUsageStats(rawStats)).toStrictEqual({});
     });
 
@@ -38,7 +37,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 0 },
                         index_pattern: { total: 0 },
                         graph_workspace: { total: 1 },
-                        timelion_sheet: { total: 1 },
                         index: '.kibana-test-01',
                       },
                     },
@@ -54,7 +52,6 @@ describe('Get Kibana Stats', () => {
               search: { total: 0 },
               index_pattern: { total: 0 },
               graph_workspace: { total: 1 },
-              timelion_sheet: { total: 1 },
               indices: 1,
               plugins: {},
             },
@@ -78,7 +75,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 1 },
                         index_pattern: { total: 1 },
                         graph_workspace: { total: 1 },
-                        timelion_sheet: { total: 1 },
                         index: '.kibana-test-01',
                       },
                     },
@@ -94,7 +90,6 @@ describe('Get Kibana Stats', () => {
               search: { total: 1 },
               index_pattern: { total: 1 },
               graph_workspace: { total: 1 },
-              timelion_sheet: { total: 1 },
               indices: 1,
               plugins: {},
             },
@@ -117,7 +112,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 1 },
                         index_pattern: { total: 1 },
                         graph_workspace: { total: 1 },
-                        timelion_sheet: { total: 1 },
                         index: '.kibana-test-01',
                       },
                     },
@@ -133,7 +127,6 @@ describe('Get Kibana Stats', () => {
               search: { total: 1 },
               index_pattern: { total: 1 },
               graph_workspace: { total: 1 },
-              timelion_sheet: { total: 1 },
               indices: 1,
               plugins: {},
             },
@@ -156,7 +149,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 1 },
                         index_pattern: { total: 1 },
                         graph_workspace: { total: 1 },
-                        timelion_sheet: { total: 1 },
                         index: '.kibana-test-01',
                         foo: { total: 5 },
                         xpack: {
@@ -180,7 +172,6 @@ describe('Get Kibana Stats', () => {
               search: { total: 1 },
               index_pattern: { total: 1 },
               graph_workspace: { total: 1 },
-              timelion_sheet: { total: 1 },
               indices: 1,
               plugins: { foo: { total: 5 }, fancy: { available: true, total: 15 } },
             },
@@ -204,7 +195,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 1 },
                         index_pattern: { total: 1 },
                         graph_workspace: { total: 1 },
-                        timelion_sheet: { total: 1 },
                         index: '.kibana-test-01',
                       },
                     },
@@ -221,7 +211,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 1 },
                         index_pattern: { total: 1 },
                         graph_workspace: { total: 1 },
-                        timelion_sheet: { total: 1 },
                         index: '.kibana-test-01',
                       },
                     },
@@ -238,7 +227,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 0 },
                         index_pattern: { total: 0 },
                         graph_workspace: { total: 1 },
-                        timelion_sheet: { total: 1 },
                         index: '.kibana-test-02',
                       },
                     },
@@ -254,7 +242,6 @@ describe('Get Kibana Stats', () => {
               search: { total: 1 },
               index_pattern: { total: 1 },
               graph_workspace: { total: 2 },
-              timelion_sheet: { total: 2 },
               indices: 2,
               plugins: {},
             },
@@ -277,7 +264,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 1 },
                         index_pattern: { total: 1 },
                         graph_workspace: { total: 1 },
-                        timelion_sheet: { total: 1 },
                         index: '.kibana-test-01',
                       },
                     },
@@ -294,7 +280,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 1 },
                         index_pattern: { total: 1 },
                         graph_workspace: { total: 1 },
-                        timelion_sheet: { total: 1 },
                         index: '.kibana-test-01',
                       },
                     },
@@ -311,7 +296,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 3 },
                         index_pattern: { total: 3 },
                         graph_workspace: { total: 1 },
-                        timelion_sheet: { total: 1 },
                         index: '.kibana-test-02',
                       },
                     },
@@ -327,7 +311,6 @@ describe('Get Kibana Stats', () => {
               search: { total: 4 },
               index_pattern: { total: 4 },
               graph_workspace: { total: 2 },
-              timelion_sheet: { total: 2 },
               indices: 2,
               plugins: {},
             },
@@ -354,7 +337,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 1 },
                         index_pattern: { total: 1 },
                         graph_workspace: { total: 3 },
-                        timelion_sheet: { total: 4 },
                         index: '.kibana-test-01',
                       },
                     },
@@ -371,7 +353,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 1 },
                         index_pattern: { total: 1 },
                         graph_workspace: { total: 3 },
-                        timelion_sheet: { total: 4 },
                         index: '.kibana-test-01',
                       },
                     },
@@ -388,7 +369,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 3 },
                         index_pattern: { total: 3 },
                         graph_workspace: { total: 3 },
-                        timelion_sheet: { total: 4 },
                         index: '.kibana-test-02',
                       },
                     },
@@ -405,7 +385,6 @@ describe('Get Kibana Stats', () => {
                         search: { total: 300 },
                         index_pattern: { total: 300 },
                         graph_workspace: { total: 3 },
-                        timelion_sheet: { total: 4 },
                         index: '.kibana-test-03',
                       },
                     },
@@ -421,7 +400,6 @@ describe('Get Kibana Stats', () => {
               search: { total: 4 },
               index_pattern: { total: 4 },
               graph_workspace: { total: 6 },
-              timelion_sheet: { total: 8 },
               indices: 2,
               plugins: {},
             },
@@ -431,7 +409,6 @@ describe('Get Kibana Stats', () => {
               search: { total: 300 },
               index_pattern: { total: 300 },
               graph_workspace: { total: 3 },
-              timelion_sheet: { total: 4 },
               indices: 1,
               plugins: {},
             },

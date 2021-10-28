@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import {
-  callApmApi,
   AutoAbortedAPMClient,
+  callApmApi,
 } from '../services/rest/createCallApmApi';
-import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useInspectorContext } from '../../../observability/public';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -68,7 +68,7 @@ export function useFetcher<TReturn>(
     showToastOnError?: boolean;
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
-  const { notifications } = useApmPluginContext().core;
+  const { notifications } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;
   const [result, setResult] = useState<
     FetcherResult<InferResponseType<TReturn>>
@@ -77,7 +77,8 @@ export function useFetcher<TReturn>(
     status: FETCH_STATUS.NOT_INITIATED,
   });
   const [counter, setCounter] = useState(0);
-  const { rangeId } = useUrlParams();
+  const { timeRangeId } = useTimeRangeId();
+  const { addInspectorRequest } = useInspectorContext();
 
   useEffect(() => {
     let controller: AbortController = new AbortController();
@@ -124,12 +125,12 @@ export function useFetcher<TReturn>(
             'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError) {
-            notifications.toasts.addDanger({
+            notifications.toasts.danger({
               title: i18n.translate('xpack.apm.fetcher.error.title', {
                 defaultMessage: `Error while fetching resource`,
               }),
 
-              text: toMountPoint(
+              body: (
                 <div>
                   <h5>
                     {i18n.translate('xpack.apm.fetcher.error.status', {
@@ -160,11 +161,19 @@ export function useFetcher<TReturn>(
   }, [
     counter,
     preservePreviousData,
-    rangeId,
+    timeRangeId,
     showToastOnError,
     ...fnDeps,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
+
+  useEffect(() => {
+    if (result.error) {
+      addInspectorRequest({ ...result, data: result.error.body?.attributes });
+    } else {
+      addInspectorRequest(result);
+    }
+  }, [addInspectorRequest, result]);
 
   return useMemo(() => {
     return {

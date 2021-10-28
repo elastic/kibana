@@ -58,6 +58,10 @@
   font-weight: $euiFontWeightBold;
 }
 
+.kbnToolbarButton--normal {
+  font-weight: $euiFontWeightRegular;
+}
+
 .kbnToolbarButton--s {
   box-shadow: none !important; // sass-lint:disable-line no-important
   font-size: $euiFontSizeS;

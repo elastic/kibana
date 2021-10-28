@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Logger } from '../../logging';
 import { GetAuthHeaders, Headers, isKibanaRequest, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
-import type { IExecutionContextContainer } from '../../execution_context';
 import { ScopeableRequest } from '../types';
 import { ElasticsearchClient } from './types';
 import { configureClient } from './configure_client';
@@ -53,8 +52,8 @@ export interface ICustomClusterClient extends IClusterClient {
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
-  public readonly asInternalUser: Client;
-  private readonly rootScopedClient: Client;
+  public readonly asInternalUser: KibanaClient;
+  private readonly rootScopedClient: KibanaClient;
   private readonly allowListHeaders: string[];
 
   private isClosed = false;
@@ -64,7 +63,7 @@ export class ClusterClient implements ICustomClusterClient {
     logger: Logger,
     type: string,
     private readonly getAuthHeaders: GetAuthHeaders = noop,
-    getExecutionContext: () => IExecutionContextContainer | undefined = noop
+    getExecutionContext: () => string | undefined = noop
   ) {
     this.asInternalUser = configureClient(config, { logger, type, getExecutionContext });
     this.rootScopedClient = configureClient(config, {

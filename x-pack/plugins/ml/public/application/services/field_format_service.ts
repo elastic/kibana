@@ -8,28 +8,28 @@
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { getIndexPatternById, getIndexPatternIdFromName } from '../util/index_utils';
 import { mlJobService } from './job_service';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
 type FormatsByJobId = Record<string, any>;
 type IndexPatternIdsByJob = Record<string, any>;
 
-// Service for accessing FieldFormat objects configured for a Kibana index pattern
+// Service for accessing FieldFormat objects configured for a Kibana data view
 // for use in formatting the actual and typical values from anomalies.
 class FieldFormatService {
   indexPatternIdsByJob: IndexPatternIdsByJob = {};
   formatsByJob: FormatsByJobId = {};
 
   // Populate the service with the FieldFormats for the list of jobs with the
-  // specified IDs. List of Kibana index patterns is passed, with a title
-  // attribute set in each pattern which will be compared to the index pattern
+  // specified IDs. List of Kibana data views is passed, with a title
+  // attribute set in each pattern which will be compared to the indices
   // configured in the datafeed of each job.
   // Builds a map of Kibana FieldFormats (plugins/data/common/field_formats)
   // against detector index by job ID.
   populateFormats(jobIds: string[]): Promise<FormatsByJobId> {
     return new Promise((resolve, reject) => {
-      // Populate a map of index pattern IDs against job ID, by finding the ID of the index
-      // pattern with a title attribute which matches the index configured in the datafeed.
-      // If a Kibana index pattern has not been created
+      // Populate a map of data view IDs against job ID, by finding the ID of the data
+      // view with a title attribute which matches the indices configured in the datafeed.
+      // If a Kibana data view has not been created
       // for this index, then no custom field formatting will occur.
       jobIds.forEach((jobId) => {
         const jobObj = mlJobService.getJob(jobId);
@@ -66,11 +66,7 @@ class FieldFormatService {
 
   // Utility for returning the FieldFormat from a full populated Kibana index pattern object
   // containing the list of fields by name with their formats.
-  getFieldFormatFromIndexPattern(
-    fullIndexPattern: IndexPattern,
-    fieldName: string,
-    esAggName: string
-  ) {
+  getFieldFormatFromIndexPattern(fullIndexPattern: DataView, fieldName: string, esAggName: string) {
     // Don't use the field formatter for distinct count detectors as
     // e.g. distinct_count(clientip) should be formatted as a count, not as an IP address.
     let fieldFormat;
@@ -93,7 +89,7 @@ class FieldFormatService {
 
       const indexPatternId = this.indexPatternIdsByJob[jobId];
       if (indexPatternId !== undefined) {
-        // Load the full index pattern configuration to obtain the formats of each field.
+        // Load the full data view configuration to obtain the formats of each field.
         getIndexPatternById(indexPatternId)
           .then((indexPatternData) => {
             // Store the FieldFormat for each job by detector_index.
@@ -105,9 +101,8 @@ class FieldFormatService {
               if (dtr.field_name !== undefined && esAgg !== 'cardinality') {
                 const field = fieldList.getByName(dtr.field_name);
                 if (field !== undefined) {
-                  formatsByDetector[dtr.detector_index!] = indexPatternData.getFormatterForField(
-                    field
-                  );
+                  formatsByDetector[dtr.detector_index!] =
+                    indexPatternData.getFormatterForField(field);
                 }
               }
             });

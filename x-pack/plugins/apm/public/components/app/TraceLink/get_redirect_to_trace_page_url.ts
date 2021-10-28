@@ -20,7 +20,7 @@ export const getRedirectToTracePageUrl = ({
   format({
     pathname: `/traces`,
     query: {
-      kuery: encodeURIComponent(`${TRACE_ID} : "${traceId}"`),
+      kuery: `${TRACE_ID} : "${traceId}"`,
       rangeFrom,
       rangeTo,
     },

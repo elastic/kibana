@@ -11,9 +11,8 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
 } from '@elastic/eui';
-import React, { PropsWithChildren, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
-import { useTrackPageview } from '../../../../../observability/public';
 import {
   invalidLicenseMessage,
   SERVICE_MAP_TIMEOUT_ERROR,
@@ -21,7 +20,6 @@ import {
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useTheme } from '../../../hooks/use_theme';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { LicensePrompt } from '../../shared/license_prompt';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
@@ -32,10 +30,10 @@ import { Popover } from './Popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './useRefDimensions';
 import { SearchBar } from '../../shared/search_bar';
-
-interface ServiceMapProps {
-  serviceName?: string;
-}
+import { useServiceName } from '../../../hooks/use_service_name';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { Environment } from '../../../../common/environment_rt';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -67,37 +65,77 @@ function LoadingSpinner() {
   );
 }
 
+export function ServiceMapHome() {
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/service-map');
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  return (
+    <ServiceMap
+      environment={environment}
+      kuery={kuery}
+      start={start}
+      end={end}
+    />
+  );
+}
+
+export function ServiceMapServiceDetail() {
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/service-map');
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  return (
+    <ServiceMap
+      environment={environment}
+      kuery={kuery}
+      start={start}
+      end={end}
+    />
+  );
+}
+
 export function ServiceMap({
-  serviceName,
-}: PropsWithChildren<ServiceMapProps>) {
+  environment,
+  kuery,
+  start,
+  end,
+}: {
+  environment: Environment;
+  kuery: string;
+  start: string;
+  end: string;
+}) {
   const theme = useTheme();
   const license = useLicenseContext();
-  const { urlParams } = useUrlParams();
 
-  const { data = { elements: [] }, status, error } = useFetcher(
+  const serviceName = useServiceName();
+
+  const {
+    data = { elements: [] },
+    status,
+    error,
+  } = useFetcher(
     (callApmApi) => {
       // When we don't have a license or a valid license, don't make the request.
       if (!license || !isActivePlatinumLicense(license)) {
         return;
       }
 
-      const { start, end, environment } = urlParams;
-      if (start && end) {
-        return callApmApi({
-          isCachable: false,
-          endpoint: 'GET /api/apm/service-map',
-          params: {
-            query: {
-              start,
-              end,
-              environment,
-              serviceName,
-            },
+      return callApmApi({
+        isCachable: false,
+        endpoint: 'GET /internal/apm/service-map',
+        params: {
+          query: {
+            start,
+            end,
+            environment,
+            serviceName,
           },
-        });
-      }
+        },
+      });
     },
-    [license, serviceName, urlParams]
+    [license, serviceName, environment, start, end]
   );
 
   const { ref, height } = useRefDimensions();
@@ -105,9 +143,6 @@ export function ServiceMap({
   // Temporary hack to work around bottom padding introduced by EuiPage
   const PADDING_BOTTOM = 24;
   const heightWithPadding = height - PADDING_BOTTOM;
-
-  useTrackPageview({ app: 'apm', path: 'service_map' });
-  useTrackPageview({ app: 'apm', path: 'service_map', delay: 15000 });
 
   if (!license) {
     return null;
@@ -161,7 +196,13 @@ export function ServiceMap({
             <Controls />
             {serviceName && <EmptyBanner />}
             {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-            <Popover focusedServiceName={serviceName} />
+            <Popover
+              focusedServiceName={serviceName}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+            />
           </Cytoscape>
         </div>
       </EuiPanel>

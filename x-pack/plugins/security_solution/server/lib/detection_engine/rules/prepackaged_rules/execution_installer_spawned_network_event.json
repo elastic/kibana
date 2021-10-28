@@ -44,7 +44,7 @@
           "subtechnique": [
             {
               "id": "T1059.007",
-              "name": "JavaScript/JScript",
+              "name": "JavaScript",
               "reference": "https://attack.mitre.org/techniques/T1059/007/"
             }
           ]
@@ -76,5 +76,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

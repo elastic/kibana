@@ -8,7 +8,7 @@
 
 import { groupFields } from './group_fields';
 import { getDefaultFieldFilter } from './field_filter';
-import { IndexPatternField } from '../../../../../../../../data/common/index_patterns/fields';
+import { IndexPatternField } from '../../../../../../../../data/common';
 
 const fields = [
   {

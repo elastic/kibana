@@ -8,7 +8,14 @@
 import { Server } from '@hapi/hapi';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/server';
+import { Logger } from '@kbn/logging';
+import {
+  CoreSetup,
+  PluginInitializerContext,
+  Plugin,
+  PluginConfigDescriptor,
+} from 'src/core/server';
+import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
@@ -32,10 +39,11 @@ import { InfraPluginRequestHandlerContext } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
 import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
+import { RulesService } from './services/rules';
+import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 
-export const config = {
+export const config: PluginConfigDescriptor = {
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     inventory: schema.object({
       compositeSize: schema.number({ defaultValue: 2000 }),
     }),
@@ -43,8 +51,6 @@ export const config = {
       schema.object({
         default: schema.maybe(
           schema.object({
-            logAlias: schema.maybe(schema.string()), // NOTE / TODO: Should be deprecated in 8.0.0
-            metricAlias: schema.maybe(schema.string()),
             fields: schema.maybe(
               schema.object({
                 timestamp: schema.maybe(schema.string()),
@@ -60,6 +66,7 @@ export const config = {
       })
     ),
   }),
+  deprecations: configDeprecations,
 };
 
 export type InfraConfig = TypeOf<typeof config.schema>;
@@ -82,9 +89,25 @@ export interface InfraPluginSetup {
 export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
   public config: InfraConfig;
   public libs: InfraBackendLibs | undefined;
+  public logger: Logger;
+
+  private logsRules: RulesService;
+  private metricsRules: RulesService;
 
   constructor(context: PluginInitializerContext) {
     this.config = context.config.get<InfraConfig>();
+    this.logger = context.logger.get();
+
+    this.logsRules = new RulesService(
+      LOGS_FEATURE_ID,
+      'observability.logs',
+      this.logger.get('logsRules')
+    );
+    this.metricsRules = new RulesService(
+      METRICS_FEATURE_ID,
+      'observability.metrics',
+      this.logger.get('metricsRules')
+    );
   }
 
   setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {
@@ -126,6 +149,8 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       ...domainLibs,
       getLogQueryFields: createGetLogQueryFields(sources, framework),
       handleEsError,
+      logsRules: this.logsRules.setup(core, plugins),
+      metricsRules: this.metricsRules.setup(core, plugins),
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
@@ -165,6 +190,11 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
 
     const logEntriesService = new LogEntriesService();
     logEntriesService.setup(core, { ...plugins, sources });
+
+    // register deprecated source configuration fields
+    core.deprecations.registerDeprecations({
+      getDeprecations: getInfraDeprecationsFactory(sources),
+    });
 
     return {
       defineInternalSourceConfiguration(sourceId, sourceProperties) {

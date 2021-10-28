@@ -12,7 +12,7 @@ import { coerce } from 'semver';
 import { promisify } from 'util';
 import { snakeCase } from 'lodash';
 import { isConfigPath, PackageInfo } from '../../config';
-import { PluginManifest } from '../types';
+import { PluginManifest, PluginType } from '../types';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { isCamelCase } from './is_camel_case';
 
@@ -39,6 +39,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
   const manifestFields: { [P in keyof PluginManifest]: boolean } = {
     id: true,
     kibanaVersion: true,
+    type: true,
     version: true,
     configPath: true,
     requiredPlugins: true,
@@ -120,6 +121,15 @@ export async function parseManifest(
     );
   }
 
+  if (!manifest.owner || !manifest.owner.name || typeof manifest.owner.name !== 'string') {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `Plugin manifest for "${manifest.id}" must contain an "owner" property, which includes a nested "name" property.`
+      )
+    );
+  }
+
   if (manifest.configPath !== undefined && !isConfigPath(manifest.configPath)) {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
@@ -178,10 +188,21 @@ export async function parseManifest(
     );
   }
 
+  const type = manifest.type ?? PluginType.standard;
+  if (type !== PluginType.preboot && type !== PluginType.standard) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `The "type" in manifest for plugin "${manifest.id}" is set to "${type}", but it should either be "standard" or "preboot".`
+      )
+    );
+  }
+
   return {
     id: manifest.id,
     version: manifest.version,
     kibanaVersion: expectedKibanaVersion,
+    type,
     configPath: manifest.configPath || snakeCase(manifest.id),
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
@@ -189,7 +210,7 @@ export async function parseManifest(
     ui: includesUiPlugin,
     server: includesServerPlugin,
     extraPublicDirs: manifest.extraPublicDirs,
-    owner: manifest.owner,
+    owner: manifest.owner!,
     description: manifest.description,
   };
 }

@@ -8,13 +8,10 @@
 import { PluginInitializerContext } from 'src/core/server';
 
 import { IndexMgmtServerPlugin } from './plugin';
-import { configSchema } from './config';
 
-export const plugin = (ctx: PluginInitializerContext) => new IndexMgmtServerPlugin(ctx);
+export { config } from './config';
 
-export const config = {
-  schema: configSchema,
-};
+export const plugin = (context: PluginInitializerContext) => new IndexMgmtServerPlugin(context);
 
 /** @public */
 export { Dependencies } from './types';

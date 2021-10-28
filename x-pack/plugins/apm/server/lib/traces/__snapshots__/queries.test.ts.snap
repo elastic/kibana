@@ -8,15 +8,6 @@ Object {
     ],
   },
   "body": Object {
-    "aggs": Object {
-      "by_transaction_id": Object {
-        "terms": Object {
-          "execution_hint": "map",
-          "field": "transaction.id",
-          "size": "myIndex",
-        },
-      },
-    },
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -29,8 +20,8 @@ Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+                "gte": 0,
+                "lte": 50000,
               },
             },
           },
@@ -46,7 +37,7 @@ Object {
         },
       },
     },
-    "size": "myIndex",
+    "size": 1000,
   },
 }
 `;

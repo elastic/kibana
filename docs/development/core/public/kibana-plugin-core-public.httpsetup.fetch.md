@@ -4,7 +4,7 @@
 
 ## HttpSetup.fetch property
 
-Makes an HTTP request. Defaults to a GET request unless overriden. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options.
+Makes an HTTP request. Defaults to a GET request unless overridden. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options.
 
 <b>Signature:</b>
 

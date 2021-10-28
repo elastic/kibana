@@ -9,14 +9,15 @@ import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { LensPublicStart } from '../../../plugins/lens/public';
 import { NewsfeedPublicPluginStart } from '../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { TelemetryManagementSectionPluginSetup } from '../../../../src/plugins/telemetry_management_section/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { FleetStart } from '../../fleet/public';
 import { PluginStart as ListsPluginStart } from '../../lists/public';
+import { SpacesPluginStart } from '../../spaces/public';
 import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
@@ -37,6 +38,7 @@ import { Overview } from './overview';
 import { Rules } from './rules';
 import { Timelines } from './timelines';
 import { Management } from './management';
+import { Ueba } from './ueba';
 import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
@@ -46,7 +48,6 @@ export interface SetupPlugins {
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
-  telemetryManagementSection?: TelemetryManagementSectionPluginSetup;
   ml?: MlPluginSetup;
 }
 
@@ -57,6 +58,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
@@ -64,6 +66,7 @@ export interface StartPlugins {
   timelines: TimelinesUIStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export type StartServices = CoreStart &
@@ -84,13 +87,15 @@ export interface AppObservableLibs {
 
 export type InspectResponse = Inspect & { response: string[] };
 
+export const CASES_SUB_PLUGIN_KEY = 'cases';
 export interface SubPlugins {
   alerts: Detections;
   rules: Rules;
   exceptions: Exceptions;
-  cases: Cases;
+  [CASES_SUB_PLUGIN_KEY]: Cases;
   hosts: Hosts;
   network: Network;
+  ueba: Ueba;
   overview: Overview;
   timelines: Timelines;
   management: Management;
@@ -101,9 +106,10 @@ export interface StartedSubPlugins {
   alerts: ReturnType<Detections['start']>;
   rules: ReturnType<Rules['start']>;
   exceptions: ReturnType<Exceptions['start']>;
-  cases: ReturnType<Cases['start']>;
+  [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
   hosts: ReturnType<Hosts['start']>;
   network: ReturnType<Network['start']>;
+  ueba: ReturnType<Ueba['start']>;
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;

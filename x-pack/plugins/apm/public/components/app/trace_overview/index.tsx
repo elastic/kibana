@@ -5,30 +5,37 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { SearchBar } from '../../shared/search_bar';
 import { TraceList } from './trace_list';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
-type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
+type TracesAPIResponse = APIReturnType<'GET /internal/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
   items: [],
-  isAggregationAccurate: true,
-  bucketSize: 0,
 };
 
 export function TraceOverview() {
   const {
-    urlParams: { environment, kuery, start, end },
-  } = useUrlParams();
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/traces');
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { status, data = DEFAULT_RESPONSE } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/traces',
+          endpoint: 'GET /internal/apm/traces',
           params: {
             query: {
               environment,
@@ -43,16 +50,22 @@ export function TraceOverview() {
     [environment, kuery, start, end]
   );
 
-  useTrackPageview({ app: 'apm', path: 'traces_overview' });
-  useTrackPageview({ app: 'apm', path: 'traces_overview', delay: 15000 });
-
   return (
     <>
       <SearchBar />
 
+      {fallbackToTransactions && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <AggregatedTransactionsBadge />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+
       <TraceList
         items={data.items}
         isLoading={status === FETCH_STATUS.LOADING}
+        isFailure={status === FETCH_STATUS.FAILURE}
       />
     </>
   );

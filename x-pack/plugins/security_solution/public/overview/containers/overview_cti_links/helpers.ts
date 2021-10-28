@@ -6,16 +6,14 @@
  */
 
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
-import { CTI_DEFAULT_SOURCES } from '../../../../common/cti/constants';
+import { CTI_DATASET_KEY_MAP } from '../../../../common/cti/constants';
+import { LinkPanelListItem } from '../../components/link_panel';
+import { EventCounts } from '../../components/link_panel/helpers';
 
-export interface CtiListItem {
-  path: string;
-  title: string;
-  count: number;
-}
+export const ctiTitles = Object.keys(CTI_DATASET_KEY_MAP) as string[];
 
-export const EMPTY_LIST_ITEMS: CtiListItem[] = CTI_DEFAULT_SOURCES.map((item) => ({
-  title: item,
+export const EMPTY_LIST_ITEMS: LinkPanelListItem[] = ctiTitles.map((title) => ({
+  title,
   count: 0,
   path: '',
 }));
@@ -27,22 +25,15 @@ export const TAG_REQUEST_BODY = {
   searchFields: ['name'],
 };
 
-export interface EventCounts {
-  [key: string]: number;
-}
-
 export const DASHBOARD_SO_TITLE_PREFIX = '[Filebeat Threat Intel] ';
 export const OVERVIEW_DASHBOARD_LINK_TITLE = 'Overview';
 
-export const getListItemsWithoutLinks = (eventCounts: EventCounts): CtiListItem[] => {
+export const getCtiListItemsWithoutLinks = (eventCounts: EventCounts): LinkPanelListItem[] => {
   return EMPTY_LIST_ITEMS.map((item) => ({
     ...item,
-    count: eventCounts[item.title.replace(' ', '').toLowerCase()] ?? 0,
+    count: eventCounts[CTI_DATASET_KEY_MAP[item.title]] ?? 0,
   }));
 };
-
-export const isCtiListItem = (item: CtiListItem | Partial<CtiListItem>): item is CtiListItem =>
-  typeof item.title === 'string' && typeof item.path === 'string' && typeof item.count === 'number';
 
 export const isOverviewItem = (item: { path?: string; title?: string }) =>
   item.title === OVERVIEW_DASHBOARD_LINK_TITLE;
@@ -58,15 +49,12 @@ export const createLinkFromDashboardSO = (
       : undefined;
   return {
     title,
-    count:
-      typeof title === 'string'
-        ? eventCountsByDataset[title.replace(' ', '').toLowerCase()]
-        : undefined,
+    count: typeof title === 'string' ? eventCountsByDataset[CTI_DATASET_KEY_MAP[title]] : undefined,
     path,
   };
 };
 
-export const emptyEventCountsByDataset = CTI_DEFAULT_SOURCES.reduce((acc, item) => {
-  acc[item.toLowerCase().replace(' ', '')] = 0;
+export const emptyEventCountsByDataset = Object.values(CTI_DATASET_KEY_MAP).reduce((acc, id) => {
+  acc[id] = 0;
   return acc;
 }, {} as { [key: string]: number });

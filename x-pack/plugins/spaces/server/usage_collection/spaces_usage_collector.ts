@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import type { ElasticsearchClient } from 'src/core/server';
@@ -30,7 +29,7 @@ interface SpacesAggregationResponse {
 
 /**
  *
- * @param {CallCluster} callCluster
+ * @param {ElasticsearchClient} esClient
  * @param {string} kibanaIndex
  * @param {PluginsSetup['features']} features
  * @param {boolean} spacesAvailable
@@ -138,7 +137,6 @@ export interface UsageData extends UsageStats {
     graph?: number;
     uptime?: number;
     savedObjectsManagement?: number;
-    timelion?: number;
     dev_tools?: number;
     advancedSettings?: number;
     infrastructure?: number;
@@ -151,7 +149,7 @@ export interface UsageData extends UsageStats {
 }
 
 interface CollectorDeps {
-  kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
+  kibanaIndex: string;
   features: PluginsSetup['features'];
   licensing: PluginsSetup['licensing'];
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
@@ -264,12 +262,6 @@ export function getSpacesUsageCollector(
           },
         },
         savedObjectsManagement: {
-          type: 'long',
-          _meta: {
-            description: 'The number of spaces which have this feature disabled.',
-          },
-        },
-        timelion: {
           type: 'long',
           _meta: {
             description: 'The number of spaces which have this feature disabled.',
@@ -433,11 +425,9 @@ export function getSpacesUsageCollector(
       },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
-      const { licensing, kibanaIndexConfig$, features, usageStatsServicePromise } = deps;
+      const { licensing, kibanaIndex, features, usageStatsServicePromise } = deps;
       const license = await licensing.license$.pipe(take(1)).toPromise();
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
-
-      const kibanaIndex = (await kibanaIndexConfig$.pipe(take(1)).toPromise()).kibana.index;
 
       const usageData = await getSpacesUsage(esClient, kibanaIndex, features, available);
       const usageStats = await getUsageStats(usageStatsServicePromise, available);

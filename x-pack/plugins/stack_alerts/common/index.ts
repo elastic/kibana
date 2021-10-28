@@ -5,5 +5,8 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110895
+/* eslint-disable @kbn/eslint/no_export_all */
+
 export * from './config';
 export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';

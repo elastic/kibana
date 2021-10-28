@@ -6,8 +6,12 @@
   "false_positives": [
     "This rule could identify benign domains that are formatted similarly to FIN7's command and control algorithm. Alerts should be investigated by an analyst to assess the validity of the individual observations."
   ],
+  "from": "now-9m",
   "index": [
-    "packetbeat-*"
+    "auditbeat-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "lucene",
   "license": "Elastic License v2",
@@ -24,7 +28,8 @@
     "Elastic",
     "Network",
     "Threat Detection",
-    "Command and Control"
+    "Command and Control",
+    "Host"
   ],
   "threat": [
     {
@@ -57,5 +62,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

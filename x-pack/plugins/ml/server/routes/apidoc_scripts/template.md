@@ -1,3 +1,7 @@
+<% if (header) { -%>
+<%- header %>
+<% } -%>
+
 <a name="top"></a>
 # <%= project.name %> v<%= project.version %>
 

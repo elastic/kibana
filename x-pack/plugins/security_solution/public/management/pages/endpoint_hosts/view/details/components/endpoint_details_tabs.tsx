@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiTab, EuiTabs, EuiFlyoutBody, EuiTabbedContentTab, EuiSpacer } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
+import { EuiTab, EuiTabs, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { EndpointIndexUIQueryParams } from '../../../types';
-import { EndpointAction } from '../../../store/action';
-import { useEndpointSelector } from '../../hooks';
-import { getActivityLogDataPaging } from '../../../store/selectors';
+
 import { EndpointDetailsFlyoutHeader } from './flyout_header';
+import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { useAppUrl } from '../../../../../../common/lib/kibana';
 
 export enum EndpointDetailsTabsTypes {
-  overview = 'overview',
+  overview = 'details',
   activityLog = 'activity_log',
 }
 
@@ -27,7 +26,28 @@ interface EndpointDetailsTabs {
   id: string;
   name: string;
   content: JSX.Element;
+  route: string;
 }
+
+const EndpointDetailsTab = memo(
+  ({ tab, isSelected }: { tab: EndpointDetailsTabs; isSelected: boolean }) => {
+    const { getAppUrl } = useAppUrl();
+    const onClick = useNavigateByRouterEventHandler(tab.route);
+    return (
+      <EuiTab
+        href={getAppUrl({ path: tab.route })}
+        onClick={onClick}
+        isSelected={isSelected}
+        key={tab.id}
+        data-test-subj={tab.id}
+      >
+        {tab.name}
+      </EuiTab>
+    );
+  }
+);
+
+EndpointDetailsTab.displayName = 'EndpointDetailsTab';
 
 export const EndpointDetailsFlyoutTabs = memo(
   ({
@@ -35,57 +55,14 @@ export const EndpointDetailsFlyoutTabs = memo(
     show,
     tabs,
   }: {
-    hostname?: string;
+    hostname: string;
     show: EndpointIndexUIQueryParams['show'];
     tabs: EndpointDetailsTabs[];
   }) => {
-    const dispatch = useDispatch<(action: EndpointAction) => void>();
-    const { pageSize } = useEndpointSelector(getActivityLogDataPaging);
-    const [selectedTabId, setSelectedTabId] = useState<EndpointDetailsTabsId>(() => {
-      return show === 'details'
-        ? EndpointDetailsTabsTypes.overview
-        : EndpointDetailsTabsTypes.activityLog;
-    });
-
-    const handleTabClick = useCallback(
-      (tab: EuiTabbedContentTab) => {
-        dispatch({
-          type: 'endpointDetailsFlyoutTabChanged',
-          payload: {
-            flyoutView: tab.id as EndpointIndexUIQueryParams['show'],
-          },
-        });
-        if (tab.id === EndpointDetailsTabsTypes.activityLog) {
-          dispatch({
-            type: 'endpointDetailsActivityLogUpdatePaging',
-            payload: {
-              disabled: false,
-              page: 1,
-              pageSize,
-              startDate: undefined,
-              endDate: undefined,
-            },
-          });
-        }
-        return setSelectedTabId(tab.id as EndpointDetailsTabsId);
-      },
-      [dispatch, pageSize, setSelectedTabId]
-    );
-
-    const selectedTab = useMemo(() => tabs.find((tab) => tab.id === selectedTabId), [
-      tabs,
-      selectedTabId,
-    ]);
+    const selectedTab = useMemo(() => tabs.find((tab) => tab.id === show), [tabs, show]);
 
     const renderTabs = tabs.map((tab) => (
-      <EuiTab
-        onClick={() => handleTabClick(tab)}
-        isSelected={tab.id === selectedTabId}
-        key={tab.id}
-        data-test-subj={tab.id}
-      >
-        {tab.name}
-      </EuiTab>
+      <EndpointDetailsTab key={tab.id} tab={tab} isSelected={tab.id === selectedTab?.id} />
     ));
 
     return (

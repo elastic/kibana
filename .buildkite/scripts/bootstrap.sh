@@ -3,9 +3,10 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/common/setup_bazel.sh
 
 echo "--- yarn install and bootstrap"
-yarn kbn bootstrap --verbose
+retry 2 15 yarn kbn bootstrap
 
 ###
 ### upload ts-refs-cache artifacts as quickly as possible so they are available for download

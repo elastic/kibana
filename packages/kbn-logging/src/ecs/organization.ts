@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-organization.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-organization.html
  *
  * @internal
  */

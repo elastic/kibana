@@ -11,7 +11,7 @@ import React from 'react';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
-import { mockDetailItemData, mockDetailItemDataId, TestProviders } from '../../mock';
+import { mockDetailItemData, mockDetailItemDataId, rawEventData, TestProviders } from '../../mock';
 
 import { EventDetails, EventsViewType } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -23,6 +23,16 @@ import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enric
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/cti/event_enrichment');
+
+jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
+  return {
+    useRuleWithFallback: jest.fn().mockReturnValue({
+      rule: {
+        note: 'investigation guide',
+      },
+    }),
+  };
+});
 
 jest.mock('../link_to');
 describe('EventDetails', () => {
@@ -37,6 +47,8 @@ describe('EventDetails', () => {
     timelineTabType: TimelineTabs.query,
     timelineId: 'test',
     eventView: EventsViewType.summaryView,
+    hostRisk: { fields: [], loading: true },
+    rawEventData,
   };
 
   const alertsProps = {
@@ -48,7 +60,12 @@ describe('EventDetails', () => {
   let wrapper: ReactWrapper;
   let alertsWrapper: ReactWrapper;
   beforeAll(async () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({});
+    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
+      result: [],
+      range: { to: 'now', from: 'now-30d' },
+      setRange: jest.fn(),
+      loading: false,
+    });
     wrapper = mount(
       <TestProviders>
         <EventDetails {...defaultProps} />
@@ -63,7 +80,7 @@ describe('EventDetails', () => {
   });
 
   describe('tabs', () => {
-    ['Table', 'JSON View'].forEach((tab) => {
+    ['Table', 'JSON'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
         expect(
           wrapper
@@ -82,26 +99,44 @@ describe('EventDetails', () => {
   });
 
   describe('alerts tabs', () => {
-    ['Summary', 'Threat Intel', 'Table', 'JSON View'].forEach((tab) => {
+    ['Overview', 'Threat Intel', 'Table', 'JSON'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
-        const expectedCopy = tab === 'Threat Intel' ? `${tab} (1)` : tab;
         expect(
           alertsWrapper
             .find('[data-test-subj="eventDetails"]')
             .find('[role="tablist"]')
-            .containsMatchingElement(<span>{expectedCopy}</span>)
+            .containsMatchingElement(<span>{tab}</span>)
         ).toBeTruthy();
       });
     });
 
-    test('the Summary tab is selected by default', () => {
+    test('the Overview tab is selected by default', () => {
       expect(
         alertsWrapper
           .find('[data-test-subj="eventDetails"]')
           .find('.euiTab-isSelected')
           .first()
           .text()
-      ).toEqual('Summary');
+      ).toEqual('Overview');
+    });
+
+    test('Enrichment count is displayed as a notification', () => {
+      expect(
+        alertsWrapper.find('[data-test-subj="enrichment-count-notification"]').hostNodes().text()
+      ).toEqual('1');
+    });
+  });
+
+  describe('summary view tab', () => {
+    it('render investigation guide', () => {
+      expect(alertsWrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(true);
+    });
+  });
+
+  describe('threat intel tab', () => {
+    it('renders a "no enrichments" panel view if there are no enrichments', () => {
+      alertsWrapper.find('[data-test-subj="threatIntelTab"]').first().simulate('click');
+      expect(alertsWrapper.find('[data-test-subj="no-enrichments-found"]').exists()).toEqual(true);
     });
   });
 });

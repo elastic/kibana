@@ -6,7 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RuleDataClient } from '../../../../../../rule_registry/server';
 import { updateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -19,14 +18,14 @@ import { buildSiemResponse } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRules } from '../../rules/update_rules';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { legacyMigrate } from '../../rules/utils';
+import { readRules } from '../../rules/read_rules';
 
 export const updateRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: RuleDataClient | null
+  isRuleRegistryEnabled: boolean
 ) => {
   router.put(
     {
@@ -45,12 +44,11 @@ export const updateRulesRoute = (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const alertsClient = context.alerting?.getAlertsClient();
+        const rulesClient = context.alerting?.getRulesClient();
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
 
-        if (!siemClient || !alertsClient) {
+        if (!siemClient || !rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
@@ -62,34 +60,40 @@ export const updateRulesRoute = (
         });
         throwHttpError(await mlAuthz.validateRuleType(request.body.type));
 
-        const rule = await updateRules({
-          alertsClient,
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+
+        const existingRule = await readRules({
+          isRuleRegistryEnabled,
+          rulesClient,
+          ruleId: request.body.rule_id,
+          id: request.body.id,
+        });
+
+        await legacyMigrate({
+          rulesClient,
           savedObjectsClient,
+          rule: existingRule,
+        });
+        const rule = await updateRules({
           defaultOutputIndex: siemClient.getSignalsIndex(),
+          isRuleRegistryEnabled,
+          rulesClient,
+          ruleStatusClient,
+          savedObjectsClient,
           ruleUpdate: request.body,
+          spaceId: context.securitySolution.getSpaceId(),
         });
 
         if (rule != null) {
-          const ruleActions = await updateRulesNotifications({
-            ruleAlertId: rule.id,
-            alertsClient,
-            savedObjectsClient,
-            enabled: request.body.enabled ?? true,
-            actions: request.body.actions ?? [],
-            throttle: request.body.throttle ?? 'no_actions',
-            name: request.body.name,
-          });
           const ruleStatuses = await ruleStatusClient.find({
-            perPage: 1,
-            sortField: 'statusDate',
-            sortOrder: 'desc',
-            search: rule.id,
-            searchFields: ['alertId'],
+            logsCount: 1,
+            ruleId: rule.id,
+            spaceId: context.securitySolution.getSpaceId(),
           });
           const [validated, errors] = transformValidate(
             rule,
-            ruleActions,
-            ruleStatuses.saved_objects[0]
+            ruleStatuses[0],
+            isRuleRegistryEnabled
           );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });

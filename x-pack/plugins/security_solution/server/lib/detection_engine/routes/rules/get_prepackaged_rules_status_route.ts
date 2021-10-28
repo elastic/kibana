@@ -20,7 +20,7 @@ import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';
 import { getLatestPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset_saved_objects_client';
+import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset/rule_asset_saved_objects_client';
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
@@ -32,7 +32,8 @@ import {
 export const getPrepackagedRulesStatusRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  security: SetupPlugins['security']
+  security: SetupPlugins['security'],
+  isRuleRegistryEnabled: boolean
 ) => {
   router.get(
     {
@@ -45,17 +46,22 @@ export const getPrepackagedRulesStatusRoute = (
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
       const siemResponse = buildSiemResponse(response);
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
       const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
 
-      if (!alertsClient) {
+      if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
       try {
-        const latestPrepackagedRules = await getLatestPrepackagedRules(ruleAssetsClient);
+        const latestPrepackagedRules = await getLatestPrepackagedRules(
+          ruleAssetsClient,
+          config.prebuiltRulesFromFileSystem,
+          config.prebuiltRulesFromSavedObjects
+        );
         const customRules = await findRules({
-          alertsClient,
+          isRuleRegistryEnabled,
+          rulesClient,
           perPage: 1,
           page: 1,
           sortField: 'enabled',
@@ -64,7 +70,10 @@ export const getPrepackagedRulesStatusRoute = (
           fields: undefined,
         });
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
+        const prepackagedRules = await getExistingPrepackagedRules({
+          rulesClient,
+          isRuleRegistryEnabled,
+        });
 
         const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);

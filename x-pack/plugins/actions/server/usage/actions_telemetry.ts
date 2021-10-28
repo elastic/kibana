@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  SavedObjectsBaseOptions,
-  SavedObjectsBulkGetObject,
-  SavedObjectsBulkResponse,
-} from 'kibana/server';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from 'kibana/server';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
-import { ActionResult } from '../types';
+import { ActionResult, PreConfiguredAction } from '../types';
 
-export async function getTotalCount(esClient: ElasticsearchClient, kibanaIndex: string) {
+export async function getTotalCount(
+  esClient: ElasticsearchClient,
+  kibanaIndex: string,
+  preconfiguredActions?: PreConfiguredAction[]
+) {
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.types = [:]',
@@ -43,6 +43,7 @@ export async function getTotalCount(esClient: ElasticsearchClient, kibanaIndex: 
 
   const { body: searchResult } = await esClient.search({
     index: kibanaIndex,
+    size: 0,
     body: {
       query: {
         bool: {
@@ -56,34 +57,41 @@ export async function getTotalCount(esClient: ElasticsearchClient, kibanaIndex: 
   });
   // @ts-expect-error aggegation type is not specified
   const aggs = searchResult.aggregations?.byActionTypeId.value?.types;
+  const countByType = Object.keys(aggs).reduce(
+    // ES DSL aggregations are returned as `any` by esClient.search
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (obj: any, key: string) => ({
+      ...obj,
+      [replaceFirstAndLastDotSymbols(key)]: aggs[key],
+    }),
+    {}
+  );
+  if (preconfiguredActions && preconfiguredActions.length) {
+    for (const preconfiguredAction of preconfiguredActions) {
+      const actionTypeId = replaceFirstAndLastDotSymbols(preconfiguredAction.actionTypeId);
+      countByType[actionTypeId] = countByType[actionTypeId] || 0;
+      countByType[actionTypeId]++;
+    }
+  }
   return {
-    countTotal: Object.keys(aggs).reduce(
-      (total: number, key: string) => parseInt(aggs[key], 0) + total,
-      0
-    ),
-    countByType: Object.keys(aggs).reduce(
-      // ES DSL aggregations are returned as `any` by esClient.search
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (obj: any, key: string) => ({
-        ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: aggs[key],
-      }),
-      {}
-    ),
+    countTotal:
+      Object.keys(aggs).reduce((total: number, key: string) => parseInt(aggs[key], 10) + total, 0) +
+      (preconfiguredActions?.length ?? 0),
+    countByType,
   };
 }
 
 export async function getInUseTotalCount(
   esClient: ElasticsearchClient,
-  actionsBulkGet: (
-    objects?: SavedObjectsBulkGetObject[] | undefined,
-    options?: SavedObjectsBaseOptions | undefined
-  ) => Promise<SavedObjectsBulkResponse<ActionResult<Record<string, unknown>>>>,
-  kibanaIndex: string
+  kibanaIndex: string,
+  referenceType?: string,
+  preconfiguredActions?: PreConfiguredAction[]
 ): Promise<{
   countTotal: number;
   countByType: Record<string, number>;
   countByAlertHistoryConnectorType: number;
+  countEmailByService: Record<string, number>;
+  countNamespaces: number;
 }> {
   const scriptedMetric = {
     scripted_metric: {
@@ -120,33 +128,115 @@ export async function getInUseTotalCount(
     },
   };
 
+  const preconfiguredActionsScriptedMetric = {
+    scripted_metric: {
+      init_script: 'state.actionRefs = new HashMap(); state.total = 0;',
+      map_script: `
+        String actionRef = doc['alert.actions.actionRef'].value;
+        String actionTypeId = doc['alert.actions.actionTypeId'].value;
+        if (actionRef.startsWith('preconfigured:') && state.actionRefs[actionRef] === null) {
+          HashMap map = new HashMap();
+          map.actionRef = actionRef;
+          map.actionTypeId = actionTypeId;
+          state.actionRefs[actionRef] = map;
+          state.total++;
+        }
+      `,
+      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+      // Despite docs that say this is optional, this script can't be blank.
+      combine_script: 'return state',
+      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+      // This also needs to account for having no data
+      reduce_script: `
+          Map actionRefs = [:];
+          long total = 0;
+          for (state in states) {
+            if (state !== null) {
+              total += state.total;
+              for (String k : state.actionRefs.keySet()) {
+                actionRefs.put(k, state.actionRefs.get(k));
+              }
+            }
+          }
+          Map result = new HashMap();
+          result.total = total;
+          result.actionRefs = actionRefs;
+          return result;
+      `,
+    },
+  };
+
+  const mustQuery = [
+    {
+      bool: {
+        should: [
+          {
+            nested: {
+              path: 'references',
+              query: {
+                bool: {
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'references.type': 'action',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            nested: {
+              path: 'alert.actions',
+              query: {
+                bool: {
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          prefix: {
+                            'alert.actions.actionRef': {
+                              value: 'preconfigured:',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  ] as QueryDslQueryContainer[];
+
+  if (!!referenceType) {
+    mustQuery.push({
+      term: { type: referenceType },
+    });
+  }
+
   const { body: actionResults } = await esClient.search({
     index: kibanaIndex,
+    size: 0,
     body: {
       query: {
         bool: {
           filter: {
             bool: {
-              must: {
-                nested: {
-                  path: 'references',
-                  query: {
-                    bool: {
-                      filter: {
-                        bool: {
-                          must: [
-                            {
-                              term: {
-                                'references.type': 'action',
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    },
-                  },
+              must_not: {
+                term: {
+                  type: 'action_task_params',
                 },
               },
+              must: mustQuery,
             },
           },
         },
@@ -160,27 +250,54 @@ export async function getInUseTotalCount(
             actionRefIds: scriptedMetric,
           },
         },
+        preconfigured_actions: {
+          nested: {
+            path: 'alert.actions',
+          },
+          aggs: {
+            preconfiguredActionRefIds: preconfiguredActionsScriptedMetric,
+          },
+        },
       },
     },
   });
 
   // @ts-expect-error aggegation type is not specified
   const aggs = actionResults.aggregations.refs.actionRefIds.value;
-  const bulkFilter = Object.entries(aggs.connectorIds).map(([key]) => ({
-    id: key,
-    type: 'action',
-    fields: ['id', 'actionTypeId'],
-  }));
-  const actions = await actionsBulkGet(bulkFilter);
+  const preconfiguredActionsAggs =
+    // @ts-expect-error aggegation type is not specified
+    actionResults.aggregations.preconfigured_actions?.preconfiguredActionRefIds.value;
 
-  // filter out preconfigured connectors, which are not saved objects and return
-  // an error in the bulk response
-  const actionsWithActionTypeId = actions.saved_objects.filter(
-    (action) => action?.attributes?.actionTypeId != null
-  );
-  const countByActionTypeId = actionsWithActionTypeId.reduce(
+  const {
+    body: { hits: actions },
+  } = await esClient.search<{
+    action: ActionResult;
+    namespaces: string[];
+  }>({
+    index: kibanaIndex,
+    _source_includes: ['action', 'namespaces'],
+    body: {
+      query: {
+        bool: {
+          must: [
+            {
+              term: { type: 'action' },
+            },
+            {
+              terms: {
+                _id: Object.entries(aggs.connectorIds).map(([key]) => `action:${key}`),
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+
+  const countByActionTypeId = actions.hits.reduce(
     (actionTypeCount: Record<string, number>, action) => {
-      const alertTypeId = replaceFirstAndLastDotSymbols(action.attributes.actionTypeId);
+      const actionSource = action._source!;
+      const alertTypeId = replaceFirstAndLastDotSymbols(actionSource.action.actionTypeId);
       const currentCount =
         actionTypeCount[alertTypeId] !== undefined ? actionTypeCount[alertTypeId] : 0;
       actionTypeCount[alertTypeId] = currentCount + 1;
@@ -189,15 +306,70 @@ export async function getInUseTotalCount(
     {}
   );
 
-  const preconfiguredAlertHistoryConnector = actions.saved_objects.filter(
-    (action) => action.id === AlertHistoryEsIndexConnectorId
-  );
+  const namespacesList = actions.hits.reduce((_namespaces: Set<string>, action) => {
+    const namespaces = action._source?.namespaces ?? ['default'];
+    namespaces.forEach((namespace) => {
+      if (!_namespaces.has(namespace)) {
+        _namespaces.add(namespace);
+      }
+    });
+    return _namespaces;
+  }, new Set<string>());
+
+  const countEmailByService = actions.hits
+    .filter((action) => action._source!.action.actionTypeId === '.email')
+    .reduce((emailServiceCount: Record<string, number>, action) => {
+      const service = (action._source!.action.config?.service ?? 'other') as string;
+      const currentCount =
+        emailServiceCount[service] !== undefined ? emailServiceCount[service] : 0;
+      emailServiceCount[service] = currentCount + 1;
+      return emailServiceCount;
+    }, {});
+
+  let preconfiguredAlertHistoryConnectors = 0;
+  const preconfiguredActionsRefs: Array<{
+    actionTypeId: string;
+    actionRef: string;
+  }> = preconfiguredActionsAggs ? Object.values(preconfiguredActionsAggs?.actionRefs) : [];
+  for (const { actionRef, actionTypeId: rawActionTypeId } of preconfiguredActionsRefs) {
+    const actionTypeId = replaceFirstAndLastDotSymbols(rawActionTypeId);
+    countByActionTypeId[actionTypeId] = countByActionTypeId[actionTypeId] || 0;
+    countByActionTypeId[actionTypeId]++;
+    if (actionRef === `preconfigured:${AlertHistoryEsIndexConnectorId}`) {
+      preconfiguredAlertHistoryConnectors++;
+    }
+    if (preconfiguredActions && actionTypeId === '__email') {
+      const preconfiguredConnectorId = actionRef.split(':')[1];
+      const service = (preconfiguredActions.find(
+        (preconfConnector) => preconfConnector.id === preconfiguredConnectorId
+      )?.config?.service ?? 'other') as string;
+      const currentCount =
+        countEmailByService[service] !== undefined ? countEmailByService[service] : 0;
+      countEmailByService[service] = currentCount + 1;
+    }
+  }
 
   return {
-    countTotal: aggs.total,
+    countTotal: aggs.total + (preconfiguredActionsAggs?.total ?? 0),
     countByType: countByActionTypeId,
-    countByAlertHistoryConnectorType: preconfiguredAlertHistoryConnector.length,
+    countByAlertHistoryConnectorType: preconfiguredAlertHistoryConnectors,
+    countEmailByService,
+    countNamespaces: namespacesList.size,
   };
+}
+
+export async function getInUseByAlertingTotalCounts(
+  esClient: ElasticsearchClient,
+  kibanaIndex: string,
+  preconfiguredActions?: PreConfiguredAction[]
+): Promise<{
+  countTotal: number;
+  countByType: Record<string, number>;
+  countByAlertHistoryConnectorType: number;
+  countEmailByService: Record<string, number>;
+  countNamespaces: number;
+}> {
+  return await getInUseTotalCount(esClient, kibanaIndex, 'alert', preconfiguredActions);
 }
 
 function replaceFirstAndLastDotSymbols(strToReplace: string) {

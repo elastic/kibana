@@ -11,15 +11,17 @@ export { config, configSchema } from './elasticsearch_config';
 export { ElasticsearchConfig } from './elasticsearch_config';
 export type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 export type {
+  ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
+  InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
   FakeRequest,
   ScopeableRequest,
+  ElasticsearchConfigPreboot,
 } from './types';
-export * from './legacy';
 export type {
   IClusterClient,
   ICustomClusterClient,
@@ -33,4 +35,6 @@ export type {
   ShardsResponse,
   GetResponse,
   DeleteDocumentResponse,
+  ElasticsearchErrorDetails,
 } from './client';
+export { getRequestDebugMeta, getErrorMessage } from './client';

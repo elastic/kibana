@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
-import { useRouterNavigate } from '../../../common/lib/kibana';
+import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { ActionsTable } from '../../../actions/actions_table';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const LiveQueriesPageComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   useBreadcrumbs('live_queries');
   const newQueryLinkProps = useRouterNavigate('live_queries/new');
 
@@ -23,15 +23,14 @@ const LiveQueriesPageComponent = () => {
     () => (
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.liveQueriesHistory.pageTitle"
                 defaultMessage="Live queries history"
               />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -40,14 +39,19 @@ const LiveQueriesPageComponent = () => {
 
   const RightColumn = useMemo(
     () => (
-      <EuiButton fill {...newQueryLinkProps} iconType="plusInCircle">
+      <EuiButton
+        fill
+        {...newQueryLinkProps}
+        iconType="plusInCircle"
+        isDisabled={!(permissions.writeLiveQueries || permissions.runSavedQueries)}
+      >
         <FormattedMessage
           id="xpack.osquery.liveQueriesHistory.newLiveQueryButtonLabel"
           defaultMessage="New live query"
         />
       </EuiButton>
     ),
-    [newQueryLinkProps]
+    [permissions.writeLiveQueries, permissions.runSavedQueries, newQueryLinkProps]
   );
 
   return (

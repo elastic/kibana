@@ -23,7 +23,8 @@ interface MetricsServiceSetupDeps {
 
 /** @internal */
 export class MetricsService
-  implements CoreService<InternalMetricsServiceSetup, InternalMetricsServiceStart> {
+  implements CoreService<InternalMetricsServiceSetup, InternalMetricsServiceStart>
+{
   private readonly logger: Logger;
   private readonly opsMetricsLogger: Logger;
   private metricsCollector?: OpsMetricsCollector;

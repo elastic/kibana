@@ -8,6 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 import rison from 'rison-node';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type {
   TimeRange,
   Filter,
@@ -17,13 +18,12 @@ import type {
 } from '../../../../src/plugins/data/public';
 import { esFilters } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
-import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
 import type { LocatorDefinition, LocatorPublic } from '../../../../src/plugins/share/public';
 import type { LayerDescriptor } from '../common/descriptor_types';
 import { INITIAL_LAYERS_KEY, APP_ID } from '../common/constants';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 
-export interface MapsAppLocatorParams extends SerializableState {
+export interface MapsAppLocatorParams extends SerializableRecord {
   /**
    * If given, it will load the given map else will load the create a new map page.
    */
@@ -37,12 +37,12 @@ export interface MapsAppLocatorParams extends SerializableState {
   /**
    * Optionally set the initial Layers.
    */
-  initialLayers?: LayerDescriptor[] & SerializableState;
+  initialLayers?: LayerDescriptor[] & SerializableRecord;
 
   /**
    * Optionally set the refresh interval.
    */
-  refreshInterval?: RefreshInterval & SerializableState;
+  refreshInterval?: RefreshInterval & SerializableRecord;
 
   /**
    * Optionally apply filers. NOTE: if given and used in conjunction with `mapId`, and the
@@ -99,11 +99,13 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     path = setStateToKbnUrl('_a', appState, { useHash }, path);
 
     if (initialLayers && initialLayers.length) {
-      const risonEncodedInitialLayers = ((rison as unknown) as {
-        encode_array: (
-          initialLayers: (LayerDescriptor[] & SerializableState) | undefined
-        ) => string;
-      }).encode_array(initialLayers);
+      const risonEncodedInitialLayers = (
+        rison as unknown as {
+          encode_array: (
+            initialLayers: (LayerDescriptor[] & SerializableRecord) | undefined
+          ) => string;
+        }
+      ).encode_array(initialLayers);
       path = `${path}&${INITIAL_LAYERS_KEY}=${encodeURIComponent(risonEncodedInitialLayers)}`;
     }
 
@@ -115,7 +117,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
   };
 }
 
-export interface MapsAppTileMapLocatorParams extends SerializableState {
+export interface MapsAppTileMapLocatorParams extends SerializableRecord {
   label: string;
   mapType: string;
   colorSchema: string;
@@ -138,7 +140,8 @@ export interface MapsAppTileMapLocatorDependencies {
 }
 
 export class MapsAppTileMapLocatorDefinition
-  implements LocatorDefinition<MapsAppTileMapLocatorParams> {
+  implements LocatorDefinition<MapsAppTileMapLocatorParams>
+{
   public readonly id = MAPS_APP_TILE_MAP_LOCATOR;
 
   constructor(protected readonly deps: MapsAppTileMapLocatorDependencies) {}
@@ -158,7 +161,7 @@ export class MapsAppTileMapLocatorDefinition
       hash = true,
     } = params;
     const mapModules = await lazyLoadMapModules();
-    const initialLayers = ([] as unknown) as LayerDescriptor[] & SerializableState;
+    const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
     const tileMapLayerDescriptor = mapModules.createTileMapLayerDescriptor({
       label,
       mapType,
@@ -183,7 +186,7 @@ export class MapsAppTileMapLocatorDefinition
   };
 }
 
-export interface MapsAppRegionMapLocatorParams extends SerializableState {
+export interface MapsAppRegionMapLocatorParams extends SerializableRecord {
   label: string;
   emsLayerId?: string;
   leftFieldName?: string;
@@ -209,7 +212,8 @@ export interface MapsAppRegionMapLocatorDependencies {
 }
 
 export class MapsAppRegionMapLocatorDefinition
-  implements LocatorDefinition<MapsAppRegionMapLocatorParams> {
+  implements LocatorDefinition<MapsAppRegionMapLocatorParams>
+{
   public readonly id = MAPS_APP_REGION_MAP_LOCATOR;
 
   constructor(protected readonly deps: MapsAppRegionMapLocatorDependencies) {}
@@ -232,7 +236,7 @@ export class MapsAppRegionMapLocatorDefinition
       hash = true,
     } = params;
     const mapModules = await lazyLoadMapModules();
-    const initialLayers = ([] as unknown) as LayerDescriptor[] & SerializableState;
+    const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
     const regionMapLayerDescriptor = mapModules.createRegionMapLayerDescriptor({
       label,
       emsLayerId,

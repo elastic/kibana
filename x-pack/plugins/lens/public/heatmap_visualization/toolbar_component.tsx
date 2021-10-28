@@ -9,9 +9,9 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { VisualizationToolbarProps } from '../types';
-import { LegendSettingsPopover } from '../shared_components';
-import { HeatmapVisualizationState } from './types';
+import type { VisualizationToolbarProps } from '../types';
+import { LegendSettingsPopover, ToolbarPopover, ValueLabelsSettings } from '../shared_components';
+import type { HeatmapVisualizationState } from './types';
 
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
   {
@@ -37,11 +37,29 @@ export const HeatmapToolbar = memo(
     const legendMode = state.legend.isVisible ? 'show' : 'hide';
 
     return (
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" responsive={false}>
+            <ToolbarPopover
+              title={i18n.translate('xpack.lens.shared.curveLabel', {
+                defaultMessage: 'Visual options',
+              })}
+              type="visualOptions"
+              groupPosition="left"
+              buttonDataTestSubj="lnsVisualOptionsButton"
+            >
+              <ValueLabelsSettings
+                valueLabels={state?.gridConfig.isCellLabelVisible ? 'inside' : 'hide'}
+                onValueLabelChange={(newMode) => {
+                  setState({
+                    ...state,
+                    gridConfig: { ...state.gridConfig, isCellLabelVisible: newMode === 'inside' },
+                  });
+                }}
+              />
+            </ToolbarPopover>
             <LegendSettingsPopover
-              groupPosition={'none'}
+              groupPosition={'right'}
               legendOptions={legendOptions}
               mode={legendMode}
               onDisplayChange={(optionId) => {
@@ -63,6 +81,21 @@ export const HeatmapToolbar = memo(
                 setState({
                   ...state,
                   legend: { ...state.legend, position: id as Position },
+                });
+              }}
+              maxLines={state?.legend.maxLines}
+              onMaxLinesChange={(val) => {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, maxLines: val },
+                });
+              }}
+              shouldTruncate={state?.legend.shouldTruncate ?? true}
+              onTruncateLegendChange={() => {
+                const current = state.legend.shouldTruncate ?? true;
+                setState({
+                  ...state,
+                  legend: { ...state.legend, shouldTruncate: !current },
                 });
               }}
             />

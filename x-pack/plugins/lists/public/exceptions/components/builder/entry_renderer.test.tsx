@@ -20,11 +20,9 @@ import {
   isOperator,
 } from '@kbn/securitysolution-list-utils';
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
+import { FieldSpec } from 'src/plugins/data/common';
 
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
@@ -374,31 +372,33 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it uses "correspondingKeywordField" if it exists', () => {
+    const correspondingKeywordField: FieldSpec = {
+      aggregatable: true,
+      count: 0,
+      esTypes: ['keyword'],
+      name: 'extension',
+      readFromDocValues: true,
+      scripted: false,
+      searchable: true,
+      type: 'string',
+    };
+    const field: FieldSpec = {
+      aggregatable: false,
+      count: 0,
+      esTypes: ['text'],
+      name: 'extension.text',
+      readFromDocValues: true,
+      scripted: false,
+      searchable: false,
+      type: 'string',
+    };
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
         entry={{
-          correspondingKeywordField: {
-            aggregatable: true,
-            count: 0,
-            esTypes: ['keyword'],
-            name: 'extension',
-            readFromDocValues: true,
-            scripted: false,
-            searchable: true,
-            type: 'string',
-          },
+          correspondingKeywordField,
           entryIndex: 0,
-          field: {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['text'],
-            name: 'extension.text',
-            readFromDocValues: true,
-            scripted: false,
-            searchable: false,
-            type: 'string',
-          },
+          field,
           id: '123',
           nested: undefined,
           operator: isOneOfOperator,
@@ -460,9 +460,11 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(0).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'machine.os' }]);
+    (
+      wrapper.find(EuiComboBox).at(0).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'machine.os' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       { field: 'machine.os', id: '123', operator: 'included', type: 'match', value: '' },
@@ -498,9 +500,11 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(1).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'is not' }]);
+    (
+      wrapper.find(EuiComboBox).at(1).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'is not' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '1234' },
@@ -536,12 +540,14 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-      onCreateOption: (a: string) => void;
-    }).onCreateOption('126.45.211.34');
+    (
+      wrapper.find(EuiComboBox).at(2).props() as unknown as {
+        onCreateOption: (a: string) => void;
+      }
+    ).onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '126.45.211.34' },
+      { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '127.0.0.1' },
       0
     );
   });
@@ -574,12 +580,14 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-      onCreateOption: (a: string) => void;
-    }).onCreateOption('126.45.211.34');
+    (
+      wrapper.find(EuiComboBox).at(2).props() as unknown as {
+        onCreateOption: (a: string) => void;
+      }
+    ).onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', id: '123', operator: 'included', type: 'match_any', value: ['126.45.211.34'] },
+      { field: 'ip', id: '123', operator: 'included', type: 'match_any', value: ['127.0.0.1'] },
       0
     );
   });
@@ -612,9 +620,11 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'some name' }]);
+    (
+      wrapper.find(EuiComboBox).at(2).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'some name' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       {
@@ -657,9 +667,11 @@ describe('BuilderEntryItem', () => {
     );
 
     await waitFor(() => {
-      ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-        onBlur: () => void;
-      }).onBlur();
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
     });
 
     expect(mockSetErrorExists).toHaveBeenCalledWith(true);
@@ -694,14 +706,18 @@ describe('BuilderEntryItem', () => {
     );
 
     await waitFor(() => {
-      ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-        onBlur: () => void;
-      }).onBlur();
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
 
       // Invalid input because field type is number
-      ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-        onSearchChange: (arg: string) => void;
-      }).onSearchChange('hellooo');
+      (
+        wrapper.find(EuiComboBox).at(2).props() as unknown as {
+          onSearchChange: (arg: string) => void;
+        }
+      ).onSearchChange('hellooo');
     });
 
     expect(mockSetErrorExists).toHaveBeenCalledWith(true);

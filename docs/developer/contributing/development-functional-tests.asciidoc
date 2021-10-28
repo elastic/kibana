@@ -185,8 +185,8 @@ node scripts/functional_test_runner --config test/functional/config.firefox.js
 [discrete]
 ==== Using the test_user service
 
-Tests should run at the positive security boundry condition, meaning that they should be run with the mimimum privileges required (and documented) and not as the superuser.
- This prevents the type of regression where additional privleges accidentally become required to perform the same action. 
+Tests should run at the positive security boundary condition, meaning that they should be run with the minimum privileges required (and documented) and not as the superuser.
+ This prevents the type of regression where additional privileges accidentally become required to perform the same action. 
  
 The functional UI tests now default to logging in with a user named `test_user` and the roles of this user can be changed dynamically without logging in and out.  
 
@@ -458,7 +458,7 @@ Bad example: `PageObjects.app.clickButton()`
 class AppPage {
   // what can people who call this method expect from the
   // UI after the promise resolves? Since the reaction to most
-  // clicks is asynchronous the behavior is dependant on timing
+  // clicks is asynchronous the behavior is dependent on timing
   // and likely to cause test that fail unexpectedly
   async clickButton () {
     await testSubjects.click(‘menuButton’);

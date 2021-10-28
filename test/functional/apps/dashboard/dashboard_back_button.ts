@@ -14,17 +14,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize', 'timePicker']);
   const browser = getService('browser');
+  const security = getService('security');
 
   describe('dashboard back button', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/dashboard/current/kibana'
       );
+      await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('after navigation from listing page to dashboard back button works', async () => {

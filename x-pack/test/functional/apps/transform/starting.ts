@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('should start the transform');
           await transform.table.assertTransformRowActionEnabled(transformId, 'Start', true);
-          await transform.table.clickTransformRowAction('Start');
+          await transform.table.clickTransformRowAction(transformId, 'Start');
           await transform.table.confirmStartTransform();
           await transform.table.clearSearchString(testDataList.length);
 

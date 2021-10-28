@@ -99,7 +99,6 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
               {
                 // only return documents with the matching _id
                 ids: {
-                  // @ts-expect-error expected string[]
                   values: _id,
                 },
               },

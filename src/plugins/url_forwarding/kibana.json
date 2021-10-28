@@ -3,5 +3,8 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["kibanaLegacy"]
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  }
 }

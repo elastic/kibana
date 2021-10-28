@@ -130,6 +130,7 @@ const mockedUseWaffleOptionsContexReturnValue: ReturnType<typeof useWaffleOption
   changeCustomMetrics: jest.fn(() => {}),
   changeLegend: jest.fn(() => {}),
   changeSort: jest.fn(() => {}),
+  changeTimelineOpen: jest.fn(() => {}),
   setWaffleOptionsState: jest.fn(() => {}),
   boundsOverride: { max: 1, min: 0 },
   autoBounds: true,

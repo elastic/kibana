@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
@@ -270,13 +270,13 @@ export const EventsTrData = styled.div.attrs(({ className = '' }) => ({
 const TIMELINE_EVENT_DETAILS_OFFSET = 40;
 
 interface WidthProp {
-  width?: number;
+  width: number;
 }
 
 export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width }) => ({
   role: 'dialog',
   style: {
-    width: `${width! - TIMELINE_EVENT_DETAILS_OFFSET}px`,
+    width: `${width - TIMELINE_EVENT_DETAILS_OFFSET}px`,
   },
 }))<WidthProp>``;
 
@@ -458,3 +458,28 @@ export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
     },
   })
 )<{ $isVisible: boolean }>``;
+
+export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean }>`
+  overflow: hidden;
+  margin: 0;
+  min-height: 490px;
+  display: ${({ $visible = true }) => ($visible ? 'flex' : 'none')};
+`;
+
+export const UpdatedFlexGroup = styled(EuiFlexGroup)`
+  position: absolute;
+  z-index: ${({ theme }) => theme.eui.euiZLevel1};
+  right: 0px;
+`;
+
+export const UpdatedFlexItem = styled(EuiFlexItem)<{ $show: boolean }>`
+  ${({ $show }) => ($show ? '' : 'visibility: hidden;')}
+`;
+
+export const AlertCount = styled.span`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
+  border-right: ${({ theme }) => theme.eui.euiBorderThin};
+  margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-right: ${({ theme }) => theme.eui.paddingSizes.m};
+`;

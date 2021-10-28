@@ -15,7 +15,6 @@ import {
   kibanaTestUser,
 } from '@kbn/test';
 import { defaultsDeep } from 'lodash';
-import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
@@ -33,7 +32,11 @@ const DEFAULTS_SETTINGS = {
     port: 0,
     xsrf: { disableProtection: true },
   },
-  logging: { silent: true },
+  logging: {
+    root: {
+      level: 'off',
+    },
+  },
   plugins: {},
   migrations: { skip: false },
 };
@@ -46,7 +49,6 @@ export function createRootWithSettings(
     configs: [],
     cliArgs: {
       dev: false,
-      silent: false,
       watch: false,
       basePath: false,
       runExamples: false,
@@ -99,12 +101,22 @@ export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
  */
 export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArgs> = {}) {
   const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
-    plugins: { scanDirs: [resolve(__dirname, '../../legacy/core_plugins')] },
     elasticsearch: {
       hosts: [esTestConfig.getUrl()],
       username: kibanaServerTestUser.username,
       password: kibanaServerTestUser.password,
     },
+    // createRootWithSettings sets default value to "true", so undefined should be threatened as "true".
+    ...(cliArgs.oss === false
+      ? {
+          // reporting loads headless browser, that prevents nodejs process from exiting and causes test flakiness
+          xpack: {
+            reporting: {
+              enabled: false,
+            },
+          },
+        }
+      : {}),
   };
 
   return createRootWithSettings(
@@ -237,6 +249,7 @@ export function createTestServers({
     startKibana: async () => {
       const root = createRootWithCorePlugins(kbnSettings);
 
+      await root.preboot();
       const coreSetup = await root.setup();
       const coreStart = await root.start();
 

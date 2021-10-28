@@ -54,7 +54,12 @@ export const DotExpander: FunctionComponent = () => {
         ]}
       />
 
-      <UseField config={fieldsConfig.path} component={Field} path="fields.path" />
+      <UseField
+        data-test-subj="pathField"
+        config={fieldsConfig.path}
+        component={Field}
+        path="fields.path"
+      />
     </>
   );
 };

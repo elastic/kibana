@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from 'src/plugins/share/public';
 import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
 import type { JobId } from './anomaly_detection_jobs/job';
@@ -184,6 +184,10 @@ export interface DataFrameAnalyticsQueryState {
   globalState?: MlCommonGlobalState;
 }
 
+export interface TrainedModelsQueryState {
+  modelId?: string;
+}
+
 export type DataFrameAnalyticsUrlState = MLPageState<
   | typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE
   | typeof ML_PAGES.DATA_FRAME_ANALYTICS_MAP
@@ -237,8 +241,7 @@ export type ExpandablePanels =
 export type ExplorationPageUrlState = {
   queryText: string;
   queryLanguage: SearchQueryLanguage;
-} & Pick<ListingPageUrlState, 'pageIndex' | 'pageSize'> &
-  { [key in ExpandablePanels]: boolean };
+} & Pick<ListingPageUrlState, 'pageIndex' | 'pageSize'> & { [key in ExpandablePanels]: boolean };
 
 /**
  * Union type of ML URL state based on page
@@ -251,8 +254,14 @@ export type MlLocatorState =
   | DataFrameAnalyticsExplorationUrlState
   | CalendarEditUrlState
   | FilterEditUrlState
-  | MlGenericUrlState;
+  | MlGenericUrlState
+  | TrainedModelsUrlState;
 
-export type MlLocatorParams = MlLocatorState & SerializableState;
+export type MlLocatorParams = MlLocatorState & SerializableRecord;
 
 export type MlLocator = LocatorPublic<MlLocatorParams>;
+
+export type TrainedModelsUrlState = MLPageState<
+  typeof ML_PAGES.TRAINED_MODELS_MANAGE,
+  TrainedModelsQueryState | undefined
+>;

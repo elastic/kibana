@@ -14,18 +14,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
+  const soInfo = getService('savedObjectInfo');
+  const log = getService('log');
 
   describe('spaces feature controls', function () {
     this.tags(['skipFirefox']);
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
+    after(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['canvas-workpad'] });
+      await soInfo.logSoTypes(log);
+    });
+
     describe('space with no features disabled', () => {
+      const canvasDefaultArchive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
+
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
+        await kibanaServer.importExport.load(canvasDefaultArchive);
 
         await spacesService.create({
           id: 'custom_space',
@@ -36,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/canvas/default');
+        await kibanaServer.importExport.unload(canvasDefaultArchive);
       });
 
       it('shows canvas navlink', async () => {
@@ -81,10 +92,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('space with Canvas disabled', () => {
+      const spaceWithCanvasDisabledArchive =
+        'x-pack/test/functional/fixtures/kbn_archiver/spaces/disabled_features';
+
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/spaces/disabled_features');
+        await kibanaServer.importExport.load(spaceWithCanvasDisabledArchive);
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -94,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/spaces/disabled_features');
+        await kibanaServer.importExport.unload(spaceWithCanvasDisabledArchive);
       });
 
       it(`doesn't show canvas navlink`, async () => {

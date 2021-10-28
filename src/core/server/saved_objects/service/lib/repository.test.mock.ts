@@ -7,7 +7,9 @@
  */
 
 import type { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
+import type { internalBulkResolve } from './internal_bulk_resolve';
 import type * as InternalUtils from './internal_utils';
+import type { preflightCheckForCreate } from './preflight_check_for_create';
 import type { updateObjectsSpaces } from './update_objects_spaces';
 
 export const mockCollectMultiNamespaceReferences = jest.fn() as jest.MockedFunction<
@@ -18,8 +20,17 @@ jest.mock('./collect_multi_namespace_references', () => ({
   collectMultiNamespaceReferences: mockCollectMultiNamespaceReferences,
 }));
 
+export const mockInternalBulkResolve = jest.fn() as jest.MockedFunction<typeof internalBulkResolve>;
+
+jest.mock('./internal_bulk_resolve', () => ({
+  internalBulkResolve: mockInternalBulkResolve,
+}));
+
 export const mockGetBulkOperationError = jest.fn() as jest.MockedFunction<
   typeof InternalUtils['getBulkOperationError']
+>;
+export const mockGetCurrentTime = jest.fn() as jest.MockedFunction<
+  typeof InternalUtils['getCurrentTime']
 >;
 
 jest.mock('./internal_utils', () => {
@@ -27,8 +38,17 @@ jest.mock('./internal_utils', () => {
   return {
     ...actual,
     getBulkOperationError: mockGetBulkOperationError,
+    getCurrentTime: mockGetCurrentTime,
   };
 });
+
+export const mockPreflightCheckForCreate = jest.fn() as jest.MockedFunction<
+  typeof preflightCheckForCreate
+>;
+
+jest.mock('./preflight_check_for_create', () => ({
+  preflightCheckForCreate: mockPreflightCheckForCreate,
+}));
 
 export const mockUpdateObjectsSpaces = jest.fn() as jest.MockedFunction<typeof updateObjectsSpaces>;
 

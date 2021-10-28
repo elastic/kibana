@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { JsonObject } from '@kbn/utility-types';
+
 import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import type { Ecs } from '../../../../ecs';
 import type { CursorType, Inspect, Maybe, PaginationInputPaginated } from '../../../common';
@@ -28,6 +30,7 @@ export interface TimelineNonEcsData {
 }
 
 export interface TimelineEventsAllStrategyResponse extends IEsSearchResponse {
+  consumers: Record<string, number>;
   edges: TimelineEdges[];
   totalCount: number;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
@@ -39,4 +42,5 @@ export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsP
   fieldRequested: string[];
   language: 'eql' | 'kuery' | 'lucene';
   excludeEcsData?: boolean;
+  authFilter?: JsonObject;
 }

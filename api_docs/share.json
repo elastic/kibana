@@ -9,10 +9,7 @@
         "tags": [],
         "label": "KibanaURL",
         "description": [],
-        "source": {
-          "path": "src/plugins/share/public/kibana_url.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/share/public/kibana_url.ts",
         "deprecated": false,
         "children": [
           {
@@ -22,10 +19,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "source": {
-              "path": "src/plugins/share/public/kibana_url.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/share/public/kibana_url.ts",
             "deprecated": false
           },
           {
@@ -35,10 +29,7 @@
             "tags": [],
             "label": "appName",
             "description": [],
-            "source": {
-              "path": "src/plugins/share/public/kibana_url.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/share/public/kibana_url.ts",
             "deprecated": false
           },
           {
@@ -48,10 +39,7 @@
             "tags": [],
             "label": "appPath",
             "description": [],
-            "source": {
-              "path": "src/plugins/share/public/kibana_url.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/share/public/kibana_url.ts",
             "deprecated": false
           },
           {
@@ -64,10 +52,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/share/public/kibana_url.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/share/public/kibana_url.ts",
             "deprecated": false,
             "children": [
               {
@@ -80,10 +65,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "src/plugins/share/public/kibana_url.ts",
-                  "lineNumber": 16
-                },
+                "path": "src/plugins/share/public/kibana_url.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -122,10 +104,7 @@
           "UrlGeneratorsStart",
           ", object, object>"
         ],
-        "source": {
-          "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-          "lineNumber": 35
-        },
+        "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -138,10 +117,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 40
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -165,10 +141,7 @@
               "<object, unknown>) => ",
               "UrlGeneratorsSetup"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 42
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -188,10 +161,7 @@
                   },
                   "<object, unknown>"
                 ],
-                "source": {
-                  "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-                  "lineNumber": 42
-                },
+                "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -217,10 +187,7 @@
               ") => ",
               "UrlGeneratorsStart"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 55
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
             "deprecated": false,
             "children": [
               {
@@ -239,10 +206,7 @@
                     "text": "CoreStart"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-                  "lineNumber": 55
-                },
+                "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -259,10 +223,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 62
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -292,10 +253,7 @@
           },
           ") => Promise<void>"
         ],
-        "source": {
-          "path": "src/plugins/share/public/lib/download_as.ts",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/share/public/lib/download_as.ts",
         "deprecated": false,
         "children": [
           {
@@ -310,10 +268,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "src/plugins/share/public/lib/download_as.ts",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/share/public/lib/download_as.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -335,10 +290,7 @@
                 "text": "DownloadableContent"
               }
             ],
-            "source": {
-              "path": "src/plugins/share/public/lib/download_as.ts",
-              "lineNumber": 23
-            },
+            "path": "src/plugins/share/public/lib/download_as.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -368,10 +320,7 @@
           },
           ">) => Promise<void>"
         ],
-        "source": {
-          "path": "src/plugins/share/public/lib/download_as.ts",
-          "lineNumber": 34
-        },
+        "path": "src/plugins/share/public/lib/download_as.ts",
         "deprecated": false,
         "children": [
           {
@@ -394,10 +343,7 @@
               },
               ">"
             ],
-            "source": {
-              "path": "src/plugins/share/public/lib/download_as.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/share/public/lib/download_as.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -417,11 +363,11 @@
         "signature": [
           "<P extends ",
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
           },
           ">(locator: ",
           {
@@ -435,10 +381,7 @@
           "LocatorGetUrlParams",
           " | undefined, deps?: React.DependencyList) => string"
         ],
-        "source": {
-          "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
         "deprecated": false,
         "children": [
           {
@@ -458,10 +401,7 @@
               },
               "<P> | null | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "isRequired": false
           },
@@ -475,10 +415,7 @@
             "signature": [
               "P"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -493,10 +430,7 @@
               "LocatorGetUrlParams",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "isRequired": false
           },
@@ -510,10 +444,7 @@
             "signature": [
               "React.DependencyList"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -536,10 +467,7 @@
           "KibanaLocation",
           "<S>"
         ],
-        "source": {
-          "path": "src/plugins/share/common/url_service/locators/types.ts",
-          "lineNumber": 110
-        },
+        "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -551,10 +479,7 @@
             "description": [
               "\nKibana application ID."
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 114
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false
           },
           {
@@ -566,10 +491,7 @@
             "description": [
               "\nA relative URL path within a Kibana application."
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 119
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false
           },
           {
@@ -584,10 +506,7 @@
             "signature": [
               "S"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 125
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false
           }
         ],
@@ -620,10 +539,7 @@
           },
           "<P>>"
         ],
-        "source": {
-          "path": "src/plugins/share/common/url_service/locators/types.ts",
-          "lineNumber": 34
-        },
+        "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -635,10 +551,7 @@
             "description": [
               "\nUnique ID of the locator. Should be constant and unique across Kibana."
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false
           },
           {
@@ -655,10 +568,7 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 47
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -673,10 +583,7 @@
                 "signature": [
                   "P"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 47
-                },
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -713,12 +620,19 @@
           },
           "<P>"
         ],
-        "source": {
-          "path": "src/plugins/share/common/url_service/locators/types.ts",
-          "lineNumber": 53
-        },
+        "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.LocatorPublic.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "share",
             "id": "def-public.LocatorPublic.getLocation",
@@ -733,10 +647,7 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 59
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -751,10 +662,7 @@
                 "signature": [
                   "P"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 59
-                },
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -765,7 +673,9 @@
             "parentPluginId": "share",
             "id": "def-public.LocatorPublic.getUrl",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "getUrl",
             "description": [
               "\nReturns a URL as a string.\n"
@@ -775,11 +685,118 @@
               "LocatorGetUrlParams",
               " | undefined) => Promise<string>"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 67
-            },
-            "deprecated": false,
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/contexts/kibana/use_create_url.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/contexts/kibana/use_create_url.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/components/navigation_menu/main_tabs.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/anomaly_detection_panel.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/anomaly_detection_panel.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_view/use_view_action.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_map/use_map_action.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/analytics_panel/analytics_panel.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/index_data_visualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/index_data_visualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/file_based/file_datavisualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/file_based/file_datavisualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/components/controls.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/job_map.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/routing/routes/data_frame_analytics/analytics_job_exploration.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/components/anomaly_results_view_selector/anomaly_results_view_selector.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/timeseriesexplorer/components/timeseriesexplorer_no_jobs_found/timeseriesexplorer_no_jobs_found.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/app.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/ui_actions/open_in_anomaly_explorer_action.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/ui_actions/open_in_anomaly_explorer_action.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/components/logging/log_analysis_setup/setup_flyout/module_list_card.tsx"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/public/management/ilm_policy_link.tsx"
+              },
+              {
+                "plugin": "ingestPipelines",
+                "path": "x-pack/plugins/ingest_pipelines/public/locator.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "share",
@@ -793,10 +810,7 @@
                 "signature": [
                   "P"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 67
-                },
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -813,10 +827,60 @@
                   "LocatorGetUrlParams",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 67
-                },
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.LocatorPublic.getRedirectUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getRedirectUrl",
+            "description": [
+              "\nReturns a URL to the redirect endpoint, which will redirect the user to\nthe final destination.\n"
+            ],
+            "signature": [
+              "(params: P, options?: ",
+              "FormatSearchParamsOptions",
+              " | undefined) => string"
+            ],
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.LocatorPublic.getRedirectUrl.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-public.LocatorPublic.getRedirectUrl.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "URL serialization options."
+                ],
+                "signature": [
+                  "FormatSearchParamsOptions",
+                  " | undefined"
+                ],
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -837,10 +901,7 @@
               "LocatorNavigationParams",
               " | undefined) => Promise<void>"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 77
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -855,10 +916,7 @@
                 "signature": [
                   "P"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 77
-                },
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -875,10 +933,7 @@
                   "LocatorNavigationParams",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 77
-                },
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -899,16 +954,12 @@
               "LocatorGetUrlParams",
               " | undefined, deps?: React.DependencyList | undefined) => string"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 83
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "share",
-                "id": "def-public.params",
+                "id": "def-public.LocatorPublic.useUrl.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
@@ -916,15 +967,13 @@
                 "signature": [
                   "P"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 83
-                },
-                "deprecated": false
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "share",
-                "id": "def-public.getUrlParams",
+                "id": "def-public.LocatorPublic.useUrl.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "getUrlParams",
@@ -933,15 +982,13 @@
                   "LocatorGetUrlParams",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 83
-                },
-                "deprecated": false
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": false
               },
               {
                 "parentPluginId": "share",
-                "id": "def-public.deps",
+                "id": "def-public.LocatorPublic.useUrl.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "deps",
@@ -949,13 +996,68 @@
                 "signature": [
                   "React.DependencyList | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 83
-                },
-                "deprecated": false
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.RedirectOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "RedirectOptions",
+        "description": [],
+        "signature": [
+          "RedirectOptions",
+          "<P>"
+        ],
+        "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.RedirectOptions.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Locator ID."
+            ],
+            "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.RedirectOptions.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "Kibana version when locator params were generated."
+            ],
+            "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.RedirectOptions.params",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [
+              "Locator params."
+            ],
+            "signature": [
+              "P"
+            ],
+            "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -967,10 +1069,7 @@
         "tags": [],
         "label": "ShareContext",
         "description": [],
-        "source": {
-          "path": "src/plugins/share/public/types.ts",
-          "lineNumber": 23
-        },
+        "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -980,10 +1079,7 @@
             "tags": [],
             "label": "objectType",
             "description": [],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 24
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           },
           {
@@ -996,10 +1092,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           },
           {
@@ -1011,10 +1104,7 @@
             "description": [
               "\nCurrent url for sharing. This can be set in cases where `window.location.href`\ndoes not contain a shareable URL (e.g. if using session storage to store the current\napp state is enabled). In these cases the property should contain the URL in a\nformat which makes it possible to use it without having access to any other state\nlike the current session.\n\nIf not set it will default to `window.location.href`"
             ],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 35
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           },
           {
@@ -1027,10 +1117,7 @@
             "signature": [
               "{ [key: string]: unknown; }"
             ],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           },
           {
@@ -1040,10 +1127,7 @@
             "tags": [],
             "label": "isDirty",
             "description": [],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 37
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           },
           {
@@ -1056,13 +1140,10 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "share",
@@ -1076,11 +1157,25 @@
               "Capabilities",
               ") => boolean) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 39
-            },
-            "deprecated": false
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.ShareContext.showPublicUrlSwitch.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "anonymousUserCapabilities",
+                "description": [],
+                "signature": [
+                  "Capabilities"
+                ],
+                "path": "src/plugins/share/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1102,12 +1197,9 @@
           },
           " extends Pick<",
           "EuiContextMenuPanelItemDescriptorEntry",
-          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"disabled\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
+          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"disabled\" | \"data-test-subj\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
         ],
-        "source": {
-          "path": "src/plugins/share/public/types.ts",
-          "lineNumber": 48
-        },
+        "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1117,10 +1209,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 50
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           },
           {
@@ -1133,10 +1222,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 51
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           }
         ],
@@ -1149,10 +1235,7 @@
         "tags": [],
         "label": "ShareMenuItem",
         "description": [],
-        "source": {
-          "path": "src/plugins/share/public/types.ts",
-          "lineNumber": 59
-        },
+        "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1171,10 +1254,7 @@
                 "text": "ShareContextMenuPanelItem"
               }
             ],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 60
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           },
           {
@@ -1187,10 +1267,7 @@
             "signature": [
               "EuiContextMenuPanelDescriptor"
             ],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 61
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           }
         ],
@@ -1203,10 +1280,7 @@
         "tags": [],
         "label": "ShareMenuProvider",
         "description": [],
-        "source": {
-          "path": "src/plugins/share/public/types.ts",
-          "lineNumber": 71
-        },
+        "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1216,10 +1290,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 72
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           },
           {
@@ -1248,16 +1319,12 @@
               },
               "[]"
             ],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 74
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "share",
-                "id": "def-public.context",
+                "id": "def-public.ShareMenuProvider.getShareMenuItems.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -1271,13 +1338,12 @@
                     "text": "ShareContext"
                   }
                 ],
-                "source": {
-                  "path": "src/plugins/share/public/types.ts",
-                  "lineNumber": 74
-                },
-                "deprecated": false
+                "path": "src/plugins/share/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1307,10 +1373,7 @@
           },
           ", \"objectType\" | \"objectId\" | \"shareableUrl\" | \"sharingData\" | \"isDirty\" | \"showPublicUrlSwitch\">"
         ],
-        "source": {
-          "path": "src/plugins/share/public/types.ts",
-          "lineNumber": 87
-        },
+        "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1323,10 +1386,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 88
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           },
           {
@@ -1336,10 +1396,7 @@
             "tags": [],
             "label": "allowEmbed",
             "description": [],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 89
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           },
           {
@@ -1349,10 +1406,7 @@
             "tags": [],
             "label": "allowShortUrl",
             "description": [],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 90
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           },
           {
@@ -1366,10 +1420,7 @@
               "UrlParamExtension",
               "[] | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 91
-            },
+            "path": "src/plugins/share/public/types.ts",
             "deprecated": false
           }
         ],
@@ -1392,10 +1443,7 @@
           },
           "<Id>"
         ],
-        "source": {
-          "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
         "deprecated": false,
         "children": [
           {
@@ -1408,10 +1456,7 @@
             "signature": [
               "Id"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
             "deprecated": false
           },
           {
@@ -1432,10 +1477,7 @@
               },
               "[Id][\"State\"]) => Promise<string>"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
             "deprecated": false,
             "children": [
               {
@@ -1455,10 +1497,7 @@
                   },
                   "[Id][\"State\"]"
                 ],
-                "source": {
-                  "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-                  "lineNumber": 13
-                },
+                "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1472,10 +1511,7 @@
             "tags": [],
             "label": "isDeprecated",
             "description": [],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
             "deprecated": false
           },
           {
@@ -1512,10 +1548,7 @@
               },
               "[Id][\"MigratedId\"]; }>"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
             "deprecated": false,
             "children": [
               {
@@ -1535,10 +1568,7 @@
                   },
                   "[Id][\"State\"]"
                 ],
-                "source": {
-                  "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-                  "lineNumber": 16
-                },
+                "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1565,10 +1595,7 @@
           },
           "<Id>"
         ],
-        "source": {
-          "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-          "lineNumber": 30
-        },
+        "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
         "deprecated": false,
         "children": [
           {
@@ -1581,10 +1608,7 @@
             "signature": [
               "Id"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
             "deprecated": false
           },
           {
@@ -1605,11 +1629,32 @@
               },
               "[Id][\"State\"]) => Promise<string>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 32
-            },
-            "deprecated": false
+            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.UrlGeneratorsDefinition.createUrl.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "share",
+                    "scope": "public",
+                    "docId": "kibSharePluginApi",
+                    "section": "def-public.UrlGeneratorStateMapping",
+                    "text": "UrlGeneratorStateMapping"
+                  },
+                  "[Id][\"State\"]"
+                ],
+                "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "share",
@@ -1621,10 +1666,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
             "deprecated": false
           },
           {
@@ -1661,11 +1703,32 @@
               },
               "[Id][\"MigratedId\"]; }>) | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 34
-            },
-            "deprecated": false
+            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.UrlGeneratorsDefinition.migrate.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "share",
+                    "scope": "public",
+                    "docId": "kibSharePluginApi",
+                    "section": "def-public.UrlGeneratorStateMapping",
+                    "text": "UrlGeneratorStateMapping"
+                  },
+                  "[Id][\"State\"]"
+                ],
+                "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1687,10 +1750,7 @@
           },
           "<S, I, MS>"
         ],
-        "source": {
-          "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
         "deprecated": false,
         "children": [
           {
@@ -1703,10 +1763,7 @@
             "signature": [
               "S"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
             "deprecated": false
           },
           {
@@ -1719,10 +1776,7 @@
             "signature": [
               "I | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
             "deprecated": false
           },
           {
@@ -1735,10 +1789,7 @@
             "signature": [
               "MS | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
             "deprecated": false
           }
         ],
@@ -1751,10 +1802,7 @@
         "tags": [],
         "label": "UrlGeneratorStateMapping",
         "description": [],
-        "source": {
-          "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-          "lineNumber": 21
-        },
+        "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
         "deprecated": false,
         "children": [
           {
@@ -1767,10 +1815,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
             "deprecated": false
           }
         ],
@@ -1789,10 +1834,7 @@
         "signature": [
           "\"csv:quoteValues\""
         ],
-        "source": {
-          "path": "src/plugins/share/common/constants.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/share/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1806,10 +1848,7 @@
         "signature": [
           "\"csv:separator\""
         ],
-        "source": {
-          "path": "src/plugins/share/common/constants.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/share/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1823,10 +1862,7 @@
         "signature": [
           "Blob | { content: string; type: string; }"
         ],
-        "source": {
-          "path": "src/plugins/share/public/lib/download_as.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/share/public/lib/download_as.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1840,10 +1876,7 @@
         "signature": [
           "string"
         ],
-        "source": {
-          "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1869,12 +1902,27 @@
         "UrlGeneratorsSetup",
         "; url: ",
         "UrlService",
-        "; }"
+        "<unknown>; navigate(options: ",
+        "RedirectOptions",
+        "<",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "server",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-server.SerializableRecord",
+          "text": "SerializableRecord"
+        },
+        ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.AnonymousAccessServiceContract",
+          "text": "AnonymousAccessServiceContract"
+        },
+        ") => void; }"
       ],
-      "source": {
-        "path": "src/plugins/share/public/plugin.ts",
-        "lineNumber": 32
-      },
+      "path": "src/plugins/share/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1899,12 +1947,19 @@
         "UrlGeneratorsStart",
         "; url: ",
         "UrlService",
-        "; }"
+        "<unknown>; navigate(options: ",
+        "RedirectOptions",
+        "<",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "server",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-server.SerializableRecord",
+          "text": "SerializableRecord"
+        },
+        ">): void; }"
       ],
-      "source": {
-        "path": "src/plugins/share/public/plugin.ts",
-        "lineNumber": 47
-      },
+      "path": "src/plugins/share/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1926,10 +1981,7 @@
         "signature": [
           "\"csv:quoteValues\""
         ],
-        "source": {
-          "path": "src/plugins/share/common/constants.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/share/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1943,10 +1995,7 @@
         "signature": [
           "\"csv:separator\""
         ],
-        "source": {
-          "path": "src/plugins/share/common/constants.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/share/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1959,10 +2008,7 @@
       "tags": [],
       "label": "SharePluginSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/share/server/plugin.ts",
-        "lineNumber": 18
-      },
+      "path": "src/plugins/share/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -1973,12 +2019,12 @@
           "label": "url",
           "description": [],
           "signature": [
-            "UrlService"
+            "UrlService",
+            "<",
+            "ServerShortUrlClientFactoryCreateParams",
+            ">"
           ],
-          "source": {
-            "path": "src/plugins/share/server/plugin.ts",
-            "lineNumber": 19
-          },
+          "path": "src/plugins/share/server/plugin.ts",
           "deprecated": false
         }
       ],
@@ -1992,10 +2038,7 @@
       "tags": [],
       "label": "SharePluginStart",
       "description": [],
-      "source": {
-        "path": "src/plugins/share/server/plugin.ts",
-        "lineNumber": 23
-      },
+      "path": "src/plugins/share/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -2006,12 +2049,12 @@
           "label": "url",
           "description": [],
           "signature": [
-            "UrlService"
+            "UrlService",
+            "<",
+            "ServerShortUrlClientFactoryCreateParams",
+            ">"
           ],
-          "source": {
-            "path": "src/plugins/share/server/plugin.ts",
-            "lineNumber": 24
-          },
+          "path": "src/plugins/share/server/plugin.ts",
           "deprecated": false
         }
       ],
@@ -2024,6 +2067,72 @@
     "functions": [
       {
         "parentPluginId": "share",
+        "id": "def-common.formatSearchParams",
+        "type": "Function",
+        "tags": [],
+        "label": "formatSearchParams",
+        "description": [],
+        "signature": [
+          "(opts: ",
+          "RedirectOptions",
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">, { lzCompress }: ",
+          "FormatSearchParamsOptions",
+          ") => URLSearchParams"
+        ],
+        "path": "src/plugins/share/common/url_service/locators/redirect/format_search_params.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.formatSearchParams.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">"
+            ],
+            "path": "src/plugins/share/common/url_service/locators/redirect/format_search_params.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.formatSearchParams.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ lzCompress }",
+            "description": [],
+            "signature": [
+              "FormatSearchParamsOptions"
+            ],
+            "path": "src/plugins/share/common/url_service/locators/redirect/format_search_params.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
         "id": "def-common.useLocatorUrl",
         "type": "Function",
         "tags": [],
@@ -2032,11 +2141,11 @@
         "signature": [
           "<P extends ",
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
           },
           ">(locator: ",
           {
@@ -2050,10 +2159,7 @@
           "LocatorGetUrlParams",
           " | undefined, deps?: React.DependencyList) => string"
         ],
-        "source": {
-          "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
         "deprecated": false,
         "children": [
           {
@@ -2073,10 +2179,7 @@
               },
               "<P> | null | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "isRequired": false
           },
@@ -2090,10 +2193,7 @@
             "signature": [
               "P"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -2108,10 +2208,7 @@
               "LocatorGetUrlParams",
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
-              "lineNumber": 17
-            },
+            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "isRequired": false
           },
@@ -2125,10 +2222,7 @@
             "signature": [
               "React.DependencyList"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
-              "lineNumber": 18
-            },
+            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2138,6 +2232,107 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "share",
+        "id": "def-common.AnonymousAccessServiceContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymousAccessServiceContract",
+        "description": [
+          "\nThe contract that is used to check anonymous access for the purposes of sharing public links. The implementation is intended to be\nprovided by the security plugin."
+        ],
+        "path": "src/plugins/share/common/anonymous_access/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessServiceContract.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [
+              "\nThis function returns the current state of anonymous access."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.AnonymousAccessState",
+                "text": "AnonymousAccessState"
+              },
+              ">"
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessServiceContract.getCapabilities",
+            "type": "Function",
+            "tags": [],
+            "label": "getCapabilities",
+            "description": [
+              "\nThis function returns the capabilities of the anonymous access user."
+            ],
+            "signature": [
+              "() => Promise<",
+              "Capabilities",
+              ">"
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-common.AnonymousAccessState",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymousAccessState",
+        "description": [
+          "\nThe state of anonymous access."
+        ],
+        "path": "src/plugins/share/common/anonymous_access/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessState.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [
+              "\nWhether anonymous access is enabled or not."
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessState.accessURLParameters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessURLParameters",
+            "description": [
+              "\nIf anonymous access is enabled, this reflects what URL parameters need to be added to a Kibana link to make it publicly accessible.\nNote that if anonymous access is the only authentication method, this will be null."
+            ],
+            "signature": [
+              "Record<string, string> | null"
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "share",
         "id": "def-common.LocatorDefinition",
@@ -2165,10 +2360,7 @@
           },
           "<P>>"
         ],
-        "source": {
-          "path": "src/plugins/share/common/url_service/locators/types.ts",
-          "lineNumber": 34
-        },
+        "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2180,10 +2372,7 @@
             "description": [
               "\nUnique ID of the locator. Should be constant and unique across Kibana."
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false
           },
           {
@@ -2200,10 +2389,7 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 47
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2218,10 +2404,7 @@
                 "signature": [
                   "P"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 47
-                },
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2258,12 +2441,19 @@
           },
           "<P>"
         ],
-        "source": {
-          "path": "src/plugins/share/common/url_service/locators/types.ts",
-          "lineNumber": 53
-        },
+        "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.LocatorPublic.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "share",
             "id": "def-common.LocatorPublic.getLocation",
@@ -2278,10 +2468,7 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 59
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2296,10 +2483,7 @@
                 "signature": [
                   "P"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 59
-                },
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2310,7 +2494,9 @@
             "parentPluginId": "share",
             "id": "def-common.LocatorPublic.getUrl",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "getUrl",
             "description": [
               "\nReturns a URL as a string.\n"
@@ -2320,11 +2506,118 @@
               "LocatorGetUrlParams",
               " | undefined) => Promise<string>"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 67
-            },
-            "deprecated": false,
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/contexts/kibana/use_create_url.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/contexts/kibana/use_create_url.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/components/navigation_menu/main_tabs.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/anomaly_detection_panel.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/anomaly_detection_panel.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_view/use_view_action.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_map/use_map_action.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/analytics_panel/analytics_panel.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/index_data_visualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/index_data_visualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/file_based/file_datavisualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/file_based/file_datavisualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/components/controls.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/job_map.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/routing/routes/data_frame_analytics/analytics_job_exploration.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/components/anomaly_results_view_selector/anomaly_results_view_selector.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/timeseriesexplorer/components/timeseriesexplorer_no_jobs_found/timeseriesexplorer_no_jobs_found.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/app.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/ui_actions/open_in_anomaly_explorer_action.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/ui_actions/open_in_anomaly_explorer_action.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/components/logging/log_analysis_setup/setup_flyout/module_list_card.tsx"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/public/management/ilm_policy_link.tsx"
+              },
+              {
+                "plugin": "ingestPipelines",
+                "path": "x-pack/plugins/ingest_pipelines/public/locator.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "share",
@@ -2338,10 +2631,7 @@
                 "signature": [
                   "P"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 67
-                },
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2358,10 +2648,60 @@
                   "LocatorGetUrlParams",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 67
-                },
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.LocatorPublic.getRedirectUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getRedirectUrl",
+            "description": [
+              "\nReturns a URL to the redirect endpoint, which will redirect the user to\nthe final destination.\n"
+            ],
+            "signature": [
+              "(params: P, options?: ",
+              "FormatSearchParamsOptions",
+              " | undefined) => string"
+            ],
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-common.LocatorPublic.getRedirectUrl.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-common.LocatorPublic.getRedirectUrl.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "URL serialization options."
+                ],
+                "signature": [
+                  "FormatSearchParamsOptions",
+                  " | undefined"
+                ],
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2382,10 +2722,7 @@
               "LocatorNavigationParams",
               " | undefined) => Promise<void>"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 77
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2400,10 +2737,7 @@
                 "signature": [
                   "P"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 77
-                },
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2420,10 +2754,7 @@
                   "LocatorNavigationParams",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 77
-                },
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2444,16 +2775,12 @@
               "LocatorGetUrlParams",
               " | undefined, deps?: React.DependencyList | undefined) => string"
             ],
-            "source": {
-              "path": "src/plugins/share/common/url_service/locators/types.ts",
-              "lineNumber": 83
-            },
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "share",
-                "id": "def-common.params",
+                "id": "def-common.LocatorPublic.useUrl.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
@@ -2461,15 +2788,13 @@
                 "signature": [
                   "P"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 83
-                },
-                "deprecated": false
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "share",
-                "id": "def-common.getUrlParams",
+                "id": "def-common.LocatorPublic.useUrl.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "getUrlParams",
@@ -2478,15 +2803,13 @@
                   "LocatorGetUrlParams",
                   " | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 83
-                },
-                "deprecated": false
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": false
               },
               {
                 "parentPluginId": "share",
-                "id": "def-common.deps",
+                "id": "def-common.LocatorPublic.useUrl.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "deps",
@@ -2494,13 +2817,12 @@
                 "signature": [
                   "React.DependencyList | undefined"
                 ],
-                "source": {
-                  "path": "src/plugins/share/common/url_service/locators/types.ts",
-                  "lineNumber": 83
-                },
-                "deprecated": false
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

@@ -21,10 +21,38 @@ export const SENDER_NOT_VALID = i18n.translate(
   }
 );
 
+export const CLIENT_ID_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredClientIdText',
+  {
+    defaultMessage: 'Client ID is required.',
+  }
+);
+
+export const TENANT_ID_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredTenantIdText',
+  {
+    defaultMessage: 'Tenant ID is required.',
+  }
+);
+
+export const CLIENT_SECRET_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredClientSecretText',
+  {
+    defaultMessage: 'Client Secret is required.',
+  }
+);
+
 export const PORT_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPortText',
   {
     defaultMessage: 'Port is required.',
+  }
+);
+
+export const SERVICE_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServiceText',
+  {
+    defaultMessage: 'Service is required.',
   }
 );
 

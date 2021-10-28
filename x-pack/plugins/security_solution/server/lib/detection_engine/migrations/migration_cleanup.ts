@@ -20,7 +20,7 @@ const getPolicyExists = async ({
 }): Promise<boolean> => {
   try {
     await esClient.ilm.getLifecycle({
-      policy,
+      name: policy,
     });
     return true;
   } catch (err) {
@@ -56,7 +56,7 @@ export const ensureMigrationCleanupPolicy = async ({
   const policyExists = await getPolicyExists({ esClient, policy });
   if (!policyExists) {
     await esClient.ilm.putLifecycle({
-      policy,
+      name: policy,
       body: migrationCleanupPolicy,
     });
   }
@@ -86,10 +86,8 @@ export const applyMigrationCleanupPolicy = async ({
   await esClient.indices.putSettings({
     index,
     body: {
-      settings: {
-        lifecycle: {
-          name: getMigrationCleanupPolicyName(alias),
-        },
+      lifecycle: {
+        name: getMigrationCleanupPolicyName(alias),
       },
     },
   });

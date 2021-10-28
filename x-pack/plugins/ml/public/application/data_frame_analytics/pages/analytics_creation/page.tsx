@@ -63,12 +63,8 @@ export const Page: FC<Props> = ({ jobId }) => {
   const { state } = createAnalyticsForm;
   const { isAdvancedEditorEnabled, disableSwitchToForm, isJobCreated } = state;
   const { jobType } = state.form;
-  const {
-    initiateWizard,
-    setJobClone,
-    switchToAdvancedEditor,
-    switchToForm,
-  } = createAnalyticsForm.actions;
+  const { initiateWizard, setJobClone, switchToAdvancedEditor, switchToForm } =
+    createAnalyticsForm.actions;
 
   useEffect(() => {
     initiateWizard();
@@ -195,8 +191,8 @@ export const Page: FC<Props> = ({ jobId }) => {
                   <h2>
                     <FormattedMessage
                       id="xpack.ml.dataframe.analytics.creationPageSourceIndexTitle"
-                      defaultMessage="Source index pattern: {indexTitle}"
-                      values={{ indexTitle: currentIndexPattern.title }}
+                      defaultMessage="Source data view: {dataViewTitle}"
+                      values={{ dataViewTitle: currentIndexPattern.title }}
                     />
                   </h2>
                 </EuiFlexItem>

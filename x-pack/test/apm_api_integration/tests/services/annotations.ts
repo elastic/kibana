@@ -7,15 +7,15 @@
 
 import expect from '@kbn/expect';
 import { merge, cloneDeep, isPlainObject } from 'lodash';
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
 
 export default function annotationApiTests({ getService }: FtrProviderContext) {
-  const supertestRead = getService('supertestAsApmReadUser');
-  const supertestWrite = getService('supertestAsApmAnnotationsWriteUser');
+  const supertestRead = getService('legacySupertestAsApmReadUser');
+  const supertestWrite = getService('legacySupertestAsApmAnnotationsWriteUser');
   const es = getService('es');
 
   function expectContainsObj(source: JsonObject, expected: JsonObject) {
@@ -70,7 +70,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   registry.when('Annotations with a trial license', { config: 'trial', archives: [] }, () => {
     describe('when creating an annotation', () => {
       afterEach(async () => {
-        const indexExists = (await es.indices.exists({ index: DEFAULT_INDEX_NAME })).body;
+        const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
         if (indexExists) {
           await es.indices.delete({
             index: DEFAULT_INDEX_NAME,
@@ -259,11 +259,9 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           index: transactionIndexName,
         });
 
-        const annotationIndexExists = (
-          await es.indices.exists({
-            index: DEFAULT_INDEX_NAME,
-          })
-        ).body;
+        const annotationIndexExists = await es.indices.exists({
+          index: DEFAULT_INDEX_NAME,
+        });
 
         if (annotationIndexExists) {
           await es.indices.delete({
@@ -279,7 +277,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         };
 
         const response = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}`,
+          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=ENVIRONMENT_ALL`,
           method: 'GET',
         });
 
@@ -312,7 +310,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         ).to.be(200);
 
         const response = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}`,
+          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=ENVIRONMENT_ALL`,
           method: 'GET',
         });
 
@@ -340,7 +338,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         ).to.be(200);
 
         const responseFromEarlierRange = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${earlierRange.start}&end=${earlierRange.end}`,
+          url: `/api/apm/services/${serviceName}/annotation/search?start=${earlierRange.start}&end=${earlierRange.end}&environment=ENVIRONMENT_ALL`,
           method: 'GET',
         });
 
@@ -387,7 +385,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         };
 
         const allEnvironmentsResponse = await request({
-          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}`,
+          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=ENVIRONMENT_ALL`,
           method: 'GET',
         });
 

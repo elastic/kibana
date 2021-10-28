@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiCommentProps,
+  EuiToken,
+} from '@elastic/eui';
+import React, { useContext } from 'react';
 import classNames from 'classnames';
+import { ThemeContext } from 'styled-components';
 import {
   CaseFullExternalService,
   ActionConnector,
@@ -15,16 +23,16 @@ import {
   CommentType,
   Comment,
   CommentRequestActionsType,
+  noneConnectorId,
 } from '../../../common';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { parseString } from '../../containers/utils';
+import { parseStringAsConnector, parseStringAsExternalService } from '../../common/user_actions';
 import { Tags } from '../tag_list/tags';
 import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 import { UserActionTimestamp } from './user_action_timestamp';
-import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { UserActionCopyLink } from './user_action_copy_link';
-import { UserActionMarkdown } from './user_action_markdown';
+import { ContentWrapper } from './user_action_markdown';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { Status, statuses } from '../status';
 import { UserActionShowAlert } from './user_action_show_alert';
@@ -32,11 +40,13 @@ import * as i18n from './translations';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
 import { CasesNavigation } from '../links';
 import { HostIsolationCommentEvent } from './user_action_host_isolation_comment_event';
+import { MarkdownRenderer } from '../markdown_editor';
 
 interface LabelTitle {
   action: CaseUserActions;
   field: string;
 }
+
 export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
 
 export type ActionsNavigation = CasesNavigation<string, 'configurable'>;
@@ -88,23 +98,27 @@ export const getConnectorLabelTitle = ({
   action: CaseUserActions;
   connectors: ActionConnector[];
 }) => {
-  const oldValue = parseString(`${action.oldValue}`);
-  const newValue = parseString(`${action.newValue}`);
+  const oldConnector = parseStringAsConnector(action.oldValConnectorId, action.oldValue);
+  const newConnector = parseStringAsConnector(action.newValConnectorId, action.newValue);
 
-  if (oldValue === null || newValue === null) {
+  if (!oldConnector || !newConnector) {
     return '';
   }
 
-  // Connector changed
-  if (oldValue.id !== newValue.id) {
-    const newConnector = connectors.find((c) => c.id === newValue.id);
-    return newValue.id != null && newValue.id !== 'none' && newConnector != null
-      ? i18n.SELECTED_THIRD_PARTY(newConnector.name)
-      : i18n.REMOVED_THIRD_PARTY;
-  } else {
-    // Field changed
+  // if the ids are the same, assume we just changed the fields
+  if (oldConnector.id === newConnector.id) {
     return i18n.CHANGED_CONNECTOR_FIELD;
   }
+
+  // ids are not the same so check and see if the id is a valid connector and then return its name
+  // if the connector id is the none connector value then it must have been removed
+  const newConnectorActionInfo = connectors.find((c) => c.id === newConnector.id);
+  if (newConnector.id !== noneConnectorId && newConnectorActionInfo != null) {
+    return i18n.SELECTED_THIRD_PARTY(newConnectorActionInfo.name);
+  }
+
+  // it wasn't a valid connector or it was the none connector, so it must have been removed
+  return i18n.REMOVED_THIRD_PARTY;
 };
 
 const getTagsLabelTitle = (action: CaseUserActions) => {
@@ -124,7 +138,8 @@ const getTagsLabelTitle = (action: CaseUserActions) => {
 };
 
 export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean) => {
-  const pushedVal = JSON.parse(action.newValue ?? '') as CaseFullExternalService;
+  const externalService = parseStringAsExternalService(action.newValConnectorId, action.newValue);
+
   return (
     <EuiFlexGroup
       alignItems="baseline"
@@ -134,12 +149,12 @@ export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: b
     >
       <EuiFlexItem data-test-subj="pushed-label">
         {`${firstPush ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT} ${
-          pushedVal?.connector_name
+          externalService?.connector_name
         }`}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink data-test-subj="pushed-value" href={pushedVal?.external_url} target="_blank">
-          {pushedVal?.external_title}
+        <EuiLink data-test-subj="pushed-value" href={externalService?.external_url} target="_blank">
+          {externalService?.external_title}
         </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -148,19 +163,19 @@ export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: b
 
 export const getPushInfo = (
   caseServices: CaseServices,
-  parsedValue: { connector_id: string; connector_name: string },
+  externalService: CaseFullExternalService | undefined,
   index: number
 ) =>
-  parsedValue != null
+  externalService != null && externalService.connector_id != null
     ? {
-        firstPush: caseServices[parsedValue.connector_id]?.firstPushIndex === index,
-        parsedConnectorId: parsedValue.connector_id,
-        parsedConnectorName: parsedValue.connector_name,
+        firstPush: caseServices[externalService.connector_id]?.firstPushIndex === index,
+        parsedConnectorId: externalService.connector_id,
+        parsedConnectorName: externalService.connector_name,
       }
     : {
         firstPush: false,
-        parsedConnectorId: 'none',
-        parsedConnectorName: 'none',
+        parsedConnectorId: noneConnectorId,
+        parsedConnectorName: noneConnectorId,
       };
 
 const getUpdateActionIcon = (actionField: string): string => {
@@ -365,16 +380,28 @@ export const getGeneratedAlertsAttachment = ({
   ),
 });
 
+const ActionIcon = React.memo<{
+  actionType: string;
+}>(({ actionType }) => {
+  const theme = useContext(ThemeContext);
+  return (
+    <EuiToken
+      style={{ marginTop: '8px' }}
+      iconType={actionType === 'isolate' ? 'lock' : 'lockOpen'}
+      size="m"
+      shape="circle"
+      color={theme.eui.euiColorLightestShade}
+      data-test-subj="endpoint-action-icon"
+    />
+  );
+});
+
 export const getActionAttachment = ({
   comment,
   userCanCrud,
   isLoadingIds,
   getCaseDetailHrefWithCommentId,
   actionsNavigation,
-  manageMarkdownEditIds,
-  handleManageMarkdownEditId,
-  handleManageQuote,
-  handleSaveComment,
   action,
 }: {
   comment: Comment & CommentRequestActionsType;
@@ -382,10 +409,6 @@ export const getActionAttachment = ({
   isLoadingIds: string[];
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   actionsNavigation?: ActionsNavigation;
-  manageMarkdownEditIds: string[];
-  handleManageMarkdownEditId: (id: string) => void;
-  handleManageQuote: (id: string) => void;
-  handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
   action: CaseUserActions;
 }): EuiCommentProps => ({
   username: (
@@ -394,9 +417,7 @@ export const getActionAttachment = ({
       fullName={comment.createdBy.fullName}
     />
   ),
-  className: classNames({
-    isEdit: manageMarkdownEditIds.includes(comment.id),
-  }),
+  className: classNames('comment-action', { 'empty-comment': comment.comment.trim().length === 0 }),
   event: (
     <HostIsolationCommentEvent
       type={comment.actions.type}
@@ -407,30 +428,17 @@ export const getActionAttachment = ({
   ),
   'data-test-subj': 'endpoint-action',
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-  timelineIcon: comment.actions.type === 'isolate' ? 'lock' : 'lockOpen',
+  timelineIcon: <ActionIcon actionType={comment.actions.type} />,
   actions: (
-    <UserActionContentToolbar
-      getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+    <UserActionCopyLink
       id={comment.id}
-      editLabel={i18n.EDIT_COMMENT}
-      quoteLabel={i18n.QUOTE}
-      userCanCrud={userCanCrud}
-      isLoading={isLoadingIds.includes(comment.id)}
-      onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
-      onQuote={handleManageQuote.bind(null, comment.comment)}
+      getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
     />
   ),
-  children: (
-    <UserActionMarkdown
-      id={comment.id}
-      content={comment.comment}
-      isEditable={manageMarkdownEditIds.includes(comment.id)}
-      onChangeEditable={handleManageMarkdownEditId}
-      onSaveContent={handleSaveComment.bind(null, {
-        id: comment.id,
-        version: comment.version,
-      })}
-    />
+  children: comment.comment.trim().length > 0 && (
+    <ContentWrapper data-test-subj="user-action-markdown">
+      <MarkdownRenderer>{comment.comment}</MarkdownRenderer>
+    </ContentWrapper>
   ),
 });
 

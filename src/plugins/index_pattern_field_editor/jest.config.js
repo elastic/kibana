@@ -10,4 +10,9 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/index_pattern_field_editor'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/index_pattern_field_editor',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/plugins/index_pattern_field_editor/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };

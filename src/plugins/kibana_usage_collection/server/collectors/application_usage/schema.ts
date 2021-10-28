@@ -124,7 +124,6 @@ export const applicationUsageSchema = {
   kibana: commonSchema, // It's a forward app so we'll likely never report it
   management: commonSchema,
   short_url_redirect: commonSchema, // It's a forward app so we'll likely never report it
-  timelion: commonSchema,
   visualize: commonSchema,
   error: commonSchema,
   status: commonSchema,
@@ -134,7 +133,6 @@ export const applicationUsageSchema = {
   // X-Pack
   apm: commonSchema,
   canvas: commonSchema,
-  dashboard_mode: commonSchema, // It's a forward app so we'll likely never report it
   enterpriseSearch: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,
@@ -158,7 +156,7 @@ export const applicationUsageSchema = {
   security_login: commonSchema,
   security_logout: commonSchema,
   security_overwritten_session: commonSchema,
-  securitySolution: commonSchema,
+  securitySolutionUI: commonSchema,
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,

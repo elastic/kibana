@@ -7,4 +7,6 @@
 
 export * from './actions';
 export * from './labels';
+export * from './tables';
+export * from './units';
 export { DEFAULT_META } from './default_meta';

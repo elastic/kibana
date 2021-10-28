@@ -1,0 +1,10 @@
+{
+  "data_frame_transform_deprecated.start_transform": {
+    "url_params": {
+      "timeout": ""
+    },
+    "methods": [],
+    "patterns": [],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/start-transform.html"
+  }
+}

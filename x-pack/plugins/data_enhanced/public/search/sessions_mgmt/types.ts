@@ -21,7 +21,7 @@ export type PersistedSearchSessionSavedObjectAttributes = SearchSessionSavedObje
   Required<
     Pick<
       SearchSessionSavedObjectAttributes,
-      'name' | 'appId' | 'urlGeneratorId' | 'initialState' | 'restoreState'
+      'name' | 'appId' | 'locatorId' | 'initialState' | 'restoreState'
     >
   >;
 
@@ -40,4 +40,5 @@ export interface UISession {
   restoreUrl: string;
   initialState: Record<string, unknown>;
   restoreState: Record<string, unknown>;
+  version: string;
 }

@@ -8,12 +8,6 @@
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
-
-const SpanBadge = euiStyled(EuiBadge)`
-  display: inline-block;
-  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
-`;
 
 export interface SyncBadgeProps {
   /**
@@ -26,19 +20,19 @@ export function SyncBadge({ sync }: SyncBadgeProps) {
   switch (sync) {
     case true:
       return (
-        <SpanBadge>
+        <EuiBadge>
           {i18n.translate('xpack.apm.transactionDetails.syncBadgeBlocking', {
             defaultMessage: 'blocking',
           })}
-        </SpanBadge>
+        </EuiBadge>
       );
     case false:
       return (
-        <SpanBadge>
+        <EuiBadge>
           {i18n.translate('xpack.apm.transactionDetails.syncBadgeAsync', {
             defaultMessage: 'async',
           })}
-        </SpanBadge>
+        </EuiBadge>
       );
     default:
       return null;

@@ -11,7 +11,7 @@ import { RuleAlertType } from './types';
 export const getRulesToInstall = (
   rulesFromFileSystem: AddPrepackagedRulesSchemaDecoded[],
   installedRules: RuleAlertType[]
-): AddPrepackagedRulesSchemaDecoded[] => {
+) => {
   return rulesFromFileSystem.filter(
     (rule) => !installedRules.some((installedRule) => installedRule.params.ruleId === rule.rule_id)
   );

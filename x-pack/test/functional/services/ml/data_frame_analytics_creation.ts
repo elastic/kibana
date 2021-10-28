@@ -18,10 +18,11 @@ import {
 } from '../../../../plugins/ml/common/util/analytics_utils';
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   mlApi: MlApi
 ) {
+  const headerPage = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -111,10 +112,12 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertSourceDataPreviewExists() {
+      await headerPage.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('mlAnalyticsCreationDataGrid loaded', { timeout: 5000 });
     },
 
     async assertIndexPreviewHistogramChartButtonExists() {
+      await headerPage.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('mlAnalyticsCreationDataGridHistogramButton');
     },
 
@@ -277,9 +280,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     async assertRuntimeMappingsEditorContent(expectedContent: string[]) {
       await this.assertRuntimeMappingEditorExists();
 
-      const runtimeMappingsEditorString = await aceEditor.getValue(
-        'mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor'
-      );
+      const wrapper = await testSubjects.find('mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor');
+      const editor = await wrapper.findByCssSelector('.monaco-editor .view-lines');
+      const runtimeMappingsEditorString = await editor.getVisibleText();
       // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
       // This means we might not get back valid JSON so we only test against the first few lines
       // and see if the string matches.
@@ -404,42 +407,58 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertConfigurationStepActive() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardConfigurationStep active');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardConfigurationStep active', {
+        timeout: 3000,
+      });
     },
 
     async assertAdditionalOptionsStepActive() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedStep active');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedStep active', {
+        timeout: 3000,
+      });
     },
 
     async assertDetailsStepActive() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDetailsStep active');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDetailsStep active', {
+        timeout: 3000,
+      });
     },
 
     async assertCreateStepActive() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep active');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep active', {
+        timeout: 3000,
+      });
     },
 
     async assertValidationStepActive() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardValidationStepWrapper active');
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardValidationStepWrapper active', {
+        timeout: 3000,
+      });
     },
 
     async continueToAdditionalOptionsStep() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await retry.tryForTime(15 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(
+          'mlAnalyticsCreateJobWizardConfigurationStep active > mlAnalyticsCreateJobWizardContinueButton'
+        );
         await this.assertAdditionalOptionsStepActive();
       });
     },
 
     async continueToDetailsStep() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await retry.tryForTime(15 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(
+          'mlAnalyticsCreateJobWizardAdvancedStep active > mlAnalyticsCreateJobWizardContinueButton'
+        );
         await this.assertDetailsStepActive();
       });
     },
 
     async continueToValidationStep() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await retry.tryForTime(15 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(
+          'mlAnalyticsCreateJobWizardDetailsStep active > mlAnalyticsCreateJobWizardContinueButton'
+        );
         await this.assertValidationStepActive();
       });
     },
@@ -456,8 +475,10 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async continueToCreateStep() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await retry.tryForTime(15 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(
+          'mlAnalyticsCreateJobWizardValidationStepWrapper active > mlAnalyticsCreateJobWizardContinueButton'
+        );
         await this.assertCreateStepActive();
       });
     },
@@ -528,7 +549,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       const actualCheckState = await this.getCreateIndexPatternSwitchCheckState();
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+        `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 

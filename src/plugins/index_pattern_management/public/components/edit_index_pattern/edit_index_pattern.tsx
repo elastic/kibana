@@ -25,6 +25,7 @@ import { useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
+import { getTags } from '../utils';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: IndexPattern;
@@ -48,20 +49,15 @@ const confirmModalOptionsDelete = {
   confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.deleteButton', {
     defaultMessage: 'Delete',
   }),
-  title: i18n.translate('indexPatternManagement.editIndexPattern.deleteHeader', {
-    defaultMessage: 'Delete index pattern?',
+  title: i18n.translate('indexPatternManagement.editDataView.deleteHeader', {
+    defaultMessage: 'Delete data view?',
   }),
 };
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const {
-      uiSettings,
-      indexPatternManagementStart,
-      overlays,
-      chrome,
-      data,
-    } = useKibana<IndexPatternManagmentContext>().services;
+    const { application, uiSettings, overlays, chrome, data } =
+      useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
@@ -77,13 +73,8 @@ export const EditIndexPattern = withRouter(
     }, [indexPattern]);
 
     useEffect(() => {
-      const indexPatternTags =
-        indexPatternManagementStart.list.getIndexPatternTags(
-          indexPattern,
-          indexPattern.id === defaultIndex
-        ) || [];
-      setTags(indexPatternTags);
-    }, [defaultIndex, indexPattern, indexPatternManagementStart.list]);
+      setTags(getTags(indexPattern, indexPattern.id === defaultIndex));
+    }, [defaultIndex, indexPattern]);
 
     const setDefaultPattern = useCallback(() => {
       uiSettings.set('defaultIndex', indexPattern.id);
@@ -93,7 +84,7 @@ export const EditIndexPattern = withRouter(
     const removePattern = () => {
       async function doRemove() {
         if (indexPattern.id === defaultIndex) {
-          const indexPatterns = await data.indexPatterns.getIdsWithTitle();
+          const indexPatterns = await data.dataViews.getIdsWithTitle();
           uiSettings.remove('defaultIndex');
           const otherPatterns = filter(indexPatterns, (pattern) => {
             return pattern.id !== indexPattern.id;
@@ -104,7 +95,7 @@ export const EditIndexPattern = withRouter(
           }
         }
         if (indexPattern.id) {
-          Promise.resolve(data.indexPatterns.delete(indexPattern.id)).then(function () {
+          Promise.resolve(data.dataViews.delete(indexPattern.id)).then(function () {
             history.push('');
           });
         }
@@ -134,8 +125,8 @@ export const EditIndexPattern = withRouter(
       }
     );
 
-    const headingAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.detailsAria', {
-      defaultMessage: 'Index pattern details',
+    const headingAriaLabel = i18n.translate('indexPatternManagement.editDataView.detailsAria', {
+      defaultMessage: 'Data view details',
     });
 
     chrome.docTitle.change(indexPattern.title);
@@ -143,12 +134,14 @@ export const EditIndexPattern = withRouter(
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
     const kibana = useKibana();
     const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
+    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         <IndexHeader
           indexPattern={indexPattern}
           setDefault={setDefaultPattern}
-          deleteIndexPatternClick={removePattern}
+          {...(userEditPermission ? { deleteIndexPatternClick: removePattern } : {})}
           defaultIndex={defaultIndex}
         >
           {showTagsSection && (

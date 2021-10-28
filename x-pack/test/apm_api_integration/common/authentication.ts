@@ -18,13 +18,15 @@ export enum ApmUser {
   apmReadUserWithoutMlAccess = 'apm_read_user_without_ml_access',
 }
 
+// TODO: Going forward we want to use the built-in roles `viewer` and `editor`. However ML privileges are not included in the built-in roles
+// Until https://github.com/elastic/kibana/issues/71422 is closed we have to use the custom roles below
 const roles = {
   [ApmUser.noAccessUser]: {},
   [ApmUser.apmReadUser]: {
     kibana: [
       {
         base: [],
-        feature: { apm: ['read'], ml: ['read'], savedObjectsManagement: ['read'] },
+        feature: { ml: ['read'] },
         spaces: ['*'],
       },
     ],
@@ -51,7 +53,7 @@ const roles = {
     kibana: [
       {
         base: [],
-        feature: { apm: ['all'], ml: ['all'], savedObjectsManagement: ['all'] },
+        feature: { ml: ['all'] },
         spaces: ['*'],
       },
     ],
@@ -81,16 +83,16 @@ const users = {
     roles: [],
   },
   [ApmUser.apmReadUser]: {
-    roles: ['apm_user', ApmUser.apmReadUser],
+    roles: ['viewer', ApmUser.apmReadUser],
   },
   [ApmUser.apmReadUserWithoutMlAccess]: {
     roles: [ApmUser.apmReadUserWithoutMlAccess],
   },
   [ApmUser.apmWriteUser]: {
-    roles: ['apm_user', ApmUser.apmWriteUser],
+    roles: ['editor', ApmUser.apmWriteUser],
   },
   [ApmUser.apmAnnotationsWriteUser]: {
-    roles: ['apm_user', ApmUser.apmWriteUser, ApmUser.apmAnnotationsWriteUser],
+    roles: ['editor', ApmUser.apmWriteUser, ApmUser.apmAnnotationsWriteUser],
   },
 };
 

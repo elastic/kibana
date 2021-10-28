@@ -45,11 +45,11 @@ describe('Access agreement view routes', () => {
       allowAccessAgreement: true,
     } as SecurityLicenseFeatures);
 
-    mockContext = ({
+    mockContext = {
       licensing: {
         license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
       },
-    } as unknown) as SecurityRequestHandlerContext;
+    } as unknown as SecurityRequestHandlerContext;
 
     defineAccessAgreementRoutes(routeParamsMock);
   });

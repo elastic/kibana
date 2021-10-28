@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { auto } from 'angular';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { getServices } from '../../kibana_services';
@@ -21,6 +20,11 @@ import { TimeRange } from '../../../../data/public';
 import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
+import {
+  getSavedSearch,
+  getSavedSearchUrl,
+  throwErrorOnSavedSearchUrlConflict,
+} from '../../saved_searches';
 
 interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
@@ -28,10 +32,9 @@ interface StartServices {
 }
 
 export class SearchEmbeddableFactory
-  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SavedSearchEmbeddable> {
+  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SavedSearchEmbeddable>
+{
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
-  private $injector: auto.IInjectorService | null;
-  private getInjector: () => Promise<auto.IInjectorService> | null;
   public readonly savedObjectMetaData = {
     name: i18n.translate('discover.savedSearch.savedObjectName', {
       defaultMessage: 'Saved search',
@@ -40,13 +43,7 @@ export class SearchEmbeddableFactory
     getIconForSavedObject: () => 'discoverApp',
   };
 
-  constructor(
-    private getStartServices: () => Promise<StartServices>,
-    getInjector: () => Promise<auto.IInjectorService>
-  ) {
-    this.$injector = null;
-    this.getInjector = getInjector;
-  }
+  constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public canCreateNew() {
     return false;
@@ -67,24 +64,27 @@ export class SearchEmbeddableFactory
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
   ): Promise<SavedSearchEmbeddable | ErrorEmbeddable> => {
-    if (!this.$injector) {
-      this.$injector = await this.getInjector();
-    }
-
-    const filterManager = getServices().filterManager;
-
-    const url = await getServices().getSavedSearchUrlById(savedObjectId);
-    const editUrl = getServices().addBasePath(`/app/discover${url}`);
+    const services = getServices();
+    const filterManager = services.filterManager;
+    const url = getSavedSearchUrl(savedObjectId);
+    const editUrl = services.addBasePath(`/app/discover${url}`);
     try {
-      const savedObject = await getServices().getSavedSearchById(savedObjectId);
-      const indexPattern = savedObject.searchSource.getField('index');
+      const savedSearch = await getSavedSearch(savedObjectId, {
+        search: services.data.search,
+        savedObjectsClient: services.core.savedObjects.client,
+        spaces: services.spaces,
+      });
+
+      await throwErrorOnSavedSearchUrlConflict(savedSearch);
+
+      const indexPattern = savedSearch.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
       const { SavedSearchEmbeddable: SavedSearchEmbeddableClass } = await import(
         './saved_search_embeddable'
       );
       return new SavedSearchEmbeddableClass(
         {
-          savedSearch: savedObject,
+          savedSearch,
           editUrl,
           editPath: url,
           filterManager,

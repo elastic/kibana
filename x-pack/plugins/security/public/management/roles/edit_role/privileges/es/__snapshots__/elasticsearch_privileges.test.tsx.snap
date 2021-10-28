@@ -183,7 +183,7 @@ exports[`it renders without crashing 1`] = `
           "_subscribe": [Function],
         },
         "getFeatures": [MockFunction],
-        "getType": [MockFunction],
+        "hasAtLeast": [MockFunction],
         "isEnabled": [MockFunction],
         "isLicenseAvailable": [MockFunction],
       }

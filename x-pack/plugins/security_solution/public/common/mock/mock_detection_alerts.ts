@@ -90,7 +90,7 @@ export const getThreatMatchDetectionAlert = (overrides: Partial<Ecs> = {}): Ecs 
     },
   },
   threat: {
-    indicator: [
+    enrichments: [
       {
         matched: {
           atomic: ['matched.atomic'],

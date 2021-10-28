@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
+import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
+import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
+import { History } from 'history';
+import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import { LensAppState } from './types';
+import { getInitialDatasourceId, getResolvedDateRange } from '../utils';
+import { LensAppState, LensStoreDeps } from './types';
+import { generateId } from '../id_generator';
+import {
+  getVisualizeFieldSuggestions,
+  Suggestion,
+} from '../editor_frame_service/editor_frame/suggestion_helpers';
 
 export const initialState: LensAppState = {
+  persistedDoc: undefined,
   searchSessionId: '',
   filters: [],
   query: { language: 'kuery', query: '' },
@@ -26,29 +36,144 @@ export const initialState: LensAppState = {
   },
 };
 
-export const lensSlice = createSlice({
-  name: 'lens',
-  initialState,
-  reducers: {
-    setState: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
+export const getPreloadedState = ({
+  lensServices: { data },
+  initialContext,
+  embeddableEditorIncomingState,
+  datasourceMap,
+  visualizationMap,
+}: LensStoreDeps) => {
+  const initialDatasourceId = getInitialDatasourceId(datasourceMap);
+  const datasourceStates: LensAppState['datasourceStates'] = {};
+  if (initialDatasourceId) {
+    datasourceStates[initialDatasourceId] = {
+      state: null,
+      isLoading: true,
+    };
+  }
+
+  const state = {
+    ...initialState,
+    isLoading: true,
+    // Do not use app-specific filters from previous app,
+    // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
+    query: !initialContext
+      ? data.query.queryString.getDefaultQuery()
+      : data.query.queryString.getQuery(),
+    filters: !initialContext
+      ? data.query.filterManager.getGlobalFilters()
+      : data.query.filterManager.getFilters(),
+    searchSessionId: data.search.session.getSessionId(),
+    resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+    isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
+    activeDatasourceId: initialDatasourceId,
+    datasourceStates,
+    visualization: {
+      state: null as unknown,
+      activeId: Object.keys(visualizationMap)[0] || null,
+    },
+  };
+  return state;
+};
+
+export const setState = createAction<Partial<LensAppState>>('lens/setState');
+export const onActiveDataChange = createAction<TableInspectorAdapter>('lens/onActiveDataChange');
+export const setSaveable = createAction<boolean>('lens/setSaveable');
+export const updateState = createAction<{
+  subType: string;
+  updater: (prevState: LensAppState) => LensAppState;
+}>('lens/updateState');
+export const updateDatasourceState = createAction<{
+  updater: unknown | ((prevState: unknown) => unknown);
+  datasourceId: string;
+  clearStagedPreview?: boolean;
+}>('lens/updateDatasourceState');
+export const updateVisualizationState = createAction<{
+  visualizationId: string;
+  updater: unknown;
+  clearStagedPreview?: boolean;
+}>('lens/updateVisualizationState');
+
+export const updateLayer = createAction<{
+  layerId: string;
+  datasourceId: string;
+  updater: (state: unknown, layerId: string) => unknown;
+}>('lens/updateLayer');
+
+export const switchVisualization = createAction<{
+  suggestion: {
+    newVisualizationId: string;
+    visualizationState: unknown;
+    datasourceState?: unknown;
+    datasourceId?: string;
+  };
+  clearStagedPreview?: boolean;
+}>('lens/switchVisualization');
+export const rollbackSuggestion = createAction<void>('lens/rollbackSuggestion');
+export const setToggleFullscreen = createAction<void>('lens/setToggleFullscreen');
+export const submitSuggestion = createAction<void>('lens/submitSuggestion');
+export const switchDatasource = createAction<{
+  newDatasourceId: string;
+}>('lens/switchDatasource');
+export const navigateAway = createAction<void>('lens/navigateAway');
+export const loadInitial = createAction<{
+  initialInput?: LensEmbeddableInput;
+  redirectCallback: (savedObjectId?: string) => void;
+  history: History<unknown>;
+}>('lens/loadInitial');
+export const initEmpty = createAction(
+  'initEmpty',
+  function prepare({
+    newState,
+    initialContext,
+  }: {
+    newState: Partial<LensAppState>;
+    initialContext?: VisualizeFieldContext;
+  }) {
+    return { payload: { layerId: generateId(), newState, initialContext } };
+  }
+);
+
+export const lensActions = {
+  setState,
+  onActiveDataChange,
+  setSaveable,
+  updateState,
+  updateDatasourceState,
+  updateVisualizationState,
+  updateLayer,
+  switchVisualization,
+  rollbackSuggestion,
+  setToggleFullscreen,
+  submitSuggestion,
+  switchDatasource,
+  navigateAway,
+  loadInitial,
+  initEmpty,
+};
+
+export const makeLensReducer = (storeDeps: LensStoreDeps) => {
+  const { datasourceMap, visualizationMap } = storeDeps;
+  return createReducer<LensAppState>(initialState, {
+    [setState.type]: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
       return {
         ...state,
         ...payload,
       };
     },
-    onActiveDataChange: (state, { payload }: PayloadAction<TableInspectorAdapter>) => {
+    [onActiveDataChange.type]: (state, { payload }: PayloadAction<TableInspectorAdapter>) => {
       return {
         ...state,
         activeData: payload,
       };
     },
-    setSaveable: (state, { payload }: PayloadAction<boolean>) => {
+    [setSaveable.type]: (state, { payload }: PayloadAction<boolean>) => {
       return {
         ...state,
         isSaveable: payload,
       };
     },
-    updateState: (
+    [updateState.type]: (
       state,
       action: {
         payload: {
@@ -59,7 +184,7 @@ export const lensSlice = createSlice({
     ) => {
       return action.payload.updater(current(state) as LensAppState);
     },
-    updateDatasourceState: (
+    [updateDatasourceState.type]: (
       state,
       {
         payload,
@@ -86,7 +211,7 @@ export const lensSlice = createSlice({
         stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
       };
     },
-    updateVisualizationState: (
+    [updateVisualizationState.type]: (
       state,
       {
         payload,
@@ -119,7 +244,7 @@ export const lensSlice = createSlice({
         stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
       };
     },
-    updateLayer: (
+    [updateLayer.type]: (
       state,
       {
         payload,
@@ -146,92 +271,65 @@ export const lensSlice = createSlice({
       };
     },
 
-    switchVisualization: (
+    [switchVisualization.type]: (
       state,
       {
         payload,
       }: {
         payload: {
-          newVisualizationId: string;
-          initialState: unknown;
-          datasourceState?: unknown;
-          datasourceId?: string;
+          suggestion: {
+            newVisualizationId: string;
+            visualizationState: unknown;
+            datasourceState?: unknown;
+            datasourceId?: string;
+          };
+          clearStagedPreview?: boolean;
         };
       }
     ) => {
+      const { newVisualizationId, visualizationState, datasourceState, datasourceId } =
+        payload.suggestion;
       return {
         ...state,
-        datasourceStates:
-          'datasourceId' in payload && payload.datasourceId
-            ? {
-                ...state.datasourceStates,
-                [payload.datasourceId]: {
-                  ...state.datasourceStates[payload.datasourceId],
-                  state: payload.datasourceState,
-                },
-              }
-            : state.datasourceStates,
+        datasourceStates: datasourceId
+          ? {
+              ...state.datasourceStates,
+              [datasourceId]: {
+                ...state.datasourceStates[datasourceId],
+                state: datasourceState,
+              },
+            }
+          : state.datasourceStates,
         visualization: {
           ...state.visualization,
-          activeId: payload.newVisualizationId,
-          state: payload.initialState,
+          activeId: newVisualizationId,
+          state: visualizationState,
         },
-        stagedPreview: undefined,
+        stagedPreview: payload.clearStagedPreview
+          ? undefined
+          : state.stagedPreview || {
+              datasourceStates: state.datasourceStates,
+              visualization: state.visualization,
+            },
       };
     },
-    selectSuggestion: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          newVisualizationId: string;
-          initialState: unknown;
-          datasourceState: unknown;
-          datasourceId: string;
-        };
-      }
-    ) => {
-      return {
-        ...state,
-        datasourceStates:
-          'datasourceId' in payload && payload.datasourceId
-            ? {
-                ...state.datasourceStates,
-                [payload.datasourceId]: {
-                  ...state.datasourceStates[payload.datasourceId],
-                  state: payload.datasourceState,
-                },
-              }
-            : state.datasourceStates,
-        visualization: {
-          ...state.visualization,
-          activeId: payload.newVisualizationId,
-          state: payload.initialState,
-        },
-        stagedPreview: state.stagedPreview || {
-          datasourceStates: state.datasourceStates,
-          visualization: state.visualization,
-        },
-      };
-    },
-    rollbackSuggestion: (state) => {
+    [rollbackSuggestion.type]: (state) => {
       return {
         ...state,
         ...(state.stagedPreview || {}),
         stagedPreview: undefined,
       };
     },
-    setToggleFullscreen: (state) => {
+    [setToggleFullscreen.type]: (state) => {
       return { ...state, isFullscreenDatasource: !state.isFullscreenDatasource };
     },
-    submitSuggestion: (state) => {
+    [submitSuggestion.type]: (state) => {
       return {
         ...state,
         stagedPreview: undefined,
       };
     },
-    switchDatasource: (
+    [switchDatasource.type]: (
       state,
       {
         payload,
@@ -253,10 +351,87 @@ export const lensSlice = createSlice({
         activeDatasourceId: payload.newDatasourceId,
       };
     },
-    navigateAway: (state) => state,
-  },
-});
+    [navigateAway.type]: (state) => state,
+    [loadInitial.type]: (
+      state,
+      payload: PayloadAction<{
+        initialInput?: LensEmbeddableInput;
+        redirectCallback: (savedObjectId?: string) => void;
+        history: History<unknown>;
+      }>
+    ) => state,
+    [initEmpty.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          newState: Partial<LensAppState>;
+          initialContext: VisualizeFieldContext | undefined;
+          layerId: string;
+        };
+      }
+    ) => {
+      const newState = {
+        ...state,
+        ...payload.newState,
+      };
+      const suggestion: Suggestion | undefined = getVisualizeFieldSuggestions({
+        datasourceMap,
+        datasourceStates: newState.datasourceStates,
+        visualizationMap,
+        visualizeTriggerFieldContext: payload.initialContext,
+      });
+      if (suggestion) {
+        return {
+          ...newState,
+          datasourceStates: {
+            ...newState.datasourceStates,
+            [suggestion.datasourceId!]: {
+              ...newState.datasourceStates[suggestion.datasourceId!],
+              state: suggestion.datasourceState,
+            },
+          },
+          visualization: {
+            ...newState.visualization,
+            activeId: suggestion.visualizationId,
+            state: suggestion.visualizationState,
+          },
+          stagedPreview: undefined,
+        };
+      }
 
-export const reducer = {
-  lens: lensSlice.reducer,
+      const visualization = newState.visualization;
+
+      if (!visualization.activeId) {
+        throw new Error('Invariant: visualization state got updated without active visualization');
+      }
+
+      const activeVisualization = visualizationMap[visualization.activeId];
+      if (visualization.state === null && activeVisualization) {
+        const activeDatasourceId = getInitialDatasourceId(datasourceMap)!;
+        const newVisState = activeVisualization.initialize(() => payload.layerId);
+        const activeDatasource = datasourceMap[activeDatasourceId];
+        return {
+          ...newState,
+          activeDatasourceId,
+          datasourceStates: {
+            ...newState.datasourceStates,
+            [activeDatasourceId]: {
+              ...newState.datasourceStates[activeDatasourceId],
+              state: activeDatasource.insertLayer(
+                newState.datasourceStates[activeDatasourceId]?.state,
+                payload.layerId
+              ),
+            },
+          },
+          visualization: {
+            ...visualization,
+            state: newVisState,
+          },
+        };
+      }
+      return newState;
+    },
+  });
 };

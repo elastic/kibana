@@ -8,19 +8,15 @@
 
 import { OpsMetrics } from '..';
 import { getEcsOpsMetricsLog } from './get_ops_metrics_log';
+import { collectorMock } from '../collectors/mocks';
 
 function createBaseOpsMetrics(): OpsMetrics {
+  const mockProcess = collectorMock.createOpsProcessMetrics();
+
   return {
     collected_at: new Date('2020-01-01 01:00:00'),
-    process: {
-      memory: {
-        heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
-        resident_set_size_in_bytes: 1,
-      },
-      event_loop_delay: 1,
-      pid: 1,
-      uptime_in_millis: 1,
-    },
+    process: mockProcess,
+    processes: [mockProcess],
     os: {
       platform: 'darwin' as const,
       platformRelease: 'test',
@@ -41,7 +37,7 @@ function createMockOpsMetrics(testMetrics: Partial<OpsMetrics>): OpsMetrics {
     ...testMetrics,
   };
 }
-const testMetrics = ({
+const testMetrics = {
   process: {
     memory: { heap: { used_in_bytes: 100 } },
     uptime_in_millis: 1500,
@@ -54,7 +50,7 @@ const testMetrics = ({
       '15m': 30,
     },
   },
-} as unknown) as Partial<OpsMetrics>;
+} as unknown as Partial<OpsMetrics>;
 
 describe('getEcsOpsMetricsLog', () => {
   it('provides correctly formatted message', () => {
@@ -71,11 +67,11 @@ describe('getEcsOpsMetricsLog', () => {
 
   it('excludes values from the message if unavailable', () => {
     const baseMetrics = createBaseOpsMetrics();
-    const missingMetrics = ({
+    const missingMetrics = {
       ...baseMetrics,
       process: {},
       os: {},
-    } as unknown) as OpsMetrics;
+    } as unknown as OpsMetrics;
     const logMeta = getEcsOpsMetricsLog(missingMetrics);
     expect(logMeta.message).toMatchInlineSnapshot(`""`);
   });

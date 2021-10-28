@@ -20,9 +20,10 @@ type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElem
  * the `href` points to `panelViewAndParameters`.
  * Existing `search` parameters are maintained.
  */
-export function useLinkProps(
-  panelViewAndParameters: PanelViewAndParameters
-): { href: string; onClick: EventHandlerCallback } {
+export function useLinkProps(panelViewAndParameters: PanelViewAndParameters): {
+  href: string;
+  onClick: EventHandlerCallback;
+} {
   const search = useSelector((state: ResolverState) =>
     selectors.relativeHref(state)(panelViewAndParameters)
   );

@@ -42,6 +42,8 @@ describe('kibana_usage_collection', () => {
 
     expect(pluginInstance.setup(coreSetup, { usageCollection })).toBe(undefined);
 
+    expect(coreSetup.coreUsageData.registerUsageCounter).toHaveBeenCalled();
+
     await expect(
       Promise.all(
         usageCollectors.map(async (usageCollector) => {

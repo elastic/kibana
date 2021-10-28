@@ -9,17 +9,15 @@ import {
   GEO_JSON_TYPE,
   FEATURE_VISIBLE_PROPERTY_NAME,
   KBN_IS_CENTROID_FEATURE,
-  KBN_METADATA_FEATURE,
 } from '../../../common/constants';
 
 import { Timeslice } from '../../../common/descriptor_types';
 
 export interface TimesliceMaskConfig {
-  timesiceMaskField: string;
+  timesliceMaskField: string;
   timeslice: Timeslice;
 }
 
-export const EXCLUDE_TOO_MANY_FEATURES_BOX = ['!=', ['get', KBN_METADATA_FEATURE], true];
 export const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true];
 
 function getFilterExpression(
@@ -34,15 +32,15 @@ function getFilterExpression(
   }
 
   if (timesliceMaskConfig) {
-    allFilters.push(['has', timesliceMaskConfig.timesiceMaskField]);
+    allFilters.push(['has', timesliceMaskConfig.timesliceMaskField]);
     allFilters.push([
       '>=',
-      ['get', timesliceMaskConfig.timesiceMaskField],
+      ['get', timesliceMaskConfig.timesliceMaskField],
       timesliceMaskConfig.timeslice.from,
     ]);
     allFilters.push([
       '<',
-      ['get', timesliceMaskConfig.timesiceMaskField],
+      ['get', timesliceMaskConfig.timesliceMaskField],
       timesliceMaskConfig.timeslice.to,
     ]);
   }
@@ -56,7 +54,6 @@ export function getFillFilterExpression(
 ): unknown[] {
   return getFilterExpression(
     [
-      EXCLUDE_TOO_MANY_FEATURES_BOX,
       EXCLUDE_CENTROID_FEATURES,
       [
         'any',
@@ -75,7 +72,6 @@ export function getLineFilterExpression(
 ): unknown[] {
   return getFilterExpression(
     [
-      EXCLUDE_TOO_MANY_FEATURES_BOX,
       EXCLUDE_CENTROID_FEATURES,
       [
         'any',
@@ -96,7 +92,6 @@ export function getPointFilterExpression(
 ): unknown[] {
   return getFilterExpression(
     [
-      EXCLUDE_TOO_MANY_FEATURES_BOX,
       EXCLUDE_CENTROID_FEATURES,
       [
         'any',
@@ -109,13 +104,17 @@ export function getPointFilterExpression(
   );
 }
 
-export function getCentroidFilterExpression(
+export function getLabelFilterExpression(
   hasJoins: boolean,
+  isSourceGeoJson: boolean,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
-  return getFilterExpression(
-    [EXCLUDE_TOO_MANY_FEATURES_BOX, ['==', ['get', KBN_IS_CENTROID_FEATURE], true]],
-    hasJoins,
-    timesliceMaskConfig
-  );
+  const filters: unknown[] = [];
+
+  // centroids added for geojson sources only
+  if (isSourceGeoJson) {
+    filters.push(['==', ['get', KBN_IS_CENTROID_FEATURE], true]);
+  }
+
+  return getFilterExpression(filters, hasJoins, timesliceMaskConfig);
 }

@@ -5,52 +5,70 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-import { IUiSettingsClient } from 'kibana/public';
+import {
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HitsCounter } from '../hits_counter';
-import { DataPublicPluginStart, IndexPattern, search } from '../../../../../../../data/public';
-import { TimechartHeader } from '../timechart_header';
 import { SavedSearch } from '../../../../../saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { TimechartBucketInterval } from '../timechart_header/timechart_header';
-import { Chart as IChart } from './point_series';
 import { DiscoverHistogram } from './histogram';
+import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
+import { DiscoverServices } from '../../../../../build_services';
+import { useChartPanels } from './use_chart_panels';
+import { VIEW_MODE, DocumentViewModeToggle } from '../view_mode_toggle';
+import { SHOW_FIELD_STATISTICS } from '../../../../../../common';
 
-const TimechartHeaderMemoized = React.memo(TimechartHeader);
-const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
+const DiscoverHistogramMemoized = memo(DiscoverHistogram);
+export const CHART_HIDDEN_KEY = 'discover:chartHidden';
+
 export function DiscoverChart({
-  config,
-  data,
-  bucketInterval,
-  chartData,
-  hits,
-  isLegacy,
-  resetQuery,
+  resetSavedSearch,
   savedSearch,
+  savedSearchDataChart$,
+  savedSearchDataTotalHits$,
+  services,
   state,
   stateContainer,
   timefield,
+  viewMode,
+  setDiscoverViewMode,
 }: {
-  config: IUiSettingsClient;
-  data: DataPublicPluginStart;
-  bucketInterval?: TimechartBucketInterval;
-  chartData?: IChart;
-  hits?: number;
-  indexPattern: IndexPattern;
-  isLegacy: boolean;
-  resetQuery: () => void;
+  resetSavedSearch: () => void;
   savedSearch: SavedSearch;
+  savedSearchDataChart$: DataCharts$;
+  savedSearchDataTotalHits$: DataTotalHits$;
+  services: DiscoverServices;
   state: AppState;
   stateContainer: GetStateReturn;
   timefield?: string;
+  viewMode: VIEW_MODE;
+  setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
 }) {
+  const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
+  const showViewModeToggle = services.uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
+
+  const { data, storage } = services;
+
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
     element: null,
     moveFocus: false,
   });
+
+  const onShowChartOptions = useCallback(() => {
+    setShowChartOptionsPopover(!showChartOptionsPopover);
+  }, [showChartOptionsPopover]);
+
+  const closeChartOptions = useCallback(() => {
+    setShowChartOptionsPopover(false);
+  }, [setShowChartOptionsPopover]);
 
   useEffect(() => {
     if (chartRef.current.moveFocus && chartRef.current.element) {
@@ -62,16 +80,8 @@ export function DiscoverChart({
     const newHideChart = !state.hideChart;
     stateContainer.setAppState({ hideChart: newHideChart });
     chartRef.current.moveFocus = !newHideChart;
-  }, [state, stateContainer]);
-
-  const onChangeInterval = useCallback(
-    (interval: string) => {
-      if (interval) {
-        stateContainer.setAppState({ interval });
-      }
-    },
-    [stateContainer]
-  );
+    storage.set(CHART_HIDDEN_KEY, newHideChart);
+  }, [state.hideChart, stateContainer, storage]);
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
@@ -83,54 +93,64 @@ export function DiscoverChart({
     },
     [data]
   );
+  const panels = useChartPanels(
+    state,
+    savedSearchDataChart$,
+    toggleHideChart,
+    (interval) => stateContainer.setAppState({ interval }),
+    () => setShowChartOptionsPopover(false)
+  );
 
   return (
     <EuiFlexGroup direction="column" alignItems="stretch" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false} className="dscResultCount">
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem
             grow={false}
-            className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
+            className="dscResultCount__title eui-textTruncate eui-textNoWrap"
           >
             <HitsCounter
-              hits={hits}
+              savedSearchData$={savedSearchDataTotalHits$}
               showResetButton={!!(savedSearch && savedSearch.id)}
-              onResetQuery={resetQuery}
+              onResetQuery={resetSavedSearch}
             />
           </EuiFlexItem>
-          {!state.hideChart && (
-            <EuiFlexItem className="dscResultCount__actions">
-              <TimechartHeaderMemoized
-                data={data}
-                dateFormat={config.get('dateFormat')}
-                options={search.aggs.intervalOptions}
-                onChangeInterval={onChangeInterval}
-                stateInterval={state.interval || ''}
-                bucketInterval={bucketInterval}
+          {showViewModeToggle && (
+            <EuiFlexItem grow={false}>
+              <DocumentViewModeToggle
+                viewMode={viewMode}
+                setDiscoverViewMode={setDiscoverViewMode}
               />
             </EuiFlexItem>
           )}
           {timefield && (
             <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                iconType={!state.hideChart ? 'eyeClosed' : 'eye'}
-                onClick={toggleHideChart}
-                data-test-subj="discoverChartToggle"
-              >
-                {!state.hideChart
-                  ? i18n.translate('discover.hideChart', {
-                      defaultMessage: 'Hide chart',
-                    })
-                  : i18n.translate('discover.showChart', {
-                      defaultMessage: 'Show chart',
+              <EuiPopover
+                id="dscChartOptions"
+                button={
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="gear"
+                    onClick={onShowChartOptions}
+                    data-test-subj="discoverChartOptionsToggle"
+                  >
+                    {i18n.translate('discover.chartOptionsButton', {
+                      defaultMessage: 'Chart options',
                     })}
-              </EuiButtonEmpty>
+                  </EuiButtonEmpty>
+                }
+                isOpen={showChartOptionsPopover}
+                closePopover={closeChartOptions}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenu initialPanelId={0} panels={panels} />
+              </EuiPopover>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {!state.hideChart && chartData && (
+      {timefield && !state.hideChart && (
         <EuiFlexItem grow={false}>
           <section
             ref={(element) => (chartRef.current.element = element)}
@@ -140,15 +160,11 @@ export function DiscoverChart({
             })}
             className="dscTimechart"
           >
-            <div
-              className={isLegacy ? 'dscHistogram' : 'dscHistogramGrid'}
-              data-test-subj="discoverChart"
-            >
-              <DiscoverHistogramMemoized
-                chartData={chartData}
-                timefilterUpdateHandler={timefilterUpdateHandler}
-              />
-            </div>
+            <DiscoverHistogramMemoized
+              savedSearchData$={savedSearchDataChart$}
+              timefilterUpdateHandler={timefilterUpdateHandler}
+              services={services}
+            />
           </section>
           <EuiSpacer size="s" />
         </EuiFlexItem>

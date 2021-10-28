@@ -8,34 +8,43 @@
 import { Store } from 'redux';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { CoreSetup, Plugin, CoreStart } from '../../../../src/core/public';
+import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from './components';
 import {
-  CoreSetup,
-  Plugin,
-  PluginInitializerContext,
-  CoreStart,
-} from '../../../../src/core/public';
-import type { TimelinesUIStart, TGridProps } from './types';
-import { getLastUpdatedLazy, getLoadingPanelLazy, getTGridLazy } from './methods';
-import type { LastUpdatedAtProps, LoadingPanelProps } from './components';
+  getLastUpdatedLazy,
+  getLoadingPanelLazy,
+  getTGridLazy,
+  getFieldsBrowserLazy,
+  getAddToCaseLazy,
+  getAddToExistingCaseButtonLazy,
+  getAddToNewCaseButtonLazy,
+  getAddToCasePopoverLazy,
+} from './methods';
+import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './types';
 import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
+import { getHoverActions } from './components/hover_actions';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
   private _store: Store | undefined;
   private _storage = new Storage(localStorage);
 
   public setup(core: CoreSetup) {}
 
-  public start(core: CoreStart, { data }: { data: DataPublicPluginStart }): TimelinesUIStart {
-    const config = this.initializerContext.config.get<{ enabled: boolean }>();
-    if (!config.enabled) {
-      return {} as TimelinesUIStart;
-    }
+  public start(core: CoreStart, { data }: TimelinesStartPlugins): TimelinesUIStart {
     return {
+      getHoverActions: () => {
+        return getHoverActions(this._store);
+      },
       getTGrid: (props: TGridProps) => {
+        if (props.type === 'standalone' && this._store) {
+          const { getState } = this._store;
+          const state = getState();
+          if (state && state.app) {
+            this._store = undefined;
+          }
+        }
         return getTGridLazy(props, {
           store: this._store,
           storage: this._storage,
@@ -52,6 +61,12 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       getLastUpdated: (props: LastUpdatedAtProps) => {
         return getLastUpdatedLazy(props);
       },
+      getFieldBrowser: (props: FieldBrowserProps) => {
+        return getFieldsBrowserLazy(props, {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          store: this._store!,
+        });
+      },
       getUseAddToTimeline: () => {
         return useAddToTimeline;
       },
@@ -63,6 +78,38 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       setTGridEmbeddedStore: (store: Store) => {
         this.setStore(store);
+      },
+      getAddToCaseAction: (props) => {
+        return getAddToCaseLazy(props, {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          store: this._store!,
+          storage: this._storage,
+          setStore: this.setStore.bind(this),
+        });
+      },
+      getAddToCasePopover: (props) => {
+        return getAddToCasePopoverLazy(props, {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          store: this._store!,
+          storage: this._storage,
+          setStore: this.setStore.bind(this),
+        });
+      },
+      getAddToExistingCaseButton: (props) => {
+        return getAddToExistingCaseButtonLazy(props, {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          store: this._store!,
+          storage: this._storage,
+          setStore: this.setStore.bind(this),
+        });
+      },
+      getAddToNewCaseButton: (props) => {
+        return getAddToNewCaseButtonLazy(props, {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          store: this._store!,
+          storage: this._storage,
+          setStore: this.setStore.bind(this),
+        });
       },
     };
   }

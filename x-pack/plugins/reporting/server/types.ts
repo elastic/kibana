@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { Writable } from 'stream';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { CancellationToken } from '../common';
-import { BaseParams, TaskRunResult } from '../common/types';
+import { BaseParams, BasePayload, TaskRunResult } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
@@ -29,11 +30,11 @@ import { ReportTaskParams } from './lib/tasks';
 export interface ReportingSetupDeps {
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
+  screenshotMode: ScreenshotModePluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
-  screenshotMode: ScreenshotModePluginSetup;
 }
 
 export interface ReportingStartDeps {
@@ -56,27 +57,20 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export { BaseParams };
-
-// base params decorated with encrypted headers that come into runJob functions
-export interface BasePayload extends BaseParams {
-  headers: string;
-  spaceId?: string;
-  isDeprecated?: boolean;
-}
+export { BaseParams, BasePayload };
 
 // default fn type for CreateJobFnFactory
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
-  context: ReportingRequestHandlerContext,
-  request: KibanaRequest<any, any, any, any>
-) => Promise<JobPayloadType>;
+  context: ReportingRequestHandlerContext
+) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
 
 // default fn type for RunTaskFnFactory
 export type RunTaskFn<TaskPayloadType = BasePayload> = (
   jobId: string,
   payload: ReportTaskParams<TaskPayloadType>['payload'],
-  cancellationToken: CancellationToken
+  cancellationToken: CancellationToken,
+  stream: Writable
 ) => Promise<TaskRunResult>;
 
 export type CreateJobFnFactory<CreateJobFnType> = (

@@ -6,7 +6,7 @@
  */
 
 import { encode } from 'rison-node';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FetchData, FetchDataParams, LogsFetchDataResponse } from '../../../observability/public';
 import { DEFAULT_SOURCE_ID } from '../../common/constants';
 import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
@@ -138,7 +138,7 @@ function buildLogOverviewAggregations(logParams: LogParams, params: FetchDataPar
         series: {
           date_histogram: {
             field: logParams.timestampField,
-            fixed_interval: params.bucketSize,
+            fixed_interval: params.intervalString,
           },
         },
       },

@@ -7,7 +7,7 @@
 import React, { memo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { CommonProps, EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { ListPageRouteState } from '../../../../common/endpoint/types';
@@ -15,7 +15,7 @@ import { ListPageRouteState } from '../../../../common/endpoint/types';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 
 const EuiButtonEmptyStyled = styled(EuiButtonEmpty)`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
 
   .euiIcon {
     width: ${({ theme }) => theme.eui.euiIconSizes.small};
@@ -24,22 +24,25 @@ const EuiButtonEmptyStyled = styled(EuiButtonEmpty)`
 
   .text {
     font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+    margin-inline-start: ${({ theme }) => theme.eui.paddingSizes.xs};
   }
 `;
 
-export const BackToExternalAppButton = memo<ListPageRouteState>(
-  ({ backButtonLabel, backButtonUrl, onBackButtonNavigateTo }) => {
-    const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo!);
+export type BackToExternalAppButtonProps = CommonProps & ListPageRouteState;
+export const BackToExternalAppButton = memo<BackToExternalAppButtonProps>(
+  ({ backButtonLabel, backButtonUrl, onBackButtonNavigateTo, ...commonProps }) => {
+    const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo);
 
     return (
       <EuiButtonEmptyStyled
+        data-test-subj="backToOrigin"
+        {...commonProps}
         flush="left"
         size="xs"
         iconType="arrowLeft"
-        href={backButtonUrl!}
+        href={backButtonUrl}
         onClick={handleBackOnClick}
         textProps={{ className: 'text' }}
-        data-test-subj="backToOrigin"
       >
         {backButtonLabel || (
           <FormattedMessage id="xpack.securitySolution.list.backButton" defaultMessage="Back" />

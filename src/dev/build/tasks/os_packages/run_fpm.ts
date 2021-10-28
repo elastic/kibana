@@ -123,6 +123,7 @@ export async function runFpm(
     `${resolveWithTrailingSlash(fromBuild('.'))}=/usr/share/kibana/`,
 
     // copy the config directory to /etc/kibana
+    `${config.resolveFromRepo('build/os_packages/config/kibana.yml')}=/etc/kibana/kibana.yml`,
     `${resolveWithTrailingSlash(fromBuild('config'))}=/etc/kibana/`,
 
     // copy the data directory at /var/lib/kibana

@@ -385,7 +385,7 @@ describe('RoleMappingsLogic', () => {
         expect(RoleMappingsLogic.values.dataLoading).toEqual(true);
 
         expect(http.post).toHaveBeenCalledWith(
-          '/api/app_search/role_mappings/enable_role_based_access'
+          '/internal/app_search/role_mappings/enable_role_based_access'
         );
         await nextTick();
         expect(setRoleMappingsSpy).toHaveBeenCalledWith(mappingsServerProps);
@@ -406,7 +406,7 @@ describe('RoleMappingsLogic', () => {
         http.get.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.initializeRoleMappings();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/role_mappings');
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/role_mappings');
         await nextTick();
         expect(setRoleMappingsDataSpy).toHaveBeenCalledWith(mappingsServerProps);
       });
@@ -417,6 +417,16 @@ describe('RoleMappingsLogic', () => {
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+      });
+
+      it('resets roleMapping state', () => {
+        mount({
+          ...mappingsServerProps,
+          roleMapping: asRoleMapping,
+        });
+        RoleMappingsLogic.actions.initializeRoleMappings();
+
+        expect(RoleMappingsLogic.values.roleMapping).toEqual(null);
       });
     });
 
@@ -492,7 +502,7 @@ describe('RoleMappingsLogic', () => {
         http.post.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.handleSaveMapping();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/role_mappings', {
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/role_mappings', {
           body: JSON.stringify(body),
         });
         await nextTick();
@@ -513,9 +523,12 @@ describe('RoleMappingsLogic', () => {
         http.put.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.handleSaveMapping();
 
-        expect(http.put).toHaveBeenCalledWith(`/api/app_search/role_mappings/${asRoleMapping.id}`, {
-          body: JSON.stringify(body),
-        });
+        expect(http.put).toHaveBeenCalledWith(
+          `/internal/app_search/role_mappings/${asRoleMapping.id}`,
+          {
+            body: JSON.stringify(body),
+          }
+        );
         await nextTick();
 
         expect(initializeRoleMappingsSpy).toHaveBeenCalled();
@@ -535,13 +548,16 @@ describe('RoleMappingsLogic', () => {
         http.put.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.handleSaveMapping();
 
-        expect(http.put).toHaveBeenCalledWith(`/api/app_search/role_mappings/${asRoleMapping.id}`, {
-          body: JSON.stringify({
-            ...body,
-            accessAllEngines: false,
-            engines: [engine.name],
-          }),
-        });
+        expect(http.put).toHaveBeenCalledWith(
+          `/internal/app_search/role_mappings/${asRoleMapping.id}`,
+          {
+            body: JSON.stringify({
+              ...body,
+              accessAllEngines: false,
+              engines: [engine.name],
+            }),
+          }
+        );
       });
 
       it('handles error', async () => {
@@ -582,7 +598,7 @@ describe('RoleMappingsLogic', () => {
         http.post.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.handleSaveUser();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/single_user_role_mapping', {
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/single_user_role_mapping', {
           body: JSON.stringify({
             roleMapping: {
               engines: [],
@@ -613,7 +629,7 @@ describe('RoleMappingsLogic', () => {
         http.put.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.handleSaveUser();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/single_user_role_mapping', {
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/single_user_role_mapping', {
           body: JSON.stringify({
             roleMapping: {
               engines: [],
@@ -666,7 +682,9 @@ describe('RoleMappingsLogic', () => {
         http.delete.mockReturnValue(Promise.resolve({}));
         RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
 
-        expect(http.delete).toHaveBeenCalledWith(`/api/app_search/role_mappings/${roleMappingId}`);
+        expect(http.delete).toHaveBeenCalledWith(
+          `/internal/app_search/role_mappings/${roleMappingId}`
+        );
         await nextTick();
 
         expect(initializeRoleMappingsSpy).toHaveBeenCalled();

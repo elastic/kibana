@@ -9,7 +9,7 @@ import React from 'react';
 import DateMath from '@elastic/datemath';
 import { DurationChartComponent } from './duration_chart';
 import { MonitorDurationResult } from '../../../../common/types';
-import { shallowWithRouter } from '../../../lib';
+import { render } from '../../../lib/helper/rtl_helpers';
 
 describe('MonitorCharts component', () => {
   let dateMathSpy: any;
@@ -48,13 +48,37 @@ describe('MonitorCharts component', () => {
   };
 
   it('renders the component without errors', () => {
-    const component = shallowWithRouter(
+    const { getByLabelText } = render(
       <DurationChartComponent
         loading={false}
         anomalies={null}
         locationDurationLines={chartResponse.monitorChartsData.locationDurationLines}
-      />
+      />,
+      {
+        state: {
+          monitorStatus: {
+            loading: false,
+            status: {
+              docId: 'docId',
+              timestamp: '123',
+              monitor: {
+                duration: { us: 123 },
+                id: 'mon-id',
+                status: 'up',
+                type: 'tcp',
+              },
+            },
+          },
+        },
+      }
     );
-    expect(component).toMatchSnapshot();
+    expect(getByLabelText(`A chart displaying the monitor's ping duration, grouped by location.`));
+  });
+
+  it('renders an empty state when no monitor data is present', () => {
+    const { getByText } = render(
+      <DurationChartComponent loading={false} anomalies={null} locationDurationLines={[]} />
+    );
+    expect(getByText('No duration data available'));
   });
 });

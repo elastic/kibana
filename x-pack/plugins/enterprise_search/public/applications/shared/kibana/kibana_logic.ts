@@ -29,14 +29,13 @@ interface KibanaLogicProps {
   renderHeaderActions(HeaderActions: FC): void;
   // Required plugins
   charts: ChartsPluginStart;
+  security: SecurityPluginStart;
   // Optional plugins
   cloud?: CloudSetup;
-  security?: SecurityPluginStart;
 }
-export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud' | 'security'> {
+export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
   cloud: Partial<CloudSetup>;
-  security: Partial<SecurityPluginStart>;
 }
 
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
@@ -54,7 +53,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
       },
       {},
     ],
-    security: [props.security || {}, {}],
+    security: [props.security, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],

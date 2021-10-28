@@ -23,8 +23,8 @@ const createTestAction = ({
   grouping?: PresentableGrouping;
 }) =>
   createAction({
-    id: type as any, // mapping doesn't matter for this test
-    type: type as any, // mapping doesn't matter for this test
+    id: type as string,
+    type,
     getDisplayName: () => dispayName,
     order,
     execute: async () => {},
@@ -67,7 +67,7 @@ test('sorts items in DESC order by "order" field first, then by display name', a
   ].sort(() => 0.5 - Math.random());
 
   const result = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: '' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: '' } })),
   });
 
   expect(result.map(resultMapper)).toMatchInlineSnapshot(`
@@ -125,7 +125,9 @@ test('can build menu with one action', async () => {
           dispayName: 'Foo',
         }),
         context: {},
-        trigger: 'TETS_TRIGGER' as any,
+        trigger: {
+          id: 'TETS_TRIGGER',
+        },
       },
     ],
     closeMenu: () => {},
@@ -156,7 +158,7 @@ test('orders items according to "order" field', async () => {
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu[0].items![0].name).toBe('Bar');
@@ -173,7 +175,7 @@ test('orders items according to "order" field', async () => {
     }),
   ];
   const menu2 = await buildContextMenuForActions({
-    actions: actions2.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions2.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu2[0].items![0].name).toBe('Bar');
@@ -199,7 +201,7 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
@@ -256,7 +258,7 @@ test('separates grouped items from main items with a separator', async () => {
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
@@ -322,7 +324,7 @@ test('separates multiple groups each with its own separator', async () => {
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
@@ -392,7 +394,7 @@ test('does not add separator for first grouping if there are no main items', asy
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu.map(resultMapper)).toMatchInlineSnapshot(`

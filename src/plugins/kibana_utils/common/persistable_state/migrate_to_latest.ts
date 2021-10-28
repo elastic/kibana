@@ -6,25 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { compare } from 'semver';
-import { SerializableState, VersionedState, MigrateFunctionsObject } from './types';
+import compare from 'semver/functions/compare';
+import { SerializableRecord } from '@kbn/utility-types';
+import { VersionedState, MigrateFunctionsObject } from './types';
 
-export function migrateToLatest<S extends SerializableState>(
+export function migrateToLatest<S extends SerializableRecord>(
   migrations: MigrateFunctionsObject,
   { state, version: oldVersion }: VersionedState
-): VersionedState<S> {
+): S {
   const versions = Object.keys(migrations || {})
     .filter((v) => compare(v, oldVersion) > 0)
     .sort(compare);
 
-  if (!versions.length) return { state, version: oldVersion } as VersionedState<S>;
+  if (!versions.length) return state as S;
 
   for (const version of versions) {
     state = migrations[version]!(state);
   }
 
-  return {
-    state: state as S,
-    version: versions[versions.length - 1],
-  };
+  return state as S;
 }

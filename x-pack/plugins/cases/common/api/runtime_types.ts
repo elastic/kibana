@@ -52,11 +52,10 @@ export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) =>
   throw createError(formatErrors(errors).join());
 };
 
-export const decodeOrThrow = <A, O, I>(
-  runtimeType: rt.Type<A, O, I>,
-  createError: ErrorFactory = createPlainError
-) => (inputValue: I) =>
-  pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+export const decodeOrThrow =
+  <A, O, I>(runtimeType: rt.Type<A, O, I>, createError: ErrorFactory = createPlainError) =>
+  (inputValue: I) =>
+    pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
 
 const getExcessProps = (props: rt.Props, r: Record<string, unknown>): string[] => {
   const ex: string[] = [];

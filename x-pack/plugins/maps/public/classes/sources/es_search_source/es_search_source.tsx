@@ -9,10 +9,16 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
-import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
+import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
-import { getHttp, getSearchService, getTimeFilter } from '../../../kibana_services';
+import {
+  getHttp,
+  getSearchService,
+  getSecurityService,
+  getTimeFilter,
+} from '../../../kibana_services';
 import {
   addFieldToDSL,
   getField,
@@ -29,39 +35,57 @@ import {
   FIELD_ORIGIN,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
-  MVT_SOURCE_LAYER_NAME,
   MVT_TOKEN_PARAM_NAME,
   SCALING_TYPES,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
 import { loadIndexSettings } from './util/load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { registerSource } from '../source_registry';
 import {
-  DataMeta,
+  DataRequestMeta,
   ESSearchSourceDescriptor,
   Timeslice,
   VectorSourceRequestMeta,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { TimeRange } from '../../../../../../../src/plugins/data/common';
+import {
+  SortDirection,
+  SortDirectionNumeric,
+  TimeRange,
+} from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import { GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source';
 import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
-import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
 import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
-import { addFeatureToIndex, deleteFeatureFromIndex, getMatchingIndexes } from './util/feature_edit';
+import {
+  addFeatureToIndex,
+  deleteFeatureFromIndex,
+  getIsDrawLayer,
+  getMatchingIndexes,
+} from './util/feature_edit';
+
+type ESSearchSourceSyncMeta = Pick<
+  ESSearchSourceDescriptor,
+  | 'filterByMapBounds'
+  | 'sortField'
+  | 'sortOrder'
+  | 'scalingType'
+  | 'topHitsSplitField'
+  | 'topHitsSize'
+>;
+
+const ES_MVT_HITS_LAYER_NAME = 'hits';
 
 export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
   const timeRangeBounds = getTimeFilter().calculateBounds(timerange);
@@ -165,6 +189,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         sortOrder={this._descriptor.sortOrder}
         scalingType={this._descriptor.scalingType}
         filterByMapBounds={this.isFilterByMapBounds()}
+        hasJoins={sourceEditorArgs.hasJoins}
+        clearJoins={sourceEditorArgs.clearJoins}
       />
     );
   }
@@ -172,17 +198,15 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async getFields(): Promise<IField[]> {
     try {
       const indexPattern = await this.getIndexPattern();
-      const fields: IFieldType[] = indexPattern.fields.filter((field) => {
+      const fields: IndexPatternField[] = indexPattern.fields.filter((field) => {
         // Ensure fielddata is enabled for field.
         // Search does not request _source
         return field.aggregatable;
       });
 
-      return fields.map(
-        (field): IField => {
-          return this.createField({ fieldName: field.name });
-        }
-      );
+      return fields.map((field): IField => {
+        return this.createField({ fieldName: field.name });
+      });
     } catch (error) {
       // failed index-pattern retrieval will show up as error-message in the layer-toc-entry
       return [];
@@ -191,6 +215,10 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   getFieldNames(): string[] {
     return [this._descriptor.geoField];
+  }
+
+  isMvt() {
+    return this._descriptor.scalingType === SCALING_TYPES.MVT;
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
@@ -211,9 +239,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         value: sourceTitle,
       },
       {
-        label: i18n.translate('xpack.maps.source.esSearch.indexPatternLabel', {
-          defaultMessage: `Index pattern`,
-        }),
+        label: getDataViewLabel(),
         value: indexPatternName,
       },
       {
@@ -289,7 +315,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       };
     }
 
-    const topHitsSplitField: IFieldType = getField(indexPattern, topHitsSplitFieldName);
+    const topHitsSplitField: IndexPatternField = getField(indexPattern, topHitsSplitFieldName);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = {
       size: DEFAULT_MAX_BUCKETS_LIMIT,
@@ -311,6 +337,18 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         },
       },
     });
+    if (topHitsSplitField.type === 'string') {
+      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(
+        topHitsSplitField,
+        '',
+        indexPattern
+      );
+      entityIsNotEmptyFilter.meta.negate = true;
+      searchSource.setField('filter', [
+        ...(searchSource.getField('filter') as Filter[]),
+        entityIsNotEmptyFilter,
+      ]);
+    }
 
     const resp = await this._runEsQuery({
       requestId: this.getId(),
@@ -418,17 +456,48 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
   }
 
+  async getSourceIndexList(): Promise<string[]> {
+    await this.getIndexPattern();
+    if (!(this.indexPattern && this.indexPattern.title)) {
+      return [];
+    }
+    let success;
+    let matchingIndexes;
+    try {
+      ({ success, matchingIndexes } = await getMatchingIndexes(this.indexPattern.title));
+    } catch (e) {
+      // Fail silently
+    }
+    return success ? matchingIndexes : [];
+  }
+
   async supportsFeatureEditing(): Promise<boolean> {
+    const matchingIndexes = await this.getSourceIndexList();
+    // For now we only support 1:1 index-pattern:index matches
+    return matchingIndexes.length === 1;
+  }
+
+  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
+    if (!(await this._isDrawingIndex())) {
+      return {};
+    }
+    const user = await getSecurityService()?.authc.getCurrentUser();
+    const timestamp = new Date().toISOString();
+    return {
+      created: {
+        ...(user ? { user: user.username } : {}),
+        '@timestamp': timestamp,
+      },
+    };
+  }
+
+  async _isDrawingIndex(): Promise<boolean> {
     await this.getIndexPattern();
     if (!(this.indexPattern && this.indexPattern.title)) {
       return false;
     }
-    const { matchingIndexes } = await getMatchingIndexes(this.indexPattern.title);
-    if (!matchingIndexes) {
-      return false;
-    }
-    // For now we only support 1:1 index-pattern:index matches
-    return matchingIndexes.length === 1;
+    const { success, isDrawingIndex } = await getIsDrawLayer(this.indexPattern.title);
+    return success && isDrawingIndex;
   }
 
   _hasSort(): boolean {
@@ -582,11 +651,9 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async getLeftJoinFields(): Promise<IField[]> {
     const indexPattern = await this.getIndexPattern();
     // Left fields are retrieved from _source.
-    return getSourceFields(indexPattern.fields).map(
-      (field): IField => {
-        return this.createField({ fieldName: field.name });
-      }
-    );
+    return getSourceFields(indexPattern.fields).map((field): IField => {
+      return this.createField({ fieldName: field.name });
+    });
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
@@ -620,17 +687,17 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         ? i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
             defaultMessage: `Results limited to first {entityCount} entities of ~{totalEntities}.`,
             values: {
-              entityCount: meta.entityCount,
-              totalEntities: meta.totalEntities,
+              entityCount: meta.entityCount?.toLocaleString(),
+              totalEntities: meta.totalEntities?.toLocaleString(),
             },
           })
         : i18n.translate('xpack.maps.esSearch.topHitsEntitiesCountMsg', {
             defaultMessage: `Found {entityCount} entities.`,
-            values: { entityCount: meta.entityCount },
+            values: { entityCount: meta.entityCount?.toLocaleString() },
           });
       const docsPerEntityMsg = i18n.translate('xpack.maps.esSearch.topHitsSizeMsg', {
         defaultMessage: `Showing top {topHitsSize} documents per entity.`,
-        values: { topHitsSize: this._descriptor.topHitsSize },
+        values: { topHitsSize: this._descriptor.topHitsSize?.toLocaleString() },
       });
 
       return {
@@ -645,7 +712,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return {
         tooltipContent: i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
           defaultMessage: `Results limited to first {count} documents.`,
-          values: { count: meta.resultsCount },
+          values: { count: meta.resultsCount?.toLocaleString() },
         }),
         areResultsTrimmed: true,
       };
@@ -654,13 +721,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return {
       tooltipContent: i18n.translate('xpack.maps.esSearch.featureCountMsg', {
         defaultMessage: `Found {count} documents.`,
-        values: { count: meta.resultsCount },
+        values: { count: meta.resultsCount?.toLocaleString() },
       }),
       areResultsTrimmed: false,
     };
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
+  getSyncMeta(): ESSearchSourceSyncMeta {
     return {
       filterByMapBounds: this._descriptor.filterByMapBounds,
       sortField: this._descriptor.sortField,
@@ -691,7 +758,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       });
     } else if (this._descriptor.scalingType === SCALING_TYPES.MVT) {
       reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReasonMvt', {
-        defaultMessage: 'Joins are not supported when scaling by mvt vector tiles',
+        defaultMessage: 'Joins are not supported when scaling by vector tiles',
       });
     } else {
       reason = null;
@@ -700,17 +767,39 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   getLayerName(): string {
-    return MVT_SOURCE_LAYER_NAME;
+    return ES_MVT_HITS_LAYER_NAME;
   }
 
-  async addFeature(geometry: Geometry | Position[]) {
-    const indexPattern = await this.getIndexPattern();
-    await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName());
+  async _getEditableIndex(): Promise<string> {
+    const indexList = await this.getSourceIndexList();
+    if (indexList.length === 0) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.indexZeroLengthEditError', {
+          defaultMessage: `Your data view doesn't point to any indices.`,
+        })
+      );
+    }
+    if (indexList.length > 1) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.indexOverOneLengthEditError', {
+          defaultMessage: `Your data view points to multiple indices. Only one index is allowed per data view.`,
+        })
+      );
+    }
+    return indexList[0];
+  }
+
+  async addFeature(
+    geometry: Geometry | Position[],
+    defaultFields: Record<string, Record<string, string>>
+  ) {
+    const index = await this._getEditableIndex();
+    await addFeatureToIndex(index, geometry, this.getGeoFieldName(), defaultFields);
   }
 
   async deleteFeature(featureId: string) {
-    const indexPattern = await this.getIndexPattern();
-    await deleteFeatureFromIndex(indexPattern.title, featureId);
+    const index = await this._getEditableIndex();
+    await deleteFeatureFromIndex(index, featureId);
   }
 
   async getUrlTemplateWithMeta(
@@ -749,22 +838,17 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    const geoField = await this._getGeoField();
-
     const urlTemplate = `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
-&requestBody=${risonDsl}\
-&geoFieldType=${geoField.type}`;
+&requestBody=${risonDsl}`;
 
     return {
       refreshTokenParamName: MVT_TOKEN_PARAM_NAME,
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),
-      urlTemplate: searchFilters.searchSessionId
-        ? urlTemplate + `&searchSessionId=${searchFilters.searchSessionId}`
-        : urlTemplate,
+      urlTemplate,
     };
   }
 
@@ -777,7 +861,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
   }
 
-  getUpdateDueToTimeslice(prevMeta: DataMeta, timeslice?: Timeslice): boolean {
+  getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return true;
     }
@@ -821,7 +905,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       sessionId: searchFilters.searchSessionId,
       legacyHitsTotal: false,
     });
-    return !isTotalHitsGreaterThan((resp.hits.total as unknown) as TotalHits, maxResultWindow);
+    return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }
 }
 

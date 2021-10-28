@@ -11,20 +11,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiConfirmModal,
+  EuiText,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useParams } from 'react-router-dom';
 
-import { useRouterNavigate } from '../../../common/lib/kibana';
+import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
 
 const EditSavedQueryPageComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
+
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const { savedQueryId } = useParams<{ savedQueryId: string }>();
   const savedQueryListProps = useRouterNavigate('saved_queries');
@@ -34,6 +36,8 @@ const EditSavedQueryPageComponent = () => {
   const deleteSavedQueryMutation = useDeleteSavedQuery({ savedQueryId });
 
   useBreadcrumbs('saved_query_edit', { savedQueryName: savedQueryDetails?.attributes?.id ?? '' });
+
+  const viewMode = useMemo(() => !permissions.writeSavedQueries, [permissions.writeSavedQueries]);
 
   const handleCloseDeleteConfirmationModal = useCallback(() => {
     setIsDeleteModalVisible(false);
@@ -61,23 +65,33 @@ const EditSavedQueryPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
-              <FormattedMessage
-                id="xpack.osquery.editSavedQuery.pageTitle"
-                defaultMessage='Edit "{savedQueryId}"'
-                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                values={{
-                  savedQueryId: savedQueryDetails?.attributes?.id ?? '',
-                }}
-              />
+              {viewMode ? (
+                <FormattedMessage
+                  id="xpack.osquery.viewSavedQuery.pageTitle"
+                  defaultMessage='"{savedQueryId}" details'
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{
+                    savedQueryId: savedQueryDetails?.attributes?.id ?? '',
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.osquery.editSavedQuery.pageTitle"
+                  defaultMessage='Edit "{savedQueryId}"'
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{
+                    savedQueryId: savedQueryDetails?.attributes?.id ?? '',
+                  }}
+                />
+              )}
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [savedQueryDetails?.attributes?.id, savedQueryListProps]
+    [savedQueryDetails?.attributes?.id, savedQueryListProps, viewMode]
   );
 
   const RightColumn = useMemo(
@@ -95,26 +109,47 @@ const EditSavedQueryPageComponent = () => {
   if (isLoading) return null;
 
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
+    <WithHeaderLayout
+      leftColumn={LeftColumn}
+      rightColumn={!viewMode ? RightColumn : undefined}
+      rightColumnGrow={false}
+    >
       {!isLoading && !isEmpty(savedQueryDetails) && (
         <EditSavedQueryForm
           defaultValue={savedQueryDetails?.attributes}
-          // @ts-expect-error update types
           handleSubmit={updateSavedQueryMutation.mutateAsync}
+          viewMode={viewMode}
         />
       )}
       {isDeleteModalVisible ? (
         <EuiConfirmModal
-          title={`Are you sure you want to delete this query?`}
+          title={
+            <FormattedMessage
+              id="xpack.osquery.deleteSavedQuery.confirmationModal.title"
+              defaultMessage="Are you sure you want to delete this query?"
+            />
+          }
           onCancel={handleCloseDeleteConfirmationModal}
           onConfirm={handleDeleteConfirmClick}
-          cancelButtonText="No, don't do it"
-          confirmButtonText="Yes, do it"
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.osquery.deleteSavedQuery.confirmationModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.osquery.deleteSavedQuery.confirmationModal.confirmButtonLabel"
+              defaultMessage="Confirm"
+            />
+          }
           buttonColor="danger"
           defaultFocusedButton="confirm"
         >
-          <p>You&rsquo;re about to delete this query.</p>
-          <p>Are you sure you want to do this?</p>
+          <FormattedMessage
+            id="xpack.osquery.deleteSavedQuery.confirmationModal.body"
+            defaultMessage="You're about to delete this query. Are you sure you want to do this?"
+          />
         </EuiConfirmModal>
       ) : null}
     </WithHeaderLayout>

@@ -5,31 +5,21 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RuleDataPluginService, RuleDataPluginServiceConstructorOptions } from './';
+import { IRuleDataService } from './rule_data_plugin_service';
 
-type Schema = PublicMethodsOf<RuleDataPluginService>;
-
-const createRuleDataPluginServiceMock = (_: RuleDataPluginServiceConstructorOptions) => {
-  const mocked: jest.Mocked<Schema> = {
-    init: jest.fn(),
-    isReady: jest.fn(),
-    wait: jest.fn(),
+export const ruleDataServiceMock = {
+  create: (): jest.Mocked<IRuleDataService> => ({
+    getResourcePrefix: jest.fn(),
+    getResourceName: jest.fn(),
     isWriteEnabled: jest.fn(),
-    getFullAssetName: jest.fn(),
-    createOrUpdateComponentTemplate: jest.fn(),
-    createOrUpdateIndexTemplate: jest.fn(),
-    createOrUpdateLifecyclePolicy: jest.fn(),
-    getRuleDataClient: jest.fn(),
-    updateIndexMappingsMatchingPattern: jest.fn(),
-  };
-  return mocked;
+    isWriterCacheEnabled: jest.fn(),
+    initializeService: jest.fn(),
+    initializeIndex: jest.fn(),
+    findIndexByName: jest.fn(),
+    findIndicesByFeature: jest.fn(),
+  }),
 };
 
-export const ruleDataPluginServiceMock: {
-  create: (
-    _: RuleDataPluginServiceConstructorOptions
-  ) => jest.Mocked<PublicMethodsOf<RuleDataPluginService>>;
-} = {
-  create: createRuleDataPluginServiceMock,
-};
+export const RuleDataServiceMock = jest
+  .fn<jest.Mocked<IRuleDataService>, []>()
+  .mockImplementation(ruleDataServiceMock.create);

@@ -28,23 +28,13 @@ yarn kbn run build -i PACKAGE_NAME
 ----
 
 [discrete]
-=== Watching Non Bazel Packages
-
-Non Bazel packages can be watched independently with
-
-[source,bash]
-----
-yarn kbn watch -i PACKAGE_NAME
-----
-
-[discrete]
 === Building Bazel Packages
 
 Bazel packages are built as a whole for now. You can use:
 
 [source,bash]
 ----
-yarn kbn build-bazel
+yarn kbn build
 ----
 
 [discrete]
@@ -54,7 +44,7 @@ Bazel packages are watched as a whole for now. You can use:
 
 [source,bash]
 ----
-yarn kbn watch-bazel
+yarn kbn watch
 ----
 
 
@@ -84,7 +74,6 @@ yarn kbn watch-bazel
 - @kbn/i18n
 - @kbn/interpreter
 - @kbn/io-ts-utils
-- @kbn/legacy-logging
 - @kbn/logging
 - @kbn/mapbox-gl
 - @kbn/monaco
@@ -92,6 +81,7 @@ yarn kbn watch-bazel
 - @kbn/plugin-helpers
 - @kbn/pr-utils
 - @kbn/rule-data-utils
+- @kbn/securitysolution-autocomplete
 - @kbn/securitysolution-es-utils
 - @kbn/securitysolution-hook-utils
 - @kbn/securitysolution-io-ts-alerting-types
@@ -102,6 +92,7 @@ yarn kbn watch-bazel
 - @kbn/securitysolution-list-constants
 - @kbn/securitysolution-list-hooks
 - @kbn/securitysolution-list-utils
+- @kbn/securitysolution-rules
 - @kbn/securitysolution-utils
 - @kbn/server-http-tools
 - @kbn/server-route-repository
@@ -113,6 +104,7 @@ yarn kbn watch-bazel
 - @kbn/test-subj-selector
 - @kbn/tinymath
 - @kbn/ui-framework
-- @kbn/ui-shared-deps
+- @kbn/ui-shared-deps-npm
+- @kbn/ui-shared-deps-src
 - @kbn/utility-types
 - @kbn/utils

@@ -49,7 +49,7 @@
 .kbnOverviewSolution {
   &.enterpriseSearch {
     .euiCard__image {
-      background-color: $euiColorSecondary;
+      background-color: $euiColorWarning;
     }
   }
   &.observability {
@@ -59,17 +59,9 @@
   }
   &.securitySolution {
     .euiCard__image {
-      background-color: $euiColorDarkestShade;
+      background-color: $euiColorSecondary;
     }
   }
-}
-
-.kbnOverviewSolution__icon {
-  background-color: $euiColorEmptyShade !important;
-  box-shadow: none !important;
-  height: $euiSizeL * 2;
-  padding: $euiSizeM;
-  width: $euiSizeL * 2;
 }
 
 .kbnOverviewSupplements--noNews .kbnOverviewMore {

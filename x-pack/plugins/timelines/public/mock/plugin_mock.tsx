@@ -13,15 +13,17 @@ import {
   useDraggableKeyboardWrapper,
 } from '../components';
 import { useAddToTimeline, useAddToTimelineSensor } from '../hooks/use_add_to_timeline';
+import { mockHoverActions } from './mock_hover_actions';
 
 export const createTGridMocks = () => ({
-  // eslint-disable-next-line react/display-name
+  getHoverActions: () => mockHoverActions,
   getTGrid: () => <>{'hello grid'}</>,
-  // eslint-disable-next-line react/display-name
+  getFieldBrowser: () => <div data-test-subj="field-browser" />,
   getLastUpdated: (props: LastUpdatedAtProps) => <LastUpdatedAt {...props} />,
-  // eslint-disable-next-line react/display-name
   getLoadingPanel: (props: LoadingPanelProps) => <LoadingPanel {...props} />,
   getUseAddToTimeline: () => useAddToTimeline,
   getUseAddToTimelineSensor: () => useAddToTimelineSensor,
   getUseDraggableKeyboardWrapper: () => useDraggableKeyboardWrapper,
+  getAddToExistingCaseButton: () => <div data-test-subj="add-to-existing-case" />,
+  getAddToNewCaseButton: () => <div data-test-subj="add-to-new-case" />,
 });

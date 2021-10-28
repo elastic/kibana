@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
+import { useLocation } from 'react-router-dom';
+
+import { Location } from 'history';
 import { useActions } from 'kea';
 
 import {
@@ -22,6 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { parseQueryParams } from '../../../shared/query_params';
 import { EuiCardTo } from '../../../shared/react_router_helpers';
 import { DOCS_PREFIX, ENGINE_CRAWLER_PATH } from '../../routes';
 import { generateEnginePath } from '../engine';
@@ -35,6 +39,20 @@ interface Props {
 export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) => {
   const { openDocumentCreation } = useActions(DocumentCreationLogic);
 
+  const { search } = useLocation() as Location;
+  const { method } = parseQueryParams(search);
+
+  useEffect(() => {
+    switch (method) {
+      case 'json':
+        openDocumentCreation('file');
+        break;
+      case 'api':
+        openDocumentCreation('api');
+        break;
+    }
+  }, []);
+
   const crawlerLink = generateEnginePath(ENGINE_CRAWLER_PATH);
 
   return (
@@ -43,7 +61,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
         <p>
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.documentCreation.description"
-            defaultMessage="There are four ways to send documents to your engine for indexing. You can paste raw JSON, upload a {jsonCode} file, {postCode} to the {documentsApiLink} endpoint, or test drive the new Elastic Crawler (beta) to automatically index documents from a URL. Click on your choice below."
+            defaultMessage="There are four ways to send documents to your engine for indexing. You can paste raw JSON, upload a {jsonCode} file, {postCode} to the {documentsApiLink} endpoint, or use the new Elastic Crawler to automatically index documents from a URL. Click on your choice below."
             values={{
               jsonCode: <EuiCode>.json</EuiCode>,
               postCode: <EuiCode>POST</EuiCode>,
@@ -58,6 +76,19 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
       </EuiText>
       <EuiSpacer />
       <EuiFlexGrid columns={2}>
+        <EuiFlexItem>
+          <EuiCardTo
+            display="subdued"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documentCreation.buttons.crawl',
+              { defaultMessage: 'Use the Crawler' }
+            )}
+            description=""
+            icon={<EuiIcon type="globe" size="xxl" color="primary" />}
+            to={crawlerLink}
+            isDisabled={disabled}
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
             display="subdued"
@@ -94,30 +125,6 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
             description=""
             icon={<EuiIcon type="editorCodeBlock" size="xxl" color="primary" />}
             onClick={() => openDocumentCreation('api')}
-            isDisabled={disabled}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCardTo
-            display="subdued"
-            title={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documentCreation.buttons.crawl',
-              { defaultMessage: 'Use the Crawler' }
-            )}
-            description=""
-            icon={<EuiIcon type="globe" size="xxl" color="primary" />}
-            betaBadgeLabel={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documentCreation.buttons.betaTitle',
-              { defaultMessage: 'Beta' }
-            )}
-            betaBadgeTooltipContent={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documentCreation.buttons.betaTooltip',
-              {
-                defaultMessage:
-                  'The Elastic Crawler is not GA. Please help us by reporting any bugs.',
-              }
-            )}
-            to={crawlerLink}
             isDisabled={disabled}
           />
         </EuiFlexItem>

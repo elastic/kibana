@@ -14,7 +14,7 @@ import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGeneratorState,
 } from '../../../../../../../../src/plugins/discover/public';
-import type { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import type { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { useUrlState } from '../../../common/util/url_state';
 import { LinkCard } from '../../../common/components/link_card';
@@ -40,6 +40,7 @@ export const ActionsPanel: FC<Props> = ({
 
   const {
     services: {
+      data,
       application: { capabilities },
       share: {
         urlGenerators: { getUrlGenerator },
@@ -60,6 +61,9 @@ export const ActionsPanel: FC<Props> = ({
       const state: DiscoverUrlGeneratorState = {
         indexPatternId,
       };
+
+      state.filters = data.query.filterManager.getFilters() ?? [];
+
       if (searchString && searchQueryLanguage !== undefined) {
         state.query = { query: searchString, language: searchQueryLanguage };
       }
@@ -113,6 +117,7 @@ export const ActionsPanel: FC<Props> = ({
     capabilities,
     getUrlGenerator,
     additionalLinks,
+    data.query,
   ]);
 
   // Note we use display:none for the DataRecognizer section as it needs to be

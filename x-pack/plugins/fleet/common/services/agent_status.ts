@@ -8,7 +8,7 @@
 import { AGENT_POLLING_THRESHOLD_MS } from '../constants';
 import type { Agent, AgentStatus } from '../types';
 
-export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
+export function getAgentStatus(agent: Agent): AgentStatus {
   const { last_checkin: lastCheckIn } = agent;
 
   if (!agent.active) {
@@ -41,36 +41,42 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
   return 'online';
 }
 
-export function buildKueryForEnrollingAgents() {
-  return 'not (last_checkin:*)';
+export function buildKueryForEnrollingAgents(path: string = '') {
+  return `not (${path}last_checkin:*)`;
 }
 
-export function buildKueryForUnenrollingAgents() {
-  return 'unenrollment_started_at:*';
+export function buildKueryForUnenrollingAgents(path: string = '') {
+  return `${path}unenrollment_started_at:*`;
 }
 
-export function buildKueryForOnlineAgents() {
-  return `not (${buildKueryForOfflineAgents()}) AND not (${buildKueryForErrorAgents()}) AND not (${buildKueryForUpdatingAgents()})`;
+export function buildKueryForOnlineAgents(path: string = '') {
+  return `not (${buildKueryForOfflineAgents(path)}) AND not (${buildKueryForErrorAgents(
+    path
+  )}) AND not (${buildKueryForUpdatingAgents(path)})`;
 }
 
-export function buildKueryForErrorAgents() {
-  return `(last_checkin_status:error or last_checkin_status:degraded) AND not (${buildKueryForUpdatingAgents()})`;
+export function buildKueryForErrorAgents(path: string = '') {
+  return `(${path}last_checkin_status:error or ${path}last_checkin_status:degraded) AND not (${buildKueryForUpdatingAgents(
+    path
+  )})`;
 }
 
-export function buildKueryForOfflineAgents() {
-  return `last_checkin < now-${
+export function buildKueryForOfflineAgents(path: string = '') {
+  return `${path}last_checkin < now-${
     (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
-  }s AND not (${buildKueryForErrorAgents()}) AND not ( ${buildKueryForUpdatingAgents()} )`;
+  }s AND not (${buildKueryForErrorAgents(path)}) AND not ( ${buildKueryForUpdatingAgents(path)} )`;
 }
 
-export function buildKueryForUpgradingAgents() {
-  return '(upgrade_started_at:*) and not (upgraded_at:*)';
+export function buildKueryForUpgradingAgents(path: string = '') {
+  return `(${path}upgrade_started_at:*) and not (${path}upgraded_at:*)`;
 }
 
-export function buildKueryForUpdatingAgents() {
-  return `(${buildKueryForUpgradingAgents()}) or (${buildKueryForEnrollingAgents()}) or (${buildKueryForUnenrollingAgents()})`;
+export function buildKueryForUpdatingAgents(path: string = '') {
+  return `(${buildKueryForUpgradingAgents(path)}) or (${buildKueryForEnrollingAgents(
+    path
+  )}) or (${buildKueryForUnenrollingAgents(path)})`;
 }
 
-export function buildKueryForInactiveAgents() {
-  return `active:false`;
+export function buildKueryForInactiveAgents(path: string = '') {
+  return `${path}active:false`;
 }

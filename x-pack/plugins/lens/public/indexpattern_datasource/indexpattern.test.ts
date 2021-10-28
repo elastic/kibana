@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import 'jest-canvas-mock';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource, IndexPatternColumn } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../types';
@@ -18,7 +20,7 @@ import { operationDefinitionMap, getErrorMessages } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
-import React from 'react';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -172,6 +174,7 @@ describe('IndexPattern Data Source', () => {
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
@@ -213,7 +216,7 @@ describe('IndexPattern Data Source', () => {
         operationType: 'count',
         sourceField: 'Records',
       };
-      const map = indexPatternDatasource.uniqueLabels(({
+      const map = indexPatternDatasource.uniqueLabels({
         layers: {
           a: {
             columnOrder: ['a', 'b'],
@@ -235,7 +238,7 @@ describe('IndexPattern Data Source', () => {
             indexPatternId: 'foo',
           },
         },
-      } as unknown) as IndexPatternPrivateState);
+      } as unknown as IndexPatternPrivateState);
 
       expect(map).toMatchInlineSnapshot(`
         Object {
@@ -397,7 +400,16 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "extended_bounds": Array [
-                            "{}",
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {},
+                                  "function": "extendedBounds",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
                           ],
                           "field": Array [
                             "timestamp",
@@ -612,7 +624,20 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "filter": Array [
-                            "{\\"language\\":\\"kuery\\",\\"query\\":\\"bytes > 5\\"}",
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {
+                                    "q": Array [
+                                      "bytes > 5",
+                                    ],
+                                  },
+                                  "function": "kql",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
                           ],
                           "id": Array [
                             "0-filter",
@@ -1385,7 +1410,7 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      const warnings = indexPatternDatasource.getWarningMessages!(state, ({
+      const warnings = indexPatternDatasource.getWarningMessages!(state, {
         activeData: {
           first: {
             type: 'datatable',
@@ -1408,7 +1433,7 @@ describe('IndexPattern Data Source', () => {
             ],
           },
         },
-      } as unknown) as FramePublicAPI);
+      } as unknown as FramePublicAPI);
       expect(warnings!.length).toBe(2);
       expect((warnings![0] as React.ReactElement).props.id).toEqual(
         'xpack.lens.indexPattern.timeShiftSmallWarning'
@@ -1514,6 +1539,168 @@ describe('IndexPattern Data Source', () => {
             columnOrder: [],
             columns: {},
             incompleteColumns: undefined,
+          },
+        },
+      });
+    });
+  });
+  describe('#isTimeBased', () => {
+    it('should return true if date histogram exists in any layer', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records2',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+            },
+          },
+          second: {
+            indexPatternId: '1',
+            columnOrder: ['bucket1', 'bucket2', 'metric2'],
+            columns: {
+              metric2: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+              bucket1: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: '1d',
+                },
+              },
+              bucket2: {
+                label: 'Terms',
+                dataType: 'string',
+                isBucketed: true,
+                operationType: 'terms',
+                sourceField: 'geo.src',
+                params: {
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                  size: 10,
+                },
+              },
+            },
+          },
+        },
+      });
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
+    });
+    it('should return false if date histogram does not exist in any layer', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      });
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+    });
+  });
+
+  describe('#initializeDimension', () => {
+    it('should return the same state if no static value is passed', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      });
+      expect(
+        indexPatternDatasource.initializeDimension!(state, 'first', {
+          columnId: 'newStatic',
+          label: 'MyNewColumn',
+          groupId: 'a',
+          dataType: 'number',
+        })
+      ).toBe(state);
+    });
+
+    it('should add a new static value column if a static value is passed', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      });
+      expect(
+        indexPatternDatasource.initializeDimension!(state, 'first', {
+          columnId: 'newStatic',
+          label: 'MyNewColumn',
+          groupId: 'a',
+          dataType: 'number',
+          staticValue: 0, // use a falsy value to check also this corner case
+        })
+      ).toEqual({
+        ...state,
+        layers: {
+          ...state.layers,
+          first: {
+            ...state.layers.first,
+            incompleteColumns: {},
+            columnOrder: ['metric', 'newStatic'],
+            columns: {
+              ...state.layers.first.columns,
+              newStatic: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Static value: 0',
+                operationType: 'static_value',
+                params: { value: 0 },
+                references: [],
+                scale: 'ratio',
+              },
+            },
           },
         },
       });

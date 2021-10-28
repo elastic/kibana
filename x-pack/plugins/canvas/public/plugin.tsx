@@ -6,6 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { SharePluginSetup } from 'src/plugins/share/public';
 import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
 import { ReportingStart } from '../../reporting/public';
 import {
@@ -15,11 +16,14 @@ import {
   AppMountParameters,
   AppUpdater,
   DEFAULT_APP_CATEGORIES,
+  PluginInitializerContext,
 } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { SpacesPluginStart } from '../../spaces/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { getSessionStorage } from './lib/storage';
-import { SESSIONSTORAGE_LASTPATH } from '../common/lib/constants';
+import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
+import { CanvasAppLocatorDefinition } from '../common/locator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -30,6 +34,7 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { getPluginApi, CanvasApi } from './plugin_api';
+import { setupExpressions } from './setup_expressions';
 import { pluginServiceRegistry } from './services/kibana';
 
 export { CoreStart, CoreSetup };
@@ -41,6 +46,7 @@ export { CoreStart, CoreSetup };
 // This interface will be built out as we require other plugins for setup
 export interface CanvasSetupDeps {
   data: DataPublicPluginSetup;
+  share: SharePluginSetup;
   expressions: ExpressionsSetup;
   home?: HomePublicPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -57,6 +63,7 @@ export interface CanvasStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -71,8 +78,14 @@ export type CanvasStart = void;
 
 /** @internal */
 export class CanvasPlugin
-  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
+  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps>
+{
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private initContext: PluginInitializerContext;
+
+  constructor(initContext: PluginInitializerContext) {
+    this.initContext = initContext;
+  }
 
   public setup(coreSetup: CoreSetup<CanvasStartDeps>, setupPlugins: CanvasSetupDeps) {
     const { api: canvasApi, registries } = getPluginApi(setupPlugins.expressions);
@@ -81,6 +94,7 @@ export class CanvasPlugin
     const lastPath = getSessionStorage().get(
       `${SESSIONSTORAGE_LASTPATH}:${coreSetup.http.basePath.get()}`
     );
+
     if (lastPath) {
       this.appUpdater.next(() => ({
         defaultPath: `#${lastPath}`,
@@ -89,7 +103,7 @@ export class CanvasPlugin
 
     coreSetup.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,
-      id: 'canvas',
+      id: CANVAS_APP,
       title: 'Canvas',
       euiIconType: 'logoKibana',
       order: 3000,
@@ -97,7 +111,9 @@ export class CanvasPlugin
       mount: async (params: AppMountParameters) => {
         const { CanvasSrcPlugin } = await import('../canvas_plugin_src/plugin');
         const srcPlugin = new CanvasSrcPlugin();
+
         srcPlugin.setup(coreSetup, { canvas: canvasApi });
+        setupExpressions({ coreSetup, setupPlugins });
 
         // Get start services
         const [coreStart, startPlugins] = await coreSetup.getStartServices();
@@ -105,7 +121,9 @@ export class CanvasPlugin
         srcPlugin.start(coreStart, startPlugins);
 
         const { pluginServices } = await import('./services');
-        pluginServices.setRegistry(pluginServiceRegistry.start({ coreStart, startPlugins }));
+        pluginServices.setRegistry(
+          pluginServiceRegistry.start({ coreStart, startPlugins, initContext: this.initContext })
+        );
 
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
@@ -132,11 +150,16 @@ export class CanvasPlugin
       setupPlugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
+    if (setupPlugins.share) {
+      setupPlugins.share.url.locators.create(new CanvasAppLocatorDefinition());
+    }
+
     canvasApi.addArgumentUIs(async () => {
       // @ts-expect-error
       const { argTypeSpecs } = await import('./expression_types/arg_types');
       return argTypeSpecs;
     });
+
     canvasApi.addTransitions(async () => {
       const { transitions } = await import('./transitions');
       return transitions;

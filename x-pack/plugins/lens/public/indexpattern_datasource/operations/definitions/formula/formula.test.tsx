@@ -22,7 +22,7 @@ jest.mock('../../layer_helpers', () => {
 });
 
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
-  average: ({
+  average: {
     input: 'field',
     buildColumn: ({ field }: { field: IndexPatternField }) => ({
       label: 'avg',
@@ -33,12 +33,28 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       scale: 'ratio',
       timeScale: false,
     }),
-  } as unknown) as GenericOperationDefinition,
-  terms: { input: 'field' } as GenericOperationDefinition,
-  sum: { input: 'field' } as GenericOperationDefinition,
-  last_value: { input: 'field' } as GenericOperationDefinition,
-  max: { input: 'field' } as GenericOperationDefinition,
-  count: ({
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
+  terms: {
+    input: 'field',
+    getPossibleOperationForField: () => ({ scale: 'ordinal' }),
+  } as unknown as GenericOperationDefinition,
+  sum: {
+    input: 'field',
+    filterable: true,
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
+  last_value: {
+    input: 'field',
+    getPossibleOperationForField: ({ type }) => ({
+      scale: type === 'string' ? 'ordinal' : 'ratio',
+    }),
+  } as GenericOperationDefinition,
+  max: {
+    input: 'field',
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
+  count: {
     input: 'field',
     filterable: true,
     buildColumn: ({ field }: { field: IndexPatternField }) => ({
@@ -50,9 +66,13 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       scale: 'ratio',
       timeScale: false,
     }),
-  } as unknown) as GenericOperationDefinition,
-  derivative: { input: 'fullReference' } as GenericOperationDefinition,
-  moving_average: ({
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
+  derivative: {
+    input: 'fullReference',
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
+  moving_average: {
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
     buildColumn: ({ references }: { references: string[] }) => ({
@@ -66,8 +86,12 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       references,
     }),
     getErrorMessage: () => ['mock error'],
-  } as unknown) as GenericOperationDefinition,
-  cumulative_sum: { input: 'fullReference' } as GenericOperationDefinition,
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
+  cumulative_sum: {
+    input: 'fullReference',
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
 };
 
 describe('formula', () => {
@@ -352,6 +376,33 @@ describe('formula', () => {
         isBucketed: false,
         scale: 'ratio',
         params: {},
+        references: [],
+      });
+    });
+
+    it('should move into Formula previous static_value operation', () => {
+      expect(
+        formulaOperation.buildColumn({
+          previousColumn: {
+            label: 'Static value: 0',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'static_value',
+            references: [],
+            params: {
+              value: '0',
+            },
+          },
+          layer,
+          indexPattern,
+        })
+      ).toEqual({
+        label: '0',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        scale: 'ratio',
+        params: { isFormulaBroken: false, formula: '0' },
         references: [],
       });
     });
@@ -928,6 +979,63 @@ invalid: "
       ).toEqual(['The operation average does not accept any parameter']);
     });
 
+    it('returns an error if first argument type is passed multiple times', () => {
+      const formulas = [
+        'average(bytes, bytes)',
+        "sum(bytes, kql='category.keyword: *', bytes)",
+        'moving_average(average(bytes), average(bytes))',
+        "moving_average(average(bytes), kql='category.keyword: *', average(bytes))",
+        'moving_average(average(bytes, bytes), count())',
+        'moving_average(moving_average(average(bytes, bytes), count(), count()))',
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(
+          expect.arrayContaining([
+            expect.stringMatching(
+              /The operation (moving_average|average|sum) in the Formula requires a single (field|metric), found:/
+            ),
+          ])
+        );
+      }
+    });
+
+    it('returns an error if a function received an argument of the wrong argument type in any position', () => {
+      const formulas = [
+        'average(bytes, count())',
+        "sum(bytes, kql='category.keyword: *', count(), count())",
+        'average(bytes, bytes + 1)',
+        'average(count(), bytes)',
+        'moving_average(average(bytes), bytes)',
+        'moving_average(bytes, bytes)',
+        'moving_average(average(bytes), window=7, bytes)',
+        'moving_average(window=7, bytes)',
+        "moving_average(kql='category.keyword: *', bytes)",
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(
+          expect.arrayContaining([
+            expect.stringMatching(
+              /The operation (moving_average|average|sum) in the Formula does not support (metric|field) parameters, found:/
+            ),
+          ])
+        );
+      }
+    });
+
     it('returns an error if the parameter passed to an operation is of the wrong type', () => {
       expect(
         formulaOperation.getErrorMessage!(
@@ -1087,6 +1195,14 @@ invalid: "
           )
         ).toEqual([`The first argument for ${fn} should be a field name. Found no field`]);
       }
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula(`sum(kql='category.keyword: *')`),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual([`The first argument for sum should be a field name. Found category.keyword: *`]);
     });
 
     it("returns a clear error when there's a missing function for a fullReference operation", () => {
@@ -1135,6 +1251,30 @@ invalid: "
             operationDefinitionMap
           )
         ).toEqual(undefined);
+      }
+    });
+
+    it('returns errors if the returned type of an operation is not supported by Formula', () => {
+      // check only "valid" operations which are strictly not supported by Formula
+      // as for last_value with ordinal data
+      const formulas = [
+        { formula: 'last_value(dest)' },
+        { formula: 'terms(dest)' },
+        { formula: 'moving_average(last_value(dest), window=7)', errorFormula: 'last_value(dest)' },
+      ];
+      for (const { formula, errorFormula } of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([
+          `The return value type of the operation ${
+            errorFormula ?? formula
+          } is not supported in Formula.`,
+        ]);
       }
     });
 

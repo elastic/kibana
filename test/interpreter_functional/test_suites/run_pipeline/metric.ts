@@ -30,10 +30,13 @@ export default function ({
         dataContext = await expectExpression('partial_metric_test', expression).getResponse();
       });
 
-      it('with invalid data', async () => {
+      it('with empty data', async () => {
         const expression = 'metricVis metric={visdimension 0}';
         await (
-          await expectExpression('metric_invalid_data', expression).toMatchSnapshot()
+          await expectExpression('metric_empty_data', expression, {
+            ...dataContext,
+            rows: [],
+          }).toMatchSnapshot()
         ).toMatchScreenshot();
       });
 
@@ -75,6 +78,15 @@ export default function ({
             expression,
             dataContext
           ).toMatchSnapshot()
+        ).toMatchScreenshot();
+      });
+    });
+
+    describe('throws error at metric', () => {
+      it('with invalid data', async () => {
+        const expression = 'metricVis metric={visdimension 0}';
+        await (
+          await expectExpression('metric_invalid_data', expression).toMatchSnapshot()
         ).toMatchScreenshot();
       });
     });

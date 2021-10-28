@@ -6,19 +6,14 @@
  */
 
 import React from 'react';
-import { ElasticDocsLink } from '../../../../../shared/Links/ElasticDocsLink';
+import { EuiLink } from '@elastic/eui';
+import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   label: string;
 }
+
 export function Documentation({ label }: Props) {
-  return (
-    <ElasticDocsLink
-      section="/kibana"
-      path="/custom-links.html"
-      target="_blank"
-    >
-      {label}
-    </ElasticDocsLink>
-  );
+  const { docLinks } = useApmPluginContext().core;
+  return <EuiLink href={docLinks.links.apm.customLinks}>{label}</EuiLink>;
 }

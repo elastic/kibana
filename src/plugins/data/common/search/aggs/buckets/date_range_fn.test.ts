@@ -39,10 +39,10 @@ describe('agg_expression_functions', () => {
       const actual = fn({
         field: 'date_field',
         time_zone: 'UTC +3',
-        ranges: JSON.stringify([
-          { from: 'now-1w/w', to: 'now' },
-          { from: 1588163532470, to: 1588163532481 },
-        ]),
+        ranges: [
+          { from: 'now-1w/w', to: 'now', type: 'date_range' },
+          { from: 1588163532470, to: 1588163532481, type: 'date_range' },
+        ],
       });
 
       expect(actual.value).toMatchInlineSnapshot(`

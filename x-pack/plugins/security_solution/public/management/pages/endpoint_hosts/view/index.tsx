@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, memo, useContext } from 'react';
+import React, { useMemo, useCallback, memo, useEffect, useState } from 'react';
+import styled from 'styled-components';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiText,
   EuiLink,
-  EuiBadge,
+  EuiHealth,
   EuiToolTip,
   EuiSelectableProps,
   EuiSuperDatePicker,
@@ -26,12 +27,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
-import { ThemeContext } from 'styled-components';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
-import { POLICY_STATUS_TO_BADGE_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
+import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
@@ -57,35 +57,35 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
 import { EndpointAgentStatus } from './components/endpoint_agent_status';
+import { CallOut } from '../../../../common/components/callouts';
+import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
+import { WARNING_TRANSFORM_STATES } from '../../../../../common/constants';
 
 const MAX_PAGINATED_ITEM = 9999;
+const TRANSFORM_URL = '/data/transform';
 
+const StyledDatePicker = styled.div`
+  .euiFormControlLayout--group {
+    background-color: rgba(0, 119, 204, 0.2);
+  }
+
+  .euiDatePickerRange--readOnly {
+    background-color: ${(props) => props.theme.eui.euiFormBackgroundColor};
+  }
+`;
 const EndpointListNavLink = memo<{
   name: string;
   href: string;
   route: string;
-  isBadge?: boolean;
   dataTestSubj: string;
-}>(({ name, href, route, isBadge = false, dataTestSubj }) => {
+}>(({ name, href, route, dataTestSubj }) => {
   const clickHandler = useNavigateByRouterEventHandler(route);
-  const theme = useContext(ThemeContext);
 
-  return isBadge ? (
+  return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink
       data-test-subj={dataTestSubj}
-      className="eui-textTruncate"
-      href={href}
-      onClick={clickHandler}
-      style={{ color: theme.eui.euiColorInk }}
-    >
-      {name}
-    </EuiLink>
-  ) : (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      data-test-subj={dataTestSubj}
-      className="eui-textTruncate"
+      className="eui-displayInline eui-textTruncate"
       href={href}
       onClick={clickHandler}
     >
@@ -120,13 +120,33 @@ export const EndpointList = () => {
     areEndpointsEnrolling,
     agentsWithEndpointsTotalError,
     endpointsTotalError,
-    isTransformEnabled,
+    metadataTransformStats,
   } = useEndpointSelector(selector);
   const { search } = useFormatUrl(SecurityPageName.administration);
   const { getAppUrl } = useAppUrl();
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
+  const [showTransformFailedCallout, setShowTransformFailedCallout] = useState(false);
+
+  useEffect(() => {
+    if (!endpointsExist || !listData?.length) {
+      return;
+    }
+
+    dispatch({ type: 'loadMetadataTransformStats' });
+  }, [endpointsExist, listData.length, dispatch]);
+
+  useEffect(() => {
+    const hasFailure = metadataTransformStats.some((transform) =>
+      WARNING_TRANSFORM_STATES.has(transform?.state)
+    );
+    setShowTransformFailedCallout(hasFailure);
+  }, [metadataTransformStats]);
+
+  const closeTransformFailedCallout = useCallback(() => {
+    setShowTransformFailedCallout(false);
+  }, []);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -157,7 +177,7 @@ export const EndpointList = () => {
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'fleet',
     {
-      path: `#/integrations/${
+      path: `/integrations/${
         endpointPackageVersion ? `/endpoint-${endpointPackageVersion}` : ''
       }/add-integration`,
       state: {
@@ -201,18 +221,16 @@ export const EndpointList = () => {
 
   const PAD_LEFT: React.CSSProperties = useMemo(() => ({ paddingLeft: '6px' }), []);
 
-  const handleDeployEndpointsClick = useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>(
-    'fleet',
-    {
-      path: `#/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
+  const handleDeployEndpointsClick =
+    useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>('fleet', {
+      path: `/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
       state: {
         onDoneNavigateTo: [
           'securitySolution',
           { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
       },
-    }
-  );
+    });
 
   const selectionOptions = useMemo<EuiSelectableProps['options']>(() => {
     return policyItems.map((item) => {
@@ -245,7 +263,7 @@ export const EndpointList = () => {
 
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
     const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
-      defaultMessage: 'Last Active',
+      defaultMessage: 'Last active',
     });
 
     return [
@@ -253,7 +271,7 @@ export const EndpointList = () => {
         field: 'metadata',
         width: '15%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
-          defaultMessage: 'Hostname',
+          defaultMessage: 'Endpoint',
         }),
         render: ({ host: { hostname }, agent: { id } }: HostInfo['metadata']) => {
           const toRoutePath = getEndpointDetailsPath(
@@ -281,9 +299,8 @@ export const EndpointList = () => {
         field: 'host_status',
         width: '14%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
-          defaultMessage: 'Agent Status',
+          defaultMessage: 'Agent status',
         }),
-        // eslint-disable-next-line react/display-name
         render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
           return (
             <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={endpointInfo.metadata} />
@@ -294,10 +311,9 @@ export const EndpointList = () => {
         field: 'metadata.Endpoint.policy.applied',
         width: '15%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
-          defaultMessage: 'Integration Policy',
+          defaultMessage: 'Policy',
         }),
         truncateText: true,
-        // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
           return (
             <>
@@ -315,6 +331,7 @@ export const EndpointList = () => {
                   color="subdued"
                   size="xs"
                   style={{ whiteSpace: 'nowrap', ...PAD_LEFT }}
+                  className="eui-textTruncate"
                   data-test-subj="policyListRevNo"
                 >
                   <FormattedMessage
@@ -335,7 +352,7 @@ export const EndpointList = () => {
         field: 'metadata.Endpoint.policy.applied',
         width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
-          defaultMessage: 'Policy Status',
+          defaultMessage: 'Policy status',
         }),
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
           const toRoutePath = getEndpointDetailsPath({
@@ -345,19 +362,23 @@ export const EndpointList = () => {
           });
           const toRouteUrl = getAppUrl({ path: toRoutePath });
           return (
-            <EuiBadge
-              color={POLICY_STATUS_TO_BADGE_COLOR[policy.status]}
-              className="eui-textTruncate"
-              data-test-subj="rowPolicyStatus"
+            <EuiToolTip
+              content={POLICY_STATUS_TO_TEXT[policy.status]}
+              anchorClassName="eui-textTruncate"
             >
-              <EndpointListNavLink
-                name={POLICY_STATUS_TO_TEXT[policy.status]}
-                href={toRouteUrl}
-                route={toRoutePath}
-                isBadge
-                dataTestSubj="policyStatusCellLink"
-              />
-            </EuiBadge>
+              <EuiHealth
+                color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
+                className="eui-textTruncate eui-fullWidth"
+                data-test-subj="rowPolicyStatus"
+              >
+                <EndpointListNavLink
+                  name={POLICY_STATUS_TO_TEXT[policy.status]}
+                  href={toRouteUrl}
+                  route={toRoutePath}
+                  dataTestSubj="policyStatusCellLink"
+                />
+              </EuiHealth>
+            </EuiToolTip>
           );
         },
       },
@@ -365,24 +386,34 @@ export const EndpointList = () => {
         field: 'metadata.host.os.name',
         width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
-          defaultMessage: 'Operating System',
+          defaultMessage: 'OS',
         }),
-        truncateText: true,
+        render: (os: string) => {
+          return (
+            <EuiToolTip content={os} anchorClassName="eui-textTruncate">
+              <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+                <p className="eui-displayInline eui-TextTruncate">{os}</p>
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'metadata.host.ip',
         width: '12%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
-          defaultMessage: 'IP Address',
+          defaultMessage: 'IP address',
         }),
-        // eslint-disable-next-line react/display-name
         render: (ip: string[]) => {
           return (
-            <EuiToolTip content={ip.toString().replace(',', ', ')} anchorClassName="eui-fullWidth">
-              <EuiText size="s" className="eui-fullWidth">
-                <span className="eui-textTruncate eui-fullWidth">
+            <EuiToolTip
+              content={ip.toString().replace(',', ', ')}
+              anchorClassName="eui-textTruncate"
+            >
+              <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+                <p className="eui-displayInline eui-textTruncate">
                   {ip.toString().replace(',', ', ')}
-                </span>
+                </p>
               </EuiText>
             </EuiToolTip>
           );
@@ -394,6 +425,15 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
           defaultMessage: 'Version',
         }),
+        render: (version: string) => {
+          return (
+            <EuiToolTip content={version} anchorClassName="eui-textTruncate">
+              <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+                <p className="eui-displayInline eui-TextTruncate">{version}</p>
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'metadata.@timestamp',
@@ -417,7 +457,6 @@ export const EndpointList = () => {
         }),
         actions: [
           {
-            // eslint-disable-next-line react/display-name
             render: (item: HostInfo) => {
               return <TableRowActions endpointMetadata={item.metadata} />;
             },
@@ -476,8 +515,8 @@ export const EndpointList = () => {
   const hasListData = listData && listData.length > 0;
 
   const refreshStyle = useMemo(() => {
-    return { display: endpointsExist && isTransformEnabled ? 'flex' : 'none', maxWidth: 200 };
-  }, [endpointsExist, isTransformEnabled]);
+    return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
+  }, [endpointsExist]);
 
   const refreshIsPaused = useMemo(() => {
     return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
@@ -492,13 +531,82 @@ export const EndpointList = () => {
   }, [endpointsTotalError, agentsWithEndpointsTotalError]);
 
   const shouldShowKQLBar = useMemo(() => {
-    return endpointsExist && !patternsError && isTransformEnabled;
-  }, [endpointsExist, patternsError, isTransformEnabled]);
+    return endpointsExist && !patternsError;
+  }, [endpointsExist, patternsError]);
+
+  const transformFailedCalloutDescription = useMemo(
+    () => (
+      <>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.list.transformFailed.message"
+          defaultMessage="A required transform, {transformId}, is currently failing. Most of the time this can be fixed by {transformsPage}. For additional help, please visit the {docsPage}"
+          values={{
+            transformId: metadataTransformStats[0]?.id || metadataTransformPrefix,
+            transformsPage: (
+              <LinkToApp
+                data-test-subj="failed-transform-restart-link"
+                appId="management"
+                appPath={TRANSFORM_URL}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.list.transformFailed.restartLink"
+                  defaultMessage="restarting the transform"
+                />
+              </LinkToApp>
+            ),
+            docsPage: (
+              <EuiLink
+                data-test-subj="failed-transform-docs-link"
+                href={services?.docLinks?.links.transforms.guide}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.list.transformFailed.docsLink"
+                  defaultMessage="troubleshooting documentation"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+        <EuiSpacer size="s" />
+      </>
+    ),
+    [metadataTransformStats, services?.docLinks?.links.transforms.guide]
+  );
+
+  const transformFailedCallout = useMemo(() => {
+    if (!showTransformFailedCallout) {
+      return;
+    }
+
+    return (
+      <>
+        <CallOut
+          message={{
+            id: 'endpoints-list-transform-failed',
+            type: 'warning',
+            title: i18n.translate('xpack.securitySolution.endpoint.list.transformFailed.title', {
+              defaultMessage: 'Required transform failed',
+            }),
+            description: transformFailedCalloutDescription,
+          }}
+          dismissButtonText={i18n.translate(
+            'xpack.securitySolution.endpoint.list.transformFailed.dismiss',
+            {
+              defaultMessage: 'Dismiss',
+            }
+          )}
+          onDismiss={closeTransformFailedCallout}
+          showDismissButton={true}
+        />
+        <EuiSpacer size="m" />
+      </>
+    );
+  }, [showTransformFailedCallout, closeTransformFailedCallout, transformFailedCalloutDescription]);
 
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      beta={false}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -508,7 +616,7 @@ export const EndpointList = () => {
       subtitle={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageSubTitle"
-          defaultMessage="Hosts running Endpoint Security"
+          defaultMessage="Hosts running endpoint security"
         />
       }
     >
@@ -545,6 +653,7 @@ export const EndpointList = () => {
             <EuiSpacer size="m" />
           </>
         )}
+        {transformFailedCallout}
         <EuiFlexGroup>
           {shouldShowKQLBar && (
             <EuiFlexItem>
@@ -552,15 +661,18 @@ export const EndpointList = () => {
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false} style={refreshStyle}>
-            <EuiSuperDatePicker
-              onTimeChange={NOOP}
-              isDisabled={hasSelectedEndpoint}
-              onRefresh={onRefresh}
-              isPaused={refreshIsPaused}
-              refreshInterval={refreshInterval}
-              onRefreshChange={onRefreshChange}
-              isAutoRefreshOnly={true}
-            />
+            <StyledDatePicker>
+              <EuiSuperDatePicker
+                className="endpointListDatePicker"
+                onTimeChange={NOOP}
+                isDisabled={hasSelectedEndpoint}
+                onRefresh={onRefresh}
+                isPaused={refreshIsPaused}
+                refreshInterval={refreshInterval}
+                onRefreshChange={onRefreshChange}
+                isAutoRefreshOnly={true}
+              />
+            </StyledDatePicker>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
@@ -571,13 +683,13 @@ export const EndpointList = () => {
             {totalItemCount > MAX_PAGINATED_ITEM + 1 ? (
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.list.totalCount.limited"
-                defaultMessage="Showing {limit} of {totalItemCount, plural, one {# Host} other {# Hosts}}"
+                defaultMessage="Showing {limit} of {totalItemCount, plural, one {# endpoint} other {# endpoints}}"
                 values={{ totalItemCount, limit: MAX_PAGINATED_ITEM + 1 }}
               />
             ) : (
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.list.totalCount"
-                defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
+                defaultMessage="Showing {totalItemCount, plural, one {# endpoint} other {# endpoints}}"
                 values={{ totalItemCount }}
               />
             )}

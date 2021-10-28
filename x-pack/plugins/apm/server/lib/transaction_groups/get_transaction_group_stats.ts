@@ -6,11 +6,11 @@
  */
 
 import { merge } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
-import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getTransactionDurationFieldForTransactions } from '../helpers/transactions';
 
 interface MetricParams {
   request: TransactionGroupRequestBase;
@@ -18,7 +18,7 @@ interface MetricParams {
   searchAggregatedTransactions: boolean;
 }
 
-type BucketKey = string | Record<string, string>;
+type BucketKey = Record<string, string>;
 
 function mergeRequestWithAggs<
   TRequestBase extends TransactionGroupRequestBase,
@@ -46,7 +46,7 @@ export async function getAverages({
   const params = mergeRequestWithAggs(request, {
     avg: {
       avg: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
+        field: getTransactionDurationFieldForTransactions(
           searchAggregatedTransactions
         ),
       },
@@ -110,7 +110,7 @@ export async function getSums({
   const params = mergeRequestWithAggs(request, {
     sum: {
       sum: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
+        field: getTransactionDurationFieldForTransactions(
           searchAggregatedTransactions
         ),
       },
@@ -128,38 +128,6 @@ export async function getSums({
     return {
       key: bucket.key as BucketKey,
       sum: bucket.sum.value,
-    };
-  });
-}
-
-export async function getPercentiles({
-  request,
-  setup,
-  searchAggregatedTransactions,
-}: MetricParams) {
-  const params = mergeRequestWithAggs(request, {
-    p95: {
-      percentiles: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-        hdr: { number_of_significant_value_digits: 2 },
-        percents: [95],
-      },
-    },
-  });
-
-  const response = await setup.apmEventClient.search(
-    'get_transaction_group_latency_percentiles',
-    params
-  );
-
-  return arrayUnionToCallable(
-    response.aggregations?.transaction_groups.buckets ?? []
-  ).map((bucket) => {
-    return {
-      key: bucket.key as BucketKey,
-      p95: Object.values(bucket.p95.values)[0],
     };
   });
 }

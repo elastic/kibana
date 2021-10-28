@@ -7,8 +7,9 @@
 
 import { isEqual } from 'lodash';
 import React, { memo, FC } from 'react';
-import { EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
 import { XJsonModeType } from './runtime_mappings';
 
@@ -31,48 +32,54 @@ export const RuntimeMappingsEditor: FC<Props> = memo(
     advancedRuntimeMappingsConfig,
   }) => {
     return (
-      <EuiCodeEditor
-        data-test-subj="mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor"
-        style={{ border: '1px solid #e3e6ef' }}
-        height="250px"
-        width="100%"
-        mode={xJsonMode}
-        value={advancedRuntimeMappingsConfig}
-        onChange={(d: string) => {
-          setAdvancedRuntimeMappingsConfig(d);
+      <div data-test-subj="mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor">
+        <CodeEditor
+          height={250}
+          languageId={'json'}
+          onChange={(d: string) => {
+            setAdvancedRuntimeMappingsConfig(d);
 
-          // Disable the "Apply"-Button if the config hasn't changed.
-          if (advancedEditorRuntimeMappingsLastApplied === d) {
-            setIsRuntimeMappingsEditorApplyButtonEnabled(false);
-            return;
-          }
+            // Disable the "Apply"-Button if the config hasn't changed.
+            if (advancedEditorRuntimeMappingsLastApplied === d) {
+              setIsRuntimeMappingsEditorApplyButtonEnabled(false);
+              return;
+            }
 
-          // Enable Apply button so user can remove previously created runtime field
-          if (d === '') {
-            setIsRuntimeMappingsEditorApplyButtonEnabled(true);
-            return;
-          }
+            // Enable Apply button so user can remove previously created runtime field
+            if (d === '') {
+              setIsRuntimeMappingsEditorApplyButtonEnabled(true);
+              return;
+            }
 
-          // Try to parse the string passed on from the editor.
-          // If parsing fails, the "Apply"-Button will be disabled
-          try {
-            const parsedJson = JSON.parse(convertToJson(d));
-            setIsRuntimeMappingsEditorApplyButtonEnabled(isRuntimeMappings(parsedJson));
-          } catch (e) {
-            setIsRuntimeMappingsEditorApplyButtonEnabled(false);
-          }
-        }}
-        setOptions={{
-          fontSize: '12px',
-        }}
-        theme="textmate"
-        aria-label={i18n.translate(
-          'xpack.ml.dataframe.analytics.createWizard.runtimeMappings.advancedEditorAriaLabel',
-          {
-            defaultMessage: 'Advanced runtime editor',
-          }
-        )}
-      />
+            // Try to parse the string passed on from the editor.
+            // If parsing fails, the "Apply"-Button will be disabled
+            try {
+              const parsedJson = JSON.parse(convertToJson(d));
+              setIsRuntimeMappingsEditorApplyButtonEnabled(isRuntimeMappings(parsedJson));
+            } catch (e) {
+              setIsRuntimeMappingsEditorApplyButtonEnabled(false);
+            }
+          }}
+          options={{
+            ariaLabel: i18n.translate(
+              'xpack.ml.dataframe.analytics.createWizard.runtimeMappings.advancedEditorAriaLabel',
+              {
+                defaultMessage: 'Advanced runtime editor',
+              }
+            ),
+            automaticLayout: true,
+            fontSize: 12,
+            scrollBeyondLastLine: false,
+            quickSuggestions: true,
+            minimap: {
+              enabled: false,
+            },
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+          }}
+          value={advancedRuntimeMappingsConfig}
+        />
+      </div>
     );
   },
   (prevProps, nextProps) => isEqual(pickProps(prevProps), pickProps(nextProps))

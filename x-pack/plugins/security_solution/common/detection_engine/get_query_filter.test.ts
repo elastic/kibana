@@ -216,8 +216,10 @@ describe('get_filter', () => {
         };
 
         const exists: Partial<Filter> = {
-          exists: {
-            field: 'host.hostname',
+          query: {
+            exists: {
+              field: 'host.hostname',
+            },
           },
         } as Partial<Filter>;
 
@@ -1150,7 +1152,7 @@ describe('get_filter', () => {
             },
             {
               field: '@timestamp',
-              format: 'epoch_millis',
+              format: 'strict_date_optional_time',
             },
           ],
         },
@@ -1196,8 +1198,12 @@ describe('get_filter', () => {
               include_unmapped: true,
             },
             {
+              field: 'event.ingested',
+              format: 'strict_date_optional_time',
+            },
+            {
               field: '@timestamp',
-              format: 'epoch_millis',
+              format: 'strict_date_optional_time',
             },
           ],
         },
@@ -1289,7 +1295,7 @@ describe('get_filter', () => {
             },
             {
               field: '@timestamp',
-              format: 'epoch_millis',
+              format: 'strict_date_optional_time',
             },
           ],
         },

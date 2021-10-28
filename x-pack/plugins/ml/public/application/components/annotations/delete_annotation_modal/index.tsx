@@ -50,6 +50,7 @@ export const DeleteAnnotationModal: React.FC<Props> = ({
           buttonColor="danger"
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
           className="eui-textBreakWord"
+          data-test-subj={'mlAnnotationFlyoutConfirmDeleteModal'}
         />
       )}
     </Fragment>

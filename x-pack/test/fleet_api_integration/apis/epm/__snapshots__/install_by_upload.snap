@@ -276,6 +276,7 @@ Object {
       "type": "image/svg+xml",
     },
   ],
+  "keepPoliciesUpToDate": false,
   "license": "basic",
   "name": "apache",
   "owner": Object {
@@ -342,6 +343,10 @@ Object {
           "type": "index_template",
         },
         Object {
+          "id": "logs-apache.access@settings",
+          "type": "component_template",
+        },
+        Object {
           "id": "logs-apache.access@custom",
           "type": "component_template",
         },
@@ -350,12 +355,20 @@ Object {
           "type": "index_template",
         },
         Object {
+          "id": "metrics-apache.status@settings",
+          "type": "component_template",
+        },
+        Object {
           "id": "metrics-apache.status@custom",
           "type": "component_template",
         },
         Object {
           "id": "logs-apache.error",
           "type": "index_template",
+        },
+        Object {
+          "id": "logs-apache.error@settings",
+          "type": "component_template",
         },
         Object {
           "id": "logs-apache.error@custom",
@@ -437,6 +450,7 @@ Object {
         },
       ],
       "internal": false,
+      "keep_policies_up_to_date": false,
       "name": "apache",
       "package_assets": Array [
         Object {

@@ -139,6 +139,7 @@ export const ScriptField = React.memo(({ existingConcreteFields, links, syntaxEr
           <>
             <EuiFormRow
               label={label}
+              id="runtimeFieldScript"
               error={errorMessage}
               isInvalid={syntaxError.error !== null || !isValid}
               helpText={

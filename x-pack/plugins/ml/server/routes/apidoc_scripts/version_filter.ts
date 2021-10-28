@@ -7,7 +7,7 @@
 
 import { Block } from './types';
 
-const API_VERSION = '7.13.0';
+const API_VERSION = '7.15.0';
 
 /**
  * Post Filter parsed results.

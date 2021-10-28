@@ -58,6 +58,12 @@ export const createInitialState = ({
   };
 
   const knownTypes = typeRegistry.getAllTypes().map((type) => type.name);
+  const excludeFilterHooks = Object.fromEntries(
+    typeRegistry
+      .getAllTypes()
+      .filter((type) => !!type.excludeOnUpgrade)
+      .map((type) => [type.name, type.excludeOnUpgrade!])
+  );
 
   return {
     controlState: 'INIT',
@@ -76,8 +82,10 @@ export const createInitialState = ({
     retryDelay: 0,
     retryAttempts: migrationsConfig.retryAttempts,
     batchSize: migrationsConfig.batchSize,
+    maxBatchSizeBytes: migrationsConfig.maxBatchSizeBytes.getValueInBytes(),
     logs: [],
     unusedTypesQuery: excludeUnusedTypesQuery,
     knownTypes,
+    excludeFromUpgradeFilterHooks: excludeFilterHooks,
   };
 };

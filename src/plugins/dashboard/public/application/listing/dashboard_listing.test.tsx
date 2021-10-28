@@ -133,9 +133,9 @@ describe('after fetch', () => {
     });
   });
 
-  test('hideWriteControls', async () => {
+  test('showWriteControls', async () => {
     const services = makeDefaultServices();
-    services.dashboardCapabilities.hideWriteControls = true;
+    services.dashboardCapabilities.showWriteControls = false;
     const { component } = mountWith({ services });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

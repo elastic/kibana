@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(body.length).to.be(1);
-      stats = body[0];
+      stats = body[0].stats;
     });
 
     it('should pass the schema validation', () => {
@@ -77,7 +77,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(stats.stack_stats.kibana.graph_workspace.total).to.be.a('number');
       expect(stats.stack_stats.kibana.index_pattern.total).to.be.a('number');
       expect(stats.stack_stats.kibana.search.total).to.be.a('number');
-      expect(stats.stack_stats.kibana.timelion_sheet.total).to.be.a('number');
       expect(stats.stack_stats.kibana.visualization.total).to.be.a('number');
 
       expect(stats.stack_stats.kibana.plugins.apm.services_per_agent).to.be.an('object');
@@ -157,7 +156,6 @@ export default function ({ getService }: FtrProviderContext) {
         'stack_stats.kibana.os',
         'stack_stats.kibana.plugins',
         'stack_stats.kibana.search',
-        'stack_stats.kibana.timelion_sheet',
         'stack_stats.kibana.versions',
         'stack_stats.kibana.visualization',
         'stack_stats.xpack.ccr',

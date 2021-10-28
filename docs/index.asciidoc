@@ -4,8 +4,6 @@
 :include-xpack:  true
 :lang:           en
 :kib-repo-dir:   {kibana-root}/docs
-:blog-ref:       https://www.elastic.co/blog/
-:wikipedia:      https://en.wikipedia.org/wiki
 
 include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 
@@ -15,6 +13,9 @@ include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 :es-docker-image: {es-docker-repo}:{version}
 :blob:            {kib-repo}blob/{branch}/
 :security-ref:    https://www.elastic.co/community/security/
+:data-source:     data view
+:data-sources:    data views
+:a-data-source:   a data view
 
 include::{docs-root}/shared/attributes.asciidoc[]
 

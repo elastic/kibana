@@ -23,7 +23,7 @@ export interface PrivilegesService {
 export function privilegesFactory(
   actions: Actions,
   featuresService: FeaturesPluginSetup,
-  licenseService: Pick<SecurityLicense, 'getFeatures' | 'getType'>
+  licenseService: Pick<SecurityLicense, 'getFeatures' | 'hasAtLeast'>
 ) {
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
 
@@ -31,7 +31,7 @@ export function privilegesFactory(
     get() {
       const features = featuresService.getKibanaFeatures();
       const { allowSubFeaturePrivileges } = licenseService.getFeatures();
-      const licenseType = licenseService.getType()!;
+      const { hasAtLeast: licenseHasAtLeast } = licenseService;
       const basePrivilegeFeatures = features.filter(
         (feature) => !feature.excludeFromBasePrivileges
       );
@@ -42,7 +42,7 @@ export function privilegesFactory(
       basePrivilegeFeatures.forEach((feature) => {
         for (const { privilegeId, privilege } of featuresService.featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: true,
-          licenseType,
+          licenseHasAtLeast,
           predicate: (pId, featurePrivilege) => !featurePrivilege.excludeFromBasePrivileges,
         })) {
           const privilegeActions = featurePrivilegeBuilder.getActions(privilege, feature);
@@ -61,7 +61,7 @@ export function privilegesFactory(
         featurePrivileges[feature.id] = {};
         for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: true,
-          licenseType,
+          licenseHasAtLeast,
         })) {
           featurePrivileges[feature.id][featurePrivilege.privilegeId] = [
             actions.login,
@@ -70,21 +70,21 @@ export function privilegesFactory(
           ];
         }
 
-        if (allowSubFeaturePrivileges && feature.subFeatures?.length > 0) {
-          for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
-            augmentWithSubFeaturePrivileges: false,
-            licenseType,
-          })) {
-            featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
-              actions.login,
-              actions.version,
-              ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
-            ];
-          }
+        for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: false,
+          licenseHasAtLeast,
+        })) {
+          featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
+            actions.login,
+            actions.version,
+            ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
+          ];
+        }
 
+        if (allowSubFeaturePrivileges && feature.subFeatures?.length > 0) {
           for (const subFeaturePrivilege of featuresService.subFeaturePrivilegeIterator(
             feature,
-            licenseType
+            licenseHasAtLeast
           )) {
             featurePrivileges[feature.id][subFeaturePrivilege.id] = [
               actions.login,

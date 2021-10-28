@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { metricChart, MetricChart } from './expression';
-import { LensMultiTable } from '../types';
+import { MetricChart } from './expression';
+import { MetricConfig, metricChart } from '../../common/expressions';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { MetricConfig } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
-import { IFieldFormat } from '../../../../../src/plugins/data/public';
+import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common';
+import { layerTypes } from '../../common';
+import type { LensMultiTable } from '../../common';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -37,6 +38,7 @@ function sampleArgs() {
   const args: MetricConfig = {
     accessor: 'c',
     layerId: 'l1',
+    layerType: layerTypes.DATA,
     title: 'My fanci metric chart',
     description: 'Fancy chart description',
     metricTitle: 'My fanci metric chart',
@@ -46,6 +48,7 @@ function sampleArgs() {
   const noAttributesArgs: MetricConfig = {
     accessor: 'c',
     layerId: 'l1',
+    layerType: layerTypes.DATA,
     title: '',
     description: '',
     metricTitle: 'My fanci metric chart',
@@ -87,7 +90,9 @@ describe('metric_expression', () => {
           reportDescription="Fancy chart description"
           reportTitle="My fanci metric chart"
         >
-          <AutoScale>
+          <AutoScale
+            key="3"
+          >
             <div
               data-test-subj="lns_metric_value"
               style={
@@ -132,7 +137,9 @@ describe('metric_expression', () => {
           reportDescription="Fancy chart description"
           reportTitle="My fanci metric chart"
         >
-          <AutoScale>
+          <AutoScale
+            key="last"
+          >
             <div
               data-test-subj="lns_metric_value"
               style={
@@ -176,7 +183,9 @@ describe('metric_expression', () => {
           reportDescription=""
           reportTitle=""
         >
-          <AutoScale>
+          <AutoScale
+            key="3"
+          >
             <div
               data-test-subj="lns_metric_value"
               style={
@@ -220,7 +229,9 @@ describe('metric_expression', () => {
           reportDescription=""
           reportTitle=""
         >
-          <AutoScale>
+          <AutoScale
+            key="3"
+          >
             <div
               data-test-subj="lns_metric_value"
               style={
@@ -249,10 +260,16 @@ describe('metric_expression', () => {
           />
         )
       ).toMatchInlineSnapshot(`
-              <EmptyPlaceholder
-                icon={[Function]}
-              />
-          `);
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportDescription=""
+          reportTitle=""
+        >
+          <EmptyPlaceholder
+            icon={[Function]}
+          />
+        </VisualizationContainer>
+      `);
     });
 
     test('it renders an EmptyPlaceholder when null value is passed as data', () => {
@@ -269,9 +286,15 @@ describe('metric_expression', () => {
           />
         )
       ).toMatchInlineSnapshot(`
-        <EmptyPlaceholder
-          icon={[Function]}
-        />
+        <VisualizationContainer
+          className="lnsMetricExpression__container"
+          reportDescription=""
+          reportTitle=""
+        >
+          <EmptyPlaceholder
+            icon={[Function]}
+          />
+        </VisualizationContainer>
       `);
     });
 
@@ -294,7 +317,9 @@ describe('metric_expression', () => {
           reportDescription=""
           reportTitle=""
         >
-          <AutoScale>
+          <AutoScale
+            key="0"
+          >
             <div
               data-test-subj="lns_metric_value"
               style={

@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+import { IconType } from '@elastic/eui';
 import { ConnectorTypes } from '../../common';
 import { FieldConfig, ValidationConfig } from '../common/shared_imports';
+import { StartPlugins } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
+import { connectorValidator as servicenowConnectorValidator } from './connectors/servicenow/validator';
 import { CaseActionConnector } from './types';
+import {
+  ENABLE_NEW_SN_ITSM_CONNECTOR,
+  ENABLE_NEW_SN_SIR_CONNECTOR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../actions/server/constants/connectors';
 
 export const getConnectorById = (
   id: string,
@@ -20,6 +28,8 @@ const validators: Record<
   (connector: CaseActionConnector) => ReturnType<ValidationConfig['validator']>
 > = {
   [ConnectorTypes.swimlane]: swimlaneConnectorValidator,
+  [ConnectorTypes.serviceNowITSM]: servicenowConnectorValidator,
+  [ConnectorTypes.serviceNowSIR]: servicenowConnectorValidator,
 };
 
 export const getConnectorsFormValidators = ({
@@ -41,3 +51,56 @@ export const getConnectorsFormValidators = ({
     },
   ],
 });
+
+export const getConnectorIcon = (
+  triggersActionsUi: StartPlugins['triggersActionsUi'],
+  type?: string
+): IconType => {
+  /**
+   * triggersActionsUi.actionTypeRegistry.get will throw an error if the type is not registered.
+   * This will break Kibana if not handled properly.
+   */
+  const emptyResponse = '';
+
+  if (type == null) {
+    return emptyResponse;
+  }
+
+  try {
+    if (triggersActionsUi.actionTypeRegistry.has(type)) {
+      return triggersActionsUi.actionTypeRegistry.get(type).iconClass;
+    }
+  } catch {
+    return emptyResponse;
+  }
+
+  return emptyResponse;
+};
+
+// TODO: Remove when the applications are certified
+export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean => {
+  if (connector == null) {
+    return true;
+  }
+
+  if (!ENABLE_NEW_SN_ITSM_CONNECTOR && connector.actionTypeId === '.servicenow') {
+    return true;
+  }
+
+  if (!ENABLE_NEW_SN_SIR_CONNECTOR && connector.actionTypeId === '.servicenow-sir') {
+    return true;
+  }
+
+  /**
+   * Connector's prior to the Elastic ServiceNow application
+   * use the Table API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_TableAPI)
+   * Connectors after the Elastic ServiceNow application use the
+   * Import Set API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_ImportSetAPI)
+   * A ServiceNow connector is considered deprecated if it uses the Table API.
+   *
+   * All other connectors do not have the usesTableApi config property
+   * so the function will always return false for them.
+   */
+
+  return !!connector.config.usesTableApi;
+};

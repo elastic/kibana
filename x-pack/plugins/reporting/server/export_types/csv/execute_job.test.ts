@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import nodeCrypto from '@elastic/node-crypto';
 import { ElasticsearchClient, IUiSettingsClient } from 'kibana/server';
 import moment from 'moment';
-// @ts-ignore
 import Puid from 'puid';
 import sinon from 'sinon';
+import type { DataView, DataViewsService } from 'src/plugins/data/common';
 import { ReportingConfig, ReportingCore } from '../../';
-import { fieldFormats, UI_SETTINGS } from '../../../../../../src/plugins/data/server';
+import {
+  FieldFormatsRegistry,
+  StringFormat,
+  FORMATS_UI_SETTINGS,
+} from '../../../../../../src/plugins/field_formats/common';
 import {
   CSV_QUOTE_VALUES_SETTING,
   CSV_SEPARATOR_SETTING,
@@ -52,10 +57,14 @@ describe('CSV Execute Job', function () {
   let encryptedHeaders: any;
 
   let configGetStub: any;
+  let mockDataView: jest.Mocked<DataView>;
+  let mockDataViewsService: jest.Mocked<DataViewsService>;
   let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
   let mockReportingConfig: ReportingConfig;
   let mockReportingCore: ReportingCore;
   let cancellationToken: any;
+  let stream: jest.Mocked<Writable>;
+  let content: string;
 
   const mockUiSettingsClient = {
     get: sinon.stub(),
@@ -67,17 +76,23 @@ describe('CSV Execute Job', function () {
   });
 
   beforeEach(async function () {
+    content = '';
+    stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
     configGetStub = sinon.stub();
     configGetStub.withArgs('queue', 'timeout').returns(moment.duration('2m'));
-    configGetStub.withArgs('index').returns('.reporting-foo-test');
     configGetStub.withArgs('encryptionKey').returns(encryptionKey);
     configGetStub.withArgs('csv', 'maxSizeBytes').returns(1024 * 1000); // 1mB
     configGetStub.withArgs('csv', 'scroll').returns({});
     mockReportingConfig = { get: configGetStub, kbnConfig: { get: configGetStub } };
+    mockDataView = { fieldFormatMap: {}, fields: [] } as unknown as typeof mockDataView;
+    mockDataViewsService = {
+      get: jest.fn().mockResolvedValue(mockDataView),
+    } as unknown as typeof mockDataViewsService;
 
     mockReportingCore = await createMockReportingCore(createMockConfigSchema());
     mockReportingCore.getUiSettingsServiceFactory = () =>
-      Promise.resolve((mockUiSettingsClient as unknown) as IUiSettingsClient);
+      Promise.resolve(mockUiSettingsClient as unknown as IUiSettingsClient);
+    mockReportingCore.getDataViewsService = jest.fn().mockResolvedValue(mockDataViewsService);
     mockReportingCore.setConfig(mockReportingConfig);
 
     mockEsClient = (await mockReportingCore.getEsClient()).asScoped({} as any)
@@ -99,15 +114,13 @@ describe('CSV Execute Job', function () {
     setFieldFormats({
       fieldFormatServiceFactory() {
         const uiConfigMock = {};
-        (uiConfigMock as any)[UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
+        (uiConfigMock as any)[FORMATS_UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
           _default_: { id: 'string', params: {} },
         };
 
-        const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+        const fieldFormatsRegistry = new FieldFormatsRegistry();
 
-        fieldFormatsRegistry.init((key) => (uiConfigMock as any)[key], {}, [
-          fieldFormats.StringFormat,
-        ]);
+        fieldFormatsRegistry.init((key) => (uiConfigMock as any)[key], {}, [StringFormat]);
 
         return Promise.resolve(fieldFormatsRegistry);
       },
@@ -124,7 +137,8 @@ describe('CSV Execute Job', function () {
           fields: [],
           searchRequest: { index: null, body: null },
         }),
-        cancellationToken
+        cancellationToken,
+        stream
       );
       expect(mockEsClient.search).toHaveBeenCalled();
     });
@@ -145,7 +159,7 @@ describe('CSV Execute Job', function () {
         },
       });
 
-      await runTask('job777', job, cancellationToken);
+      await runTask('job777', job, cancellationToken, stream);
 
       expect(mockEsClient.search).toHaveBeenCalledWith(expect.objectContaining({ body, index }));
     });
@@ -171,7 +185,8 @@ describe('CSV Execute Job', function () {
           fields: [],
           searchRequest: { index: null, body: null },
         }),
-        cancellationToken
+        cancellationToken,
+        stream
       );
 
       expect(mockEsClient.scroll).toHaveBeenCalledWith(
@@ -188,7 +203,8 @@ describe('CSV Execute Job', function () {
           fields: [],
           searchRequest: { index: null, body: null },
         }),
-        cancellationToken
+        cancellationToken,
+        stream
       );
 
       expect(mockEsClient.search).toHaveBeenCalled();
@@ -221,7 +237,8 @@ describe('CSV Execute Job', function () {
           fields: [],
           searchRequest: { index: null, body: null },
         }),
-        cancellationToken
+        cancellationToken,
+        stream
       );
 
       expect(mockEsClient.search).toHaveBeenCalled();
@@ -257,7 +274,8 @@ describe('CSV Execute Job', function () {
           fields: [],
           searchRequest: { index: null, body: null },
         }),
-        cancellationToken
+        cancellationToken,
+        stream
       );
 
       expect(mockEsClient.clearScroll).toHaveBeenCalledWith(
@@ -290,8 +308,10 @@ describe('CSV Execute Job', function () {
         conflictedTypesFields: undefined,
         searchRequest: { index: null, body: null },
       });
-      await expect(runTask('job123', jobParams, cancellationToken)).rejects.toMatchInlineSnapshot(
-        `[TypeError: Cannot read property 'indexOf' of undefined]`
+      await expect(
+        runTask('job123', jobParams, cancellationToken, stream)
+      ).rejects.toMatchInlineSnapshot(
+        `[TypeError: Cannot read properties of undefined (reading 'indexOf')]`
       );
 
       expect(mockEsClient.clearScroll).toHaveBeenCalledWith(
@@ -322,7 +342,8 @@ describe('CSV Execute Job', function () {
       const { csv_contains_formulas: csvContainsFormulas } = await runTask(
         'job123',
         jobParams,
-        cancellationToken
+        cancellationToken,
+        stream
       );
 
       expect(csvContainsFormulas).toEqual(true);
@@ -349,7 +370,8 @@ describe('CSV Execute Job', function () {
       const { csv_contains_formulas: csvContainsFormulas } = await runTask(
         'job123',
         jobParams,
-        cancellationToken
+        cancellationToken,
+        stream
       );
 
       expect(csvContainsFormulas).toEqual(true);
@@ -377,7 +399,8 @@ describe('CSV Execute Job', function () {
       const { csv_contains_formulas: csvContainsFormulas } = await runTask(
         'job123',
         jobParams,
-        cancellationToken
+        cancellationToken,
+        stream
       );
 
       expect(csvContainsFormulas).toEqual(false);
@@ -406,7 +429,8 @@ describe('CSV Execute Job', function () {
       const { csv_contains_formulas: csvContainsFormulas } = await runTask(
         'job123',
         jobParams,
-        cancellationToken
+        cancellationToken,
+        stream
       );
 
       expect(csvContainsFormulas).toEqual(false);
@@ -433,7 +457,8 @@ describe('CSV Execute Job', function () {
       const { csv_contains_formulas: csvContainsFormulas } = await runTask(
         'job123',
         jobParams,
-        cancellationToken
+        cancellationToken,
+        stream
       );
 
       expect(csvContainsFormulas).toEqual(false);
@@ -459,7 +484,7 @@ describe('CSV Execute Job', function () {
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
       });
-      const { content } = await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
 
       expect(content).toEqual(`${CSV_BOM_CHARS}one,two\none,bar\n`);
     });
@@ -482,7 +507,7 @@ describe('CSV Execute Job', function () {
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
       });
-      const { content } = await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
 
       expect(content).toEqual('one,two\none,bar\n');
     });
@@ -507,7 +532,7 @@ describe('CSV Execute Job', function () {
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
       });
-      const { content } = await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
 
       expect(content).toEqual("one,two\n\"'=cmd|' /C calc'!A0\",bar\n");
     });
@@ -530,7 +555,7 @@ describe('CSV Execute Job', function () {
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
       });
-      const { content } = await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
 
       expect(content).toEqual('one,two\n"=cmd|\' /C calc\'!A0",bar\n');
     });
@@ -545,9 +570,9 @@ describe('CSV Execute Job', function () {
         fields: [],
         searchRequest: { index: null, body: null },
       });
-      await expect(runTask('job123', jobParams, cancellationToken)).rejects.toMatchInlineSnapshot(
-        `[Error]`
-      );
+      await expect(
+        runTask('job123', jobParams, cancellationToken, stream)
+      ).rejects.toMatchInlineSnapshot(`[Error]`);
     });
 
     it('should reject Promise if scroll call errors out', async function () {
@@ -566,9 +591,9 @@ describe('CSV Execute Job', function () {
         fields: [],
         searchRequest: { index: null, body: null },
       });
-      await expect(runTask('job123', jobParams, cancellationToken)).rejects.toMatchInlineSnapshot(
-        `[Error]`
-      );
+      await expect(
+        runTask('job123', jobParams, cancellationToken, stream)
+      ).rejects.toMatchInlineSnapshot(`[Error]`);
     });
   });
 
@@ -589,7 +614,9 @@ describe('CSV Execute Job', function () {
         fields: [],
         searchRequest: { index: null, body: null },
       });
-      await expect(runTask('job123', jobParams, cancellationToken)).rejects.toMatchInlineSnapshot(
+      await expect(
+        runTask('job123', jobParams, cancellationToken, stream)
+      ).rejects.toMatchInlineSnapshot(
         `[Error: Expected _scroll_id in the following Elasticsearch response: {"hits":{"hits":[{}]}}]`
       );
     });
@@ -610,7 +637,9 @@ describe('CSV Execute Job', function () {
         fields: [],
         searchRequest: { index: null, body: null },
       });
-      await expect(runTask('job123', jobParams, cancellationToken)).rejects.toMatchInlineSnapshot(
+      await expect(
+        runTask('job123', jobParams, cancellationToken, stream)
+      ).rejects.toMatchInlineSnapshot(
         `[Error: Expected _scroll_id in the following Elasticsearch response: {"hits":{"hits":[]}}]`
       );
     });
@@ -640,7 +669,9 @@ describe('CSV Execute Job', function () {
         fields: [],
         searchRequest: { index: null, body: null },
       });
-      await expect(runTask('job123', jobParams, cancellationToken)).rejects.toMatchInlineSnapshot(
+      await expect(
+        runTask('job123', jobParams, cancellationToken, stream)
+      ).rejects.toMatchInlineSnapshot(
         `[Error: Expected _scroll_id in the following Elasticsearch response: {"hits":{"hits":[{}]}}]`
       );
     });
@@ -670,7 +701,9 @@ describe('CSV Execute Job', function () {
         fields: [],
         searchRequest: { index: null, body: null },
       });
-      await expect(runTask('job123', jobParams, cancellationToken)).rejects.toMatchInlineSnapshot(
+      await expect(
+        runTask('job123', jobParams, cancellationToken, stream)
+      ).rejects.toMatchInlineSnapshot(
         `[Error: Expected _scroll_id in the following Elasticsearch response: {"hits":{"hits":[]}}]`
       );
     });
@@ -705,7 +738,8 @@ describe('CSV Execute Job', function () {
           fields: [],
           searchRequest: { index: null, body: null },
         }),
-        cancellationToken
+        cancellationToken,
+        stream
       );
 
       await delay(250);
@@ -729,7 +763,8 @@ describe('CSV Execute Job', function () {
           fields: [],
           searchRequest: { index: null, body: null },
         }),
-        cancellationToken
+        cancellationToken,
+        stream
       );
       cancellationToken.cancel();
 
@@ -745,16 +780,15 @@ describe('CSV Execute Job', function () {
           fields: [],
           searchRequest: { index: null, body: null },
         }),
-        cancellationToken
+        cancellationToken,
+        stream
       );
       await delay(100);
       cancellationToken.cancel();
       await delay(100);
 
       expect(mockEsClient.clearScroll).toHaveBeenCalledWith(
-        expect.objectContaining({
-          scroll_id: scrollId,
-        })
+        expect.objectContaining({ scroll_id: scrollId })
       );
     });
   });
@@ -767,7 +801,7 @@ describe('CSV Execute Job', function () {
         fields: ['one', 'two'],
         searchRequest: { index: null, body: null },
       });
-      const { content } = await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
       expect(content).toBe(`one,two\n`);
     });
 
@@ -779,7 +813,7 @@ describe('CSV Execute Job', function () {
         fields: ['one', 'two'],
         searchRequest: { index: null, body: null },
       });
-      const { content } = await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
       expect(content).toBe(`one;two\n`);
     });
 
@@ -791,7 +825,7 @@ describe('CSV Execute Job', function () {
         fields: ['one and a half', 'two', 'three-and-four', 'five & six'],
         searchRequest: { index: null, body: null },
       });
-      const { content } = await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
       expect(content).toBe(`"one and a half",two,"three-and-four","five & six"\n`);
     });
 
@@ -803,7 +837,7 @@ describe('CSV Execute Job', function () {
         fields: ['one and a half', 'two', 'three-and-four', 'five & six'],
         searchRequest: { index: null, body: null },
       });
-      const { content } = await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
       expect(content).toBe(`one and a half,two,three-and-four,five & six\n`);
     });
 
@@ -823,7 +857,7 @@ describe('CSV Execute Job', function () {
         fields: ['one', 'two'],
         searchRequest: { index: null, body: null },
       });
-      const { content } = await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
       expect(content).not.toBe(null);
       const lines = content!.split('\n');
       const headerLine = lines[0];
@@ -847,7 +881,7 @@ describe('CSV Execute Job', function () {
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
       });
-      const { content } = await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
       expect(content).not.toBe(null);
       const lines = content!.split('\n');
       const valuesLine = lines[1];
@@ -879,7 +913,7 @@ describe('CSV Execute Job', function () {
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
       });
-      const { content } = await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
       expect(content).not.toBe(null);
       const lines = content!.split('\n');
 
@@ -903,17 +937,15 @@ describe('CSV Execute Job', function () {
         fields: ['one', 'two'],
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
-        indexPatternSavedObject: {
-          id: 'logstash-*',
-          type: 'index-pattern',
-          attributes: {
-            title: 'logstash-*',
-            fields: '[{"name":"one","type":"string"}, {"name":"two","type":"string"}]',
-            fieldFormatMap: '{"one":{"id":"string","params":{"transform": "upper"}}}',
-          },
-        },
+        indexPatternId: 'something',
       });
-      const { content } = await runTask('job123', jobParams, cancellationToken);
+
+      mockDataView.fieldFormatMap = { one: { id: 'string', params: { transform: 'upper' } } };
+      mockDataView.fields = [
+        { name: 'one', type: 'string' },
+        { name: 'two', type: 'string' },
+      ] as typeof mockDataView.fields;
+      await runTask('job123', jobParams, cancellationToken, stream);
       expect(content).not.toBe(null);
       const lines = content!.split('\n');
 
@@ -927,7 +959,6 @@ describe('CSV Execute Job', function () {
     // tests use these 'simple' characters to make the math easier
 
     describe('when only the headers exceed the maxSizeBytes', function () {
-      let content: string | null;
       let maxSizeReached: boolean | undefined;
 
       beforeEach(async function () {
@@ -940,10 +971,11 @@ describe('CSV Execute Job', function () {
           searchRequest: { index: null, body: null },
         });
 
-        ({ content, max_size_reached: maxSizeReached } = await runTask(
+        ({ max_size_reached: maxSizeReached } = await runTask(
           'job123',
           jobParams,
-          cancellationToken
+          cancellationToken,
+          stream
         ));
       });
 
@@ -957,7 +989,6 @@ describe('CSV Execute Job', function () {
     });
 
     describe('when headers are equal to maxSizeBytes', function () {
-      let content: string | null;
       let maxSizeReached: boolean | undefined;
 
       beforeEach(async function () {
@@ -970,10 +1001,11 @@ describe('CSV Execute Job', function () {
           searchRequest: { index: null, body: null },
         });
 
-        ({ content, max_size_reached: maxSizeReached } = await runTask(
+        ({ max_size_reached: maxSizeReached } = await runTask(
           'job123',
           jobParams,
-          cancellationToken
+          cancellationToken,
+          stream
         ));
       });
 
@@ -987,7 +1019,6 @@ describe('CSV Execute Job', function () {
     });
 
     describe('when the data exceeds the maxSizeBytes', function () {
-      let content: string | null;
       let maxSizeReached: boolean | undefined;
 
       beforeEach(async function () {
@@ -1010,10 +1041,11 @@ describe('CSV Execute Job', function () {
           searchRequest: { index: null, body: null },
         });
 
-        ({ content, max_size_reached: maxSizeReached } = await runTask(
+        ({ max_size_reached: maxSizeReached } = await runTask(
           'job123',
           jobParams,
-          cancellationToken
+          cancellationToken,
+          stream
         ));
       });
 
@@ -1027,12 +1059,11 @@ describe('CSV Execute Job', function () {
     });
 
     describe('when headers and data equal the maxSizeBytes', function () {
-      let content: string | null;
       let maxSizeReached: boolean | undefined;
 
       beforeEach(async function () {
         mockReportingCore.getUiSettingsServiceFactory = () =>
-          Promise.resolve((mockUiSettingsClient as unknown) as IUiSettingsClient);
+          Promise.resolve(mockUiSettingsClient as unknown as IUiSettingsClient);
         configGetStub.withArgs('csv', 'maxSizeBytes').returns(18);
 
         mockEsClient.search.mockResolvedValueOnce({
@@ -1052,10 +1083,11 @@ describe('CSV Execute Job', function () {
           searchRequest: { index: null, body: null },
         });
 
-        ({ content, max_size_reached: maxSizeReached } = await runTask(
+        ({ max_size_reached: maxSizeReached } = await runTask(
           'job123',
           jobParams,
-          cancellationToken
+          cancellationToken,
+          stream
         ));
       });
 
@@ -1091,7 +1123,7 @@ describe('CSV Execute Job', function () {
         searchRequest: { index: null, body: null },
       });
 
-      await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({ scroll: scrollDuration })
@@ -1119,7 +1151,7 @@ describe('CSV Execute Job', function () {
         searchRequest: { index: null, body: null },
       });
 
-      await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({ size: scrollSize })
@@ -1147,10 +1179,10 @@ describe('CSV Execute Job', function () {
         searchRequest: { index: null, body: null },
       });
 
-      await runTask('job123', jobParams, cancellationToken);
+      await runTask('job123', jobParams, cancellationToken, stream);
 
       expect(mockEsClient.scroll).toHaveBeenCalledWith(
-        expect.objectContaining({ scroll: scrollDuration })
+        expect.objectContaining({ scroll: scrollDuration, scroll_id: 'scrollId' })
       );
     });
   });

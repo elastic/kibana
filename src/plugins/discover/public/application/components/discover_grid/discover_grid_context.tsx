@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
-import { IndexPattern } from '../../../kibana_services';
 
 export interface GridContext {
   expanded: ElasticSearchHit | undefined;
@@ -21,6 +21,6 @@ export interface GridContext {
   setSelectedDocs: (selected: string[]) => void;
 }
 
-const defaultContext = ({} as unknown) as GridContext;
+const defaultContext = {} as unknown as GridContext;
 
 export const DiscoverGridContext = React.createContext<GridContext>(defaultContext);

@@ -11,7 +11,7 @@ import { Dispatch } from 'redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiSpacer, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -36,14 +36,19 @@ import {
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { Immutable, ListPageRouteState } from '../../../../../common/endpoint/types';
+import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
 import {
-  ExceptionItem,
-  ExceptionItemProps,
-} from '../../../../common/components/exceptions/viewer/exception_item';
+  AnyArtifact,
+  ArtifactEntryCard,
+  ArtifactEntryCardProps,
+} from '../../../components/artifact_entry_card';
 import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 
-import { SearchBar } from '../../../components/search_bar';
+import { SearchExceptions } from '../../../components/search_exceptions';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
+import { ABOUT_EVENT_FILTERS } from './translations';
+
+type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
 type EventListPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -59,6 +64,20 @@ const AdministrationListPage = styled(_AdministrationListPage)`
     }
   }
 `;
+
+const EDIT_EVENT_FILTER_ACTION_LABEL = i18n.translate(
+  'xpack.securitySolution.eventFilters.list.cardAction.edit',
+  {
+    defaultMessage: 'Edit event filter',
+  }
+);
+
+const DELETE_EVENT_FILTER_ACTION_LABEL = i18n.translate(
+  'xpack.securitySolution.eventFilters.list.cardAction.delete',
+  {
+    defaultMessage: 'Delete event filter',
+  }
+);
 
 export const EventFiltersListPage = memo(() => {
   const { state: routeState } = useLocation<ListPageRouteState | undefined>();
@@ -132,41 +151,6 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleItemEdit: ExceptionItemProps['onEditException'] = useCallback(
-    (item: ExceptionListItemSchema) => {
-      navigateCallback({
-        show: 'edit',
-        id: item.id,
-      });
-    },
-    [navigateCallback]
-  );
-
-  const handleItemDelete: ExceptionItemProps['onDeleteException'] = useCallback(
-    ({ id }) => {
-      dispatch({
-        type: 'eventFilterForDeletion',
-        // Casting below needed due to error around the comments array needing to be mutable
-        payload: listItems.find((item) => item.id === id)! as ExceptionListItemSchema,
-      });
-    },
-    [dispatch, listItems]
-  );
-
-  const handleItemComponentProps: EventListPaginatedContent['itemComponentProps'] = useCallback(
-    (exceptionItem) => ({
-      exceptionItem: exceptionItem as ExceptionListItemSchema,
-      loadingItemIds: [],
-      commentsAccordionId: '',
-      onEditException: handleItemEdit,
-      onDeleteException: handleItemDelete,
-      showModified: true,
-      showName: true,
-      'data-test-subj': `eventFilterCard`,
-    }),
-    [handleItemDelete, handleItemEdit]
-  );
-
   const handlePaginatedContentChange: EventListPaginatedContent['onChange'] = useCallback(
     ({ pageIndex, pageSize }) => {
       navigateCallback({
@@ -185,21 +169,69 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback, dispatch]
   );
 
+  const artifactCardPropsPerItem = useMemo(() => {
+    const cachedCardProps: Record<string, ArtifactEntryCardProps> = {};
+
+    // Casting `listItems` below to remove the `Immutable<>` from it in order to prevent errors
+    // with common component's props
+    for (const eventFilter of listItems as ExceptionListItemSchema[]) {
+      let policies: ArtifactEntryCardProps['policies'];
+
+      cachedCardProps[eventFilter.id] = {
+        item: eventFilter as AnyArtifact,
+        policies,
+        hideDescription: true,
+        'data-test-subj': 'eventFilterCard',
+        actions: [
+          {
+            icon: 'controlsHorizontal',
+            onClick: () => {
+              history.push(
+                getEventFiltersListPath({
+                  ...location,
+                  show: 'edit',
+                  id: eventFilter.id,
+                })
+              );
+            },
+            'data-test-subj': 'editEventFilterAction',
+            children: EDIT_EVENT_FILTER_ACTION_LABEL,
+          },
+          {
+            icon: 'trash',
+            onClick: () => {
+              dispatch({
+                type: 'eventFilterForDeletion',
+                payload: eventFilter,
+              });
+            },
+            'data-test-subj': 'deleteEventFilterAction',
+            children: DELETE_EVENT_FILTER_ACTION_LABEL,
+          },
+        ],
+      };
+    }
+
+    return cachedCardProps;
+  }, [dispatch, history, listItems, location]);
+
+  const handleArtifactCardProps = useCallback(
+    (eventFilter: ExceptionListItemSchema) => {
+      return artifactCardPropsPerItem[eventFilter.id];
+    },
+    [artifactCardPropsPerItem]
+  );
+
   return (
     <AdministrationListPage
-      beta={false}
       headerBackComponent={backButton}
       title={
         <FormattedMessage
           id="xpack.securitySolution.eventFilters.list.pageTitle"
-          defaultMessage="Event Filters"
+          defaultMessage="Event filters"
         />
       }
-      subtitle={i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
-        defaultMessage:
-          'Add an event filter to exclude high volume or unwanted events from being written to Elasticsearch. Event ' +
-          'filters are processed by the Endpoint Security integration, and are applied to hosts running this integration on their agents.',
-      })}
+      subtitle={ABOUT_EVENT_FILTERS}
       actions={
         doesDataExist && (
           <EuiButton
@@ -211,11 +243,12 @@ export const EventFiltersListPage = memo(() => {
           >
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.list.pageAddButton"
-              defaultMessage="Add Event Filter"
+              defaultMessage="Add event filter"
             />
           </EuiButton>
         )
       }
+      hideHeader={!doesDataExist}
     >
       {showFlyout && (
         <EventFiltersFlyout
@@ -229,7 +262,7 @@ export const EventFiltersListPage = memo(() => {
 
       {doesDataExist && (
         <>
-          <SearchBar
+          <SearchExceptions
             defaultValue={location.filter}
             onSearch={handleOnSearch}
             placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
@@ -240,18 +273,18 @@ export const EventFiltersListPage = memo(() => {
           <EuiText color="subdued" size="xs" data-test-subj="eventFiltersCountLabel">
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.list.totalCount"
-              defaultMessage="{total, plural, one {# event filter} other {# event filters}}"
+              defaultMessage="Showing {total, plural, one {# event filter} other {# event filters}}"
               values={{ total: totalCountListItems }}
             />
           </EuiText>
-          <EuiHorizontalRule margin="m" />
+          <EuiSpacer size="s" />
         </>
       )}
 
-      <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof ExceptionItem>
+      <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
         items={listItems}
-        ItemComponent={ExceptionItem}
-        itemComponentProps={handleItemComponentProps}
+        ItemComponent={ArtifactEntryCard}
+        itemComponentProps={handleArtifactCardProps}
         onChange={handlePaginatedContentChange}
         error={fetchError?.message}
         loading={isLoading}

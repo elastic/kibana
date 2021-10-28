@@ -35,8 +35,10 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./alerts_space1'));
     loadTestFile(require.resolve('./alerts_default_space'));
     loadTestFile(require.resolve('./builtin_alert_types'));
+    loadTestFile(require.resolve('./transform_rule_types'));
     loadTestFile(require.resolve('./mustache_templates.ts'));
     loadTestFile(require.resolve('./notify_when'));
+    loadTestFile(require.resolve('./ephemeral'));
     loadTestFile(require.resolve('./event_log_alerts'));
 
     // note that this test will destroy existing spaces

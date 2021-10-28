@@ -12,10 +12,11 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { getAPMHref } from '../../shared/Links/apm/APMLink';
+import { getLegacyApmHref } from '../../shared/Links/apm/APMLink';
 import { APMQueryParams } from '../../shared/Links/url_helpers';
 import { CytoscapeContext } from './Cytoscape';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 const ControlsContainer = euiStyled('div')`
   left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
@@ -103,14 +104,18 @@ export function Controls() {
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const { urlParams } = useUrlParams();
-  const currentSearch = urlParams.kuery ?? '';
+
+  const {
+    query: { kuery },
+  } = useApmParams('/service-map', '/services/{serviceName}/service-map');
+
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
   const duration = parseInt(theme.eui.euiAnimSpeedFast, 10);
   const downloadUrl = useDebugDownloadUrl(cy);
-  const viewFullMapUrl = getAPMHref({
+  const viewFullMapUrl = getLegacyApmHref({
     basePath,
     path: '/service-map',
-    search: currentSearch,
+    search: `kuery=${encodeURIComponent(kuery)}`,
     query: urlParams as APMQueryParams,
   });
 

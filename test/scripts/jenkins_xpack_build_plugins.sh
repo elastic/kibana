@@ -16,5 +16,4 @@ node scripts/build_kibana_platform_plugins \
   --scan-dir "$XPACK_DIR/test/security_functional/fixtures/common" \
   --scan-dir "$KIBANA_DIR/examples" \
   --scan-dir "$XPACK_DIR/examples" \
-  --workers 12 \
-  --verbose
+  --workers 12

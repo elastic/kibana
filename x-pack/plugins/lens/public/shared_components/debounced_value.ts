@@ -11,6 +11,10 @@ import { debounce } from 'lodash';
 /**
  * Debounces value changes and updates inputValue on root state changes if no debounced changes
  * are in flight because the user is currently modifying the value.
+ *
+ * * allowFalsyValue: update upstream with all falsy values but null or undefined
+ *
+ * When testing this function mock the "debounce" function in lodash (see this module test for an example)
  */
 
 export const useDebouncedValue = <T>(
@@ -21,11 +25,11 @@ export const useDebouncedValue = <T>(
     onChange: (val: T) => void;
     value: T;
   },
-  { allowEmptyString }: { allowEmptyString?: boolean } = {}
+  { allowFalsyValue }: { allowFalsyValue?: boolean } = {}
 ) => {
   const [inputValue, setInputValue] = useState(value);
   const unflushedChanges = useRef(false);
-  const shouldUpdateWithEmptyString = Boolean(allowEmptyString);
+  const shouldUpdateWithFalsyValue = Boolean(allowFalsyValue);
 
   // Save the initial value
   const initialValue = useRef(value);
@@ -57,7 +61,7 @@ export const useDebouncedValue = <T>(
 
   const handleInputChange = (val: T) => {
     setInputValue(val);
-    const valueToUpload = shouldUpdateWithEmptyString
+    const valueToUpload = shouldUpdateWithFalsyValue
       ? val ?? initialValue.current
       : val || initialValue.current;
     onChangeDebounced(valueToUpload);

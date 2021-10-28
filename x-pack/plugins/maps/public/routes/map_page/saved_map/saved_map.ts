@@ -30,7 +30,7 @@ import {
   setHiddenLayers,
 } from '../../../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
-import { getMapAttributeService } from '../../../map_attribute_service';
+import { getMapAttributeService, SharingSavedObjectProps } from '../../../map_attribute_service';
 import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public';
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
 import {
@@ -50,6 +50,7 @@ import { whenLicenseInitialized } from '../../../licensed_features';
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
+  private _sharingSavedObjectProps: SharingSavedObjectProps | null = null;
   private readonly _defaultLayers: LayerDescriptor[];
   private readonly _embeddableId?: string;
   private _initialLayerListConfig: LayerDescriptor[] = [];
@@ -98,8 +99,11 @@ export class SavedMap {
       };
     } else {
       const doc = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
-      const { references, ...savedObjectAttributes } = doc;
+      const { references, sharingSavedObjectProps, ...savedObjectAttributes } = doc;
       this._attributes = savedObjectAttributes;
+      if (sharingSavedObjectProps) {
+        this._sharingSavedObjectProps = sharingSavedObjectProps;
+      }
       const savedObjectsTagging = getSavedObjectsTagging();
       if (savedObjectsTagging && references && references.length) {
         this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
@@ -274,6 +278,10 @@ export class SavedMap {
     return this._attributes;
   }
 
+  public getSharingSavedObjectProps(): SharingSavedObjectProps | null {
+    return this._sharingSavedObjectProps;
+  }
+
   public isByValue(): boolean {
     const hasSavedObjectId = !!this.getSavedObjectId();
     return getIsAllowByValueEmbeddables() && !!this._originatingApp && !hasSavedObjectId;
@@ -402,7 +410,7 @@ export class SavedMap {
         isPaused: getTimeFilter().getRefreshInterval().pause,
         interval: getTimeFilter().getRefreshInterval().value,
       },
-      query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
+      query: getQuery(state),
       filters: getFilters(state),
       settings: getMapSettings(state),
     });

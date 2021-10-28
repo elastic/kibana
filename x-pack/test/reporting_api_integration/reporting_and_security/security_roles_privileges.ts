@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { SearchSourceFields } from 'src/plugins/data/common';
 import supertest from 'supertest';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -32,10 +33,10 @@ export default function ({ getService }: FtrProviderContext) {
               query: { query: '', language: 'kuery' },
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
               filter: [],
-            },
+            } as unknown as SearchSourceFields,
             browserTimezone: 'UTC',
             title: 'testfooyu78yt90-',
-          } as any
+          }
         )) as supertest.Response;
         expect(res.status).to.eql(403);
       });
@@ -49,10 +50,10 @@ export default function ({ getService }: FtrProviderContext) {
               query: { query: '', language: 'kuery' },
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
               filter: [],
-            },
+            } as unknown as SearchSourceFields,
             browserTimezone: 'UTC',
             title: 'testfooyu78yt90-',
-          } as any
+          }
         )) as supertest.Response;
         expect(res.status).to.eql(200);
       });
@@ -69,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
             layout: { id: 'preserve' },
             relativeUrls: ['/fooyou'],
             objectType: 'dashboard',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(403);
@@ -84,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
             layout: { id: 'preserve' },
             relativeUrls: ['/fooyou'],
             objectType: 'dashboard',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(200);
@@ -101,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
             layout: { id: 'preserve' },
             relativeUrls: ['/fooyou'],
             objectType: 'visualization',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(403);
@@ -116,6 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
             layout: { id: 'preserve' },
             relativeUrls: ['/fooyou'],
             objectType: 'visualization',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(200);
@@ -133,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
             layout: { id: 'preserve' },
             relativeUrls: ['/fooyou'],
             objectType: 'canvas',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(403);
@@ -148,6 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
             layout: { id: 'preserve' },
             relativeUrls: ['/fooyou'],
             objectType: 'canvas',
+            version: '7.14.0',
           }
         );
         expect(res.status).to.eql(200);
@@ -157,22 +164,21 @@ export default function ({ getService }: FtrProviderContext) {
     describe('Discover: Generate CSV report', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
         const res = await reportingAPI.generateCsv(
-          reportingAPI.DATA_ANALYST_USERNAME,
-          reportingAPI.DATA_ANALYST_PASSWORD,
           {
             browserTimezone: 'UTC',
-            searchSource: {},
+            searchSource: {} as SearchSourceFields,
             objectType: 'search',
             title: 'test disallowed',
-          }
+            version: '7.14.0',
+          },
+          reportingAPI.DATA_ANALYST_USERNAME,
+          reportingAPI.DATA_ANALYST_PASSWORD
         );
         expect(res.status).to.eql(403);
       });
 
       it('does allow user with the role-based privilege', async () => {
         const res = await reportingAPI.generateCsv(
-          reportingAPI.REPORTING_USER_USERNAME,
-          reportingAPI.REPORTING_USER_PASSWORD,
           {
             browserTimezone: 'UTC',
             title: 'allowed search',
@@ -181,9 +187,12 @@ export default function ({ getService }: FtrProviderContext) {
               version: true,
               fields: [{ field: '*', include_unmapped: 'true' }],
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            } as any,
+            } as unknown as SearchSourceFields,
             columns: [],
-          }
+            version: '7.13.0',
+          },
+          reportingAPI.REPORTING_USER_USERNAME,
+          reportingAPI.REPORTING_USER_PASSWORD
         );
         expect(res.status).to.eql(200);
       });

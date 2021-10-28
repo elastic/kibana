@@ -17,8 +17,6 @@ import { argv } from 'yargs';
 import { Logger } from 'kibana/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { unwrapEsResponse } from '../../../observability/server/utils/unwrap_es_response';
 import { downloadTelemetryTemplate } from '../shared/download-telemetry-template';
 import { mergeApmTelemetryMapping } from '../../common/apm_telemetry';
 import { generateSampleDocuments } from './generate-sample-documents';
@@ -76,25 +74,25 @@ async function uploadData() {
 
   const sampleDocuments = await generateSampleDocuments({
     collectTelemetryParams: {
-      logger: (console as unknown) as Logger,
+      logger: console as unknown as Logger,
       indices: {
-        ...config,
+        transaction: config['xpack.apm.indices.transaction'],
+        metric: config['xpack.apm.indices.metric'],
+        error: config['xpack.apm.indices.error'],
+        span: config['xpack.apm.indices.span'],
+        onboarding: config['xpack.apm.indices.onboarding'],
+        sourcemap: config['xpack.apm.indices.sourcemap'],
         apmCustomLinkIndex: '.apm-custom-links',
         apmAgentConfigurationIndex: '.apm-agent-configuration',
       },
       search: (body) => {
-        return unwrapEsResponse(client.search(body)) as Promise<any>;
+        return client.search(body) as Promise<any>;
       },
       indicesStats: (body) => {
-        return unwrapEsResponse(client.indices.stats(body));
+        return client.indices.stats(body);
       },
       transportRequest: ((params) => {
-        return unwrapEsResponse(
-          client.transport.request({
-            method: params.method,
-            path: params.path,
-          })
-        );
+        return;
       }) as CollectTelemetryParams['transportRequest'],
     },
   });

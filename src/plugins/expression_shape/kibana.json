@@ -1,0 +1,16 @@
+{
+  "id": "expressionShape",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "description": "Adds 'shape' function and renderer to expressions",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "extraPublicDirs": ["common"],
+  "requiredPlugins": ["expressions", "presentationUtil"],
+  "optionalPlugins": [],
+  "requiredBundles": []
+}

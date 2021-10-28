@@ -8,7 +8,6 @@
 
 import { History } from 'history';
 
-import type { auto } from 'angular';
 import {
   Capabilities,
   ChromeStart,
@@ -17,6 +16,7 @@ import {
   ToastsStart,
   IUiSettingsClient,
   PluginInitializerContext,
+  HttpStart,
 } from 'kibana/public';
 import {
   FilterManager,
@@ -27,15 +27,19 @@ import {
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
-
 import { UiCounterMetricType } from '@kbn/analytics';
+import { Storage } from '../../kibana_utils/public';
+
 import { DiscoverStartPlugins } from './plugin';
-import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './kibana_services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { FieldFormatsStart } from '../../field_formats/public';
+import { EmbeddableStart } from '../../embeddable/public';
+
+import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -44,9 +48,11 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
+  embeddable: EmbeddableStart;
   history: () => History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
+  fieldFormats: FieldFormatsStart;
   indexPatterns: IndexPatternsContract;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string };
@@ -56,26 +62,21 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedSearchById: (id?: string) => Promise<SavedSearch>;
-  getSavedSearchUrlById: (id: string) => Promise<string>;
-  getEmbeddableInjector: () => Promise<auto.IInjectorService>;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  http: HttpStart;
+  storage: Storage;
+  spaces?: SpacesApi;
 }
 
-export async function buildServices(
+export function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
-  context: PluginInitializerContext,
-  getEmbeddableInjector: () => Promise<auto.IInjectorService>
-): Promise<DiscoverServices> {
-  const services = {
-    savedObjectsClient: core.savedObjects.client,
-    savedObjects: plugins.savedObjects,
-  };
-  const savedObjectService = createSavedSearchesLoader(services);
+  context: PluginInitializerContext
+): DiscoverServices {
   const { usageCollection } = plugins;
+  const storage = new Storage(localStorage);
 
   return {
     addBasePath: core.http.basePath.prepend,
@@ -84,11 +85,10 @@ export async function buildServices(
     core,
     data: plugins.data,
     docLinks: core.docLinks,
+    embeddable: plugins.embeddable,
     theme: plugins.charts.theme,
+    fieldFormats: plugins.fieldFormats,
     filterManager: plugins.data.query.filterManager,
-    getEmbeddableInjector,
-    getSavedSearchById: async (id?: string) => savedObjectService.get(id),
-    getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
     inspector: plugins.inspector,
@@ -102,7 +102,10 @@ export async function buildServices(
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
+    storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
     indexPatternFieldEditor: plugins.indexPatternFieldEditor,
+    http: core.http,
+    spaces: plugins.spaces,
   };
 }

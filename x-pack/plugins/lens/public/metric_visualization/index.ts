@@ -5,29 +5,24 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
-import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
-import { EditorFrameSetup, FormatFactory } from '../types';
+import type { CoreSetup } from 'kibana/public';
+import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import type { EditorFrameSetup } from '../types';
+import type { FormatFactory } from '../../common';
 
 export interface MetricVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
 }
 
 export class MetricVisualization {
-  constructor() {}
-
   setup(
     _core: CoreSetup | null,
     { expressions, formatFactory, editorFrame }: MetricVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { metricVisualization, metricChart, getMetricChartRenderer } = await import(
-        '../async_services'
-      );
-
-      expressions.registerFunction(() => metricChart);
+      const { metricVisualization, getMetricChartRenderer } = await import('../async_services');
 
       expressions.registerRenderer(() => getMetricChartRenderer(formatFactory));
       return metricVisualization;

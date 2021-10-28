@@ -40,7 +40,6 @@ export interface KFetchKibanaOptions {
 export interface IShims {
   toastNotifications: CoreStart['notifications']['toasts'];
   capabilities: CoreStart['application']['capabilities'];
-  getAngularInjector: () => angular.auto.IInjectorService;
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
   breadcrumbs: {
@@ -52,7 +51,7 @@ export interface IShims {
   docTitle: CoreStart['chrome']['docTitle'];
   timefilter: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter'];
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  ruleTypeRegistry: TypeRegistry<AlertTypeModel>;
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   kfetch: (
@@ -69,21 +68,17 @@ export interface IShims {
 export class Legacy {
   private static _shims: IShims;
 
-  public static init(
-    {
-      core,
-      data,
-      isCloud,
-      triggersActionsUi,
-      usageCollection,
-      appMountParameters,
-    }: MonitoringStartPluginDependencies,
-    ngInjector: angular.auto.IInjectorService
-  ) {
+  public static init({
+    core,
+    data,
+    isCloud,
+    triggersActionsUi,
+    usageCollection,
+    appMountParameters,
+  }: MonitoringStartPluginDependencies) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
       capabilities: core.application.capabilities,
-      getAngularInjector: (): angular.auto.IInjectorService => ngInjector,
       getBasePath: (): string => core.http.basePath.get(),
       getInjected: (name: string, defaultValue?: unknown): string | unknown =>
         core.injectedMetadata.getInjectedVar(name, defaultValue),
@@ -119,7 +114,7 @@ export class Legacy {
       docTitle: core.chrome.docTitle,
       timefilter: data.query.timefilter.timefilter,
       actionTypeRegistry: triggersActionsUi?.actionTypeRegistry,
-      alertTypeRegistry: triggersActionsUi?.alertTypeRegistry,
+      ruleTypeRegistry: triggersActionsUi?.ruleTypeRegistry,
       uiSettings: core.uiSettings,
       http: core.http,
       kfetch: async (
@@ -146,5 +141,9 @@ export class Legacy {
       throw new Error('Legacy needs to be initiated with Legacy.init(...) before use');
     }
     return Legacy._shims;
+  }
+
+  public static isInitializated(): boolean {
+    return Boolean(Legacy._shims);
   }
 }

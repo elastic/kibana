@@ -8,9 +8,8 @@
 
 import './index.scss';
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
-import type { SecurityOssPluginSetup, SecurityOssPluginStart } from '../../security_oss/public';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
 import { createShortUrlRedirectApp } from './services/short_url_redirect_app';
 import {
@@ -20,14 +19,9 @@ import {
 } from './url_generators/url_generator_service';
 import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
-
-export interface ShareSetupDependencies {
-  securityOss?: SecurityOssPluginSetup;
-}
-
-export interface ShareStartDependencies {
-  securityOss?: SecurityOssPluginStart;
-}
+import type { RedirectOptions } from '../common/url_service/locators/redirect';
+import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
+import { AnonymousAccessServiceContract } from '../common';
 
 /** @public */
 export type SharePluginSetup = ShareMenuRegistrySetup & {
@@ -42,6 +36,17 @@ export type SharePluginSetup = ShareMenuRegistrySetup & {
    * Utilities to work with URL locators and short URLs.
    */
   url: UrlService;
+
+  /**
+   * Accepts serialized values for extracting a locator, migrating state from a provided version against
+   * the locator, then using the locator to navigate.
+   */
+  navigate(options: RedirectOptions): void;
+
+  /**
+   * Sets the provider for the anonymous access service; this is consumed by the Security plugin to avoid a circular dependency.
+   */
+  setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => void;
 };
 
 /** @public */
@@ -57,18 +62,32 @@ export type SharePluginStart = ShareMenuManagerStart & {
    * Utilities to work with URL locators and short URLs.
    */
   url: UrlService;
+
+  /**
+   * Accepts serialized values for extracting a locator, migrating state from a provided version against
+   * the locator, then using the locator to navigate.
+   */
+  navigate(options: RedirectOptions): void;
 };
 
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly shareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
   private readonly urlGeneratorsService = new UrlGeneratorsService();
-  private url?: UrlService;
 
-  public setup(core: CoreSetup, plugins: ShareSetupDependencies): SharePluginSetup {
-    core.application.register(createShortUrlRedirectApp(core, window.location));
+  private redirectManager?: RedirectManager;
+  private url?: UrlService;
+  private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup): SharePluginSetup {
+    const { application, http } = core;
+    const { basePath } = http;
 
     this.url = new UrlService({
+      baseUrl: basePath.publicBaseUrl || basePath.serverBasePath,
+      version: this.initializerContext.env.packageInfo.version,
       navigate: async ({ app, path, state }, { replace = false } = {}) => {
         const [start] = await core.getStartServices();
         await start.application.navigateToApp(app, {
@@ -85,29 +104,57 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         });
         return url;
       },
+      shortUrls: () => ({
+        get: () => ({
+          create: async () => {
+            throw new Error('Not implemented');
+          },
+          get: async () => {
+            throw new Error('Not implemented');
+          },
+          delete: async () => {
+            throw new Error('Not implemented');
+          },
+          resolve: async () => {
+            throw new Error('Not implemented.');
+          },
+        }),
+      }),
     });
 
-    const redirectManager = new RedirectManager({
+    this.url.locators.create(new LegacyShortUrlLocatorDefinition());
+
+    application.register(createShortUrlRedirectApp(core, window.location, this.url));
+
+    this.redirectManager = new RedirectManager({
       url: this.url,
     });
-    redirectManager.registerRedirectApp(core);
+    this.redirectManager.registerRedirectApp(core);
 
     return {
       ...this.shareMenuRegistry.setup(),
       urlGenerators: this.urlGeneratorsService.setup(core),
       url: this.url,
+      navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
+      setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {
+        if (this.anonymousAccessServiceProvider) {
+          throw new Error('Anonymous Access service provider is already set.');
+        }
+        this.anonymousAccessServiceProvider = provider;
+      },
     };
   }
 
-  public start(core: CoreStart, plugins: ShareStartDependencies): SharePluginStart {
+  public start(core: CoreStart): SharePluginStart {
     return {
       ...this.shareContextMenu.start(
         core,
         this.shareMenuRegistry.start(),
-        plugins.securityOss?.anonymousAccess
+        this.anonymousAccessServiceProvider
       ),
       urlGenerators: this.urlGeneratorsService.start(core),
       url: this.url!,
+      navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
     };
   }
 }

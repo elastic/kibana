@@ -111,6 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
         totalFieldsCount: 12,
         fieldTypeFiltersResultCount: 4,
         fieldNameFiltersResultCount: 1,
+        ingestedDocCount: 20,
       },
     },
     {
@@ -152,6 +153,51 @@ export default function ({ getService }: FtrProviderContext) {
         totalFieldsCount: 3,
         fieldTypeFiltersResultCount: 1,
         fieldNameFiltersResultCount: 1,
+        ingestedDocCount: 13,
+      },
+    },
+    {
+      suiteSuffix: 'with a file with a missing new line char at the end',
+      filePath: path.join(__dirname, 'files_to_import', 'missing_end_of_file_newline.csv'),
+      indexName: 'user-import_3',
+      createIndexPattern: false,
+      fieldTypeFilters: [],
+      fieldNameFilters: [],
+      expected: {
+        results: {
+          title: 'missing_end_of_file_newline.csv',
+          numberOfFields: 3,
+        },
+        metricFields: [
+          {
+            fieldName: 'value',
+            type: ML_JOB_FIELD_TYPES.NUMBER,
+            docCountFormatted: '3 (100%)',
+            exampleCount: 3,
+            topValuesCount: 3,
+          },
+        ],
+        nonMetricFields: [
+          {
+            fieldName: 'title',
+            type: ML_JOB_FIELD_TYPES.UNKNOWN,
+            docCountFormatted: '3 (100%)',
+            exampleCount: 3,
+          },
+          {
+            fieldName: 'description',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            docCountFormatted: '3 (100%)',
+            exampleCount: 3,
+          },
+        ],
+        visibleMetricFieldsCount: 0,
+        totalMetricFieldsCount: 0,
+        populatedFieldsCount: 3,
+        totalFieldsCount: 3,
+        fieldTypeFiltersResultCount: 3,
+        fieldNameFiltersResultCount: 3,
+        ingestedDocCount: 3,
       },
     },
   ];
@@ -263,13 +309,17 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('sets the index name');
           await ml.dataVisualizerFileBased.setIndexName(testData.indexName);
 
-          await ml.testExecution.logTestStep('sets the create index pattern checkbox');
+          await ml.testExecution.logTestStep('sets the create data view checkbox');
           await ml.dataVisualizerFileBased.setCreateIndexPatternCheckboxState(
             testData.createIndexPattern
           );
 
           await ml.testExecution.logTestStep('imports the file');
           await ml.dataVisualizerFileBased.startImportAndWaitForProcessing();
+
+          await ml.dataVisualizerFileBased.assertIngestedDocCount(
+            testData.expected.ingestedDocCount
+          );
 
           await ml.testExecution.logTestStep('creates filebeat config');
           await ml.dataVisualizerFileBased.selectCreateFilebeatConfig();

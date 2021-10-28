@@ -32,14 +32,9 @@ describe('ImportModeControl', () => {
     jest.resetAllMocks();
   });
 
-  const props: ImportModeControlProps = { initialValues, updateSelection, isLegacyFile: false };
+  const props: ImportModeControlProps = { initialValues, updateSelection };
 
-  it('returns partial import mode control when used with a legacy file', async () => {
-    const wrapper = shallowWithI18nProvider(<ImportModeControl {...props} isLegacyFile={true} />);
-    expect(wrapper.find('EuiFormFieldset')).toHaveLength(0);
-  });
-
-  it('returns full import mode control when used without a legacy file', async () => {
+  it('returns full import mode control', async () => {
     const wrapper = shallowWithI18nProvider(<ImportModeControl {...props} />);
     expect(wrapper.find('EuiFormFieldset')).toHaveLength(1);
   });

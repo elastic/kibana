@@ -6,10 +6,7 @@ free text search or field-based search. KQL is only used for filtering data, and
 no role in sorting or aggregating the data.
 
 KQL is able to suggest field names, values, and operators as you type.
-The performance of the suggestions is controlled by <<settings, {kib} settings>>:
-
-[role="screenshot"]
-image::images/kql-autocomplete.png[Autocomplete in Search bar]
+The performance of the suggestions is controlled by <<settings, {kib} settings>>.
 
 KQL has a different set of features than the <<lucene-query>>. KQL is able to query
 nested fields and <<scripted-fields, scripted fields>>. KQL does not support regular expressions

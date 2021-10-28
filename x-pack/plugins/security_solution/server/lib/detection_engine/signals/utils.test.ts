@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
+import { TransportResult } from '@elastic/elasticsearch';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
@@ -22,7 +22,6 @@ moment.suppressDeprecationWarnings = true;
 import {
   generateId,
   parseInterval,
-  getDriftTolerance,
   getGapBetweenRuns,
   getNumCatchupIntervals,
   errorAggregator,
@@ -36,11 +35,12 @@ import {
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
-  createTotalHitsFromSearchResult,
   lastValidDate,
   calculateThresholdSignalUuid,
   buildChunkedOrFilter,
   getValidDateFromDoc,
+  calculateTotal,
+  getTotalHitsValue,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -53,11 +53,11 @@ import {
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
   sampleDocSearchResultsNoSortIdNoHits,
-  repeatedSearchResultsWithSortId,
   sampleDocSearchResultsNoSortId,
   sampleDocNoSortId,
 } from './__mocks__/es_results';
 import { ShardError } from '../../types';
+import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -66,13 +66,7 @@ const buildRuleMessage = buildRuleMessageFactory({
   name: 'fake name',
 });
 
-const ruleStatusServiceMock = {
-  success: jest.fn(),
-  find: jest.fn(),
-  goingToRun: jest.fn(),
-  error: jest.fn(),
-  partialFailure: jest.fn(),
-};
+const ruleStatusClient = ruleExecutionLogClientMock.create();
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -117,105 +111,13 @@ describe('utils', () => {
     });
   });
 
-  describe('getDriftTolerance', () => {
-    test('it returns a drift tolerance in milliseconds of 1 minute when "from" overlaps "to" by 1 minute and the interval is 5 minutes', () => {
-      const drift = getDriftTolerance({
-        from: 'now-6m',
-        to: 'now',
-        intervalDuration: moment.duration(5, 'minutes'),
-      });
-      expect(drift).not.toBeNull();
-      expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
-    });
-
-    test('it returns a drift tolerance of 0 when "from" equals the interval', () => {
-      const drift = getDriftTolerance({
-        from: 'now-5m',
-        to: 'now',
-        intervalDuration: moment.duration(5, 'minutes'),
-      });
-      expect(drift?.asMilliseconds()).toEqual(0);
-    });
-
-    test('it returns a drift tolerance of 5 minutes when "from" is 10 minutes but the interval is 5 minutes', () => {
-      const drift = getDriftTolerance({
-        from: 'now-10m',
-        to: 'now',
-        intervalDuration: moment.duration(5, 'minutes'),
-      });
-      expect(drift).not.toBeNull();
-      expect(drift?.asMilliseconds()).toEqual(moment.duration(5, 'minutes').asMilliseconds());
-    });
-
-    test('it returns a drift tolerance of 10 minutes when "from" is 10 minutes ago and the interval is 0', () => {
-      const drift = getDriftTolerance({
-        from: 'now-10m',
-        to: 'now',
-        intervalDuration: moment.duration(0, 'milliseconds'),
-      });
-      expect(drift).not.toBeNull();
-      expect(drift?.asMilliseconds()).toEqual(moment.duration(10, 'minutes').asMilliseconds());
-    });
-
-    test('returns a drift tolerance of 1 minute when "from" is invalid and defaults to "now-6m" and interval is 5 minutes', () => {
-      const drift = getDriftTolerance({
-        from: 'invalid',
-        to: 'now',
-        intervalDuration: moment.duration(5, 'minutes'),
-      });
-      expect(drift).not.toBeNull();
-      expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
-    });
-
-    test('returns a drift tolerance of 1 minute when "from" does not include `now` and defaults to "now-6m" and interval is 5 minutes', () => {
-      const drift = getDriftTolerance({
-        from: '10m',
-        to: 'now',
-        intervalDuration: moment.duration(5, 'minutes'),
-      });
-      expect(drift).not.toBeNull();
-      expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
-    });
-
-    test('returns a drift tolerance of 4 minutes when "to" is "now-x", from is a valid input and interval is 5 minute', () => {
-      const drift = getDriftTolerance({
-        from: 'now-10m',
-        to: 'now-1m',
-        intervalDuration: moment.duration(5, 'minutes'),
-      });
-      expect(drift).not.toBeNull();
-      expect(drift?.asMilliseconds()).toEqual(moment.duration(4, 'minutes').asMilliseconds());
-    });
-
-    test('it returns expected drift tolerance when "from" is an ISO string', () => {
-      const drift = getDriftTolerance({
-        from: moment().subtract(10, 'minutes').toISOString(),
-        to: 'now',
-        intervalDuration: moment.duration(5, 'minutes'),
-      });
-      expect(drift).not.toBeNull();
-      expect(drift?.asMilliseconds()).toEqual(moment.duration(5, 'minutes').asMilliseconds());
-    });
-
-    test('it returns expected drift tolerance when "to" is an ISO string', () => {
-      const drift = getDriftTolerance({
-        from: 'now-6m',
-        to: moment().toISOString(),
-        intervalDuration: moment.duration(5, 'minutes'),
-      });
-      expect(drift).not.toBeNull();
-      expect(drift?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
-    });
-  });
-
   describe('getGapBetweenRuns', () => {
     test('it returns a gap of 0 when "from" and interval match each other and the previous started was from the previous interval time', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(5, 'minutes').toDate(),
-        intervalDuration: moment.duration(5, 'minutes'),
-        from: 'now-5m',
-        to: 'now',
-        now: nowDate.clone(),
+        startedAt: nowDate.clone().toDate(),
+        originalFrom: nowDate.clone().subtract(5, 'minutes'),
+        originalTo: nowDate.clone(),
       });
       expect(gap).not.toBeNull();
       expect(gap?.asMilliseconds()).toEqual(0);
@@ -224,10 +126,9 @@ describe('utils', () => {
     test('it returns a negative gap of 1 minute when "from" overlaps to by 1 minute and the previousStartedAt was 5 minutes ago', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(5, 'minutes').toDate(),
-        intervalDuration: moment.duration(5, 'minutes'),
-        from: 'now-6m',
-        to: 'now',
-        now: nowDate.clone(),
+        startedAt: nowDate.clone().toDate(),
+        originalFrom: nowDate.clone().subtract(6, 'minutes'),
+        originalTo: nowDate.clone(),
       });
       expect(gap).not.toBeNull();
       expect(gap?.asMilliseconds()).toEqual(moment.duration(-1, 'minute').asMilliseconds());
@@ -236,10 +137,9 @@ describe('utils', () => {
     test('it returns a negative gap of 5 minutes when "from" overlaps to by 1 minute and the previousStartedAt was 5 minutes ago', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(5, 'minutes').toDate(),
-        intervalDuration: moment.duration(5, 'minutes'),
-        from: 'now-10m',
-        to: 'now',
-        now: nowDate.clone(),
+        startedAt: nowDate.clone().toDate(),
+        originalFrom: nowDate.clone().subtract(10, 'minutes'),
+        originalTo: nowDate.clone(),
       });
       expect(gap).not.toBeNull();
       expect(gap?.asMilliseconds()).toEqual(moment.duration(-5, 'minute').asMilliseconds());
@@ -248,10 +148,9 @@ describe('utils', () => {
     test('it returns a negative gap of 1 minute when "from" overlaps to by 1 minute and the previousStartedAt was 10 minutes ago and so was the interval', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(10, 'minutes').toDate(),
-        intervalDuration: moment.duration(10, 'minutes'),
-        from: 'now-11m',
-        to: 'now',
-        now: nowDate.clone(),
+        startedAt: nowDate.clone().toDate(),
+        originalFrom: nowDate.clone().subtract(11, 'minutes'),
+        originalTo: nowDate.clone(),
       });
       expect(gap).not.toBeNull();
       expect(gap?.asMilliseconds()).toEqual(moment.duration(-1, 'minute').asMilliseconds());
@@ -260,10 +159,9 @@ describe('utils', () => {
     test('it returns a gap of only -30 seconds when the from overlaps with now by 1 minute, the interval is 5 minutes but the previous started is 30 seconds more', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(5, 'minutes').subtract(30, 'seconds').toDate(),
-        intervalDuration: moment.duration(5, 'minutes'),
-        from: 'now-6m',
-        to: 'now',
-        now: nowDate.clone(),
+        startedAt: nowDate.clone().toDate(),
+        originalFrom: nowDate.clone().subtract(6, 'minutes'),
+        originalTo: nowDate.clone(),
       });
       expect(gap).not.toBeNull();
       expect(gap?.asMilliseconds()).toEqual(moment.duration(-30, 'seconds').asMilliseconds());
@@ -272,10 +170,9 @@ describe('utils', () => {
     test('it returns an exact 0 gap when the from overlaps with now by 1 minute, the interval is 5 minutes but the previous started is one minute late', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(6, 'minutes').toDate(),
-        intervalDuration: moment.duration(5, 'minutes'),
-        from: 'now-6m',
-        to: 'now',
-        now: nowDate.clone(),
+        startedAt: nowDate.clone().toDate(),
+        originalFrom: nowDate.clone().subtract(6, 'minutes'),
+        originalTo: nowDate.clone(),
       });
       expect(gap).not.toBeNull();
       expect(gap?.asMilliseconds()).toEqual(moment.duration(0, 'minute').asMilliseconds());
@@ -284,10 +181,9 @@ describe('utils', () => {
     test('it returns a gap of 30 seconds when the from overlaps with now by 1 minute, the interval is 5 minutes but the previous started is one minute and 30 seconds late', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(6, 'minutes').subtract(30, 'seconds').toDate(),
-        intervalDuration: moment.duration(5, 'minutes'),
-        from: 'now-6m',
-        to: 'now',
-        now: nowDate.clone(),
+        startedAt: nowDate.clone().toDate(),
+        originalFrom: nowDate.clone().subtract(6, 'minutes'),
+        originalTo: nowDate.clone(),
       });
       expect(gap).not.toBeNull();
       expect(gap?.asMilliseconds()).toEqual(moment.duration(30, 'seconds').asMilliseconds());
@@ -296,10 +192,9 @@ describe('utils', () => {
     test('it returns a gap of 1 minute when the from overlaps with now by 1 minute, the interval is 5 minutes but the previous started is two minutes late', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone().subtract(7, 'minutes').toDate(),
-        intervalDuration: moment.duration(5, 'minutes'),
-        from: 'now-6m',
-        to: 'now',
-        now: nowDate.clone(),
+        startedAt: nowDate.clone().toDate(),
+        originalFrom: nowDate.clone().subtract(6, 'minutes'),
+        originalTo: nowDate.clone(),
       });
       expect(gap?.asMilliseconds()).not.toBeNull();
       expect(gap?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
@@ -308,36 +203,11 @@ describe('utils', () => {
     test('it returns 0 if given a previousStartedAt of null', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: null,
-        intervalDuration: moment.duration(5, 'minutes'),
-        from: 'now-5m',
-        to: 'now',
-        now: nowDate.clone(),
+        startedAt: nowDate.clone().toDate(),
+        originalFrom: nowDate.clone().subtract(5, 'minutes'),
+        originalTo: nowDate.clone(),
       });
       expect(gap.asMilliseconds()).toEqual(0);
-    });
-
-    test('it returns the expected result when "from" is an invalid string such as "invalid"', () => {
-      const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate.clone().subtract(7, 'minutes').toDate(),
-        intervalDuration: moment.duration(5, 'minutes'),
-        from: 'invalid',
-        to: 'now',
-        now: nowDate.clone(),
-      });
-      expect(gap?.asMilliseconds()).not.toBeNull();
-      expect(gap?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
-    });
-
-    test('it returns the expected result when "to" is an invalid string such as "invalid"', () => {
-      const gap = getGapBetweenRuns({
-        previousStartedAt: nowDate.clone().subtract(7, 'minutes').toDate(),
-        intervalDuration: moment.duration(5, 'minutes'),
-        from: 'now-6m',
-        to: 'invalid',
-        now: nowDate.clone(),
-      });
-      expect(gap?.asMilliseconds()).not.toBeNull();
-      expect(gap?.asMilliseconds()).toEqual(moment.duration(1, 'minute').asMilliseconds());
     });
   });
 
@@ -577,6 +447,7 @@ describe('utils', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
         previousStartedAt: moment().subtract(30, 's').toDate(),
+        startedAt: moment().subtract(30, 's').toDate(),
         interval: '30s',
         from: 'now-30s',
         to: 'now',
@@ -593,6 +464,7 @@ describe('utils', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
         previousStartedAt: moment().subtract(30, 's').toDate(),
+        startedAt: moment().subtract(30, 's').toDate(),
         interval: 'invalid',
         from: 'now-30s',
         to: 'now',
@@ -609,6 +481,7 @@ describe('utils', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
         previousStartedAt: moment().subtract(65, 's').toDate(),
+        startedAt: moment().toDate(),
         interval: '50s',
         from: 'now-55s',
         to: 'now',
@@ -624,6 +497,7 @@ describe('utils', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
         previousStartedAt: moment().subtract(65, 's').toDate(), // 64 is 5 times the interval + lookback, which will trigger max lookback
+        startedAt: moment().toDate(),
         interval: '10s',
         from: 'now-13s',
         to: 'now',
@@ -646,6 +520,7 @@ describe('utils', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
         logger: mockLogger,
         previousStartedAt: moment().subtract(-15, 's').toDate(),
+        startedAt: moment().subtract(-15, 's').toDate(),
         interval: '10s',
         from: 'now-13s',
         to: 'now',
@@ -688,14 +563,14 @@ describe('utils', () => {
   describe('#getExceptions', () => {
     test('it successfully returns array of exception list items', async () => {
       listMock.getExceptionListClient = () =>
-        (({
+        ({
           findExceptionListsItem: jest.fn().mockResolvedValue({
             data: [getExceptionListItemSchemaMock()],
             page: 1,
             per_page: 10000,
             total: 1,
           }),
-        } as unknown) as ExceptionListClient);
+        } as unknown as ExceptionListClient);
       const client = listMock.getExceptionListClient();
       const exceptions = await getExceptions({
         client,
@@ -717,9 +592,9 @@ describe('utils', () => {
     test('it throws if "getExceptionListClient" fails', async () => {
       const err = new Error('error fetching list');
       listMock.getExceptionListClient = () =>
-        (({
+        ({
           getExceptionList: jest.fn().mockRejectedValue(err),
-        } as unknown) as ExceptionListClient);
+        } as unknown as ExceptionListClient);
 
       await expect(() =>
         getExceptions({
@@ -732,9 +607,9 @@ describe('utils', () => {
     test('it throws if "findExceptionListsItem" fails', async () => {
       const err = new Error('error fetching list');
       listMock.getExceptionListClient = () =>
-        (({
+        ({
           findExceptionListsItem: jest.fn().mockRejectedValue(err),
-        } as unknown) as ExceptionListClient);
+        } as unknown as ExceptionListClient);
 
       await expect(() =>
         getExceptions({
@@ -746,9 +621,9 @@ describe('utils', () => {
 
     test('it returns empty array if "findExceptionListsItem" returns null', async () => {
       listMock.getExceptionListClient = () =>
-        (({
+        ({
           findExceptionListsItem: jest.fn().mockResolvedValue(null),
-        } as unknown) as ExceptionListClient);
+        } as unknown as ExceptionListClient);
 
       const exceptions = await getExceptions({
         client: listMock.getExceptionListClient(),
@@ -763,7 +638,7 @@ describe('utils', () => {
     test('returns true when missing timestamp override field', async () => {
       const timestampField = 'event.ingested';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -785,17 +660,21 @@ describe('utils', () => {
         },
       };
       mockLogger.error.mockClear();
-      const res = await hasTimestampFields(
-        false,
+      const res = await hasTimestampFields({
         timestampField,
-        'myfakerulename',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
-        ['myfa*'],
-        ruleStatusServiceMock,
-        mockLogger,
-        buildRuleMessage
-      );
+        ruleName: 'myfakerulename',
+        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Record<string, any>
+        >,
+        inputIndices: ['myfa*'],
+        ruleStatusClient,
+        ruleId: 'ruleId',
+        ruleType: 'ruleType',
+        spaceId: 'default',
+        logger: mockLogger,
+        buildRuleMessage,
+      });
       expect(mockLogger.error).toHaveBeenCalledWith(
         'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
@@ -804,7 +683,7 @@ describe('utils', () => {
     test('returns true when missing timestamp field', async () => {
       const timestampField = '@timestamp';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -826,17 +705,21 @@ describe('utils', () => {
         },
       };
       mockLogger.error.mockClear();
-      const res = await hasTimestampFields(
-        false,
+      const res = await hasTimestampFields({
         timestampField,
-        'myfakerulename',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
-        ['myfa*'],
-        ruleStatusServiceMock,
-        mockLogger,
-        buildRuleMessage
-      );
+        ruleName: 'myfakerulename',
+        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Record<string, any>
+        >,
+        inputIndices: ['myfa*'],
+        ruleStatusClient,
+        ruleId: 'ruleId',
+        ruleType: 'ruleType',
+        spaceId: 'default',
+        logger: mockLogger,
+        buildRuleMessage,
+      });
       expect(mockLogger.error).toHaveBeenCalledWith(
         'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
@@ -846,24 +729,28 @@ describe('utils', () => {
     test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
       const timestampField = '@timestamp';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
         body: {
           indices: [],
           fields: {},
         },
       };
       mockLogger.error.mockClear();
-      const res = await hasTimestampFields(
-        false,
+      const res = await hasTimestampFields({
         timestampField,
-        'Endpoint Security',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
-        ['logs-endpoint.alerts-*'],
-        ruleStatusServiceMock,
-        mockLogger,
-        buildRuleMessage
-      );
+        ruleName: 'Endpoint Security',
+        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Record<string, any>
+        >,
+        inputIndices: ['logs-endpoint.alerts-*'],
+        ruleStatusClient,
+        ruleId: 'ruleId',
+        ruleType: 'ruleType',
+        spaceId: 'default',
+        logger: mockLogger,
+        buildRuleMessage,
+      });
       expect(mockLogger.error).toHaveBeenCalledWith(
         'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
@@ -873,24 +760,28 @@ describe('utils', () => {
     test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
       const timestampField = '@timestamp';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
         body: {
           indices: [],
           fields: {},
         },
       };
       mockLogger.error.mockClear();
-      const res = await hasTimestampFields(
-        false,
+      const res = await hasTimestampFields({
         timestampField,
-        'NOT Endpoint Security',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
-        ['logs-endpoint.alerts-*'],
-        ruleStatusServiceMock,
-        mockLogger,
-        buildRuleMessage
-      );
+        ruleName: 'NOT Endpoint Security',
+        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Record<string, any>
+        >,
+        inputIndices: ['logs-endpoint.alerts-*'],
+        ruleStatusClient,
+        ruleId: 'ruleId',
+        ruleType: 'ruleType',
+        spaceId: 'default',
+        logger: mockLogger,
+        buildRuleMessage,
+      });
       expect(mockLogger.error).toHaveBeenCalledWith(
         'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
@@ -1270,7 +1161,7 @@ describe('utils', () => {
     test('It returns timestampOverride date time if set', () => {
       const override = '2020-10-07T19:20:28.049Z';
       const searchResult = sampleDocSearchResultsNoSortId();
-      searchResult.hits.hits[0]._source!.different_timestamp = new Date(override).toISOString();
+      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
       const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
@@ -1569,22 +1460,6 @@ describe('utils', () => {
     });
   });
 
-  describe('createTotalHitsFromSearchResult', () => {
-    test('it should return 0 for empty results', () => {
-      const result = createTotalHitsFromSearchResult({
-        searchResult: sampleEmptyDocSearchResults(),
-      });
-      expect(result).toEqual(0);
-    });
-
-    test('it should return 4 for 4 result sets', () => {
-      const result = createTotalHitsFromSearchResult({
-        searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
-      });
-      expect(result).toEqual(4);
-    });
-  });
-
   describe('calculateThresholdSignalUuid', () => {
     it('should generate a uuid without key', () => {
       const startedAt = new Date('2020-12-17T16:27:00Z');
@@ -1618,6 +1493,30 @@ describe('utils', () => {
     test('should return a filter with a multiple values chunked', () => {
       const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2', 'id-3'], 2);
       expect(filter).toEqual('field.name: ("id-1" OR "id-2") OR field.name: ("id-3")');
+    });
+  });
+
+  describe('getTotalHitsValue', () => {
+    test('returns value if present as number', () => {
+      expect(getTotalHitsValue(sampleDocSearchResultsWithSortId().hits.total)).toBe(1);
+    });
+
+    test('returns value if present as value object', () => {
+      expect(getTotalHitsValue({ value: 1 })).toBe(1);
+    });
+
+    test('returns -1 if not present', () => {
+      expect(getTotalHitsValue(undefined)).toBe(-1);
+    });
+  });
+
+  describe('calculateTotal', () => {
+    test('should add totalHits if both totalHits values are numbers', () => {
+      expect(calculateTotal(1, 2)).toBe(3);
+    });
+
+    test('should return -1 if totalHits is undefined', () => {
+      expect(calculateTotal(undefined, 2)).toBe(-1);
     });
   });
 });

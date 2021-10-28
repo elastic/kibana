@@ -5,24 +5,29 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useCallback, useRef } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
-import type { AlertStatus } from '../../../common/typings';
+import type { AlertWorkflowStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useFetcher } from '../../hooks/use_fetcher';
+import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { RouteParams } from '../../routes';
-import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
+import { useTimefilterService } from '../../hooks/use_timefilter_service';
+import { callObservabilityApi } from '../../services/call_observability_api';
+import { getNoDataConfig } from '../../utils/no_data_config';
+import { LoadingObservability } from '../overview/loading_observability';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
-import { StatusFilter } from './status_filter';
-import { useFetcher } from '../../hooks/use_fetcher';
-import { callObservabilityApi } from '../../services/call_observability_api';
-
-export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
+import { Provider, alertsPageStateContainer, useAlertsPageStateContainer } from './state_container';
+import './styles.scss';
+import { WorkflowStatusFilter } from './workflow_status_filter';
+import { AlertsDisclaimer } from './alerts_disclaimer';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -32,18 +37,24 @@ export interface TopAlert {
   active: boolean;
 }
 
-interface AlertsPageProps {
-  routeParams: RouteParams<'/alerts'>;
-}
+const NO_INDEX_NAMES: string[] = [];
+const NO_INDEX_PATTERNS: IndexPatternBase[] = [];
 
-export function AlertsPage({ routeParams }: AlertsPageProps) {
-  const { core, ObservabilityPageTemplate } = usePluginContext();
+function AlertsPage() {
+  const { core, plugins, ObservabilityPageTemplate } = usePluginContext();
   const { prepend } = core.http.basePath;
-  const history = useHistory();
   const refetch = useRef<() => void>();
+  const timefilterService = useTimefilterService();
   const {
-    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'open' },
-  } = routeParams;
+    rangeFrom,
+    setRangeFrom,
+    rangeTo,
+    setRangeTo,
+    kuery,
+    setKuery,
+    workflowStatus,
+    setWorkflowStatus,
+  } = useAlertsPageStateContainer();
 
   useBreadcrumbs([
     {
@@ -55,32 +66,48 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
 
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
-  const manageDetectionRulesHref = prepend(
-    '/app/management/insightsAndAlerting/triggersActions/alerts'
-  );
+  const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
 
-  const { data: dynamicIndexPatternResp } = useFetcher(({ signal }) => {
+  const { data: indexNames = NO_INDEX_NAMES } = useFetcher(({ signal }) => {
     return callObservabilityApi({
       signal,
       endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
+      params: {
+        query: {
+          namespace: 'default',
+          registrationContexts: [
+            'observability.apm',
+            'observability.logs',
+            'observability.metrics',
+            'observability.uptime',
+          ],
+        },
+      },
     });
   }, []);
 
-  const dynamicIndexPattern = useMemo(
-    () => (dynamicIndexPatternResp ? [dynamicIndexPatternResp] : []),
-    [dynamicIndexPatternResp]
-  );
+  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<IndexPatternBase[]> => {
+    if (indexNames.length === 0) {
+      return [];
+    }
 
-  const setStatusFilter = useCallback(
-    (value: AlertStatus) => {
-      const nextSearchParams = new URLSearchParams(history.location.search);
-      nextSearchParams.set('status', value);
-      history.push({
-        ...history.location,
-        search: nextSearchParams.toString(),
-      });
+    return [
+      {
+        id: 'dynamic-observability-alerts-table-index-pattern',
+        title: indexNames.join(','),
+        fields: await plugins.data.indexPatterns.getFieldsForWildcard({
+          pattern: indexNames.join(','),
+          allowNoIndex: true,
+        }),
+      },
+    ];
+  }, [indexNames]);
+
+  const setWorkflowStatusFilter = useCallback(
+    (value: AlertWorkflowStatus) => {
+      setWorkflowStatus(value);
     },
-    [history]
+    [setWorkflowStatus]
   );
 
   const onQueryChange = useCallback(
@@ -88,26 +115,52 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
       if (rangeFrom === dateRange.from && rangeTo === dateRange.to && kuery === (query ?? '')) {
         return refetch.current && refetch.current();
       }
-      const nextSearchParams = new URLSearchParams(history.location.search);
 
-      nextSearchParams.set('rangeFrom', dateRange.from);
-      nextSearchParams.set('rangeTo', dateRange.to);
-      nextSearchParams.set('kuery', query ?? '');
+      timefilterService.setTime(dateRange);
+      setRangeFrom(dateRange.from);
+      setRangeTo(dateRange.to);
+      setKuery(query);
+    },
+    [rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, timefilterService]
+  );
 
-      history.push({
-        ...history.location,
-        search: nextSearchParams.toString(),
+  const addToQuery = useCallback(
+    (value: string) => {
+      let output = value;
+      if (kuery !== '') {
+        output = `${kuery} and ${value}`;
+      }
+      onQueryChange({
+        dateRange: { from: rangeFrom, to: rangeTo },
+        query: output,
       });
     },
-    [history, rangeFrom, rangeTo, kuery]
+    [kuery, onQueryChange, rangeFrom, rangeTo]
   );
 
   const setRefetch = useCallback((ref) => {
     refetch.current = ref;
   }, []);
 
+  const { hasAnyData, isAllRequestsComplete } = useHasData();
+
+  // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
+  const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
+
+  if (!hasAnyData && !isAllRequestsComplete) {
+    return <LoadingObservability />;
+  }
+
+  const noDataConfig = getNoDataConfig({
+    hasData,
+    basePath: core.http.basePath,
+    docsLink: core.docLinks.links.observability.guide,
+  });
+
   return (
     <ObservabilityPageTemplate
+      noDataConfig={noDataConfig}
+      data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       pageHeader={{
         pageTitle: (
           <>
@@ -116,68 +169,58 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           </>
         ),
         rightSideItems: [
-          <EuiButton fill href={manageDetectionRulesHref} iconType="gear">
-            {i18n.translate('xpack.observability.alerts.manageDetectionRulesButtonLabel', {
-              defaultMessage: 'Manage detection rules',
+          <EuiButtonEmpty href={manageRulesHref}>
+            {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
+              defaultMessage: 'Manage Rules',
             })}
-          </EuiButton>,
+          </EuiButtonEmpty>,
         ],
       }}
     >
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
-              defaultMessage: 'Experimental',
-            })}
-            color="warning"
-            iconType="beaker"
-          >
-            <p>
-              {i18n.translate('xpack.observability.alertsDisclaimerText', {
-                defaultMessage:
-                  'This page shows an experimental alerting view. The data shown here will probably not be an accurate representation of alerts. A non-experimental list of alerts is available in the Alerts and Actions settings in Stack Management.',
-              })}
-            </p>
-            <p>
-              <EuiLink href={prepend('/app/management/insightsAndAlerting/triggersActions/alerts')}>
-                {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
-                  defaultMessage: 'Alerts and Actions',
-                })}
-              </EuiLink>
-            </p>
-          </EuiCallOut>
+          <AlertsDisclaimer />
         </EuiFlexItem>
         <EuiFlexItem>
           <AlertsSearchBar
-            dynamicIndexPattern={dynamicIndexPattern}
+            dynamicIndexPatterns={dynamicIndexPatternsAsyncState.value ?? NO_INDEX_PATTERNS}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             query={kuery}
             onQueryChange={onQueryChange}
           />
         </EuiFlexItem>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <StatusFilter status={status} onChange={setStatusFilter} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <AlertsTableTGrid
-              indexName={dynamicIndexPattern.length > 0 ? dynamicIndexPattern[0].title : ''}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              kuery={kuery}
-              status={status}
-              setRefetch={setRefetch}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <WorkflowStatusFilter status={workflowStatus} onChange={setWorkflowStatusFilter} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <AlertsTableTGrid
+            indexNames={indexNames}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            kuery={kuery}
+            workflowStatus={workflowStatus}
+            setRefetch={setRefetch}
+            addToQuery={addToQuery}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
   );
 }
+
+function WrappedAlertsPage() {
+  return (
+    <Provider value={alertsPageStateContainer}>
+      <AlertsPage />
+    </Provider>
+  );
+}
+
+export { WrappedAlertsPage as AlertsPage };

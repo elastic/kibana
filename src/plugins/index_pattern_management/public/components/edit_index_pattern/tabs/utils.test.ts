@@ -12,8 +12,8 @@ import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 test('getPath() should encode "fieldName"', () => {
   expect(
     getPath(
-      ({ name: 'Memory: Allocated Bytes/sec' } as unknown) as IndexPatternField,
-      ({ id: 'id' } as unknown) as IndexPattern
+      { name: 'Memory: Allocated Bytes/sec' } as unknown as IndexPatternField,
+      { id: 'id' } as unknown as IndexPattern
     )
-  ).toMatchInlineSnapshot(`"/patterns/id/field/Memory%3A%20Allocated%20Bytes%2Fsec"`);
+  ).toMatchInlineSnapshot(`"/dataView/id/field/Memory%3A%20Allocated%20Bytes%2Fsec"`);
 });

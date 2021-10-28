@@ -5,22 +5,32 @@
  * 2.0.
  */
 
-import { AlertTypeModel, AlertTypeRegistryContract } from '../../../triggers_actions_ui/public';
+import {
+  AlertTypeModel,
+  AlertTypeParams,
+  RuleTypeRegistryContract,
+} from '../../../triggers_actions_ui/public';
 import { ParsedTechnicalFields } from '../../../rule_registry/common/parse_technical_fields';
 import { AsDuration, AsPercent } from '../../common/utils/formatters';
 
-export type Formatter = (options: {
+export type ObservabilityRuleTypeFormatter = (options: {
   fields: ParsedTechnicalFields & Record<string, any>;
   formatters: { asDuration: AsDuration; asPercent: AsPercent };
 }) => { reason: string; link: string };
 
-export function createObservabilityRuleTypeRegistry(alertTypeRegistry: AlertTypeRegistryContract) {
-  const formatters: Array<{ typeId: string; fn: Formatter }> = [];
+export interface ObservabilityRuleTypeModel<Params extends AlertTypeParams = AlertTypeParams>
+  extends AlertTypeModel<Params> {
+  format: ObservabilityRuleTypeFormatter;
+}
+
+export function createObservabilityRuleTypeRegistry(ruleTypeRegistry: RuleTypeRegistryContract) {
+  const formatters: Array<{ typeId: string; fn: ObservabilityRuleTypeFormatter }> = [];
+
   return {
-    register: (type: AlertTypeModel<any> & { format: Formatter }) => {
+    register: (type: ObservabilityRuleTypeModel<any>) => {
       const { format, ...rest } = type;
       formatters.push({ typeId: type.id, fn: format });
-      alertTypeRegistry.register(rest);
+      ruleTypeRegistry.register(rest);
     },
     getFormatter: (typeId: string) => {
       return formatters.find((formatter) => formatter.typeId === typeId)?.fn;

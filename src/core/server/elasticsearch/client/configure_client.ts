@@ -8,15 +8,19 @@
 
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { ApiError, Client, RequestEvent, errors, Transport } from '@elastic/elasticsearch';
+import { Client, errors, Transport, HttpConnection } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import type {
-  RequestBody,
   TransportRequestParams,
   TransportRequestOptions,
-} from '@elastic/elasticsearch/lib/Transport';
-import type { IExecutionContextContainer } from '../../execution_context';
+  TransportResult,
+  DiagnosticResult,
+  RequestBody,
+} from '@elastic/elasticsearch';
+
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
+import type { ElasticsearchErrorDetails } from './types';
 
 const noop = () => undefined;
 
@@ -31,26 +35,35 @@ export const configureClient = (
     logger: Logger;
     type: string;
     scoped?: boolean;
-    getExecutionContext?: () => IExecutionContextContainer | undefined;
+    getExecutionContext?: () => string | undefined;
   }
-): Client => {
+): KibanaClient => {
   const clientOptions = parseClientOptions(config, scoped);
   class KibanaTransport extends Transport {
     request(params: TransportRequestParams, options?: TransportRequestOptions) {
-      const opts = options || {};
-      const opaqueId = getExecutionContext()?.toString();
+      const opts: TransportRequestOptions = options || {};
+      const opaqueId = getExecutionContext();
       if (opaqueId && !opts.opaqueId) {
         // rewrites headers['x-opaque-id'] if it presents
         opts.opaqueId = opaqueId;
       }
-      return super.request(params, opts);
+      // Enforce the client to return TransportResult.
+      // It's required for bwc with responses in 7.x version.
+      if (opts.meta === undefined) {
+        opts.meta = true;
+      }
+      return super.request(params, opts) as Promise<TransportResult<any, any>>;
     }
   }
 
-  const client = new Client({ ...clientOptions, Transport: KibanaTransport });
+  const client = new Client({
+    ...clientOptions,
+    Transport: KibanaTransport,
+    Connection: HttpConnection,
+  });
   addLogging(client, logger.get('query', type));
 
-  return client;
+  return client as KibanaClient;
 };
 
 const convertQueryString = (qs: string | Record<string, any> | undefined): string => {
@@ -67,11 +80,14 @@ function ensureString(body: RequestBody): string {
   return JSON.stringify(body);
 }
 
-function getErrorMessage(error: ApiError, event: RequestEvent): string {
+/**
+ * Returns a debug message from an Elasticsearch error in the following format:
+ * [error type] error reason
+ */
+export function getErrorMessage(error: errors.ElasticsearchClientError): string {
   if (error instanceof errors.ResponseError) {
-    return `${getResponseMessage(event)} [${event.body?.error?.type}]: ${
-      event.body?.error?.reason ?? error.message
-    }`;
+    const errorBody = error.meta.body as ElasticsearchErrorDetails;
+    return `[${errorBody?.error?.type}]: ${errorBody?.error?.reason ?? error.message}`;
   }
   return `[${error.name}]: ${error.message}`;
 }
@@ -80,28 +96,55 @@ function getErrorMessage(error: ApiError, event: RequestEvent): string {
  * returns a string in format:
  *
  * status code
- * URL
+ * method URL
  * request body
  *
  * so it could be copy-pasted into the Dev console
  */
-function getResponseMessage(event: RequestEvent): string {
-  const params = event.meta.request.params;
+function getResponseMessage(event: DiagnosticResult): string {
+  const errorMeta = getRequestDebugMeta(event);
+  const body = errorMeta.body ? `\n${errorMeta.body}` : '';
+  return `${errorMeta.statusCode}\n${errorMeta.method} ${errorMeta.url}${body}`;
+}
 
+/**
+ * Returns stringified debug information from an Elasticsearch request event
+ * useful for logging in case of an unexpected failure.
+ */
+export function getRequestDebugMeta(event: DiagnosticResult): {
+  url: string;
+  body: string;
+  statusCode: number | null;
+  method: string;
+} {
+  const params = event.meta.request.params;
   // definition is wrong, `params.querystring` can be either a string or an object
   const querystring = convertQueryString(params.querystring);
-  const url = `${params.path}${querystring ? `?${querystring}` : ''}`;
-  const body = params.body ? `\n${ensureString(params.body)}` : '';
-  return `${event.statusCode}\n${params.method} ${url}${body}`;
+  return {
+    url: `${params.path}${querystring ? `?${querystring}` : ''}`,
+    body: params.body ? `${ensureString(params.body)}` : '',
+    method: params.method,
+    statusCode: event.statusCode!,
+  };
 }
 
 const addLogging = (client: Client, logger: Logger) => {
-  client.on('response', (error, event) => {
+  client.diagnostic.on('response', (error, event) => {
     if (event) {
+      const opaqueId = event.meta.request.options.opaqueId;
+      const meta = opaqueId
+        ? {
+            http: { request: { id: event.meta.request.options.opaqueId } },
+          }
+        : undefined; // do not clutter logs if opaqueId is not present
       if (error) {
-        logger.debug(getErrorMessage(error, event));
+        if (error instanceof errors.ResponseError) {
+          logger.debug(`${getResponseMessage(event)} ${getErrorMessage(error)}`, meta);
+        } else {
+          logger.debug(getErrorMessage(error), meta);
+        }
       } else {
-        logger.debug(getResponseMessage(event));
+        logger.debug(getResponseMessage(event), meta);
       }
     }
   });

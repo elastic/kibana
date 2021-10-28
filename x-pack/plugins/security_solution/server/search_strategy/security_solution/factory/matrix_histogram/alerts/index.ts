@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { MatrixHistogramTypeToAggName } from '../../../../../../common';
 import { buildAlertsHistogramQuery } from './query.alerts_histogram.dsl';
 
 export const alertsMatrixHistogramConfig = {
   buildDsl: buildAlertsHistogramQuery,
-  aggName: 'aggregations.alertsGroup.buckets',
+  aggName: MatrixHistogramTypeToAggName.alerts,
   parseKey: 'alerts.buckets',
 };

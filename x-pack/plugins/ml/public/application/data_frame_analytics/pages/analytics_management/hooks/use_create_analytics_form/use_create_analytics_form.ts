@@ -13,7 +13,7 @@ import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
-import { DuplicateIndexPatternError } from '../../../../../../../../../../src/plugins/data/public';
+import { DuplicateDataViewError } from '../../../../../../../../../../src/plugins/data/public';
 
 import { useRefreshAnalyticsList, DataFrameAnalyticsConfig } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
@@ -84,9 +84,9 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const createAnalyticsJob = async () => {
     resetRequestMessages();
 
-    const analyticsJobConfig = (isAdvancedEditorEnabled
-      ? jobConfig
-      : getJobConfigFromFormState(form)) as DataFrameAnalyticsConfig;
+    const analyticsJobConfig = (
+      isAdvancedEditorEnabled ? jobConfig : getJobConfigFromFormState(form)
+    ) as DataFrameAnalyticsConfig;
 
     if (isAdvancedEditorEnabled) {
       destinationIndex = analyticsJobConfig.dest.index;
@@ -124,12 +124,12 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const createKibanaIndexPattern = async () => {
-    const indexPatternName = destinationIndex;
+    const dataViewName = destinationIndex;
 
     try {
       await mlContext.indexPatterns.createAndSave(
         {
-          title: indexPatternName,
+          title: dataViewName,
         },
         false,
         true
@@ -137,27 +137,27 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
       addRequestMessage({
         message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.createIndexPatternSuccessMessage',
+          'xpack.ml.dataframe.analytics.create.createDataViewSuccessMessage',
           {
-            defaultMessage: 'Kibana index pattern {indexPatternName} created.',
-            values: { indexPatternName },
+            defaultMessage: 'Kibana data view {dataViewName} created.',
+            values: { dataViewName },
           }
         ),
       });
     } catch (e) {
-      if (e instanceof DuplicateIndexPatternError) {
+      if (e instanceof DuplicateDataViewError) {
         addRequestMessage({
           error: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessageError',
+            'xpack.ml.dataframe.analytics.create.duplicateDataViewErrorMessageError',
             {
-              defaultMessage: 'The index pattern {indexPatternName} already exists.',
-              values: { indexPatternName },
+              defaultMessage: 'The data view {dataViewName} already exists.',
+              values: { dataViewName },
             }
           ),
           message: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessage',
+            'xpack.ml.dataframe.analytics.create.duplicateDataViewErrorMessage',
             {
-              defaultMessage: 'An error occurred creating the Kibana index pattern:',
+              defaultMessage: 'An error occurred creating the Kibana data view:',
             }
           ),
         });
@@ -165,9 +165,9 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         addRequestMessage({
           error: extractErrorMessage(e),
           message: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.createIndexPatternErrorMessage',
+            'xpack.ml.dataframe.analytics.create.createDataViewErrorMessage',
             {
-              defaultMessage: 'An error occurred creating the Kibana index pattern:',
+              defaultMessage: 'An error occurred creating the Kibana data view:',
             }
           ),
         });
@@ -177,7 +177,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const prepareFormValidation = async () => {
     try {
-      // Set the existing index pattern titles.
+      // Set the existing data view names.
       const indexPatternsMap: SourceIndexMap = {};
       const savedObjects = (await mlContext.indexPatterns.getCache()) || [];
       savedObjects.forEach((obj) => {
@@ -193,12 +193,9 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     } catch (e) {
       addRequestMessage({
         error: extractErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorGettingIndexPatternTitles',
-          {
-            defaultMessage: 'An error occurred getting the existing index pattern titles:',
-          }
-        ),
+        message: i18n.translate('xpack.ml.dataframe.analytics.create.errorGettingDataViewNames', {
+          defaultMessage: 'An error occurred getting the existing data view names:',
+        }),
       });
     }
   };

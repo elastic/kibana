@@ -30,7 +30,6 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
 import { useToastNotifications } from '../../../../app_dependencies';
-
 import { useApi } from '../../../../hooks/use_api';
 
 import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
@@ -43,9 +42,14 @@ import {
 interface EditTransformFlyoutProps {
   closeFlyout: () => void;
   config: TransformConfigUnion;
+  indexPatternId?: string;
 }
 
-export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout, config }) => {
+export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
+  closeFlyout,
+  config,
+  indexPatternId,
+}) => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
 
@@ -96,7 +100,10 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout,
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
-        <EditTransformFlyoutForm editTransformFlyout={[state, dispatch]} />
+        <EditTransformFlyoutForm
+          editTransformFlyout={[state, dispatch]}
+          indexPatternId={indexPatternId}
+        />
         {errorMessage !== undefined && (
           <>
             <EuiSpacer size="m" />

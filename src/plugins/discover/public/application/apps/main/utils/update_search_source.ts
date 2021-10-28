@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { getSortForSearchSource } from '../../../angular/doc_table';
-import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
+import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import { IndexPattern, ISearchSource } from '../../../../../../data/common';
-import { SortOrder } from '../../../../saved_searches/types';
+import type { SortOrder } from '../../../../saved_searches';
 import { DiscoverServices } from '../../../../build_services';
-import { indexPatterns as indexPatternsUtils } from '../../../../../../data/public';
+import { getSortForSearchSource } from '../components/doc_table';
 
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting
@@ -32,31 +31,28 @@ export function updateSearchSource(
   }
 ) {
   const { uiSettings, data } = services;
-  const usedSort = getSortForSearchSource(
-    sort,
-    indexPattern,
-    uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
-  );
-  const usedSearchSource = persist ? searchSource : searchSource.getParent()!;
+  const parentSearchSource = persist ? searchSource : searchSource.getParent()!;
 
-  usedSearchSource
+  parentSearchSource
     .setField('index', indexPattern)
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
 
   if (!persist) {
+    const usedSort = getSortForSearchSource(
+      sort,
+      indexPattern,
+      uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
+    );
     searchSource
       .setField('trackTotalHits', true)
-      .setField('size', uiSettings.get(SAMPLE_SIZE_SETTING))
       .setField('sort', usedSort)
-      .setField('highlightAll', true)
-      .setField('version', true)
       // Even when searching rollups, we want to use the default strategy so that we get back a
       // document-like response.
       .setPreferredSearchStrategyId('default');
 
-    // this is not the default index pattern, it determines that it's not of type rollup
-    if (indexPatternsUtils.isDefault(indexPattern)) {
+    if (indexPattern.type !== 'rollup') {
+      // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
       searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern));
     }
 

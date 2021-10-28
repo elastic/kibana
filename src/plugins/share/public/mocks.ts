@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import { SharePluginSetup, SharePluginStart } from '.';
 import { LocatorPublic, UrlService } from '../common/url_service';
 
@@ -18,6 +18,22 @@ const url = new UrlService({
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
+  shortUrls: () => ({
+    get: () => ({
+      create: async () => {
+        throw new Error('Not implemented');
+      },
+      get: async () => {
+        throw new Error('Not implemented');
+      },
+      delete: async () => {
+        throw new Error('Not implemented');
+      },
+      resolve: async () => {
+        throw new Error('Not implemented.');
+      },
+    }),
+  }),
 });
 
 const createSetupContract = (): Setup => {
@@ -27,6 +43,8 @@ const createSetupContract = (): Setup => {
       registerUrlGenerator: jest.fn(),
     },
     url,
+    navigate: jest.fn(),
+    setAnonymousAccessServiceProvider: jest.fn(),
   };
   return setupContract;
 };
@@ -38,15 +56,18 @@ const createStartContract = (): Start => {
       getUrlGenerator: jest.fn(),
     },
     toggleShareContextMenu: jest.fn(),
+    navigate: jest.fn(),
   };
   return startContract;
 };
 
-const createLocator = <T extends SerializableState = SerializableState>(): jest.Mocked<
+const createLocator = <T extends SerializableRecord = SerializableRecord>(): jest.Mocked<
   LocatorPublic<T>
 > => ({
+  id: 'MOCK_LOCATOR',
   getLocation: jest.fn(),
   getUrl: jest.fn(),
+  getRedirectUrl: jest.fn(),
   useUrl: jest.fn(),
   navigate: jest.fn(),
   extract: jest.fn(),

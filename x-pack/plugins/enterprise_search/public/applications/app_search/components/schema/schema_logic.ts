@@ -146,7 +146,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       clearFlashMessages();
 
       try {
-        const response = await http.post(`/api/app_search/engines/${engineName}/schema`, {
+        const response = await http.post(`/internal/app_search/engines/${engineName}/schema`, {
           body: JSON.stringify(schema),
         });
         actions.onSchemaLoad(response);

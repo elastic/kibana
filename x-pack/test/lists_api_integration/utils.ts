@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { SuperTest } from 'supertest';
-import supertestAsPromised from 'supertest-as-promised';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type SuperTest from 'supertest';
 
 import type {
   Type,
@@ -15,10 +13,15 @@ import type {
   ListItemSchema,
   ExceptionListSchema,
   ExceptionListItemSchema,
+  ExceptionList,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { LIST_INDEX, LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import {
+  EXCEPTION_LIST_URL,
+  LIST_INDEX,
+  LIST_ITEM_URL,
+} from '@kbn/securitysolution-list-constants';
 import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
-import { countDownES, countDownTest } from '../detection_engine_api_integration/utils';
+import { countDownTest } from '../detection_engine_api_integration/utils';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
@@ -26,7 +29,7 @@ import { countDownES, countDownTest } from '../detection_engine_api_integration/
  * @param supertest The supertest client library
  */
 export const createListsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   return countDownTest(async () => {
     await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
@@ -39,7 +42,7 @@ export const createListsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteListsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   return countDownTest(async () => {
     await supertest.delete(LIST_INDEX).set('kbn-xsrf', 'true').send();
@@ -53,7 +56,7 @@ export const deleteListsIndex = async (
  * @param supertest The supertest client library
  */
 export const createExceptionListsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   return countDownTest(async () => {
     await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
@@ -117,21 +120,29 @@ export const waitFor = async (
   timeoutWait: number = 10
 ) => {
   await new Promise<void>(async (resolve, reject) => {
-    let found = false;
-    let numberOfTries = 0;
-    while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
-      const itPasses = await functionToTest();
-      if (itPasses) {
-        found = true;
-      } else {
-        numberOfTries++;
+    try {
+      let found = false;
+      let numberOfTries = 0;
+
+      while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
+        const itPasses = await functionToTest();
+
+        if (itPasses) {
+          found = true;
+        } else {
+          numberOfTries++;
+        }
+
+        await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
       }
-      await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
-    }
-    if (found) {
-      resolve();
-    } else {
-      reject(new Error(`timed out waiting for function ${functionName} condition to be true`));
+
+      if (found) {
+        resolve();
+      } else {
+        reject(new Error(`timed out waiting for function ${functionName} condition to be true`));
+      }
+    } catch (error) {
+      reject(error);
     }
   });
 };
@@ -153,20 +164,34 @@ export const binaryToString = (res: any, callback: any): void => {
 };
 
 /**
- * Remove all exceptions from the .kibana index
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
- * @param es The ElasticSearch handle
+ * Remove all exceptions
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
+ * @param supertest The supertest handle
  */
-export const deleteAllExceptions = async (es: KibanaClient): Promise<void> => {
-  return countDownES(async () => {
-    return es.deleteByQuery({
-      index: '.kibana',
-      q: 'type:exception-list or type:exception-list-agnostic',
-      wait_for_completion: true,
-      refresh: true,
-      body: {},
-    });
-  }, 'deleteAllExceptions');
+export const deleteAllExceptions = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>
+): Promise<void> => {
+  await countDownTest(
+    async () => {
+      const { body } = await supertest
+        .get(`${EXCEPTION_LIST_URL}/_find?per_page=9999`)
+        .set('kbn-xsrf', 'true')
+        .send();
+
+      const ids: string[] = body.data.map((exception: ExceptionList) => exception.id);
+      for await (const id of ids) {
+        await supertest.delete(`${EXCEPTION_LIST_URL}?id=${id}`).set('kbn-xsrf', 'true').send();
+      }
+      const { body: finalCheck } = await supertest
+        .get(`${EXCEPTION_LIST_URL}/_find`)
+        .set('kbn-xsrf', 'true')
+        .send();
+      return finalCheck.data.length === 0;
+    },
+    'deleteAllExceptions',
+    50,
+    1000
+  );
 };
 
 /**
@@ -179,18 +204,26 @@ export const deleteAllExceptions = async (es: KibanaClient): Promise<void> => {
  * @param testValues Optional test values in case you're using CIDR or range based lists
  */
 export const importFile = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   type: Type,
   contents: string[],
   fileName: string,
   testValues?: string[]
 ): Promise<void> => {
-  await supertest
+  const response = await supertest
     .post(`${LIST_ITEM_URL}/_import?type=${type}`)
     .set('kbn-xsrf', 'true')
     .attach('file', getImportListItemAsBuffer(contents), fileName)
-    .expect('Content-Type', 'application/json; charset=utf-8')
-    .expect(200);
+    .expect('Content-Type', 'application/json; charset=utf-8');
+
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" When importing a file. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
 
   // although we have pushed the list and its items, it is async so we
   // have to wait for the contents before continuing
@@ -208,7 +241,7 @@ export const importFile = async (
  * @param fileName filename to import as
  */
 export const importTextFile = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   type: Type,
   contents: string[],
   fileName: string
@@ -233,7 +266,7 @@ export const importTextFile = async (
  * @param itemValue The item value to wait for
  */
 export const waitForListItem = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   itemValue: string,
   fileName: string
 ): Promise<void> => {
@@ -254,7 +287,7 @@ export const waitForListItem = async (
  * @param itemValue The item value to wait for
  */
 export const waitForListItems = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   itemValues: string[],
   fileName: string
 ): Promise<void> => {
@@ -269,7 +302,7 @@ export const waitForListItems = async (
  * @param itemValue The item value to wait for
  */
 export const waitForTextListItem = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   itemValue: string,
   fileName: string
 ): Promise<void> => {
@@ -296,7 +329,7 @@ export const waitForTextListItem = async (
  * @param itemValue The item value to wait for
  */
 export const waitForTextListItems = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   itemValues: string[],
   fileName: string
 ): Promise<void> => {

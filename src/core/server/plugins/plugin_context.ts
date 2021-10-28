@@ -10,11 +10,15 @@ import { shareReplay } from 'rxjs/operators';
 import type { RequestHandlerContext } from 'src/core/server';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
-import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import {
+  PluginsServicePrebootSetupDeps,
+  PluginsServiceSetupDeps,
+  PluginsServiceStartDeps,
+} from './plugins_service';
 import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
 import { IRouter, RequestHandlerContextProvider } from '../http';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
-import { CoreSetup, CoreStart } from '..';
+import { CorePreboot, CoreSetup, CoreStart } from '..';
 
 export interface InstanceInfo {
   uuid: string;
@@ -49,6 +53,7 @@ export function createPluginInitializerContext(
       mode: coreContext.env.mode,
       packageInfo: coreContext.env.packageInfo,
       instanceUuid: instanceInfo.uuid,
+      configs: coreContext.env.configs,
     },
 
     /**
@@ -79,6 +84,43 @@ export function createPluginInitializerContext(
       get<T>() {
         return coreContext.configService.atPathSync<T>(pluginManifest.configPath);
       },
+    },
+  };
+}
+
+/**
+ * Provides `CorePreboot` contract that will be exposed to the `preboot` plugin `setup` method.
+ * This contract should be safe to use only within `setup` itself.
+ *
+ * This is called for each `preboot` plugin when it's set up, so each plugin gets its own
+ * version of these values.
+ *
+ * We should aim to be restrictive and specific in the APIs that we expose.
+ *
+ * @param coreContext Kibana core context
+ * @param deps Dependencies that Plugins services gets during setup.
+ * @param plugin The plugin we're building these values for.
+ * @internal
+ */
+export function createPluginPrebootSetupContext(
+  coreContext: CoreContext,
+  deps: PluginsServicePrebootSetupDeps,
+  plugin: PluginWrapper
+): CorePreboot {
+  return {
+    elasticsearch: {
+      config: deps.elasticsearch.config,
+      createClient: deps.elasticsearch.createClient,
+    },
+    http: {
+      registerRoutes: deps.http.registerRoutes,
+      basePath: deps.http.basePath,
+      getServerInfo: deps.http.getServerInfo,
+    },
+    preboot: {
+      isSetupOnHold: deps.preboot.isSetupOnHold,
+      holdSetupUntilResolved: (reason, promise) =>
+        deps.preboot.holdSetupUntilResolved(plugin.name, reason, promise),
     },
   };
 }
@@ -115,7 +157,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
     },
-    executionContext: deps.executionContext,
+    executionContext: {
+      withContext: deps.executionContext.withContext,
+    },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerRouteHandlerContext: <
@@ -153,6 +197,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
+      getKibanaIndex: deps.savedObjects.getKibanaIndex,
     },
     status: {
       core$: deps.status.core$,
@@ -167,6 +212,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
+    coreUsageData: {
+      registerUsageCounter: deps.coreUsageData.registerUsageCounter,
+    },
   };
 }
 

@@ -32,9 +32,10 @@ import {
 } from '../../../../../../data/public';
 import { migrateLegacyQuery } from '../../../helpers/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
-import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../../../url_generator';
 import { SavedSearch } from '../../../../saved_searches';
-import { handleSourceColumnState } from '../../../angular/helpers';
+import { handleSourceColumnState } from '../../../helpers/state_helpers';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../locator';
+import { VIEW_MODE } from '../components/view_mode_toggle';
 
 export interface AppState {
   /**
@@ -73,6 +74,14 @@ export interface AppState {
    * id of the used saved query
    */
   savedQuery?: string;
+  /**
+   * Table view: Documents vs Field Statistics
+   */
+  viewMode?: VIEW_MODE;
+  /**
+   * Hide mini distribution/preview charts when in Field Statistics mode
+   */
+  hideAggregatedPreview?: boolean;
 }
 
 interface GetStateParams {
@@ -112,7 +121,7 @@ export interface GetStateReturn {
    */
   appStateContainer: ReduxLikeStateContainer<AppState>;
   /**
-   * Function starting state sync when Discover main is loaded
+   * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: (
     indexPattern: IndexPattern,
@@ -232,7 +241,10 @@ export function getState({
       initialAppState = appStateContainer.getState();
     },
     resetAppState: () => {
-      const defaultState = getStateDefaults ? getStateDefaults() : {};
+      const defaultState = handleSourceColumnState(
+        getStateDefaults ? getStateDefaults() : {},
+        uiSettings
+      );
       setState(appStateContainerModified, defaultState);
     },
     getPreviousAppState: () => previousAppState,
@@ -349,9 +361,9 @@ export function createSearchSessionRestorationDataProvider(deps: {
         })
       );
     },
-    getUrlGeneratorData: async () => {
+    getLocatorData: async () => {
       return {
-        urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
+        id: DISCOVER_APP_LOCATOR,
         initialState: createUrlGeneratorState({
           ...deps,
           getSavedSearchId,
@@ -377,7 +389,7 @@ function createUrlGeneratorState({
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
   shouldRestoreSearchSession: boolean;
-}): DiscoverUrlGeneratorState {
+}): DiscoverAppLocatorParams {
   const appState = appStateContainer.get();
   return {
     filters: data.query.filterManager.getFilters(),
@@ -392,6 +404,12 @@ function createUrlGeneratorState({
     sort: appState.sort,
     savedQuery: appState.savedQuery,
     interval: appState.interval,
+    refreshInterval: shouldRestoreSearchSession
+      ? {
+          pause: true, // force pause refresh interval when restoring a session
+          value: 0,
+        }
+      : undefined,
     useHash: false,
   };
 }

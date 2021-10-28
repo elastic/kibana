@@ -11,18 +11,19 @@ import React, { Fragment } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DefaultFormatEditor, defaultState } from '../default';
+import { DefaultFormatEditor, defaultState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
 
 import { sample } from './sample';
+import { formatId } from './constants';
 
 interface TruncateFormatEditorFormatParams {
   fieldLength: number;
 }
 
 export class TruncateFormatEditor extends DefaultFormatEditor<TruncateFormatEditorFormatParams> {
-  static formatId = 'truncate';
+  static formatId = formatId;
   state = {
     ...defaultState,
     sampleInputs: [sample],
@@ -47,6 +48,7 @@ export class TruncateFormatEditor extends DefaultFormatEditor<TruncateFormatEdit
           <EuiFieldNumber
             defaultValue={formatParams.fieldLength}
             min={1}
+            data-test-subj={'truncateEditorLength'}
             onChange={(e) => {
               if (e.target.checkValidity()) {
                 this.onChange({

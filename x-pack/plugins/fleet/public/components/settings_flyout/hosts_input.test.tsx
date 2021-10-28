@@ -12,13 +12,17 @@ import { createFleetTestRendererMock } from '../../mock';
 
 import { HostsInput } from './hosts_input';
 
-function renderInput(value = ['http://host1.com']) {
+function renderInput(
+  value = ['http://host1.com'],
+  errors: Array<{ message: string; index?: number }> = [],
+  mockOnChange: (...args: any[]) => void = jest.fn()
+) {
   const renderer = createFleetTestRendererMock();
-  const mockOnChange = jest.fn();
 
   const utils = renderer.render(
     <HostsInput
       value={value}
+      errors={errors}
       label="HOST LABEL"
       helpText="HELP TEXT"
       id="ID"
@@ -74,4 +78,66 @@ test('it should render an input if there is not hosts', async () => {
   expect(inputEl).toBeDefined();
   fireEvent.change(inputEl, { target: { value: 'http://newhost.com' } });
   expect(mockOnChange).toHaveBeenCalledWith(['http://newhost.com']);
+});
+
+test('Should display single indexed error message', async () => {
+  const { utils } = renderInput(['bad host'], [{ message: 'Invalid URL', index: 0 }]);
+  const inputEl = await utils.findByText('Invalid URL');
+  expect(inputEl).toBeDefined();
+});
+
+test('Should display errors in order', async () => {
+  const { utils } = renderInput(
+    ['bad host 1', 'bad host 2', 'bad host 3'],
+    [
+      { message: 'Error 1', index: 0 },
+      { message: 'Error 2', index: 1 },
+      { message: 'Error 3', index: 2 },
+    ]
+  );
+  await act(async () => {
+    const errors = await utils.queryAllByText(/Error [1-3]/);
+    expect(errors[0]).toHaveTextContent('Error 1');
+    expect(errors[1]).toHaveTextContent('Error 2');
+    expect(errors[2]).toHaveTextContent('Error 3');
+  });
+});
+
+test('Should remove error when item deleted', async () => {
+  const mockOnChange = jest.fn();
+  const errors = [
+    { message: 'Error 1', index: 0 },
+    { message: 'Error 2', index: 1 },
+    { message: 'Error 3', index: 2 },
+  ];
+
+  const { utils } = renderInput(['bad host 1', 'bad host 2', 'bad host 3'], errors, mockOnChange);
+
+  mockOnChange.mockImplementation((newValue) => {
+    utils.rerender(
+      <HostsInput
+        value={newValue}
+        errors={errors}
+        label="HOST LABEL"
+        helpText="HELP TEXT"
+        id="ID"
+        onChange={mockOnChange}
+      />
+    );
+  });
+
+  await act(async () => {
+    const deleteRowButtons = await utils.container.querySelectorAll('[aria-label="Delete host"]');
+    if (deleteRowButtons.length !== 3) {
+      throw new Error('Delete host buttons not found');
+    }
+
+    fireEvent.click(deleteRowButtons[1]);
+    expect(mockOnChange).toHaveBeenCalled();
+
+    const renderedErrors = await utils.queryAllByText(/Error [1-3]/);
+    expect(renderedErrors).toHaveLength(2);
+    expect(renderedErrors[0]).toHaveTextContent('Error 1');
+    expect(renderedErrors[1]).toHaveTextContent('Error 3');
+  });
 });

@@ -229,7 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
-          await transform.testExecution.logTestStep('displays the create index pattern switch');
+          await transform.testExecution.logTestStep('displays the create data view switch');
           await transform.wizard.assertCreateIndexPatternSwitchExists();
           await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
 
@@ -279,6 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
+            type: testData.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,

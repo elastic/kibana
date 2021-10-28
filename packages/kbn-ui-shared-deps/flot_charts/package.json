@@ -1,4 +1,0 @@
-{
-  "main": "../target/flot_charts/index.js",
-  "types": "../target/flot_charts/index.d.ts"
-}

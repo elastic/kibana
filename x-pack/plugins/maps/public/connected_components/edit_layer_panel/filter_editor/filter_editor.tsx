@@ -15,8 +15,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiTextAlign,
   EuiButtonEmpty,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,6 +29,7 @@ import { getIndexPatternService, getData } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
 import { ILayer } from '../../../classes/layers/layer';
+import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 
 export interface Props {
   layer: ILayer;
@@ -113,6 +116,10 @@ export class FilterEditor extends Component<Props, State> {
     this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalTime', applyGlobalTime);
   };
 
+  _onRespondToForceRefreshChange = (applyForceRefresh: boolean) => {
+    this.props.updateSourceProp(this.props.layer.getId(), 'applyForceRefresh', applyForceRefresh);
+  };
+
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
     const { SearchBar } = getData().ui;
@@ -153,7 +160,7 @@ export class FilterEditor extends Component<Props, State> {
     const query = this.props.layer.getQuery();
     if (!query || !query.query) {
       return (
-        <EuiText size="s" textAlign="center">
+        <EuiText size="s">
           <p>
             <EuiTextColor color="subdued">
               <FormattedMessage
@@ -169,7 +176,6 @@ export class FilterEditor extends Component<Props, State> {
     return (
       <Fragment>
         <EuiCodeBlock paddingSize="s">{query.query}</EuiCodeBlock>
-
         <EuiSpacer size="m" />
       </Fragment>
     );
@@ -183,7 +189,7 @@ export class FilterEditor extends Component<Props, State> {
             defaultMessage: 'Edit filter',
           })
         : i18n.translate('xpack.maps.layerPanel.filterEditor.addFilterButtonLabel', {
-            defaultMessage: 'Add filter',
+            defaultMessage: 'Set filter',
           });
     const openButtonIcon = query && query.query ? 'pencil' : 'plusInCircleFilled';
 
@@ -209,6 +215,7 @@ export class FilterEditor extends Component<Props, State> {
         setApplyGlobalTime={this._onApplyGlobalTimeChange}
       />
     ) : null;
+
     return (
       <Fragment>
         <EuiTitle size="xs">
@@ -222,21 +229,28 @@ export class FilterEditor extends Component<Props, State> {
 
         <EuiSpacer size="m" />
 
-        {this._renderQuery()}
-
-        <EuiTextAlign textAlign="center">{this._renderQueryPopover()}</EuiTextAlign>
+        <EuiFlexGroup direction={'row'} wrap={false} component={'span'}>
+          <EuiFlexItem grow={1}>{this._renderQueryPopover()}</EuiFlexItem>
+          <EuiFlexItem grow={6}>{this._renderQuery()}</EuiFlexItem>
+        </EuiFlexGroup>
 
         <EuiSpacer size="m" />
 
+        <EuiHorizontalRule size="full" margin="s" />
+
         <GlobalFilterCheckbox
           label={i18n.translate('xpack.maps.filterEditor.applyGlobalQueryCheckboxLabel', {
-            defaultMessage: `Apply global filter to layer data`,
+            defaultMessage: `Apply global search to layer data`,
           })}
           applyGlobalQuery={this.props.layer.getSource().getApplyGlobalQuery()}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
         />
 
         {globalTimeCheckbox}
+        <ForceRefreshCheckbox
+          applyForceRefresh={this.props.layer.getSource().getApplyForceRefresh()}
+          setApplyForceRefresh={this._onRespondToForceRefreshChange}
+        />
       </Fragment>
     );
   }

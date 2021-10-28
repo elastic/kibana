@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import type { Filter } from '@kbn/es-query';
+import type { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import type {
   IndexPatternColumn,
@@ -15,6 +16,7 @@ import type {
 } from '../../../../../../../lens/public';
 import { FieldVisConfig } from '../../stats_table/types';
 import { JOB_FIELD_TYPES } from '../../../../../../common';
+
 interface ColumnsAndLayer {
   columns: Record<string, IndexPatternColumn>;
   layer: XYLayerConfig;
@@ -55,6 +57,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
     const layer: XYLayerConfig = {
       accessors: ['col2'],
       layerId: 'layer1',
+      layerType: 'data',
       seriesType: 'bar',
       xAccessor: 'col1',
     };
@@ -86,6 +89,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
   const layer: XYLayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
+    layerType: 'data',
     seriesType: 'line',
     xAccessor: 'col1',
   };
@@ -115,6 +119,7 @@ export function getDateSettings(item: FieldVisConfig) {
   const layer: XYLayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
+    layerType: 'data',
     seriesType: 'line',
     xAccessor: 'col1',
   };
@@ -147,7 +152,8 @@ export function getKeywordSettings(item: FieldVisConfig) {
   const layer: XYLayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
-    seriesType: 'bar',
+    layerType: 'data',
+    seriesType: 'bar_horizontal',
     xAccessor: 'col1',
   };
 
@@ -179,6 +185,7 @@ export function getBooleanSettings(item: FieldVisConfig) {
   const layer: XYLayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
+    layerType: 'data',
     seriesType: 'bar',
     xAccessor: 'col1',
   };
@@ -236,6 +243,7 @@ function getColumnsAndLayer(
 export function getLensAttributes(
   defaultIndexPattern: IndexPattern | undefined,
   combinedQuery: CombinedQuery,
+  filters: Filter[],
   item: FieldVisConfig
 ): TypedLensByValueInput['attributes'] | undefined {
   if (defaultIndexPattern === undefined || item.type === undefined || item.fieldName === undefined)
@@ -274,7 +282,7 @@ export function getLensAttributes(
           },
         },
       },
-      filters: [],
+      filters,
       query: { language: combinedQuery.searchQueryLanguage, query: combinedQuery.searchString },
       visualization: {
         axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },

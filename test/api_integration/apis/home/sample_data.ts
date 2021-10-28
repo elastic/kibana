@@ -43,12 +43,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.body).to.eql({
           elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 },
-          kibanaSavedObjectsLoaded: 23,
+          kibanaSavedObjectsLoaded: 11,
         });
       });
 
       it('should load elasticsearch index containing sample data with dates relative to current time', async () => {
-        const { body: resp } = await es.search<{ timestamp: string }>({
+        const resp = await es.search<{ timestamp: string }>({
           index: 'kibana_sample_data_flights',
         });
 
@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post(`/api/sample_data/flights?now=${nowString}`)
             .set('kbn-xsrf', 'kibana');
 
-          const { body: resp } = await es.search<{ timestamp: string }>({
+          const resp = await es.search<{ timestamp: string }>({
             index: 'kibana_sample_data_flights',
           });
 
@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should remove elasticsearch index containing sample data', async () => {
-        const { body: resp } = await es.indices.exists({
+        const resp = await es.indices.exists({
           index: 'kibana_sample_data_flights',
         });
         expect(resp).to.be(false);

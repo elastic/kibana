@@ -9,29 +9,37 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable @typescript-eslint/no-useless-constructor */
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import moment from 'moment';
 import uuid from 'uuid';
 import {
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
   EndpointAction,
   EndpointActionResponse,
   ISOLATION_ACTIONS,
 } from '../../../../common/endpoint/types';
 
-export const mockAuditLog = (results: any = []): ApiResponse<any> => {
-  return {
+export interface Results {
+  _index: string;
+  _source:
+    | LogsEndpointAction
+    | LogsEndpointActionResponse
+    | EndpointAction
+    | EndpointActionResponse;
+}
+export const mockAuditLogSearchResult = (results?: Results[]) => {
+  const response = {
     body: {
       hits: {
-        total: results.length,
-        hits: results.map((a: any) => {
-          const _index = a._index;
-          delete a._index;
-          const _source = a;
-          return {
-            _index,
-            _source,
-          };
-        }),
+        total: { value: results?.length ?? 0, relation: 'eq' },
+        hits:
+          results?.map((a: Results) => ({
+            _index: a._index,
+            _id: Math.random().toString(36).split('.')[1],
+            _score: 0.0,
+            _source: a._source,
+          })) ?? [],
       },
     },
     statusCode: 200,
@@ -39,9 +47,10 @@ export const mockAuditLog = (results: any = []): ApiResponse<any> => {
     warnings: [],
     meta: {} as any,
   };
+  return response;
 };
 
-export const mockSearchResult = (results: any = []): ApiResponse<any> => {
+export const mockSearchResult = (results: any = []): TransportResult<any> => {
   return {
     body: {
       hits: {

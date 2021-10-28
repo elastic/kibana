@@ -14,7 +14,7 @@ import {
   EuiPopoverProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ContextMenuItemNavByRouter } from './context_menu_item_nav_by_rotuer';
+import { ContextMenuItemNavByRouter } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useEndpointActionItems } from '../hooks';
 
@@ -62,5 +62,3 @@ export const TableRowActions = memo<TableRowActionProps>(({ endpointMetadata }) 
   );
 });
 TableRowActions.displayName = 'EndpointTableRowActions';
-
-ContextMenuItemNavByRouter.displayName = 'EuiContextMenuItemNavByRouter';

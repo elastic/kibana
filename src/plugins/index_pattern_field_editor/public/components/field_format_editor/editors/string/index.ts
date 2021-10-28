@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { StringFormatEditor } from './string';
+import { FieldFormatEditorFactory } from '../types';
+import { formatId } from './constants';
+
+export type { StringFormatEditor } from './string';
+export const stringFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./string').then((m) => m.StringFormatEditor);
+stringFormatEditorFactory.formatId = formatId;

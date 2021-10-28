@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { JsonObject } from '@kbn/utility-types';
+
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { Inspect, Maybe } from '../../../common';
 import { TimelineRequestOptionsPaginated } from '../..';
@@ -22,10 +24,12 @@ export interface TimelineEventsDetailsItem {
 export interface TimelineEventsDetailsStrategyResponse extends IEsSearchResponse {
   data?: Maybe<TimelineEventsDetailsItem[]>;
   inspect?: Maybe<Inspect>;
+  rawEventData?: Maybe<object>;
 }
 
 export interface TimelineEventsDetailsRequestOptions
   extends Partial<TimelineRequestOptionsPaginated> {
   indexName: string;
   eventId: string;
+  authFilter?: JsonObject;
 }

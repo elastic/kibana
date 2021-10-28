@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110904
+/* eslint-disable @kbn/eslint/no_export_all */
+
 export const PLUGIN_ID = 'metricsEntities';
 export const PLUGIN_NAME = 'metrics_entities';
 

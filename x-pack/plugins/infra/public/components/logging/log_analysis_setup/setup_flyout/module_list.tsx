@@ -23,14 +23,10 @@ export const LogAnalysisModuleList: React.FC<{
   onViewModuleSetup: (module: ModuleId) => void;
 }> = ({ onViewModuleSetup }) => {
   const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
-  const {
-    setupStatus: logEntryRateSetupStatus,
-    jobIds: logEntryRateJobIds,
-  } = useLogEntryRateModuleContext();
-  const {
-    setupStatus: logEntryCategoriesSetupStatus,
-    jobIds: logEntryCategoriesJobIds,
-  } = useLogEntryCategoriesModuleContext();
+  const { setupStatus: logEntryRateSetupStatus, jobIds: logEntryRateJobIds } =
+    useLogEntryRateModuleContext();
+  const { setupStatus: logEntryCategoriesSetupStatus, jobIds: logEntryCategoriesJobIds } =
+    useLogEntryCategoriesModuleContext();
 
   const viewLogEntryRateSetupFlyout = useCallback(() => {
     onViewModuleSetup('logs_ui_analysis');

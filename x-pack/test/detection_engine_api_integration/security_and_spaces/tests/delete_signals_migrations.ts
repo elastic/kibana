@@ -15,7 +15,7 @@ import {
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createSignalsIndex, deleteSignalsIndex, getIndexNameFromLoad, waitFor } from '../../utils';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole } from '../../../common/services/security_solution';
 
 interface CreateResponse {
   index: string;
@@ -41,10 +41,11 @@ export default ({ getService }: FtrProviderContext): void => {
     let finalizedMigration: FinalizeResponse;
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
       outdatedSignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
+
+      await createSignalsIndex(supertest);
 
       ({
         body: {
@@ -95,7 +96,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ migration_ids: [createdMigration.migration_id] })
         .expect(200);
 
-      const { body } = await es.indices.getSettings({ index: createdMigration.index });
+      const { body } = await es.indices.getSettings(
+        { index: createdMigration.index },
+        { meta: true }
+      );
       // @ts-expect-error @elastic/elasticsearch supports flatten 'index.*' keys only
       const indexSettings = body[createdMigration.index].settings.index;
       expect(indexSettings.lifecycle.name).to.eql(

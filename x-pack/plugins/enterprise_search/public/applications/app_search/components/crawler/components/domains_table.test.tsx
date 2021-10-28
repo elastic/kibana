@@ -30,6 +30,9 @@ const domains: CrawlerDomain[] = [
     sitemaps: [],
     lastCrawl: '2020-01-01T00:00:00-12:00',
     createdOn: '2020-01-01T00:00:00-12:00',
+    deduplicationEnabled: false,
+    deduplicationFields: ['title'],
+    availableDeduplicationFields: ['title', 'description'],
   },
   {
     id: '4567',
@@ -39,6 +42,9 @@ const domains: CrawlerDomain[] = [
     entryPoints: [],
     sitemaps: [],
     createdOn: '1970-01-01T00:00:00-12:00',
+    deduplicationEnabled: false,
+    deduplicationFields: ['title'],
+    availableDeduplicationFields: ['title', 'description'],
   },
 ];
 
@@ -79,6 +85,18 @@ describe('DomainsTable', () => {
   describe('columns', () => {
     it('renders a url column', () => {
       expect(tableContent).toContain('elastic.co');
+    });
+
+    it('renders a clickable domain url', () => {
+      const basicTable = wrapper.find(EuiInMemoryTable).dive().find(EuiBasicTable).dive();
+      const link = basicTable.find('[data-test-subj="CrawlerDomainURL"]').at(0);
+
+      expect(link.dive().text()).toContain('elastic.co');
+      expect(link.props()).toEqual(
+        expect.objectContaining({
+          to: '/engines/some-engine/crawler/domains/1234',
+        })
+      );
     });
 
     it('renders a last crawled column', () => {

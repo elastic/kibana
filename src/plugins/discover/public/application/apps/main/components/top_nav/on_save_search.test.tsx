@@ -17,12 +17,12 @@ import { GetStateReturn } from '../../services/discover_state';
 import { i18nServiceMock } from '../../../../../../../../core/public/mocks';
 
 test('onSaveSearch', async () => {
-  const serviceMock = ({
+  const serviceMock = {
     core: {
       i18n: i18nServiceMock.create(),
     },
-  } as unknown) as DiscoverServices;
-  const stateMock = ({} as unknown) as GetStateReturn;
+  } as unknown as DiscoverServices;
+  const stateMock = {} as unknown as GetStateReturn;
 
   await onSaveSearch({
     indexPattern: indexPatternMock,

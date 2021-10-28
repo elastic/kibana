@@ -20,6 +20,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
+import styled from 'styled-components';
+
 import type {
   AgentPolicy,
   PackageInfo,
@@ -35,8 +37,17 @@ import { isAdvancedVar } from './services';
 import type { PackagePolicyValidationResults } from './services';
 import { PackagePolicyInputVarField } from './components';
 
+// on smaller screens, fields should be displayed in one column
+const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
+  @media (max-width: 767px) {
+    .euiFlexGroup--responsive {
+      align-items: flex-start;
+    }
+  }
+`;
+
 export const StepDefinePackagePolicy: React.FunctionComponent<{
-  agentPolicy: AgentPolicy;
+  agentPolicy?: AgentPolicy;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
   integrationToEnable?: string;
@@ -81,22 +92,25 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       if (currentPkgKey !== pkgKey) {
         // Existing package policies on the agent policy using the package name, retrieve highest number appended to package policy name
         const pkgPoliciesNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
-        const pkgPoliciesWithMatchingNames = (agentPolicy.package_policies as PackagePolicy[])
-          .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-          .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-          .sort((a, b) => a - b);
+        const pkgPoliciesWithMatchingNames = agentPolicy
+          ? (agentPolicy.package_policies as PackagePolicy[])
+              .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+              .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
+              .sort((a, b) => a - b)
+          : [];
 
         updatePackagePolicy(
           packageToPackagePolicy(
             packageInfo,
-            agentPolicy.id,
+            agentPolicy?.id || '',
             packagePolicy.output_id,
             packagePolicy.namespace,
-            `${packageInfo.name}-${
-              pkgPoliciesWithMatchingNames.length
-                ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-                : 1
-            }`,
+            packagePolicy.name ||
+              `${packageInfo.name}-${
+                pkgPoliciesWithMatchingNames.length
+                  ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
+                  : 1
+              }`,
             packagePolicy.description,
             integrationToEnable
           )
@@ -104,7 +118,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       }
 
       // If agent policy has changed, update package policy's agent policy ID and namespace
-      if (packagePolicy.policy_id !== agentPolicy.id) {
+      if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
         updatePackagePolicy({
           policy_id: agentPolicy.id,
           namespace: agentPolicy.namespace,
@@ -113,7 +127,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     }, [packagePolicy, agentPolicy, packageInfo, updatePackagePolicy, integrationToEnable]);
 
     return validationResults ? (
-      <EuiDescribedFormGroup
+      <FormGroupResponsiveFields
         title={
           <h4>
             <FormattedMessage
@@ -161,22 +175,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel"
                   defaultMessage="Description"
-                />
-              }
-              helpText={
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
-                  defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
-                  values={{
-                    learnMore: (
-                      <EuiLink href={docLinks.links.fleet.datastreamsNamingScheme} target="_blank">
-                        {i18n.translate(
-                          'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
-                          { defaultMessage: 'Learn more' }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
                 />
               }
               labelAppend={
@@ -275,6 +273,25 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         defaultMessage="Namespace"
                       />
                     }
+                    helpText={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
+                        defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
+                        values={{
+                          learnMore: (
+                            <EuiLink
+                              href={docLinks.links.fleet.datastreamsNamingScheme}
+                              target="_blank"
+                            >
+                              {i18n.translate(
+                                'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
+                                { defaultMessage: 'Learn more' }
+                              )}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    }
                   >
                     <EuiComboBox
                       noSuggestions
@@ -293,6 +310,34 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         });
                       }}
                     />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLabel"
+                        defaultMessage="Data retention settings"
+                      />
+                    }
+                    helpText={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText"
+                        defaultMessage="By default all logs and metrics data are stored on the hot tier. {learnMore} about changing the data retention policy for this integration."
+                        values={{
+                          learnMore: (
+                            <EuiLink href={docLinks.links.fleet.datastreamsILM} target="_blank">
+                              {i18n.translate(
+                                'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink',
+                                { defaultMessage: 'Learn more' }
+                              )}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    }
+                  >
+                    <div />
                   </EuiFormRow>
                 </EuiFlexItem>
                 {/* Advanced vars */}
@@ -326,7 +371,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-      </EuiDescribedFormGroup>
+      </FormGroupResponsiveFields>
     ) : (
       <Loading />
     );

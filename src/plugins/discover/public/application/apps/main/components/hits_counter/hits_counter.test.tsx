@@ -11,6 +11,9 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { HitsCounter, HitsCounterProps } from './hits_counter';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { BehaviorSubject } from 'rxjs';
+import { FetchStatus } from '../../../../types';
+import { DataTotalHits$ } from '../../services/use_saved_search';
 
 describe('hits counter', function () {
   let props: HitsCounterProps;
@@ -20,7 +23,10 @@ describe('hits counter', function () {
     props = {
       onResetQuery: jest.fn(),
       showResetButton: true,
-      hits: 2,
+      savedSearchData$: new BehaviorSubject({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: 2,
+      }) as DataTotalHits$,
     };
   });
 
@@ -30,9 +36,7 @@ describe('hits counter', function () {
   });
 
   it('HitsCounter not renders a button when the showResetButton property is false', () => {
-    component = mountWithIntl(
-      <HitsCounter hits={2} showResetButton={false} onResetQuery={jest.fn()} />
-    );
+    component = mountWithIntl(<HitsCounter {...props} showResetButton={false} />);
     expect(findTestSubject(component, 'resetSavedSearch').length).toBe(0);
   });
 
@@ -43,8 +47,17 @@ describe('hits counter', function () {
   });
 
   it('expect to render 1,899 hits if 1899 hits given', function () {
+    const data$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 1899,
+    }) as DataTotalHits$;
     component = mountWithIntl(
-      <HitsCounter hits={1899} showResetButton={false} onResetQuery={jest.fn()} />
+      <HitsCounter
+        {...props}
+        savedSearchData$={data$}
+        showResetButton={false}
+        onResetQuery={jest.fn()}
+      />
     );
     const hits = findTestSubject(component, 'discoverQueryHits');
     expect(hits.text()).toBe('1,899');

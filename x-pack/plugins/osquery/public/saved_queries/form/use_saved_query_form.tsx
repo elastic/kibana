@@ -5,28 +5,60 @@
  * 2.0.
  */
 
-import { isArray } from 'lodash';
+import { isArray, isEmpty, map } from 'lodash';
 import uuid from 'uuid';
 import { produce } from 'immer';
+import { RefObject, useMemo } from 'react';
 
 import { useForm } from '../../shared_imports';
-import { formSchema } from '../../scheduled_query_groups/queries/schema';
-import { ScheduledQueryGroupFormData } from '../../scheduled_query_groups/queries/use_scheduled_query_group_query_form';
+import { createFormSchema } from '../../packs/queries/schema';
+import { PackFormData } from '../../packs/queries/use_pack_query_form';
+import { useSavedQueries } from '../use_saved_queries';
+import { SavedQueryFormRefObject } from '.';
 
 const SAVED_QUERY_FORM_ID = 'savedQueryForm';
 
 interface UseSavedQueryFormProps {
   defaultValue?: unknown;
   handleSubmit: (payload: unknown) => Promise<void>;
+  savedQueryFormRef: RefObject<SavedQueryFormRefObject>;
 }
 
-export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryFormProps) =>
-  useForm({
+export const useSavedQueryForm = ({
+  defaultValue,
+  handleSubmit,
+  savedQueryFormRef,
+}: UseSavedQueryFormProps) => {
+  const { data } = useSavedQueries({});
+  const ids: string[] = useMemo<string[]>(
+    () => map(data?.saved_objects, 'attributes.id') ?? [],
+    [data]
+  );
+  const idSet = useMemo<Set<string>>(() => {
+    const res = new Set<string>(ids);
+    // @ts-expect-error update types
+    if (defaultValue && defaultValue.id) res.delete(defaultValue.id);
+    return res;
+  }, [ids, defaultValue]);
+  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(
+    () => createFormSchema(idSet),
+    [idSet]
+  );
+  return useForm({
     id: SAVED_QUERY_FORM_ID + uuid.v4(),
     schema: formSchema,
-    onSubmit: handleSubmit,
-    options: {
-      stripEmptyFields: false,
+    onSubmit: async (formData, isValid) => {
+      const ecsFieldValue = await savedQueryFormRef?.current?.validateEcsMapping();
+
+      if (isValid) {
+        try {
+          await handleSubmit({
+            ...formData,
+            ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
+          });
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+      }
     },
     // @ts-expect-error update types
     defaultValue,
@@ -46,19 +78,27 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
             draft.version = draft.version[0];
           }
         }
+        if (isEmpty(draft.ecs_mapping)) {
+          // @ts-expect-error update types
+          delete draft.ecs_mapping;
+        }
+        // @ts-expect-error update types
+        draft.interval = draft.interval + '';
         return draft;
       }),
     // @ts-expect-error update types
     deserializer: (payload) => {
-      if (!payload) return {} as ScheduledQueryGroupFormData;
+      if (!payload) return {} as PackFormData;
 
       return {
         id: payload.id,
         description: payload.description,
         query: payload.query,
-        interval: payload.interval ? parseInt(payload.interval, 10) : undefined,
+        interval: payload.interval ?? 3600,
         platform: payload.platform,
         version: payload.version ? [payload.version] : [],
+        ecs_mapping: payload.ecs_mapping ?? {},
       };
     },
   });
+};

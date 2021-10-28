@@ -21,7 +21,7 @@ export class FileUploadPlugin implements Plugin {
     this._logger = initializerContext.logger.get();
   }
 
-  async setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
+  setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
     fileUploadRoutes(coreSetup, this._logger);
 
     setupCapabilities(coreSetup);

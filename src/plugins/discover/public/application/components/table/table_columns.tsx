@@ -18,6 +18,7 @@ export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
   field: 'action',
   className: 'kbnDocViewer__tableActionsCell',
   width: '108px',
+  mobileOptions: { header: false },
   name: (
     <EuiText size="xs">
       <strong>
@@ -30,16 +31,17 @@ export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
   ),
   render: (
     { flattenedField, isActive, onFilter, onToggleColumn }: FieldRecord['action'],
-    { field: { fieldName, fieldMapping } }: FieldRecord
+    { field: { field, fieldMapping }, value: { ignored } }: FieldRecord
   ) => {
     return (
       <TableActions
         isActive={isActive}
-        fieldName={fieldName}
+        field={field}
         fieldMapping={fieldMapping}
         flattenedField={flattenedField}
         onFilter={onFilter!}
         onToggleColumn={onToggleColumn}
+        ignoredValue={!!ignored}
       />
     );
   },
@@ -49,6 +51,7 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
   {
     field: 'field',
     className: 'kbnDocViewer__tableFieldNameCell',
+    mobileOptions: { header: false },
     name: (
       <EuiText size="xs">
         <strong>
@@ -56,19 +59,23 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
         </strong>
       </EuiText>
     ),
-    render: ({ fieldName, fieldType, fieldMapping, scripted }: FieldRecord['field']) => {
-      return (
+    render: ({ field, fieldType, displayName, fieldMapping, scripted }: FieldRecord['field']) => {
+      return field ? (
         <FieldName
-          fieldName={fieldName}
+          fieldName={displayName}
           fieldType={fieldType}
           fieldMapping={fieldMapping}
           scripted={scripted}
         />
+      ) : (
+        <span>&nbsp;</span>
       );
     },
   },
   {
     field: 'value',
+    className: 'kbnDocViewer__tableValueCell',
+    mobileOptions: { header: false },
     name: (
       <EuiText size="xs">
         <strong>
@@ -77,14 +84,15 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
       </EuiText>
     ),
     render: (
-      { formattedField }: FieldRecord['value'],
-      { field: { fieldName, fieldMapping } }: FieldRecord
+      { formattedValue, ignored }: FieldRecord['value'],
+      { field: { field }, action: { flattenedField } }: FieldRecord
     ) => {
       return (
         <TableFieldValue
-          formattedField={formattedField}
-          fieldName={fieldName}
-          fieldMapping={fieldMapping}
+          field={field}
+          formattedValue={formattedValue}
+          rawValue={flattenedField}
+          ignoreReason={ignored}
         />
       );
     },

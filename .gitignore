@@ -5,6 +5,7 @@
 /.chromium
 .DS_Store
 .node_binaries
+/.beats
 .native_modules
 node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
@@ -18,6 +19,9 @@ target
 .idea
 *.iml
 *.log
+
+# Ignore example plugin builds
+/examples/*/build
 
 # Ignore certain functional test runner artifacts
 /test/*/failure_debug
@@ -72,10 +76,13 @@ report.asciidoc
 # TS incremental build cache
 *.tsbuildinfo
 
+# Automatically generated and user-modifiable
+/tsconfig.refs.json
+
 # Yarn local mirror content
 .yarn-local-mirror
 
 # Bazel
-bazel
-bazel-*
+/bazel
+/bazel-*
 .bazelrc.user

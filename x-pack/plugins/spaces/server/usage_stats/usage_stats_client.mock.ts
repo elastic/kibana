@@ -8,12 +8,12 @@
 import type { UsageStatsClient } from './usage_stats_client';
 
 const createUsageStatsClientMock = () =>
-  (({
+  ({
     getUsageStats: jest.fn().mockResolvedValue({}),
     incrementCopySavedObjects: jest.fn().mockResolvedValue(null),
     incrementResolveCopySavedObjectsErrors: jest.fn().mockResolvedValue(null),
     incrementDisableLegacyUrlAliases: jest.fn().mockResolvedValue(null),
-  } as unknown) as jest.Mocked<UsageStatsClient>);
+  } as unknown as jest.Mocked<UsageStatsClient>);
 
 export const usageStatsClientMock = {
   create: createUsageStatsClientMock,

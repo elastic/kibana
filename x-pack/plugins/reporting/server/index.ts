@@ -21,5 +21,4 @@ export {
   ReportingSetupDeps as PluginSetup,
   ReportingStartDeps as PluginStart,
 } from './types';
-
 export { ReportingPlugin as Plugin };

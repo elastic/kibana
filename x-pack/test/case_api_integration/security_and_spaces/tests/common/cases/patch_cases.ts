@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
@@ -126,6 +128,8 @@ export default ({ getService }: FtrProviderContext): void => {
           action: 'update',
           action_by: defaultUser,
           new_value: CaseStatuses.closed,
+          new_val_connector_id: null,
+          old_val_connector_id: null,
           old_value: CaseStatuses.open,
           case_id: `${postedCase.id}`,
           comment_id: null,
@@ -165,6 +169,8 @@ export default ({ getService }: FtrProviderContext): void => {
           action_by: defaultUser,
           new_value: CaseStatuses['in-progress'],
           old_value: CaseStatuses.open,
+          old_val_connector_id: null,
+          new_val_connector_id: null,
           case_id: `${postedCase.id}`,
           comment_id: null,
           sub_case_id: '',
@@ -535,8 +541,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should update the status of multiple alerts attached to multiple cases', async () => {
-          const signalID = '5f2b9ec41f8febb1c06b5d1045aeabb9874733b7617e88a370510f2fb3a41a5d';
-          const signalID2 = '4d0f4b1533e46b66b43bdd0330d23f39f2cf42a7253153270e38d30cce9ff0c6';
+          const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
+          const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
 
           // does NOT updates alert status when adding comments and syncAlerts=false
           const individualCase1 = await createCase(supertest, {
@@ -586,10 +592,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // There should be no change in their status since syncing is disabled
-          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal?.status).to.be(
             CaseStatuses.open
           );
-          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal?.status).to.be(
             CaseStatuses.open
           );
 
@@ -620,10 +626,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // There should still be no change in their status since syncing is disabled
-          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal?.status).to.be(
             CaseStatuses.open
           );
-          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal?.status).to.be(
             CaseStatuses.open
           );
 
@@ -649,11 +655,11 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // alerts should be updated now that the
-          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal?.status).to.be(
             CaseStatuses.closed
           );
-          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
-            CaseStatuses['in-progress']
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal?.status).to.be(
+            'acknowledged'
           );
         });
       });
@@ -721,10 +727,10 @@ export default ({ getService }: FtrProviderContext): void => {
           let signals = await getSignals();
           // There should be no change in their status since syncing is disabled
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
           expect(
-            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal.status
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
 
           const updatedIndWithStatus: CasesResponse = (await setStatus({
@@ -745,10 +751,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // There should still be no change in their status since syncing is disabled
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
           expect(
-            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal.status
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
 
           // turn on the sync settings
@@ -770,15 +776,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // alerts should be updated now that the
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.closed);
           expect(
-            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal.status
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.closed);
 
           // the duplicate signal id in the other index should not be affect (so its status should be open)
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInSecondIndex)?._source?.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInSecondIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
         });
       });
@@ -805,7 +811,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const signals = await getSignalsByIds(supertest, [id]);
 
           const alert = signals.hits.hits[0];
-          expect(alert._source.signal.status).eql('open');
+          expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
 
           const caseUpdated = await createComment({
             supertest,
@@ -846,7 +852,9 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source.signal.status).eql('in-progress');
+          expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql(
+            'acknowledged'
+          );
         });
 
         it('does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
@@ -863,7 +871,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const signals = await getSignalsByIds(supertest, [id]);
 
           const alert = signals.hits.hits[0];
-          expect(alert._source.signal.status).eql('open');
+          expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
 
           const caseUpdated = await createComment({
             supertest,
@@ -899,7 +907,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
+          expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql('open');
         });
 
         it('it updates alert status when syncAlerts is turned on', async () => {
@@ -916,7 +924,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const signals = await getSignalsByIds(supertest, [id]);
 
           const alert = signals.hits.hits[0];
-          expect(alert._source.signal.status).eql('open');
+          expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
 
           const caseUpdated = await createComment({
             supertest,
@@ -970,7 +978,9 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source.signal.status).eql('in-progress');
+          expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql(
+            'acknowledged'
+          );
         });
 
         it('it does NOT updates alert status when syncAlerts is turned off', async () => {
@@ -983,7 +993,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const signals = await getSignalsByIds(supertest, [id]);
 
           const alert = signals.hits.hits[0];
-          expect(alert._source.signal.status).eql('open');
+          expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
 
           const caseUpdated = await createComment({
             supertest,
@@ -1034,7 +1044,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send(getQuerySignalIds([alert._id]))
             .expect(200);
 
-          expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
+          expect(updatedAlert.hits.hits[0]._source['kibana.alert.workflow_status']).eql('open');
         });
       });
     });

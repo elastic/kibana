@@ -106,7 +106,9 @@ describe('write_list_items_to_stream', () => {
       firstResponse.hits.hits[0].sort = ['some-sort-value'];
 
       const secondResponse = getSearchListItemMock();
-      secondResponse.hits.hits[0]._source.ip = '255.255.255.255';
+      if (secondResponse.hits.hits[0]._source) {
+        secondResponse.hits.hits[0]._source.ip = '255.255.255.255';
+      }
 
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       esClient.search.mockResolvedValueOnce(

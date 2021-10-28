@@ -105,7 +105,7 @@ describe('CommentsUpdate', () => {
     });
 
     test('it should fail validation when array includes non comments types', () => {
-      const payload = ([1] as unknown) as UpdateCommentsArray;
+      const payload = [1] as unknown as UpdateCommentsArray;
       const decoded = updateCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -136,7 +136,7 @@ describe('CommentsUpdate', () => {
     });
 
     test('it should fail validation when array includes non comments types', () => {
-      const payload = ([1] as unknown) as UpdateCommentsArrayOrUndefined;
+      const payload = [1] as unknown as UpdateCommentsArrayOrUndefined;
       const decoded = updateCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 

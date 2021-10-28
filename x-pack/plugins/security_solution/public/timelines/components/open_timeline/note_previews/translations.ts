@@ -18,6 +18,13 @@ export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.timeline.adde
   defaultMessage: 'added a note',
 });
 
+export const ADDED_A_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.timeline.addedADescriptionLabel',
+  {
+    defaultMessage: 'added description',
+  }
+);
+
 export const AN_UNKNOWN_USER = i18n.translate(
   'xpack.securitySolution.timeline.anUnknownUserLabel',
   {

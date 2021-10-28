@@ -7,14 +7,7 @@
 
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { TimelinesPlugin } from './plugin';
-import { ConfigSchema } from './config';
 
-export const config = {
-  schema: ConfigSchema,
-  exposeToBrowser: {
-    enabled: true,
-  },
-};
 export function plugin(initializerContext: PluginInitializerContext) {
   return new TimelinesPlugin(initializerContext);
 }

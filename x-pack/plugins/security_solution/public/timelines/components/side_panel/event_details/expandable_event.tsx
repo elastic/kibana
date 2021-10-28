@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import { find } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import {
   EuiButtonIcon,
   EuiTextColor,
   EuiLoadingContent,
   EuiTitle,
-  EuiSpacer,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import { LineClamp } from '../../../../common/components/line_clamp';
 import * as i18n from './translations';
+import { HostRisk } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -34,15 +30,19 @@ interface Props {
   detailsData: TimelineEventsDetailsItem[] | null;
   event: { eventId: string; indexName: string };
   isAlert: boolean;
+  isDraggable?: boolean;
   loading: boolean;
   messageHeight?: number;
+  rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
+  hostRisk: HostRisk | null;
 }
 
 interface ExpandableEventTitleProps {
   isAlert: boolean;
   loading: boolean;
+  ruleName?: string;
   handleOnEventClosed?: HandleOnEventClosed;
 }
 
@@ -63,12 +63,14 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
-  ({ isAlert, loading, handleOnEventClosed }) => (
+  ({ isAlert, loading, handleOnEventClosed, ruleName }) => (
     <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
       <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          {!loading ? <h4>{isAlert ? i18n.ALERT_DETAILS : i18n.EVENT_DETAILS}</h4> : <></>}
-        </EuiTitle>
+        {!loading && (
+          <EuiTitle size="s">
+            <h4>{isAlert && !isEmpty(ruleName) ? ruleName : i18n.EVENT_DETAILS}</h4>
+          </EuiTitle>
+        )}
       </EuiFlexItem>
       {handleOnEventClosed && (
         <EuiFlexItem grow={false}>
@@ -82,22 +84,18 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
 ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
 export const ExpandableEvent = React.memo<Props>(
-  ({ browserFields, event, timelineId, timelineTabType, isAlert, loading, detailsData }) => {
-    const message = useMemo(() => {
-      if (detailsData) {
-        const messageField = find({ category: 'base', field: 'message' }, detailsData) as
-          | TimelineEventsDetailsItem
-          | undefined;
-
-        if (messageField?.originalValue) {
-          return Array.isArray(messageField?.originalValue)
-            ? messageField?.originalValue.join()
-            : messageField?.originalValue;
-        }
-      }
-      return null;
-    }, [detailsData]);
-
+  ({
+    browserFields,
+    event,
+    timelineId,
+    timelineTabType,
+    isAlert,
+    isDraggable,
+    loading,
+    detailsData,
+    hostRisk,
+    rawEventData,
+  }) => {
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
     }
@@ -108,25 +106,17 @@ export const ExpandableEvent = React.memo<Props>(
 
     return (
       <StyledFlexGroup direction="column" gutterSize="none">
-        {message && (
-          <EuiFlexItem grow={false}>
-            <EuiDescriptionList data-test-subj="event-message" compressed>
-              <EuiDescriptionListTitle>{i18n.MESSAGE}</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                <LineClamp>{message}</LineClamp>
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
-            <EuiSpacer size="m" />
-          </EuiFlexItem>
-        )}
         <StyledEuiFlexItem grow={true}>
           <EventDetails
             browserFields={browserFields}
             data={detailsData ?? []}
-            id={event.eventId!}
+            id={event.eventId}
             isAlert={isAlert}
+            isDraggable={isDraggable}
+            rawEventData={rawEventData}
             timelineId={timelineId}
             timelineTabType={timelineTabType}
+            hostRisk={hostRisk}
           />
         </StyledEuiFlexItem>
       </StyledFlexGroup>

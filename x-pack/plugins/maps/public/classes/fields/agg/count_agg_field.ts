@@ -43,6 +43,10 @@ export class CountAggField implements IESAggField {
     return this._source.getAggKey(this._getAggType(), this.getRootName());
   }
 
+  getMbFieldName(): string {
+    return this._source.isMvt() ? '_count' : this.getName();
+  }
+
   getRootName(): string {
     return '';
   }
@@ -62,7 +66,13 @@ export class CountAggField implements IESAggField {
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     const indexPattern = await this._source.getIndexPattern();
     const tooltipProperty = new TooltipProperty(this.getName(), await this.getLabel(), value);
-    return new ESAggTooltipProperty(tooltipProperty, indexPattern, this, this._getAggType());
+    return new ESAggTooltipProperty(
+      tooltipProperty,
+      indexPattern,
+      this,
+      this._getAggType(),
+      this._source.getApplyGlobalQuery()
+    );
   }
 
   getValueAggDsl(indexPattern: IndexPattern): unknown | null {

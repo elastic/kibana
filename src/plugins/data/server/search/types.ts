@@ -35,7 +35,7 @@ export interface SearchEnhancements {
 export interface SearchStrategyDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
-  uiSettingsClient: IUiSettingsClient;
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>;
   searchSessionsClient: IScopedSearchSessionsClient;
   request: KibanaRequest;
 }
@@ -102,6 +102,11 @@ export interface ISearchStart<
   SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
 > {
   aggs: AggsStart;
+  /**
+   * Search as the internal Kibana system user. This is not a registered search strategy as we don't
+   * want to allow access from the client.
+   */
+  searchAsInternalUser: ISearchStrategy;
   /**
    * Get other registered search strategies by name (or, by default, the Elasticsearch strategy).
    * For example, if a new strategy needs to use the already-registered ES search strategy, it can

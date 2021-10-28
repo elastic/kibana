@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './helpers';
+export { createFilter } from './helpers';

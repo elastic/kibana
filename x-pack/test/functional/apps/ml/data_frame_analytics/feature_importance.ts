@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('total feature importance panel and decision path popover', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/116078
+  describe.skip('total feature importance panel and decision path popover', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
@@ -204,9 +205,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('should display the feature importance decision path in the data grid', async () => {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsResults.openFeatureImportanceDecisionPathPopover();
-          await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathElementsExists();
-          await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathChartElementsExists();
+          await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
+          await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
         });
       });
     }

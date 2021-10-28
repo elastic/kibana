@@ -45,6 +45,9 @@ export const CUSTOM_SOURCE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-ap
 export const CUSTOM_API_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-sources-api.html`;
 export const CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL = `${CUSTOM_SOURCE_DOCS_URL}#custom-api-source-document-level-access-control`;
 export const ENT_SEARCH_LICENSE_MANAGEMENT = `${docLinks.enterpriseSearchBase}/license-management.html`;
+export const SYNCHRONIZATION_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#workplace-search-customizing-indexing-rules`;
+export const DIFFERENT_SYNC_TYPES_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#_indexing_schedule`;
+export const OBJECTS_AND_ASSETS_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#workplace-search-customizing-indexing-rules`;
 
 export const PERSONAL_PATH = '/p';
 
@@ -60,7 +63,7 @@ export const GROUP_PATH = `${GROUPS_PATH}/:groupId`;
 export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source_prioritization`;
 
 export const SOURCES_PATH = '/sources';
-export const PERSONAL_SOURCES_PATH = `${PERSONAL_PATH}${SOURCES_PATH}`;
+export const PRIVATE_SOURCES_PATH = `${PERSONAL_PATH}${SOURCES_PATH}`;
 
 export const SOURCE_ADDED_PATH = `${SOURCES_PATH}/added`;
 export const ADD_SOURCE_PATH = `${SOURCES_PATH}/add`;
@@ -89,11 +92,16 @@ export const SOURCE_DETAILS_PATH = `${SOURCES_PATH}/:sourceId`;
 export const SOURCE_CONTENT_PATH = `${SOURCES_PATH}/:sourceId/content`;
 export const SOURCE_SCHEMAS_PATH = `${SOURCES_PATH}/:sourceId/schemas`;
 export const SOURCE_DISPLAY_SETTINGS_PATH = `${SOURCES_PATH}/:sourceId/display_settings`;
+export const SOURCE_SYNCHRONIZATION_PATH = `${SOURCES_PATH}/:sourceId/synchronization`;
 export const SOURCE_SETTINGS_PATH = `${SOURCES_PATH}/:sourceId/settings`;
 export const REINDEX_JOB_PATH = `${SOURCE_SCHEMAS_PATH}/:activeReindexJobId`;
 
 export const DISPLAY_SETTINGS_SEARCH_RESULT_PATH = `${SOURCE_DISPLAY_SETTINGS_PATH}/`;
 export const DISPLAY_SETTINGS_RESULT_DETAIL_PATH = `${SOURCE_DISPLAY_SETTINGS_PATH}/result_detail`;
+
+export const SYNC_FREQUENCY_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/frequency`;
+export const BLOCKED_TIME_WINDOWS_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/frequency/blocked_windows`;
+export const OBJECTS_AND_ASSETS_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/objects_and_assets`;
 
 export const ORG_SETTINGS_PATH = '/settings';
 export const ORG_SETTINGS_CUSTOMIZE_PATH = `${ORG_SETTINGS_PATH}/customize`;

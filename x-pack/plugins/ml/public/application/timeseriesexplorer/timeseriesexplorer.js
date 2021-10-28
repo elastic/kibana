@@ -104,7 +104,6 @@ function getTimeseriesexplorerDefaultState() {
     entitiesLoading: false,
     entityValues: {},
     focusAnnotationData: [],
-    focusAggregations: {},
     focusAggregationInterval: {},
     focusChartData: undefined,
     focusForecastData: undefined,
@@ -264,12 +263,8 @@ export class TimeSeriesExplorer extends React.Component {
    * Gets focus data for the current component state/
    */
   getFocusData(selection) {
-    const {
-      selectedJobId,
-      selectedForecastId,
-      selectedDetectorIndex,
-      functionDescription,
-    } = this.props;
+    const { selectedJobId, selectedForecastId, selectedDetectorIndex, functionDescription } =
+      this.props;
     const { modelPlotEnabled } = this.state;
     const selectedJob = mlJobService.getJob(selectedJobId);
     if (isMetricDetector(selectedJob, selectedDetectorIndex) && functionDescription === undefined) {
@@ -939,7 +934,6 @@ export class TimeSeriesExplorer extends React.Component {
       focusAggregationInterval,
       focusAnnotationError,
       focusAnnotationData,
-      focusAggregations,
       focusChartData,
       focusForecastData,
       fullRefresh,
@@ -1176,9 +1170,13 @@ export class TimeSeriesExplorer extends React.Component {
                     <EuiFlexItem grow={false}>
                       <EuiCheckbox
                         id="toggleShowForecastCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                          defaultMessage: 'show forecast',
-                        })}
+                        label={
+                          <span data-test-subj={'mlForecastCheckbox'}>
+                            {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                              defaultMessage: 'show forecast',
+                            })}
+                          </span>
+                        }
                         checked={showForecast}
                         onChange={this.toggleShowForecastHandler}
                       />
@@ -1231,7 +1229,7 @@ export class TimeSeriesExplorer extends React.Component {
                 )}
                 {focusAnnotationData && focusAnnotationData.length > 0 && (
                   <EuiAccordion
-                    id={'EuiAccordion-blah'}
+                    id={'mlAnnotationsAccordion'}
                     buttonContent={
                       <EuiTitle className="panel-title">
                         <h2>
@@ -1261,7 +1259,6 @@ export class TimeSeriesExplorer extends React.Component {
                       detectors={detectors}
                       jobIds={[this.props.selectedJobId]}
                       annotations={focusAnnotationData}
-                      aggregations={focusAggregations}
                       isSingleMetricViewerLinkVisible={false}
                       isNumberBadgeVisible={true}
                     />

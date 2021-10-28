@@ -82,6 +82,7 @@ describe('DeprecationsClient', () => {
     it('returns true if deprecation has correctiveActions.api', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const mockDeprecationDetails: DomainDeprecationDetails = {
+        title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
         level: 'warning',
@@ -102,6 +103,7 @@ describe('DeprecationsClient', () => {
     it('returns false if deprecation is missing correctiveActions.api', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const mockDeprecationDetails: DomainDeprecationDetails = {
+        title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
         level: 'warning',
@@ -120,6 +122,7 @@ describe('DeprecationsClient', () => {
     it('fails if deprecation is not resolvable', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const mockDeprecationDetails: DomainDeprecationDetails = {
+        title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
         level: 'warning',
@@ -129,15 +132,18 @@ describe('DeprecationsClient', () => {
       };
       const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
-      expect(result).toEqual({
-        status: 'fail',
-        reason: 'deprecation has no correctiveAction via api.',
-      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "reason": "This deprecation cannot be resolved automatically.",
+          "status": "fail",
+        }
+      `);
     });
 
     it('fetches the deprecation api', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const mockDeprecationDetails: DomainDeprecationDetails = {
+        title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
         level: 'warning',
@@ -171,6 +177,7 @@ describe('DeprecationsClient', () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const mockResponse = 'Failed to fetch';
       const mockDeprecationDetails: DomainDeprecationDetails = {
+        title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
         level: 'warning',
@@ -189,6 +196,39 @@ describe('DeprecationsClient', () => {
       const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
       expect(result).toEqual({ status: 'fail', reason: mockResponse });
+    });
+
+    it('omit deprecationDetails in the request of the body', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      const mockDeprecationDetails: DomainDeprecationDetails = {
+        title: 'some-title',
+        domainId: 'testPluginId-1',
+        message: 'some-message',
+        level: 'warning',
+        correctiveActions: {
+          api: {
+            path: 'some-path',
+            method: 'POST',
+            body: {
+              extra_param: 123,
+            },
+            omitContextFromBody: true,
+          },
+          manualSteps: ['manual-step'],
+        },
+      };
+      const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
+
+      expect(http.fetch).toBeCalledTimes(1);
+      expect(http.fetch).toBeCalledWith({
+        path: 'some-path',
+        method: 'POST',
+        asSystemRequest: true,
+        body: JSON.stringify({
+          extra_param: 123,
+        }),
+      });
+      expect(result).toEqual({ status: 'ok' });
     });
   });
 });

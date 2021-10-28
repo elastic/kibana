@@ -14,6 +14,8 @@ import {
   EuiButtonEmptyProps,
   EuiButtonProps,
   EuiLinkAnchorProps,
+  EuiListGroupItem,
+  EuiListGroupItemProps,
   EuiPanel,
   EuiCard,
   EuiCardProps,
@@ -67,3 +69,13 @@ export const EuiCardTo: React.FC<ReactRouterEuiCardProps> = ({
   shouldNotCreateHref,
   ...rest
 }) => <EuiCard {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+
+type ReactRouterEuiListGroupItemProps = ReactRouterProps & EuiListGroupItemProps;
+export const EuiListGroupItemTo: React.FC<ReactRouterEuiListGroupItemProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}) => (
+  <EuiListGroupItem {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+);

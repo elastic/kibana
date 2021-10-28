@@ -5,40 +5,37 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
-import { getServiceColumns, ServiceList } from './';
-import { items } from './__fixtures__/service_api_mock_data';
+import { composeStories } from '@storybook/testing-react';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { Breakpoints } from '../../../../hooks/use_breakpoints';
+import { getServiceColumns } from './';
+import * as stories from './service_list.stories';
 
-function Wrapper({ children }: { children?: ReactNode }) {
-  return (
-    <MockApmPluginContextWrapper>
-      <MemoryRouter>{children}</MemoryRouter>
-    </MockApmPluginContextWrapper>
-  );
-}
+const { Example, EmptyState, WithHealthWarnings } = composeStories(stories);
 
 describe('ServiceList', () => {
-  beforeAll(() => {
-    mockMoment();
+  it('renders empty state', async () => {
+    render(<EmptyState />);
+
+    expect(await screen.findByRole('table')).toBeInTheDocument();
   });
 
-  it('renders empty state', () => {
-    expect(() =>
-      renderWithTheme(<ServiceList items={[]} />, { wrapper: Wrapper })
-    ).not.toThrowError();
+  it('renders with data', async () => {
+    render(<Example />);
+
+    expect(await screen.findByRole('table')).toBeInTheDocument();
   });
 
-  it('renders with data', () => {
-    expect(() =>
-      renderWithTheme(<ServiceList items={items} />, { wrapper: Wrapper })
-    ).not.toThrowError();
-  });
+  describe('responsive columns', () => {
+    const query = {
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
+    };
 
-  it('renders columns correctly', () => {
     const service: any = {
       serviceName: 'opbeans-python',
       agentName: 'python',
@@ -55,50 +52,149 @@ describe('ServiceList', () => {
         timeseries: [],
       },
       environments: ['test'],
+      transactionType: 'request',
     };
-    const renderedColumns = getServiceColumns({
-      showTransactionTypeColumn: false,
-    }).map((c) => c.render!(service[c.field!], service));
+    describe('when small', () => {
+      it('shows environment, transaction type and sparklines', () => {
+        const renderedColumns = getServiceColumns({
+          query,
+          showTransactionTypeColumn: true,
+          breakpoints: {
+            isSmall: true,
+            isLarge: true,
+            isXl: true,
+          } as Breakpoints,
+        }).map((c) =>
+          c.render ? c.render!(service[c.field!], service) : service[c.field!]
+        );
+        expect(renderedColumns.length).toEqual(7);
+        expect(renderedColumns[2]).toMatchInlineSnapshot(`
+          <EnvironmentBadge
+            environments={
+              Array [
+                "test",
+              ]
+            }
+          />
+        `);
+        expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
+        expect(renderedColumns[4]).toMatchInlineSnapshot(`
+          <ListMetric
+            color="euiColorVis1"
+            hideSeries={false}
+            valueLabel="0 ms"
+          />
+        `);
+      });
+    });
 
-    expect(renderedColumns[0]).toMatchInlineSnapshot(`
-      <HealthBadge
-        healthStatus="unknown"
-      />
-    `);
+    describe('when Large', () => {
+      it('hides environment, transaction type and sparklines', () => {
+        const renderedColumns = getServiceColumns({
+          query,
+          showTransactionTypeColumn: true,
+          breakpoints: {
+            isSmall: false,
+            isLarge: true,
+            isXl: true,
+          } as Breakpoints,
+        }).map((c) =>
+          c.render ? c.render!(service[c.field!], service) : service[c.field!]
+        );
+        expect(renderedColumns.length).toEqual(5);
+        expect(renderedColumns[2]).toMatchInlineSnapshot(`
+          <ListMetric
+            color="euiColorVis1"
+            hideSeries={true}
+            valueLabel="0 ms"
+          />
+        `);
+      });
+
+      describe('when XL', () => {
+        it('hides transaction type', () => {
+          const renderedColumns = getServiceColumns({
+            query,
+            showTransactionTypeColumn: true,
+            breakpoints: {
+              isSmall: false,
+              isLarge: false,
+              isXl: true,
+            } as Breakpoints,
+          }).map((c) =>
+            c.render ? c.render!(service[c.field!], service) : service[c.field!]
+          );
+          expect(renderedColumns.length).toEqual(6);
+          expect(renderedColumns[2]).toMatchInlineSnapshot(`
+            <EnvironmentBadge
+              environments={
+                Array [
+                  "test",
+                ]
+              }
+            />
+          `);
+          expect(renderedColumns[3]).toMatchInlineSnapshot(`
+            <ListMetric
+              color="euiColorVis1"
+              hideSeries={false}
+              valueLabel="0 ms"
+            />
+          `);
+        });
+      });
+
+      describe('when XXL', () => {
+        it('hides transaction type', () => {
+          const renderedColumns = getServiceColumns({
+            query,
+            showTransactionTypeColumn: true,
+            breakpoints: {
+              isSmall: false,
+              isLarge: false,
+              isXl: false,
+            } as Breakpoints,
+          }).map((c) =>
+            c.render ? c.render!(service[c.field!], service) : service[c.field!]
+          );
+          expect(renderedColumns.length).toEqual(7);
+          expect(renderedColumns[2]).toMatchInlineSnapshot(`
+                      <EnvironmentBadge
+                        environments={
+                          Array [
+                            "test",
+                          ]
+                        }
+                      />
+                  `);
+          expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
+          expect(renderedColumns[4]).toMatchInlineSnapshot(`
+            <ListMetric
+              color="euiColorVis1"
+              hideSeries={false}
+              valueLabel="0 ms"
+            />
+          `);
+        });
+      });
+    });
   });
 
   describe('without ML data', () => {
-    it('does not render the health column', () => {
-      const { queryByText } = renderWithTheme(<ServiceList items={items} />, {
-        wrapper: Wrapper,
-      });
-      const healthHeading = queryByText('Health');
-
-      expect(healthHeading).toBeNull();
-    });
-
     it('sorts by throughput', async () => {
-      const { findByTitle } = renderWithTheme(<ServiceList items={items} />, {
-        wrapper: Wrapper,
-      });
+      render(<Example />);
 
-      expect(await findByTitle('Throughput')).toBeInTheDocument();
+      expect(await screen.findByTitle('Throughput')).toBeInTheDocument();
     });
   });
 
   describe('with ML data', () => {
     it('renders the health column', async () => {
-      const { findByTitle } = renderWithTheme(
-        <ServiceList
-          items={items.map((item) => ({
-            ...item,
-            healthStatus: ServiceHealthStatus.warning,
-          }))}
-        />,
-        { wrapper: Wrapper }
-      );
+      render(<WithHealthWarnings />);
 
-      expect(await findByTitle('Health')).toBeInTheDocument();
+      expect(
+        await screen.findByRole('button', { name: /Health/ })
+      ).toBeInTheDocument();
     });
   });
 });

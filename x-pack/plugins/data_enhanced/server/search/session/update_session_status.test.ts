@@ -21,6 +21,7 @@ import {
 
 describe('bulkUpdateSessions', () => {
   let mockClient: any;
+  const mockConfig: any = {};
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   const mockLogger: any = {
     debug: jest.fn(),
@@ -66,6 +67,7 @@ describe('bulkUpdateSessions', () => {
           client: mockClient,
           logger: mockLogger,
         },
+        mockConfig,
         so
       );
 
@@ -105,6 +107,7 @@ describe('bulkUpdateSessions', () => {
           client: mockClient,
           logger: mockLogger,
         },
+        mockConfig,
         so
       );
 
@@ -139,6 +142,7 @@ describe('bulkUpdateSessions', () => {
           client: mockClient,
           logger: mockLogger,
         },
+        mockConfig,
         so
       );
 
@@ -176,6 +180,7 @@ describe('bulkUpdateSessions', () => {
           client: mockClient,
           logger: mockLogger,
         },
+        mockConfig,
         so
       );
 
@@ -219,6 +224,7 @@ describe('bulkUpdateSessions', () => {
           client: mockClient,
           logger: mockLogger,
         },
+        mockConfig,
         so
       );
 

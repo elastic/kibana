@@ -95,12 +95,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const pieChart = getService('pieChart');
-  const browser = getService('browser');
   const dashboardExpect = getService('dashboardExpect');
   const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'visChart']);
+  const monacoEditor = getService('monacoEditor');
 
-  describe('dashboard container', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/116414
+  describe.skip('dashboard container', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
       await esArchiver.loadIfNeeded(
@@ -128,17 +129,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   });
 
   async function updateInput(input: string) {
-    const editorWrapper = await (
-      await testSubjects.find('dashboardEmbeddableByValueInputEditor')
-    ).findByClassName('ace_editor');
-    const editorId = await editorWrapper.getAttribute('id');
-    await browser.execute(
-      (_editorId: string, _input: string) => {
-        return (window as any).ace.edit(_editorId).setValue(_input);
-      },
-      editorId,
-      input
-    );
+    await monacoEditor.setCodeEditorValue(input);
     await testSubjects.click('dashboardEmbeddableByValueInputSubmit');
   }
 }

@@ -6,7 +6,7 @@
  */
 
 import {
-  EuiButtonEmpty,
+  EuiHeaderLink,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
@@ -123,8 +123,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
   return (
     <EuiPopover
       button={
-        <EuiButtonEmpty
-          size="xs"
+        <EuiHeaderLink
           color="text"
           aria-label={ToggleFlyoutTranslations.toggleButtonAriaLabel}
           data-test-subj="xpack.uptime.alertsPopover.toggleButton"
@@ -136,7 +135,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
             id="xpack.uptime.alerts.toggleAlertFlyoutButtonText"
             defaultMessage="Alerts and rules"
           />
-        </EuiButtonEmpty>
+        </EuiHeaderLink>
       }
       closePopover={() => setIsOpen(false)}
       isOpen={isOpen}

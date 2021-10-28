@@ -88,7 +88,7 @@ export interface PublicDrilldownManagerProps {
  */
 export interface DrilldownTemplate {
   /**
-   * Any string that uniquely identifies this item in a list of `DrilldownTemplate[]`.
+   * A string that uniquely identifies this item in a list of `DrilldownTemplate[]`.
    */
   id: string;
 

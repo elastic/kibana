@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import * as Rx from 'rxjs';
-import type { CoreSetup } from 'src/core/public';
+import { first } from 'rxjs/operators';
+import type { CoreSetup, NotificationsSetup } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
 import type { ISearchEmbeddable, SavedSearch } from '../../../../../src/plugins/discover/public';
 import {
@@ -20,9 +20,10 @@ import { ViewMode } from '../../../../../src/plugins/embeddable/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 import { IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
 import type { LicensingPluginSetup } from '../../../licensing/public';
-import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../common/constants';
-import type { JobParamsDownloadCSV } from '../../server/export_types/csv_searchsource_immediate/types';
+import { CSV_REPORTING_ACTION } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
+import type { ReportingPublicPluginStartDendencies } from '../plugin';
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
@@ -30,13 +31,14 @@ function isSavedSearchEmbeddable(
   return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
 }
 
-interface ActionContext {
+export interface ActionContext {
   embeddable: ISearchEmbeddable;
 }
 
 interface Params {
+  apiClient: ReportingAPIClient;
   core: CoreSetup;
-  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
+  startServices$: Rx.Observable<[CoreStart, ReportingPublicPluginStartDendencies, unknown]>;
   license$: LicensingPluginSetup['license$'];
   usesUiCapabilities: boolean;
 }
@@ -47,11 +49,16 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   public readonly id = CSV_REPORTING_ACTION;
   private licenseHasDownloadCsv: boolean = false;
   private capabilityHasDownloadCsv: boolean = false;
-  private core: CoreSetup;
+  private notifications: NotificationsSetup;
+  private apiClient: ReportingAPIClient;
+  private startServices$: Params['startServices$'];
 
-  constructor({ core, startServices$, license$, usesUiCapabilities }: Params) {
+  constructor({ core, startServices$, license$, usesUiCapabilities, apiClient }: Params) {
     this.isDownloading = false;
-    this.core = core;
+
+    this.notifications = core.notifications;
+    this.apiClient = apiClient;
+    this.startServices$ = startServices$;
 
     license$.subscribe((license) => {
       const results = license.check('reporting', 'basic');
@@ -60,7 +67,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     });
 
     if (usesUiCapabilities) {
-      startServices$.subscribe(([{ application }]) => {
+      this.startServices$.subscribe(([{ application }]) => {
         this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
       });
     } else {
@@ -79,11 +86,12 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public async getSearchSource(savedSearch: SavedSearch, embeddable: ISearchEmbeddable) {
+    const [{ uiSettings }, { data }] = await this.startServices$.pipe(first()).toPromise();
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(
       savedSearch.searchSource,
-      savedSearch, // TODO: get unsaved state (using embeddale.searchScope): https://github.com/elastic/kibana/issues/43977
-      this.core.uiSettings
+      savedSearch, // TODO: get unsaved state (using embeddable.searchScope): https://github.com/elastic/kibana/issues/43977
+      { uiSettings, data }
     );
   }
 
@@ -109,26 +117,18 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     }
 
     const savedSearch = embeddable.getSavedSearch();
-    const { columns, searchSource } = await this.getSearchSource(savedSearch, embeddable);
+    const { columns, getSearchSource } = await this.getSearchSource(savedSearch, embeddable);
 
-    // If the TZ is set to the default "Browser", it will not be useful for
-    // server-side export. We need to derive the timezone and pass it as a param
-    // to the export API.
-    // TODO: create a helper utility in Reporting. This is repeated in a few places.
-    const kibanaTimezone = this.core.uiSettings.get('dateFormat:tz');
-    const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
-    const immediateJobParams: JobParamsDownloadCSV = {
-      searchSource,
+    const immediateJobParams = this.apiClient.getDecoratedJobParams({
+      searchSource: getSearchSource(true),
       columns,
-      browserTimezone,
-      title: savedSearch.title,
-    };
-
-    const body = JSON.stringify(immediateJobParams);
+      title: savedSearch.title || '',
+      objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType
+    });
 
     this.isDownloading = true;
 
-    this.core.notifications.toasts.addSuccess({
+    this.notifications.toasts.addSuccess({
       title: i18n.translate('xpack.reporting.dashboard.csvDownloadStartedTitle', {
         defaultMessage: `CSV Download Started`,
       }),
@@ -138,9 +138,9 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       'data-test-subj': 'csvDownloadStarted',
     });
 
-    await this.core.http
-      .post(`${API_GENERATE_IMMEDIATE}`, { body })
-      .then((rawResponse: string) => {
+    await this.apiClient
+      .createImmediateReport(immediateJobParams)
+      .then((rawResponse) => {
         this.isDownloading = false;
 
         const download = `${savedSearch.title}.csv`;
@@ -166,7 +166,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
 
   private onGenerationFail(error: Error) {
     this.isDownloading = false;
-    this.core.notifications.toasts.addDanger({
+    this.notifications.toasts.addDanger({
       title: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadTitle', {
         defaultMessage: `CSV download failed`,
       }),

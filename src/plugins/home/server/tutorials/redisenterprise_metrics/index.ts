@@ -23,16 +23,16 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
   return {
     id: 'redisenterpriseMetrics',
     name: i18n.translate('home.tutorials.redisenterpriseMetrics.nameTitle', {
-      defaultMessage: 'Redis Enterprise metrics',
+      defaultMessage: 'Redis Enterprise Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.redisenterpriseMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from Redis Enterprise Server.',
+      defaultMessage: 'Collect metrics from Redis Enterprise servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.redisenterpriseMetrics.longDescription', {
       defaultMessage:
-        'The `redisenterprise` Metricbeat module fetches monitoring metrics from Redis Enterprise Server \
+        'The `redisenterprise` Metricbeat module fetches metrics from Redis Enterprise Server \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-redisenterprise.html',
@@ -57,5 +57,6 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['datastore', 'message_queue'],
   };
 }

@@ -13,8 +13,12 @@ describe('Platform assets', function () {
   let root: Root;
 
   beforeAll(async function () {
-    root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+    root = kbnTestServer.createRoot({
+      plugins: { initialize: false },
+      elasticsearch: { skipStartupConnectionCheck: true },
+    });
 
+    await root.preboot();
     await root.setup();
     await root.start();
   });

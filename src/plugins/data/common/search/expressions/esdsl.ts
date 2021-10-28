@@ -7,13 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { buildEsQuery } from '@kbn/es-query';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 
 import { EsRawResponse } from './es_raw_response';
 import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
 import { ISearchGeneric, KibanaContext } from '..';
-import { buildEsQuery, getEsQueryConfig } from '../../es_query/es_query';
-import { UiSettingsCommon } from '../../index_patterns';
+import { getEsQueryConfig } from '../../es_query';
+import { UiSettingsCommon } from '../..';
 
 const name = 'esdsl';
 
@@ -114,12 +115,12 @@ export const getEsdslFn = ({
 
       request.stats({
         indexPattern: {
-          label: i18n.translate('data.search.es_search.indexPatternLabel', {
-            defaultMessage: 'Index pattern',
+          label: i18n.translate('data.search.es_search.dataViewLabel', {
+            defaultMessage: 'Data view',
           }),
           value: args.index,
           description: i18n.translate('data.search.es_search.indexPatternDescription', {
-            defaultMessage: 'The index pattern that connected to the Elasticsearch indices.',
+            defaultMessage: 'The data view that connected to the Elasticsearch indices.',
           }),
         },
       });

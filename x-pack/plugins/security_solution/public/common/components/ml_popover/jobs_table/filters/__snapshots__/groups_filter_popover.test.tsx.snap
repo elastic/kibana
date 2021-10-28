@@ -10,6 +10,7 @@ exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
       iconType="arrowDown"
       isSelected={false}
       numActiveFilters={0}
+      numFilters={3}
       onClick={[Function]}
     >
       Groups

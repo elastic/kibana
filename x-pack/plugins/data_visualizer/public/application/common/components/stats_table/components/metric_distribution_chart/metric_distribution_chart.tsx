@@ -75,14 +75,17 @@ export const MetricDistributionChart: FC<Props> = ({
     return (
       <MetricDistributionChartTooltipHeader
         chartPoint={chartPoint}
-        maxWidth={width / 2}
+        maxWidth={width}
         fieldFormat={fieldFormat}
       />
     );
   };
 
   return (
-    <div data-test-subj="dataVisualizerFieldDataMetricDistributionChart">
+    <div
+      data-test-subj="dataVisualizerFieldDataMetricDistributionChart"
+      className="dataGridChart__histogram"
+    >
       <Chart size={{ width, height }}>
         <Settings theme={theme} tooltip={{ headerFormatter }} />
         <Axis

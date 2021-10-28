@@ -8,7 +8,7 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsRawDocSource } from '../../serialization';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import {
@@ -32,41 +32,34 @@ export interface CheckForUnknownDocsFoundDoc {
 
 /** @internal */
 export interface UnknownDocsFound {
-  type: 'unknown_docs_found';
   unknownDocs: CheckForUnknownDocsFoundDoc[];
 }
 
-export const checkForUnknownDocs = ({
-  client,
-  indexName,
-  unusedTypesQuery,
-  knownTypes,
-}: CheckForUnknownDocsParams): TaskEither.TaskEither<
-  RetryableEsClientError | UnknownDocsFound,
-  {}
-> => () => {
-  const query = createUnknownDocQuery(unusedTypesQuery, knownTypes);
+export const checkForUnknownDocs =
+  ({
+    client,
+    indexName,
+    unusedTypesQuery,
+    knownTypes,
+  }: CheckForUnknownDocsParams): TaskEither.TaskEither<RetryableEsClientError, UnknownDocsFound> =>
+  () => {
+    const query = createUnknownDocQuery(unusedTypesQuery, knownTypes);
 
-  return client
-    .search<SavedObjectsRawDocSource>({
-      index: indexName,
-      body: {
-        query,
-      },
-    })
-    .then((response) => {
-      const { hits } = response.body.hits;
-      if (hits.length) {
-        return Either.left({
-          type: 'unknown_docs_found' as const,
+    return client
+      .search<SavedObjectsRawDocSource>({
+        index: indexName,
+        body: {
+          query,
+        },
+      })
+      .then((response) => {
+        const { hits } = response.body.hits;
+        return Either.right({
           unknownDocs: hits.map((hit) => ({ id: hit._id, type: hit._source?.type ?? 'unknown' })),
         });
-      } else {
-        return Either.right({});
-      }
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+      })
+      .catch(catchRetryableEsClientErrors);
+  };
 
 const createUnknownDocQuery = (
   unusedTypesQuery: estypes.QueryDslQueryContainer,

@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { MaybePromise } from '@kbn/utility-types';
-import type { IExecutionContextContainer } from '../execution_context';
+import type { KibanaExecutionContext } from '../execution_context';
 
 /** @public */
 export interface HttpSetup {
@@ -32,7 +32,7 @@ export interface HttpSetup {
    */
   intercept(interceptor: HttpInterceptor): () => void;
 
-  /** Makes an HTTP request. Defaults to a GET request unless overriden. See {@link HttpHandler} for options. */
+  /** Makes an HTTP request. Defaults to a GET request unless overridden. See {@link HttpHandler} for options. */
   fetch: HttpHandler;
   /** Makes an HTTP request with the DELETE method. See {@link HttpHandler} for options. */
   delete: HttpHandler;
@@ -272,7 +272,7 @@ export interface HttpFetchOptions extends HttpRequestInit {
    */
   asResponse?: boolean;
 
-  context?: IExecutionContextContainer;
+  context?: KibanaExecutionContext;
 }
 
 /**

@@ -12,7 +12,7 @@
  */
 
 import _ from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MigrationEsClient } from './migration_es_client';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
@@ -43,6 +43,10 @@ export const REMOVED_TYPES: string[] = [
   'server',
   // https://github.com/elastic/kibana/issues/95617
   'tsvb-validation-telemetry',
+  // replaced by osquery-manager-usage-metric
+  'osquery-usage-metric',
+  // Was removed in 7.16
+  'timelion-sheet',
 ].sort();
 
 // When migrating from the outdated index we use a read query which excludes
@@ -302,7 +306,7 @@ export async function convertToAlias(
  * alias, meaning that it will only point to one index at a time, so we
  * remove any other indices from the alias.
  *
- * @param {CallCluster} client
+ * @param {MigrationEsClient} client
  * @param {string} index
  * @param {string} alias
  * @param {AliasAction[]} aliasActions - Optional actions to be added to the updateAliases call

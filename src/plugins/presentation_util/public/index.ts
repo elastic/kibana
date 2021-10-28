@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110893
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PresentationUtilPlugin } from './plugin';
 
 export {
@@ -38,6 +41,8 @@ export {
   withSuspense,
 } from './components';
 
+export * from './components/types';
+
 export {
   AddFromLibraryButton,
   PrimaryActionButton,
@@ -48,6 +53,8 @@ export {
   SolutionToolbarButton,
   SolutionToolbarPopover,
 } from './components/solution_toolbar';
+
+export * from './components/controls';
 
 export function plugin() {
   return new PresentationUtilPlugin();

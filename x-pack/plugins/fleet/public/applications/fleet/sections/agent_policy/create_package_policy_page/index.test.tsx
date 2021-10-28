@@ -31,7 +31,7 @@ describe('when on the package policy create page', () => {
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
     mockApiCalls(testRenderer.startServices.http);
-    testRenderer.history.push(createPageUrlPath);
+    testRenderer.mountHistory.push(createPageUrlPath);
   });
 
   describe('and Route state is provided via Fleet HashRouter', () => {
@@ -43,7 +43,7 @@ describe('when on the package policy create page', () => {
         onCancelNavigateTo: [PLUGIN_ID, { path: '/cancel/url/here' }],
       };
 
-      testRenderer.history.replace({
+      testRenderer.mountHistory.replace({
         pathname: createPageUrlPath,
         state: expectedRouteState,
       });
@@ -70,20 +70,6 @@ describe('when on the package policy create page', () => {
       it('should use custom "cancel" URL', () => {
         expect(cancelLink.href).toBe(expectedRouteState.onCancelUrl);
         expect(cancelButton.href).toBe(expectedRouteState.onCancelUrl);
-      });
-
-      it('should redirect via Fleet HashRouter when cancel link is clicked', () => {
-        act(() => {
-          cancelLink.click();
-        });
-        expect(testRenderer.history.location.pathname).toBe('/cancel/url/here');
-      });
-
-      it('should redirect via Fleet HashRouter when cancel Button (button bar) is clicked', () => {
-        act(() => {
-          cancelButton.click();
-        });
-        expect(testRenderer.history.location.pathname).toBe('/cancel/url/here');
       });
     });
   });

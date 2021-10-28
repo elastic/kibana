@@ -11,9 +11,10 @@ import { ExecutionContext } from './execution/types';
 export const createMockExecutionContext = <ExtraContext extends object = object>(
   extraContext: ExtraContext = {} as ExtraContext
 ): ExecutionContext & ExtraContext => {
-  const executionContext: ExecutionContext = {
+  const executionContext = {
     getSearchContext: jest.fn(),
     getSearchSessionId: jest.fn(),
+    getExecutionContext: jest.fn(),
     variables: {},
     types: {},
     abortSignal: {
@@ -24,10 +25,10 @@ export const createMockExecutionContext = <ExtraContext extends object = object>
       removeEventListener: jest.fn(),
     },
     inspectorAdapters: {
-      requests: {} as any,
-      data: {} as any,
+      requests: {},
+      data: {},
     },
-  };
+  } as unknown as ExecutionContext;
 
   return {
     ...executionContext,

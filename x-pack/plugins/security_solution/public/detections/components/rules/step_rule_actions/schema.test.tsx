@@ -83,6 +83,7 @@ describe('stepRuleActions schema', () => {
         form: {} as FormHook,
         formData: jest.fn(),
         errors: [],
+        customData: { value: null, provider: () => Promise.resolve(null) },
       });
 
       expect(result).toEqual(undefined);
@@ -105,6 +106,7 @@ describe('stepRuleActions schema', () => {
         form: {} as FormHook,
         formData: jest.fn(),
         errors: [],
+        customData: { value: null, provider: () => Promise.resolve(null) },
       });
 
       expect(result).toEqual({
@@ -147,6 +149,7 @@ describe('stepRuleActions schema', () => {
         form: {} as FormHook,
         formData: jest.fn(),
         errors: [],
+        customData: { value: null, provider: () => Promise.resolve(null) },
       });
 
       expect(result).toEqual({

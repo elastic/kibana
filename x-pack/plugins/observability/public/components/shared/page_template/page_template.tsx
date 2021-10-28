@@ -17,6 +17,7 @@ import {
   KibanaPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import type { NavigationSection } from '../../../services/navigation_registry';
+import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
@@ -30,7 +31,10 @@ export type WrappedPageTemplateProps = Pick<
   | 'restrictWidth'
   | 'template'
   | 'isEmptyState'
->;
+  | 'noDataConfig'
+> & {
+  showSolutionNav?: boolean;
+};
 
 export interface ObservabilityPageTemplateDependencies {
   currentAppId$: Observable<string | undefined>;
@@ -48,6 +52,7 @@ export function ObservabilityPageTemplate({
   getUrlForApp,
   navigateToApp,
   navigationSections$,
+  showSolutionNav = true,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
@@ -71,13 +76,26 @@ export function ObservabilityPageTemplate({
               exact: !!entry.matchFullPath,
               strict: !entry.ignoreTrailingSlash,
             }) != null;
-
+          const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           return {
             id: `${sectionIndex}.${entryIndex}`,
-            name: entry.label,
+            name: entry.isNewFeature ? (
+              <NavNameWithBadge label={entry.label} localStorageId={badgeLocalStorageId} />
+            ) : (
+              entry.label
+            ),
             href,
             isSelected,
             onClick: (event) => {
+              if (entry.onClick) {
+                entry.onClick(event);
+              }
+
+              // Hides NEW badge when the item is clicked
+              if (entry.isNewFeature) {
+                hideBadge(badgeLocalStorageId);
+              }
+
               if (
                 event.button !== 0 ||
                 event.defaultPrevented ||
@@ -104,11 +122,15 @@ export function ObservabilityPageTemplate({
     <KibanaPageTemplate
       restrictWidth={false}
       {...pageTemplateProps}
-      solutionNav={{
-        icon: 'logoObservability',
-        items: sideNavItems,
-        name: sideNavTitle,
-      }}
+      solutionNav={
+        showSolutionNav
+          ? {
+              icon: 'logoObservability',
+              items: sideNavItems,
+              name: sideNavTitle,
+            }
+          : undefined
+      }
     >
       {children}
     </KibanaPageTemplate>

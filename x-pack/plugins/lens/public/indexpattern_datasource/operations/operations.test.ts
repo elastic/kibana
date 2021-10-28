@@ -378,6 +378,10 @@ describe('getOperationTypesForField', () => {
                 "operationType": "formula",
                 "type": "managedReference",
               },
+              Object {
+                "operationType": "static_value",
+                "type": "managedReference",
+              },
             ],
           },
           Object {

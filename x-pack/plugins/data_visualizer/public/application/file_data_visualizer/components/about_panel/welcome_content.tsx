@@ -39,8 +39,7 @@ export const WelcomeContent: FC = () => {
           <p>
             <FormattedMessage
               id="xpack.dataVisualizer.file.welcomeContent.visualizeDataFromLogFileDescription"
-              defaultMessage="The File Data Visualizer helps you understand the fields and metrics in a log file.
-              Upload your file, analyze its data, and then choose whether to import the data into an Elasticsearch index."
+              defaultMessage="Upload your file, analyze its data, and optionally import the data into an Elasticsearch index."
             />
           </p>
         </EuiText>
@@ -49,7 +48,7 @@ export const WelcomeContent: FC = () => {
           <p>
             <FormattedMessage
               id="xpack.dataVisualizer.file.welcomeContent.supportedFileFormatDescription"
-              defaultMessage="The File Data Visualizer supports these file formats:"
+              defaultMessage="The following file formats are supported:"
             />
           </p>
         </EuiText>

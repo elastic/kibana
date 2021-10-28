@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { SanitizedAlert } from '../../../../../alerting/common';
-import { SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
+import { NOTIFICATION_THROTTLE_NO_ACTIONS, SERVER_APP_ID } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { PartialFilter, RuleTypeParams } from '../types';
+import { transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 export const createRules = async ({
-  alertsClient,
+  rulesClient,
   anomalyThreshold,
   author,
   buildingBlockType,
@@ -59,19 +62,22 @@ export const createRules = async ({
   threatMapping,
   threshold,
   timestampOverride,
+  throttle,
   to,
   type,
   references,
+  namespace,
   note,
   version,
   exceptionsList,
   actions,
+  isRuleRegistryEnabled,
 }: CreateRulesOptions): Promise<SanitizedAlert<RuleTypeParams>> => {
-  return alertsClient.create<RuleTypeParams>({
+  const rule = await rulesClient.create<RuleTypeParams>({
     data: {
       name,
       tags: addTags(tags, ruleId, immutable),
-      alertTypeId: SIGNALS_ID,
+      alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[type] : SIGNALS_ID,
       consumer: SERVER_APP_ID,
       params: {
         anomalyThreshold,
@@ -119,6 +125,7 @@ export const createRules = async ({
         to,
         type,
         references,
+        namespace,
         note,
         version,
         exceptionsList,
@@ -126,8 +133,15 @@ export const createRules = async ({
       schedule: { interval },
       enabled,
       actions: actions.map(transformRuleToAlertAction),
-      throttle: null,
-      notifyWhen: null,
+      throttle: transformToAlertThrottle(throttle),
+      notifyWhen: transformToNotifyWhen(throttle),
     },
   });
+
+  // Mute the rule if it is first created with the explicit no actions
+  if (throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    await rulesClient.muteAll({ id: rule.id });
+  }
+
+  return rule;
 };

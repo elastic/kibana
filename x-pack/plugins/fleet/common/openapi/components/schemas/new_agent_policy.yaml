@@ -1,4 +1,4 @@
-title: NewAgentPolicy
+title: New agent policy
 type: object
 properties:
   name:
@@ -7,3 +7,10 @@ properties:
     type: string
   description:
     type: string
+  monitoring_enabled:
+    type: array
+    items:
+      type: string
+      enum:
+        - metrics
+        - logs

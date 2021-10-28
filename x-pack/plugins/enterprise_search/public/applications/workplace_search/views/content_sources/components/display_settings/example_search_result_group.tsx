@@ -117,7 +117,7 @@ export const ExampleSearchResultGroup: React.FC = () => {
                       data-test-subj="MediaTypeField"
                     >
                       <span className="example-search-result__tag-content">
-                        {mimeType(result[mediaTypeField] as string)}
+                        {mimeType(result[mediaTypeField])}
                       </span>
                     </div>
                   )}
@@ -135,8 +135,7 @@ export const ExampleSearchResultGroup: React.FC = () => {
                           by {result[updatedByField]}&nbsp;
                         </span>
                       )}
-                      {getAsLocalDateTimeString(result.last_updated as string) ||
-                        result.last_updated}
+                      {getAsLocalDateTimeString(result.last_updated) || result.last_updated}
                     </span>
                   </div>
                 </div>

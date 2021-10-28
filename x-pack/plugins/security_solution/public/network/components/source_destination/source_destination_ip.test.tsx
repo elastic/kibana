@@ -15,7 +15,7 @@ import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { ID_FIELD_NAME } from '../../../common/components/event_details/event_id';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
-import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port';
+import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port/helpers';
 import * as i18n from '../../../timelines/components/timeline/body/renderers/translations';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
@@ -958,6 +958,7 @@ describe('SourceDestinationIp', () => {
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -979,7 +980,6 @@ describe('SourceDestinationIp', () => {
         />
       </TestProviders>
     );
-
     expect(
       removeExternalLinkText(
         wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()
@@ -1011,6 +1011,7 @@ describe('SourceDestinationIp', () => {
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -1064,6 +1065,7 @@ describe('SourceDestinationIp', () => {
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -1118,6 +1120,7 @@ describe('SourceDestinationIp', () => {
           destinationIp={undefined}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -1271,6 +1274,7 @@ describe('SourceDestinationIp', () => {
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}

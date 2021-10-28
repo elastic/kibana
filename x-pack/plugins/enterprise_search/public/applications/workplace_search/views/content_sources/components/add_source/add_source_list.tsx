@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { AppLogic } from '../../../../app_logic';
-import noSharedSourcesIcon from '../../../../assets/share_circle.svg';
+import noOrgSourcesIcon from '../../../../assets/share_circle.svg';
 import {
   WorkplaceSearchPageTemplate,
   PersonalDashboardLayout,
@@ -46,9 +46,8 @@ import {
 } from './constants';
 
 export const AddSourceList: React.FC = () => {
-  const { contentSources, dataLoading, availableSources, configuredSources } = useValues(
-    SourcesLogic
-  );
+  const { contentSources, dataLoading, availableSources, configuredSources } =
+    useValues(SourcesLogic);
 
   const { initializeSources, resetSourcesState } = useActions(SourcesLogic);
 
@@ -104,7 +103,9 @@ export const AddSourceList: React.FC = () => {
     <Layout
       pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE]}
       pageViewTelemetry="add_source"
-      pageHeader={{ pageTitle: PAGE_TITLE, description: PAGE_DESCRIPTION }}
+      pageHeader={
+        dataLoading ? undefined : { pageTitle: PAGE_TITLE, description: PAGE_DESCRIPTION }
+      }
       isLoading={dataLoading}
     >
       {!isOrganization && (
@@ -141,7 +142,7 @@ export const AddSourceList: React.FC = () => {
                 <EuiSpacer size="s" />
                 <EuiSpacer size="xxl" />
                 <EuiEmptyPrompt
-                  iconType={noSharedSourcesIcon}
+                  iconType={noOrgSourcesIcon}
                   title={<h2>{ADD_SOURCE_EMPTY_TITLE}</h2>}
                   body={<p>{ADD_SOURCE_EMPTY_BODY}</p>}
                 />

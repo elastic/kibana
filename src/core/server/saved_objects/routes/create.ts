@@ -8,11 +8,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
-import { CoreUsageDataSetup } from '../../core_usage_data';
+import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import { catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
-  coreUsageData: CoreUsageDataSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
 }
 
 export const registerCreateRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
@@ -47,13 +47,8 @@ export const registerCreateRoute = (router: IRouter, { coreUsageData }: RouteDep
     catchAndReturnBoomErrors(async (context, req, res) => {
       const { type, id } = req.params;
       const { overwrite } = req.query;
-      const {
-        attributes,
-        migrationVersion,
-        coreMigrationVersion,
-        references,
-        initialNamespaces,
-      } = req.body;
+      const { attributes, migrationVersion, coreMigrationVersion, references, initialNamespaces } =
+        req.body;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});

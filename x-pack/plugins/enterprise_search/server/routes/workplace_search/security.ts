@@ -15,7 +15,7 @@ export function registerSecurityRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/security',
+      path: '/internal/workplace_search/org/security',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -30,7 +30,7 @@ export function registerSecuritySourceRestrictionsRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/security/source_restrictions',
+      path: '/internal/workplace_search/org/security/source_restrictions',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -40,7 +40,7 @@ export function registerSecuritySourceRestrictionsRoute({
 
   router.patch(
     {
-      path: '/api/workplace_search/org/security/source_restrictions',
+      path: '/internal/workplace_search/org/security/source_restrictions',
       validate: {
         body: schema.object({
           isEnabled: schema.boolean(),

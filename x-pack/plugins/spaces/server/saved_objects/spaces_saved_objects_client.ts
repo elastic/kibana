@@ -9,9 +9,11 @@ import Boom from '@hapi/boom';
 
 import type {
   ISavedObjectTypeRegistry,
+  SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
+  SavedObjectsBulkResolveObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
@@ -30,11 +32,24 @@ import type {
   SavedObjectsUpdateOptions,
 } from 'src/core/server';
 
-import { SavedObjectsUtils } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID } from '../../common/constants';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
 import type { ISpacesClient } from '../spaces_client';
 import type { SpacesServiceStart } from '../spaces_service/spaces_service';
+
+interface Left<L> {
+  tag: 'Left';
+  value: L;
+}
+
+interface Right<R> {
+  tag: 'Right';
+  value: R;
+}
+
+type Either<L = unknown, R = L> = Left<L> | Right<R>;
+const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => either.tag === 'Left';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
@@ -59,6 +74,7 @@ const throwErrorIfNamespaceSpecified = (options: any) => {
 
 export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly client: SavedObjectsClientContract;
+  private readonly typeRegistry: ISavedObjectTypeRegistry;
   private readonly spaceId: string;
   private readonly types: string[];
   private readonly spacesClient: ISpacesClient;
@@ -70,20 +86,14 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     const spacesService = getSpacesService();
 
     this.client = baseClient;
+    this.typeRegistry = typeRegistry;
     this.spacesClient = spacesService.createSpacesClient(request);
     this.spaceId = spacesService.getSpaceId(request);
     this.types = typeRegistry.getAllTypes().map((t) => t.name);
     this.errors = baseClient.errors;
   }
 
-  /**
-   * Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are
-   * multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten.
-   *
-   * @param objects
-   * @param options
-   */
-  public async checkConflicts(
+  async checkConflicts(
     objects: SavedObjectsCheckConflictsObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ) {
@@ -95,18 +105,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * Persists an object
-   *
-   * @param {string} type
-   * @param {object} attributes
-   * @param {object} [options={}]
-   * @property {string} [options.id] - force id on creation, not recommended
-   * @property {boolean} [options.overwrite=false]
-   * @property {string} [options.namespace]
-   * @returns {promise} - { id, type, version, attributes }
-   */
-  public async create<T = unknown>(
+  async create<T = unknown>(
     type: string,
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
@@ -119,16 +118,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * Creates multiple documents at once
-   *
-   * @param {array} objects - [{ type, id, attributes }]
-   * @param {object} [options={}]
-   * @property {boolean} [options.overwrite=false] - overwrites existing documents
-   * @property {string} [options.namespace]
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
-   */
-  public async bulkCreate<T = unknown>(
+  async bulkCreate<T = unknown>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsBaseOptions = {}
   ) {
@@ -140,16 +130,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * Deletes an object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
-   * @returns {promise}
-   */
-  public async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
+  async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.delete(type, id, {
@@ -158,49 +139,20 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * @param {object} [options={}]
-   * @property {(string|Array<string>)} [options.type]
-   * @property {string} [options.search]
-   * @property {string} [options.defaultSearchOperator]
-   * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
-   *                                        Query field argument for more information
-   * @property {integer} [options.page=1]
-   * @property {integer} [options.perPage=20]
-   * @property {string} [options.sortField]
-   * @property {string} [options.sortOrder]
-   * @property {Array<string>} [options.fields]
-   * @property {string} [options.namespaces]
-   * @property {object} [options.hasReference] - { type, id }
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
-   */
-  public async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {
-    throwErrorIfNamespaceSpecified(options);
-
-    let namespaces = options.namespaces;
-    if (namespaces) {
-      try {
-        const availableSpaces = await this.spacesClient.getAll({ purpose: 'findSavedObjects' });
-        if (namespaces.includes(ALL_SPACES_ID)) {
-          namespaces = availableSpaces.map((space) => space.id);
-        } else {
-          namespaces = namespaces.filter((namespace) =>
-            availableSpaces.some((space) => space.id === namespace)
-          );
-        }
-        if (namespaces.length === 0) {
-          // return empty response, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
-          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
-        }
-      } catch (err) {
-        if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
-          // return empty response, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
-          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
-        }
-        throw err;
+  async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {
+    let namespaces: string[];
+    try {
+      namespaces = await this.getSearchableSpaces(options.namespaces);
+    } catch (err) {
+      if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+        // return empty response, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
+        return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
       }
-    } else {
-      namespaces = [this.spaceId];
+      throw err;
+    }
+    if (namespaces.length === 0) {
+      // return empty response, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
+      return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
     }
 
     return await this.client.find<T, A>({
@@ -212,42 +164,70 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * Returns an array of objects by id
-   *
-   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
-   * @example
-   *
-   * bulkGet([
-   *   { id: 'one', type: 'config' },
-   *   { id: 'foo', type: 'index-pattern' }
-   * ])
-   */
-  public async bulkGet<T = unknown>(
+  async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ) {
     throwErrorIfNamespaceSpecified(options);
 
-    return await this.client.bulkGet<T>(objects, {
-      ...options,
-      namespace: spaceIdToNamespace(this.spaceId),
-    });
+    let availableSpacesPromise: Promise<string[]> | undefined;
+    const getAvailableSpaces = async () => {
+      if (!availableSpacesPromise) {
+        availableSpacesPromise = this.getSearchableSpaces([ALL_SPACES_ID]).catch((err) => {
+          if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+            return []; // the user doesn't have access to any spaces
+          } else {
+            throw err;
+          }
+        });
+      }
+      return availableSpacesPromise;
+    };
+
+    const expectedResults = await Promise.all(
+      objects.map<Promise<Either<SavedObjectsBulkGetObject>>>(async (object) => {
+        const { namespaces, type } = object;
+        if (namespaces?.includes(ALL_SPACES_ID)) {
+          // If searching for an isolated object in all spaces, we may need to return a 400 error for consistency with the validation at the
+          // repository level. This is needed if there is only one space available *and* the user is authorized to access the object in that
+          // space; in that case, we don't want to unintentionally bypass the repository's validation by deconstructing the '*' identifier
+          // into all available spaces.
+          const tag =
+            !this.typeRegistry.isNamespaceAgnostic(type) && !this.typeRegistry.isShareable(type)
+              ? 'Left'
+              : 'Right';
+          return { tag, value: { ...object, namespaces: await getAvailableSpaces() } };
+        }
+        return { tag: 'Right', value: object };
+      })
+    );
+
+    const objectsToGet = expectedResults.map(({ value }) => value);
+    const { saved_objects: responseObjects } = objectsToGet.length
+      ? await this.client.bulkGet<T>(objectsToGet, {
+          ...options,
+          namespace: spaceIdToNamespace(this.spaceId),
+        })
+      : { saved_objects: [] };
+    return {
+      saved_objects: expectedResults.map((expectedResult, i) => {
+        const actualResult = responseObjects[i];
+        if (isLeft(expectedResult)) {
+          const { type, id } = expectedResult.value;
+          return {
+            type,
+            id,
+            error: SavedObjectsErrorHelpers.createBadRequestError(
+              '"namespaces" can only specify a single space when used with space-isolated types'
+            ).output.payload,
+          } as unknown as SavedObject<T>;
+        }
+        return actualResult;
+      }),
+    };
   }
 
-  /**
-   * Gets a single object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
-   * @returns {promise} - { id, type, version, attributes }
-   */
-  public async get<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
+  async get<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.get<T>(type, id, {
@@ -256,20 +236,19 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * Resolves a single object, using any legacy URL alias if it exists
-   *
-   * @param type - The type of SavedObject to retrieve
-   * @param id - The ID of the SavedObject to retrieve
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
-   * @returns {promise} - { saved_object, outcome }
-   */
-  public async resolve<T = unknown>(
-    type: string,
-    id: string,
+  async bulkResolve<T = unknown>(
+    objects: SavedObjectsBulkResolveObject[],
     options: SavedObjectsBaseOptions = {}
   ) {
+    throwErrorIfNamespaceSpecified(options);
+
+    return await this.client.bulkResolve<T>(objects, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  async resolve<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.resolve<T>(type, id, {
@@ -278,17 +257,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * Updates an object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options={}]
-   * @property {string} options.version - ensures version matches that of persisted object
-   * @property {string} [options.namespace]
-   * @returns {promise}
-   */
-  public async update<T = unknown>(
+  async update<T = unknown>(
     type: string,
     id: string,
     attributes: Partial<T>,
@@ -302,19 +271,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * Updates an array of objects by id
-   *
-   * @param {array} objects - an array ids, or an array of objects containing id, type, attributes and optionally version, references and namespace
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
-   * @example
-   *
-   * bulkUpdate([
-   *   { id: 'one', type: 'config', attributes: { title: 'My new title'}, version: 'd7rhfk47d=' },
-   *   { id: 'foo', type: 'index-pattern', attributes: {} }
-   * ])
-   */
-  public async bulkUpdate<T = unknown>(
+  async bulkUpdate<T = unknown>(
     objects: Array<SavedObjectsBulkUpdateObject<T>> = [],
     options: SavedObjectsBaseOptions = {}
   ) {
@@ -325,14 +282,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * Remove outward references to given object.
-   *
-   * @param type
-   * @param id
-   * @param options
-   */
-  public async removeReferencesTo(
+  async removeReferencesTo(
     type: string,
     id: string,
     options: SavedObjectsRemoveReferencesToOptions = {}
@@ -344,13 +294,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * Gets all references and transitive references of the listed objects. Ignores any object that is not a multi-namespace type.
-   *
-   * @param objects
-   * @param options
-   */
-  public async collectMultiNamespaceReferences(
+  async collectMultiNamespaceReferences(
     objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
     options: SavedObjectsCollectMultiNamespaceReferencesOptions = {}
   ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
@@ -361,15 +305,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * Updates one or more objects to add and/or remove them from specified spaces.
-   *
-   * @param objects
-   * @param spacesToAdd
-   * @param spacesToRemove
-   * @param options
-   */
-  public async updateObjectsSpaces(
+  async updateObjectsSpaces(
     objects: SavedObjectsUpdateObjectsSpacesObject[],
     spacesToAdd: string[],
     spacesToRemove: string[],
@@ -382,36 +318,31 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
-   * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
-   *
-   * @param {string|Array<string>} type
-   * @param {object} [options] - {@link SavedObjectsOpenPointInTimeOptions}
-   * @property {string} [options.keepAlive]
-   * @property {string} [options.preference]
-   * @returns {promise} - { id: string }
-   */
   async openPointInTimeForType(
     type: string | string[],
     options: SavedObjectsOpenPointInTimeOptions = {}
   ) {
-    throwErrorIfNamespaceSpecified(options);
+    let namespaces: string[];
+    try {
+      namespaces = await this.getSearchableSpaces(options.namespaces);
+    } catch (err) {
+      if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+        // throw bad request since the user is unauthorized in any space
+        throw SavedObjectsErrorHelpers.createBadRequestError();
+      }
+      throw err;
+    }
+    if (namespaces.length === 0) {
+      // throw bad request if no valid spaces were found.
+      throw SavedObjectsErrorHelpers.createBadRequestError();
+    }
+
     return await this.client.openPointInTimeForType(type, {
       ...options,
-      namespace: spaceIdToNamespace(this.spaceId),
+      namespaces,
     });
   }
 
-  /**
-   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES
-   * via the Elasticsearch client, and is included in the Saved Objects Client
-   * as a convenience for consumers who are using `openPointInTimeForType`.
-   *
-   * @param {string} id - ID returned from `openPointInTimeForType`
-   * @param {object} [options] - {@link SavedObjectsClosePointInTimeOptions}
-   * @returns {promise} - { succeeded: boolean; num_freed: number }
-   */
   async closePointInTime(id: string, options: SavedObjectsClosePointInTimeOptions = {}) {
     throwErrorIfNamespaceSpecified(options);
     return await this.client.closePointInTime(id, {
@@ -420,17 +351,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     });
   }
 
-  /**
-   * Returns a generator to help page through large sets of saved objects.
-   *
-   * The generator wraps calls to `SavedObjects.find` and iterates over
-   * multiple pages of results using `_pit` and `search_after`. This will
-   * open a new Point In Time (PIT), and continue paging until a set of
-   * results is received that's smaller than the designated `perPage`.
-   *
-   * @param {object} findOptions - {@link SavedObjectsCreatePointInTimeFinderOptions}
-   * @param {object} [dependencies] - {@link SavedObjectsCreatePointInTimeFinderDependencies}
-   */
   createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
@@ -445,5 +365,20 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       // Include dependencies last so that subsequent SO client wrappers have their settings applied.
       ...dependencies,
     });
+  }
+
+  private async getSearchableSpaces(namespaces?: string[]): Promise<string[]> {
+    if (namespaces) {
+      const availableSpaces = await this.spacesClient.getAll({ purpose: 'findSavedObjects' });
+      if (namespaces.includes(ALL_SPACES_ID)) {
+        return availableSpaces.map((space) => space.id);
+      } else {
+        return namespaces.filter((namespace) =>
+          availableSpaces.some((space) => space.id === namespace)
+        );
+      }
+    } else {
+      return [this.spaceId];
+    }
   }
 }

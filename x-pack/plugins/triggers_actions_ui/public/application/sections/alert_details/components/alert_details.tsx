@@ -21,13 +21,17 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiButton,
+  EuiLoadingSpinner,
+  EuiIconTip,
+  EuiEmptyPrompt,
+  EuiPageTemplate,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
-import { Alert, AlertType, ActionType } from '../../../../types';
+import { Alert, AlertType, ActionType, ActionConnector } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
@@ -39,6 +43,7 @@ import { routeToRuleDetails } from '../../../constants';
 import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { alertReducer } from '../../alert_form/alert_reducer';
+import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 
 export type AlertDetailsProps = {
   alert: Alert;
@@ -60,7 +65,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const history = useHistory();
   const {
     application: { capabilities },
-    alertTypeRegistry,
+    ruleTypeRegistry,
     actionTypeRegistry,
     setBreadcrumbs,
     chrome,
@@ -71,6 +76,9 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
+  const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
+    useState<boolean>(false);
+
   // Set breadcrumb and page title
   useEffect(() => {
     setBreadcrumbs([
@@ -78,6 +86,28 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
       getAlertDetailsBreadcrumb(alert.id, alert.name),
     ]);
     chrome.docTitle.change(getCurrentDocTitle('alerts'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Determine if any attached action has an issue with its connector
+  useEffect(() => {
+    (async () => {
+      let loadedConnectors: ActionConnector[] = [];
+      try {
+        loadedConnectors = await loadConnectors({ http });
+      } catch (err) {
+        loadedConnectors = [];
+      }
+
+      if (loadedConnectors.length > 0) {
+        const hasActionWithBrokenConnector = alert.actions.some(
+          (action) => !loadedConnectors.find((connector) => connector.id === action.id)
+        );
+        if (setHasActionsWithBrokenConnector) {
+          setHasActionsWithBrokenConnector(hasActionWithBrokenConnector);
+        }
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -92,13 +122,15 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     // can the user save the alert
     canSaveAlert &&
     // is this alert type editable from within Alerts Management
-    (alertTypeRegistry.has(alert.alertTypeId)
-      ? !alertTypeRegistry.get(alert.alertTypeId).requiresAppContext
+    (ruleTypeRegistry.has(alert.alertTypeId)
+      ? !ruleTypeRegistry.get(alert.alertTypeId).requiresAppContext
       : false);
 
   const alertActions = alert.actions;
   const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
+  const [isEnabledUpdating, setIsEnabledUpdating] = useState<boolean>(false);
+  const [isMutedUpdating, setIsMutedUpdating] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
@@ -138,7 +170,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 setEditFlyoutVisibility(false);
               }}
               actionTypeRegistry={actionTypeRegistry}
-              alertTypeRegistry={alertTypeRegistry}
+              ruleTypeRegistry={ruleTypeRegistry}
+              ruleType={alertType}
               onSave={setAlert}
             />
           )}
@@ -194,13 +227,27 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             {uniqueActions && uniqueActions.length ? (
               <>
                 <EuiText size="s">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsTex"
-                      defaultMessage="Actions"
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsTex"
+                    defaultMessage="Actions"
+                  />{' '}
+                  {hasActionsWithBrokenConnector && (
+                    <EuiIconTip
+                      data-test-subj="actionWithBrokenConnector"
+                      type="alert"
+                      color="danger"
+                      content={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsWarningTooltip',
+                        {
+                          defaultMessage:
+                            'Unable to load one of the connectors associated with this rule. Edit the rule to select a new connector.',
+                        }
+                      )}
+                      position="right"
                     />
-                  </p>
+                  )}
                 </EuiText>
+
                 <EuiSpacer size="xs" />
                 <EuiFlexGroup wrap gutterSize="s">
                   {uniqueActions.map((action, index) => (
@@ -218,54 +265,92 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             <EuiSpacer />
             <EuiFlexGroup justifyContent="flexEnd" wrap responsive={false} gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  name="disable"
-                  disabled={!canSaveAlert || !alertType.enabledInLicense}
-                  checked={!isEnabled}
-                  data-test-subj="disableSwitch"
-                  onChange={async () => {
-                    if (isEnabled) {
-                      setIsEnabled(false);
-                      await disableAlert(alert);
-                      // Reset dismiss if previously clicked
-                      setDissmissAlertErrors(false);
-                    } else {
-                      setIsEnabled(true);
-                      await enableAlert(alert);
+                {isEnabledUpdating ? (
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiLoadingSpinner data-test-subj="enableSpinner" size="m" />
+                    </EuiFlexItem>
+
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.enableLoadingTitle"
+                          defaultMessage="Enable"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : (
+                  <EuiSwitch
+                    name="enable"
+                    disabled={!canSaveAlert || !alertType.enabledInLicense}
+                    checked={isEnabled}
+                    data-test-subj="enableSwitch"
+                    onChange={async () => {
+                      setIsEnabledUpdating(true);
+                      if (isEnabled) {
+                        setIsEnabled(false);
+                        await disableAlert(alert);
+                        // Reset dismiss if previously clicked
+                        setDissmissAlertErrors(false);
+                      } else {
+                        setIsEnabled(true);
+                        await enableAlert(alert);
+                      }
+                      requestRefresh();
+                      setIsEnabledUpdating(false);
+                    }}
+                    label={
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.enableTitle"
+                        defaultMessage="Enable"
+                      />
                     }
-                    requestRefresh();
-                  }}
-                  label={
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.disableTitle"
-                      defaultMessage="Disable"
-                    />
-                  }
-                />
+                  />
+                )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  name="mute"
-                  checked={isMuted}
-                  disabled={!canSaveAlert || !isEnabled || !alertType.enabledInLicense}
-                  data-test-subj="muteSwitch"
-                  onChange={async () => {
-                    if (isMuted) {
-                      setIsMuted(false);
-                      await unmuteAlert(alert);
-                    } else {
-                      setIsMuted(true);
-                      await muteAlert(alert);
+                {isMutedUpdating ? (
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiLoadingSpinner size="m" />
+                    </EuiFlexItem>
+
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteLoadingTitle"
+                          defaultMessage="Mute"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : (
+                  <EuiSwitch
+                    name="mute"
+                    checked={isMuted}
+                    disabled={!canSaveAlert || !isEnabled || !alertType.enabledInLicense}
+                    data-test-subj="muteSwitch"
+                    onChange={async () => {
+                      setIsMutedUpdating(true);
+                      if (isMuted) {
+                        setIsMuted(false);
+                        await unmuteAlert(alert);
+                      } else {
+                        setIsMuted(true);
+                        await muteAlert(alert);
+                      }
+                      requestRefresh();
+                      setIsMutedUpdating(false);
+                    }}
+                    label={
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteTitle"
+                        defaultMessage="Mute"
+                      />
                     }
-                    requestRefresh();
-                  }}
-                  label={
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteTitle"
-                      defaultMessage="Mute"
-                    />
-                  }
-                />
+                  />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -317,6 +402,42 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}
+        {hasActionsWithBrokenConnector && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiSpacer size="s" />
+              <EuiCallOut
+                color="warning"
+                data-test-subj="actionWithBrokenConnectorWarningBanner"
+                size="s"
+                title={i18n.translate(
+                  'xpack.triggersActionsUI.sections.alertDetails.actionWithBrokenConnectorWarningBannerTitle',
+                  {
+                    defaultMessage:
+                      'There is an issue with one of the connectors associated with this rule.',
+                  }
+                )}
+              >
+                {hasEditButton && (
+                  <EuiFlexGroup gutterSize="s" wrap={true}>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="actionWithBrokenConnectorWarningBannerEdit"
+                        color="warning"
+                        onClick={() => setEditFlyoutVisibility(true)}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.actionWithBrokenConnectorWarningBannerEditText"
+                          defaultMessage="Edit rule"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+              </EuiCallOut>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
         <EuiFlexGroup>
           <EuiFlexItem>
             {alert.enabled ? (
@@ -329,23 +450,46 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             ) : (
               <>
                 <EuiSpacer />
-                <EuiCallOut
-                  title={i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertDetails.alerts.disabledRuleTitle',
-                    {
-                      defaultMessage: 'Disabled Rule',
+                <EuiPageTemplate template="empty">
+                  <EuiEmptyPrompt
+                    data-test-subj="disabledEmptyPrompt"
+                    title={
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.alerts.disabledRuleTitle"
+                          defaultMessage="Disabled Rule"
+                        />
+                      </h2>
                     }
-                  )}
-                  color="warning"
-                  iconType="help"
-                >
-                  <p>
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledRule"
-                      defaultMessage="This rule is disabled and cannot be displayed. Toggle Disable ↑ to activate it."
-                    />
-                  </p>
-                </EuiCallOut>
+                    body={
+                      <>
+                        <p>
+                          <FormattedMessage
+                            id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledRule"
+                            defaultMessage="This rule is disabled and cannot be displayed."
+                          />
+                        </p>
+                      </>
+                    }
+                    actions={[
+                      <EuiButton
+                        data-test-subj="disabledEmptyPromptAction"
+                        color="primary"
+                        fill
+                        disabled={isEnabledUpdating}
+                        onClick={async () => {
+                          setIsEnabledUpdating(true);
+                          setIsEnabled(true);
+                          await enableAlert(alert);
+                          requestRefresh();
+                          setIsEnabledUpdating(false);
+                        }}
+                      >
+                        Enable
+                      </EuiButton>,
+                    ]}
+                  />
+                </EuiPageTemplate>
               </>
             )}
           </EuiFlexItem>

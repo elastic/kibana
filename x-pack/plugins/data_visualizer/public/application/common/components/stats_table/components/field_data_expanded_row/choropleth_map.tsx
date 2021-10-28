@@ -6,19 +6,21 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { EuiFlexItem, EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
+import { EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   FIELD_ORIGIN,
+  LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
-} from '../../../../../../../../maps/common/constants';
+  VectorLayerDescriptor,
+} from '../../../../../../../../maps/common';
 import { EMSTermJoinConfig } from '../../../../../../../../maps/public';
-import { VectorLayerDescriptor } from '../../../../../../../../maps/common/descriptor_types';
 import { EmbeddedMapComponent } from '../../../embedded_map';
 import { FieldVisStats } from '../../../../../../../common/types';
+import { ExpandedRowPanel } from './expanded_row_panel';
 
 export const getChoroplethTopValuesLayer = (
   fieldName: string,
@@ -85,7 +87,7 @@ export const getChoroplethTopValuesLayer = (
       },
       isTimeAware: true,
     },
-    type: 'VECTOR',
+    type: LAYER_TYPE.VECTOR,
   };
 };
 
@@ -103,14 +105,19 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   );
 
   return (
-    <EuiFlexItem data-test-subj={'fileDataVisualizerChoroplethMapTopValues'}>
-      <div style={{ width: '100%', minHeight: 300 }}>
+    <ExpandedRowPanel
+      dataTestSubj={'fileDataVisualizerChoroplethMapTopValues'}
+      className={'dvPanel__wrapper'}
+      grow={true}
+    >
+      <div className={'dvMap__wrapper'}>
         <EmbeddedMapComponent layerList={layerList} />
       </div>
+
       {isTopValuesSampled === true && (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiText size="xs" textAlign={'left'}>
+        <div>
+          <EuiSpacer size={'s'} />
+          <EuiText size="xs" textAlign={'center'}>
             <FormattedMessage
               id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"
               defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
@@ -119,8 +126,8 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
               }}
             />
           </EuiText>
-        </>
+        </div>
       )}
-    </EuiFlexItem>
+    </ExpandedRowPanel>
   );
 };

@@ -13,8 +13,8 @@ import { isInvestigationTimeEnrichment } from './helpers';
 
 export const getTooltipTitle = (type: string | undefined) =>
   isInvestigationTimeEnrichment(type)
-    ? i18n.INVESTIGATION_TOOLTIP_TITLE
-    : i18n.INDICATOR_TOOLTIP_TITLE;
+    ? i18n.INVESTIGATION_ENRICHMENT_TITLE
+    : i18n.INDICATOR_ENRICHMENT_TITLE;
 
 export const getTooltipContent = (type: string | undefined) =>
   isInvestigationTimeEnrichment(type)
@@ -24,7 +24,7 @@ export const getTooltipContent = (type: string | undefined) =>
 export const EnrichmentIcon: React.FC<{ type: string | undefined }> = ({ type }) => {
   return (
     <EuiToolTip title={getTooltipTitle(type)} content={getTooltipContent(type)}>
-      <EuiIcon type="logoSecurity" size="s" />
+      <EuiIcon type="iInCircle" size="m" />
     </EuiToolTip>
   );
 };

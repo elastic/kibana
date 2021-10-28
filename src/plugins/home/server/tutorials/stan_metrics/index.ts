@@ -23,16 +23,16 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'stanMetrics',
     name: i18n.translate('home.tutorials.stanMetrics.nameTitle', {
-      defaultMessage: 'STAN metrics',
+      defaultMessage: 'STAN Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.stanMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from the STAN server.',
+      defaultMessage: 'Collect metrics from STAN servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.stanMetrics.longDescription', {
       defaultMessage:
-        'The `stan` Metricbeat module fetches monitoring metrics from STAN. \
+        'The `stan` Metricbeat module fetches metrics from STAN. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-stan.html',
@@ -58,5 +58,6 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['message_queue', 'kubernetes'],
   };
 }

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   CoreSetup,
   CoreStart,
@@ -29,7 +28,7 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
-import { alertTypeInitializers } from '../lib/alert_types';
+import { alertTypeInitializers, legacyAlertTypeInitializers } from '../lib/alert_types';
 import { FleetStart } from '../../../fleet/public';
 import {
   FetchDataParams,
@@ -43,6 +42,7 @@ import {
   LazySyntheticsPolicyEditExtension,
 } from '../components/fleet_package';
 import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
+import { Start as InspectorPluginStart } from '../../../../../src/plugins/inspector/public';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -57,6 +57,7 @@ export interface ClientPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   fleet?: FleetStart;
   observability: ObservabilityPublicStart;
+  inspector: InspectorPluginStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -70,7 +71,8 @@ export type ClientSetup = void;
 export type ClientStart = void;
 
 export class UptimePlugin
-  implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
+  implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
+{
   constructor(_context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
@@ -141,6 +143,36 @@ export class UptimePlugin
       )
     );
 
+    const { observabilityRuleTypeRegistry } = plugins.observability;
+
+    core.getStartServices().then(([coreStart, clientPluginsStart]) => {
+      alertTypeInitializers.forEach((init) => {
+        const alertInitializer = init({
+          core: coreStart,
+          plugins: clientPluginsStart,
+        });
+        if (
+          clientPluginsStart.triggersActionsUi &&
+          !clientPluginsStart.triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)
+        ) {
+          observabilityRuleTypeRegistry.register(alertInitializer);
+        }
+      });
+
+      legacyAlertTypeInitializers.forEach((init) => {
+        const alertInitializer = init({
+          core: coreStart,
+          plugins: clientPluginsStart,
+        });
+        if (
+          clientPluginsStart.triggersActionsUi &&
+          !clientPluginsStart.triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)
+        ) {
+          plugins.triggersActionsUi.ruleTypeRegistry.register(alertInitializer);
+        }
+      });
+    });
+
     core.application.register({
       id: PLUGIN.ID,
       euiIconType: 'logoObservability',
@@ -171,26 +203,12 @@ export class UptimePlugin
         const [coreStart, corePlugins] = await core.getStartServices();
 
         const { renderApp } = await import('./render_app');
-
         return renderApp(coreStart, plugins, corePlugins, params);
       },
     });
   }
 
   public start(start: CoreStart, plugins: ClientPluginsStart): void {
-    alertTypeInitializers.forEach((init) => {
-      const alertInitializer = init({
-        core: start,
-        plugins,
-      });
-      if (
-        plugins.triggersActionsUi &&
-        !plugins.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
-      ) {
-        plugins.triggersActionsUi.alertTypeRegistry.register(alertInitializer);
-      }
-    });
-
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
@@ -203,6 +221,7 @@ export class UptimePlugin
       registerExtension({
         package: 'synthetics',
         view: 'package-policy-edit',
+        useLatestPackageVersion: true,
         Component: LazySyntheticsPolicyEditExtension,
       });
 

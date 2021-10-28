@@ -8,7 +8,8 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
-import { errors as EsErrors, estypes } from '@elastic/elasticsearch';
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { checkForUnknownDocs } from './check_for_unknown_docs';
 
@@ -97,9 +98,12 @@ describe('checkForUnknownDocs', () => {
     const result = await task();
 
     expect(Either.isRight(result)).toBe(true);
+    expect((result as Either.Right<any>).right).toEqual({
+      unknownDocs: [],
+    });
   });
 
-  it('resolves with `Either.left` when unknown docs are found', async () => {
+  it('resolves with `Either.right` when unknown docs are found', async () => {
     const client = elasticsearchClientMock.createInternalClient(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
@@ -120,9 +124,8 @@ describe('checkForUnknownDocs', () => {
 
     const result = await task();
 
-    expect(Either.isLeft(result)).toBe(true);
-    expect((result as Either.Left<any>).left).toEqual({
-      type: 'unknown_docs_found',
+    expect(Either.isRight(result)).toBe(true);
+    expect((result as Either.Right<any>).right).toEqual({
       unknownDocs: [
         { id: '12', type: 'foo' },
         { id: '14', type: 'bar' },
@@ -148,9 +151,8 @@ describe('checkForUnknownDocs', () => {
 
     const result = await task();
 
-    expect(Either.isLeft(result)).toBe(true);
-    expect((result as Either.Left<any>).left).toEqual({
-      type: 'unknown_docs_found',
+    expect(Either.isRight(result)).toBe(true);
+    expect((result as Either.Right<any>).right).toEqual({
       unknownDocs: [{ id: '12', type: 'unknown' }],
     });
   });

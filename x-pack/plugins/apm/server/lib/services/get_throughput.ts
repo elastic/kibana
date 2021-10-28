@@ -8,65 +8,67 @@
 import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import {
   SERVICE_NAME,
+  TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import {
-  environmentQuery,
-  kqlQuery,
-  rangeQuery,
-} from '../../../server/utils/queries';
-import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
-import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
+import { calculateThroughputWithInterval } from '../helpers/calculate_throughput';
 
 interface Options {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   searchAggregatedTransactions: boolean;
   serviceName: string;
   setup: Setup;
   transactionType: string;
+  transactionName?: string;
   start: number;
   end: number;
+  intervalString: string;
+  bucketSize: number;
 }
 
-function fetcher({
+export async function getThroughput({
   environment,
   kuery,
   searchAggregatedTransactions,
   serviceName,
   setup,
   transactionType,
+  transactionName,
   start,
   end,
+  intervalString,
+  bucketSize,
 }: Options) {
   const { apmEventClient } = setup;
-  const { intervalString } = getBucketSizeForAggregatedTransactions({
-    start,
-    end,
-    searchAggregatedTransactions,
-  });
+
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    ...getDocumentTypeFilterForAggregatedTransactions(
-      searchAggregatedTransactions
-    ),
+    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
 
+  if (transactionName) {
+    filter.push({
+      term: {
+        [TRANSACTION_NAME]: transactionName,
+      },
+    });
+  }
+
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -79,29 +81,24 @@ function fetcher({
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },
-          aggs: {
-            throughput: {
-              rate: {
-                unit: 'minute' as const,
-              },
-            },
-          },
         },
       },
     },
   };
 
-  return apmEventClient.search('get_throughput_for_service', params);
-}
-
-export async function getThroughput(options: Options) {
-  const response = await fetcher(options);
+  const response = await apmEventClient.search(
+    'get_throughput_for_service',
+    params
+  );
 
   return (
     response.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key,
-        y: bucket.throughput.value,
+        y: calculateThroughputWithInterval({
+          bucketSize,
+          value: bucket.doc_count,
+        }),
       };
     }) ?? []
   );

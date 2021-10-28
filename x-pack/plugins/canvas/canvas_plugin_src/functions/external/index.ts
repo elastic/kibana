@@ -10,4 +10,4 @@ import { savedMap } from './saved_map';
 import { savedSearch } from './saved_search';
 import { savedVisualization } from './saved_visualization';
 
-export const functions = [savedLens, savedMap, savedSearch, savedVisualization];
+export const functions = [savedLens, savedMap, savedVisualization, savedSearch];

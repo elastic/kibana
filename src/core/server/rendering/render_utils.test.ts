@@ -21,8 +21,8 @@ describe('getStylesheetPaths', () => {
           })
         ).toMatchInlineSnapshot(`
           Array [
-            "/base-path/9000/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.css",
-            "/base-path/9000/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.v7.dark.css",
+            "/base-path/9000/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.v7.dark.css",
+            "/base-path/9000/bundles/kbn-ui-shared-deps-src/kbn-ui-shared-deps-src.css",
             "/base-path/node_modules/@kbn/ui-framework/dist/kui_dark.css",
             "/base-path/ui/legacy_dark_theme.css",
           ]
@@ -40,8 +40,8 @@ describe('getStylesheetPaths', () => {
           })
         ).toMatchInlineSnapshot(`
           Array [
-            "/base-path/17/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.css",
-            "/base-path/17/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.v8.dark.css",
+            "/base-path/17/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.v8.dark.css",
+            "/base-path/17/bundles/kbn-ui-shared-deps-src/kbn-ui-shared-deps-src.css",
             "/base-path/node_modules/@kbn/ui-framework/dist/kui_dark.css",
             "/base-path/ui/legacy_dark_theme.css",
           ]
@@ -61,8 +61,8 @@ describe('getStylesheetPaths', () => {
           })
         ).toMatchInlineSnapshot(`
           Array [
-            "/base-path/42/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.css",
-            "/base-path/42/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.v7.light.css",
+            "/base-path/42/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.v7.light.css",
+            "/base-path/42/bundles/kbn-ui-shared-deps-src/kbn-ui-shared-deps-src.css",
             "/base-path/node_modules/@kbn/ui-framework/dist/kui_light.css",
             "/base-path/ui/legacy_light_theme.css",
           ]
@@ -80,8 +80,8 @@ describe('getStylesheetPaths', () => {
           })
         ).toMatchInlineSnapshot(`
           Array [
-            "/base-path/69/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.css",
-            "/base-path/69/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.v8.light.css",
+            "/base-path/69/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.v8.light.css",
+            "/base-path/69/bundles/kbn-ui-shared-deps-src/kbn-ui-shared-deps-src.css",
             "/base-path/node_modules/@kbn/ui-framework/dist/kui_light.css",
             "/base-path/ui/legacy_light_theme.css",
           ]

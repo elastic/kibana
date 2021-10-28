@@ -13,8 +13,9 @@ import type {
 } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import mappings from './mappings.json';
-import { getMigrations } from './migrations';
-import { RawAction } from '../types';
+import { getActionsMigrations } from './actions_migrations';
+import { getActionTaskParamsMigrations } from './action_task_params_migrations';
+import { PreConfiguredAction, RawAction } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { ActionTypeRegistry } from '../action_type_registry';
@@ -22,19 +23,24 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
+import { getOldestIdleActionTask } from '../../../task_manager/server';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  actionTypeRegistry: ActionTypeRegistry
+  actionTypeRegistry: ActionTypeRegistry,
+  taskManagerIndex: string,
+  preconfiguredActions: PreConfiguredAction[]
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
     hidden: true,
-    namespaceType: 'single',
+    namespaceType: 'multiple-isolated',
+    convertToMultiNamespaceTypeVersion: '8.0.0',
     mappings: mappings.action as SavedObjectsTypeMappingDefinition,
-    migrations: getMigrations(encryptedSavedObjects),
+    migrations: getActionsMigrations(encryptedSavedObjects),
     management: {
+      displayName: 'connector',
       defaultSearchField: 'name',
       importableAndExportable: true,
       getTitle(savedObject: SavedObject<RawAction>) {
@@ -67,8 +73,24 @@ export function setupSavedObjects(
   savedObjects.registerType({
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     hidden: true,
-    namespaceType: 'single',
+    namespaceType: 'multiple-isolated',
+    convertToMultiNamespaceTypeVersion: '8.0.0',
     mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
+    migrations: getActionTaskParamsMigrations(encryptedSavedObjects, preconfiguredActions),
+    excludeOnUpgrade: async ({ readonlyEsClient }) => {
+      const oldestIdleActionTask = await getOldestIdleActionTask(
+        readonlyEsClient,
+        taskManagerIndex
+      );
+      return {
+        bool: {
+          must: [
+            { term: { type: 'action_task_params' } },
+            { range: { updated_at: { lt: oldestIdleActionTask } } },
+          ],
+        },
+      };
+    },
   });
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,

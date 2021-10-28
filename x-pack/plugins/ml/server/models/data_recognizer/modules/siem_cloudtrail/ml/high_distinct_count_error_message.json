@@ -18,7 +18,8 @@
       "aws.cloudtrail.user_identity.arn",
       "source.ip",
       "source.geo.city_name"
-    ]
+    ],
+    "model_prune_window": "30d"
   },
   "allow_lazy_open": true,
   "analysis_limits": {

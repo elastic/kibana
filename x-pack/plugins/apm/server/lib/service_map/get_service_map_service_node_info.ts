@@ -19,14 +19,15 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { environmentQuery, rangeQuery } from '../../../server/utils/queries';
+import { rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
+import { Setup } from '../helpers/setup_request';
 import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
@@ -34,14 +35,16 @@ import {
 import { getErrorRate } from '../transaction_groups/get_error_rate';
 
 interface Options {
-  setup: Setup & SetupTimeRange;
-  environment?: string;
+  setup: Setup;
+  environment: string;
   serviceName: string;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }
 
 interface TaskParameters {
-  environment?: string;
+  environment: string;
   filter: ESFilter[];
   searchAggregatedTransactions: boolean;
   minutes: number;
@@ -54,10 +57,10 @@ export function getServiceMapServiceNodeInfo({
   serviceName,
   setup,
   searchAggregatedTransactions,
-}: Options & { serviceName: string }) {
+  start,
+  end,
+}: Options) {
   return withApmSpan('get_service_map_node_stats', async () => {
-    const { start, end } = setup;
-
     const filter: ESFilter[] = [
       { term: { [SERVICE_NAME]: serviceName } },
       ...rangeQuery(start, end),
@@ -72,19 +75,17 @@ export function getServiceMapServiceNodeInfo({
       minutes,
       serviceName,
       setup,
+      start,
+      end,
     };
 
-    const [
-      errorStats,
-      transactionStats,
-      cpuStats,
-      memoryStats,
-    ] = await Promise.all([
-      getErrorStats(taskParams),
-      getTransactionStats(taskParams),
-      getCpuStats(taskParams),
-      getMemoryStats(taskParams),
-    ]);
+    const [errorStats, transactionStats, cpuStats, memoryStats] =
+      await Promise.all([
+        getErrorStats(taskParams),
+        getTransactionStats(taskParams),
+        getCpuStats(taskParams),
+        getMemoryStats(taskParams),
+      ]);
     return {
       ...errorStats,
       transactionStats,
@@ -99,14 +100,10 @@ async function getErrorStats({
   serviceName,
   environment,
   searchAggregatedTransactions,
-}: {
-  setup: Options['setup'];
-  serviceName: string;
-  environment?: string;
-  searchAggregatedTransactions: boolean;
-}) {
+  start,
+  end,
+}: Options) {
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
-    const { start, end } = setup;
     const { noHits, average } = await getErrorRate({
       environment,
       setup,
@@ -114,6 +111,7 @@ async function getErrorStats({
       searchAggregatedTransactions,
       start,
       end,
+      kuery: '',
     });
 
     return { avgErrorRate: noHits ? null : average };
@@ -133,11 +131,7 @@ async function getTransactionStats({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -145,7 +139,7 @@ async function getTransactionStats({
         bool: {
           filter: [
             ...filter,
-            ...getDocumentTypeFilterForAggregatedTransactions(
+            ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
             {
@@ -163,7 +157,7 @@ async function getTransactionStats({
       aggs: {
         duration: {
           avg: {
-            field: getTransactionDurationFieldForAggregatedTransactions(
+            field: getTransactionDurationFieldForTransactions(
               searchAggregatedTransactions
             ),
           },

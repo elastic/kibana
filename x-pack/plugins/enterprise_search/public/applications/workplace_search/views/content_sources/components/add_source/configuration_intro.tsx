@@ -28,6 +28,7 @@ import {
   CONFIG_INTRO_STEPS_TEXT,
   CONFIG_INTRO_STEP1_HEADING,
   CONFIG_INTRO_STEP1_TEXT,
+  CONFIG_INTRO_STEP1_BADGE,
   CONFIG_INTRO_STEP2_HEADING,
   CONFIG_INTRO_STEP2_TITLE,
   CONFIG_INTRO_STEP2_TEXT,
@@ -96,9 +97,9 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                   >
                     <EuiFlexItem grow={false}>
                       <div className="adding-a-source__intro-step">
-                        <EuiText>
-                          <h4>{CONFIG_INTRO_STEP1_HEADING}</h4>
-                        </EuiText>
+                        <EuiTitle size="xs">
+                          <h3>{CONFIG_INTRO_STEP1_HEADING}</h3>
+                        </EuiTitle>
                       </div>
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -108,7 +109,9 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                             id="xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.step1.title"
                             defaultMessage="Configure an OAuth application {badge}"
                             values={{
-                              badge: <EuiBadge color="#6DCCB1">One-Time Action</EuiBadge>,
+                              badge: (
+                                <EuiBadge color="#6DCCB1">{CONFIG_INTRO_STEP1_BADGE}</EuiBadge>
+                              ),
                             }}
                           />
                         </h4>
@@ -125,9 +128,9 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                   >
                     <EuiFlexItem grow={false}>
                       <div className="adding-a-source__intro-step">
-                        <EuiText>
+                        <EuiTitle size="xs">
                           <h4>{CONFIG_INTRO_STEP2_HEADING}</h4>
-                        </EuiText>
+                        </EuiTitle>
                       </div>
                     </EuiFlexItem>
                     <EuiFlexItem>

@@ -14,7 +14,7 @@ import {
 } from './discover_state';
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
-import { SavedSearch } from '../../../../saved_searches';
+import type { SavedSearch } from '../../../../saved_searches';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 
 let history: History;
@@ -22,8 +22,7 @@ let state: GetStateReturn;
 const getCurrentUrl = () => history.createHref(history.location);
 
 const uiSettingsMock = {
-  get: <T>(key: string) =>
-    ((key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown) as T,
+  get: <T>(key: string) => (key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown as T,
 } as IUiSettingsClient;
 
 describe('Test discover state', () => {
@@ -151,7 +150,7 @@ describe('Test discover state with legacy migration', () => {
 });
 
 describe('createSearchSessionRestorationDataProvider', () => {
-  let mockSavedSearch: SavedSearch = ({} as unknown) as SavedSearch;
+  let mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
   const mockDataPlugin = dataPluginMock.createStartContract();
   const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
     data: mockDataPlugin,
@@ -168,12 +167,12 @@ describe('createSearchSessionRestorationDataProvider', () => {
     });
 
     test('Saved Search with a title returns saved search title', async () => {
-      mockSavedSearch = ({ id: 'id', title: 'Name' } as unknown) as SavedSearch;
+      mockSavedSearch = { id: 'id', title: 'Name' } as unknown as SavedSearch;
       expect(await searchSessionInfoProvider.getName()).toBe('Name');
     });
 
     test('Saved Search without a title returns default name', async () => {
-      mockSavedSearch = ({ id: 'id', title: undefined } as unknown) as SavedSearch;
+      mockSavedSearch = { id: 'id', title: undefined } as unknown as SavedSearch;
       expect(await searchSessionInfoProvider.getName()).toBe('Discover');
     });
   });
@@ -184,7 +183,7 @@ describe('createSearchSessionRestorationDataProvider', () => {
       (mockDataPlugin.search.session.getSessionId as jest.Mock).mockImplementation(
         () => searchSessionId
       );
-      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.searchSessionId).toBeUndefined();
       expect(restoreState.searchSessionId).toBe(searchSessionId);
     });
@@ -198,9 +197,20 @@ describe('createSearchSessionRestorationDataProvider', () => {
       (mockDataPlugin.query.timefilter.timefilter.getAbsoluteTime as jest.Mock).mockImplementation(
         () => absoluteTime
       );
-      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.timeRange).toBe(relativeTime);
       expect(restoreState.timeRange).toBe(absoluteTime);
+    });
+
+    test('restoreState has paused autoRefresh', async () => {
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
+      expect(initialState.refreshInterval).toBe(undefined);
+      expect(restoreState.refreshInterval).toMatchInlineSnapshot(`
+        Object {
+          "pause": true,
+          "value": 0,
+        }
+      `);
     });
   });
 });

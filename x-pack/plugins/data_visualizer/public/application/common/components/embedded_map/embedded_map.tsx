@@ -8,8 +8,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { htmlIdGenerator } from '@elastic/eui';
-import { LayerDescriptor } from '../../../../../../maps/common/descriptor_types';
-import { INITIAL_LOCATION } from '../../../../../../maps/common/constants';
+import { INITIAL_LOCATION, LayerDescriptor } from '../../../../../../maps/common';
 import {
   MapEmbeddable,
   MapEmbeddableInput,
@@ -40,7 +39,7 @@ export function EmbeddedMapComponent({
   const baseLayers = useRef<LayerDescriptor[]>();
 
   const {
-    services: { embeddable: embeddablePlugin, maps: mapsPlugin },
+    services: { embeddable: embeddablePlugin, maps: mapsPlugin, data },
   } = useDataVisualizerKibana();
 
   const factory:
@@ -74,7 +73,7 @@ export function EmbeddedMapComponent({
       const input: MapEmbeddableInput = {
         id: htmlIdGenerator()(),
         attributes: { title: '' },
-        filters: [],
+        filters: data.query.filterManager.getFilters() ?? [],
         hidePanelTitles: true,
         viewMode: ViewMode.VIEW,
         isLayerTOCOpen: false,
@@ -144,7 +143,7 @@ export function EmbeddedMapComponent({
   return (
     <div
       data-test-subj="dataVisualizerEmbeddedMapContent"
-      className="embeddedMapContent"
+      className="embeddedMap__content"
       ref={embeddableRoot}
     />
   );

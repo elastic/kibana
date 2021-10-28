@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { IClusterClient } from 'src/core/server';
+import { IClusterClient, PluginInitializerContext } from 'src/core/server';
 
 import { Plugin } from './plugin';
 import { EsContext } from './es';
@@ -24,6 +24,7 @@ interface EventLogServiceCtorParams {
   kibanaUUID: string;
   systemLogger: SystemLogger;
   savedObjectProviderRegistry: SavedObjectProviderRegistry;
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
@@ -34,6 +35,7 @@ export class EventLogService implements IEventLogService {
   private registeredProviderActions: Map<string, Set<string>>;
   private savedObjectProviderRegistry: SavedObjectProviderRegistry;
 
+  public readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   public readonly kibanaUUID: string;
 
   constructor({
@@ -42,6 +44,7 @@ export class EventLogService implements IEventLogService {
     kibanaUUID,
     systemLogger,
     savedObjectProviderRegistry,
+    kibanaVersion,
   }: EventLogServiceCtorParams) {
     this.config = config;
     this.esContext = esContext;
@@ -49,18 +52,15 @@ export class EventLogService implements IEventLogService {
     this.systemLogger = systemLogger;
     this.registeredProviderActions = new Map<string, Set<string>>();
     this.savedObjectProviderRegistry = savedObjectProviderRegistry;
-  }
-
-  public isEnabled(): boolean {
-    return this.config.enabled;
+    this.kibanaVersion = kibanaVersion;
   }
 
   public isLoggingEntries(): boolean {
-    return this.isEnabled() && this.config.logEntries;
+    return this.config.logEntries;
   }
 
   public isIndexingEntries(): boolean {
-    return this.isEnabled() && this.config.indexEntries;
+    return this.config.indexEntries;
   }
 
   registerProviderActions(provider: string, actions: string[]): void {

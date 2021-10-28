@@ -26,6 +26,7 @@ import {
   isLoadedResourceState,
   isLoadingResourceState,
   isStaleResourceState,
+  isUninitialisedResourceState,
   StaleResourceState,
   TrustedAppsListData,
   TrustedAppsListPageState,
@@ -63,8 +64,10 @@ import {
   editingTrustedApp,
   getListItems,
   editItemState,
+  getCurrentLocationIncludedPolicies,
+  getCurrentLocationExcludedPolicies,
 } from './selectors';
-import { parseQueryFilterToKQL } from '../../../common/utils';
+import { parsePoliciesToKQL, parseQueryFilterToKQL } from '../../../common/utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { SEARCHABLE_FIELDS } from '../constants';
 
@@ -95,11 +98,21 @@ const refreshListIfNeeded = async (
       const pageIndex = getCurrentLocationPageIndex(store.getState());
       const pageSize = getCurrentLocationPageSize(store.getState());
       const filter = getCurrentLocationFilter(store.getState());
+      const includedPolicies = getCurrentLocationIncludedPolicies(store.getState());
+      const excludedPolicies = getCurrentLocationExcludedPolicies(store.getState());
+
+      const kuery = [];
+
+      const filterKuery = parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined;
+      if (filterKuery) kuery.push(filterKuery);
+
+      const policiesKuery = parsePoliciesToKQL(includedPolicies, excludedPolicies) || undefined;
+      if (policiesKuery) kuery.push(policiesKuery);
 
       const response = await trustedAppsService.getTrustedAppsList({
         page: pageIndex + 1,
         per_page: pageSize,
-        kuery: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
+        kuery: kuery.join(' AND ') || undefined,
       });
 
       store.dispatch(
@@ -112,6 +125,8 @@ const refreshListIfNeeded = async (
             totalItemsCount: response.total,
             timestamp: Date.now(),
             filter,
+            includedPolicies,
+            excludedPolicies,
           },
         })
       );
@@ -176,6 +191,7 @@ const submitCreationIfNeeded = async (
       if (editMode) {
         responseTrustedApp = (
           await trustedAppsService.updateTrustedApp(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             { id: editItemId(currentState)! },
             // TODO: try to remove the cast
             entry as PostTrustedAppCreateRequest
@@ -311,8 +327,9 @@ export const retrieveListOfPoliciesIfNeeded = async (
   const isLoading = isLoadingResourceState(currentPoliciesState);
   const isPageActive = trustedAppsListPageActive(currentState);
   const isCreateFlow = isCreationDialogLocation(currentState);
+  const isUninitialized = isUninitialisedResourceState(currentPoliciesState);
 
-  if (isPageActive && isCreateFlow && !isLoading) {
+  if (isPageActive && ((isCreateFlow && !isLoading) || isUninitialized)) {
     dispatch({
       type: 'trustedAppsPoliciesStateChanged',
       payload: {
@@ -396,11 +413,9 @@ const fetchEditTrustedAppIfNeeded = async (
         dispatch({
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
-            // No easy way to get around this that I can see. `previousState` does not
-            // seem to allow everything that `editItem` state can hold, so not even sure if using
-            // type guards would work here
-            // @ts-ignore
+            // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
             type: 'LoadingResourceState',
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             previousState: editItemState(currentState)!,
           },
         });
@@ -463,6 +478,5 @@ export const createTrustedAppsPageMiddleware = (
   };
 };
 
-export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<TrustedAppsListPageState> = (
-  coreStart
-) => createTrustedAppsPageMiddleware(new TrustedAppsHttpService(coreStart.http));
+export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<TrustedAppsListPageState> =
+  (coreStart) => createTrustedAppsPageMiddleware(new TrustedAppsHttpService(coreStart.http));

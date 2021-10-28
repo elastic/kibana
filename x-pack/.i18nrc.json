@@ -13,7 +13,6 @@
     "xpack.dashboard": "plugins/dashboard_enhanced",
     "xpack.discover": "plugins/discover_enhanced",
     "xpack.crossClusterReplication": "plugins/cross_cluster_replication",
-    "xpack.dashboardMode": "plugins/dashboard_mode",
     "xpack.data": "plugins/data_enhanced",
     "xpack.embeddableEnhanced": "plugins/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",

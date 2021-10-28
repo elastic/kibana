@@ -32,7 +32,12 @@ import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import { startServices, services, LegacyServicesProvider, CanvasPluginServices } from './services';
+import {
+  startLegacyServices,
+  services,
+  LegacyServicesProvider,
+  CanvasPluginServices,
+} from './services';
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
@@ -72,7 +77,7 @@ export const renderApp = ({
           <presentationUtil.ContextProvider>
             <I18nProvider>
               <Provider store={canvasStore}>
-                <App />
+                <App history={params.history} />
               </Provider>
             </I18nProvider>
           </presentationUtil.ContextProvider>
@@ -95,7 +100,8 @@ export const initializeCanvas = async (
   registries: SetupRegistries,
   appUpdater: BehaviorSubject<AppUpdater>
 ) => {
-  await startServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
+  await startLegacyServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
+  const { expressions } = setupPlugins;
 
   // Adding these functions here instead of in plugin.ts.
   // Some of these functions have deep dependencies into Canvas, which was bulking up the size
@@ -108,13 +114,13 @@ export const initializeCanvas = async (
   });
 
   for (const fn of canvasFunctions) {
-    services.expressions.getService().registerFunction(fn);
+    expressions.registerFunction(fn);
   }
 
   // Create Store
   const canvasStore = await createStore(coreSetup);
 
-  registerLanguage(Object.values(services.expressions.getService().getFunctions()));
+  registerLanguage(Object.values(expressions.getFunctions()));
 
   // Init Registries
   initRegistries();
@@ -145,10 +151,7 @@ export const initializeCanvas = async (
       },
     ],
     content: (domNode) => {
-      ReactDOM.render(
-        <HelpMenu functionRegistry={services.expressions.getService().getFunctions()} />,
-        domNode
-      );
+      ReactDOM.render(<HelpMenu functionRegistry={expressions.getFunctions()} />, domNode);
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });

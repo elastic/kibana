@@ -137,13 +137,46 @@ describe('TelemetryService', () => {
   });
 
   describe('getTelemetryUrl', () => {
-    it('should return the config.url parameter', async () => {
-      const url = 'http://test.com';
+    it('should return staging endpoint when sendUsageTo is set to staging', async () => {
       const telemetryService = mockTelemetryService({
-        config: { url },
+        config: { sendUsageTo: 'staging' },
       });
 
-      expect(telemetryService.getTelemetryUrl()).toBe(url);
+      expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
+        `"https://telemetry-staging.elastic.co/v3/send/kibana-snapshot"`
+      );
+    });
+
+    it('should return prod endpoint when sendUsageTo is set to prod', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { sendUsageTo: 'prod' },
+      });
+
+      expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
+        `"https://telemetry.elastic.co/v3/send/kibana-snapshot"`
+      );
+    });
+  });
+
+  describe('getOptInStatusUrl', () => {
+    it('should return staging endpoint when sendUsageTo is set to staging', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { sendUsageTo: 'staging' },
+      });
+
+      expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
+        `"https://telemetry-staging.elastic.co/v3/send/kibana-opt_in_status"`
+      );
+    });
+
+    it('should return prod endpoint when sendUsageTo is set to prod', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { sendUsageTo: 'prod' },
+      });
+
+      expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
+        `"https://telemetry.elastic.co/v3/send/kibana-opt_in_status"`
+      );
     });
   });
 
@@ -218,7 +251,7 @@ describe('TelemetryService', () => {
       const telemetryService = mockTelemetryService({
         config: { userCanChangeSettings: undefined },
       });
-      const mockPayload = ['mock_hashed_opt_in_status_payload'];
+      const mockPayload = [{ clusterUuid: 'mk_uuid', stats: 'mock_hashed_opt_in_status_payload' }];
       const mockUrl = 'mock_telemetry_optin_status_url';
 
       const mockGetOptInStatusUrl = jest.fn().mockReturnValue(mockUrl);
@@ -228,21 +261,28 @@ describe('TelemetryService', () => {
       expect(mockGetOptInStatusUrl).toBeCalledTimes(1);
       expect(mockFetch).toBeCalledTimes(1);
 
-      expect(mockFetch).toBeCalledWith(mockUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Elastic-Stack-Version': 'mockKibanaVersion',
-        },
-        body: JSON.stringify(mockPayload),
-      });
+      expect(mockFetch.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "mock_telemetry_optin_status_url",
+          Object {
+            "body": "mock_hashed_opt_in_status_payload",
+            "headers": Object {
+              "Content-Type": "application/json",
+              "X-Elastic-Cluster-ID": "mk_uuid",
+              "X-Elastic-Content-Encoding": "aes256gcm",
+              "X-Elastic-Stack-Version": "mockKibanaVersion",
+            },
+            "method": "POST",
+          },
+        ]
+      `);
     });
 
     it('swallows errors if fetch fails', async () => {
       const telemetryService = mockTelemetryService({
         config: { userCanChangeSettings: undefined },
       });
-      const mockPayload = ['mock_hashed_opt_in_status_payload'];
+      const mockPayload = [{ clusterUuid: 'mk_uuid', stats: 'mock_hashed_opt_in_status_payload' }];
       const mockUrl = 'mock_telemetry_optin_status_url';
 
       const mockGetOptInStatusUrl = jest.fn().mockReturnValue(mockUrl);

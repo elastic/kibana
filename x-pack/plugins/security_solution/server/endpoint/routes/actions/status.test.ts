@@ -21,6 +21,7 @@ import { parseExperimentalConfigValue } from '../../../../common/experimental_fe
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
@@ -67,6 +68,7 @@ describe('Endpoint Action Status', () => {
       const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
       const routerMock = httpServiceMock.createRouter();
       endpointAppContextService = new EndpointAppContextService();
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
       registerActionStatusRoutes(routerMock, {
@@ -243,6 +245,11 @@ describe('Endpoint Action Status', () => {
         ],
         [aMockResponse(actionID, mockAgentID)]
       );
+      (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+        .fn()
+        .mockReturnValue({
+          findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+        });
       const response = await getPendingStatus({
         query: {
           agent_ids: [mockAgentID],
@@ -273,6 +280,11 @@ describe('Endpoint Action Status', () => {
         ],
         [aMockResponse(actionTwoID, agentThree)]
       );
+      (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+        .fn()
+        .mockReturnValue({
+          findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+        });
       const response = await getPendingStatus({
         query: {
           agent_ids: [agentOne, agentTwo, agentThree],

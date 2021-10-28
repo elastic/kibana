@@ -122,7 +122,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   return (
     <>
       <EuiTitle size="s">
-        <h2>{CONFIGURED_SOURCES_TITLE}</h2>
+        <h3>{CONFIGURED_SOURCES_TITLE}</h3>
       </EuiTitle>
       <EuiText>
         <p>{CONFIGURED_SOURCES_EMPTY_BODY}</p>

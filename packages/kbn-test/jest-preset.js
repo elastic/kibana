@@ -66,6 +66,7 @@ module.exports = {
   snapshotSerializers: [
     '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
+    '<rootDir>/node_modules/@emotion/jest/serializer',
   ],
 
   // The test environment that will be used for testing
@@ -103,10 +104,10 @@ module.exports = {
   collectCoverageFrom: [
     '**/*.{js,mjs,jsx,ts,tsx}',
     '!**/{__test__,__snapshots__,__examples__,*mock*,tests,test_helpers,integration_tests,types}/**/*',
-    '!**/*mock*.ts',
-    '!**/*.test.ts',
+    '!**/*mock*.{ts,tsx}',
+    '!**/*.test.{ts,tsx}',
     '!**/*.d.ts',
-    '!**/index.{js,ts}',
+    '!**/index.{js,ts,tsx}',
   ],
 
   // A custom resolver to preserve symlinks by default

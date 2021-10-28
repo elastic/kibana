@@ -37,7 +37,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
-import { KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../common';
+import { KIBANA_USER_QUERY_LANGUAGE_KEY, getFieldSubtypeNested } from '../../../common';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -76,6 +76,11 @@ export interface QueryStringInputProps {
    * @param storageKey this key is used to use user preference between kql and non-kql mode
    */
   storageKey?: string;
+
+  /**
+   * Override whether autocomplete suggestions are restricted by time range.
+   */
+  timeRangeForSuggestionsOverride?: boolean;
 }
 
 interface Props extends QueryStringInputProps {
@@ -211,6 +216,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
           selectionStart,
           selectionEnd,
           signal: this.abortController.signal,
+          useTimeRange: this.props.timeRangeForSuggestionsOverride,
         })) || [];
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
@@ -419,10 +425,10 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private handleNestedFieldSyntaxNotification = (suggestion: QuerySuggestion) => {
+    const subTypeNested = 'field' in suggestion && getFieldSubtypeNested(suggestion.field);
     if (
-      'field' in suggestion &&
-      suggestion.field.subType &&
-      suggestion.field.subType.nested &&
+      subTypeNested &&
+      subTypeNested.nested &&
       !this.services.storage.get('kibana.KQLNestedQuerySyntaxInfoOptOut')
     ) {
       const { notifications, docLinks } = this.services;

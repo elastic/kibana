@@ -24,7 +24,7 @@ describe('Sidebar', () => {
   beforeEach(() => {
     casesMock = casesPluginMock.createStartContract();
     casesMock.getRecentCases.mockImplementation(() => <>{'test'}</>);
-    useKibanaMock.mockReturnValue(({
+    useKibanaMock.mockReturnValue({
       services: {
         cases: casesMock,
         application: {
@@ -33,7 +33,7 @@ describe('Sidebar', () => {
           getUrlForApp: jest.fn(() => ''),
         },
       },
-    } as unknown) as ReturnType<typeof useKibana>);
+    } as unknown as ReturnType<typeof useKibana>);
   });
 
   it('does not render the recently created cases section when the user does not have read permissions', async () => {

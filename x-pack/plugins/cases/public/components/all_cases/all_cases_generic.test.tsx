@@ -7,20 +7,27 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { AllCasesGeneric } from './all_cases_generic';
+import { act } from 'react-dom/test-utils';
 
+import { AllCasesGeneric } from './all_cases_generic';
 import { TestProviders } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { useConnectors } from '../../containers/configure/use_connectors';
+import { useKibana } from '../../common/lib/kibana';
 import { StatusAll } from '../../containers/types';
 import { CaseStatuses, SECURITY_SOLUTION_OWNER } from '../../../common';
-import { act } from 'react-dom/test-utils';
+import { connectorsMock } from '../../containers/mock';
+import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_action_license');
+jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/api');
+jest.mock('../../common/lib/kibana');
 
 const createCaseNavigation = { href: '', onClick: jest.fn() };
 
@@ -34,26 +41,30 @@ const alertDataMock = {
   alertId: 'alert-id',
   owner: SECURITY_SOLUTION_OWNER,
 };
+
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useConnectorsMock = useConnectors as jest.Mock;
+const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
+
 jest.mock('../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: () => ({
       services: {
-        triggersActionsUi: {
-          actionTypeRegistry: {
-            get: jest.fn().mockReturnValue({
-              actionTypeTitle: '.jira',
-              iconClass: 'logoSecurity',
-            }),
-          },
-        },
+        triggersActionsUi: mockTriggersActionsUiService,
       },
     }),
   };
 });
 
 describe('AllCasesGeneric ', () => {
+  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
+
+  beforeAll(() => {
+    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
+  });
+
   beforeEach(() => {
     jest.resetAllMocks();
     (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
@@ -68,6 +79,7 @@ describe('AllCasesGeneric ', () => {
       actionLicense: null,
       isLoading: false,
     });
+    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
   });
 
   it('renders the first available status when hiddenStatus is given', () =>

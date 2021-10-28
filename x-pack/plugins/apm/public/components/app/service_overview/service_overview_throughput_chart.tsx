@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiTitle,
+  EuiIconTip,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useParams } from 'react-router-dom';
-import { asTransactionRate } from '../../../../common/utils/formatters';
+import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 import {
   getComparisonChartTheme,
@@ -23,26 +30,33 @@ import {
 const INITIAL_STATE = {
   currentPeriod: [],
   previousPeriod: [],
+  throughputUnit: 'minute' as const,
 };
 
 export function ServiceOverviewThroughputChart({
   height,
+  environment,
+  kuery,
+  transactionName,
 }: {
   height?: number;
+  environment: string;
+  kuery: string;
+  transactionName?: string;
 }) {
   const theme = useTheme();
-  const { serviceName } = useParams<{ serviceName?: string }>();
+
   const {
-    urlParams: {
-      environment,
-      kuery,
-      start,
-      end,
-      comparisonEnabled,
-      comparisonType,
-    },
+    urlParams: { comparisonEnabled, comparisonType },
   } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
+
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { transactionType, serviceName } = useApmServiceContext();
   const comparisonChartTheme = getComparisonChartTheme(theme);
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
@@ -55,7 +69,7 @@ export function ServiceOverviewThroughputChart({
     (callApmApi) => {
       if (serviceName && transactionType && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+          endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
           params: {
             path: {
               serviceName,
@@ -68,6 +82,7 @@ export function ServiceOverviewThroughputChart({
               transactionType,
               comparisonStart,
               comparisonEnd,
+              transactionName,
             },
           },
         });
@@ -82,6 +97,7 @@ export function ServiceOverviewThroughputChart({
       transactionType,
       comparisonStart,
       comparisonEnd,
+      transactionName,
     ]
   );
 
@@ -111,20 +127,36 @@ export function ServiceOverviewThroughputChart({
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
-            defaultMessage: 'Throughput',
-          })}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate(
+                'xpack.apm.serviceOverview.throughtputChartTitle',
+                { defaultMessage: 'Throughput' }
+              )}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
+              defaultMessage:
+                'Throughput is measured in transactions per minute (tpm)',
+            })}
+            position="right"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <TimeseriesChart
         id="throughput"
         height={height}
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
-        yLabelFormat={asTransactionRate}
+        yLabelFormat={asExactTransactionRate}
         customTheme={comparisonChartTheme}
       />
     </EuiPanel>

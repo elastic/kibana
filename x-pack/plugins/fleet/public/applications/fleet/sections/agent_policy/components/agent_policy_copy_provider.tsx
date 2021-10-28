@@ -34,7 +34,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
     onSuccess = () => undefined
   ) => {
     if (!agentPolicyToCopy) {
-      throw new Error('No agent policy specified to copy');
+      throw new Error('No agent policy specified to duplicate');
     }
     setIsModalOpen(true);
     setAgentPolicy(agentPolicyToCopy);
@@ -63,7 +63,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
       if (data) {
         notifications.toasts.addSuccess(
           i18n.translate('xpack.fleet.copyAgentPolicy.successNotificationTitle', {
-            defaultMessage: 'Agent policy copied',
+            defaultMessage: 'Agent policy duplicated',
           })
         );
         if (onSuccessCallback.current) {
@@ -72,7 +72,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
       } else {
         notifications.toasts.addDanger(
           i18n.translate('xpack.fleet.copyAgentPolicy.failureNotificationTitle', {
-            defaultMessage: "Error copying agent policy '{id}'",
+            defaultMessage: "Error duplicating agent policy '{id}'",
             values: { id: agentPolicy!.id },
           })
         );
@@ -80,7 +80,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
     } catch (e) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.fleet.copyAgentPolicy.fatalErrorNotificationTitle', {
-          defaultMessage: 'Error copying agent policy',
+          defaultMessage: 'Error duplicating agent policy',
         })
       );
     }
@@ -98,7 +98,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
           <span className="eui-textBreakWord">
             <FormattedMessage
               id="xpack.fleet.copyAgentPolicy.confirmModal.copyPolicyTitle"
-              defaultMessage="Copy '{name}' agent policy"
+              defaultMessage="Duplicate '{name}' agent policy"
               values={{
                 name: agentPolicy.name,
               }}
@@ -116,7 +116,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
         confirmButtonText={
           <FormattedMessage
             id="xpack.fleet.copyAgentPolicy.confirmModal.confirmButtonLabel"
-            defaultMessage="Copy policy"
+            defaultMessage="Duplicate policy"
           />
         }
         confirmButtonDisabled={isLoading || !newAgentPolicy.name.trim()}

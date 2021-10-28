@@ -4,19 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 export {
-  MonitorTypeContext,
-  MonitorTypeContextProvider,
-  initialValue as defaultMonitorType,
-  useMonitorTypeContext,
-} from './monitor_type_context';
+  PolicyConfigContext,
+  PolicyConfigContextProvider,
+  initialValue as defaultPolicyConfig,
+  usePolicyConfigContext,
+} from './policy_config_context';
 export {
   HTTPSimpleFieldsContext,
   HTTPSimpleFieldsContextProvider,
   initialValues as defaultHTTPSimpleFields,
   useHTTPSimpleFieldsContext,
 } from './http_context';
+export {
+  HTTPAdvancedFieldsContext,
+  HTTPAdvancedFieldsContextProvider,
+  initialValues as defaultHTTPAdvancedFields,
+  useHTTPAdvancedFieldsContext,
+} from './http_context_advanced';
 export {
   TCPSimpleFieldsContext,
   TCPSimpleFieldsContextProvider,
@@ -34,13 +39,19 @@ export {
   TCPAdvancedFieldsContextProvider,
   initialValues as defaultTCPAdvancedFields,
   useTCPAdvancedFieldsContext,
-} from './advanced_fields_tcp_context';
+} from './tcp_context_advanced';
 export {
-  HTTPAdvancedFieldsContext,
-  HTTPAdvancedFieldsContextProvider,
-  initialValues as defaultHTTPAdvancedFields,
-  useHTTPAdvancedFieldsContext,
-} from './advanced_fields_http_context';
+  BrowserSimpleFieldsContext,
+  BrowserSimpleFieldsContextProvider,
+  initialValues as defaultBrowserSimpleFields,
+  useBrowserSimpleFieldsContext,
+} from './browser_context';
+export {
+  BrowserAdvancedFieldsContext,
+  BrowserAdvancedFieldsContextProvider,
+  initialValues as defaultBrowserAdvancedFields,
+  useBrowserAdvancedFieldsContext,
+} from './browser_context_advanced';
 export {
   TLSFieldsContext,
   TLSFieldsContextProvider,
@@ -49,3 +60,4 @@ export {
 } from './tls_fields_context';
 export { HTTPContextProvider } from './http_provider';
 export { TCPContextProvider } from './tcp_provider';
+export { BrowserContextProvider } from './browser_provider';

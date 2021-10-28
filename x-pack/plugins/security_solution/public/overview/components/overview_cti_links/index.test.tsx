@@ -19,9 +19,19 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
-import { mockTheme, mockProps } from './mock';
+import { mockTheme, mockProps, mockCtiEventCountsResponse } from './mock';
+import { useRequestEventCounts } from '../../containers/overview_cti_links/use_request_event_counts';
+import { useCtiEventCounts } from '../../containers/overview_cti_links/use_cti_event_counts';
 
 jest.mock('../../../common/lib/kibana');
+
+jest.mock('../../containers/overview_cti_links/use_request_event_counts');
+const useRequestEventCountsMock = useRequestEventCounts as jest.Mock;
+useRequestEventCountsMock.mockReturnValue([true, {}]);
+
+jest.mock('../../containers/overview_cti_links/use_cti_event_counts');
+const useCTIEventCountsMock = useCtiEventCounts as jest.Mock;
+useCTIEventCountsMock.mockReturnValue(mockCtiEventCountsResponse);
 
 describe('ThreatIntelLinkPanel', () => {
   const state: State = mockGlobalState;

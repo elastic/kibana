@@ -15,39 +15,15 @@
   z-index: $euiZLevel3 + 1
 }
 
-.lnsPalettePanelContainer__footer {
-  padding: $euiSizeS;
-}
-
 .lnsPalettePanelContainer__header {
-  padding: $euiSizeS $euiSizeXS;
+  padding: $euiSize;
 }
 
-.lnsPalettePanelContainer__headerTitle {
-  padding: $euiSizeS $euiSizeXS;
-  cursor: pointer;
-
-  &:hover {
-    text-decoration: underline;
-  }
+.lnsPalettePanelContainer__content {
+  @include euiYScroll;
+  flex: 1;
 }
 
-.lnsPalettePanelContainer__headerLink {
-  &:focus-within {
-    background-color: transparentize($euiColorVis1, .9);
-
-    .lnsPalettePanelContainer__headerTitle {
-      text-decoration: underline;
-    }
-  }
-}
-
-.lnsPalettePanelContainer__backIcon {
-  &:hover {
-    transform: none !important; // sass-lint:disable-line no-important
-  }
-
-  &:focus {
-    background-color: transparent;
-  }
+.lnsPalettePanelContainer__footer {
+  padding: $euiSize;
 }

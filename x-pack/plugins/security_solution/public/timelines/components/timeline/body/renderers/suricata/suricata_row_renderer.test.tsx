@@ -24,7 +24,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -45,6 +44,7 @@ describe('suricata_row_renderer', () => {
     const children = suricataRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
+      isDraggable: true,
       timelineId: 'test',
     });
 
@@ -64,6 +64,7 @@ describe('suricata_row_renderer', () => {
     const children = suricataRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -77,10 +78,11 @@ describe('suricata_row_renderer', () => {
   });
 
   test('should render a suricata row even if it does not have a suricata signature', () => {
-    delete suricata!.suricata!.eve!.alert!.signature;
+    delete suricata?.suricata?.eve?.alert?.signature;
     const children = suricataRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(

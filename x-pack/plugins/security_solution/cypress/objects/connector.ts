@@ -12,13 +12,15 @@ export interface EmailConnector {
   port: string;
   user: string;
   password: string;
+  service: string;
 }
 
-export const emailConnector: EmailConnector = {
+export const getEmailConnector = (): EmailConnector => ({
   name: 'Test connector',
   from: 'test@example.com',
   host: 'example.com',
   port: '80',
   user: 'username',
   password: 'password',
-};
+  service: 'Other',
+});

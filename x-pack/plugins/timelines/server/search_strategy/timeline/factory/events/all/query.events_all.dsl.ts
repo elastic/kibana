@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 
 import {
@@ -23,6 +24,7 @@ export const buildTimelineEventsAllQuery = ({
   pagination: { activePage, querySize },
   sort,
   timerange,
+  authFilter,
 }: Omit<TimelineEventsAllRequestOptions, 'fieldRequested'>) => {
   const filterClause = [...createQueryFilterClauses(filterQuery)];
 
@@ -46,7 +48,8 @@ export const buildTimelineEventsAllQuery = ({
     return [];
   };
 
-  const filter = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
+  const filters = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
+  const filter = authFilter != null ? [...filters, authFilter] : filters;
 
   const getSortField = (sortFields: TimelineRequestSortField[]) =>
     sortFields.map((item) => {
@@ -60,11 +63,16 @@ export const buildTimelineEventsAllQuery = ({
     });
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+      aggregations: {
+        producers: {
+          terms: { field: ALERT_RULE_PRODUCER, exclude: ['alerts'] },
+        },
+      },
       query: {
         bool: {
           filter,

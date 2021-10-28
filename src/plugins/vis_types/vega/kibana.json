@@ -1,0 +1,14 @@
+{
+  "id": "visTypeVega",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data", "visualizations", "mapsEms", "expressions", "inspector"],
+  "optionalPlugins": ["home","usageCollection"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor", "esUiShared"],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  },
+  "description": "Registers the vega visualization. Is the elastic version of vega and vega-lite libraries."
+}

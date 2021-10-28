@@ -67,8 +67,8 @@ export function ChangeIndexPattern({
     >
       <div style={{ width: 320 }}>
         <EuiPopoverTitle>
-          {i18n.translate('discover.fieldChooser.indexPattern.changeIndexPatternTitle', {
-            defaultMessage: 'Change index pattern',
+          {i18n.translate('discover.fieldChooser.indexPattern.changeDataViewTitle', {
+            defaultMessage: 'Change data view',
           })}
         </EuiPopoverTitle>
         <EuiSelectable<{ value: string }>
@@ -83,7 +83,7 @@ export function ChangeIndexPattern({
             checked: id === indexPatternId ? 'on' : undefined,
           }))}
           onChange={(choices) => {
-            const choice = (choices.find(({ checked }) => checked) as unknown) as {
+            const choice = choices.find(({ checked }) => checked) as unknown as {
               value: string;
             };
             if (choice.value !== indexPatternId) {

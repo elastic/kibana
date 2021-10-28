@@ -17,9 +17,9 @@ interface MetaEnginesTableValues {
 }
 
 interface MetaEnginesTableActions {
-  addSourceEngines(
-    sourceEngines: MetaEnginesTableValues['sourceEngines']
-  ): { sourceEngines: MetaEnginesTableValues['sourceEngines'] };
+  addSourceEngines(sourceEngines: MetaEnginesTableValues['sourceEngines']): {
+    sourceEngines: MetaEnginesTableValues['sourceEngines'];
+  };
   displayRow(itemId: string): { itemId: string };
   fetchOrDisplayRow(itemId: string): { itemId: string };
   fetchSourceEngines(engineName: string): { engineName: string };
@@ -84,7 +84,7 @@ export const MetaEnginesTableLogic = kea<
     },
     fetchSourceEngines: ({ engineName }) => {
       recursivelyFetchEngines({
-        endpoint: `/api/app_search/engines/${engineName}/source_engines`,
+        endpoint: `/internal/app_search/engines/${engineName}/source_engines`,
         onComplete: (sourceEngines) => {
           actions.addSourceEngines({ [engineName]: sourceEngines });
           actions.displayRow(engineName);

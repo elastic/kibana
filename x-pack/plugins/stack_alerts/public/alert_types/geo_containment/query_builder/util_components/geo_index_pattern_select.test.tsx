@@ -24,7 +24,7 @@ function makeMockIndexPattern(id: string, fields: unknown) {
   };
 }
 
-const mockIndexPatternService: IndexPatternsContract = ({
+const mockIndexPatternService: IndexPatternsContract = {
   get(id: string) {
     if (id === 'foobar_with_geopoint') {
       return makeMockIndexPattern(id, [{ type: 'geo_point' }]);
@@ -32,12 +32,12 @@ const mockIndexPatternService: IndexPatternsContract = ({
       return makeMockIndexPattern(id, [{ type: 'string' }]);
     }
   },
-} as unknown) as IndexPatternsContract;
+} as unknown as IndexPatternsContract;
 
 test('should render without error after mounting', async () => {
   const component = shallow(
     <GeoIndexPatternSelect
-      http={({} as unknown) as HttpSetup}
+      http={{} as unknown as HttpSetup}
       onChange={() => {}}
       value={'foobar_with_geopoint'}
       includedGeoTypes={['geo_point']}
@@ -53,10 +53,10 @@ test('should render without error after mounting', async () => {
   expect(component).toMatchSnapshot();
 });
 
-test('should render with error when index pattern does not have geo_point field', async () => {
+test('should render with error when data view does not have geo_point field', async () => {
   const component = shallow(
     <GeoIndexPatternSelect
-      http={({} as unknown) as HttpSetup}
+      http={{} as unknown as HttpSetup}
       onChange={() => {}}
       value={'foobar_without_geopoint'}
       includedGeoTypes={['geo_point']}

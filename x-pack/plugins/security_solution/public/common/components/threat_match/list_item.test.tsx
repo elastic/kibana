@@ -10,7 +10,7 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
 import { useKibana } from '../../../common/lib/kibana';
-import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 
 import { ListItemComponent } from './list_item';
 import { ThreatMapEntries } from './types';

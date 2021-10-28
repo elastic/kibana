@@ -180,6 +180,13 @@ export const useTimelineEvents = ({
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
 
+  const setUpdated = useCallback(
+    (updatedAt: number) => {
+      dispatch(timelineActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
+    },
+    [dispatch, id]
+  );
+
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     id,
     inspect: {
@@ -230,6 +237,7 @@ export const useTimelineEvents = ({
                     totalCount: response.totalCount,
                     updatedAt: Date.now(),
                   };
+                  setUpdated(newTimelineResponse.updatedAt);
                   if (id === TimelineId.active) {
                     activeTimeline.setExpandedDetail({});
                     activeTimeline.setPageName(pageName);
@@ -237,6 +245,7 @@ export const useTimelineEvents = ({
                       activeTimeline.setEqlRequest(request as TimelineEqlRequestOptions);
                       activeTimeline.setEqlResponse(newTimelineResponse);
                     } else {
+                      // @ts-expect-error EqlSearchRequest.query is not compatible with QueryDslQueryContainer
                       activeTimeline.setRequest(request);
                       activeTimeline.setResponse(newTimelineResponse);
                     }
@@ -303,7 +312,17 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, id, addWarning, addError, pageName, refetchGrid, skip, wrappedLoadPage]
+    [
+      pageName,
+      skip,
+      id,
+      data.search,
+      setUpdated,
+      addWarning,
+      addError,
+      refetchGrid,
+      wrappedLoadPage,
+    ]
   );
 
   useEffect(() => {

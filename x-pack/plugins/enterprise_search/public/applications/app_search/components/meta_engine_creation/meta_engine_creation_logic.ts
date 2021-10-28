@@ -31,9 +31,9 @@ interface MetaEngineCreationValues {
 interface MetaEngineCreationActions {
   fetchIndexedEngineNames(page?: number): { page: number };
   onEngineCreationSuccess(): void;
-  setIndexedEngineNames(
-    indexedEngineNames: MetaEngineCreationValues['indexedEngineNames']
-  ): { indexedEngineNames: MetaEngineCreationValues['indexedEngineNames'] };
+  setIndexedEngineNames(indexedEngineNames: MetaEngineCreationValues['indexedEngineNames']): {
+    indexedEngineNames: MetaEngineCreationValues['indexedEngineNames'];
+  };
   setRawName(rawName: string): { rawName: string };
   setSelectedIndexedEngineNames(
     selectedIndexedEngineNames: MetaEngineCreationValues['selectedIndexedEngineNames']
@@ -92,7 +92,7 @@ export const MetaEngineCreationLogic = kea<
       let response: { results: EngineDetails[]; meta: Meta } | undefined;
 
       try {
-        response = await http.get('/api/app_search/engines', {
+        response = await http.get('/internal/app_search/engines', {
           query: { type: 'indexed', 'page[current]': page, 'page[size]': DEFAULT_META.page.size },
         });
       } catch (e) {
@@ -127,7 +127,7 @@ export const MetaEngineCreationLogic = kea<
       });
 
       try {
-        await http.post('/api/app_search/engines', { body });
+        await http.post('/internal/app_search/engines', { body });
         actions.onEngineCreationSuccess();
       } catch (e) {
         flashAPIErrors(e);
