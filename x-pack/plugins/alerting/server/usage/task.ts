@@ -50,7 +50,7 @@ function registerAlertingTelemetryTask(
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting usage fetch task',
-      timeout: '5s',
+      timeout: '5m',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex, eventLog),
     },
   });
@@ -129,5 +129,5 @@ export function telemetryTaskRunner(
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'm').startOf('m').toDate();
+  return moment().add(1, 'd').startOf('d').toDate();
 }
