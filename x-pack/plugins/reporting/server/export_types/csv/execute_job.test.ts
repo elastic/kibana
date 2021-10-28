@@ -190,7 +190,7 @@ describe('CSV Execute Job', function () {
       );
 
       expect(mockEsClient.scroll).toHaveBeenCalledWith(
-        expect.objectContaining({ body: { scroll_id: scrollId } })
+        expect.objectContaining({ scroll_id: scrollId })
       );
     });
 
@@ -279,7 +279,7 @@ describe('CSV Execute Job', function () {
       );
 
       expect(mockEsClient.clearScroll).toHaveBeenCalledWith(
-        expect.objectContaining({ body: { scroll_id: lastScrollId } })
+        expect.objectContaining({ scroll_id: lastScrollId })
       );
     });
 
@@ -315,7 +315,7 @@ describe('CSV Execute Job', function () {
       );
 
       expect(mockEsClient.clearScroll).toHaveBeenCalledWith(
-        expect.objectContaining({ body: { scroll_id: lastScrollId } })
+        expect.objectContaining({ scroll_id: lastScrollId })
       );
     });
   });
@@ -788,9 +788,7 @@ describe('CSV Execute Job', function () {
       await delay(100);
 
       expect(mockEsClient.clearScroll).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: { scroll_id: scrollId },
-        })
+        expect.objectContaining({ scroll_id: scrollId })
       );
     });
   });
@@ -1184,7 +1182,7 @@ describe('CSV Execute Job', function () {
       await runTask('job123', jobParams, cancellationToken, stream);
 
       expect(mockEsClient.scroll).toHaveBeenCalledWith(
-        expect.objectContaining({ body: { scroll: scrollDuration, scroll_id: 'scrollId' } })
+        expect.objectContaining({ scroll: scrollDuration, scroll_id: 'scrollId' })
       );
     });
   });
