@@ -28,7 +28,7 @@ export const isFieldInvalid = (
 ): boolean => error !== undefined && error.length > 0 && field != null;
 
 // TODO: Remove when the applications are certified
-export const isDeprecatedConnector = (connector: ServiceNowActionConnector): boolean => {
+export const isDeprecatedConnector = (connector?: ServiceNowActionConnector): boolean => {
   if (connector == null) {
     return false;
   }
