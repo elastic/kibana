@@ -126,17 +126,17 @@ export const rulesFieldMap = {
     array: true,
     required: false,
   },
-  'kibana.alert.rule.threat_mapping.field': {
+  'kibana.alert.rule.threat_mapping.entries.field': {
     type: 'keyword',
     array: true,
     required: false,
   },
-  'kibana.alert.rule.threat_mapping.value': {
+  'kibana.alert.rule.threat_mapping.entries.value': {
     type: 'keyword',
     array: true,
     required: false,
   },
-  'kibana.alert.rule.threat_mapping.type': {
+  'kibana.alert.rule.threat_mapping.entries.type': {
     type: 'keyword',
     array: true,
     required: false,
