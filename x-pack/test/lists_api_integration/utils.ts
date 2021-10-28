@@ -210,12 +210,20 @@ export const importFile = async (
   fileName: string,
   testValues?: string[]
 ): Promise<void> => {
-  await supertest
+  const response = await supertest
     .post(`${LIST_ITEM_URL}/_import?type=${type}`)
     .set('kbn-xsrf', 'true')
     .attach('file', getImportListItemAsBuffer(contents), fileName)
-    .expect('Content-Type', 'application/json; charset=utf-8')
-    .expect(200);
+    .expect('Content-Type', 'application/json; charset=utf-8');
+
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" When importing a file. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
 
   // although we have pushed the list and its items, it is async so we
   // have to wait for the contents before continuing
