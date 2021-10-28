@@ -86,7 +86,6 @@ def _pkg_npm_types_impl(ctx):
   extractor_args.add_joined(template_args, join_with = ",", omit_if_empty = False)
   extractor_args.add(tsconfig_inputs[0])
   extractor_args.add(_calculate_entrypoint_path(ctx))
-  # extractor_args.add_joined([s.path for s in ctx.files.deps], join_with = ",", omit_if_empty = False)
 
   run_node(
     ctx,
