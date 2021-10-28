@@ -37,8 +37,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./correlations/latency'));
     });
 
-    describe('metadata/event_metadata', function () {
-      loadTestFile(require.resolve('./metadata/event_metadata'));
+    describe('event_metadata/event_metadata', function () {
+      loadTestFile(require.resolve('./event_metadata/event_metadata'));
     });
 
     describe('metrics_charts/metrics_charts', function () {
