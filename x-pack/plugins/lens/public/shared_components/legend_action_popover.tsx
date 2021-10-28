@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiContextMenuPanelDescriptor,
-  EuiIcon,
-  EuiPopover,
-  EuiContextMenu,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import { useLegendAction } from '@elastic/charts';
 import type { LensFilterEvent } from '../types';
 
 export interface LegendActionPopoverProps {
@@ -37,7 +32,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   context,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const containerRef = useRef<HTMLButtonElement | null>(null);
+  const [ref, onClose] = useLegendAction<HTMLDivElement>();
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 'main',
@@ -70,9 +65,9 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   ];
 
   const Button = (
-    <EuiButton
-      buttonRef={containerRef}
-      role="button"
+    <div
+      tabIndex={0}
+      ref={ref}
       aria-pressed="false"
       style={{
         display: 'flex',
@@ -87,7 +82,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
       onClick={() => setPopoverOpen(!popoverOpen)}
     >
       <EuiIcon size="s" type="boxesVertical" />
-    </EuiButton>
+    </div>
   );
   return (
     <EuiPopover
@@ -96,9 +91,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
       isOpen={popoverOpen}
       closePopover={() => {
         setPopoverOpen(false);
-        if (containerRef.current) {
-          requestAnimationFrame(() => containerRef?.current?.focus?.());
-        }
+        onClose();
       }}
       panelPaddingSize="none"
       anchorPosition="upLeft"

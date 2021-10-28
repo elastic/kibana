@@ -6,17 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import {
-  EuiContextMenuPanelDescriptor,
-  EuiIcon,
-  EuiPopover,
-  EuiContextMenu,
-  EuiButton,
-} from '@elastic/eui';
-import { LegendAction, SeriesIdentifier } from '@elastic/charts';
+import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { PieVisParams } from '../types';
 import { ClickTriggerEvent } from '../../../../charts/public';
@@ -36,7 +30,7 @@ export const getLegendActions = (
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isfilterable, setIsfilterable] = useState(true);
     const filterData = useMemo(() => getFilterEventData(pieSeries), [pieSeries]);
-    const containerRef = useRef<HTMLButtonElement | null>(null);
+    const [ref, onClose] = useLegendAction<HTMLDivElement>();
 
     useEffect(() => {
       (async () => setIsfilterable(await canFilter(filterData, actions)))();
@@ -87,8 +81,9 @@ export const getLegendActions = (
     ];
 
     const Button = (
-      <EuiButton
-        buttonRef={containerRef}
+      <div
+        tabIndex={0}
+        ref={ref}
         role="button"
         aria-pressed="false"
         style={{
@@ -104,7 +99,7 @@ export const getLegendActions = (
         onClick={() => setPopoverOpen(!popoverOpen)}
       >
         <EuiIcon size="s" type="boxesVertical" />
-      </EuiButton>
+      </div>
     );
 
     return (
@@ -114,9 +109,7 @@ export const getLegendActions = (
         isOpen={popoverOpen}
         closePopover={() => {
           setPopoverOpen(false);
-          if (containerRef.current) {
-            requestAnimationFrame(() => containerRef?.current?.focus?.());
-          }
+          onClose();
         }}
         panelPaddingSize="none"
         anchorPosition="upLeft"
