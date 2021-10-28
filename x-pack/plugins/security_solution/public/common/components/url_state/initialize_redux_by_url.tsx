@@ -29,7 +29,6 @@ import {
   dispatchUpdateTimeline,
 } from '../../../timelines/components/open_timeline/helpers';
 import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
-import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 
 export const useSetInitialStateFromUrl = () => {
@@ -65,7 +64,7 @@ export const useSetInitialStateFromUrl = () => {
               dispatch(
                 sourcererActions.setSelectedDataView({
                   id: scope,
-                  selectedDataViewId: sourcererState[scope]?.id ?? DEFAULT_DATA_VIEW_ID,
+                  selectedDataViewId: sourcererState[scope]?.id ?? '',
                   selectedPatterns: sourcererState[scope]?.selectedPatterns ?? [],
                 })
               )

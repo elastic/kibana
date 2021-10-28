@@ -84,7 +84,8 @@ export const useInitSourcerer = (
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
             SourcererScopeName.timeline,
-            signalIndexName
+            signalIndexName,
+            true
           ),
         })
       );
@@ -101,7 +102,8 @@ export const useInitSourcerer = (
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
             SourcererScopeName.timeline,
-            signalIndexNameSelector
+            signalIndexNameSelector,
+            true
           ),
         })
       );
@@ -186,7 +188,8 @@ export const useInitSourcerer = (
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
             SourcererScopeName.detections,
-            signalIndexName
+            signalIndexName,
+            true
           ),
         })
       );
@@ -202,7 +205,8 @@ export const useInitSourcerer = (
         selectedPatterns: getScopePatternListSelection(
           defaultDataView,
           SourcererScopeName.detections,
-          signalIndexNameSelector
+          signalIndexNameSelector,
+          true
         ),
       });
     }

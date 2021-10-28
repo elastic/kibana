@@ -245,14 +245,15 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         getScopePatternListSelection(
           kibanaDataViews.find((dataView) => dataView.id === newSelectedOption),
           SourcererScopeName.timeline,
-          signalIndexName
+          signalIndexName,
+          newSelectedOption === defaultDataView.id
         ).map((indexSelected: string) => ({
           label: indexSelected,
           value: indexSelected,
         }))
       );
     },
-    [kibanaDataViews, signalIndexName]
+    [defaultDataView.id, kibanaDataViews, signalIndexName]
   );
 
   const togglePopover = useCallback(
@@ -277,7 +278,8 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       getScopePatternListSelection(
         defaultDataView,
         SourcererScopeName.timeline,
-        signalIndexName
+        signalIndexName,
+        true
       ).map((indexSelected: string) => ({
         label: indexSelected,
         value: indexSelected,
