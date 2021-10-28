@@ -12,7 +12,7 @@ import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportResult } from '@elastic/elasticsearch';
-import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_UUID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
@@ -61,15 +61,6 @@ import {
 import { WrappedRACAlert } from '../rule_types/types';
 import { SearchTypes } from '../../../../common/detection_engine/types';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
-import {
-  EQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SIGNALS_ID,
-  THRESHOLD_RULE_TYPE_ID,
-} from '../../../../common/constants';
-
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
   exceptionsWithoutValueLists: ExceptionListItemSchema[];
@@ -991,7 +982,7 @@ export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit 
 };
 
 export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
-  return (event as WrappedRACAlert)?._source?.[ALERT_INSTANCE_ID] != null;
+  return (event as WrappedRACAlert)?._source?.[ALERT_UUID] != null;
 };
 
 export const racFieldMappings: Record<string, string> = {
@@ -1007,16 +998,4 @@ export const getField = <T extends SearchTypes>(event: SimpleHit, field: string)
   } else if (isWrappedEventHit(event)) {
     return get(event._source, field) as T;
   }
-};
-
-/**
- * Maps legacy rule types to RAC rule type IDs.
- */
-export const ruleTypeMappings = {
-  eql: EQL_RULE_TYPE_ID,
-  machine_learning: ML_RULE_TYPE_ID,
-  query: QUERY_RULE_TYPE_ID,
-  saved_query: SIGNALS_ID,
-  threat_match: INDICATOR_RULE_TYPE_ID,
-  threshold: THRESHOLD_RULE_TYPE_ID,
 };

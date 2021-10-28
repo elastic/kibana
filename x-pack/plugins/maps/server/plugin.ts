@@ -73,9 +73,7 @@ export class MapsPlugin implements Plugin {
       defaultMessage: 'Map',
     });
 
-    // commented out since it registers an SO already registered by home plugin
-    // https://github.com/elastic/kibana/blob/2ddaddc2e958f60c6685ab9f9840cdd86da9d398/src/plugins/home/server/services/sample_data/data_sets/ecommerce/saved_objects.ts#L151
-    // home.sampleData.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
+    home.sampleData.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
 
     home.sampleData.addAppLinksToSampleDataset('ecommerce', [
       {
@@ -84,6 +82,18 @@ export class MapsPlugin implements Plugin {
         icon: APP_ICON,
       },
     ]);
+
+    home.sampleData.replacePanelInSampleDatasetDashboard({
+      sampleDataId: 'ecommerce',
+      dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
+      oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
+      embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+      // @ts-ignore
+      embeddableType: MAP_SAVED_OBJECT_TYPE,
+      embeddableConfig: {
+        isLayerTOCOpen: false,
+      },
+    });
 
     home.sampleData.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
 
