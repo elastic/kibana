@@ -64,6 +64,26 @@ image::images/lens_clickAndDragZoom_7.16.gif[Cursor clicking and dragging across
 *Normalize unit* converts *Average sales per 12 hours* into *Average sales per 12 hours (per hour)* by dividing the number of hours.
 
 . To hide the *Horizontal axis* label, open the *Bottom Axis* menu, then deselect *Show*.
+
+To identify the 75th percentile of orders, add a reference line:
+
+. In the layer pane, click *Add layer > Add reference layer*.
+
+. Click *Static value*.
+
+. Click the *Percentile* function, then enter `75` in the *Percentile* field. 
+
+. Configure the following display options:
+
+* In the *Display name* field, enter `75th`.
+
+* Select *Show display name*.
+
+* From the *Icon* dropdown, select *Tag*.
+
+* In the *Color* field, `#E7664C`.
+
+. Click *Close*.
 +
 [role="screenshot"]
 image::images/lens_barChartCustomTimeInterval_7.16.png[Orders per day]

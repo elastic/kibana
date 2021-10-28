@@ -82,6 +82,9 @@ In the layer pane, *Unique count of clientip* appears because the editor automat
 .. In the *Display name* field, enter `Unique visitors`.
 
 .. Click *Close*.
++
+[role="screenshot"]
+image::images/lens_metricUniqueVisitors_7.16.png[Metric visualization that displays number of unique visitors]
 
 . Click *Save and return*.
 +
@@ -133,6 +136,9 @@ To save space on the dashboard, hide the vertical and horizontal axes labels.
 image::images/lens_leftAxisMenu_7.16.png[Left axis menu]
 
 . Open the *Bottom axis* menu, then deselect *Show*.
++
+[role="screenshot"]
+image::images/lens_lineChartMetricOverTime_7.16.png[Line chart that displays metric data over time]
 
 . Click *Save and return*
 
@@ -180,6 +186,9 @@ image::images/lens_end_to_end_2_1_2.png[Table with top values of request.keyword
 .. In the *Display name* field, enter `Page URL`.
 
 .. Click *Close*.
++
+[role="screenshot"]
+image::images/lens_tableTopFieldValues_7.16.png[Table that displays the top field values]
 
 . Click *Save and return*.
 +
@@ -226,6 +235,9 @@ image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
 To display the values as a percentage of the sum of all values, use the *Pie* chart. 
 
 . Open the *Visualization Type* dropdown, then select *Pie*.
++
+[role="screenshot"]
+image::images/lens_pieChartCompareSubsetOfDocs_7.16.png[Pie chart that compares a subset of documents to all documents]
 
 . Click *Save and return*.
 
@@ -257,7 +269,8 @@ The distribution of a number can help you find patterns. For example, you can an
 
 . In the layer pane, click *hour_of_day*, then slide the *Intervals granularity* slider until the horizontal axis displays hourly intervals.
 +
-The *Intervals* function displays an evenly spaced distribution of the field.
+[role="screenshot"]
+image::images/lens_barChartDistributionOfNumberField_7.16.png[Bar chart that displays the distribution of a number field]
 
 . Click *Save and return*.
 
@@ -319,6 +332,9 @@ Remove the documents that do not match the filter criteria:
 . In the layer pane, click *Top values of geo.srcdest*.
 
 . Click *Advanced*, then deselect *Group other values as "Other"*, the click *Close*.
++
+[role="screenshot"]
+image::images/lens_treemapMultiLevelChart_7.16.png[Treemap visualization]
 
 . Click *Save and return*.
 
