@@ -11,10 +11,19 @@ import useScroll from '../../hooks/use_scroll';
 import { useEuiTheme } from '@elastic/eui';
 
 interface IProcessTreeDeps {
+  // process.entity_id to act as root node
   sessionId: string;
-  forward: IProcessEvent[];
-  backward?: IProcessEvent[];
+
+  // bi-directional paging support. allows us to load
+  // processes before and after a particular process.entity_id
+  // implementation in-complete. see use_process_tree.js
+  forward: IProcessEvent[]; // load next
+  backward?: IProcessEvent[]; // load previous
+
+  // plain text search query (only searches "process.working_directory process.args.join(' ')"
   searchQuery?: string;
+
+  // currently selected process
   selectedProcess: IProcess | null;
   onProcessSelected(process: IProcess): void;
 }

@@ -217,6 +217,10 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
           results.push(process);
         }
       }
+    } else {
+      for (let processId in processMap) {
+        processMap[processId].searchMatched = null;
+      }
     }
 
     setSearchResults(results);
@@ -230,6 +234,7 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
         let { parent } = process;
 
         while (parent) {
+          console.log('auto expanding', parent.getLatest().process.name);
           parent.autoExpand = true;
           parent = parent.parent;
         }

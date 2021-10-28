@@ -18,6 +18,10 @@ interface IProcessDeps {
   onProcessSelected(process: IProcess): void;
 }
 
+/**
+ * Renders a node on the process tree
+ * TODO: as well as sections for tty output, alerts and file redirection.
+ */
 function Process({ process, isSessionLeader = false, depth = 0, onProcessSelected }: IProcessDeps) {
   const { euiTheme } = useEuiTheme();
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
@@ -26,7 +30,7 @@ function Process({ process, isSessionLeader = false, depth = 0, onProcessSelecte
     color: ${euiTheme.colors.text};
   `;
 
-  const highlightCSS = `
+  const searchHighlightCSS = `
     background-color: ${euiTheme.colors.highlight};
     color: ${euiTheme.colors.text};
     border-radius: 4px;
@@ -197,14 +201,14 @@ function Process({ process, isSessionLeader = false, depth = 0, onProcessSelecte
     const { args, working_directory } = event.process;
     const { searchMatched } = process;
 
-    if (searchMatched) {
+    if (searchMatched !== null) {
       const regex = new RegExp(searchMatched);
 
-      //TODO: should we allow some form of customization?
+      //TODO: should we allow some form of customization via settings?
       let text = `${working_directory} ${args.join(' ')}`;
 
       text = text.replace(regex, (match) => {
-        return `<span style="${highlightCSS}">${match}</span>`;
+        return `<span style="${searchHighlightCSS}">${match}</span>`;
       });
 
       return (
