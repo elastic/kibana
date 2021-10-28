@@ -54,7 +54,9 @@ export class AgentManager extends Manager {
       { hosts: [this.params.esHost] },
       this.requestOptions
     );
+  }
 
+  public async startAgent() {
     this.log.info('Getting agent enrollment key');
     const { data: apiKeys } = await axios.get(
       this.params.kibanaUrl + '/api/fleet/enrollment-api-keys',
@@ -100,6 +102,7 @@ export class AgentManager extends Manager {
         throw new Error('Agent timed out while coming online');
       }
     }
+
     return { policyId: policy.policy_id as string };
   }
 

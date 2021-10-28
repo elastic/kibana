@@ -51,11 +51,9 @@ async function withFleetAgent(
   });
 
   await fleetManager.setup();
-  const { policyId } = await agentManager.setup();
+  await agentManager.setup();
   try {
-    await runner({
-      CYPRESS_AGENT_POLICY: policyId,
-    });
+    await runner({});
   } finally {
     fleetManager.cleanup();
     agentManager.cleanup();
