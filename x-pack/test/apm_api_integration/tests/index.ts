@@ -14,7 +14,7 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
   describe('APM API tests', function () {
     this.tags('ciGroup1');
 
-    // inspect feature
+    // // inspect feature
     describe('inspect/inspect', function () {
       loadTestFile(require.resolve('./inspect/inspect'));
     });
@@ -239,6 +239,11 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
 
     describe('latency/service_apis', function () {
       loadTestFile(require.resolve('./latency/service_apis'));
+    });
+
+    // Dependencies
+    describe('dependencies/metadata', function () {
+      loadTestFile(require.resolve('./dependencies/metadata'));
     });
 
     registry.run(providerContext);
