@@ -163,6 +163,11 @@ export const alertsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  'kibana.alert.original_event.severity': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'kibana.alert.original_event.start': {
     type: 'date',
     array: false,
