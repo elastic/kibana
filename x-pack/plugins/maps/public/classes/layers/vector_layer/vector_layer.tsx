@@ -832,7 +832,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
     //
     // Create label layer
-    // label layer - "symbol" layer type for labels. Can not use same layer label and marker layers for icons because of conflicting styling requirements
+    // label layer - "symbol" layer type for labels. Can not use same layer label and marker layers because of conflicting styling requirements
     //
     if (!textLayer) {
       const mbLayer: MbLayer = {
@@ -846,6 +846,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.addLayer(mbLayer);
     }
 
+    //
     // Create marker layer
     // "circle" layer type for points
     // "symbol" layer type for icons
