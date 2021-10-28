@@ -37,8 +37,10 @@ function createApiExtraction(
       pkgJson,
       JSON.stringify({
         name: 'GENERATED-BY-BAZEL',
-        version: '0.0.0',
         description: 'This is a dummy package.json as API Extractor always requires one.',
+        types: './index.d.ts',
+        license: 'SSPL-1.0 OR Elastic License 2.0',
+        version: '1.0.0',
       })
     );
   }
