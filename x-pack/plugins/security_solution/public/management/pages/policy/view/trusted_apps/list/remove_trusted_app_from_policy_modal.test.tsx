@@ -25,7 +25,7 @@ import {
 import { Immutable } from '../../../../../../../common/endpoint/types';
 import { HttpFetchOptionsWithPath } from 'kibana/public';
 
-describe.only('When using the RemoveTrustedAppFromPolicyModal component', () => {
+describe('When using the RemoveTrustedAppFromPolicyModal component', () => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: (waitForLoadedState?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
