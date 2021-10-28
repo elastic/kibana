@@ -865,7 +865,6 @@ export class VectorStyle implements IVectorStyle {
     mbMap: MbMap;
     textLayerId: string;
   }) {
-    mbMap.setLayoutProperty(textLayerId, 'icon-allow-overlap', true);
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
     this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
@@ -884,6 +883,7 @@ export class VectorStyle implements IVectorStyle {
   }) {
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-allow-overlap', true);
 
     this._iconStyleProperty.syncIconWithMb(
       symbolLayerId,
