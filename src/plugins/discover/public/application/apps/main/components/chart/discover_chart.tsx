@@ -14,17 +14,19 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../../saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
-import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
+import { DataCharts$, DataChartsMessage, DataTotalHits$ } from '../../services/use_saved_search';
 import { DiscoverServices } from '../../../../../build_services';
 import { useChartPanels } from './use_chart_panels';
 import { VIEW_MODE, DocumentViewModeToggle } from '../view_mode_toggle';
 import { SHOW_FIELD_STATISTICS } from '../../../../../../common';
+import { useDataState } from '../../utils/use_data_state';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
@@ -52,6 +54,7 @@ export function DiscoverChart({
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
 }) {
+  const { bucketInterval }: DataChartsMessage = useDataState(savedSearchDataChart$);
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = services.uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
@@ -101,6 +104,68 @@ export function DiscoverChart({
     () => setShowChartOptionsPopover(false)
   );
 
+  const chartOptionsButton = (
+    <EuiFlexItem className="dscResultCount__toggle" grow={false}>
+      <EuiPopover
+        id="dscChartOptions"
+        button={
+          <EuiButtonEmpty
+            size="xs"
+            iconType="gear"
+            onClick={onShowChartOptions}
+            data-test-subj="discoverChartOptionsToggle"
+          >
+            {i18n.translate('discover.chartOptionsButton', {
+              defaultMessage: 'Chart options',
+            })}
+          </EuiButtonEmpty>
+        }
+        isOpen={showChartOptionsPopover}
+        closePopover={closeChartOptions}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+      </EuiPopover>
+    </EuiFlexItem>
+  );
+
+  let chartOptions = null;
+  if (timefield && !state.hideChart && bucketInterval?.scaled) {
+    const toolTiTitle = i18n.translate('discover.timeIntervalWithValueWarning', {
+      defaultMessage: 'Warning',
+    });
+
+    const toolTipContent = i18n.translate('discover.bucketIntervalTooltip', {
+      defaultMessage:
+        'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
+      values: {
+        bucketsDescription:
+          bucketInterval!.scale && bucketInterval!.scale > 1
+            ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
+                defaultMessage: 'buckets that are too large',
+              })
+            : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
+                defaultMessage: 'too many buckets',
+              }),
+        bucketIntervalDescription: bucketInterval?.description,
+      },
+    });
+
+    chartOptions = (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="baseline" responsive={false} gutterSize="none">
+          {chartOptionsButton}
+          <EuiFlexItem grow={false}>
+            <EuiIconTip type="alert" title={toolTiTitle} content={toolTipContent} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  } else if (timefield) {
+    chartOptions = chartOptionsButton;
+  }
+
   return (
     <EuiFlexGroup direction="column" alignItems="stretch" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false} className="dscResultCount">
@@ -124,32 +189,7 @@ export function DiscoverChart({
               />
             </EuiFlexItem>
           )}
-
-          {timefield && (
-            <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-              <EuiPopover
-                id="dscChartOptions"
-                button={
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType="gear"
-                    onClick={onShowChartOptions}
-                    data-test-subj="discoverChartOptionsToggle"
-                  >
-                    {i18n.translate('discover.chartOptionsButton', {
-                      defaultMessage: 'Chart options',
-                    })}
-                  </EuiButtonEmpty>
-                }
-                isOpen={showChartOptionsPopover}
-                closePopover={closeChartOptions}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-              >
-                <EuiContextMenu initialPanelId={0} panels={panels} />
-              </EuiPopover>
-            </EuiFlexItem>
-          )}
+          {chartOptions}
         </EuiFlexGroup>
       </EuiFlexItem>
       {timefield && !state.hideChart && (
