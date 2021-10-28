@@ -48,14 +48,19 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   const { data: hasActionResultsPrivileges, isFetched } = useActionResultsPrivileges();
 
   const defaultValue = useMemo(() => {
-    if (agentId || agentPolicyIds || query) {
+    if (agentId || agentPolicyIds?.length || query?.length) {
+      const agentSelection =
+        agentId || agentPolicyIds?.length
+          ? {
+              allAgentsSelected: false,
+              agents: castArray(agentId ?? agentIds ?? []),
+              platformsSelected: [],
+              policiesSelected: agentPolicyIds ?? [],
+            }
+          : null;
+
       return {
-        agentSelection: {
-          allAgentsSelected: false,
-          agents: castArray(agentId ?? agentIds ?? []),
-          platformsSelected: [],
-          policiesSelected: agentPolicyIds ?? [],
-        },
+        ...(agentSelection ? { agentSelection } : {}),
         query,
         savedQueryId,
         ecs_mapping,

@@ -1,6 +1,7 @@
 {
   "index": ".ml-annotations-read",
   "size": 500,
+  "track_total_hits": true,
   "body": {
     "query": {
       "bool": {

@@ -6,7 +6,7 @@
  */
 
 import { merge } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';

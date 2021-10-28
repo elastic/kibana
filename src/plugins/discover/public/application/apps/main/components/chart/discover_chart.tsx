@@ -180,7 +180,6 @@ export function DiscoverChart({
               onResetQuery={resetSavedSearch}
             />
           </EuiFlexItem>
-
           {showViewModeToggle && (
             <EuiFlexItem grow={false}>
               <DocumentViewModeToggle
