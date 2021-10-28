@@ -82,6 +82,11 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
       const { transformSpecs } = await import('./canvas_addons');
       return transformSpecs;
     });
+
+    plugins.canvas.addFilterViewsUIs(async () => {
+      const { filterViewsSpecs } = await import('./canvas_addons');
+      return filterViewsSpecs;
+    });
   }
 
   public start(core: CoreStart, plugins: StartDeps) {}

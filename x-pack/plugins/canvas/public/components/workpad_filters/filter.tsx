@@ -9,21 +9,21 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
 
 interface Props {
-  filter: Record<string, string>;
+  filter: Record<string, { label: string; formattedValue: string }>;
 }
 
 export const Filter: FC<Props> = ({ filter }) => {
-  const fields = Object.keys(filter).map((name, index) => (
+  const fields = Object.values(filter).map((filterView, index) => (
     <EuiFlexItem key={`fields-${index}`}>
       <EuiText size="m">
-        <strong>{name}</strong>
+        <strong>{filterView.label}</strong>
       </EuiText>
     </EuiFlexItem>
   ));
 
-  const values = Object.values(filter).map((value, index) => (
-    <EuiFlexItem key={`fields-${index}`}>
-      <EuiText>{value}</EuiText>
+  const values = Object.values(filter).map((filterView, index) => (
+    <EuiFlexItem key={`values-${index}`}>
+      <EuiText>{filterView.formattedValue}</EuiText>
     </EuiFlexItem>
   ));
 

@@ -15,3 +15,4 @@ export * from './uis/arguments';
 export * from './uis/tags';
 // @ts-expect-error Untyped Local
 export * from './uis/transforms';
+export * from './uis/filter_views';

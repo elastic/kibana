@@ -7,8 +7,9 @@
 
 import { EuiAccordion } from '@elastic/eui';
 import React, { FC } from 'react';
+import { filterToView } from '../../lib/filter';
 import { Filter } from './filter';
-import { Filter as FilterType, FiltersGroup as FiltersGroupType } from './types';
+import { FiltersGroup as FiltersGroupType } from './types';
 
 type Props = FiltersGroupType;
 
@@ -17,18 +18,9 @@ const panelStyle = {
   paddingTop: '15px',
 };
 
-const transform = (filter: FilterType): Record<string, string> => {
-  if (filter.type === 'time') {
-    const { value, ...rest } = filter;
-    return { ...rest, ...(value as {}) };
-  }
-
-  return { ...filter, value: `${filter.value}` };
-};
-
 export const FiltersGroup: FC<Props> = ({ name, filters }) => {
-  const preparedFilters: Array<Record<string, string>> = filters.map(transform);
-  const filtersComponents = preparedFilters.map((filter, index) => (
+  const filterViews: Array<Record<string, string>> = filters.map(filterToView);
+  const filtersComponents = filterViews.map((filter, index) => (
     <Filter key={`filter-${name}-${index}`} filter={filter} />
   ));
 

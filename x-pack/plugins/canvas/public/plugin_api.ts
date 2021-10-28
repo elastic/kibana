@@ -32,6 +32,7 @@ export interface CanvasApi {
   addTransitions: AddToRegistry<any>;
   addTypes: AddSpecsToRegistry<() => AnyExpressionTypeDefinition>;
   addViewUIs: AddToRegistry<any>;
+  addFilterViewsUIs: AddToRegistry<any>;
 }
 
 export interface SetupRegistries extends Record<string, any[]> {
@@ -43,6 +44,7 @@ export interface SetupRegistries extends Record<string, any[]> {
   argumentUIs: any[];
   tagUIs: any[];
   transitions: any[];
+  filterViewsUIs: any[];
 }
 
 export function getPluginApi(expressionsPluginSetup: ExpressionsSetup): {
@@ -58,6 +60,7 @@ export function getPluginApi(expressionsPluginSetup: ExpressionsSetup): {
     argumentUIs: [],
     tagUIs: [],
     transitions: [],
+    filterViewsUIs: [],
   };
 
   const addToRegistry = <T>(registry: Array<T | SpecPromiseFn<T>>) => {
@@ -100,6 +103,7 @@ export function getPluginApi(expressionsPluginSetup: ExpressionsSetup): {
     addArgumentUIs: addToRegistry(registries.argumentUIs),
     addTagUIs: addToRegistry(registries.tagUIs),
     addTransitions: addToRegistry(registries.transitions),
+    addFilterViewsUIs: addToRegistry(registries.filterViewsUIs),
   };
 
   return { api, registries };
