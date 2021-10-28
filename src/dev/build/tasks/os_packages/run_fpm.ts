@@ -129,6 +129,9 @@ export async function runFpm(
     // copy the data directory at /var/lib/kibana
     `${resolveWithTrailingSlash(fromBuild('data'))}=/var/lib/kibana/`,
 
+    // copy the logs directory at /var/log/kibana
+    `${resolveWithTrailingSlash(fromBuild('logs'))}=/var/log/kibana/`,
+
     // copy package configurations
     `${resolveWithTrailingSlash(__dirname, 'service_templates/systemd/')}=/`,
 
