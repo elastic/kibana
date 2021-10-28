@@ -62,7 +62,7 @@ describe('From alert', () => {
     esArchiverUnload('auditbeat_for_exceptions2');
   });
 
-  it.skip('Creates an exception and deletes it', () => {
+  it('Creates an exception and deletes it', () => {
     addExceptionFromFirstAlert();
     addsException(getException());
     esArchiverLoad('auditbeat_for_exceptions2');
