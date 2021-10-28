@@ -146,10 +146,6 @@ export const useInitSourcerer = (
           });
         }
       };
-      while (!doesIndexExist) {
-        abortCtrl.current.abort();
-        asyncSearch();
-      }
 
       const poll = () => {
         abortCtrl.current.abort();
@@ -168,6 +164,7 @@ export const useInitSourcerer = (
     (newSignalsIndex: string) => {
       const asyncSearch = async (newPatternList: string[]) => {
         abortCtrl.current = new AbortController();
+
         dispatch(sourcererActions.setSourcererScopeLoading({ loading: true }));
         try {
           const response = await postSourcererDataView({
