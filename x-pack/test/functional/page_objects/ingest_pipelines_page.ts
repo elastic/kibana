@@ -35,8 +35,8 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       processors?: string;
       onFailureProcessors?: string;
     }) {
-      await testSubjects.click('createPipelineDropdown');
-      await testSubjects.click('createNewPipeline');
+      await testSubjects.click('emptyStateCreatePipelineDropdown');
+      await testSubjects.click('emptyStateCreatePipelineButton');
 
       await testSubjects.exists('pipelineForm');
 
@@ -72,15 +72,14 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       return await Promise.all(pipelines.map((pipeline) => getPipelineName(pipeline)));
     },
 
-    async createPipelineFromCsv({ name, file }: { name: string; file: string }) {
-      await testSubjects.click('createPipelineDropdown');
-      await testSubjects.click('createNewPipelineFromCsv');
+    async navigateToCreateFromCsv() {
+      await testSubjects.click('emptyStateCreatePipelineDropdown');
+      await testSubjects.click('emptyStatecreatePipelineFromCsvButton');
 
       await testSubjects.exists('createFromCsvInstructions');
+    },
 
-      // TODO upload file
-      // await testSubjects.setValue('csvFilePicker > input', file);
-
+    async createPipelineFromCsv({ name }: { name: string; }) {
       await testSubjects.click('processFileButton');
 
       await testSubjects.exists('pipelineMappingsJSONEditor');
@@ -96,6 +95,10 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click('submitButton');
 
       await pageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    async closePipelineDetailsFlyout () {
+      await testSubjects.click('euiFlyoutCloseButton');
     },
   };
 }
