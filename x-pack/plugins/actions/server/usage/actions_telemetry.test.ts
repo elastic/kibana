@@ -613,17 +613,23 @@ Object {
         aggregations: {
           totalExecutions: {
             byConnectorTypeId: {
-              connectorTypes: {
-                '.slack': 100,
-                '.server-log': 20,
+              value: {
+                connectorTypes: {
+                  '.slack': 100,
+                  '.server-log': 20,
+                },
+                total: 120,
               },
             },
           },
           failedExecutions: {
             refs: {
               byConnectorTypeId: {
-                connectorTypes: {
-                  '.slack': 7,
+                value: {
+                  connectorTypes: {
+                    '.slack': 7,
+                  },
+                  total: 7,
                 },
               },
             },
@@ -674,28 +680,34 @@ Object {
         },
       })
     );
-
-    // for .server-log connectorss
-    mockEsClient.search.mockReturnValueOnce(
-      // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        aggregations: {
-          avgDuration: { value: 2 },
-        },
-      })
-    );
     const telemetry = await getExecutionsTotalCount(mockEsClient, 'test');
 
-    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
-    expect(telemetry).toMatchInlineSnapshot(`
-Object {
-  "countByAlertHistoryConnectorType": 0,
-  "countByType": Object {
-    "__server-log": 1,
-    "__slack": 1,
-  },
-  "countTotal": 2,
-}
-`);
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(telemetry).toStrictEqual({
+      avgExecutionTime: 0,
+      avgExecutionTimeByType: [
+        {
+          '__server-log': 919191.9191919192,
+        },
+        {
+          __email: 419666666.6666667,
+        },
+      ],
+      countByType: [
+        {
+          __slack: 100,
+        },
+        {
+          '__server-log': 20,
+        },
+      ],
+      countFailed: 7,
+      countFailedByType: [
+        {
+          __slack: 7,
+        },
+      ],
+      countTotal: 120,
+    });
   });
 });

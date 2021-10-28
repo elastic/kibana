@@ -528,9 +528,15 @@ export async function getExecutionsTotalCount(
 
   return {
     countTotal: aggsExecutions.total,
-    countByType: aggsExecutions.connectorTypes,
+    // @ts-expect-error aggegation type is not specified
+    countByType: Object.entries(aggsExecutions.connectorTypes).map(([key, value]) => ({
+      [replaceFirstAndLastDotSymbols(key)]: value,
+    })),
     countFailed: aggsFailedExecutions.total,
-    countFailedByType: aggsFailedExecutions.connectorTypes,
+    // @ts-expect-error aggegation type is not specified
+    countFailedByType: Object.entries(aggsFailedExecutions.connectorTypes).map(([key, value]) => ({
+      [replaceFirstAndLastDotSymbols(key)]: value,
+    })),
     avgExecutionTime: aggsAvgExecutionTime,
     avgExecutionTimeByType,
   };

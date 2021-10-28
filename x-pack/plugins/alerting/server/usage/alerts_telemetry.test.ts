@@ -162,16 +162,30 @@ Object {
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
-    expect(telemetry).toMatchInlineSnapshot(`
-Object {
-  "countByType": Object {
-    "__index-threshold": 2,
-    "document.test__": 1,
-    "logs.alert.document.count": 1,
-  },
-  "countNamespaces": 1,
-  "countTotal": 4,
-}
-`);
+    expect(telemetry).toStrictEqual({
+      avgExecutionTime: 0,
+      avgExecutionTimeByType: {
+        '__index-threshold': 1043934,
+        'document.test__': 17687687,
+        'logs.alert.document.count': 1675765,
+      },
+      countByType: {
+        '__index-threshold': 2,
+        'document.test__': 1,
+        'logs.alert.document.count': 1,
+      },
+      countFailuresByReason: {
+        unknown: 4,
+      },
+      countFailuresByReasonByType: {
+        unknown: {
+          '.index-threshold': 2,
+          'document.test.': 1,
+          'logs.alert.document.count': 1,
+        },
+      },
+      countTotal: 4,
+      countTotalFailures: 4,
+    });
   });
 });
