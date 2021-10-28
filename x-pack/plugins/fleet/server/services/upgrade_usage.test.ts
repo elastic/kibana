@@ -30,8 +30,8 @@ describe('sendTelemetryEvents', () => {
       new_version: '1.3.0',
       status: 'failure',
       error: [
-        { key: 'fieldX', message: ['Field X is required'] },
-        { key: 'fieldX', message: 'Invalid format' },
+        { key: 'queueUrl', message: ['Queue URL is required'] },
+        { message: 'Invalid format' },
       ],
       dryRun: true,
     };
@@ -43,14 +43,14 @@ describe('sendTelemetryEvents', () => {
         current_version: '0.6.1',
         error: [
           {
-            key: 'fieldX',
-            message: ['Field is required'],
+            key: 'queueUrl',
+            message: ['Queue URL is required'],
           },
           {
-            key: 'fieldX',
             message: 'Invalid format',
           },
         ],
+        error_message: ['Field is required', 'Invalid format'],
         new_version: '1.3.0',
         package_name: 'aws',
         status: 'failure',

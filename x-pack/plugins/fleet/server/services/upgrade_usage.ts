@@ -16,6 +16,7 @@ export interface PackagePolicyUpgradeUsage {
   status: 'success' | 'failure';
   error?: UpgradeError[];
   dryRun?: boolean;
+  error_message?: string[];
 }
 
 export interface UpgradeError {
@@ -36,12 +37,12 @@ export function sendTelemetryEvents(
   }
 
   try {
+    const cappedErrors = capErrorSize(upgradeUsage.error || [], MAX_ERROR_SIZE);
     eventsTelemetry.queueTelemetryEvents(FLEET_UPGRADES_CHANNEL_NAME, [
       {
         ...upgradeUsage,
-        error: upgradeUsage.error
-          ? makeErrorGeneric(capErrorSize(upgradeUsage.error, MAX_ERROR_SIZE))
-          : undefined,
+        error: upgradeUsage.error ? cappedErrors : undefined,
+        error_message: makeErrorGeneric(cappedErrors),
       },
     ]);
   } catch (exc) {
@@ -53,15 +54,12 @@ export function capErrorSize(errors: UpgradeError[], maxSize: number): UpgradeEr
   return errors.length > maxSize ? errors?.slice(0, maxSize) : errors;
 }
 
-function makeErrorGeneric(errors: UpgradeError[]): UpgradeError[] {
+function makeErrorGeneric(errors: UpgradeError[]): string[] {
   return errors.map((error) => {
-    let message = error.message;
-    if (error.key && Array.isArray(error.message) && error.message[0].indexOf('is required') > -1) {
-      message = ['Field is required'];
+    if (Array.isArray(error.message)) {
+      const firstMessage = error.message[0];
+      return firstMessage?.indexOf('is required') > -1 ? 'Field is required' : firstMessage;
     }
-    return {
-      key: error.key,
-      message,
-    };
+    return error.message as string;
   });
 }
