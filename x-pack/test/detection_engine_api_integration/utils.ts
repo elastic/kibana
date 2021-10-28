@@ -962,7 +962,9 @@ export const deleteRule = async (
   if (response.status !== 200) {
     // eslint-disable-next-line no-console
     console.log(
-      'Did not get an expected 200 "ok" when deleting the rule. CI issues could happen. Suspect this line if you are seeing CI issues.'
+      `Did not get an expected 200 "ok" when deleting the rule. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
     );
   }
 
@@ -1126,7 +1128,9 @@ export const deleteExceptionList = async (
   if (response.status !== 200) {
     // eslint-disable-next-line no-console
     console.log(
-      'Did not get an expected 200 "ok" when deleting an exception list. CI issues could happen. Suspect this line if you are seeing CI issues.'
+      `Did not get an expected 200 "ok" when deleting an exception list. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
     );
   }
 
@@ -1151,9 +1155,9 @@ export const createExceptionListItem = async (
   if (response.status !== 200) {
     // eslint-disable-next-line no-console
     console.log(
-      `Did not get an expected 200 "ok" when creating an exception list item. CI issues could happen. Suspect this line if you are seeing CI issues. ${JSON.stringify(
+      `Did not get an expected 200 "ok" when creating an exception list item. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
-      )}`
+      )}, status: ${JSON.stringify(response.status)}`
     );
   }
   return response.body;

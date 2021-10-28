@@ -219,9 +219,9 @@ export const importFile = async (
   if (response.status !== 200) {
     // eslint-disable-next-line no-console
     console.log(
-      `When importing a file found an unexpected non-200 response code. If you see errors in CI suspect this line. ${JSON.stringify(
+      `Did not get an expected 200 "ok" When importing a file. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
-      )}`
+      )}, status: ${JSON.stringify(response.status)}`
     );
   }
 
