@@ -31,7 +31,8 @@ The API tests are located in `x-pack/test/apm_api_integration/`.
 
 **API Test tips**
 
-- For debugging access Elasticsearch on http://localhost:9220 (`elastic` / `changeme`)
+- For data generation have a look at the [elastic-apm-synthtrace](../../../../packages/elastic-apm-synthtrace/README.md) package
+- For debugging access Elasticsearch on http://localhost:9220 and Kibana on http://localhost:5620 (`elastic` / `changeme`)
 - To update snapshots append `--updateSnapshots` to the functional_test_runner command
 
 ---
