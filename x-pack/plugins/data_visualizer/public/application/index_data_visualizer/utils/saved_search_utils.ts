@@ -146,8 +146,20 @@ export function getEsQueryFromSavedSearch({
     savedSearch.searchSource.getParent() !== undefined &&
     userQuery
   ) {
+    // Flattened query from search source may contain a clause that narrows the time range
+    // which might interfere with global time pickers so we need to remove
+    const savedQuery =
+      cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultQuery();
+    const timeField = savedSearch.searchSource.getField('index')?.timeFieldName;
+
+    if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
+      savedQuery.bool.filter = savedQuery.bool.filter.filter(
+        (c: QueryDslQueryContainer) =>
+          !(c.hasOwnProperty('range') && c.range?.hasOwnProperty(timeField))
+      );
+    }
     return {
-      searchQuery: savedSearch.searchSource.getSearchRequestBody()?.query ?? getDefaultQuery(),
+      searchQuery: savedQuery,
       searchString: userQuery.query,
       queryLanguage: userQuery.language as SearchQueryLanguage,
     };

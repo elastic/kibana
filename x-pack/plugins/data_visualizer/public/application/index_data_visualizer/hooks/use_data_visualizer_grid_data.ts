@@ -115,6 +115,7 @@ export const useDataVisualizerGridData = (
       currentQuery,
       currentFilters,
     }),
+    lastRefresh,
   ]);
 
   useEffect(() => {
