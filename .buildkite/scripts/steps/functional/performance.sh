@@ -14,6 +14,8 @@ cat << EOF | buildkite-agent pipeline upload
 steps:
   - command: .buildkite/scripts/steps/functional/performance_sub.sh
     parallelism: "$ITERATION_COUNT"
+    concurrency: 20
+    concurrency_group: 'performance-test-group'
 EOF
 
 

@@ -15,6 +15,7 @@ const layerList = [
     sourceDescriptor: {
       type: 'EMS_TMS',
       isAutoSelect: true,
+      lightModeDefault: 'road_map_desaturated',
     },
     visible: true,
     style: {},
