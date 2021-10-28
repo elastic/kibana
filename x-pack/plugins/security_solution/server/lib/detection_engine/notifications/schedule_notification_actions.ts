@@ -35,7 +35,7 @@ const formatAlertsForNotificationActions = (alerts: unknown[]) => {
     isRACAlert(alert)
       ? {
           ...expandDottedObject(convertToLegacyAlert(alert)),
-          ...expandDottedObject(alert as object),
+          ...expandDottedObject(alert),
         }
       : alerts
   );
