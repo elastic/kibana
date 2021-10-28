@@ -203,6 +203,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         afterEach(async () => {
           await observability.alerts.common.clearQueryBar();
+          // Reset the query bar by hiding the dropdown
+          await observability.alerts.common.submitQuery('');
         });
 
         it('Filter for value works', async () => {
