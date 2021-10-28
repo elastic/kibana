@@ -11,8 +11,8 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { useDispatch } from 'react-redux';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/api/types';
 import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';

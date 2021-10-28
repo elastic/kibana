@@ -125,7 +125,7 @@ interface PickEventTypeProps {
     dataViewId: string
   ) => void;
 }
-// TODO: Steph/sourcerer needs tests
+
 // AKA TimelineSourcerer
 const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   eventType = 'all',

@@ -71,6 +71,7 @@ export const createInitialState = (
       signalIndexName
     ),
   };
+
   const preloadedState: State = {
     ...pluginsInitState,
     app: { ...initialAppState, enableExperimental },

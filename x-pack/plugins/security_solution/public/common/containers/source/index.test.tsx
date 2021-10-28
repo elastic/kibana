@@ -93,11 +93,25 @@ describe('source/index.tsx', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      jest.restoreAllMocks();
-      store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-      (useKibana().services.data.search.search as jest.Mock).mockReturnValue({
+      const mock = {
         subscribe: ({ next }: { next: Function }) => next(mockSearchResponse),
         unsubscribe: jest.fn(),
+      };
+
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          data: {
+            search: {
+              search: jest.fn().mockReturnValue({
+                subscribe: ({ next }: { next: Function }) => {
+                  next(mockSearchResponse);
+                  return mock;
+                },
+                unsubscribe: jest.fn(),
+              }),
+            },
+          },
+        },
       });
     });
     it('sets field data for data view', async () => {
@@ -120,6 +134,154 @@ describe('source/index.tsx', () => {
         expect(payload.id).toEqual('neato');
         expect(Object.keys(payload.browserFields)).toHaveLength(10);
         expect(payload.docValueFields).toEqual([{ field: '@timestamp' }]);
+      });
+    });
+    it('sets source for timelines scope', async () => {
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(
+          () => useIndexFields(SourcererScopeName.timeline),
+          {
+            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+          }
+        );
+        await waitForNextUpdate();
+        rerender();
+        expect(mockDispatch.mock.calls[0][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+          payload: { id: SourcererScopeName.timeline, loading: true },
+        });
+        const {
+          type: sourceType,
+          payload: { payload },
+        } = mockDispatch.mock.calls[1][0];
+        expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_SOURCE');
+        expect(payload.id).toEqual(SourcererScopeName.timeline);
+        expect(payload.indicesExist).toEqual(true);
+        expect(payload.indexPattern.title).toEqual(
+          `${sourcererState.signalIndexName},apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*`
+        );
+      });
+    });
+    it('sets source for detections scope when signalIndexName is updated', async () => {
+      store = createStore(
+        { ...state, sourcerer: { ...state.sourcerer, signalIndexName: null } },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      await act(async () => {
+        const { result, rerender, waitForNextUpdate } = renderHook<
+          string,
+          { indexFieldsSearch: (selectedDataViewId: string, newSignalsIndex?: string) => void }
+        >(() => useIndexFields(SourcererScopeName.detections), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        act(() => {
+          result.current.indexFieldsSearch(
+            sourcererState.defaultDataView.id,
+            `${sourcererState.signalIndexName}`
+          );
+        });
+
+        expect(mockDispatch.mock.calls[0][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+          payload: { id: SourcererScopeName.detections, loading: true },
+        });
+        expect(mockDispatch.mock.calls[1][0].payload.payload.indicesExist).toEqual(false);
+        expect(mockDispatch.mock.calls[2][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+          payload: { id: SourcererScopeName.detections, loading: true },
+        });
+        expect(mockDispatch.mock.calls[3][0].payload.payload.indicesExist).toEqual(true);
+      });
+    });
+    it('when selectedPatterns=[], defaults to the patternList of the selected dataView', async () => {
+      await act(async () => {
+        store = createStore(
+          {
+            ...state,
+            sourcerer: {
+              ...state.sourcerer,
+              sourcererScopes: {
+                ...state.sourcerer.sourcererScopes,
+                [SourcererScopeName.default]: {
+                  ...state.sourcerer.sourcererScopes[SourcererScopeName.default],
+                  selectedDataViewId: 'something-random',
+                  selectedPatterns: [],
+                },
+              },
+            },
+          },
+          SUB_PLUGINS_REDUCER,
+          kibanaObservable,
+          storage
+        );
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(
+          () => useIndexFields(SourcererScopeName.default),
+          {
+            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+          }
+        );
+        await waitForNextUpdate();
+        rerender();
+        expect(mockDispatch.mock.calls[0][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+          payload: { id: SourcererScopeName.default, loading: true },
+        });
+        const {
+          type: sourceType,
+          payload: { payload },
+        } = mockDispatch.mock.calls[1][0];
+        expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_SOURCE');
+        expect(payload.id).toEqual(SourcererScopeName.default);
+        expect(payload.indicesExist).toEqual(true);
+        expect(payload.indexPattern.title).toEqual('random,something');
+      });
+    });
+    it('when selectedPatterns=[] and selectedDataViewId=security-solution, runs getScopePatternListSelection', async () => {
+      await act(async () => {
+        store = createStore(
+          {
+            ...state,
+            sourcerer: {
+              ...state.sourcerer,
+              sourcererScopes: {
+                ...state.sourcerer.sourcererScopes,
+                [SourcererScopeName.default]: {
+                  ...state.sourcerer.sourcererScopes[SourcererScopeName.default],
+                  selectedPatterns: [],
+                },
+              },
+            },
+          },
+          SUB_PLUGINS_REDUCER,
+          kibanaObservable,
+          storage
+        );
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(
+          () => useIndexFields(SourcererScopeName.default),
+          {
+            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+          }
+        );
+        await waitForNextUpdate();
+        rerender();
+        expect(mockDispatch.mock.calls[0][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+          payload: { id: SourcererScopeName.default, loading: true },
+        });
+        const {
+          type: sourceType,
+          payload: { payload },
+        } = mockDispatch.mock.calls[1][0];
+        expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_SOURCE');
+        expect(payload.id).toEqual(SourcererScopeName.default);
+        expect(payload.indicesExist).toEqual(true);
+        expect(payload.indexPattern.title).toEqual(
+          'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*'
+        );
       });
     });
   });
