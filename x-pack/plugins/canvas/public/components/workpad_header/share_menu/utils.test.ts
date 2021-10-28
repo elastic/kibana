@@ -16,7 +16,6 @@ test('getPdfJobParams returns the correct job params for canvas layout', () => {
   const jobParams = getPdfJobParams(workpadSharingData, 'v99.99.99');
   expect(jobParams).toMatchInlineSnapshot(`
     Object {
-      "browserTimezone": "",
       "layout": Object {
         "dimensions": Object {
           "height": 0,
@@ -136,7 +135,6 @@ test('getPdfJobParams returns the correct job params for canvas layout', () => {
       ],
       "objectType": "canvas workpad",
       "title": "base workpad",
-      "version": "",
     }
   `);
 });
