@@ -29,7 +29,7 @@ function flushPromises() {
 }
 
 describe('Painless DiagnosticAdapter', () => {
-  let diagnosticAdatper: DiagnosticsAdapter;
+  let diagnosticAdapter: DiagnosticsAdapter;
   let subscription: Subscription;
   let model: MockIModel;
   let validation: LangValidation;
@@ -44,13 +44,13 @@ describe('Painless DiagnosticAdapter', () => {
 
   beforeEach(async () => {
     model = monaco.editor.createModel(ID) as unknown as MockIModel;
-    diagnosticAdatper = new DiagnosticsAdapter(getMockWorker);
+    diagnosticAdapter = new DiagnosticsAdapter(getMockWorker);
 
     // validate() has a promise we need to wait for
     // --> await worker.getSyntaxErrors()
     await flushPromises();
 
-    subscription = diagnosticAdatper.validation$.subscribe((newValidation) => {
+    subscription = diagnosticAdapter.validation$.subscribe((newValidation) => {
       validation = newValidation;
     });
   });

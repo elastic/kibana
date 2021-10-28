@@ -67,6 +67,12 @@ export const PreviewListItem: React.FC<Props> = ({
     return key;
   };
 
+  const withTooltip = (content: JSX.Element) => (
+    <EuiToolTip position="top" content={typeof value !== 'string' ? JSON.stringify(value) : value}>
+      {content}
+    </EuiToolTip>
+  );
+
   const renderValue = () => {
     if (isFromScript && isLoadingPreview) {
       return (
@@ -78,11 +84,13 @@ export const PreviewListItem: React.FC<Props> = ({
 
     if (hasScriptError) {
       return (
-        <EuiBadge iconType="alert" color="danger" data-test-subj="scriptErrorBadge">
-          {i18n.translate('indexPatternFieldEditor.fieldPreview.scriptErrorBadgeLabel', {
-            defaultMessage: 'Script error',
-          })}
-        </EuiBadge>
+        <div>
+          <EuiBadge iconType="alert" color="danger" data-test-subj="scriptErrorBadge">
+            {i18n.translate('indexPatternFieldEditor.fieldPreview.scriptErrorBadgeLabel', {
+              defaultMessage: 'Script error',
+            })}
+          </EuiBadge>
+        </div>
       );
     }
 
@@ -113,7 +121,7 @@ export const PreviewListItem: React.FC<Props> = ({
     }
 
     if (formattedValue !== undefined) {
-      return (
+      return withTooltip(
         <span
           className="indexPatternFieldEditor__previewFieldList__item__value__wrapper"
           // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
@@ -122,7 +130,7 @@ export const PreviewListItem: React.FC<Props> = ({
       );
     }
 
-    return (
+    return withTooltip(
       <span className="indexPatternFieldEditor__previewFieldList__item__value__wrapper">
         {JSON.stringify(value)}
       </span>
@@ -144,12 +152,7 @@ export const PreviewListItem: React.FC<Props> = ({
           className="indexPatternFieldEditor__previewFieldList__item__value"
           data-test-subj="value"
         >
-          <EuiToolTip
-            position="top"
-            content={typeof value !== 'string' ? JSON.stringify(value) : value}
-          >
-            {renderValue()}
-          </EuiToolTip>
+          {renderValue()}
         </EuiFlexItem>
 
         <EuiFlexItem

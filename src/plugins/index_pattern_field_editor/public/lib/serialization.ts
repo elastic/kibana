@@ -35,6 +35,9 @@ export const painlessErrorToMonacoMarker = (
     startLineNumber: startPosition.lineNumber,
     startColumn: startPosition.column,
     endLineNumber: startPosition.lineNumber,
+    // Ideally we'd want the endColumn to be the end of the error but
+    // ES does not return that info. There is an issue to track the enhancement:
+    // https://github.com/elastic/elasticsearch/issues/78072
     endColumn: startPosition.column + 1,
     message: reason,
     severity: monaco.MarkerSeverity.Error,

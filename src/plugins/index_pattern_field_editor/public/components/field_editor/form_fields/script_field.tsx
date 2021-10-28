@@ -172,20 +172,13 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
 
   useEffect(() => {
     nextValidationData$({ isFetchingDoc, isLoadingPreview, error });
+  }, [nextValidationData$, isFetchingDoc, isLoadingPreview, error]);
 
+  useEffect(() => {
     if (error?.code === 'PAINLESS_SCRIPT_ERROR') {
       displayPainlessScriptErrorInMonaco(error!.error as RuntimeFieldPainlessError);
-    } else {
-      updateMonacoMarkers([]);
     }
-  }, [
-    nextValidationData$,
-    isFetchingDoc,
-    isLoadingPreview,
-    error,
-    displayPainlessScriptErrorInMonaco,
-    updateMonacoMarkers,
-  ]);
+  }, [error, displayPainlessScriptErrorInMonaco, updateMonacoMarkers]);
 
   useEffect(() => {
     return () => {
