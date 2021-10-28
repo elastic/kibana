@@ -70,19 +70,23 @@ export class AgentManager extends Manager {
       .flatMap((x) => x)
       .find((inf: any) => inf.family === 'IPv4' && inf.address !== '127.0.0.1')?.address;
 
-    this.log.info(ipAddress);
+    const fleetUrl = `http://${ipAddress}:8220`;
+    this.log.info('Fleet url: ' + fleetUrl);
+
+    const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
+    this.log.info(artifact);
 
     const args = [
       'run',
       '--env',
       'FLEET_ENROLL=1',
       '--env',
-      `FLEET_URL=http://${ipAddress}:8220`,
+      `FLEET_URL=${fleetUrl}`,
       '--env',
       `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
       '--env',
       'FLEET_INSECURE=true',
-      `docker.elastic.co/beats/elastic-agent:${getLatestVersion()}`,
+      artifact,
     ];
 
     this.agentProcess = spawn('docker', args, { stdio: 'inherit' });

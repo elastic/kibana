@@ -21,8 +21,7 @@ type ArtifactName = 'elastic-agent' | 'fleet-server';
 
 export async function getLatestVersion(): Promise<string> {
   const response: any = await axios('https://artifacts-api.elastic.co/v1/versions');
-  // console.log(response);
-  return last(response.versions as string[]) || ''; // || '8.0.0-SNAPSHOT';
+  return last(response.data.versions as string[]) || '8.0.0-SNAPSHOT';
 }
 
 async function getArtifact(
