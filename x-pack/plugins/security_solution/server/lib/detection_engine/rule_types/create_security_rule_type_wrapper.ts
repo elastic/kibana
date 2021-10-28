@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -36,6 +37,7 @@ import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './fact
 import { RuleExecutionLogClient, truncateMessageList } from '../rule_execution_log';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
+import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
@@ -89,7 +91,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           id: alertId,
           ruleId,
           name,
-          index: ruleDataClient.indexName,
+          index: spaceId,
         });
 
         logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
@@ -182,7 +184,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           from: from as string,
           to: to as string,
           interval,
-          maxSignals: DEFAULT_MAX_SIGNALS,
+          maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
           buildRuleMessage,
           startedAt,
         });
@@ -224,17 +226,17 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             refresh
           );
 
+          const legacySignalFields: string[] = Object.keys(aadFieldConversion);
           const wrapHits = wrapHitsFactory({
-            ignoreFields,
+            ignoreFields: [...ignoreFields, ...legacySignalFields],
             mergeStrategy,
             completeRule,
             spaceId,
-            signalsIndex: '',
           });
 
           const wrapSequences = wrapSequencesFactory({
             logger,
-            ignoreFields,
+            ignoreFields: [...ignoreFields, ...legacySignalFields],
             mergeStrategy,
             completeRule,
             spaceId,
