@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import { IAggConfigs } from '../aggs';
 import { tabifyGetColumns } from './get_columns';
 
-import { TabbedResponseWriterOptions, TabbedAggColumn, TabbedAggRow } from './types';
+import type { TabbedResponseWriterOptions, TabbedAggColumn, TabbedAggRow } from './types';
 import { Datatable, DatatableColumn } from '../../../../expressions/common/expression_types/specs';
 
 interface BufferColumn {
@@ -77,6 +77,7 @@ export class TabbedAggResponseWriter {
               column.aggConfig.type.valueType || column.aggConfig.params.field?.type || 'number',
             field: column.aggConfig.params.field?.name,
             index: column.aggConfig.getIndexPattern()?.title,
+            hasPrecisionError: Boolean(column.hasPrecisionError),
             params: column.aggConfig.toSerializedFieldFormat(),
             source: 'esaggs',
             sourceParams: {

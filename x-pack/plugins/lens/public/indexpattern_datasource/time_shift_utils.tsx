@@ -143,6 +143,41 @@ export function getLayerTimeShiftChecks({
   };
 }
 
+export function getPrecisionErrorWarningMessages(
+  state: IndexPatternPrivateState,
+  { activeData }: FramePublicAPI
+) {
+  const warningMessages: React.ReactNode[] = [];
+
+  if (state && activeData) {
+    const hasPrecisionError = Object.values(activeData).some((datatable) =>
+      datatable.columns.some((col) => col.meta.hasPrecisionError)
+    );
+
+    if (hasPrecisionError) {
+      warningMessages.push(
+        <FormattedMessage
+          key={`precision-error`}
+          id="xpack.lens.indexPattern.precisionErrorWarning"
+          defaultMessage="{docCount} values for a terms aggregation may be approximate. As a result, any sub-aggregations on the terms aggregation may also be approximate."
+          values={{
+            docCount: (
+              <strong>
+                <FormattedMessage
+                  id="xpack.lens.indexPattern.precisionErrorWarning.docCount"
+                  defaultMessage="doc_count"
+                />
+              </strong>
+            ),
+          }}
+        />
+      );
+    }
+  }
+
+  return warningMessages;
+}
+
 export function getStateTimeShiftWarningMessages(
   state: IndexPatternPrivateState,
   { activeData }: FramePublicAPI
