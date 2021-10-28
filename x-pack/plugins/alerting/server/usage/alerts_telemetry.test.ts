@@ -7,7 +7,11 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
-import { getTotalCountAggregations, getTotalCountInUse } from './alerts_telemetry';
+import {
+  getTotalCountAggregations,
+  getTotalCountInUse,
+  getTotalExecutionsCount,
+} from './alerts_telemetry';
 
 describe('alerts telemetry', () => {
   test('getTotalCountInUse should replace first "." symbol to "__" in alert types names', async () => {
@@ -111,6 +115,62 @@ Object {
     "max": 60,
     "min": 0,
   },
+}
+`);
+  });
+
+  test('getTotalExecutionsCount should return execution aggregations for total count, count by rule type and number of failed executions', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          byRuleTypeId: {
+            value: {
+              ruleTypes: {
+                '.index-threshold': 2,
+                'logs.alert.document.count': 1,
+                'document.test.': 1,
+              },
+              ruleTypesDuration: {
+                '.index-threshold': 2087868,
+                'logs.alert.document.count': 1675765,
+                'document.test.': 17687687,
+              },
+            },
+          },
+          failuresByReason: {
+            value: {
+              reasons: {
+                unknown: {
+                  '.index-threshold': 2,
+                  'logs.alert.document.count': 1,
+                  'document.test.': 1,
+                },
+              },
+            },
+          },
+          avgDuration: { value: 10 },
+        },
+        hits: {
+          hits: [],
+        },
+      })
+    );
+
+    const telemetry = await getTotalExecutionsCount(mockEsClient, 'test');
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "countByType": Object {
+    "__index-threshold": 2,
+    "document.test__": 1,
+    "logs.alert.document.count": 1,
+  },
+  "countNamespaces": 1,
+  "countTotal": 4,
 }
 `);
   });
