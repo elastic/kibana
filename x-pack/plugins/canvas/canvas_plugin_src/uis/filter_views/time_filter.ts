@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { FilterViewSpec } from '../../../public/filter_view_types/intex';
+import { FilterType } from '../../../types';
+import { FilterViewSpec } from '../../../public/filter_view_types';
 import { defaultFilter } from './default_filter';
 
 const defConfig = defaultFilter.view();
 
 export const timeFilter: FilterViewSpec = {
-  name: 'time',
+  name: FilterType.time,
   view: () => ({
     ...defConfig,
     value: (val: any) => ({

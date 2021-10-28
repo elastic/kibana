@@ -6,19 +6,28 @@
  */
 
 import { flowRight, identity } from 'lodash';
-import { filterViewsRegistry } from '../filter_view_types/intex';
+import { Filter as FilterType } from '../../types/filters';
+import {
+  FilterViewInstance,
+  FlattenFilterViewInstance,
+  filterViewsRegistry,
+} from '../filter_view_types';
 
-const flattenFilterView = (filterValue: any) => (filterView: any) =>
-  Object.keys(filterView).reduce((acc, key) => {
-    if (typeof filterView[key] === 'function') {
-      const val = filterView[key](filterValue[key]);
+const flattenFilterView = (filterValue: FilterType) => (filterView: FilterViewInstance) => {
+  const filterViewKeys = Object.keys(filterView) as Array<keyof FilterViewInstance>;
+  return filterViewKeys.reduce<FlattenFilterViewInstance>((acc, key) => {
+    const filterField = filterView[key];
+    if (typeof filterField === 'function') {
+      const val = filterField(filterValue[key]);
       return { ...acc, ...val };
     }
-    return { ...acc, [key]: filterView[key] };
+    return { ...acc, [key]: filterField };
   }, {});
+};
 
-const formatFilterView = (filterValue: any) => (filterView: any) =>
-  Object.keys(filterView).reduce(
+const formatFilterView = (filterValue: FilterType) => (filterView: FlattenFilterViewInstance) => {
+  const filterViewKeys = Object.keys(filterView) as Array<keyof FilterViewInstance>;
+  return filterViewKeys.reduce(
     (acc, key) => ({
       ...acc,
       [key]: {
@@ -28,8 +37,9 @@ const formatFilterView = (filterValue: any) => (filterView: any) =>
     }),
     {}
   );
+};
 
-export const transformFilterView = (filterView: any) => (filterValue: any) =>
+export const transformFilterView = (filterView: FilterViewInstance) => (filterValue: FilterType) =>
   flowRight(formatFilterView(filterValue), flattenFilterView(filterValue))(filterView);
 
 export const getFilterFormatter = (type: string = '') => {

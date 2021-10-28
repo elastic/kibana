@@ -7,4 +7,10 @@
 
 export { FilterView } from './filter_view';
 export { filterViewsRegistry } from './filter_views_registry';
-export type { FilterViewSpec } from './filter_view';
+export type {
+  FilterViewSpec,
+  FilterViewInstance,
+  FlattenFilterViewInstance,
+  FormattedFilterViewInstance,
+  FormattedFilterViewField,
+} from './filter_view';

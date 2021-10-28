@@ -7,9 +7,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
+import { FormattedFilterViewInstance } from '../../filter_view_types';
 
 interface Props {
-  filter: Record<string, { label: string; formattedValue: string }>;
+  filter: FormattedFilterViewInstance;
 }
 
 export const Filter: FC<Props> = ({ filter }) => {

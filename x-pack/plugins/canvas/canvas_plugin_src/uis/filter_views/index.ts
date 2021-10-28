@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FilterViewSpec } from '../../../public/filter_view_types/intex';
+import { FilterViewSpec } from '../../../public/filter_view_types';
 import { defaultFilter } from './default_filter';
 import { timeFilter } from './time_filter';
 

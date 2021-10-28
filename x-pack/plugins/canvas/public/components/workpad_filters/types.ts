@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-export interface Filter<FilterValue = unknown> {
-  type: string;
-  column: string;
-  value: FilterValue;
-  filterGroup: string;
-}
+import { Filter } from '../../../types';
 
 export interface FiltersGroup {
   name: string;

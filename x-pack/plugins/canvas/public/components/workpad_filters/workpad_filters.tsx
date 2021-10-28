@@ -6,11 +6,12 @@
  */
 
 import React, { FC } from 'react';
+import { Filter } from '../../../types';
 import { WorkpadFilters as Component } from './workpad_filters.component';
 
 export const WorkpadFilters: FC = () => {
-  const filters = [
-    { type: 'dropdown', column: 'project', value: 'logstash', filterGroup: 'Gamma' },
+  const filters: Filter[] = [
+    { type: 'exactly', column: 'project', value: 'logstash', filterGroup: 'Gamma' },
     {
       type: 'time',
       column: '@timestamp',
@@ -18,7 +19,7 @@ export const WorkpadFilters: FC = () => {
       filterGroup: 'Gamma',
     },
 
-    { type: 'dropdown', column: 'project', value: 'beats', filterGroup: 'Alpha' },
+    { type: 'exactly', column: 'project', value: 'beats', filterGroup: 'Alpha' },
     {
       type: 'time',
       column: '@timestamp',
