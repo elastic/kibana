@@ -11,6 +11,9 @@ echo "--- Default CI Group $CI_GROUP"
 
 cd "$XPACK_DIR"
 
+echo 'Sleeping...'
+sleep 86400
+
 checks-reporter-with-killswitch "X-Pack Chrome Functional tests / Group ${CI_GROUP}" \
   node scripts/functional_tests \
     --bail \
