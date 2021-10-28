@@ -112,7 +112,7 @@ const setup = async (opts: SetupOpts = {}) => {
   return { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy };
 };
 
-describe.only('CopyToSpaceFlyout', () => {
+describe('CopyToSpaceFlyout', () => {
   it('waits for spaces to load', async () => {
     const { wrapper } = await setup({ returnBeforeSpacesLoad: true });
 
