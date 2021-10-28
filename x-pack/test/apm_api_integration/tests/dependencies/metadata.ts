@@ -5,12 +5,9 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { dataConfig, generateData } from './generate_data';
-
-type DependenciesMetadata = APIReturnType<'GET /internal/apm/backends/metadata'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
@@ -33,35 +30,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('Dependencies when data is not loaded', { config: 'basic', archives: [] }, () => {
-    it('handles empty state', async () => {
-      const response = await callApi();
-      expect(response.status).to.be(200);
-      expect(response.body.metadata).to.empty();
-    });
-  });
+  registry.when(
+    'Dependency metadata when data is not loaded',
+    { config: 'basic', archives: [] },
+    () => {
+      it('handles empty state', async () => {
+        const { status, body } = await callApi();
 
-  registry.when('Dependencies metadata', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
-    describe('when data is loaded', () => {
-      before(async () => {
+        expect(status).to.be(200);
+        expect(body.metadata).to.empty();
+      });
+    }
+  );
+
+  registry.when(
+    'Dependency metadata when data is loaded',
+    { config: 'basic', archives: ['apm_8.0.0_empty'] },
+    () => {
+      it('returns correct metadata for the dependency', async () => {
         await generateData({ synthtraceEsClient, backendName, start, end });
+        const { status, body } = await callApi();
+
+        expect(status).to.be(200);
+        expect(body.metadata.spanType).to.equal(dataConfig.spanType);
+        expect(body.metadata.spanSubtype).to.equal(backendName);
       });
-
-      after(() => synthtraceEsClient.clean());
-
-      describe('returns the correct data', () => {
-        let dependencyMetadata: DependenciesMetadata;
-
-        before(async () => {
-          const response = await callApi();
-          dependencyMetadata = response.body;
-        });
-
-        it('returns correct metadata for the dependency', () => {
-          expect(dependencyMetadata.metadata.spanType).to.equal(dataConfig.spanType);
-          expect(dependencyMetadata.metadata.spanSubtype).to.equal(backendName);
-        });
-      });
-    });
-  });
+    }
+  );
 }
