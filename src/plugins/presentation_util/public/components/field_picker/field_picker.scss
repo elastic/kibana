@@ -4,6 +4,10 @@
   border: 1px dashed transparent;
 }
 
+.presFieldPickerFieldButtonActive {
+  box-shadow: 0 0 0 2px $euiColorPrimary;
+}
+
 .presFieldPicker__fieldPanel {
   height: 300px;
   overflow-y: scroll;
