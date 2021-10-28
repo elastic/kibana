@@ -68,7 +68,7 @@ interface ReqOptions {
 export interface TimingsOptions {
   /** list of timings to record */
   timings: CiStatsTiming[];
-  /** master, 7.x, etc, automatically detected from package.json if not specified */
+  /** main, 7.x, etc, automatically detected from package.json if not specified */
   upstreamBranch?: string;
   /** value of data/uuid, automatically loaded if not specified */
   kibanaUuid?: string | null;

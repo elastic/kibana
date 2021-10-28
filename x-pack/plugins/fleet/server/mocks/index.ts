@@ -58,7 +58,7 @@ export const createAppContextStartContractMock = (): MockedFleetAppContext => {
     },
     config$,
     kibanaVersion: '8.0.0',
-    kibanaBranch: 'master',
+    kibanaBranch: 'main',
   };
 };
 

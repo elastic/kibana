@@ -95,7 +95,7 @@ Implemented under the [Actions Config](./server/actions_config.ts).
 
 ### Configuration Options
 
-Built-In-Actions are configured using the _xpack.actions_ namespace under _kibana.yml_. See the [Actions configuration Documentation](https://www.elastic.co/guide/en/kibana/master/defining-alerts.html#actions-configuration) for all configuration options.
+Built-In-Actions are configured using the _xpack.actions_ namespace under _kibana.yml_. See the [Actions configuration Documentation](https://www.elastic.co/guide/en/kibana/main/defining-alerts.html#actions-configuration) for all configuration options.
 
 #### **allowedHosts** configuration
 
@@ -163,7 +163,7 @@ The built-in email action type provides a good example of creating an action typ
 
 ## RESTful API
 
-Using an action type requires an action to be created that will contain and encrypt configuration for a given action type. See the [REST API Documentation](https://www.elastic.co/guide/en/kibana/master/actions-and-connectors-api.html) API for CRUD operations for Actions.
+Using an action type requires an action to be created that will contain and encrypt configuration for a given action type. See the [REST API Documentation](https://www.elastic.co/guide/en/kibana/main/actions-and-connectors-api.html) API for CRUD operations for Actions.
 
 ## Firing actions
 
@@ -252,13 +252,13 @@ const result = await actionsClient.execute({
 
 # Built-in Action Types
 
-Kibana ships with a set of built-in action types. See [Actions and connector types Documentation](https://www.elastic.co/guide/en/kibana/master/action-types.html).
+Kibana ships with a set of built-in action types. See [Actions and connector types Documentation](https://www.elastic.co/guide/en/kibana/main/action-types.html).
 
 In addition to the documented configurations, several built in action type offer additional `params` configurations.
 
 ## ServiceNow ITSM
 
-The [ServiceNow ITSM user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
+The [ServiceNow ITSM user documentation `params`](https://www.elastic.co/guide/en/kibana/main/servicenow-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
 ### `params`
 
 | Property        | Description                                                                                        | Type   |
@@ -309,7 +309,7 @@ No parameters for the `getFields` subaction. Provide an empty object `{}`.
 
 ## ServiceNow Sec Ops
 
-The [ServiceNow SecOps user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-sir-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
+The [ServiceNow SecOps user documentation `params`](https://www.elastic.co/guide/en/kibana/main/servicenow-sir-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
 
 ### `params`
 
@@ -362,7 +362,7 @@ No parameters for the `getFields` subaction. Provide an empty object `{}`.
 ---
 ## ServiceNow ITOM
 
-The [ServiceNow ITOM user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-itom-action-type.html) lists configuration properties for the `addEvent` subaction. In addition, several other subaction types are available.
+The [ServiceNow ITOM user documentation `params`](https://www.elastic.co/guide/en/kibana/main/servicenow-itom-action-type.html) lists configuration properties for the `addEvent` subaction. In addition, several other subaction types are available.
 ### `params`
 
 | Property        | Description                                                       | Type   |
@@ -398,7 +398,7 @@ Refer to [ServiceNow documentation](https://docs.servicenow.com/bundle/rome-it-o
 ---
 ## Jira
 
-The [Jira user documentation `params`](https://www.elastic.co/guide/en/kibana/master/jira-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
+The [Jira user documentation `params`](https://www.elastic.co/guide/en/kibana/main/jira-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
 ### `params`
 
 | Property        | Description                                                                                                                                | Type   |
@@ -461,7 +461,7 @@ No parameters for the `getFields` subaction. Provide an empty object `{}`.
 
 ## IBM Resilient
 
-The [IBM Resilient user documentation `params`](https://www.elastic.co/guide/en/kibana/master/resilient-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
+The [IBM Resilient user documentation `params`](https://www.elastic.co/guide/en/kibana/main/resilient-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
 
 ### `params`
 
@@ -570,7 +570,7 @@ Actions that take URLs or hostnames should check that those values are allowed. 
 
 You should create asciidoc for the new action type. Add an entry to the action type index - [`docs/user/alerting/action-types.asciidoc`](../../../docs/user/alerting/action-types.asciidoc), which points to a new document for the action type that should be in the directory [`docs/user/alerting/action-types`](../../../docs/user/alerting/action-types).
 
-We suggest following the template provided in `docs/action-type-template.asciidoc`. The [Email action type](https://www.elastic.co/guide/en/kibana/master/email-action-type.html) is an example of documentation created following the template.
+We suggest following the template provided in `docs/action-type-template.asciidoc`. The [Email action type](https://www.elastic.co/guide/en/kibana/main/email-action-type.html) is an example of documentation created following the template.
 
 ## tests
 

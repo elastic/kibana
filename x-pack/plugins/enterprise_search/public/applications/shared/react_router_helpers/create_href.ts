@@ -20,7 +20,7 @@ import { HttpSetup } from 'src/core/public';
  *
  * Said escape hatch should still contain all of Kibana's basepaths - for example,
  * 'localhost:5601/xyz' when developing locally, or '/s/some-custom-space/' for space basepaths.
- * See: https://www.elastic.co/guide/en/kibana/master/kibana-navigation.html
+ * See: https://www.elastic.co/guide/en/kibana/main/kibana-navigation.html
  *
  * Links completely outside of Kibana should not use our React Router helpers or navigateToUrl.
  */

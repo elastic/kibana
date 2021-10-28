@@ -1,7 +1,7 @@
 # Kibana task manager
 
 The task manager is a generic system for running background tasks.
-Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-production-considerations.html
+Documentation: https://www.elastic.co/guide/en/kibana/main/task-manager-production-considerations.html
 
 It supports:
 - Single-run and recurring tasks
@@ -522,5 +522,5 @@ The task manager's public API is create / delete / list. Updates aren't directly
 
 Task Manager exposes runtime statistics which enable basic observability into its inner workings and makes it possible to monitor the system from external services.
 
-Public Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-health-monitoring.html
+Public Documentation: https://www.elastic.co/guide/en/kibana/main/task-manager-health-monitoring.html
 Developer Documentation: [./MONITORING](./MONITORING.MD)

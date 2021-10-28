@@ -16,7 +16,7 @@ import { parseManifest } from './plugin_manifest_parser';
 const pluginPath = resolve('path', 'existent-dir');
 const pluginManifestPath = resolve(pluginPath, 'kibana.json');
 const packageInfo = {
-  branch: 'master',
+  branch: 'main',
   buildNum: 1,
   buildSha: '',
   version: '7.0.0-alpha1',

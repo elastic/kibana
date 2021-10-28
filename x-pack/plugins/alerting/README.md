@@ -59,7 +59,7 @@ A Kibana rule detects a condition and executes one or more actions when that con
 
 1. Develop and register a rule type (see rule types -> example).
 2. Configure feature level privileges using RBAC.
-3. Create a rule using the RESTful API [Documentation](https://www.elastic.co/guide/en/kibana/master/alerting-apis.html) (see rules -> create).
+3. Create a rule using the RESTful API [Documentation](https://www.elastic.co/guide/en/kibana/main/alerting-apis.html) (see rules -> create).
 
 ## Alerting API Keys
 
@@ -203,7 +203,7 @@ You should create asciidoc for each new rule type you develop:
 
 - Solution specific rule documentation should live within the docs for the solution.
 
-We suggest following the template provided in `docs/rule-type-template.asciidoc`. The [Index Threshold rule type](https://www.elastic.co/guide/en/kibana/master/rule-type-index-threshold.html) is an example of documentation created following the template.
+We suggest following the template provided in `docs/rule-type-template.asciidoc`. The [Index Threshold rule type](https://www.elastic.co/guide/en/kibana/main/rule-type-index-threshold.html) is an example of documentation created following the template.
 
 ## Tests
 
@@ -517,7 +517,7 @@ As part of that same change, we also decided that not only should they be allowe
 
 In the above examples, we have been giving the same level of access to both rules and alerts for a particular rule type. There may be cases when you want your feature privilege to allow for escalated or de-escalated privileges for either rules or alerts within a feature. We can use subfeature privileges to achieve this granularity.
 
-For more information and other examples of subfeature privilege, refer to the [user documentation](https://www.elastic.co/guide/en/kibana/master/development-security.html#example-3-discover).
+For more information and other examples of subfeature privilege, refer to the [user documentation](https://www.elastic.co/guide/en/kibana/main/development-security.html#example-3-discover).
 
 ```typescript
 features.registerKibanaFeature({
@@ -703,7 +703,7 @@ You can use the `registerNavigation` API to specify as many AlertType specific h
 
 ## Internal HTTP APIs
 
-We provide public APIs for performing CRUD operations on rules. Descriptions for these APIs are available in the [user documentation](https://www.elastic.co/guide/en/kibana/master/alerting-apis.html).
+We provide public APIs for performing CRUD operations on rules. Descriptions for these APIs are available in the [user documentation](https://www.elastic.co/guide/en/kibana/main/alerting-apis.html).
 In addition to the public APIs, we provide the following internal APIs. Internal APIs should not be consumed by plugins outside of the alerting plugins.
 
 ### `GET /internal/alerting/rule/{id}/state`: Get rule state

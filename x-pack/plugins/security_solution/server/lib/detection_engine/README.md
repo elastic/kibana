@@ -119,7 +119,7 @@ Every 5 minutes if you get positive hits you will see messages on info like so:
 server log [09:54:59.013] [info][plugins][siem] Total signals found from signal rule "id: a556065c-0656-4ba1-ad64-a77ca9d2013b", "ruleId: rule-1": 10000
 ```
 
-Rules are [space aware](https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html) and default
+Rules are [space aware](https://www.elastic.co/guide/en/kibana/main/xpack-spaces.html) and default
 to the "default" (empty) URL space if you do not export the variable of `SPACE_URL`. Example, if you want to
 post rules to `test-space` you set `SPACE_URL` to be:
 
@@ -152,8 +152,8 @@ logging.events:
 ```
 
 See these two README.md's pages for more references on the alerting and actions API:
-https://github.com/elastic/kibana/blob/master/x-pack/plugins/alerting/README.md
-https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions
+https://github.com/elastic/kibana/blob/main/x-pack/plugins/alerting/README.md
+https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions
 
 ### Signals API
 

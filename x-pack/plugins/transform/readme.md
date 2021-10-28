@@ -16,7 +16,7 @@ info, refer to
 1. Fork and clone the [Kibana repo](https://github.com/elastic/kibana).
 
 1. Install `nvm`, `node`, `yarn` (for example, by using Homebrew). See 
-   [Install dependencies](https://www.elastic.co/guide/en/kibana/master/development-getting-started.html#_install_dependencies).
+   [Install dependencies](https://www.elastic.co/guide/en/kibana/main/development-getting-started.html#_install_dependencies).
 
 1. Make sure that Elasticsearch is deployed and running on `localhost:9200`.
 
@@ -46,7 +46,7 @@ info, refer to
 1. Go to http://localhost:560x/xxx (check the terminal message for the exact 
    path).
 
-For more details, refer to this [getting started](https://www.elastic.co/guide/en/kibana/master/development-getting-started.html) page.
+For more details, refer to this [getting started](https://www.elastic.co/guide/en/kibana/main/development-getting-started.html) page.
 
 ### Adding sample data to Kibana
 

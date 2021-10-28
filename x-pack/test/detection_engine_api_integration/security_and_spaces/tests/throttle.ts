@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
    * Work within the security_solution's API and states of "throttle" which currently not a 1 to 1 relationship:
    *
    * Ref:
-   * https://www.elastic.co/guide/en/kibana/master/create-and-manage-rules.html#controlling-rules
+   * https://www.elastic.co/guide/en/kibana/main/create-and-manage-rules.html#controlling-rules
    * https://www.elastic.co/guide/en/kibana/current/mute-all-alerts-api.html
    * https://www.elastic.co/guide/en/security/current/rules-api-create.html
    */

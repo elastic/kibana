@@ -75,7 +75,7 @@ export type ConfigDeprecation = (
 export interface ConfigDeprecationContext {
   /** The current Kibana version, e.g `7.16.1`, `8.0.0` */
   version: string;
-  /** The current Kibana branch, e.g `7.x`, `7.16`, `master` */
+  /** The current Kibana branch, e.g `7.x`, `7.16`, `main` */
   branch: string;
 }
 

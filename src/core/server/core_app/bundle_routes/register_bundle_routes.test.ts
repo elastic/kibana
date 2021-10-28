@@ -19,7 +19,7 @@ const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   buildNum: 42,
   buildSha: 'sha',
   dist: true,
-  branch: 'master',
+  branch: 'main',
   version: '8.0.0',
 });
 

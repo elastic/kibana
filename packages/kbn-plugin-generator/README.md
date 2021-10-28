@@ -14,7 +14,7 @@ If you are targeting **Kibana 6.3 or greater** then checkout the corresponding K
 
 ## Quick Start
 
-To target the current development version of Kibana just use the default  `master` branch.
+To target the current development version of Kibana just use the default  `main` branch.
 
 ```sh
 node scripts/generate_plugin --name my_plugin_name -y
@@ -43,7 +43,7 @@ Since the Plugin Generator is now a part of the Kibana repo, when you update you
 > ***NOTE:*** These commands should be run from the Kibana repo, and `upstream` is our convention for the git remote that references https://github.com/elastic/kibana.git, unless you added this remote you might need to use `origin`.
 
 ```sh
-git pull upstream master
+git pull upstream main
 yarn kbn bootstrap
 ```
 

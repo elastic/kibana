@@ -194,7 +194,7 @@ For open source solutions, good documentation is especially important. If much o
 
 #### Scheduled Builds
 
-We have certain pipelines (ES Snapshots) that run once daily, and `master` CI currently only runs once an hour. We need the ability to configure scheduled builds.
+We have certain pipelines (ES Snapshots) that run once daily, and `main` CI currently only runs once an hour. We need the ability to configure scheduled builds.
 
 #### Container support
 
@@ -550,7 +550,7 @@ All of these things would need to be true at the same time for a large number of
 
 #### Configuration
 
-Here's an example configuration, which would likely reside in the `master` branch of the kibana repository.
+Here's an example configuration, which would likely reside in the `main` branch of the kibana repository.
 
 ```js
 {
@@ -611,7 +611,7 @@ Features supported by the bot:
 
 #### Configuration
 
-The configuration is stored in a `json` file (default: `.ci/pull-requests.json`) in the repo for which pull requests will be monitored. Multiple branches in the repo can store different configurations, or one configuration (e.g. in `master`) can cover the entire repo.
+The configuration is stored in a `json` file (default: `.ci/pull-requests.json`) in the repo for which pull requests will be monitored. Multiple branches in the repo can store different configurations, or one configuration (e.g. in `main`) can cover the entire repo.
 
 Example configuration:
 
@@ -624,7 +624,7 @@ Example configuration:
       "pipelineSlug": "kibana",
 
       "enabled": true,
-      "target_branch": "master",
+      "target_branch": "main",
       "allow_org_users": true,
       "allowed_repo_permissions": ["admin", "write"],
       "allowed_list": ["renovate[bot]"],

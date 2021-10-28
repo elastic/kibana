@@ -33,7 +33,7 @@ xpack.task_manager.monitored_task_execution_thresholds:
 
 ## Consuming Health Stats
 
-Public Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-health-monitoring.html#task-manager-consuming-health-stats
+Public Documentation: https://www.elastic.co/guide/en/kibana/main/task-manager-health-monitoring.html#task-manager-consuming-health-stats
 
 ### Understanding the Exposed Stats
 
@@ -47,7 +47,7 @@ An `OK` status will only be displayed when all sections are marked as `OK`.
 
 The root `timestamp` is the time in which the summary was exposed (either to the DEBUG logger or the http api) and the `last_update` is the last time any one of the sections was updated.
 
-Follow this step-by-step guide to make sense of the stats: https://www.elastic.co/guide/en/kibana/master/task-manager-troubleshooting.html#task-manager-diagnosing-root-cause
+Follow this step-by-step guide to make sense of the stats: https://www.elastic.co/guide/en/kibana/main/task-manager-troubleshooting.html#task-manager-diagnosing-root-cause
 
 #### The Configuration Section
 The `configuration` section summarizes Task Manager's current configuration, including dynamic configurations which change over time, such as `poll_interval` and `max_workers` which adjust in reaction to changing load on the system.

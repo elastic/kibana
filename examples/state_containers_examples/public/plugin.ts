@@ -88,21 +88,21 @@ export class StateContainersExamplesPlugin implements Plugin {
       links: [
         {
           label: 'State containers README',
-          href: 'https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_containers',
+          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_containers',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
         },
         {
           label: 'State sync utils README',
-          href: 'https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync',
+          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
         },
         {
           label: 'Kibana navigation best practices',
-          href: 'https://www.elastic.co/guide/en/kibana/master/kibana-navigation.html',
+          href: 'https://www.elastic.co/guide/en/kibana/main/kibana-navigation.html',
           iconType: 'logoKibana',
           size: 's',
           target: '_blank',

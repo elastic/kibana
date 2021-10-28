@@ -694,7 +694,7 @@ During Phase 1, we should create documentation on the clustering mode: best prac
 clustered mode, and so on.
 
 We will specifically look to make changes to our docs around contributing to Kibana, specifically we can add a section
-in the [best practices](https://www.elastic.co/guide/en/kibana/master/development-best-practices.html#_testing_stability) to
+in the [best practices](https://www.elastic.co/guide/en/kibana/main/development-best-practices.html#_testing_stability) to
 remind contributers to be thinking about the fact that you cannot rely on a 1:1 relationship between the Kibana process and
 an individual machine.
 

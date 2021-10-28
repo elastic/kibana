@@ -22,7 +22,7 @@ import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.moc
 import { bootstrapRendererFactory, BootstrapRenderer } from './bootstrap_renderer';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
-  branch: 'master',
+  branch: 'main',
   buildNum: 42,
   buildSha: 'buildSha',
   dist: false,

@@ -17,7 +17,7 @@ to the telemetry cluster using the
 [Usage Collection plugin](../../../../src/plugins/usage_collection/README.mdx).
 
 During the APM server-side plugin's setup phase a
-[Saved Object](https://www.elastic.co/guide/en/kibana/master/managing-saved-objects.html)
+[Saved Object](https://www.elastic.co/guide/en/kibana/main/managing-saved-objects.html)
 for APM telemetry is registered and a
 [task manager](../../task_manager/server/README.md) task is registered and started.
 The task periodically queries the APM indices and saves the results in the Saved

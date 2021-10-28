@@ -21,7 +21,7 @@ import { ConfigService, Env, RawPackageInfo } from '.';
 import { getEnvOptions } from './__mocks__/env';
 
 const packageInfos: RawPackageInfo = {
-  branch: 'master',
+  branch: 'main',
   version: '8.0.0',
   build: {
     number: 42,

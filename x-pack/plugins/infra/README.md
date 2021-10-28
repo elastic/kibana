@@ -86,10 +86,10 @@ life-cycle of a PR looks like the following:
    * `Feature:Metrics UI` if it relates to the *Metrics UI*
    * `Feature:Logs UI` if it relates to the *Logs UI*
    * Version labels for merge and backport targets (see [Kibana's contribution
-     procedures](https://www.elastic.co/guide/en/kibana/master/contributing.html)), usually:
+     procedures](https://www.elastic.co/guide/en/kibana/main/contributing.html)), usually:
      * the version that `master` currently represents
      * the version of the next minor release
-   * Release note labels (see [Kibana's contribution procedures](https://www.elastic.co/guide/en/kibana/master/contributing.html#kibana-release-notes-process))
+   * Release note labels (see [Kibana's contribution procedures](https://www.elastic.co/guide/en/kibana/main/contributing.html#kibana-release-notes-process))
      * `release_note:enhancement` if the PR contains a new feature or enhancement
      * `release_note:fix` if the PR contains an external-facing fix
      * `release_note:breaking` if the PR contains a breaking change

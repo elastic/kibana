@@ -113,7 +113,7 @@ const Plugins = {
 };
 
 const packageMock = {
-  branch: 'master',
+  branch: 'main',
   version: '1.2.3',
   build: {
     distributable: true,

@@ -38,7 +38,7 @@ export const convertTagsToSet = (tagObjects: object[]): Set<string> => {
 // records in batches of this const setting and uses the fields to try to get the least
 // amount of data per record back. If saved objects at some point supports aggregations
 // then this should be replaced with a an aggregation call.
-// Ref: https://www.elastic.co/guide/en/kibana/master/saved-objects-api.html
+// Ref: https://www.elastic.co/guide/en/kibana/main/saved-objects-api.html
 export const readTags = async ({
   isRuleRegistryEnabled,
   rulesClient,
