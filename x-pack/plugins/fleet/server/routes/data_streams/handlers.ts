@@ -192,6 +192,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
         estypes.AggregationsMultiBucketAggregate<{ key?: string; value?: number }>
       >;
 
+      // some integrations e.g custom logs don't have event.ingested
       if (maxIngestedTimestamp?.value) {
         dataStreamResponse.last_activity_ms = maxIngestedTimestamp?.value;
       }
