@@ -1,0 +1,13 @@
+{
+  "id": "sessionView",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Security Team",
+    "githubTeam": "security-team"
+  },
+  "requiredPlugins": ["data"],
+  "requiredBundles": ["kibanaReact"],
+  "server": true,
+  "ui": true
+}
