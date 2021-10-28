@@ -14,8 +14,8 @@ jest.mock('../../../timelines/components/open_timeline/helpers');
 describe('queryTimelineByIdOnUrlChange', () => {
   const oldTestTimelineId = '04e8ffb0-2c2a-11ec-949c-39005af91f70';
   const newTestTimelineId = `${oldTestTimelineId}-newId`;
-  const oldTimelineRisonSearchString = `?timeline=(activeTab:query,graphEventId:%27%27,id:%27${oldTestTimelineId}%27,isOpen:!t)`;
-  const newTimelineRisonSearchString = `?timeline=(activeTab:query,graphEventId:%27%27,id:%27${newTestTimelineId}%27,isOpen:!t)`;
+  const oldTimelineRisonSearchString = `?timeline=(activeTab:query,graphEventInfo:(id:%27%27,index:%27%27),id:%27${oldTestTimelineId}%27,isOpen:!t)`;
+  const newTimelineRisonSearchString = `?timeline=(activeTab:query,graphEventInfo:(id:%27%27,index:%27%27),id:%27${newTestTimelineId}%27,isOpen:!t)`;
   const mockUpdateTimeline = jest.fn();
   const mockUpdateTimelineIsLoading = jest.fn();
   const mockQueryTimelineById = jest.fn();

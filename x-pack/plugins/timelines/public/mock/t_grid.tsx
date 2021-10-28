@@ -98,7 +98,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   filterStatus: 'open',
   filters: [],
   globalFullScreen: false,
-  graphEventId: undefined,
+  graphEventInfo: undefined,
   hasAlertsCrud: true,
   id: TimelineId.active,
   indexNames: mockIndexNames,

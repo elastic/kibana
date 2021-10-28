@@ -16,7 +16,7 @@ import { useAppToasts } from '../../../../hooks/use_app_toasts';
 export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
   id,
   title,
-  graphEventId,
+  graphEventInfo,
 }) => {
   const { addError } = useAppToasts();
 
@@ -33,8 +33,8 @@ export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
   );
 
   const onClickTimeline = useCallback(
-    () => handleTimelineClick(id ?? '', onError, graphEventId),
-    [id, graphEventId, handleTimelineClick, onError]
+    () => handleTimelineClick(id ?? '', onError, graphEventInfo),
+    [id, graphEventInfo, handleTimelineClick, onError]
   );
   return (
     <EuiToolTip content={i18n.TIMELINE_ID(id ?? '')}>

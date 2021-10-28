@@ -228,9 +228,11 @@ describe('EventsViewer', () => {
         ...eventsViewerDefaultProps,
         showTotalCount: false,
       };
+      const graphEventInfo = { id: 'a valid id', index: 'valid index' };
+
       const wrapper = mount(
         <TestProviders>
-          <EventsViewer {...disableSubTitle} graphEventId="a valid id" />
+          <EventsViewer {...disableSubTitle} graphEventInfo={graphEventInfo} />
         </TestProviders>
       );
       expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toEqual('');
@@ -339,7 +341,7 @@ describe('EventsViewer', () => {
         <TestProviders>
           <EventsViewer
             {...eventsViewerDefaultProps}
-            graphEventId={undefined}
+            graphEventInfo={undefined}
             headerFilterGroup={
               <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
             }
@@ -349,12 +351,12 @@ describe('EventsViewer', () => {
       expect(wrapper.find(`[data-test-subj="alerts-table-filter-group"]`).exists()).toBe(true);
     });
 
-    test('it has a visible HeaderFilterGroupWrapper when Resolver is NOT showing, because graphEventId is undefined', () => {
+    test('it has a visible HeaderFilterGroupWrapper when Resolver is NOT showing, because graphEventInfo is undefined', () => {
       const wrapper = mount(
         <TestProviders>
           <EventsViewer
             {...eventsViewerDefaultProps}
-            graphEventId={undefined}
+            graphEventInfo={undefined}
             headerFilterGroup={
               <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
             }
@@ -366,12 +368,12 @@ describe('EventsViewer', () => {
       ).not.toHaveStyleRule('visibility', 'hidden');
     });
 
-    test('it has a visible HeaderFilterGroupWrapper when Resolver is NOT showing, because graphEventId is an empty string', () => {
+    test('it has a visible HeaderFilterGroupWrapper when Resolver is NOT showing, because id is an empty string', () => {
       const wrapper = mount(
         <TestProviders>
           <EventsViewer
             {...eventsViewerDefaultProps}
-            graphEventId=""
+            graphEventInfo={{ id: '', index: 'awesome' }}
             headerFilterGroup={
               <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
             }
@@ -388,7 +390,7 @@ describe('EventsViewer', () => {
         <TestProviders>
           <EventsViewer
             {...eventsViewerDefaultProps}
-            graphEventId="a valid id"
+            graphEventInfo={{ id: 'a valid id', index: 'index' }}
             headerFilterGroup={
               <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
             }
@@ -405,7 +407,7 @@ describe('EventsViewer', () => {
         <TestProviders>
           <EventsViewer
             {...eventsViewerDefaultProps}
-            graphEventId="a valid id"
+            graphEventInfo={{ id: 'a valid id', index: 'index' }}
             headerFilterGroup={
               <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
             }
@@ -421,28 +423,31 @@ describe('EventsViewer', () => {
       mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponse]);
     });
 
-    test('it renders the provided utilityBar when Resolver is NOT showing, because graphEventId is undefined', () => {
+    test('it renders the provided utilityBar when Resolver is NOT showing, because graphEventInfo is undefined', () => {
       const wrapper = mount(
         <TestProviders>
-          <EventsViewer {...eventsViewerDefaultProps} graphEventId={undefined} />
+          <EventsViewer {...eventsViewerDefaultProps} graphEventInfo={undefined} />
         </TestProviders>
       );
       expect(wrapper.find(`[data-test-subj="mock-utility-bar"]`).exists()).toBe(true);
     });
 
-    test('it renders the provided utilityBar when Resolver is NOT showing, because graphEventId is an empty string', () => {
+    test('it renders the provided utilityBar when Resolver is NOT showing, because graphEventInfo is an empty string', () => {
       const wrapper = mount(
         <TestProviders>
-          <EventsViewer {...eventsViewerDefaultProps} graphEventId="" />
+          <EventsViewer {...eventsViewerDefaultProps} graphEventInfo={{ id: '', index: '' }} />
         </TestProviders>
       );
       expect(wrapper.find(`[data-test-subj="mock-utility-bar"]`).exists()).toBe(true);
     });
 
-    test('it does NOT render the provided utilityBar when Resolver is showing, because graphEventId is a valid id', () => {
+    test('it does NOT render the provided utilityBar when Resolver is showing, because graphEventInfo has a valid id', () => {
       const wrapper = mount(
         <TestProviders>
-          <EventsViewer {...eventsViewerDefaultProps} graphEventId="a valid id" />
+          <EventsViewer
+            {...eventsViewerDefaultProps}
+            graphEventInfo={{ id: 'a valid id', index: '' }}
+          />
         </TestProviders>
       );
       expect(wrapper.find(`[data-test-subj="mock-utility-bar"]`).exists()).toBe(false);
@@ -454,28 +459,31 @@ describe('EventsViewer', () => {
       mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponse]);
     });
 
-    test('it renders the inspect button when Resolver is NOT showing, because graphEventId is undefined', () => {
+    test('it renders the inspect button when Resolver is NOT showing, because graphEventInfo is undefined', () => {
       const wrapper = mount(
         <TestProviders>
-          <EventsViewer {...eventsViewerDefaultProps} graphEventId={undefined} />
+          <EventsViewer {...eventsViewerDefaultProps} graphEventInfo={undefined} />
         </TestProviders>
       );
       expect(wrapper.find(`[data-test-subj="inspect-icon-button"]`).exists()).toBe(true);
     });
 
-    test('it renders the inspect button when Resolver is NOT showing, because graphEventId is an empty string', () => {
+    test('it renders the inspect button when Resolver is NOT showing, because graphEventInfo id is an empty string', () => {
       const wrapper = mount(
         <TestProviders>
-          <EventsViewer {...eventsViewerDefaultProps} graphEventId="" />
+          <EventsViewer {...eventsViewerDefaultProps} graphEventInfo={{ id: '', index: '' }} />
         </TestProviders>
       );
       expect(wrapper.find(`[data-test-subj="inspect-icon-button"]`).exists()).toBe(true);
     });
 
-    test('it does NOT render the inspect button when Resolver is showing, because graphEventId is a valid id', () => {
+    test('it does NOT render the inspect button when Resolver is showing, because graphEventInfo id is a valid id', () => {
       const wrapper = mount(
         <TestProviders>
-          <EventsViewer {...eventsViewerDefaultProps} graphEventId="a valid id" />
+          <EventsViewer
+            {...eventsViewerDefaultProps}
+            graphEventInfo={{ id: 'valid id', index: 'index' }}
+          />
         </TestProviders>
       );
       expect(wrapper.find(`[data-test-subj="inspect-icon-button"]`).exists()).toBe(false);

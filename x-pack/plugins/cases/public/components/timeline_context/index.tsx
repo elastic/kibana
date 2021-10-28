@@ -16,7 +16,14 @@ import { Plugin } from 'unified';
 
 // TODO: copied from 'use_insert_timeline' in security_solution till timeline moved into it's own plugin.
 interface UseInsertTimelineReturn {
-  handleOnTimelineChange: (title: string, id: string | null, graphEventId?: string) => void;
+  handleOnTimelineChange: (
+    title: string,
+    id: string | null,
+    graphEventInfo?: {
+      id: string;
+      index?: string;
+    }
+  ) => void;
 }
 
 interface TimelineProcessingPluginRendererProps {

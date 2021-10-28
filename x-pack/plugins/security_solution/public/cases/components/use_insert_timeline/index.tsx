@@ -14,9 +14,14 @@ import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { setInsertTimeline } from '../../../timelines/store/timeline/actions';
+import { GraphEventInfo } from '../../../../../timelines/public';
 
 export interface UseInsertTimelineReturn {
-  handleOnTimelineChange: (title: string, id: string | null, graphEventId?: string) => void;
+  handleOnTimelineChange: (
+    title: string,
+    id: string | null,
+    graphEventInfo?: GraphEventInfo
+  ) => void;
 }
 
 export const useInsertTimeline = (
@@ -29,8 +34,8 @@ export const useInsertTimeline = (
   const insertTimeline = useShallowEqualSelector(timelineSelectors.selectInsertTimeline);
 
   const handleOnTimelineChange = useCallback(
-    (title: string, id: string | null, graphEventId?: string) => {
-      const url = formatUrl(getTimelineUrl(id ?? '', graphEventId), {
+    (title: string, id: string | null, graphEventInfo?: GraphEventInfo) => {
+      const url = formatUrl(getTimelineUrl(id ?? '', graphEventInfo), {
         absolute: true,
         skipSearch: true,
       });
@@ -52,7 +57,7 @@ export const useInsertTimeline = (
       handleOnTimelineChange(
         insertTimeline.timelineTitle,
         insertTimeline.timelineSavedObjectId,
-        insertTimeline.graphEventId
+        insertTimeline.graphEventInfo
       );
       dispatch(setInsertTimeline(null));
     }

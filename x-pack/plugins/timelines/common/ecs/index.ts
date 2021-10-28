@@ -38,7 +38,7 @@ export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
 };
 export interface Ecs {
   _id: string;
-  _index: string;
+  _index?: string;
   agent?: AgentEcs;
   auditd?: AuditdEcs;
   destination?: DestinationEcs;

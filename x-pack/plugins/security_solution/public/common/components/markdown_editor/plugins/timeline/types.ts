@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { GraphEventInfo } from '../../../../../../../timelines/public';
 import { ID } from './constants';
 
 export interface TimelineConfiguration {
   id: string | null;
   title: string;
-  graphEventId?: string;
-  [key: string]: string | null | undefined;
+  graphEventInfo?: GraphEventInfo;
+  [key: string]: string | null | undefined | GraphEventInfo;
 }
 
 export interface TimelineProps extends TimelineConfiguration {

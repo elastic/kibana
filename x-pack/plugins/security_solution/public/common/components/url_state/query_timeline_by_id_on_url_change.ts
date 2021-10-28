@@ -73,7 +73,7 @@ export const queryTimelineByIdOnUrlChange = ({
       queryTimelineById({
         activeTimelineTab: newTimeline?.activeTab ?? TimelineTabs.query,
         duplicate: false,
-        graphEventId: newTimeline?.graphEventId,
+        graphEventInfo: newTimeline?.graphEventInfo,
         timelineId: newId,
         openTimeline: true,
         updateIsLoading: updateTimelineIsLoading,

@@ -26,7 +26,8 @@ export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
     (get(['agent', 'type', 0], ecsData) === 'winlogbeat' &&
       get(['event', 'module', 0], ecsData) === 'sysmon')) &&
   get(['process', 'entity_id'], ecsData)?.length === 1 &&
-  get(['process', 'entity_id', 0], ecsData) !== '';
+  get(['process', 'entity_id', 0], ecsData) !== '' &&
+  get(['_index'], ecsData) != null;
 interface InvestigateInResolverProps {
   timelineId: string;
   ecsData: Ecs;

@@ -110,7 +110,7 @@ const getMockObject = (
     activeTab: TimelineTabs.query,
     id: '',
     isOpen: false,
-    graphEventId: '',
+    graphEventInfo: { id: '', index: '' },
   },
   timerange: {
     global: {

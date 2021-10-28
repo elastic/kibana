@@ -149,7 +149,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
   const graphOverlay = useMemo(
     () =>
-      graphEventInfo != null && graphEventInfo.id.length > 0 && graphEventInfo.index.length > 0 ? (
+      graphEventInfo != null &&
+      graphEventInfo.id.length > 0 &&
+      graphEventInfo.index != null &&
+      graphEventInfo.index.length > 0 ? (
         <GraphOverlay timelineId={id} />
       ) : null,
     [graphEventInfo, id]

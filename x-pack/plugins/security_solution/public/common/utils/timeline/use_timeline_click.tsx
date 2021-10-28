@@ -7,6 +7,7 @@
 
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { GraphEventInfo } from '../../../../../timelines/public';
 import {
   dispatchUpdateTimeline,
   queryTimelineById,
@@ -18,9 +19,9 @@ export const useTimelineClick = () => {
   const dispatch = useDispatch();
 
   const handleTimelineClick = useCallback(
-    (timelineId: string, onError: TimelineErrorCallback, graphEventId?: string) => {
+    (timelineId: string, onError: TimelineErrorCallback, graphEventInfo?: GraphEventInfo) => {
       queryTimelineById({
-        graphEventId,
+        graphEventInfo,
         timelineId,
         onError,
         updateIsLoading: ({

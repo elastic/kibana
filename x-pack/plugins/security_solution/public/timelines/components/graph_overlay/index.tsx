@@ -262,7 +262,7 @@ const useGetOriginEventInfo = (timelineId: TimelineId): OriginEventInfo | undefi
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventInfo
   );
 
-  if (!graphEventInfo) {
+  if (!graphEventInfo || !graphEventInfo.index) {
     return;
   }
 

@@ -97,7 +97,7 @@ describe('SIEM Navigation', () => {
         activeTab: TimelineTabs.query,
         id: '',
         isOpen: false,
-        graphEventId: '',
+        graphEventInfo: { id: '', index: '' },
       },
     },
   };

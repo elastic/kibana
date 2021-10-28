@@ -88,7 +88,7 @@ export interface TGridModel extends TGridModelSettings {
 // TODO: should this be defined inside of resolve/security solution instead?
 export interface GraphEventInfo {
   id: string;
-  index: string;
+  index?: string;
 }
 
 export type TGridModelForTimeline = Pick<
