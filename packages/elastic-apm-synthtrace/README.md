@@ -93,10 +93,10 @@ const esEvents = toElasticsearchOutput([
 
 Via the CLI, you can upload scenarios, either using a fixed time range or continuously generating data. Some examples are available in in `src/scripts/examples`. Here's an example for live data:
 
-`$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-generator/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --live`
+`$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --live`
 
 For a fixed time window:
-`$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-generator/src/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now`
+`$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now`
 
 The script will try to automatically find bootstrapped APM indices. __If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.__
 

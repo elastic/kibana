@@ -38,6 +38,11 @@ export const alertsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  'kibana.alert.building_block_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'kibana.alert.depth': {
     type: 'long',
     array: false,
@@ -157,6 +162,11 @@ export const alertsFieldMap: FieldMap = {
     type: 'long',
     array: false,
     required: true,
+  },
+  'kibana.alert.original_event.severity': {
+    type: 'long',
+    array: false,
+    required: false,
   },
   'kibana.alert.original_event.start': {
     type: 'date',

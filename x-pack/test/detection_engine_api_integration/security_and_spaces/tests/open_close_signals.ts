@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -29,6 +29,7 @@ import {
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
+import { RACAlert } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -37,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('open_close_signals', () => {
-    describe('validation checks', () => {
+    describe.skip('validation checks', () => {
       it('should not give errors when querying and the signals index does not exist yet', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
@@ -102,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, 10, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
           const everySignalOpen = signalsOpen.hits.hits.every(
-            (hit) => hit._source?.signal?.status === 'open'
+            (hit) => hit._source?.[ALERT_WORKFLOW_STATUS] === 'open'
           );
           expect(everySignalOpen).to.eql(true);
         });
@@ -124,7 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(setSignalStatus({ signalIds, status: 'closed' }))
             .expect(200);
 
-          const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+          const { body: signalsClosed }: { body: estypes.SearchResponse<RACAlert> } =
             await supertest
               .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
               .set('kbn-xsrf', 'true')
@@ -150,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(setSignalStatus({ signalIds, status: 'closed' }))
             .expect(200);
 
-          const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+          const { body: signalsClosed }: { body: estypes.SearchResponse<RACAlert> } =
             await supertest
               .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
               .set('kbn-xsrf', 'true')
@@ -158,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
               .expect(200);
 
           const everySignalClosed = signalsClosed.hits.hits.every(
-            (hit) => hit._source?.signal?.status === 'closed'
+            (hit) => hit._source?.['kibana.alert.workflow_status'] === 'closed'
           );
           expect(everySignalClosed).to.eql(true);
         });
@@ -183,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // query for the signals with the superuser
           // to allow a check that the signals were NOT closed with t1 analyst
-          const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+          const { body: signalsClosed }: { body: estypes.SearchResponse<RACAlert> } =
             await supertest
               .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
               .set('kbn-xsrf', 'true')
@@ -191,7 +192,7 @@ export default ({ getService }: FtrProviderContext) => {
               .expect(200);
 
           const everySignalClosed = signalsClosed.hits.hits.every(
-            (hit) => hit._source?.signal?.status === 'closed'
+            (hit) => hit._source?.['kibana.alert.workflow_status'] === 'closed'
           );
           expect(everySignalClosed).to.eql(true);
 
@@ -217,7 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(setSignalStatus({ signalIds, status: 'closed' }))
             .expect(200);
 
-          const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
+          const { body: signalsClosed }: { body: estypes.SearchResponse<RACAlert> } =
             await supertest
               .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
               .set('kbn-xsrf', 'true')
@@ -225,7 +226,7 @@ export default ({ getService }: FtrProviderContext) => {
               .expect(200);
 
           const everySignalClosed = signalsClosed.hits.hits.every(
-            (hit) => hit._source?.signal?.status === 'closed'
+            (hit) => hit._source?.['kibana.alert.workflow_status'] === 'closed'
           );
           expect(everySignalClosed).to.eql(true);
 
