@@ -123,7 +123,7 @@
     "GetJobAuditMessages",
     "GetAllJobAuditMessages",
     "ClearJobAuditMessages",
-    
+
     "JobValidation",
     "EstimateBucketSpan",
     "CalculateModelMemoryLimit",
@@ -160,7 +160,11 @@
     "TrainedModels",
     "GetTrainedModel",
     "GetTrainedModelStats",
+    "GetTrainedModelDeploymentStats",
+    "GetTrainedModelsNodesOverview",
     "GetTrainedModelPipelines",
+    "StartTrainedModelDeployment",
+    "StopTrainedModelDeployment",
     "DeleteTrainedModel",
 
     "Alerting",
