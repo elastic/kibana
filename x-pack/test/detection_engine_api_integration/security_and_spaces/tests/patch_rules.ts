@@ -203,7 +203,8 @@ export default ({ getService }: FtrProviderContext) => {
           createRule(supertest, getSimpleRule('rule-1')),
         ]);
         await createLegacyRuleAction(supertest, rule.id, connector.body.id);
-        // patch a simple rule's name
+
+        // patch disable the rule
         const patchResponse = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
