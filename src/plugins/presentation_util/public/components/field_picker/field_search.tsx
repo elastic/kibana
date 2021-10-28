@@ -96,7 +96,7 @@ export function FieldSearch({
             button={buttonContent}
           >
             <EuiPopoverTitle paddingSize="s">
-              {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
+              {i18n.translate('presentationUtil.fieldSearch.filterByTypeLabel', {
                 defaultMessage: 'Filter by type',
               })}
             </EuiPopoverTitle>
