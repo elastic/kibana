@@ -26,11 +26,12 @@ export function ViewActions({ onApply }: Props) {
 
   let noChanges = allSeries.length === urlAllSeries.length;
 
-  allSeries.forEach((series, index) => {
-    if (!isEqual(removeUndefinedProps(series), removeUndefinedProps(urlAllSeries[index]))) {
-      noChanges = false;
-    }
-  });
+  if (noChanges) {
+    noChanges = !allSeries.some(
+      (series, index) =>
+        !isEqual(removeUndefinedProps(series), removeUndefinedProps(urlAllSeries[index]))
+    );
+  }
 
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
