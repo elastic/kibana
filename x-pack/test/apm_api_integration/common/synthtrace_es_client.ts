@@ -14,6 +14,7 @@ import {
 import { chunk } from 'lodash';
 import pLimit from 'p-limit';
 import { inspect } from 'util';
+import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
 export async function synthtraceEsClient(context: InheritedFtrProviderContext) {
@@ -74,3 +75,5 @@ export async function synthtraceEsClient(context: InheritedFtrProviderContext) {
     },
   };
 }
+
+export type SynthtraceEsClient = PromiseReturnType<typeof synthtraceEsClient>;
