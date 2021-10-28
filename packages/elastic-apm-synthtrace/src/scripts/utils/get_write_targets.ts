@@ -24,21 +24,21 @@ export async function getWriteTargets({
   ]);
 
   function getDataStreamName(filter: string) {
-    return datastreamsResponse.body.data_streams.find((stream) => stream.name.includes(filter))
-      ?.name;
+    return datastreamsResponse.data_streams.find((stream) => stream.name.includes(filter))?.name;
   }
 
   function getAlias(filter: string) {
-    return Object.keys(indicesResponse.body)
+    return Object.keys(indicesResponse)
       .map((key) => {
         return {
           key,
-          writeIndexAlias: Object.entries(indicesResponse.body[key].aliases).find(
+          writeIndexAlias: Object.entries(indicesResponse[key].aliases).find(
             ([_, alias]) => alias.is_write_index
           )?.[0],
         };
       })
-      .find(({ key }) => key.includes(filter))?.writeIndexAlias!;
+      .find(({ key, writeIndexAlias }) => writeIndexAlias && key.includes(filter))
+      ?.writeIndexAlias!;
   }
 
   const targets = {

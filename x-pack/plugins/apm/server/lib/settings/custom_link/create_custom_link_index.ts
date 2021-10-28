@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from 'src/core/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   createOrUpdateIndex,
   Mappings,

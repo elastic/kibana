@@ -7,7 +7,7 @@
  */
 
 import { take } from 'rxjs/operators';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
@@ -252,7 +252,7 @@ const mockV2MigrationOptions = () => {
       error: undefined,
       failures: [],
       task: { description: 'task description' } as any,
-    } as estypes.TaskGetResponse)
+    } as estypes.TasksGetResponse)
   );
 
   options.client.search = jest

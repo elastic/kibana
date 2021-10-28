@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { EqlSearchResponse } from './types';
 import { EqlSearchStrategyResponse } from '../../../../common';
 
@@ -15,7 +15,7 @@ import { EqlSearchStrategyResponse } from '../../../../common';
  * (EQL does not provide _shard info, so total/loaded cannot be calculated.)
  */
 export function toEqlKibanaSearchResponse(
-  response: ApiResponse<EqlSearchResponse>
+  response: TransportResult<EqlSearchResponse>
 ): EqlSearchStrategyResponse {
   return {
     id: response.body.id,

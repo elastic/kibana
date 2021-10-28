@@ -16,9 +16,11 @@ import { signalsMigrationService } from '../../migrations/migration_service';
 import { buildSiemResponse } from '../utils';
 
 import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
+import { RuleDataPluginService } from '../../../../../../rule_registry/server';
 
 export const finalizeSignalsMigrationRoute = (
   router: SecuritySolutionPluginRouter,
+  ruleDataService: RuleDataPluginService,
   security: SetupPlugins['security']
 ) => {
   router.post(
@@ -53,12 +55,14 @@ export const finalizeSignalsMigrationRoute = (
           soClient,
         });
 
+        const spaceId = context.securitySolution.getSpaceId();
+        const signalsAlias = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
         const finalizeResults = await Promise.all(
           migrations.map(async (migration) => {
             try {
               const finalizedMigration = await migrationService.finalize({
                 migration,
-                signalsAlias: appClient.getSignalsIndex(),
+                signalsAlias,
               });
 
               if (isMigrationFailed(finalizedMigration)) {

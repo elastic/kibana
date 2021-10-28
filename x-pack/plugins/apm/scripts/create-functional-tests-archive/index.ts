@@ -10,7 +10,7 @@ import { execSync } from 'child_process';
 import moment from 'moment';
 import path from 'path';
 import fs from 'fs';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getEsClient } from '../shared/get_es_client';
 import { parseIndexUrl } from '../shared/parse_index_url';
 
@@ -144,6 +144,7 @@ async function run() {
   // profile
   const indicesWithDocs =
     response.body.aggregations?.index.buckets.map(
+      // @ts-expect-error bucket has any type
       (bucket) => bucket.key as string
     ) ?? [];
 

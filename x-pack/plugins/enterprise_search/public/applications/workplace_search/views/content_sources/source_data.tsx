@@ -207,6 +207,7 @@ export const staticSourceData = [
       SOURCE_OBJ_TYPES.ISSUES,
       SOURCE_OBJ_TYPES.PULL_REQUESTS,
       SOURCE_OBJ_TYPES.REPOSITORY_LIST,
+      SOURCE_OBJ_TYPES.FILES,
     ],
     features: {
       basicOrgContext: [
@@ -247,6 +248,7 @@ export const staticSourceData = [
       SOURCE_OBJ_TYPES.ISSUES,
       SOURCE_OBJ_TYPES.PULL_REQUESTS,
       SOURCE_OBJ_TYPES.REPOSITORY_LIST,
+      SOURCE_OBJ_TYPES.FILES,
     ],
     features: {
       basicOrgContext: [
