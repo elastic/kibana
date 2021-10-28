@@ -88,7 +88,7 @@ describe('BannersPlugin', () => {
 
       await startPlugin();
 
-      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(0);
+      expect(coreStart.chrome.setHeaderBanner).not.toHaveBeenCalled();
     });
   });
 
