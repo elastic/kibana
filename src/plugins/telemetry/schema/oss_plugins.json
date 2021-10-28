@@ -7241,6 +7241,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "visualization:useLegacyTimeAxis": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "visualization:regionmap:showWarnings": {
           "type": "boolean",
           "_meta": {
@@ -7797,12 +7803,6 @@
           }
         },
         "labs:canvas:enable_ui": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "labs:canvas:byValueEmbeddable": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
