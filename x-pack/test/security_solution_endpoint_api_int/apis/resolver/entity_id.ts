@@ -47,14 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await resolver.deleteData(genData);
+        await resolver.deleteIndex(genData.dataStream);
       });
 
       it('excludes events that have an empty entity_id field', async () => {
         const { body }: { body: ResolverEntityIndex } = await supertest.get(
-          // using the same indices value here twice to force the query parameter to be an array
-          // for some reason using supertest's query() function doesn't construct a parsable array
-          `/api/endpoint/resolver/entity?_id=${genData.eventsInfo[0]._id}&_index=logs-endpoint.events.process-default`
+          `/api/endpoint/resolver/entity?_id=${genData.eventsInfo[0]._id}&_index=${genData.eventsInfo[0]._index}`
         );
         expect(body).to.be.empty();
       });
@@ -93,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await resolver.deleteData(genData);
+        await resolver.deleteIndex(genData.dataStream);
       });
 
       it('does not find children without a process entity_id', async () => {
@@ -159,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await resolver.deleteData(genData);
+        await resolver.deleteIndex(genData.dataStream);
       });
 
       it('does not query for ancestors that have an empty string for the entity_id', async () => {

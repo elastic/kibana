@@ -280,7 +280,9 @@ export const updateGraphEventId = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      graphEventInfo,
+      graphEventInfo: {
+        ...graphEventInfo,
+      },
       ...(graphEventId === '' && graphEventIndex === '' && id === TimelineId.active
         ? { activeTab: timeline.prevActiveTab, prevActiveTab: timeline.activeTab }
         : {}),

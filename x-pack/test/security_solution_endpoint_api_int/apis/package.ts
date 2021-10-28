@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
       let networkIndexData: InsertedEvents;
 
       after(async () => {
-        await resolver.deleteData(networkIndexData);
+        await resolver.deleteIndex(networkIndexData.dataStream);
       });
 
       it('handles events without the `network.protocol` field being defined', async () => {
@@ -175,7 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await resolver.deleteData(genData);
+        await resolver.deleteIndex(genData.dataStream);
       });
 
       it('sets the event.ingested field', async () => {
@@ -217,8 +217,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await resolver.deleteData(networkIndexData);
-        await resolver.deleteData(processIndexData);
+        await resolver.deleteIndex(networkIndexData.dataStream);
+        await resolver.deleteIndex(processIndexData.dataStream);
       });
 
       it('sets the geoip fields', async () => {

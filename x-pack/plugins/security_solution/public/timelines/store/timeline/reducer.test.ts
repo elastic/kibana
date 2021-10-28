@@ -1775,33 +1775,44 @@ describe('Timeline', () => {
     test('should return a new reference and not the same reference', () => {
       const update = updateGraphEventId({
         id: 'foo',
-        graphEventId: '123',
+        graphEventInfo: {
+          id: '123',
+          index: 'index',
+        },
         timelineById: timelineByIdMock,
       });
       expect(update).not.toBe(timelineByIdMock);
     });
 
-    test('should empty graphEventId', () => {
+    test('should be an empty graphEventInfo id and index', () => {
       const update = updateGraphEventId({
         id: 'foo',
-        graphEventId: '',
+        graphEventInfo: {
+          id: '',
+          index: '',
+        },
         timelineById: timelineByIdMock,
       });
-      expect(update.foo.graphEventId).toEqual('');
+      expect(update.foo.graphEventInfo?.id).toEqual('');
+      expect(update.foo.graphEventInfo?.index).toEqual('');
     });
 
-    test('should empty graphEventId and not change activeTab and prevActiveTab because TimelineId !== TimelineId.active', () => {
+    test('should be an empty graphEventInfo id and index and not change activeTab and prevActiveTab because TimelineId !== TimelineId.active', () => {
       const update = updateGraphEventId({
         id: 'foo',
-        graphEventId: '',
+        graphEventInfo: {
+          id: '',
+          index: '',
+        },
         timelineById: timelineByIdMock,
       });
-      expect(update.foo.graphEventId).toEqual('');
+      expect(update.foo.graphEventInfo?.id).toEqual('');
+      expect(update.foo.graphEventInfo?.index).toEqual('');
       expect(update.foo.activeTab).toEqual(timelineByIdMock.foo.activeTab);
       expect(update.foo.prevActiveTab).toEqual(timelineByIdMock.foo.prevActiveTab);
     });
 
-    test('should empty graphEventId and return to the previous tab if TimelineId === TimelineId.active', () => {
+    test('should be an empty graphEventInfo id and index and return to the previous tab if TimelineId === TimelineId.active', () => {
       const mock = cloneDeep(timelineByIdMock);
       mock[TimelineId.active] = {
         ...timelineByIdMock.foo,
@@ -1812,11 +1823,15 @@ describe('Timeline', () => {
 
       const update = updateGraphEventId({
         id: TimelineId.active,
-        graphEventId: '',
+        graphEventInfo: {
+          id: '',
+          index: '',
+        },
         timelineById: mock,
       });
 
-      expect(update[TimelineId.active].graphEventId).toEqual('');
+      expect(update[TimelineId.active].graphEventInfo?.id).toEqual('');
+      expect(update[TimelineId.active].graphEventInfo?.index).toEqual('');
       expect(update[TimelineId.active].activeTab).toEqual(TimelineTabs.eql);
       expect(update[TimelineId.active].prevActiveTab).toEqual(TimelineTabs.graph);
     });

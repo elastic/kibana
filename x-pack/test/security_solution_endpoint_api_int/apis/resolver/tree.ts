@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
       tree = resolverTrees.trees[0];
     });
     after(async () => {
-      await resolver.deleteData(resolverTrees);
+      await resolver.deleteTrees(resolverTrees);
     });
 
     describe('ancestry events', () => {

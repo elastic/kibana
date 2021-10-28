@@ -32,15 +32,15 @@ export interface Options extends TreeOptions {
  */
 export interface GeneratedTrees {
   trees: Tree[];
-  indices: string[];
+  dataStreams: string[];
 }
 
 /**
  * Structure containing the events inserted into ES and the index they live in
  */
 export interface InsertedEvents {
-  eventsInfo: Array<{ _id: string; event: Event }>;
-  indices: string[];
+  eventsInfo: Array<{ _id: string; _index: string; event: Event }>;
+  dataStream: string;
 }
 
 interface BulkCreateHeader {
@@ -51,6 +51,21 @@ interface BulkCreateHeader {
 
 export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
   const client = getService('es');
+
+  const deleteDataHelper = async (genData: { dataStreams: string[] }) => {
+    for (const dataStream of genData.dataStreams) {
+      /**
+       * The ingest manager handles creating the template for the endpoint's indices. It is using a V2 template
+       * with data streams. Data streams aren't included in the javascript elasticsearch client in kibana yet so we
+       * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which
+       * is why we're using _data_stream here.
+       */
+      await client.transport.request({
+        method: 'DELETE',
+        path: `_data_stream/${dataStream}`,
+      });
+    }
+  };
 
   return {
     async insertEvents(
@@ -64,11 +79,14 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
       const bulkResp = await client.bulk({ body, refresh: true });
 
       const eventsInfo = events.map((event: Event, i: number) => {
-        return { event, _id: bulkResp.items[i].create?._id };
+        return {
+          event,
+          _id: bulkResp.items[i].create!._id!,
+          _index: bulkResp.items[i].create!._index,
+        };
       });
 
-      // @ts-expect-error @elastic/elasticsearch expected BulkResponseItemBase._id: string
-      return { eventsInfo, indices: [eventsIndex] };
+      return { eventsInfo, dataStream: eventsIndex };
     },
     async createTrees(
       options: Options,
@@ -96,21 +114,13 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
         await client.bulk({ body, refresh: true });
         allTrees.push(tree);
       }
-      return { trees: allTrees, indices: [eventsIndex, alertsIndex] };
+      return { trees: allTrees, dataStreams: [eventsIndex, alertsIndex] };
     },
-    async deleteData(genData: { indices: string[] }) {
-      for (const index of genData.indices) {
-        /**
-         * The ingest manager handles creating the template for the endpoint's indices. It is using a V2 template
-         * with data streams. Data streams aren't included in the javascript elasticsearch client in kibana yet so we
-         * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which
-         * is why we're using _data_stream here.
-         */
-        await client.transport.request({
-          method: 'DELETE',
-          path: `_data_stream/${index}`,
-        });
-      }
+    async deleteTrees(genData: { dataStreams: string[] }) {
+      return await deleteDataHelper(genData);
+    },
+    async deleteIndex(index: string) {
+      return await deleteDataHelper({ dataStreams: [index] });
     },
   };
 }

@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     after(async () => {
-      await resolver.deleteData(resolverTrees);
+      await resolver.deleteTrees(resolverTrees);
     });
 
     it('should filter events by event.id', async () => {

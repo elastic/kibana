@@ -66,7 +66,7 @@ export const formatTimelineData = async (
       return Promise.resolve(waitForIt);
     },
     Promise.resolve({
-      node: { ecs: { _id: '' }, data: [], _id: '', _index: '' },
+      node: { ecs: { _id: '', _index: '' }, data: [], _id: '', _index: '' },
       cursor: {
         value: '',
         tiebreaker: null,
