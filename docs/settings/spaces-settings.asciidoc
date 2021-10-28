@@ -13,7 +13,7 @@ return all spaces using a single `_search` from {es}, so you must
 configure this setting lower than the `index.max_result_window` in {es}.
 The default is `1000`.
 
-`monitoring.cluster_alerts-allowedSpaces` {ess-icon}:: 
+`monitoring.cluster_alerts.allowedSpaces` {ess-icon}:: 
 Specifies the spaces where cluster alerts are automatically generated. 
 You must specify all spaces where you want to generate alerts, including the default space. 
 When the default space is unspecified, {kib} is unable to generate an alert for the default space.
