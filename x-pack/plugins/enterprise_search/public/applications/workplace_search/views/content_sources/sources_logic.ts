@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, MakeLogicType, isBreakpoint } from 'kea';
+import type { BreakPointFunction } from 'kea';
 import { cloneDeep, findIndex } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
@@ -176,18 +177,18 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
 
       if (isOrganization && !values.serverStatuses) {
         // We want to get the initial statuses from the server to compare our polling results to.
-        const sourceStatuses = await fetchSourceStatuses(isOrganization);
+        const sourceStatuses = await fetchSourceStatuses(isOrganization, breakpoint);
         actions.setServerSourceStatuses(sourceStatuses);
       }
     },
     // We poll the server and if the status update, we trigger a new fetch of the sources.
-    pollForSourceStatusChanges: () => {
+    pollForSourceStatusChanges: (_, breakpoint) => {
       const { isOrganization } = AppLogic.values;
       if (!isOrganization) return;
       const serverStatuses = values.serverStatuses;
 
       pollingInterval = window.setInterval(async () => {
-        const sourceStatuses = await fetchSourceStatuses(isOrganization);
+        const sourceStatuses = await fetchSourceStatuses(isOrganization, breakpoint);
 
         sourceStatuses.some((source: ContentSourceStatus) => {
           if (serverStatuses && serverStatuses[source.id] !== source.status.status) {
@@ -245,7 +246,10 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   }),
 });
 
-export const fetchSourceStatuses = async (isOrganization: boolean) => {
+export const fetchSourceStatuses = async (
+  isOrganization: boolean,
+  breakpoint: BreakPointFunction
+) => {
   const route = isOrganization
     ? '/internal/workplace_search/org/sources/status'
     : '/internal/workplace_search/account/sources/status';
@@ -253,9 +257,14 @@ export const fetchSourceStatuses = async (isOrganization: boolean) => {
 
   try {
     response = await HttpLogic.values.http.get(route);
+    breakpoint();
     SourcesLogic.actions.setServerSourceStatuses(response);
   } catch (e) {
-    flashAPIErrors(e);
+    if (isBreakpoint(e)) {
+      // Do nothing, silence the error
+    } else {
+      flashAPIErrors(e);
+    }
   }
 
   return response;
