@@ -31,6 +31,7 @@ import { EventFiltersListPageState, EventFiltersPageLocation } from '../types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import {
+  asStaleResourceState,
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
@@ -41,8 +42,6 @@ import {
 describe('event filters selectors', () => {
   let initialState: EventFiltersListPageState;
 
-  // When `setToLoadingState()` is called, this variable will hold the prevousState in order to
-  // avoid ts-ignores due to know issues (#830) around the LoadingResourceState
   let previousStateWhileLoading: EventFiltersListPageState['listPage']['data'] | undefined;
 
   const setToLoadedState = () => {
@@ -60,9 +59,7 @@ describe('event filters selectors', () => {
   ) => {
     previousStateWhileLoading = previousState;
 
-    // will be fixed when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    initialState.listPage.data = createLoadingResourceState(previousState);
+    initialState.listPage.data = createLoadingResourceState(asStaleResourceState(previousState));
   };
 
   beforeEach(() => {
@@ -204,9 +201,9 @@ describe('event filters selectors', () => {
       expect(getListPageDoesDataExist(initialState)).toBe(false);
 
       // Set DataExists to Loading
-      // ts-ignore will be fixed when AsyncResourceState is refactored (#830)
-      // @ts-ignore
-      initialState.listPage.dataExist = createLoadingResourceState(initialState.listPage.dataExist);
+      initialState.listPage.dataExist = createLoadingResourceState(
+        asStaleResourceState(initialState.listPage.dataExist)
+      );
       expect(getListPageDoesDataExist(initialState)).toBe(false);
 
       // Set DataExists to Failure
