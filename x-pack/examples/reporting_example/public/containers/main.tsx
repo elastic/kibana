@@ -35,9 +35,9 @@ import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import type {
-  JobParamsPNGV2,
   JobParamsPDF,
   JobParamsPDFV2,
+  JobParamsPNGV2,
 } from '../../../../plugins/reporting/public';
 import { constants, ReportingStart } from '../../../../plugins/reporting/public';
 

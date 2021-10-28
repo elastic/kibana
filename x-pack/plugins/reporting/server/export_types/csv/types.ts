@@ -7,7 +7,6 @@
 
 export type {
   RawValue,
-  IndexPatternSavedObjectDeprecatedCSV,
   JobParamsDeprecatedCSV,
   TaskPayloadDeprecatedCSV,
   SearchRequestDeprecatedCSV,
