@@ -137,6 +137,8 @@ export default ({ getService }: FtrProviderContext) => {
         it(`${username} should be able to view alerts from "${featureIds.join(',')}" ${
           space != null ? `in space ${space}` : 'when no space specified'
         }`, async () => {
+          // This will be flake until it uses the bsearch service, but these tests aren't operational. Once you do make this operational
+          // use const bsearch = getService('bsearch');
           const resp = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
             .auth(username, password)
@@ -165,6 +167,8 @@ export default ({ getService }: FtrProviderContext) => {
         it(`${username} should NOT be able to access "${featureIds.join(',')}" ${
           space != null ? `in space ${space}` : 'when no space specified'
         }`, async () => {
+          // This will be flake until it uses the bsearch service, but these tests aren't operational. Once you do make this operational
+          // use const bsearch = getService('bsearch');
           await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
             .auth(username, password)
