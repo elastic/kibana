@@ -8,6 +8,8 @@
 import * as React from 'react';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import numeral from '@elastic/numeral';
 import { JourneyStep } from '../../../../common/runtime_types';
 import { StepFieldTrend } from './waterfall_marker_trend';
 
@@ -18,17 +20,32 @@ interface Props {
 export const StepDuration = ({ step }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const button = (
-    <EuiButtonEmpty onClick={() => setIsOpen((prevState) => !prevState)} iconType="visArea">
-      {step.synthetics.step?.duration.us! / 1000} ms
+    <EuiButtonEmpty onMouseEnter={() => setIsOpen(true)} iconType="visArea">
+      {i18n.translate('xpack.uptime.synthetics.step.duration', {
+        defaultMessage: '{value} sec',
+        values: {
+          value: numeral(step.synthetics.step?.duration.us! / (1000 * 1000)).format('00.0'),
+        },
+      })}
     </EuiButtonEmpty>
   );
   return (
-    <EuiPopover isOpen={isOpen} button={button} closePopover={() => setIsOpen(false)} zIndex={100}>
+    <EuiPopover
+      isOpen={isOpen}
+      button={button}
+      closePopover={() => setIsOpen(false)}
+      zIndex={100}
+      ownFocus={false}
+    >
       <StepFieldTrend
         step={step}
         field={'synthetics.step.duration.us'}
-        title={'Step duration trend'}
+        title={STEP_DURATION_TREND}
       />
     </EuiPopover>
   );
 };
+
+const STEP_DURATION_TREND = i18n.translate('xpack.uptime.synthetics.step.durationTrend', {
+  defaultMessage: 'Step duration trend',
+});

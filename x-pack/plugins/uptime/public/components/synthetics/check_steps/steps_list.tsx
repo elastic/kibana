@@ -144,6 +144,7 @@ export const StepsList = ({ data, error, loading }: Props) => {
         if (
           targetElem.tagName !== 'IMG' &&
           targetElem.tagName !== 'BUTTON' &&
+          targetElem.tagName !== 'CANVAS' &&
           !targetElem.classList.contains('euiButtonEmpty__text') &&
           !targetElem.classList.contains('euiIcon')
         ) {
