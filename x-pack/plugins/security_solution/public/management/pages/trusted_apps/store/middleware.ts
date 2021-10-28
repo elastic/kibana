@@ -70,6 +70,7 @@ import {
 import { parsePoliciesToKQL, parseQueryFilterToKQL } from '../../../common/utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { SEARCHABLE_FIELDS } from '../constants';
+import { asStaleResourceState } from '../../../state';
 
 const createTrustedAppsListResourceStateChangedAction = (
   newState: Immutable<AsyncResourceState<TrustedAppsListData>>
@@ -413,10 +414,9 @@ const fetchEditTrustedAppIfNeeded = async (
         dispatch({
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
-            // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
             type: 'LoadingResourceState',
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            previousState: editItemState(currentState)!,
+            previousState: asStaleResourceState<TrustedApp>(editItemState(currentState)!),
           },
         });
 
