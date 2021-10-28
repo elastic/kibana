@@ -35,7 +35,7 @@ import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import type {
-  JobParamsPDF,
+  JobAppParamsPDF,
   JobParamsPDFV2,
   JobParamsPNGV2,
 } from '../../../../plugins/reporting/public';
@@ -84,7 +84,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       });
   });
 
-  const getPDFJobParamsDefault = (): JobParamsPDF => {
+  const getPDFJobParamsDefault = (): JobAppParamsPDF => {
     return {
       layout: {
         id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
@@ -92,8 +92,6 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       relativeUrls: ['/app/reportingExample#/intended-visualization'],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
-      browserTimezone: '',
-      version: '',
     };
   };
 

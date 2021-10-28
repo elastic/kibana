@@ -26,6 +26,7 @@ export type {
   JobAppParamsPDFV2,
   JobParamsPDF,
   JobParamsPDFV2,
+  JobAppParamsPDF,
 } from '../common/types';
 
 export { ReportingAPIClient, ReportingPublicPlugin as Plugin };
