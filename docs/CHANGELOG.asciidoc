@@ -173,7 +173,7 @@ Configure the settings in https://www.elastic.co/guide/en/ecs/current/ecs-refere
 Machine learning features are included as base privileges. For more information, refer to {kibana-pull}115444[#115444].
 
 *Impact* +
-If you do not want to grant users privileges to machine learning features update, <<xpack-security,*Users* and *Roles*>>.
+If you do not want to grant users privileges to machine learning features, update <<xpack-security,*Users* and *Roles*>>.
 ====
 
 [float]
