@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it.only('should update a single rule property of name using an auto-generated rule_id and migrate the actions', async () => {
+      it('should update a single rule property of name using an auto-generated rule_id and migrate the actions', async () => {
         const rule = getSimpleRule('rule-1');
         delete rule.rule_id;
         const [connector, createRuleBody] = await Promise.all([

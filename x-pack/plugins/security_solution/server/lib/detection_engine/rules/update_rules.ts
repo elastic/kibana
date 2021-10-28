@@ -13,13 +13,13 @@ import { transformRuleToAlertAction } from '../../../../common/detection_engine/
 import { PartialAlert } from '../../../../../alerting/server';
 import { AlertAction } from '../../../../../alerting/common';
 
-import { readRules } from './read_rules';
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
 import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
 class UpdateError extends Error {
   public readonly statusCode: number;
@@ -56,9 +56,6 @@ export const updateRules = async ({
     existingRuleThrottle: string | null | undefined,
     ruleUpdateThrottle: string | null | undefined
   ) => {
-    console.error(`migratedRuleThrottle ${migratedRuleThrottle}`);
-    console.error(`existingRuleThrottle ${existingRuleThrottle}`);
-    console.error(`ruleUpdateThrottle ${ruleUpdateThrottle}`);
     if (
       existingRuleThrottle == null &&
       ruleUpdateThrottle == null &&
@@ -89,7 +86,7 @@ export const updateRules = async ({
     transform: typeof transformRuleToAlertAction,
     migratedRuleActions: AlertAction[] | null | undefined,
     existingRuleActions: AlertAction[] | null | undefined,
-    ruleUpdateActions: AlertAction[] | null | undefined
+    ruleUpdateActions: RuleAlertAction[] | null | undefined
   ) => {
     // console.error('migratedRuleActions', JSON.stringify(migratedRuleActions, null, 2));
     // console.error('existingRuleActions', JSON.stringify(existingRuleActions, null, 2));

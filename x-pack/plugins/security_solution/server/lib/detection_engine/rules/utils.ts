@@ -338,13 +338,7 @@ export const legacyMigrate = async ({
     }),
   ]);
 
-  console.error(
-    "HOW MANY LEGACY ACTION SO'S ARE THERE?",
-    JSON.stringify(legacyRuleActionsSO, null, 2)
-  );
-
   if (siemNotification != null && siemNotification.data.length > 0) {
-    console.error('BEFORE DELETE');
     await Promise.all([
       rulesClient.delete({ id: siemNotification.data[0].id }),
       legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0
@@ -355,7 +349,6 @@ export const legacyMigrate = async ({
         : null,
     ]);
 
-    console.error('AFTER DELETE');
     const { id, ...restOfRule } = rule;
     const migratedRule = {
       ...restOfRule,
