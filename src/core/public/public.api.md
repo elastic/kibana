@@ -5,13 +5,11 @@
 ```ts
 
 import { Action } from 'history';
-import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
-import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
 import { EnvironmentMode } from '@kbn/config';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -21,7 +19,7 @@ import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -39,9 +37,9 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
-import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestOptions } from '@elastic/elasticsearch';
+import { TransportRequestParams } from '@elastic/elasticsearch';
+import { TransportResult } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -698,6 +696,8 @@ export interface DocLinksStart {
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
+            datastreamsILM: string;
+            beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
             fleetServerAddFleetServer: string;

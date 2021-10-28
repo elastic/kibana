@@ -10,8 +10,9 @@ import getPort from 'get-port';
 import http from 'http';
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 
 import type SuperTest from 'supertest';
 import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
@@ -73,32 +74,36 @@ function toArray<T>(input: T | T[]): T[] {
 /**
  * Query Elasticsearch for a set of signals within a set of indices
  */
+// TODO: fix this to use new API/schema
 export const getSignalsWithES = async ({
   es,
   indices,
   ids,
 }: {
-  es: KibanaClient;
+  es: Client;
   indices: string | string[];
   ids: string | string[];
 }): Promise<Map<string, Map<string, estypes.SearchHit<SignalHit>>>> => {
-  const signals: ApiResponse<estypes.SearchResponse<SignalHit>> = await es.search({
-    index: indices,
-    body: {
-      size: 10000,
-      query: {
-        bool: {
-          filter: [
-            {
-              ids: {
-                values: toArray(ids),
+  const signals: TransportResult<estypes.SearchResponse<SignalHit>, unknown> = await es.search(
+    {
+      index: indices,
+      body: {
+        size: 10000,
+        query: {
+          bool: {
+            filter: [
+              {
+                ids: {
+                  values: toArray(ids),
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     },
-  });
+    { meta: true }
+  );
 
   return signals.body.hits.hits.reduce((acc, hit) => {
     let indexMap = acc.get(hit._index);
@@ -329,7 +334,7 @@ export const getServiceNowConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
-    isLegacy: false,
+    usesTableApi: false,
   },
 });
 
@@ -386,7 +391,7 @@ export const getServiceNowSIRConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
-    isLegacy: false,
+    usesTableApi: false,
   },
 });
 
@@ -470,7 +475,7 @@ export const removeServerGeneratedPropertiesFromComments = (
   });
 };
 
-export const deleteAllCaseItems = async (es: KibanaClient) => {
+export const deleteAllCaseItems = async (es: Client) => {
   await Promise.all([
     deleteCasesByESQuery(es),
     deleteSubCases(es),
@@ -481,7 +486,7 @@ export const deleteAllCaseItems = async (es: KibanaClient) => {
   ]);
 };
 
-export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> => {
+export const deleteCasesUserActions = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-user-actions',
@@ -492,7 +497,7 @@ export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> =>
   });
 };
 
-export const deleteCasesByESQuery = async (es: KibanaClient): Promise<void> => {
+export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases',
@@ -507,7 +512,7 @@ export const deleteCasesByESQuery = async (es: KibanaClient): Promise<void> => {
  * Deletes all sub cases in the .kibana index. This uses ES to perform the delete and does
  * not go through the case API.
  */
-export const deleteSubCases = async (es: KibanaClient): Promise<void> => {
+export const deleteSubCases = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-sub-case',
@@ -518,7 +523,7 @@ export const deleteSubCases = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const deleteComments = async (es: KibanaClient): Promise<void> => {
+export const deleteComments = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-comments',
@@ -529,7 +534,7 @@ export const deleteComments = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
+export const deleteConfiguration = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-configure',
@@ -540,7 +545,7 @@ export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const deleteMappings = async (es: KibanaClient): Promise<void> => {
+export const deleteMappings = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-connector-mappings',
@@ -595,9 +600,12 @@ interface ConnectorMappingsSavedObject {
 /**
  * Returns connector mappings saved objects from Elasticsearch directly.
  */
-export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) => {
-  const mappings: ApiResponse<estypes.SearchResponse<ConnectorMappingsSavedObject>> =
-    await es.search({
+export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
+  const mappings: TransportResult<
+    estypes.SearchResponse<ConnectorMappingsSavedObject>,
+    unknown
+  > = await es.search(
+    {
       index: '.kibana',
       body: {
         query: {
@@ -608,7 +616,9 @@ export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) =
           },
         },
       },
-    });
+    },
+    { meta: true }
+  );
 
   return mappings;
 };
@@ -620,26 +630,35 @@ interface ConfigureSavedObject {
 /**
  * Returns configure saved objects from Elasticsearch directly.
  */
-export const getConfigureSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
-  const configure: ApiResponse<estypes.SearchResponse<ConfigureSavedObject>> = await es.search({
-    index: '.kibana',
-    body: {
-      query: {
-        term: {
-          type: {
-            value: 'cases-configure',
+export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => {
+  const configure: TransportResult<
+    estypes.SearchResponse<ConfigureSavedObject>,
+    unknown
+  > = await es.search(
+    {
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases-configure',
+            },
           },
         },
       },
     },
-  });
+    { meta: true }
+  );
 
   return configure;
 };
 
-export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
-  const configure: ApiResponse<estypes.SearchResponse<{ cases: ESCaseAttributes }>> =
-    await es.search({
+export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
+  const configure: TransportResult<
+    estypes.SearchResponse<{ cases: ESCaseAttributes }>,
+    unknown
+  > = await es.search(
+    {
       index: '.kibana',
       body: {
         query: {
@@ -650,7 +669,9 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) =>
           },
         },
       },
-    });
+    },
+    { meta: true }
+  );
 
   return configure;
 };
