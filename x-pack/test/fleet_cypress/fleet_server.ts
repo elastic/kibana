@@ -37,6 +37,7 @@ export class FleetManager extends Manager {
         const serviceToken = response.data.token.value;
         const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
         this.log.info(artifact);
+        this.log.info('es port: ' + this.esConfig.port);
         const args = [
           'run',
           '--add-host',
@@ -44,7 +45,7 @@ export class FleetManager extends Manager {
           '--env',
           'FLEET_SERVER_ENABLE=true',
           '--env',
-          `FLEET_SERVER_ELASTICSEARCH_HOST=http://host.docker.internal:${this.esConfig.port}`,
+          `FLEET_SERVER_ELASTICSEARCH_HOST=http://host.docker.internal:9220`,
           '--env',
           `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
           '--rm',
