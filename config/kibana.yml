@@ -115,19 +115,3 @@
 # Specifies locale to be used for all localizable strings, dates and number formats.
 # Supported languages are the following: English - en , by default , Chinese - zh-CN .
 #i18n.locale: "en"
-
-
-logging:
-  appenders:
-    console:
-      type: console
-      layout:
-        type: pattern
-        pattern: "[%date][%level] %message - %meta"
-  root:
-    appenders: [default, console]
-    level: warn
-  loggers:
-    - name: status
-      level: debug
-      appenders: [console]
