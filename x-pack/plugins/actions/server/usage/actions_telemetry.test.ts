@@ -685,28 +685,20 @@ Object {
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(telemetry).toStrictEqual({
       avgExecutionTime: 0,
-      avgExecutionTimeByType: [
-        {
-          '__server-log': 919191.9191919192,
-        },
-        {
-          __email: 419666666.6666667,
-        },
-      ],
-      countByType: [
-        {
-          __slack: 100,
-        },
-        {
-          '__server-log': 20,
-        },
-      ],
+      avgExecutionTimeByType: {
+        '__server-log': 919191.9191919192,
+        __email: 419666666.6666667,
+      },
+
+      countByType: {
+        __slack: 100,
+
+        '__server-log': 20,
+      },
       countFailed: 7,
-      countFailedByType: [
-        {
-          __slack: 7,
-        },
-      ],
+      countFailedByType: {
+        __slack: 7,
+      },
       countTotal: 120,
     });
   });

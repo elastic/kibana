@@ -521,22 +521,34 @@ export async function getExecutionsTotalCount(
     // @ts-expect-error aggegation type is not specified
     actionResults.aggregations.avgDurationByType?.actionSavedObjects?.byTypeId?.buckets;
 
-  // @ts-expect-error aggegation type is not specified
-  const avgExecutionTimeByType: Record<string, number> = avgDurationByType.map((bucket) => ({
-    [replaceFirstAndLastDotSymbols(bucket.key)]: bucket?.refs.avgDuration.value,
-  }));
+  const avgExecutionTimeByType: Record<string, number> = avgDurationByType.reduce(
+    // @ts-expect-error aggegation type is not specified
+    (res: Record<string, number>, bucket) => {
+      res[replaceFirstAndLastDotSymbols(bucket.key)] = bucket?.refs.avgDuration.value;
+      return res;
+    },
+    {}
+  );
 
   return {
     countTotal: aggsExecutions.total,
-    // @ts-expect-error aggegation type is not specified
-    countByType: Object.entries(aggsExecutions.connectorTypes).map(([key, value]) => ({
-      [replaceFirstAndLastDotSymbols(key)]: value,
-    })),
+    countByType: Object.entries(aggsExecutions.connectorTypes).reduce(
+      (res: Record<string, number>, [key, value]) => {
+        // @ts-expect-error aggegation type is not specified
+        res[replaceFirstAndLastDotSymbols(key)] = value;
+        return res;
+      },
+      {}
+    ),
     countFailed: aggsFailedExecutions.total,
-    // @ts-expect-error aggegation type is not specified
-    countFailedByType: Object.entries(aggsFailedExecutions.connectorTypes).map(([key, value]) => ({
-      [replaceFirstAndLastDotSymbols(key)]: value,
-    })),
+    countFailedByType: Object.entries(aggsFailedExecutions.connectorTypes).reduce(
+      (res: Record<string, number>, [key, value]) => {
+        // @ts-expect-error aggegation type is not specified
+        res[replaceFirstAndLastDotSymbols(key)] = value;
+        return res;
+      },
+      {}
+    ),
     avgExecutionTime: aggsAvgExecutionTime,
     avgExecutionTimeByType,
   };
