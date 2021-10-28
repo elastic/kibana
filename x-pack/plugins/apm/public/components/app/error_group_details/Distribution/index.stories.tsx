@@ -19,13 +19,16 @@ export default {
   component: ErrorDistribution,
   decorators: [
     (Story: ComponentType) => {
-      const apmPluginContextMock = {
-        observabilityRuleTypeRegistry: { getFormatter: () => undefined },
-      } as unknown as ApmPluginContextValue;
-
       const kibanaContextServices = {
         uiSettings: { get: () => {} },
       };
+
+      const apmPluginContextMock = {
+        observabilityRuleTypeRegistry: { getFormatter: () => undefined },
+        core: {
+          uiSettings: kibanaContextServices.uiSettings,
+        },
+      } as unknown as ApmPluginContextValue;
 
       return (
         <ApmPluginContext.Provider value={apmPluginContextMock}>
