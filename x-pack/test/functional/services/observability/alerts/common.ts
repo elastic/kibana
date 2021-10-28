@@ -17,7 +17,6 @@ const DATE_WITH_DATA = {
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filter-for-value';
-const FILTER_OUT_VALUE_BUTTON_SELECTOR = 'filter-out-value';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const ACTION_COLUMN_INDEX = 1;
 
@@ -154,16 +153,8 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.exists(FILTER_FOR_VALUE_BUTTON_SELECTOR);
   };
 
-  const filterOutValueButtonExists = async () => {
-    return await testSubjects.exists(FILTER_OUT_VALUE_BUTTON_SELECTOR);
-  };
-
   const getFilterForValueButton = async () => {
     return await testSubjects.find(FILTER_FOR_VALUE_BUTTON_SELECTOR);
-  };
-
-  const getFilterOutValueButton = async () => {
-    return await testSubjects.find(FILTER_OUT_VALUE_BUTTON_SELECTOR);
   };
 
   const openActionsMenuForRow = async (rowIndex: number) => {
@@ -222,7 +213,6 @@ export function ObservabilityAlertsCommonProvider({
     clearQueryBar,
     closeAlertsFlyout,
     filterForValueButtonExists,
-    filterOutValueButtonExists,
     getAlertsFlyout,
     getAlertsFlyoutDescriptionListDescriptions,
     getAlertsFlyoutDescriptionListTitles,
@@ -230,7 +220,6 @@ export function ObservabilityAlertsCommonProvider({
     getAlertsFlyoutTitle,
     getAlertsFlyoutViewInAppButtonOrFail,
     getFilterForValueButton,
-    getFilterOutValueButton,
     getNoDataPageOrFail,
     getNoDataStateOrFail,
     getTableCells,

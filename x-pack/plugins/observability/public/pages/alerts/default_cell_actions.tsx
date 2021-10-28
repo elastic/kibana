@@ -35,23 +35,6 @@ const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellA
         />
       );
     },
-  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
-    ({ rowIndex, columnId, Component }) => {
-      const value = getMappedNonEcsValue({
-        data: data[getPageRowIndex(rowIndex, pageSize)],
-        fieldName: columnId,
-      });
-
-      return (
-        <FilterForValueButton
-          Component={Component}
-          field={columnId}
-          value={value}
-          addToQuery={addToQuery}
-          exclude={true}
-        />
-      );
-    },
 ];
 
 /** returns the default actions shown in `EuiDataGrid` cells */
