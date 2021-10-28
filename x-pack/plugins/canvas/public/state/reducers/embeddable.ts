@@ -40,7 +40,7 @@ export const embeddableReducer = handleActions<
 
       const element = pageWithElement.elements.find((elem) => elem.id === elementId);
 
-      if (!element || element.expression === embeddableExpression) {
+      if (!element) {
         return workpadState;
       }
 

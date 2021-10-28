@@ -14,7 +14,6 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import { EmbeddableSetup } from 'src/plugins/embeddable/server';
 import { ESSQL_SEARCH_STRATEGY } from '../common/lib/constants';
 import { ReportingSetup } from '../../reporting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -31,7 +30,6 @@ import { CanvasRouteHandlerContext, createWorkpadRouteContext } from './workpad_
 
 interface PluginsSetup {
   expressions: ExpressionsServerSetup;
-  embeddable: EmbeddableSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   bfetch: BfetchServerSetup;
@@ -84,12 +82,7 @@ export class CanvasPlugin implements Plugin {
     const kibanaIndex = coreSetup.savedObjects.getKibanaIndex();
     registerCanvasUsageCollector(plugins.usageCollection, kibanaIndex);
 
-    setupInterpreter(expressionsFork, {
-      embeddablePersistableStateService: {
-        extract: plugins.embeddable.extract,
-        inject: plugins.embeddable.inject,
-      },
-    });
+    setupInterpreter(expressionsFork);
 
     coreSetup.getStartServices().then(([_, depsStart]) => {
       const strategy = essqlSearchStrategyProvider();

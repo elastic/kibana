@@ -14,7 +14,7 @@ export function toExpression(input: SavedLensInput, palettes: PaletteRegistry): 
 
   expressionParts.push('savedLens');
 
-  expressionParts.push(`id="${input.savedObjectId}"`);
+  expressionParts.push(`id="${input.id}"`);
 
   if (input.title !== undefined) {
     expressionParts.push(`title="${input.title}"`);
