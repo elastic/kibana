@@ -10,8 +10,8 @@ import { fold, map } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as runtimeTypes from 'io-ts';
-import { compact } from 'lodash';
 import { JsonArray } from '@kbn/utility-types';
+import { compact } from 'lodash';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   LogEntriesAdapter,
@@ -46,7 +46,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     const highlightClause = highlightQuery
       ? {
           highlight: {
-            boundary_scanner: 'word',
+            boundary_scanner: 'word' as const,
             fields: fields.reduce(
               (highlightFieldConfigs, fieldName) => ({
                 ...highlightFieldConfigs,
@@ -69,9 +69,9 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     };
 
     const esQuery = {
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: resolvedLogSourceConfiguration.indices,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         size: size + 1, // Extra one to test if it has more before or after
         track_total_hits: false,
@@ -139,9 +139,9 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     );
 
     const query = {
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: resolvedLogSourceConfiguration.indices,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         aggregations: {
           count_by_date: {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ApiResponse } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
 import { from, of, timer } from 'rxjs';
@@ -34,7 +34,7 @@ import { getDetailedErrorMessage, getErrorStatusCode } from './errors';
 
 export interface EnrollParameters {
   apiKey: string;
-  hosts: string[];
+  hosts: readonly string[];
   caFingerprint: string;
 }
 
@@ -49,7 +49,7 @@ export interface ElasticsearchServiceSetupDeps {
   /**
    * Core Elasticsearch service preboot contract;
    */
-  elasticsearch: ElasticsearchServicePreboot;
+  elasticsearch: Pick<ElasticsearchServicePreboot, 'createClient'>;
 
   /**
    * Interval for the Elasticsearch connection check (whether it's configured or not).
@@ -169,7 +169,7 @@ export class ElasticsearchService {
    * the Elasticsearch node we're enrolling with. Should be in a form of a hex colon-delimited string in upper case.
    */
   private async enroll(
-    elasticsearch: ElasticsearchServicePreboot,
+    elasticsearch: Pick<ElasticsearchServicePreboot, 'createClient'>,
     { apiKey, hosts, caFingerprint }: EnrollParameters
   ) {
     const scopeableRequest: ScopeableRequest = { headers: { authorization: `ApiKey ${apiKey}` } };
@@ -193,7 +193,7 @@ export class ElasticsearchService {
           .asCurrentUser.transport.request({
             method: 'GET',
             path: '/_security/enroll/kibana',
-          })) as ApiResponse<{ token: { name: string; value: string }; http_ca: string }>;
+          })) as TransportResult<{ token: { name: string; value: string }; http_ca: string }>;
       } catch (err) {
         // We expect that all hosts belong to exactly same node and any non-connection error for one host would mean
         // that enrollment will fail for any other host and we should bail out.
@@ -257,7 +257,7 @@ export class ElasticsearchService {
   }
 
   private async authenticate(
-    elasticsearch: ElasticsearchServicePreboot,
+    elasticsearch: Pick<ElasticsearchServicePreboot, 'createClient'>,
     { host, username, password, caCert }: AuthenticateParameters
   ) {
     const client = elasticsearch.createClient('authenticate', {
@@ -281,7 +281,10 @@ export class ElasticsearchService {
     }
   }
 
-  private async ping(elasticsearch: ElasticsearchServicePreboot, host: string) {
+  private async ping(
+    elasticsearch: Pick<ElasticsearchServicePreboot, 'createClient'>,
+    host: string
+  ) {
     const client = elasticsearch.createClient('ping', {
       hosts: [host],
       username: '',
@@ -392,5 +395,16 @@ export class ElasticsearchService {
       .replace(/-/g, '+')
       .replace(/([^\n]{1,65})/g, '$1\n')
       .replace(/\n$/g, '')}\n-----END CERTIFICATE-----\n`;
+  }
+
+  public static formatFingerprint(caFingerprint: string) {
+    // Convert a plain hex string returned in the enrollment token to a format that ES client
+    // expects, i.e. to a colon delimited hex string in upper case: deadbeef -> DE:AD:BE:EF.
+    return (
+      caFingerprint
+        .toUpperCase()
+        .match(/.{1,2}/g)
+        ?.join(':') ?? ''
+    );
   }
 }

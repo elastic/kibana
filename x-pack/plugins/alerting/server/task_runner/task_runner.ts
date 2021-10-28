@@ -49,15 +49,17 @@ import {
   AlertInstanceContext,
   WithoutReservedActionGroups,
 } from '../../common';
-import { NormalizedAlertType } from '../rule_type_registry';
+import { NormalizedAlertType, UntypedNormalizedAlertType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
+import {
+  createAlertEventLogRecordObject,
+  Event,
+} from '../lib/create_alert_event_log_record_object';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
-
-type Event = Exclude<IEvent, undefined>;
 
 interface AlertTaskRunResult {
   state: AlertTaskState;
@@ -517,37 +519,26 @@ export class TaskRunner<
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
     const scheduleDelay = runDate.getTime() - this.taskInstance.runAt.getTime();
-    const event: IEvent = {
-      // explicitly set execute timestamp so it will be before other events
-      // generated here (new-instance, schedule-action, etc)
-      '@timestamp': runDateString,
-      event: {
-        action: EVENT_LOG_ACTIONS.execute,
-        kind: 'alert',
-        category: [this.alertType.producer],
+
+    const event = createAlertEventLogRecordObject({
+      timestamp: runDateString,
+      ruleId: alertId,
+      ruleType: this.alertType as UntypedNormalizedAlertType,
+      action: EVENT_LOG_ACTIONS.execute,
+      namespace,
+      task: {
+        scheduled: this.taskInstance.runAt.toISOString(),
+        scheduleDelay: Millis2Nanos * scheduleDelay,
       },
-      kibana: {
-        saved_objects: [
-          {
-            rel: SAVED_OBJECT_REL_PRIMARY,
-            type: 'alert',
-            id: alertId,
-            type_id: this.alertType.id,
-            namespace,
-          },
-        ],
-        task: {
-          scheduled: this.taskInstance.runAt.toISOString(),
-          schedule_delay: Millis2Nanos * scheduleDelay,
+      savedObjects: [
+        {
+          id: alertId,
+          type: 'alert',
+          typeId: this.alertType.id,
+          relation: SAVED_OBJECT_REL_PRIMARY,
         },
-      },
-      rule: {
-        id: alertId,
-        license: this.alertType.minimumLicenseRequired,
-        category: this.alertType.id,
-        ruleset: this.alertType.producer,
-      },
-    };
+      ],
+    });
 
     eventLogger.startTiming(event);
 
@@ -584,6 +575,11 @@ export class TaskRunner<
     event.kibana = event.kibana || {};
     event.kibana.alerting = event.kibana.alerting || {};
     event.kibana.alerting.status = executionStatus.status;
+
+    // Copy duration into execution status if available
+    if (null != event.event?.duration) {
+      executionStatus.lastDuration = Math.round(event.event?.duration / Millis2Nanos);
+    }
 
     // if executionStatus indicates an error, fill in fields in
     // event from it

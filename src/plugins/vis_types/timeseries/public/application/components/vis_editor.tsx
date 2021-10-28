@@ -79,6 +79,15 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
             ? TIME_RANGE_DATA_MODES.LAST_VALUE
             : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
         ...this.props.vis.params,
+        series: this.props.vis.params.series.map((val) => ({
+          [TIME_RANGE_MODE_KEY]:
+            this.props.vis.title &&
+            this.props.vis.params.type !== 'timeseries' &&
+            val.override_index_pattern
+              ? TIME_RANGE_DATA_MODES.LAST_VALUE
+              : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+          ...val,
+        })),
       },
       extractedIndexPatterns: [''],
     };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { MetricExpression } from '../types';
@@ -14,7 +14,7 @@ import { useMetricsExplorerData } from '../../../pages/metrics/metrics_explorer/
 
 export const useMetricsExplorerChartData = (
   expression: MetricExpression,
-  derivedIndexPattern: IIndexPattern,
+  derivedIndexPattern: DataViewBase,
   source: MetricsSourceConfiguration | null,
   filterQuery?: string,
   groupBy?: string | string[]

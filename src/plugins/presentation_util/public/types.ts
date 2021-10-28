@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { DataPublicPluginStart } from '../../data/public';
 import { PresentationLabsService } from './services/labs';
+import { PresentationControlsService } from './services/controls';
+import { DataViewsPublicPluginStart } from '../../data_views/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {}
@@ -14,9 +18,16 @@ export interface PresentationUtilPluginSetup {}
 export interface PresentationUtilPluginStart {
   ContextProvider: React.FC;
   labsService: PresentationLabsService;
+  controlsService: PresentationControlsService;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PresentationUtilPluginSetupDeps {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PresentationUtilPluginStartDeps {}
+export interface PresentationUtilPluginSetupDeps {
+  embeddable: EmbeddableSetup;
+}
+export interface PresentationUtilPluginStartDeps {
+  data: DataPublicPluginStart;
+  embeddable: EmbeddableStart;
+  dataViews: DataViewsPublicPluginStart;
+}
+
+export * from './components/controls';

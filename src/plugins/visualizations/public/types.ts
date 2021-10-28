@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../../plugins/saved_objects/public';
+import type { SavedObjectsMigrationVersion } from 'kibana/public';
 import {
   IAggConfigs,
   SearchSourceFields,
   TimefilterContract,
   AggConfigSerialized,
 } from '../../../plugins/data/public';
+import type { ISearchSource } from '../../data/common';
 import { ExpressionAstExpression } from '../../expressions/public';
 
 import type { SerializedVis, Vis } from './vis';
@@ -36,9 +37,39 @@ export interface ISavedVis {
   uiStateJSON?: string;
   savedSearchRefName?: string;
   savedSearchId?: string;
+  sharingSavedObjectProps?: {
+    outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
+    aliasTargetId?: string;
+    errorJSON?: string;
+  };
 }
 
-export interface VisSavedObject extends SavedObject, ISavedVis {}
+export interface VisSavedObject extends ISavedVis {
+  lastSavedTitle: string;
+  getEsType: () => string;
+  getDisplayName?: () => string;
+  displayName: string;
+  migrationVersion?: SavedObjectsMigrationVersion;
+  searchSource?: ISearchSource;
+  version?: string;
+  tags?: string[];
+}
+
+export interface SaveVisOptions {
+  confirmOverwrite?: boolean;
+  isTitleDuplicateConfirmed?: boolean;
+  onTitleDuplicate?: () => void;
+  copyOnSave?: boolean;
+}
+
+export interface GetVisOptions {
+  id?: string;
+  searchSource?: boolean;
+  migrationVersion?: SavedObjectsMigrationVersion;
+  savedSearchId?: string;
+  type?: string;
+  indexPattern?: string;
+}
 
 export interface VisToExpressionAstParams {
   timefilter: TimefilterContract;

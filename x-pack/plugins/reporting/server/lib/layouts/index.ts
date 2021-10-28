@@ -13,6 +13,8 @@ import type { Layout } from './layout';
 export interface LayoutSelectorDictionary {
   screenshot: string;
   renderComplete: string;
+  renderError: string;
+  renderErrorAttribute: string;
   itemsCountAttribute: string;
   timefilterDurationAttribute: string;
 }
@@ -33,6 +35,8 @@ export const LayoutTypes = {
 export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({
   screenshot: '[data-shared-items-container]',
   renderComplete: '[data-shared-item]',
+  renderError: '[data-render-error]',
+  renderErrorAttribute: 'data-render-error',
   itemsCountAttribute: 'data-shared-items-count',
   timefilterDurationAttribute: 'data-shared-timefilter-duration',
 });

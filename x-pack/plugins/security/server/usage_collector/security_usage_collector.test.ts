@@ -46,8 +46,8 @@ describe('Security UsageCollector', () => {
     authProviderCount: 1,
     enabledAuthProviders: ['basic'],
     loginSelectorEnabled: false,
-    httpAuthSchemes: ['apikey'],
-    sessionIdleTimeoutInMinutes: 60,
+    httpAuthSchemes: ['apikey', 'bearer'],
+    sessionIdleTimeoutInMinutes: 480,
     sessionLifespanInMinutes: 43200,
     sessionCleanupInMinutes: 60,
   };
@@ -343,35 +343,7 @@ describe('Security UsageCollector', () => {
   });
 
   describe('audit logging', () => {
-    it('reports when legacy audit logging is enabled (and ECS audit logging is not enabled)', async () => {
-      const config = createSecurityConfig(
-        ConfigSchema.validate({
-          audit: {
-            enabled: true,
-            appender: undefined,
-          },
-        })
-      );
-      const usageCollection = usageCollectionPluginMock.createSetupContract();
-      const license = createSecurityLicense({
-        isLicenseAvailable: true,
-        allowLegacyAuditLogging: true,
-        allowAuditLogging: true,
-      });
-      registerSecurityUsageCollector({ usageCollection, config, license });
-
-      const usage = await usageCollection
-        .getCollectorByType('security')
-        ?.fetch(collectorFetchContext);
-
-      expect(usage).toEqual({
-        ...DEFAULT_USAGE,
-        auditLoggingEnabled: true,
-        auditLoggingType: 'legacy',
-      });
-    });
-
-    it('reports when ECS audit logging is enabled (and legacy audit logging is not enabled)', async () => {
+    it('reports when ECS audit logging is enabled', async () => {
       const config = createSecurityConfig(
         ConfigSchema.validate({
           audit: {

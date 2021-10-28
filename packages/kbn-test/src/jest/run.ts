@@ -28,6 +28,20 @@ import { map } from 'lodash';
 // yarn test:jest src/core/public/core_system.test.ts
 // :kibana/src/core/server/saved_objects yarn test:jest
 
+// Patch node 16 types to be compatible with jest 26
+// https://github.com/facebook/jest/issues/11640#issuecomment-893867514
+/* eslint-disable */
+declare global {
+  namespace NodeJS {
+    interface Global {}
+    interface InspectOptions {}
+
+    interface ConsoleConstructor
+      extends console.ConsoleConstructor {}
+  }
+}
+/* eslint-enable */
+
 export function runJest(configName = 'jest.config.js') {
   const argv = buildArgv(process.argv);
 
