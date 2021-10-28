@@ -457,7 +457,7 @@ Dashboard::
 Elastic Security::
 For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Machine Learning::
-* Nodes overview for the Model Management page {kibana-pull}115772[#115772]
+* Enhancements for the Model Management page {kibana-pull}115772[#115772]
 Platform::
 * Changes edit view to json read-only view {kibana-pull}112034[#112034]
 
