@@ -73,7 +73,7 @@ To make sure that your PR is included in the Release Notes, add the right label.
   * `release_note:fix` — Fixes for bugs that existed in the previous release. 
   * `release_note:deprecation` — Deprecates functionality that existed in previous releases.
   * `release_note:breaking` — Breaking changes that weren't present in previous releases.
-  * `release_note:skip` — Changes that should not appear in the Release Notes. For example, docs, build, and test fixes, or unreleased issues that are only in `master`.
+  * `release_note:skip` — Changes that should not appear in the Release Notes. For example, docs, build, and test fixes, or unreleased issues that are only in `main`.
 
 
 include::development-github.asciidoc[leveloffset=+1]

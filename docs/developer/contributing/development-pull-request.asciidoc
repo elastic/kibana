@@ -18,7 +18,7 @@
  4. Do *not* assign a version label. Someone from Elastic staff will assign a version label, if necessary, when your Pull Request is ready to be merged.
  5. If you would like someone specific to review your pull request, assign them. Otherwise an Elastic staff member will assign the appropriate person.
 
-Always submit your pull against master unless the bug is only present in an older version. If the bug affects both master and another branch say so in your pull.
+Always submit your pull against `main` unless the bug is only present in an older version. If the bug affects both `main` and another branch say so in your pull.
 
 Then sit back and wait. There will probably be discussion about the Pull Request and, if any changes are needed, we'll work with you to get your Pull Request merged into {kib}.
 

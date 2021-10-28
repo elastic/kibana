@@ -35,14 +35,14 @@ Hence, upgrades to either Node.js 14 or Node.js 10 should be done as separate PR
 
 Typically, you want to backport Node.js *patch* upgrades to all supported release branches that run the same *major* Node.js version:
 
-  - If upgrading Node.js 14, and the current release is 7.11.1, the main PR should target `master` and be backported to `7.x` and `7.11`.
+  - If upgrading Node.js 14, and the current release is 7.11.1, the main PR should target `main` and be backported to `7.x` and `7.11`.
   - If upgrading Node.js 10, the main PR should target `6.8` only.
 
 ==== Node.js minor upgrades
 
 Typically, you want to backport Node.js *minor* upgrades to the next minor {kib} release branch that runs the same *major* Node.js version:
 
-  - If upgrading Node.js 14, and the current release is 7.11.1, the main PR should target `master` and be backported to `7.x`, while leaving the `7.11` branch as-is.
+  - If upgrading Node.js 14, and the current release is 7.11.1, the main PR should target `main` and be backported to `7.x`, while leaving the `7.11` branch as-is.
   - If upgrading Node.js 10, the main PR should target `6.8` only.
 
 === Upgrading installed Node.js version

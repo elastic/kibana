@@ -91,7 +91,7 @@ node scripts/build_kibana_platform_plugins --focus {pluginid} --profile
 jq -r .modules[].id {pluginDir}/target/public/stats.json | sort - > moduleids.txt
 -----------
 +
-Produce a moduleids.txt file for both your branch and master and then pop them into Beyond Compare to get a very specific view of what's new.
+Produce a moduleids.txt file for both your branch and `main` and then pop them into Beyond Compare to get a very specific view of what's new.
 
 5. As a last resort you might want to try comparing the bundle source directly. It's usually best to do this using the production source so that you're inspecting the actual change in bytes that CI is seeing. After building the distributable version of your bundle run it through prettier and then dropping it into Beyond Compare along with the chunk from upstream:
 +

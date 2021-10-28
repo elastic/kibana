@@ -12,7 +12,7 @@ number of heavy {kib} users, you might need to load balance across multiple
 {kib} instances that are all connected to the same {es} instance.
 
 While {kib} isn't terribly resource intensive, we still recommend running {kib}
-separate from  your {es} data or master nodes. To distribute {kib}
+separate from your {es} data or master nodes. To distribute {kib}
 traffic across the nodes in your {es} cluster,
 you can configure {kib} to use a list of {es} hosts.
 

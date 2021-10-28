@@ -109,7 +109,7 @@ export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
 });
 -----------
 
-Full details are {kib-repo}tree/master/packages/kbn-i18n#vanilla-js[here].
+Full details are {kib-repo}tree/main/packages/kbn-i18n#vanilla-js[here].
 
 [discrete]
 ==== i18n for React
@@ -133,7 +133,7 @@ export const Component = () => {
 };
 -----------
 
-Full details are {kib-repo}tree/master/packages/kbn-i18n#react[here].
+Full details are {kib-repo}tree/main/packages/kbn-i18n#react[here].
 
 [discrete]
 === Resources
