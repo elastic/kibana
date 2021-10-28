@@ -44,7 +44,6 @@ import {
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
-  createUninitialisedResourceState,
   isLoadingResourceState,
   isUninitialisedResourceState,
 } from '../../../../../state';
@@ -115,9 +114,7 @@ const checkIfThereAreAssignableTrustedApps = async (
 
   store.dispatch({
     type: 'policyArtifactsAssignableListExistDataChanged',
-    payload: {
-      type: 'LoadingResourceState',
-    },
+    payload: createLoadingResourceState<boolean>(),
   });
   try {
     const trustedApps = await trustedAppsService.getTrustedAppsList({
@@ -148,9 +145,7 @@ const checkIfAnyTrustedApp = async (
   }
   store.dispatch({
     type: 'policyArtifactsDeosAnyTrustedAppExists',
-    payload: {
-      type: 'LoadingResourceState',
-    },
+    payload: createLoadingResourceState<boolean>(),
   });
   try {
     const trustedApps = await trustedAppsService.getTrustedAppsList({
@@ -180,9 +175,7 @@ const searchTrustedApps = async (
 
   store.dispatch({
     type: 'policyArtifactsAssignableListPageDataChanged',
-    payload: {
-      type: 'LoadingResourceState',
-    },
+    payload: createLoadingResourceState<GetTrustedAppsListResponse>(),
   });
 
   try {
@@ -227,9 +220,7 @@ const updateTrustedApps = async (
 
   store.dispatch({
     type: 'policyArtifactsUpdateTrustedAppsChanged',
-    payload: {
-      type: 'LoadingResourceState',
-    },
+    payload: createLoadingResourceState<PutTrustedAppUpdateResponse[]>(),
   });
 
   try {
