@@ -231,7 +231,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
     <SolutionToolbarPopover
       ownFocus
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
-        defaultMessage: 'Select type',
+        defaultMessage: 'All types',
       })}
       iconType="arrowDown"
       iconSide="right"
