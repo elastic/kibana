@@ -117,7 +117,7 @@ export class PrApi {
   async getPr(number: number) {
     const resp = await this.gqlRequest(
       gql`
-        query($number: Int!) {
+        query ($number: Int!) {
           repository(owner: "elastic", name: "kibana") {
             pullRequest(number: $number) {
               ...PrNode
@@ -142,7 +142,7 @@ export class PrApi {
   async leaveAComment(pr: PullRequest, body: string) {
     await this.gqlRequest(
       gql`
-        mutation($subj: String!, $body: String!) {
+        mutation ($subj: String!, $body: String!) {
           addComment(input: { subjectId: $subj, body: $body }) {
             commentEdge {
               node {
@@ -190,7 +190,7 @@ export class PrApi {
     while (hasNextPage) {
       const resp = await this.gqlRequest(
         gql`
-          query($cursor: String) {
+          query ($cursor: String) {
             repository(owner: "elastic", name: "kibana") {
               pullRequests(first: 100, after: $cursor, states: OPEN) {
                 pageInfo {
