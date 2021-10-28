@@ -35,7 +35,13 @@ export function ViewActions({ onApply }: Props) {
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiButton onClick={() => applyChanges(onApply)} isDisabled={noChanges} fill size="s">
+        <EuiButton
+          onClick={() => applyChanges(onApply)}
+          isDisabled={noChanges}
+          fill
+          size="s"
+          data-test-subj={'seriesChangesApplyButton'}
+        >
           {i18n.translate('xpack.observability.expView.seriesBuilder.apply', {
             defaultMessage: 'Apply changes',
           })}
