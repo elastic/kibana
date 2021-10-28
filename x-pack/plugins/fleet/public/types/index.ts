@@ -128,6 +128,8 @@ export {
   Installable,
   RegistryRelease,
   PackageSpecCategory,
+  UpdatePackageRequest,
+  UpdatePackageResponse,
 } from '../../common';
 
 export * from './intra_app_route_state';

@@ -4,25 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+// @ts-ignore
 import { ElasticsearchOverview } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { zoomInfo, onBrush } = useCharts();
   const { services } = useKibana<{ data: any }>();
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
-  });
+  }) as any;
   const [data, setData] = useState(null);
   const [showShardActivityHistory, setShowShardActivityHistory] = useState(false);
   const toggleShardActivityHistory = () => {
@@ -41,6 +44,14 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
   const pageTitle = i18n.translate('xpack.monitoring.elasticsearch.overview.pageTitle', {
     defaultMessage: 'Elasticsearch overview',
   });
+
+  useEffect(() => {
+    if (cluster) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inElasticsearch: true,
+      });
+    }
+  }, [cluster, generateBreadcrumbs]);
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();

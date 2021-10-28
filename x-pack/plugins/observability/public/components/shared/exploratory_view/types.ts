@@ -6,7 +6,7 @@
  */
 
 import { PaletteOutput } from 'src/plugins/charts/public';
-import { ExistsFilter } from '@kbn/es-query';
+import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
 import {
   LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -42,7 +42,7 @@ export interface MetricOption {
   field?: string;
   label: string;
   description?: string;
-  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
+  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
   columnFilters?: ColumnFilter[];
   timeScale?: string;
 }
@@ -55,8 +55,16 @@ export interface SeriesConfig {
   defaultSeriesType: SeriesType;
   filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
-  baseFilters?: PersistableFilter[] | ExistsFilter[];
-  definitionFields: string[];
+  baseFilters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
+  definitionFields: Array<
+    | string
+    | {
+        field: string;
+        nested?: string;
+        singleSelection?: boolean;
+        filters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
+      }
+  >;
   metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;
@@ -69,6 +77,7 @@ export interface SeriesConfig {
 export type URLReportDefinition = Record<string, string[]>;
 
 export interface SeriesUrl {
+  name: string;
   time: {
     to: string;
     from: string;
@@ -76,18 +85,20 @@ export interface SeriesUrl {
   breakdown?: string;
   filters?: UrlFilter[];
   seriesType?: SeriesType;
-  reportType: ReportViewType;
   operationType?: OperationType;
   dataType: AppDataType;
   reportDefinitions?: URLReportDefinition;
   selectedMetricField?: string;
-  isNew?: boolean;
+  hidden?: boolean;
+  color?: string;
 }
 
 export interface UrlFilter {
   field: string;
   values?: string[];
   notValues?: string[];
+  wildcards?: string[];
+  notWildcards?: string[];
 }
 
 export interface ConfigProps {
@@ -115,4 +126,10 @@ export interface FieldFormat {
     id: FormatType;
     params: FieldFormatParams;
   };
+}
+
+export interface BuilderItem {
+  id: number;
+  series: SeriesUrl;
+  seriesConfig?: SeriesConfig;
 }

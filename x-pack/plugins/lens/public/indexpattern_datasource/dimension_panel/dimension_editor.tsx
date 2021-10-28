@@ -26,6 +26,7 @@ import {
   insertOrReplaceColumn,
   replaceColumn,
   updateColumnParam,
+  updateDefaultLabels,
   resetIncomplete,
   FieldBasedIndexPatternColumn,
   canTransition,
@@ -107,16 +108,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
   );
 
   const setStateWrapper = (
-    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
+    options: { forceRender?: boolean } = {}
   ) => {
     const hypotheticalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
+    const isDimensionComplete = Boolean(hypotheticalLayer.columns[columnId]);
     setState(
       (prevState) => {
         const layer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
         return mergeLayer({ state: prevState, layerId, newLayer: layer });
       },
       {
-        isDimensionComplete: Boolean(hypotheticalLayer.columns[columnId]),
+        isDimensionComplete,
+        ...options,
       }
     );
   };
@@ -148,13 +152,27 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const addStaticValueColumn = (prevLayer = props.state.layers[props.layerId]) => {
     if (selectedColumn?.operationType !== staticValueOperationName) {
       trackUiEvent(`indexpattern_dimension_operation_static_value`);
-      return insertOrReplaceColumn({
+      const layer = insertOrReplaceColumn({
         layer: prevLayer,
         indexPattern: currentIndexPattern,
         columnId,
         op: staticValueOperationName,
         visualizationGroups: dimensionGroups,
       });
+      const value = props.activeData?.[layerId]?.rows[0]?.[columnId];
+      // replace the default value with the one from the active data
+      if (value != null) {
+        return updateDefaultLabels(
+          updateColumnParam({
+            layer,
+            columnId,
+            paramName: 'value',
+            value: props.activeData?.[layerId]?.rows[0]?.[columnId],
+          }),
+          currentIndexPattern
+        );
+      }
+      return layer;
     }
     return prevLayer;
   };
@@ -169,20 +187,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
   ) => {
     if (temporaryStaticValue) {
       setTemporaryState('none');
-      if (typeof setter === 'function') {
-        return setState(
-          (prevState) => {
-            const layer = setter(addStaticValueColumn(prevState.layers[layerId]));
-            return mergeLayer({ state: prevState, layerId, newLayer: layer });
-          },
-          {
-            isDimensionComplete: true,
-            forceRender: true,
-          }
-        );
-      }
     }
-    return setStateWrapper(setter);
+    if (typeof setter === 'function') {
+      return setState(
+        (prevState) => {
+          const layer = setter(addStaticValueColumn(prevState.layers[layerId]));
+          return mergeLayer({ state: prevState, layerId, newLayer: layer });
+        },
+        {
+          isDimensionComplete: true,
+          forceRender: true,
+        }
+      );
+    }
   };
 
   const ParamEditor = getParamEditor(
@@ -314,7 +331,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               temporaryQuickFunction &&
               isQuickFunction(newLayer.columns[columnId].operationType)
             ) {
-              // Only switch the tab once the formula is fully removed
+              // Only switch the tab once the "non quick function" is fully removed
               setTemporaryState('none');
             }
             setStateWrapper(newLayer);
@@ -344,13 +361,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
               });
-              // );
             }
             if (
               temporaryQuickFunction &&
               isQuickFunction(newLayer.columns[columnId].operationType)
             ) {
-              // Only switch the tab once the formula is fully removed
+              // Only switch the tab once the "non quick function" is fully removed
               setTemporaryState('none');
             }
             setStateWrapper(newLayer);
@@ -422,7 +438,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           maxWidth={false}
         />
       </div>
-      <EuiSpacer size="s" />
+
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
         {!incompleteInfo &&
         selectedColumn &&
@@ -508,6 +524,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
               }
               incompleteOperation={incompleteOperation}
               onChoose={(choice) => {
+                if (temporaryQuickFunction) {
+                  setTemporaryState('none');
+                }
                 setStateWrapper(
                   insertOrReplaceColumn({
                     layer: state.layers[layerId],
@@ -518,7 +537,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     visualizationGroups: dimensionGroups,
                     targetGroup: props.groupId,
                     incompleteParams,
-                  })
+                  }),
+                  { forceRender: temporaryQuickFunction }
                 );
               }}
             />
@@ -636,8 +656,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           />
         )}
       </div>
-
-      <EuiSpacer size="s" />
     </>
   );
 
@@ -680,7 +698,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const hasFormula =
     !isFullscreen && operationSupportMatrix.operationWithoutField.has(formulaOperationName);
 
-  const hasTabs = hasFormula || supportStaticValue;
+  const hasTabs = !isFullscreen && (hasFormula || supportStaticValue);
 
   return (
     <div id={columnId}>
@@ -739,9 +757,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
       />
       {TabContent}
 
-      {!isFullscreen && !currentFieldIsInvalid && temporaryState === 'none' && (
-        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
-          {!incompleteInfo && selectedColumn && (
+      {!isFullscreen && !currentFieldIsInvalid && (
+        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded  lnsIndexPatternDimensionEditor__section--collapseNext">
+          {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
             <LabelInput
               value={selectedColumn.label}
               onChange={(value) => {
@@ -764,7 +782,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           )}
 
-          {!isFullscreen && !incompleteInfo && !hideGrouping && (
+          {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
             <BucketNestingEditor
               layer={state.layers[props.layerId]}
               columnId={props.columnId}

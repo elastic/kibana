@@ -33,19 +33,20 @@ import {
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
+import { SOLUTION_NAME } from './common/translations';
 
 import {
   APP_ID,
-  OVERVIEW_PATH,
-  APP_OVERVIEW_PATH,
+  APP_UI_ID,
   APP_PATH,
   DEFAULT_INDEX_KEY,
   APP_ICON_SOLUTION,
   DETECTION_ENGINE_INDEX_URL,
+  SERVER_APP_ID,
 } from '../common/constants';
 
-import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
-import { manageOldSiemRoutes } from './helpers';
+import { getDeepLinks } from './app/deep_links';
+import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -96,21 +97,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initTelemetry(
       {
         usageCollection: plugins.usageCollection,
-        telemetryManagementSection: plugins.telemetryManagementSection,
       },
-      APP_ID
+      APP_UI_ID
     );
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
         id: APP_ID,
-        title: APP_NAME,
+        title: SOLUTION_NAME,
         description: i18n.translate('xpack.securitySolution.featureCatalogueDescription', {
           defaultMessage:
             'Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.',
         }),
         icon: 'logoSecurity',
-        path: APP_OVERVIEW_PATH,
+        path: APP_PATH,
         order: 300,
       });
     }
@@ -133,13 +133,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     })();
 
     core.application.register({
-      id: APP_ID,
-      title: APP_NAME,
+      id: APP_UI_ID,
+      title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       navLinkStatus: AppNavLinkStatus.hidden,
       searchable: true,
-      defaultPath: OVERVIEW_PATH,
       updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
       deepLinks: getDeepLinks(this.experimentalFeatures),
@@ -152,7 +151,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           services: await startServices,
           store: await this.store(coreStart, startPlugins, subPlugins),
           usageCollection: plugins.usageCollection,
-          subPlugins,
+          subPluginRoutes: getSubPluginRoutesByCapabilities(
+            subPlugins,
+            coreStart.application.capabilities
+          ),
         });
       },
     });
@@ -232,11 +234,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       });
     } else {
-      updateGlobalNavigation({
-        capabilities: core.application.capabilities,
-        updater$: this.appUpdater$,
-        enableExperimental: this.experimentalFeatures,
-      });
+      this.appUpdater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+        deepLinks: getDeepLinks(
+          this.experimentalFeatures,
+          undefined,
+          core.application.capabilities
+        ),
+      }));
     }
 
     return {};
@@ -292,7 +297,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cases: new subPluginClasses.Cases(),
         hosts: new subPluginClasses.Hosts(),
         network: new subPluginClasses.Network(),
-        ...(this.experimentalFeatures.uebaEnabled ? { ueba: new subPluginClasses.Ueba() } : {}),
+        ueba: new subPluginClasses.Ueba(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -313,14 +318,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return {
       overview: subPlugins.overview.start(),
       alerts: subPlugins.alerts.start(storage),
+      cases: subPlugins.cases.start(),
       rules: subPlugins.rules.start(storage),
       exceptions: subPlugins.exceptions.start(storage),
-      cases: subPlugins.cases.start(),
       hosts: subPlugins.hosts.start(storage),
       network: subPlugins.network.start(storage),
-      ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-        ? { ueba: subPlugins.ueba.start(storage) }
-        : {}),
+      ueba: subPlugins.ueba.start(storage),
       timelines: subPlugins.timelines.start(),
       management: subPlugins.management.start(core, plugins),
     };
@@ -360,9 +363,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         //   }
         // );
         // signal = { name: indexName[0] };
-        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-          method: 'GET',
-        });
+        if (coreStart.application.capabilities[SERVER_APP_ID].read === true) {
+          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+            method: 'GET',
+          });
+        }
       } catch {
         signal = { name: null };
       }
@@ -372,17 +377,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       const timelineInitialState = {
         timeline: {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           ...subPlugins.timelines.store.initialState.timeline!,
           timelineById: {
-            ...subPlugins.timelines.store.initialState.timeline!.timelineById,
+            ...subPlugins.timelines.store.initialState.timeline.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.alerts.storageTimelines!.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.rules.storageTimelines!.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.exceptions.storageTimelines!.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.hosts.storageTimelines!.timelineById,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.network.storageTimelines!.timelineById,
-            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-              ? subPlugins.ueba.storageTimelines!.timelineById
-              : {}),
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            ...subPlugins.ueba.storageTimelines!.timelineById,
           },
         },
       };
@@ -399,9 +409,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           {
             ...subPlugins.hosts.store.initialState,
             ...subPlugins.network.store.initialState,
-            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-              ? subPlugins.ueba.store.initialState
-              : {}),
+            ...subPlugins.ueba.store.initialState,
             ...timelineInitialState,
             ...subPlugins.management.store.initialState,
           },
@@ -415,9 +423,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         {
           ...subPlugins.hosts.store.reducer,
           ...subPlugins.network.store.reducer,
-          ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-            ? subPlugins.ueba.store.reducer
-            : {}),
+          ...subPlugins.ueba.store.reducer,
           timeline: timelineReducer,
           ...subPlugins.management.store.reducer,
           ...tGridReducer,
@@ -433,7 +439,3 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return this._store;
   }
 }
-
-const APP_NAME = i18n.translate('xpack.securitySolution.security.title', {
-  defaultMessage: 'Security',
-});

@@ -11,10 +11,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
 import { NumericField } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../form';
-import { ROLLOVER_FORM_PATHS } from '../../../../constants';
-import { UnitField } from './unit_field';
-
-import { maxSizeStoredUnits } from '../constants';
+import { byteSizeUnits, ROLLOVER_FORM_PATHS } from '../../../../constants';
+import { UnitField } from '../../shared_fields/unit_field';
 
 const i18nTexts = {
   deprecationMessage: i18n.translate(
@@ -52,7 +50,7 @@ export const MaxIndexSizeField: FunctionComponent = () => {
               append: (
                 <UnitField
                   path="_meta.hot.customRollover.maxStorageSizeUnit"
-                  options={maxSizeStoredUnits}
+                  options={byteSizeUnits}
                   euiFieldProps={{
                     'data-test-subj': 'hot-selectedMaxSizeStoredUnits',
                     'aria-label': i18nTexts.maxSizeUnit.ariaLabel,

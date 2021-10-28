@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   SERVICE_NAME,
@@ -17,7 +17,7 @@ import {
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { rangeQuery, kqlQuery } from '../../../../../../observability/server';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
+import { Setup } from '../../../helpers/setup_request';
 
 const TRACE_SAMPLES_SIZE = 500;
 
@@ -32,6 +32,8 @@ export async function getTraceSamples({
   sampleRangeFrom,
   sampleRangeTo,
   setup,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
@@ -42,10 +44,12 @@ export async function getTraceSamples({
   traceId: string;
   sampleRangeFrom?: number;
   sampleRangeTo?: number;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_trace_samples', async () => {
-    const { start, end, apmEventClient } = setup;
+    const { apmEventClient } = setup;
 
     const commonFilters = [
       { term: { [SERVICE_NAME]: serviceName } },

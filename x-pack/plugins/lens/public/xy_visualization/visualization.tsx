@@ -27,19 +27,20 @@ import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
-import { LensIconChartBarThreshold } from '../assets/chart_bar_threshold';
+import { LensIconChartBarReferenceLine } from '../assets/chart_bar_reference_line';
 import { generateId } from '../id_generator';
 import {
   getGroupsAvailableInData,
   getGroupsRelatedToData,
   getGroupsToShow,
   getStaticValue,
-} from './threshold_helpers';
+} from './reference_line_helpers';
 import {
   checkScaleOperation,
   checkXAccessorCompatibility,
   getAxisName,
 } from './visualization_helpers';
+import { groupAxesByType } from './axes_configuration';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
@@ -194,17 +195,17 @@ export const getXyVisualization = ({
   },
 
   getSupportedLayers(state, frame) {
-    const thresholdGroupIds = [
+    const referenceLineGroupIds = [
       {
-        id: 'yThresholdLeft',
+        id: 'yReferenceLineLeft',
         label: 'yLeft' as const,
       },
       {
-        id: 'yThresholdRight',
+        id: 'yReferenceLineRight',
         label: 'yRight' as const,
       },
       {
-        id: 'xThreshold',
+        id: 'xReferenceLine',
         label: 'x' as const,
       },
     ];
@@ -220,8 +221,8 @@ export const getXyVisualization = ({
       'number',
       frame?.datasourceLayers || {}
     );
-    const thresholdGroups = getGroupsRelatedToData(
-      thresholdGroupIds,
+    const referenceLineGroups = getGroupsRelatedToData(
+      referenceLineGroupIds,
       state,
       frame?.datasourceLayers || {},
       frame?.activeData
@@ -236,22 +237,22 @@ export const getXyVisualization = ({
         icon: LensIconChartMixedXy,
       },
       {
-        type: layerTypes.THRESHOLD,
-        label: i18n.translate('xpack.lens.xyChart.addThresholdLayerLabel', {
-          defaultMessage: 'Add threshold layer',
+        type: layerTypes.REFERENCELINE,
+        label: i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabel', {
+          defaultMessage: 'Add reference layer',
         }),
-        icon: LensIconChartBarThreshold,
+        icon: LensIconChartBarReferenceLine,
         disabled:
           !filledDataLayers.length ||
           (!dataLayers.some(layerHasNumberHistogram) &&
             dataLayers.every(({ accessors }) => !accessors.length)),
         tooltipContent: filledDataLayers.length
           ? undefined
-          : i18n.translate('xpack.lens.xyChart.addThresholdLayerLabelDisabledHelp', {
-              defaultMessage: 'Add some data to enable threshold layer',
+          : i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabelDisabledHelp', {
+              defaultMessage: 'Add some data to enable reference layer',
             }),
         initialDimensions: state
-          ? thresholdGroups.map(({ id, label }) => ({
+          ? referenceLineGroups.map(({ id, label }) => ({
               groupId: id,
               columnId: generateId(),
               dataType: 'number',
@@ -318,25 +319,25 @@ export const getXyVisualization = ({
       );
       const groupsToShow = getGroupsToShow(
         [
-          // When a threshold layer panel is added, a static threshold should automatically be included by default
+          // When a reference layer panel is added, a static reference line should automatically be included by default
           // in the first available axis, in the following order: vertical left, vertical right, horizontal.
           {
             config: left,
-            id: 'yThresholdLeft',
+            id: 'yReferenceLineLeft',
             label: 'yLeft',
-            dataTestSubj: 'lnsXY_yThresholdLeftPanel',
+            dataTestSubj: 'lnsXY_yReferenceLineLeftPanel',
           },
           {
             config: right,
-            id: 'yThresholdRight',
+            id: 'yReferenceLineRight',
             label: 'yRight',
-            dataTestSubj: 'lnsXY_yThresholdRightPanel',
+            dataTestSubj: 'lnsXY_yReferenceLineRightPanel',
           },
           {
             config: bottom,
-            id: 'xThreshold',
+            id: 'xReferenceLine',
             label: 'x',
-            dataTestSubj: 'lnsXY_xThresholdPanel',
+            dataTestSubj: 'lnsXY_xReferenceLinePanel',
           },
         ],
         state,
@@ -346,9 +347,9 @@ export const getXyVisualization = ({
       return {
         supportFieldFormat: false,
         supportStaticValue: true,
-        // Each thresholds layer panel will have sections for each available axis
+        // Each reference lines layer panel will have sections for each available axis
         // (horizontal axis, vertical axis left, vertical axis right).
-        // Only axes that support numeric thresholds should be shown
+        // Only axes that support numeric reference lines should be shown
         groups: groupsToShow.map(({ config = [], id, label, dataTestSubj, valid }) => ({
           groupId: id,
           groupLabel: getAxisName(label, { isHorizontal }),
@@ -363,13 +364,54 @@ export const getXyVisualization = ({
           enableDimensionEditor: true,
           dataTestSubj,
           invalid: !valid,
-          invalidMessage: i18n.translate('xpack.lens.configure.invalidThresholdDimension', {
-            defaultMessage:
-              'This threshold is assigned to an axis that no longer exists. You may move this threshold to another available axis or remove it.',
-          }),
+          invalidMessage:
+            label === 'x'
+              ? i18n.translate('xpack.lens.configure.invalidBottomReferenceLineDimension', {
+                  defaultMessage:
+                    'This reference line is assigned to an axis that no longer exists or is no longer valid. You may move this reference line to another available axis or remove it.',
+                })
+              : i18n.translate('xpack.lens.configure.invalidReferenceLineDimension', {
+                  defaultMessage:
+                    'This reference line is assigned to an axis that no longer exists. You may move this reference line to another available axis or remove it.',
+                }),
+          requiresPreviousColumnOnDuplicate: true,
         })),
       };
     }
+
+    const { left, right } = groupAxesByType([layer], frame.activeData);
+    // Check locally if it has one accessor OR one accessor per axis
+    const layerHasOnlyOneAccessor = Boolean(
+      layer.accessors.length < 2 ||
+        (left.length && left.length < 2) ||
+        (right.length && right.length < 2)
+    );
+    // Check also for multiple layers that can stack for percentage charts
+    // Make sure that if multiple dimensions are defined for a single layer, they should belong to the same axis
+    const hasOnlyOneAccessor =
+      layerHasOnlyOneAccessor &&
+      getLayersByType(state, layerTypes.DATA).filter(
+        // check that the other layers are compatible with this one
+        (dataLayer) => {
+          if (
+            dataLayer.seriesType === layer.seriesType &&
+            Boolean(dataLayer.xAccessor) === Boolean(layer.xAccessor) &&
+            Boolean(dataLayer.splitAccessor) === Boolean(layer.splitAccessor)
+          ) {
+            const { left: localLeft, right: localRight } = groupAxesByType(
+              [dataLayer],
+              frame.activeData
+            );
+            // return true only if matching axis are found
+            return (
+              dataLayer.accessors.length &&
+              (Boolean(localLeft.length) === Boolean(left.length) ||
+                Boolean(localRight.length) === Boolean(right.length))
+            );
+          }
+          return false;
+        }
+      ).length < 2;
 
     return {
       groups: [
@@ -410,7 +452,7 @@ export const getXyVisualization = ({
           filterOperations: isBucketed,
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
-          required: layer.seriesType.includes('percentage'),
+          required: layer.seriesType.includes('percentage') && hasOnlyOneAccessor,
           enableDimensionEditor: true,
         },
       ],
@@ -422,7 +464,7 @@ export const getXyVisualization = ({
     return state.layers[0].palette;
   },
 
-  setDimension({ prevState, layerId, columnId, groupId }) {
+  setDimension({ prevState, layerId, columnId, groupId, previousColumn }) {
     const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {
       return prevState;
@@ -438,25 +480,26 @@ export const getXyVisualization = ({
       newLayer.splitAccessor = columnId;
     }
 
-    if (newLayer.layerType === layerTypes.THRESHOLD) {
+    if (newLayer.layerType === layerTypes.REFERENCELINE) {
       newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
       const hasYConfig = newLayer.yConfig?.some(({ forAccessor }) => forAccessor === columnId);
+      const previousYConfig = previousColumn
+        ? newLayer.yConfig?.find(({ forAccessor }) => forAccessor === previousColumn)
+        : false;
       if (!hasYConfig) {
         newLayer.yConfig = [
           ...(newLayer.yConfig || []),
-          // TODO: move this
-          // add a default config if none is available
           {
+            // override with previous styling,
+            ...previousYConfig,
+            // but keep the new group & id config
             forAccessor: columnId,
             axisMode:
-              groupId === 'xThreshold'
+              groupId === 'xReferenceLine'
                 ? 'bottom'
-                : groupId === 'yThresholdRight'
+                : groupId === 'yReferenceLineRight'
                 ? 'right'
                 : 'left',
-            icon: undefined,
-            lineStyle: 'solid',
-            lineWidth: 1,
           },
         ];
       }
@@ -489,9 +532,9 @@ export const getXyVisualization = ({
     }
 
     let newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
-    // // check if there's any threshold layer and pull it off if all data layers have no dimensions set
+    // check if there's any reference layer and pull it off if all data layers have no dimensions set
     const layersByType = groupBy(newLayers, ({ layerType }) => layerType);
-    // // check for data layers if they all still have xAccessors
+    // check for data layers if they all still have xAccessors
     const groupsAvailable = getGroupsAvailableInData(
       layersByType[layerTypes.DATA],
       frame.datasourceLayers,

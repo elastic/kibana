@@ -79,9 +79,6 @@ export const createVislibVisController = (
         return;
       }
 
-      const [, { kibanaLegacy }] = await core.getStartServices();
-      kibanaLegacy.loadFontAwesome();
-
       // @ts-expect-error
       const { Vis: Vislib } = await import('./vislib/vis');
       const { uiState, event: fireEvent } = handlers;

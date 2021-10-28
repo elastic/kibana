@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -19,27 +19,26 @@ import { Annotation as ESAnnotation } from '../../../../../observability/common/
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export function getStoredAnnotations({
-  setup,
   serviceName,
   environment,
   client,
   annotationsClient,
   logger,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
   serviceName: string;
   environment: string;
   client: ElasticsearchClient;
   annotationsClient: ScopedAnnotationsClient;
   logger: Logger;
+  start: number;
+  end: number;
 }): Promise<Annotation[]> {
   return withApmSpan('get_stored_annotations', async () => {
-    const { start, end } = setup;
-
     const body = {
       size: 50,
       query: {
@@ -82,7 +81,7 @@ export function getStoredAnnotations({
       // so we should handle this error gracefully
       if (
         error instanceof WrappedElasticsearchClientError &&
-        error.originalError instanceof ResponseError
+        error.originalError instanceof errors.ResponseError
       ) {
         const type = error.originalError.body.error.type;
 

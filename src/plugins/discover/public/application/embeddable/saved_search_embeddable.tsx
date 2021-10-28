@@ -19,12 +19,12 @@ import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { APPLY_FILTER_TRIGGER, esFilters, FilterManager } from '../../../../data/public';
 import { DiscoverServices } from '../../build_services';
 import {
-  Query,
-  TimeRange,
   Filter,
   IndexPattern,
-  ISearchSource,
   IndexPatternField,
+  ISearchSource,
+  Query,
+  TimeRange,
 } from '../../../../data/common';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
@@ -35,6 +35,7 @@ import {
   DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
+  SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
 import * as columnActions from '../apps/main/components/doc_table/actions/columns';
@@ -45,6 +46,8 @@ import { DocTableProps } from '../apps/main/components/doc_table/doc_table_wrapp
 import { getDefaultSort } from '../apps/main/components/doc_table';
 import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
 import { updateSearchSource } from './helpers/update_search_source';
+import { VIEW_MODE } from '../apps/main/components/view_mode_toggle';
+import { FieldStatsTableEmbeddable } from '../components/data_visualizer_grid/field_stats_table_embeddable';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -165,7 +168,7 @@ export class SavedSearchEmbeddable
     const executionContext = {
       type: this.type,
       name: 'discover',
-      id: this.savedSearch.id,
+      id: this.savedSearch.id!,
       description: this.output.title || this.output.defaultTitle || '',
       url: this.output.editUrl,
       parent: this.input.executionContext,
@@ -216,7 +219,7 @@ export class SavedSearchEmbeddable
     if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
       this.savedSearch.sort = getDefaultSort(
         indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
       );
     }
 
@@ -226,13 +229,13 @@ export class SavedSearchEmbeddable
       isLoading: false,
       sort: getDefaultSort(
         indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
       ),
       rows: [],
       searchDescription: this.savedSearch.description,
       description: this.savedSearch.description,
       inspectorAdapters: this.inspectorAdapters,
-      searchTitle: this.savedSearch.lastSavedTitle,
+      searchTitle: this.savedSearch.title,
       services: this.services,
       onAddColumn: (columnName: string) => {
         if (!props.columns) {
@@ -379,6 +382,28 @@ export class SavedSearchEmbeddable
     if (!this.searchProps) {
       return;
     }
+
+    if (
+      this.services.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
+      this.savedSearch.viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
+      searchProps.services &&
+      searchProps.indexPattern &&
+      Array.isArray(searchProps.columns)
+    ) {
+      ReactDOM.render(
+        <FieldStatsTableEmbeddable
+          services={searchProps.services}
+          indexPattern={searchProps.indexPattern}
+          columns={searchProps.columns}
+          savedSearch={this.savedSearch}
+          filters={this.input.filters}
+          query={this.input.query}
+          onAddFilter={searchProps.onFilter}
+        />,
+        domNode
+      );
+      return;
+    }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
     const props = {
       searchProps,
@@ -402,9 +427,12 @@ export class SavedSearchEmbeddable
     return this.inspectorAdapters;
   }
 
+  public getDescription() {
+    return this.savedSearch.description;
+  }
+
   public destroy() {
     super.destroy();
-    this.savedSearch.destroy();
     if (this.searchProps) {
       delete this.searchProps;
     }

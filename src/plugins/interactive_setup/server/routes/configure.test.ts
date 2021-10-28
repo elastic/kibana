@@ -13,7 +13,14 @@ import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { ElasticsearchConnectionStatus } from '../../common';
+import {
+  ElasticsearchConnectionStatus,
+  ERROR_CONFIGURE_FAILURE,
+  ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
+  ERROR_KIBANA_CONFIG_FAILURE,
+  ERROR_KIBANA_CONFIG_NOT_WRITABLE,
+  ERROR_OUTSIDE_PREBOOT_STAGE,
+} from '../../common';
 import { interactiveSetupMock } from '../mocks';
 import { defineConfigureRoute } from './configure';
 import { routeDefinitionParamsMock } from './index.mock';
@@ -135,11 +142,17 @@ describe('Configure routes', () => {
         body: { host: 'host1' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 400,
-        options: { body: 'Cannot process request outside of preboot stage.' },
-        payload: 'Cannot process request outside of preboot stage.',
-      });
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 400,
+          payload: {
+            attributes: {
+              type: ERROR_OUTSIDE_PREBOOT_STAGE,
+            },
+            message: 'Cannot process request outside of preboot stage.',
+          },
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.authenticate).not.toHaveBeenCalled();
       expect(mockRouteParams.kibanaConfigWriter.writeConfig).not.toHaveBeenCalled();
@@ -156,19 +169,15 @@ describe('Configure routes', () => {
         body: { host: 'host1' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 400,
-        options: {
-          body: {
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 400,
+          payload: {
             message: 'Elasticsearch connection is already configured.',
-            attributes: { type: 'elasticsearch_connection_configured' },
+            attributes: { type: ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED },
           },
-        },
-        payload: {
-          message: 'Elasticsearch connection is already configured.',
-          attributes: { type: 'elasticsearch_connection_configured' },
-        },
-      });
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.authenticate).not.toHaveBeenCalled();
       expect(mockRouteParams.kibanaConfigWriter.writeConfig).not.toHaveBeenCalled();
@@ -186,20 +195,15 @@ describe('Configure routes', () => {
         body: { host: 'host1' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        options: {
-          body: {
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 500,
+          payload: {
             message: 'Kibana process does not have enough permissions to write to config file.',
-            attributes: { type: 'kibana_config_not_writable' },
+            attributes: { type: ERROR_KIBANA_CONFIG_NOT_WRITABLE },
           },
-          statusCode: 500,
-        },
-        payload: {
-          message: 'Kibana process does not have enough permissions to write to config file.',
-          attributes: { type: 'kibana_config_not_writable' },
-        },
-      });
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.authenticate).not.toHaveBeenCalled();
       expect(mockRouteParams.kibanaConfigWriter.writeConfig).not.toHaveBeenCalled();
@@ -225,14 +229,15 @@ describe('Configure routes', () => {
         body: { host: 'host1' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        options: {
-          body: { message: 'Failed to configure.', attributes: { type: 'configure_failure' } },
-          statusCode: 500,
-        },
-        payload: { message: 'Failed to configure.', attributes: { type: 'configure_failure' } },
-      });
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 500,
+          payload: {
+            message: 'Failed to configure.',
+            attributes: { type: ERROR_CONFIGURE_FAILURE },
+          },
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.authenticate).toHaveBeenCalledTimes(1);
       expect(mockRouteParams.kibanaConfigWriter.writeConfig).not.toHaveBeenCalled();
@@ -253,20 +258,15 @@ describe('Configure routes', () => {
         body: { host: 'host1' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        options: {
-          body: {
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 500,
+          payload: {
             message: 'Failed to save configuration.',
-            attributes: { type: 'kibana_config_failure' },
+            attributes: { type: ERROR_KIBANA_CONFIG_FAILURE },
           },
-          statusCode: 500,
-        },
-        payload: {
-          message: 'Failed to save configuration.',
-          attributes: { type: 'kibana_config_failure' },
-        },
-      });
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.authenticate).toHaveBeenCalledTimes(1);
       expect(mockRouteParams.kibanaConfigWriter.writeConfig).toHaveBeenCalledTimes(1);
@@ -285,11 +285,12 @@ describe('Configure routes', () => {
         body: { host: 'host', username: 'username', password: 'password', caCert: 'der' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 204,
-        options: {},
-        payload: undefined,
-      });
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 204,
+          payload: undefined,
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.authenticate).toHaveBeenCalledTimes(1);
       expect(mockRouteParams.elasticsearch.authenticate).toHaveBeenCalledWith({

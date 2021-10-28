@@ -12,10 +12,10 @@ import {
   luceneStringToDsl,
   toElasticsearchQuery,
 } from '@kbn/es-query';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useMlContext } from '../../../../../contexts/ml';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
-import { getQueryFromSavedSearch } from '../../../../../util/index_utils';
+import { getQueryFromSavedSearchObject } from '../../../../../util/index_utils';
 
 // `undefined` is used for a non-initialized state
 // `null` is set if no saved search is used
@@ -40,7 +40,7 @@ export function useSavedSearch() {
     let qryString;
 
     if (currentSavedSearch !== null) {
-      const { query } = getQueryFromSavedSearch(currentSavedSearch);
+      const { query } = getQueryFromSavedSearchObject(currentSavedSearch);
       const queryLanguage = query.language;
       qryString = query.query;
 

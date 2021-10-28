@@ -39,6 +39,7 @@ export const createDeserializer =
         },
         bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
         readonlyEnabled: Boolean(hot?.actions?.readonly),
+        shrink: { isUsingShardSize: Boolean(hot?.actions.shrink?.max_primary_shard_size) },
       },
       warm: {
         enabled: Boolean(warm),
@@ -47,18 +48,17 @@ export const createDeserializer =
         dataTierAllocationType: determineDataTierAllocationType(warm?.actions),
         readonlyEnabled: Boolean(warm?.actions?.readonly),
         minAgeToMilliSeconds: -1,
+        shrink: { isUsingShardSize: Boolean(warm?.actions.shrink?.max_primary_shard_size) },
       },
       cold: {
         enabled: Boolean(cold),
         dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
-        freezeEnabled: Boolean(cold?.actions?.freeze),
         readonlyEnabled: Boolean(cold?.actions?.readonly),
         minAgeToMilliSeconds: -1,
       },
       frozen: {
         enabled: Boolean(frozen),
         dataTierAllocationType: determineDataTierAllocationType(frozen?.actions),
-        freezeEnabled: Boolean(frozen?.actions?.freeze),
         minAgeToMilliSeconds: -1,
       },
       delete: {
@@ -97,6 +97,13 @@ export const createDeserializer =
             draft._meta.hot.customRollover.maxAgeUnit = maxAge.units;
           }
         }
+        if (draft.phases.hot?.actions.shrink?.max_primary_shard_size) {
+          const primaryShardSize = splitSizeAndUnits(
+            draft.phases.hot.actions.shrink.max_primary_shard_size!
+          );
+          draft.phases.hot.actions.shrink.max_primary_shard_size = primaryShardSize.size;
+          draft._meta.hot.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
+        }
 
         if (draft.phases.warm) {
           if (draft.phases.warm.actions?.allocate?.require) {
@@ -109,6 +116,14 @@ export const createDeserializer =
             const minAge = splitSizeAndUnits(draft.phases.warm.min_age);
             draft.phases.warm.min_age = minAge.size;
             draft._meta.warm.minAgeUnit = minAge.units;
+          }
+
+          if (draft.phases.warm.actions.shrink?.max_primary_shard_size) {
+            const primaryShardSize = splitSizeAndUnits(
+              draft.phases.warm.actions.shrink.max_primary_shard_size!
+            );
+            draft.phases.warm.actions.shrink.max_primary_shard_size = primaryShardSize.size;
+            draft._meta.warm.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
           }
         }
 

@@ -22,7 +22,7 @@ export type ExpressionValueError = ExpressionValueBoxed<
   }
 >;
 
-export const isExpressionValueError = (value: any): value is ExpressionValueError =>
+export const isExpressionValueError = (value: unknown): value is ExpressionValueError =>
   getType(value) === 'error';
 
 /**

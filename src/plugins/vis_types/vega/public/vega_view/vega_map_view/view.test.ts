@@ -124,6 +124,8 @@ describe('vega_map_view/view', () => {
       } as unknown as VegaViewParams);
     }
 
+    let mockedConsoleLog: jest.SpyInstance;
+
     beforeEach(() => {
       vegaParser = new VegaParser(
         JSON.stringify(vegaMap),
@@ -137,10 +139,13 @@ describe('vega_map_view/view', () => {
         {},
         mockGetServiceSettings
       );
+      mockedConsoleLog = jest.spyOn(console, 'log'); // mocked console.log to avoid messages in the console when running tests
+      mockedConsoleLog.mockImplementation(() => {}); //  comment this line when console logging for debugging
     });
 
     afterEach(() => {
       jest.clearAllMocks();
+      mockedConsoleLog.mockRestore();
     });
 
     test('should be added TmsRasterLayer and do not use tmsService if mapStyle is "user_configured"', async () => {

@@ -12,7 +12,7 @@ import { loggingSystemMock, elasticsearchServiceMock } from '../../mocks';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { LoggerAdapter } from '../../logging/logger_adapter';
 import { AllControlStates, State } from './types';
@@ -45,7 +45,6 @@ describe('migrationsStateActionMachine', () => {
       pollInterval: 0,
       scrollDuration: '0s',
       skip: false,
-      enableV2: true,
       retryAttempts: 5,
     },
     typeRegistry,
@@ -194,7 +193,7 @@ describe('migrationsStateActionMachine', () => {
         logger: mockLogger.get(),
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
         next: () => {
-          throw new ResponseError(
+          throw new errors.ResponseError(
             elasticsearchClientMock.createApiResponse({
               meta: {
                 request: { options: {}, id: '', params: { method: 'POST', path: '/mock' } },

@@ -17,11 +17,11 @@ import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
@@ -71,9 +71,7 @@ export async function getErrorRate({
     },
     ...transactionNamefilter,
     ...transactionTypefilter,
-    ...getDocumentTypeFilterForAggregatedTransactions(
-      searchAggregatedTransactions
-    ),
+    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
@@ -83,11 +81,7 @@ export async function getErrorRate({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -143,18 +137,21 @@ export async function getErrorRatePeriods({
   searchAggregatedTransactions,
   comparisonStart,
   comparisonEnd,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
   comparisonStart?: number;
   comparisonEnd?: number;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
   const commonProps = {
     environment,
     kuery,

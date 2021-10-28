@@ -157,6 +157,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getMarkdownText(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const el = await this.find.byCssSelector('.tvbVis');
     const text = await el.getVisibleText();
     return text;
@@ -284,7 +285,8 @@ export class VisualBuilderPageObject extends FtrService {
     const drilldownEl = await this.testSubjects.find('drilldownUrl');
 
     await drilldownEl.clearValue();
-    await drilldownEl.type(value);
+    await drilldownEl.type(value, { charByChar: true });
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   /**
@@ -443,6 +445,7 @@ export class VisualBuilderPageObject extends FtrService {
    * @memberof VisualBuilderPage
    */
   public async getViewTable(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const tableView = await this.testSubjects.find('tableView', 20000);
     return await tableView.getVisibleText();
   }

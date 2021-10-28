@@ -19,6 +19,7 @@ import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { MarkdownSimple } from '../../../../../../../../plugins/kibana_react/public';
+import { LEGACY_TIME_AXIS } from '../../../../../../../../plugins/charts/common';
 import { replaceVars } from '../../lib/replace_vars';
 import { getInterval } from '../../lib/get_interval';
 import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
@@ -37,6 +38,8 @@ class TimeseriesVisualization extends Component {
 
   scaledDataFormat = this.props.getConfig('dateFormat:scaled');
   dateFormat = this.props.getConfig('dateFormat');
+
+  yAxisIdGenerator = htmlIdGenerator('yaxis');
 
   xAxisFormatter = (interval) => {
     const formatter = createIntervalBasedFormatter(
@@ -165,8 +168,7 @@ class TimeseriesVisualization extends Component {
     } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
-    const yAxisIdGenerator = htmlIdGenerator('yaxis');
-    const mainAxisGroupId = yAxisIdGenerator('main_group');
+    const mainAxisGroupId = this.yAxisIdGenerator('main_group');
 
     const seriesModel = model.series.filter((s) => !s.hidden).map((s) => cloneDeep(s));
 
@@ -226,7 +228,7 @@ class TimeseriesVisualization extends Component {
         TimeseriesVisualization.addYAxis(yAxis, {
           domain,
           groupId,
-          id: yAxisIdGenerator(seriesGroup.id),
+          id: this.yAxisIdGenerator(seriesGroup.id),
           position: seriesGroup.axis_position,
           hide: isStackedWithinSeries,
           tickFormatter:
@@ -241,7 +243,7 @@ class TimeseriesVisualization extends Component {
 
         TimeseriesVisualization.addYAxis(yAxis, {
           tickFormatter,
-          id: yAxisIdGenerator('main'),
+          id: this.yAxisIdGenerator('main'),
           groupId: mainAxisGroupId,
           position: model.axis_position,
           domain: mainAxisDomain,
@@ -271,6 +273,7 @@ class TimeseriesVisualization extends Component {
             syncColors={syncColors}
             palettesService={palettesService}
             interval={interval}
+            useLegacyTimeAxis={getConfig(LEGACY_TIME_AXIS, false)}
             isLastBucketDropped={Boolean(
               model.drop_last_bucket ||
                 model.series.some((series) => series.series_drop_last_bucket)

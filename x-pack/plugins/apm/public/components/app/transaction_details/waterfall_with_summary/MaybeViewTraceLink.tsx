@@ -15,7 +15,7 @@ import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_det
 import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
 import { Environment } from '../../../../../common/environment_rt';
 
-export const MaybeViewTraceLink = ({
+export function MaybeViewTraceLink({
   transaction,
   waterfall,
   environment,
@@ -23,7 +23,7 @@ export const MaybeViewTraceLink = ({
   transaction: ITransaction;
   waterfall: IWaterfall;
   environment: Environment;
-}) => {
+}) {
   const {
     urlParams: { latencyAggregationType },
   } = useUrlParams();
@@ -102,4 +102,4 @@ export const MaybeViewTraceLink = ({
       </EuiFlexItem>
     );
   }
-};
+}

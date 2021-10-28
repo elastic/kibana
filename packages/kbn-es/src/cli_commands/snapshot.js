@@ -8,6 +8,7 @@
 
 const dedent = require('dedent');
 const getopts = require('getopts');
+import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
 const { Cluster } = require('../cluster');
 
 exports.description = 'Downloads and run from a nightly snapshot';
@@ -36,6 +37,13 @@ exports.help = (defaults = {}) => {
 };
 
 exports.run = async (defaults = {}) => {
+  const runStartTime = Date.now();
+  const log = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
+  const reportTime = getTimeReporter(log, 'scripts/es snapshot');
+
   const argv = process.argv.slice(2);
   const options = getopts(argv, {
     alias: {
@@ -56,12 +64,22 @@ exports.run = async (defaults = {}) => {
   if (options['download-only']) {
     await cluster.downloadSnapshot(options);
   } else {
+    const installStartTime = Date.now();
     const { installPath } = await cluster.installSnapshot(options);
 
     if (options.dataArchive) {
       await cluster.extractDataDirectory(installPath, options.dataArchive);
     }
 
-    await cluster.run(installPath, options);
+    reportTime(installStartTime, 'installed', {
+      success: true,
+      ...options,
+    });
+
+    await cluster.run(installPath, {
+      reportTime,
+      startTime: runStartTime,
+      ...options,
+    });
   }
 };

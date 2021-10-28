@@ -19,6 +19,7 @@ import {
   RectAnnotation,
   ScaleType,
   Settings,
+  XYBrushEvent,
   YDomainRange,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
@@ -44,6 +45,7 @@ import { getLatencyChartSelector } from '../../../selectors/latency_chart_select
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
 import { getAlertAnnotations } from './helper/get_alert_annotations';
+import { getTimeZone } from './helper/timezone';
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
 
 interface Props {
@@ -83,7 +85,7 @@ export function TimeseriesChart({
   alerts,
 }: Props) {
   const history = useHistory();
-  const { observabilityRuleTypeRegistry } = useApmPluginContext();
+  const { observabilityRuleTypeRegistry, core } = useApmPluginContext();
   const { getFormatter } = observabilityRuleTypeRegistry;
   const { annotations } = useAnnotationsContext();
   const { setPointerEvent, chartRef } = useChartPointerEventContext();
@@ -94,6 +96,8 @@ export function TimeseriesChart({
   );
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
+
+  const timeZone = getTimeZone(core.uiSettings);
 
   const min = Math.min(...xValues);
   const max = Math.max(...xValues);
@@ -114,7 +118,9 @@ export function TimeseriesChart({
       <Chart ref={chartRef} id={id}>
         <Settings
           tooltip={{ stickTo: 'top' }}
-          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          onBrushEnd={(event) =>
+            onBrushEnd({ x: (event as XYBrushEvent).x, history })
+          }
           theme={{
             ...chartTheme,
             areaSeriesStyle: {
@@ -174,6 +180,7 @@ export function TimeseriesChart({
 
           return (
             <Series
+              timeZone={timeZone}
               key={serie.title}
               id={serie.title}
               xScaleType={ScaleType.Time}

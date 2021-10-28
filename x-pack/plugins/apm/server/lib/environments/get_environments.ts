@@ -12,27 +12,33 @@ import {
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeQuery } from '../../../../observability/server';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getProcessorEventForTransactions } from '../helpers/transactions';
+import { Setup } from '../helpers/setup_request';
 
 /**
  * This is used for getting the list of environments for the environments selector,
  * filtered by range.
  */
 export async function getEnvironments({
-  setup,
-  serviceName,
   searchAggregatedTransactions,
+  serviceName,
+  setup,
+  size,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName?: string;
   searchAggregatedTransactions: boolean;
+  size: number;
+  start: number;
+  end: number;
 }) {
   const operationName = serviceName
     ? 'get_environments_for_service'
     : 'get_environments';
 
-  const { start, end, apmEventClient, config } = setup;
+  const { apmEventClient } = setup;
 
   const filter = rangeQuery(start, end);
 
@@ -42,14 +48,10 @@ export async function getEnvironments({
     });
   }
 
-  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
-
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.metric,
         ProcessorEvent.error,
       ],
@@ -66,7 +68,7 @@ export async function getEnvironments({
           terms: {
             field: SERVICE_ENVIRONMENT,
             missing: ENVIRONMENT_NOT_DEFINED.value,
-            size: maxServiceEnvironments,
+            size,
           },
         },
       },

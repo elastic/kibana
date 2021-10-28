@@ -19,13 +19,14 @@ import { discoverServiceMock } from '../../../../../__mocks__/services';
 import { FetchStatus } from '../../../../types';
 import { Chart } from './point_series';
 import { DiscoverChart } from './discover_chart';
+import { VIEW_MODE } from '../view_mode_toggle';
 
 setHeaderActionMenuMounter(jest.fn());
 
 function getProps(timefield?: string) {
   const searchSourceMock = createSearchSourceMock({});
   const services = discoverServiceMock;
-  services.data.query.timefilter.timefilter.getTime = () => {
+  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
@@ -94,16 +95,18 @@ function getProps(timefield?: string) {
     state: { columns: [] },
     stateContainer: {} as GetStateReturn,
     timefield,
+    viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    setDiscoverViewMode: jest.fn(),
   };
 }
 
 describe('Discover chart', () => {
   test('render without timefield', () => {
     const component = mountWithIntl(<DiscoverChart {...getProps()} />);
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
   test('render with filefield', () => {
     const component = mountWithIntl(<DiscoverChart {...getProps('timefield')} />);
-    expect(component.find('[data-test-subj="discoverChartToggle"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });
 });

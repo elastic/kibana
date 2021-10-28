@@ -224,7 +224,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
         <Chart>
           <BarSeries
             id="criterion-preview"
-            xScaleType={ScaleType.Linear}
+            xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="timestamp"
             yAccessors={['value']}

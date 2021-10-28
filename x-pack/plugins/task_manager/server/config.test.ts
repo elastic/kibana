@@ -12,12 +12,10 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
         },
-        "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
@@ -45,17 +43,6 @@ describe('config validation', () => {
     `);
   });
 
-  test('the ElastiSearch Tasks index cannot be used for task manager', () => {
-    const config: Record<string, unknown> = {
-      index: '.tasks',
-    };
-    expect(() => {
-      configSchema.validate(config);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[index]: \\".tasks\\" is an invalid Kibana Task Manager index, as it is already in use by the ElasticSearch Tasks Manager"`
-    );
-  });
-
   test('the required freshness of the monitored stats config must always be less-than-equal to the poll interval', () => {
     const config: Record<string, unknown> = {
       monitored_stats_required_freshness: 100,
@@ -71,12 +58,10 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
         },
-        "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
@@ -117,12 +102,10 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
         },
-        "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,

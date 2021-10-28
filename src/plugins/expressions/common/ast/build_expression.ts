@@ -32,13 +32,13 @@ import { parse } from './parse';
  * @param val Value you want to check.
  * @return boolean
  */
-export function isExpressionAstBuilder(val: any): val is ExpressionAstExpressionBuilder {
-  return val?.type === 'expression_builder';
+export function isExpressionAstBuilder(val: unknown): val is ExpressionAstExpressionBuilder {
+  return (val as Record<string, unknown> | undefined)?.type === 'expression_builder';
 }
 
 /** @internal */
-export function isExpressionAst(val: any): val is ExpressionAstExpression {
-  return val?.type === 'expression';
+export function isExpressionAst(val: unknown): val is ExpressionAstExpression {
+  return (val as Record<string, unknown> | undefined)?.type === 'expression';
 }
 
 export interface ExpressionAstExpressionBuilder {

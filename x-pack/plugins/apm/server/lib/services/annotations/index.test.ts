@@ -36,6 +36,8 @@ describe('getServiceAnnotations', () => {
             serviceName: 'foo',
             environment: 'bar',
             searchAggregatedTransactions: false,
+            start: 0,
+            end: 50000,
           }),
         {
           mockResponse: () =>
@@ -66,6 +68,8 @@ describe('getServiceAnnotations', () => {
             serviceName: 'foo',
             environment: 'bar',
             searchAggregatedTransactions: false,
+            start: 0,
+            end: 50000,
           }),
         {
           mockResponse: () =>
@@ -106,6 +110,8 @@ describe('getServiceAnnotations', () => {
             serviceName: 'foo',
             environment: 'bar',
             searchAggregatedTransactions: false,
+            start: 1528113600000,
+            end: 1528977600000,
           }),
         {
           mockResponse: () =>
@@ -151,6 +157,8 @@ describe('getServiceAnnotations', () => {
             serviceName: 'foo',
             environment: 'bar',
             searchAggregatedTransactions: false,
+            start: 0,
+            end: 50000,
           }),
         {
           mockResponse: () =>

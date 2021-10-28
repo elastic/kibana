@@ -92,7 +92,6 @@ export function PieComponent(
   }
 
   const fillLabel: Partial<PartitionFillLabel> = {
-    textInvertible: true,
     valueFont: {
       fontWeight: 700,
     },
@@ -215,11 +214,11 @@ export function PieComponent(
     },
   });
 
-  const [state, setState] = useState({ isReady: false });
+  const [isReady, setIsReady] = useState(false);
   // It takes a cycle for the chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
-    setState({ isReady: true });
+    setIsReady(true);
   }, []);
 
   const hasNegative = firstTable.rows.some((row) => {
@@ -273,7 +272,7 @@ export function PieComponent(
       reportTitle={props.args.title}
       reportDescription={props.args.description}
       className="lnsPieExpression__container"
-      isReady={state.isReady}
+      isReady={isReady}
     >
       <Chart>
         <Settings
@@ -291,7 +290,7 @@ export function PieComponent(
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}
-          legendAction={getLegendAction(firstTable, onClickValue)}
+          legendAction={props.interactive ? getLegendAction(firstTable, onClickValue) : undefined}
           theme={{
             ...chartTheme,
             background: {

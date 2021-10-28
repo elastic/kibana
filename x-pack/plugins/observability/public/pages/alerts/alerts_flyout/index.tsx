@@ -37,6 +37,7 @@ import {
   ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
 import type { TopAlert } from '../';
@@ -44,6 +45,8 @@ import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana
 import { asDuration } from '../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import { parseAlert } from '../parse_alert';
+import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
+import { ExperimentalBadge } from '../../../components/shared/experimental_badge';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
@@ -92,7 +95,11 @@ export function AlertsFlyout({
       title: i18n.translate('xpack.observability.alertsFlyout.statusLabel', {
         defaultMessage: 'Status',
       }),
-      description: alertData.active ? 'Active' : 'Recovered',
+      description: (
+        <AlertStatusIndicator
+          alertStatus={alertData.active ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED}
+        />
+      ),
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.lastUpdatedLabel', {
@@ -131,6 +138,8 @@ export function AlertsFlyout({
   return (
     <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
       <EuiFlyoutHeader>
+        <ExperimentalBadge />
+        <EuiSpacer size="s" />
         <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
           <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>
         </EuiTitle>

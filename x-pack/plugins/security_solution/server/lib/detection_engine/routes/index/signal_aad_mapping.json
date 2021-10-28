@@ -28,7 +28,7 @@
   "signal.original_time": "kibana.alert.original_time",
   "signal.reason": "kibana.alert.reason",
   "signal.rule.author": "kibana.alert.rule.author",
-  "signal.rule.building_block_type": "kibana.alert.rule.building_block_type",
+  "signal.rule.building_block_type": "kibana.alert.building_block_type",
   "signal.rule.created_at": "kibana.alert.rule.created_at",
   "signal.rule.created_by": "kibana.alert.rule.created_by",
   "signal.rule.description": "kibana.alert.rule.description",

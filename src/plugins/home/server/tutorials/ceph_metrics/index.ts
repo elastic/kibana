@@ -23,17 +23,17 @@ export function cephMetricsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'cephMetrics',
     name: i18n.translate('home.tutorials.cephMetrics.nameTitle', {
-      defaultMessage: 'Ceph metrics',
+      defaultMessage: 'Ceph Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.cephMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Ceph server.',
+      defaultMessage: 'Collect metrics from Ceph servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.cephMetrics.longDescription', {
       defaultMessage:
-        'The `ceph` Metricbeat module fetches internal metrics from Ceph. \
+        'The `ceph` Metricbeat module fetches metrics from Ceph. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-ceph.html',
@@ -56,5 +56,6 @@ export function cephMetricsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['network', 'security'],
   };
 }

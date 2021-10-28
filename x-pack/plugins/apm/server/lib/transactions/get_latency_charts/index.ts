@@ -17,11 +17,11 @@ import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../../../lib/helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../../../lib/helpers/transactions';
+import { Setup } from '../../../lib/helpers/setup_request';
 import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
@@ -63,9 +63,7 @@ function searchLatency({
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    ...getDocumentTypeFilterForAggregatedTransactions(
-      searchAggregatedTransactions
-    ),
+    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
@@ -79,18 +77,13 @@ function searchLatency({
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
   }
 
-  const transactionDurationField =
-    getTransactionDurationFieldForAggregatedTransactions(
-      searchAggregatedTransactions
-    );
+  const transactionDurationField = getTransactionDurationFieldForTransactions(
+    searchAggregatedTransactions
+  );
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -184,19 +177,22 @@ export async function getLatencyPeriods({
   comparisonEnd,
   kuery,
   environment,
+  start,
+  end,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;
   comparisonStart?: number;
   comparisonEnd?: number;
   kuery: string;
   environment: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
   const options = {
     serviceName,
     transactionType,

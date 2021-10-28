@@ -13,7 +13,7 @@ import {
   METRIC_JAVA_HEAP_MEMORY_USED,
   AGENT_NAME,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { Setup } from '../../../../helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
@@ -58,12 +58,16 @@ export function getHeapMemoryChart({
   setup,
   serviceName,
   serviceNodeName,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
 }) {
   return fetchAndTransformMetrics({
     environment,
@@ -71,6 +75,8 @@ export function getHeapMemoryChart({
     setup,
     serviceName,
     serviceNodeName,
+    start,
+    end,
     chartBase,
     aggs: {
       heapMemoryMax: { avg: { field: METRIC_JAVA_HEAP_MEMORY_MAX } },

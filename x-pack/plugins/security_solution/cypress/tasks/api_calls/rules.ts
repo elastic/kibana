@@ -29,6 +29,27 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
     failOnStatusCode: false,
   });
 
+export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_testing') =>
+  cy.request({
+    method: 'POST',
+    url: 'api/detection_engine/rules',
+    body: {
+      rule_id: ruleId,
+      risk_score: parseInt(rule.riskScore, 10),
+      description: rule.description,
+      interval: `${rule.runsEvery.interval}${rule.runsEvery.type}`,
+      from: `now-${rule.lookBack.interval}${rule.lookBack.type}`,
+      name: rule.name,
+      severity: rule.severity.toLocaleLowerCase(),
+      type: 'eql',
+      index: rule.index,
+      query: rule.customQuery,
+      language: 'eql',
+      enabled: true,
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
+
 export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'rule_testing') =>
   cy.request({
     method: 'POST',
@@ -93,6 +114,7 @@ export const createCustomRuleActivated = (
       enabled: true,
       tags: ['rule1'],
       max_signals: maxSignals,
+      building_block_type: rule.buildingBlockType,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
@@ -104,6 +126,14 @@ export const deleteCustomRule = (ruleId = '1') => {
     url: `api/detection_engine/rules?rule_id=${ruleId}`,
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
+  });
+};
+
+export const createSignalsIndex = () => {
+  cy.request({
+    method: 'POST',
+    url: 'api/detection_engine/index',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
   });
 };
 

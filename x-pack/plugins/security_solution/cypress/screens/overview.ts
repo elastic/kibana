@@ -7,67 +7,67 @@
 
 // Host Stats
 export const STAT_AUDITD = {
-  value: '123',
+  value: '1',
   domId: '[data-test-subj="host-stat-auditbeatAuditd"]',
 };
 export const ENDGAME_DNS = {
-  value: '391',
+  value: '1',
   domId: '[data-test-subj="host-stat-endgameDns"]',
 };
 export const ENDGAME_FILE = {
-  value: '392',
+  value: '1',
   domId: '[data-test-subj="host-stat-endgameFile"]',
 };
 export const ENDGAME_IMAGE_LOAD = {
-  value: '393',
+  value: '1',
   domId: '[data-test-subj="host-stat-endgameImageLoad"]',
 };
 export const ENDGAME_NETWORK = {
-  value: '394',
+  value: '1',
   domId: '[data-test-subj="host-stat-endgameNetwork"]',
 };
 export const ENDGAME_PROCESS = {
-  value: '395',
+  value: '1',
   domId: '[data-test-subj="host-stat-endgameProcess"]',
 };
 export const ENDGAME_REGISTRY = {
-  value: '396',
+  value: '1',
   domId: '[data-test-subj="host-stat-endgameRegistry"]',
 };
 export const ENDGAME_SECURITY = {
-  value: '397',
+  value: '1',
   domId: '[data-test-subj="host-stat-endgameSecurity"]',
 };
 export const STAT_FILEBEAT = {
-  value: '890',
+  value: '1',
   domId: '[data-test-subj="host-stat-filebeatSystemModule"]',
 };
 export const STAT_FIM = {
-  value: '345',
+  value: '1',
   domId: '[data-test-subj="host-stat-auditbeatFIM"]',
 };
 export const STAT_LOGIN = {
-  value: '456',
+  value: '1',
   domId: '[data-test-subj="host-stat-auditbeatLogin"]',
 };
 export const STAT_PACKAGE = {
-  value: '567',
+  value: '1',
   domId: '[data-test-subj="host-stat-auditbeatPackage"]',
 };
 export const STAT_PROCESS = {
-  value: '678',
+  value: '1',
   domId: '[data-test-subj="host-stat-auditbeatProcess"]',
 };
 export const STAT_USER = {
-  value: '789',
+  value: '1',
   domId: '[data-test-subj="host-stat-auditbeatUser"]',
 };
 export const STAT_WINLOGBEAT_SECURITY = {
-  value: '70',
+  value: '1',
   domId: '[data-test-subj="host-stat-winlogbeatSecurity"]',
 };
 export const STAT_WINLOGBEAT_MWSYSMON_OPERATIONAL = {
-  value: '30',
+  value: '1',
   domId: '[data-test-subj="host-stat-winlogbeatMWSysmonOperational"]',
 };
 
@@ -92,39 +92,39 @@ export const HOST_STATS = [
 
 // Network Stats
 export const STAT_SOCKET = {
-  value: '578,502',
+  value: '1',
   domId: '[data-test-subj="network-stat-auditbeatSocket"]',
 };
 export const STAT_CISCO = {
-  value: '999',
+  value: '1',
   domId: '[data-test-subj="network-stat-filebeatCisco"]',
 };
 export const STAT_NETFLOW = {
-  value: '2,544',
+  value: '1',
   domId: '[data-test-subj="network-stat-filebeatNetflow"]',
 };
 export const STAT_PANW = {
-  value: '678',
+  value: '1',
   domId: '[data-test-subj="network-stat-filebeatPanw"]',
 };
 export const STAT_SURICATA = {
-  value: '303,699',
+  value: '1',
   domId: '[data-test-subj="network-stat-filebeatSuricata"]',
 };
 export const STAT_ZEEK = {
-  value: '71,129',
+  value: '1',
   domId: '[data-test-subj="network-stat-filebeatZeek"]',
 };
 export const STAT_DNS = {
-  value: '1,090',
+  value: '1',
   domId: '[data-test-subj="network-stat-packetbeatDNS"]',
 };
 export const STAT_FLOW = {
-  value: '722,153',
+  value: '1',
   domId: '[data-test-subj="network-stat-packetbeatFlow"]',
 };
 export const STAT_TLS = {
-  value: '340',
+  value: '1',
   domId: '[data-test-subj="network-stat-packetbeatTLS"]',
 };
 
@@ -155,3 +155,16 @@ export const OVERVIEW_CTI_LINKS_INFO_INNER_PANEL = '[data-test-subj="cti-inner-p
 export const OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON = '[data-test-subj="cti-view-dashboard-button"]';
 export const OVERVIEW_CTI_TOTAL_EVENT_COUNT = `${OVERVIEW_CTI_LINKS} [data-test-subj="header-panel-subtitle"]`;
 export const OVERVIEW_CTI_ENABLE_MODULE_BUTTON = '[data-test-subj="cti-enable-module-button"]';
+
+export const OVERVIEW_RISKY_HOSTS_LINKS = '[data-test-subj="risky-hosts-dashboard-links"]';
+export const OVERVIEW_RISKY_HOSTS_LINKS_ERROR_INNER_PANEL =
+  '[data-test-subj="risky-hosts-inner-panel-danger"]';
+export const OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL =
+  '[data-test-subj="risky-hosts-inner-panel-warning"]';
+export const OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON =
+  '[data-test-subj="risky-hosts-view-dashboard-button"]';
+export const OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT = `${OVERVIEW_RISKY_HOSTS_LINKS} [data-test-subj="header-panel-subtitle"]`;
+export const OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON =
+  '[data-test-subj="risky-hosts-enable-module-button"]';
+
+export const OVERVIEW_ALERTS_HISTOGRAM = '[data-test-subj="alerts-histogram-panel"]';

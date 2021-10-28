@@ -10,7 +10,7 @@ import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo, useCallback } from 'react';
 import uuid from 'uuid';
 
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
@@ -49,8 +49,10 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   indexPattern: IIndexPattern;
   indexNames: string[];
   onlyField?: string;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
+  showLegend?: boolean;
   showSpacer?: boolean;
   timelineId?: string;
   toggleTopN?: () => void;
@@ -70,9 +72,11 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   indexPattern,
   indexNames,
   onlyField,
+  paddingSize,
   query,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
+  showLegend,
   showSpacer = true,
   timelineId,
   to,
@@ -97,7 +101,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   const goToHostEvents = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.events, urlSearch),
       });
@@ -177,9 +181,11 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       id={uniqueQueryId}
       indexNames={indexNames}
       onError={toggleTopN}
+      paddingSize={paddingSize}
       setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
       setQuery={setQuery}
       showSpacer={showSpacer}
+      showLegend={showLegend}
       skip={filterQuery === undefined}
       startDate={from}
       timelineId={timelineId}

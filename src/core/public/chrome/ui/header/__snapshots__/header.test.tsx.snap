@@ -4267,7 +4267,7 @@ exports[`Header renders 1`] = `
                     }
                     button={
                       <EuiHeaderSectionItemButton
-                        aria-controls="mockId"
+                        aria-controls="generated-id"
                         aria-expanded={false}
                         aria-label="Toggle primary navigation"
                         aria-pressed={false}
@@ -4337,7 +4337,7 @@ exports[`Header renders 1`] = `
                       }
                     }
                     homeHref="/"
-                    id="mockId"
+                    id="generated-id"
                     isLocked={true}
                     isNavOpen={false}
                     navLinks$={
@@ -4497,7 +4497,7 @@ exports[`Header renders 1`] = `
                       aria-label="Primary"
                       button={
                         <EuiHeaderSectionItemButton
-                          aria-controls="mockId"
+                          aria-controls="generated-id"
                           aria-expanded={false}
                           aria-label="Toggle primary navigation"
                           aria-pressed={false}
@@ -4511,14 +4511,14 @@ exports[`Header renders 1`] = `
                         </EuiHeaderSectionItemButton>
                       }
                       data-test-subj="collapsibleNav"
-                      id="mockId"
+                      id="generated-id"
                       isOpen={false}
                       onClose={[Function]}
                       ownFocus={false}
                       size={248}
                     >
                       <EuiHeaderSectionItemButton
-                        aria-controls="mockId"
+                        aria-controls="generated-id"
                         aria-expanded={false}
                         aria-label="Toggle primary navigation"
                         aria-pressed={false}
@@ -4528,14 +4528,14 @@ exports[`Header renders 1`] = `
                         onTouchEnd={[Function]}
                       >
                         <EuiButtonEmpty
-                          aria-controls="mockId"
+                          aria-controls="generated-id"
                           aria-expanded={false}
                           aria-label="Toggle primary navigation"
                           aria-pressed={false}
                           buttonRef={
                             Object {
                               "current": <button
-                                aria-controls="mockId"
+                                aria-controls="generated-id"
                                 aria-expanded="false"
                                 aria-label="Toggle primary navigation"
                                 aria-pressed="false"
@@ -4569,7 +4569,7 @@ exports[`Header renders 1`] = `
                           onTouchEnd={[Function]}
                         >
                           <button
-                            aria-controls="mockId"
+                            aria-controls="generated-id"
                             aria-expanded={false}
                             aria-label="Toggle primary navigation"
                             aria-pressed={false}

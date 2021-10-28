@@ -13,11 +13,11 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
   getSearchAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../../helpers/transactions';
+import { Setup } from '../../helpers/setup_request';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
@@ -27,26 +27,25 @@ export async function getTransactionErrorRateChartPreview({
   setup,
   alertParams,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   alertParams: AlertParams;
 }) {
+  const { apmEventClient } = setup;
+  const { serviceName, environment, transactionType, interval, start, end } =
+    alertParams;
+
   const searchAggregatedTransactions = await getSearchAggregatedTransactions({
     ...setup,
     kuery: '',
+    start,
+    end,
   });
-
-  const { apmEventClient, start, end } = setup;
-  const { serviceName, environment, transactionType, interval } = alertParams;
 
   const outcomes = getOutcomeAggregation();
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -59,7 +58,7 @@ export async function getTransactionErrorRateChartPreview({
               : []),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
-            ...getDocumentTypeFilterForAggregatedTransactions(
+            ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
           ],

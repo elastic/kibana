@@ -121,7 +121,6 @@ interface Props {
   end: string;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
-  height?: number;
   id: TimelineId;
   indexNames: string[];
   indexPattern: IIndexPattern;
@@ -237,7 +236,7 @@ const EventsViewerComponent: React.FC<Props> = ({
     useTimelineEvents({
       docValueFields,
       fields,
-      filterQuery: combinedQueries!.filterQuery,
+      filterQuery: combinedQueries?.filterQuery,
       id,
       indexNames,
       limit: itemsPerPage,
@@ -301,7 +300,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
               subtitle={utilityBar ? undefined : subtitle}
               title={globalFullScreen ? titleWithExitFullScreen : justTitle}
-              isInspectDisabled={combinedQueries!.filterQuery === undefined}
+              isInspectDisabled={combinedQueries?.filterQuery === undefined}
             >
               {HeaderSectionContent}
             </HeaderSection>

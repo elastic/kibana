@@ -10,7 +10,10 @@ import styled from 'styled-components';
 import { EuiPanel } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { AppLeaveHandler } from '../../../../../../../src/core/public';
-import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaPageTemplate,
+  NO_DATA_PAGE_TEMPLATE_PROPS,
+} from '../../../../../../../src/plugins/kibana_react/public';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
@@ -23,8 +26,7 @@ import {
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { gutterTimeline } from '../../../common/lib/helpers';
-
-/* eslint-disable react/display-name */
+import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -73,10 +75,15 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
+    const showEmptyState = useShowPagesWithEmptyView();
+    const emptyStateProps = showEmptyState ? NO_DATA_PAGE_TEMPLATE_PROPS : {};
 
-    /* StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop, which may account for any style discrepancies, such as the bottom border not extending the full width of the page, between EuiPageTemplate and the security solution pages.
+    /*
+     * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
+     * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
+     * which may account for any style discrepancies, such as the bottom border not extending the full width of the page,
+     * between EuiPageTemplate and the security solution pages.
      */
-
     return (
       <StyledKibanaPageTemplate
         $isTimelineBottomBarVisible={isTimelineBottomBarVisible}
@@ -87,16 +94,23 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         solutionNav={solutionNav}
         restrictWidth={false}
         template="default"
+        {...emptyStateProps}
       >
-        <GlobalKQLHeader />
-        <EuiPanel
-          className="securityPageWrapper"
-          data-test-subj="pageContainer"
-          hasShadow={false}
-          paddingSize="l"
-        >
-          {children}
-        </EuiPanel>
+        {showEmptyState ? (
+          children
+        ) : (
+          <>
+            <GlobalKQLHeader />
+            <EuiPanel
+              className="securityPageWrapper"
+              data-test-subj="pageContainer"
+              hasShadow={false}
+              paddingSize="l"
+            >
+              {children}
+            </EuiPanel>
+          </>
+        )}
       </StyledKibanaPageTemplate>
     );
   });

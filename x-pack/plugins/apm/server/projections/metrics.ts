@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
@@ -31,18 +30,18 @@ function getServiceNodeNameFilters(serviceNodeName?: string) {
 export function getMetricsProjection({
   environment,
   kuery,
-  setup,
   serviceName,
   serviceNodeName,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
-
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...getServiceNodeNameFilters(serviceNodeName),

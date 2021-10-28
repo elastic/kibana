@@ -9,19 +9,30 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
+import { EngineLogic } from '../../engine';
 import { CurationsTable, EmptyState } from '../components';
+import { SuggestionsTable } from '../components/suggestions_table';
 import { CurationsLogic } from '../curations_logic';
 
 export const CurationsOverview: React.FC = () => {
   const { curations } = useValues(CurationsLogic);
+  const {
+    engine: { search_relevance_suggestions_active: searchRelevanceSuggestionsActive },
+  } = useValues(EngineLogic);
 
-  return curations.length ? (
-    <EuiPanel hasBorder>
-      <CurationsTable />
-    </EuiPanel>
-  ) : (
-    <EmptyState />
+  const shouldShowSuggestions = searchRelevanceSuggestionsActive;
+
+  return (
+    <>
+      {shouldShowSuggestions && (
+        <>
+          <SuggestionsTable />
+          <EuiSpacer />
+        </>
+      )}
+      {curations.length > 0 ? <CurationsTable /> : <EmptyState />}
+    </>
   );
 };

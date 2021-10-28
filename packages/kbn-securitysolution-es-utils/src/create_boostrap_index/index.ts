@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../elasticsearch_client';
+import type { ElasticsearchClient } from '../elasticsearch_client';
 
 // See the reference(s) below on explanations about why -000001 was chosen and
 // why the is_write_index is true as well as the bootstrapping step which is needed.
@@ -16,16 +16,18 @@ export const createBootstrapIndex = async (
   index: string
 ): Promise<unknown> => {
   return (
-    await esClient.transport.request({
-      path: `/${index}-000001`,
-      method: 'PUT',
-      body: {
-        aliases: {
-          [index]: {
-            is_write_index: true,
+    await esClient.indices.create(
+      {
+        index: `${index}-000001`,
+        body: {
+          aliases: {
+            [index]: {
+              is_write_index: true,
+            },
           },
         },
       },
-    })
+      { meta: true }
+    )
   ).body;
 };

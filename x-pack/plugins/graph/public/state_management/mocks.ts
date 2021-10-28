@@ -42,6 +42,7 @@ export function createMockGraphStore({
 }): MockedGraphEnvironment {
   const workspaceMock = {
     runLayout: jest.fn(),
+    simpleSearch: jest.fn(),
     nodes: [],
     edges: [],
     options: {},
@@ -55,7 +56,7 @@ export function createMockGraphStore({
     chrome: {
       setBreadcrumbs: jest.fn(),
     } as unknown as ChromeStart,
-    createWorkspace: jest.fn(),
+    createWorkspace: jest.fn((index, advancedSettings) => workspaceMock),
     getWorkspace: jest.fn(() => workspaceMock),
     indexPatternProvider: {
       get: jest.fn(() =>

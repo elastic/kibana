@@ -41,14 +41,7 @@ describe('getSharingData', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [],
-        "searchSource": Object {
-          "index": "the-index-pattern-id",
-          "sort": Array [
-            Object {
-              "_score": "desc",
-            },
-          ],
-        },
+        "getSearchSource": [Function],
       }
     `);
   });
@@ -66,14 +59,7 @@ describe('getSharingData', () => {
           "column_a",
           "column_b",
         ],
-        "searchSource": Object {
-          "index": "the-index-pattern-id",
-          "sort": Array [
-            Object {
-              "_score": "desc",
-            },
-          ],
-        },
+        "getSearchSource": [Function],
       }
     `);
   });
@@ -108,14 +94,7 @@ describe('getSharingData', () => {
           "cool-field-5",
           "cool-field-6",
         ],
-        "searchSource": Object {
-          "index": "the-index-pattern-id",
-          "sort": Array [
-            Object {
-              "_doc": "desc",
-            },
-          ],
-        },
+        "getSearchSource": [Function],
       }
     `);
   });
@@ -158,14 +137,7 @@ describe('getSharingData', () => {
           "cool-field-5",
           "cool-field-6",
         ],
-        "searchSource": Object {
-          "index": "the-index-pattern-id",
-          "sort": Array [
-            Object {
-              "_doc": false,
-            },
-          ],
-        },
+        "getSearchSource": [Function],
       }
     `);
   });

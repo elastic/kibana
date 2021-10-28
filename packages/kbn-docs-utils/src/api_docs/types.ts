@@ -6,6 +6,23 @@
  * Side Public License, v 1.
  */
 
+export interface PluginOrPackage {
+  manifest: {
+    id: string;
+    description?: string;
+    owner: { name: string; githubTeam?: string };
+    serviceFolders: readonly string[];
+  };
+  isPlugin: boolean;
+  directory: string;
+  manifestPath: string;
+  /**
+   * Only relevant if `isPlugin` is false. Plugins define functionality for each scope using folder structure,
+   * while a package defines it's intended usage via package.json fields.
+   */
+  scope?: ApiScope;
+}
+
 /**
  * The kinds of typescript types we want to show in the docs. `Unknown` is used if
  * we aren't accounting for a particular type. See {@link getPropertyTypeKind}
@@ -226,3 +243,9 @@ export interface ApiStats {
   missingExports: number;
   deprecatedAPIsReferencedCount: number;
 }
+
+export type PluginMetaInfo = ApiStats & {
+  owner: { name: string; githubTeam?: string };
+  description?: string;
+  isPlugin: boolean; // True if plugin, false if a package;
+};

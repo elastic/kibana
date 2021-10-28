@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './data_views/fields/fields.mocks';
+export * from '../../data_views/common/fields/fields.mocks';

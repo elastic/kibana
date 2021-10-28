@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   ThreatQuery,
   ThreatMapping,
@@ -24,107 +24,106 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { ElasticsearchClient, Logger, SavedObject } from '../../../../../../../../src/core/server';
+import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import {
-  AlertAttributes,
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SignalsEnrichment,
   WrapHits,
 } from '../types';
-import { ThreatRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
 export interface CreateThreatSignalsOptions {
-  tuple: RuleRangeTuple;
-  threatMapping: ThreatMapping;
-  query: string;
-  inputIndex: string[];
-  type: Type;
-  filters: unknown[];
-  language: LanguageOrUndefined;
-  savedId: string | undefined;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  alertId: string;
+  buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  completeRule: CompleteRule<ThreatRuleParams>;
+  concurrentSearches: ConcurrentSearches;
+  eventsTelemetry: TelemetryEventsSender | undefined;
   exceptionItems: ExceptionListItemSchema[];
+  filters: unknown[];
+  inputIndex: string[];
+  itemsPerSearch: ItemsPerSearch;
+  language: LanguageOrUndefined;
   listClient: ListClient;
   logger: Logger;
-  eventsTelemetry: TelemetryEventsSender | undefined;
-  alertId: string;
   outputIndex: string;
-  ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
+  query: string;
+  savedId: string | undefined;
   searchAfterSize: number;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
-  threatQuery: ThreatQuery;
-  buildRuleMessage: BuildRuleMessage;
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
-  concurrentSearches: ConcurrentSearches;
-  itemsPerSearch: ItemsPerSearch;
-  bulkCreate: BulkCreate;
+  threatMapping: ThreatMapping;
+  threatQuery: ThreatQuery;
+  tuple: RuleRangeTuple;
+  type: Type;
   wrapHits: WrapHits;
 }
 
 export interface CreateThreatSignalOptions {
-  tuple: RuleRangeTuple;
-  threatMapping: ThreatMapping;
-  threatEnrichment: SignalsEnrichment;
-  query: string;
-  inputIndex: string[];
-  type: Type;
-  filters: unknown[];
-  language: LanguageOrUndefined;
-  savedId: string | undefined;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  alertId: string;
+  buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  completeRule: CompleteRule<ThreatRuleParams>;
+  currentResult: SearchAfterAndBulkCreateReturnType;
+  currentThreatList: ThreatListItem[];
+  eventsTelemetry: TelemetryEventsSender | undefined;
   exceptionItems: ExceptionListItemSchema[];
+  filters: unknown[];
+  inputIndex: string[];
+  language: LanguageOrUndefined;
   listClient: ListClient;
   logger: Logger;
-  eventsTelemetry: TelemetryEventsSender | undefined;
-  alertId: string;
   outputIndex: string;
-  ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
+  query: string;
+  savedId: string | undefined;
   searchAfterSize: number;
-  buildRuleMessage: BuildRuleMessage;
-  currentThreatList: ThreatListItem[];
-  currentResult: SearchAfterAndBulkCreateReturnType;
-  bulkCreate: BulkCreate;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  threatEnrichment: SignalsEnrichment;
+  threatMapping: ThreatMapping;
+  tuple: RuleRangeTuple;
+  type: Type;
   wrapHits: WrapHits;
 }
 
 export interface BuildThreatMappingFilterOptions {
-  threatMapping: ThreatMapping;
-  threatList: ThreatListItem[];
   chunkSize?: number;
+  threatList: ThreatListItem[];
+  threatMapping: ThreatMapping;
 }
 
 export interface FilterThreatMappingOptions {
-  threatMapping: ThreatMapping;
   threatListItem: ThreatListItem;
+  threatMapping: ThreatMapping;
 }
 
 export interface CreateInnerAndClausesOptions {
-  threatMappingEntries: ThreatMappingEntries;
   threatListItem: ThreatListItem;
+  threatMappingEntries: ThreatMappingEntries;
 }
 
 export interface CreateAndOrClausesOptions {
-  threatMapping: ThreatMapping;
   threatListItem: ThreatListItem;
+  threatMapping: ThreatMapping;
 }
 
 export interface BuildEntriesMappingFilterOptions {
-  threatMapping: ThreatMapping;
-  threatList: ThreatListItem[];
   chunkSize: number;
+  threatList: ThreatListItem[];
+  threatMapping: ThreatMapping;
 }
 
 export interface SplitShouldClausesOptions {
-  should: BooleanFilter[];
   chunkSize: number;
+  should: BooleanFilter[];
 }
 
 export interface BooleanFilter {
@@ -132,35 +131,35 @@ export interface BooleanFilter {
 }
 
 export interface GetThreatListOptions {
+  buildRuleMessage: BuildRuleMessage;
   esClient: ElasticsearchClient;
-  query: string;
-  language: ThreatLanguageOrUndefined;
+  exceptionItems: ExceptionListItemSchema[];
   index: string[];
+  language: ThreatLanguageOrUndefined;
+  listClient: ListClient;
+  logger: Logger;
   perPage?: number;
+  query: string;
   searchAfter: string[] | undefined;
   sortField: string | undefined;
   sortOrder: SortOrderOrUndefined;
   threatFilters: unknown[];
-  exceptionItems: ExceptionListItemSchema[];
-  listClient: ListClient;
-  buildRuleMessage: BuildRuleMessage;
-  logger: Logger;
 }
 
 export interface ThreatListCountOptions {
   esClient: ElasticsearchClient;
-  query: string;
-  language: ThreatLanguageOrUndefined;
-  threatFilters: unknown[];
-  index: string[];
   exceptionItems: ExceptionListItemSchema[];
+  index: string[];
+  language: ThreatLanguageOrUndefined;
+  query: string;
+  threatFilters: unknown[];
 }
 
 export interface GetSortWithTieBreakerOptions {
-  sortField: string | undefined;
-  sortOrder: SortOrderOrUndefined;
   index: string[];
   listItemIndex: string;
+  sortField: string | undefined;
+  sortOrder: SortOrderOrUndefined;
 }
 
 export interface ThreatListDoc {

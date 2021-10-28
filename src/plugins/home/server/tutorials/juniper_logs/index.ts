@@ -29,7 +29,7 @@ export function juniperLogsSpecProvider(context: TutorialContext): TutorialSchem
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.juniperLogs.shortDescription', {
-      defaultMessage: 'Collect Juniper JUNOS logs over syslog or from a file.',
+      defaultMessage: 'Collect and parse logs from Juniper JUNOS with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.juniperLogs.longDescription', {
       defaultMessage:
@@ -56,5 +56,6 @@ export function juniperLogsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['network', 'security'],
   };
 }

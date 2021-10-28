@@ -36,32 +36,32 @@
   background: $euiColorLightestShade;
   padding: $euiSize;
 
+  &:last-child {
+    border-radius: 0 0 $euiBorderRadius $euiBorderRadius;
+  }
+
   // Add border to the top of the next same panel
   & + & {
     border-top: $euiBorderThin;
     margin-top: 0;
   }
-  &:last-child {
-    border-bottom-right-radius: $euiBorderRadius;
-    border-bottom-left-radius: $euiBorderRadius;
+
+  & > * {
+    margin-bottom: 0;
+  }
+
+  // Targeting EUI class as we are unable to apply a class to this element in component
+  &,
+  .euiFormRow__fieldWrapper {
+    & > * + * {
+      margin-top: $euiSize;
+    }
   }
 }
 
-.lnsLayerPanel__row--notSupportsMoreColumns {
-  padding-bottom: 0;
-}
-
 .lnsLayerPanel__group {
-  padding: $euiSizeS 0;
-  margin-bottom: $euiSizeS;
-}
-
-.lnsLayerPanel__group:empty {
-  padding: 0;
-}
-
-.lnsLayerPanel__error {
-  padding: 0 $euiSizeS;
+  margin: (-$euiSizeS) (-$euiSize);
+  padding: $euiSizeS $euiSize;
 }
 
 .lnsLayerPanel__dimension {
@@ -87,11 +87,10 @@
 }
 
 .lnsLayerPanel__dimensionContainer {
-  margin: 0 0 $euiSizeS;
   position: relative;
 
-  &:last-child {
-    margin-bottom: 0;
+  & + & {
+    margin-top: $euiSizeS;
   }
 }
 
@@ -105,6 +104,10 @@
   min-height: $euiSizeXXL - 2;
   word-break: break-word;
   font-weight: $euiFontWeightRegular;
+
+  @include kbnThemeStyle('v7') {
+    font-size: $euiFontSizeS;
+  }
 }
 
 .lnsLayerPanel__triggerTextLabel {
@@ -119,7 +122,7 @@
 }
 
 .lnsLayerPanel__styleEditor {
-  padding: 0 $euiSizeS $euiSizeS;
+  padding: $euiSize;
 }
 
 .lnsLayerPanel__colorIndicator {

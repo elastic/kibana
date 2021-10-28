@@ -37,6 +37,7 @@ import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { DataDocuments$ } from '../../services/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
+import { VIEW_MODE } from '../view_mode_toggle';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -106,6 +107,10 @@ export interface DiscoverSidebarResponsiveProps {
    * callback to execute on edit runtime field
    */
   onEditRuntimeField: () => void;
+  /**
+   * Discover view mode
+   */
+  viewMode: VIEW_MODE;
 }
 
 /**
@@ -217,7 +222,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   return (
     <>
-      {props.isClosed ? null : (
+      {!props.isClosed && (
         <EuiHideFor sizes={['xs', 's']}>
           <DiscoverSidebar
             {...props}

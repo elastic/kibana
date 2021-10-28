@@ -52,7 +52,6 @@ const pathCollector = function () {
 };
 
 const configPathCollector = pathCollector();
-const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
@@ -68,7 +67,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   delete extraCliOptions.env;
 
   if (opts.dev) {
-    if (!has('elasticsearch.serviceAccountToken')) {
+    if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
       if (!has('elasticsearch.username')) {
         set('elasticsearch.username', 'kibana_system');
       }
@@ -125,20 +124,14 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.elasticsearch) set('elasticsearch.hosts', opts.elasticsearch.split(','));
   if (opts.port) set('server.port', opts.port);
   if (opts.host) set('server.host', opts.host);
+
   if (opts.silent) {
-    set('logging.silent', true);
     set('logging.root.level', 'off');
   }
   if (opts.verbose) {
-    if (has('logging.root.appenders')) {
-      set('logging.root.level', 'all');
-    } else {
-      // Only set logging.verbose to true for legacy logging when KP logging isn't configured.
-      set('logging.verbose', true);
-    }
+    set('logging.root.level', 'all');
   }
 
-  set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
   merge(extraCliOptions);
@@ -161,20 +154,12 @@ export default function (program) {
       [getConfigPath()]
     )
     .option('-p, --port <port>', 'The port to bind to', parseInt)
-    .option('-q, --quiet', 'Deprecated, set logging level in your configuration')
-    .option('-Q, --silent', 'Prevent all logging')
-    .option('--verbose', 'Turns on verbose logging')
+    .option('-Q, --silent', 'Set the root logger level to off')
+    .option('--verbose', 'Set the root logger level to all')
     .option('-H, --host <host>', 'The host to bind to')
     .option(
       '-l, --log-file <path>',
       'Deprecated, set logging file destination in your configuration'
-    )
-    .option(
-      '--plugin-dir <path>',
-      'A path to scan for plugins, this can be specified multiple ' +
-        'times to specify multiple directories',
-      pluginDirCollector,
-      [fromRoot('plugins')]
     )
     .option(
       '--plugin-path <path>',
@@ -183,7 +168,6 @@ export default function (program) {
       pluginPathCollector,
       []
     )
-    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (!isKibanaDistributable()) {
@@ -207,7 +191,11 @@ export default function (program) {
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
       .option('--no-optimizer', 'Disable the kbn/optimizer completely')
       .option('--no-cache', 'Disable the kbn/optimizer cache')
-      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
+      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode')
+      .option(
+        '--no-dev-credentials',
+        'Prevents setting default values for `elasticsearch.username` and `elasticsearch.password` in --dev mode'
+      );
   }
 
   command.action(async function (opts) {
@@ -227,8 +215,6 @@ export default function (program) {
     const cliArgs = {
       dev: !!opts.dev,
       envName: unknownOptions.env ? unknownOptions.env.name : undefined,
-      // no longer supported
-      quiet: !!opts.quiet,
       silent: !!opts.silent,
       verbose: !!opts.verbose,
       watch: !!opts.watch,
