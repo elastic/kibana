@@ -158,7 +158,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
         await this.ensureAuthorizedAtSpace(
           id,
           this.authorization.actions.login,
-          'get',
           `Unauthorized to get ${id} space`
         );
       } catch (error) {
@@ -362,12 +361,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     }
   }
 
-  private async ensureAuthorizedAtSpace(
-    spaceId: string,
-    action: string,
-    method: string,
-    forbiddenMessage: string
-  ) {
+  private async ensureAuthorizedAtSpace(spaceId: string, action: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
     const { hasAllRequested } = await checkPrivileges.atSpace(spaceId, {
       kibana: action,
