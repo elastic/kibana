@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'src/core/server';
 import {
   transformError,
@@ -16,9 +16,8 @@ import {
   createBootstrapIndex,
 } from '@kbn/securitysolution-es-utils';
 import type {
-  AppClient,
+  SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
-  SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
@@ -32,15 +31,8 @@ import signalsPolicy from './signals_policy.json';
 import { templateNeedsUpdate } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
-import { RuleDataPluginService } from '../../../../../../rule_registry/server';
-import { ConfigType } from '../../../../config';
-import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 
-export const createIndexRoute = (
-  router: SecuritySolutionPluginRouter,
-  ruleDataService: RuleDataPluginService,
-  config: ConfigType
-) => {
+export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
     {
       path: DETECTION_ENGINE_INDEX_URL,
@@ -49,16 +41,15 @@ export const createIndexRoute = (
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
-      const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
 
       try {
         const siemClient = context.securitySolution?.getAppClient();
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        await createDetectionIndex(context, siemClient, ruleDataService, ruleRegistryEnabled);
+        await createDetectionIndex(context.securitySolution);
         return response.ok({ body: { acknowledged: true } });
       } catch (err) {
         const error = transformError(err);
@@ -71,30 +62,18 @@ export const createIndexRoute = (
   );
 };
 
-class CreateIndexError extends Error {
-  public readonly statusCode: number;
-  constructor(message: string, statusCode: number) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-}
-
 export const createDetectionIndex = async (
-  context: SecuritySolutionRequestHandlerContext,
-  siemClient: AppClient,
-  ruleDataService: RuleDataPluginService,
-  ruleRegistryEnabled: boolean
+  context: SecuritySolutionApiRequestHandlerContext
 ): Promise<void> => {
+  const config = context.getConfig();
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const spaceId = siemClient.getSpaceId();
-
-  if (!siemClient) {
-    throw new CreateIndexError('', 404);
-  }
-
+  const siemClient = context.getAppClient();
+  const spaceId = context.getSpaceId();
   const index = siemClient.getSignalsIndex();
 
   const indexExists = await getIndexExists(esClient, index);
+  const { ruleRegistryEnabled } = config.experimentalFeatures;
+
   // If using the rule registry implementation, we don't want to create new .siem-signals indices -
   // only create/update resources if there are existing indices
   if (ruleRegistryEnabled && !indexExists) {
@@ -106,7 +85,10 @@ export const createDetectionIndex = async (
   if (!policyExists) {
     await setPolicy(esClient, index, signalsPolicy);
   }
+
+  const ruleDataService = context.getRuleDataService();
   const aadIndexAliasName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
+
   if (await templateNeedsUpdate({ alias: index, esClient })) {
     await esClient.indices.putIndexTemplate({
       name: index,
@@ -128,11 +110,11 @@ export const createDetectionIndex = async (
     // for BOTH the index AND alias name. However, through 7.14 admins only needed permissions for .siem-signals (the index)
     // and not .alerts-security.alerts (the alias). From the security solution perspective, all .siem-signals-<space id>-*
     // indices should have an alias to .alerts-security.alerts-<space id> so it's safe to add those aliases as the internal user.
-    // await addIndexAliases({
-    //   esClient: context.core.elasticsearch.client.asInternalUser,
-    //   index,
-    //   aadIndexAliasName,
-    // });
+    await addIndexAliases({
+      esClient: context.core.elasticsearch.client.asInternalUser,
+      index,
+      aadIndexAliasName,
+    });
     const indexVersion = await getIndexVersion(esClient, index);
     if (isOutdated({ current: indexVersion, target: SIGNALS_TEMPLATE_VERSION })) {
       await esClient.indices.rollover({ alias: index });
@@ -161,26 +143,26 @@ const addFieldAliasesToIndices = async ({
   }
 };
 
-// const addIndexAliases = async ({
-//   esClient,
-//   index,
-//   aadIndexAliasName,
-// }: {
-//   esClient: ElasticsearchClient;
-//   index: string;
-//   aadIndexAliasName: string;
-// }) => {
-//   const { body: indices } = await esClient.indices.getAlias({ name: index });
-//   const aliasActions = {
-//     actions: Object.keys(indices).map((concreteIndexName) => {
-//       return {
-//         add: {
-//           index: concreteIndexName,
-//           alias: aadIndexAliasName,
-//           is_write_index: false,
-//         },
-//       };
-//     }),
-//   };
-//   await esClient.indices.updateAliases({ body: aliasActions });
-// };
+const addIndexAliases = async ({
+  esClient,
+  index,
+  aadIndexAliasName,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  aadIndexAliasName: string;
+}) => {
+  const { body: indices } = await esClient.indices.getAlias({ name: index });
+  const aliasActions = {
+    actions: Object.keys(indices).map((concreteIndexName) => {
+      return {
+        add: {
+          index: concreteIndexName,
+          alias: aadIndexAliasName,
+          is_write_index: false,
+        },
+      };
+    }),
+  };
+  await esClient.indices.updateAliases({ body: aliasActions });
+};

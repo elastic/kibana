@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
@@ -17,6 +17,7 @@ import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pi
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { LogstashTemplate } from './logstash_template';
 import { useTable } from '../../hooks/use_table';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -29,18 +30,20 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
 
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
-  });
+  }) as any;
   const [data, setData] = useState(null);
   const { getPaginationTableProps, getPaginationRouteOptions, updateTotalItemCount } =
     useTable('logstash.pipelines');
 
-  const title = i18n.translate('xpack.monitoring.logstash.overview.title', {
-    defaultMessage: 'Logstash',
+  const title = i18n.translate('xpack.monitoring.logstash.pipelines.routeTitle', {
+    defaultMessage: 'Logstash Pipelines',
   });
 
-  const pageTitle = i18n.translate('xpack.monitoring.logstash.overview.pageTitle', {
-    defaultMessage: 'Logstash overview',
+  const pageTitle = i18n.translate('xpack.monitoring.logstash.pipelines.pageTitle', {
+    defaultMessage: 'Logstash pipelines',
   });
+
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
@@ -68,6 +71,14 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
     getPaginationRouteOptions,
     updateTotalItemCount,
   ]);
+
+  useEffect(() => {
+    if (cluster) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inLogstash: true,
+      });
+    }
+  }, [cluster, data, generateBreadcrumbs]);
 
   const renderOverview = (pageData: any) => {
     if (pageData === null) {

@@ -37,16 +37,16 @@ import { SOLUTION_NAME } from './common/translations';
 
 import {
   APP_ID,
-  OVERVIEW_PATH,
-  APP_OVERVIEW_PATH,
+  APP_UI_ID,
   APP_PATH,
   DEFAULT_INDEX_KEY,
   APP_ICON_SOLUTION,
   DETECTION_ENGINE_INDEX_URL,
+  SERVER_APP_ID,
 } from '../common/constants';
 
-import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
-import { manageOldSiemRoutes } from './helpers';
+import { getDeepLinks } from './app/deep_links';
+import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -97,9 +97,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initTelemetry(
       {
         usageCollection: plugins.usageCollection,
-        telemetryManagementSection: plugins.telemetryManagementSection,
       },
-      APP_ID
+      APP_UI_ID
     );
 
     if (plugins.home) {
@@ -111,7 +110,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             'Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.',
         }),
         icon: 'logoSecurity',
-        path: APP_OVERVIEW_PATH,
+        path: APP_PATH,
         order: 300,
       });
     }
@@ -134,13 +133,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     })();
 
     core.application.register({
-      id: APP_ID,
+      id: APP_UI_ID,
       title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       navLinkStatus: AppNavLinkStatus.hidden,
       searchable: true,
-      defaultPath: OVERVIEW_PATH,
       updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
       deepLinks: getDeepLinks(this.experimentalFeatures),
@@ -153,7 +151,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           services: await startServices,
           store: await this.store(coreStart, startPlugins, subPlugins),
           usageCollection: plugins.usageCollection,
-          subPlugins,
+          subPluginRoutes: getSubPluginRoutesByCapabilities(
+            subPlugins,
+            coreStart.application.capabilities
+          ),
         });
       },
     });
@@ -233,11 +234,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       });
     } else {
-      updateGlobalNavigation({
-        capabilities: core.application.capabilities,
-        updater$: this.appUpdater$,
-        enableExperimental: this.experimentalFeatures,
-      });
+      this.appUpdater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+        deepLinks: getDeepLinks(
+          this.experimentalFeatures,
+          undefined,
+          core.application.capabilities
+        ),
+      }));
     }
 
     return {};
@@ -314,9 +318,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return {
       overview: subPlugins.overview.start(),
       alerts: subPlugins.alerts.start(storage),
+      cases: subPlugins.cases.start(),
       rules: subPlugins.rules.start(storage),
       exceptions: subPlugins.exceptions.start(storage),
-      cases: subPlugins.cases.start(),
       hosts: subPlugins.hosts.start(storage),
       network: subPlugins.network.start(storage),
       ueba: subPlugins.ueba.start(storage),
@@ -359,9 +363,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         //   }
         // );
         // signal = { name: indexName[0] };
-        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-          method: 'GET',
-        });
+        if (coreStart.application.capabilities[SERVER_APP_ID].read === true) {
+          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+            method: 'GET',
+          });
+        }
       } catch {
         signal = { name: null };
       }
@@ -385,10 +391,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...subPlugins.hosts.storageTimelines!.timelineById,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.network.storageTimelines!.timelineById,
-            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-              ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                subPlugins.ueba.storageTimelines!.timelineById
-              : {}),
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            ...subPlugins.ueba.storageTimelines!.timelineById,
           },
         },
       };
@@ -419,9 +423,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         {
           ...subPlugins.hosts.store.reducer,
           ...subPlugins.network.store.reducer,
-          ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-            ? subPlugins.ueba.store.reducer
-            : {}),
+          ...subPlugins.ueba.store.reducer,
           timeline: timelineReducer,
           ...subPlugins.management.store.reducer,
           ...tGridReducer,

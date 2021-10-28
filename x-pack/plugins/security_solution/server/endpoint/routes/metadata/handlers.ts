@@ -6,8 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { ApiResponse } from '@elastic/elasticsearch';
-import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/api/types';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { TypeOf } from '@kbn/config-schema';
 import {
@@ -48,6 +48,7 @@ import {
 } from './support/query_strategies';
 import { NotFoundError } from '../../errors';
 import { EndpointHostUnEnrolledError } from '../../services/metadata';
+import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
@@ -462,7 +463,7 @@ async function queryUnitedIndex(
     endpointPolicyIds
   );
 
-  let unitedMetadataQueryResponse: ApiResponse<SearchResponse<UnitedAgentMetadata>>;
+  let unitedMetadataQueryResponse: TransportResult<SearchResponse<UnitedAgentMetadata>, unknown>;
   try {
     unitedMetadataQueryResponse =
       await context.core.elasticsearch.client.asCurrentUser.search<UnitedAgentMetadata>(
@@ -522,10 +523,11 @@ async function queryUnitedIndex(
       const agentPolicy = agentPoliciesMap[agent.policy_id!];
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const endpointPolicy = endpointPoliciesMap[agent.policy_id!];
+      const fleetAgentStatus = getAgentStatus(agent as Agent);
+
       return {
         metadata,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        host_status: fleetAgentStatusToEndpointHostStatus(agent.last_checkin_status!),
+        host_status: fleetAgentStatusToEndpointHostStatus(fleetAgentStatus),
         policy_info: {
           agent: {
             applied: {

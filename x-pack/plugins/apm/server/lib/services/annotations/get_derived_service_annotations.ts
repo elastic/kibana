@@ -15,9 +15,9 @@ import {
 import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../../helpers/transactions';
 import { Setup } from '../../helpers/setup_request';
 
 export async function getDerivedServiceAnnotations({
@@ -41,9 +41,7 @@ export async function getDerivedServiceAnnotations({
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    ...getDocumentTypeFilterForAggregatedTransactions(
-      searchAggregatedTransactions
-    ),
+    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...environmentQuery(environment),
   ];
 
@@ -52,9 +50,7 @@ export async function getDerivedServiceAnnotations({
       await apmEventClient.search('get_derived_service_annotations', {
         apm: {
           events: [
-            getProcessorEventForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
+            getProcessorEventForTransactions(searchAggregatedTransactions),
           ],
         },
         body: {
@@ -73,7 +69,7 @@ export async function getDerivedServiceAnnotations({
           },
         },
       })
-    ).aggregations?.versions.buckets.map((bucket) => bucket.key) ?? [];
+    ).aggregations?.versions.buckets.map((bucket) => bucket.key as string) ?? [];
 
   if (versions.length <= 1) {
     return [];
@@ -113,9 +109,7 @@ async function getFirstSeenVersion(
   const response = await apmEventClient.search('get_first_seen_of_version', {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
       ],
     },
     body: {
@@ -166,9 +160,7 @@ async function getFirstSeenVersionByServiceNode(
   const response = await apmEventClient.search('get_first_seen_of_version_by_service_node', {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
       ],
     },
     body: {
