@@ -198,7 +198,6 @@ const providersConfigSchema = schema.object(
 );
 
 export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
   showInsecureClusterWarning: schema.boolean({ defaultValue: true }),
   loginHelp: schema.maybe(schema.string()),
@@ -211,7 +210,7 @@ export const ConfigSchema = schema.object({
   ),
   session: schema.object({
     idleTimeout: schema.oneOf([schema.duration(), schema.literal(null)], {
-      defaultValue: schema.duration().validate('1h'),
+      defaultValue: schema.duration().validate('8h'),
     }),
     lifespan: schema.oneOf([schema.duration(), schema.literal(null)], {
       defaultValue: schema.duration().validate('30d'),

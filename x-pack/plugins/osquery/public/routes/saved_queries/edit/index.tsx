@@ -118,7 +118,6 @@ const EditSavedQueryPageComponent = () => {
       {!isLoading && !isEmpty(savedQueryDetails) && (
         <EditSavedQueryForm
           defaultValue={savedQueryDetails?.attributes}
-          // @ts-expect-error update types
           handleSubmit={updateSavedQueryMutation.mutateAsync}
           viewMode={viewMode}
         />

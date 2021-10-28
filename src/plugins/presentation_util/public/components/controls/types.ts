@@ -6,46 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '@kbn/es-query';
-import { Query, TimeRange } from '../../../../data/public';
-import {
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '../../../../embeddable/public';
+import { InputControlInput } from '../../services/controls';
 
 export type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
 export type ControlStyle = 'twoLine' | 'oneLine';
-
-/**
- * Control embeddable types
- */
-export type InputControlFactory = EmbeddableFactory<
-  InputControlInput,
-  InputControlOutput,
-  InputControlEmbeddable
->;
-
-export interface ControlTypeRegistry {
-  [key: string]: InputControlFactory;
-}
-
-export type InputControlInput = EmbeddableInput & {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  twoLineLayout?: boolean;
-};
-
-export type InputControlOutput = EmbeddableOutput & {
-  filters?: Filter[];
-};
-
-export type InputControlEmbeddable<
-  TInputControlEmbeddableInput extends InputControlInput = InputControlInput,
-  TInputControlEmbeddableOutput extends InputControlOutput = InputControlOutput
-> = IEmbeddable<TInputControlEmbeddableInput, TInputControlEmbeddableOutput>;
 
 /**
  * Control embeddable editor types

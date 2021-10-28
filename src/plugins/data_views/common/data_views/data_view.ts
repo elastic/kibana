@@ -17,7 +17,6 @@ import { DuplicateField } from '../../../kibana_utils/common';
 
 import { IIndexPattern, IFieldType } from '../../common';
 import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
-import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import {
   FieldFormatsStartCommon,
@@ -45,8 +44,6 @@ interface SavedObjectBody {
   type?: string;
 }
 
-type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
-
 export class DataView implements IIndexPattern {
   public id?: string;
   public title: string = '';
@@ -67,11 +64,9 @@ export class DataView implements IIndexPattern {
    * Type is used to identify rollup index patterns
    */
   public type: string | undefined;
-  public formatHit: {
-    (hit: Record<string, any>, type?: string): any;
-    formatField: FormatFieldFn;
-  };
-  public formatField: FormatFieldFn;
+  /**
+   * @deprecated Use `flattenHit` utility method exported from data plugin instead.
+   */
   public flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
   public metaFields: string[];
   /**
@@ -100,11 +95,6 @@ export class DataView implements IIndexPattern {
     this.fields = fieldList([], this.shortDotsEnable);
 
     this.flattenHit = flattenHitWrapper(this, metaFields);
-    this.formatHit = formatHitProvider(
-      this,
-      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
-    );
-    this.formatField = this.formatHit.formatField;
 
     // set values
     this.id = spec.id;

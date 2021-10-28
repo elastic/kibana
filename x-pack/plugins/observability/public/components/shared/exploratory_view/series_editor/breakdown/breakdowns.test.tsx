@@ -10,6 +10,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import { Breakdowns } from './breakdowns';
 import { mockIndexPattern, mockUxSeries, render } from '../../rtl_helpers';
 import { getDefaultConfigs } from '../../configurations/default_configs';
+import { RECORDS_FIELD } from '../../configurations/constants';
 import { USER_AGENT_OS } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('Breakdowns', function () {
@@ -54,6 +55,26 @@ describe('Breakdowns', function () {
       time: { from: 'now-15m', to: 'now' },
     });
     expect(setSeries).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show percentile breakdown for records metrics', function () {
+    const kpiConfig = getDefaultConfigs({
+      reportType: 'kpi-over-time',
+      indexPattern: mockIndexPattern,
+      dataType: 'ux',
+    });
+
+    render(
+      <Breakdowns
+        seriesId={0}
+        seriesConfig={kpiConfig}
+        series={{ ...mockUxSeries, selectedMetricField: RECORDS_FIELD }}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('seriesBreakdown'));
+
+    expect(screen.queryByText('Percentile')).not.toBeInTheDocument();
   });
 
   it('should disable breakdowns when a different series has a breakdown', function () {

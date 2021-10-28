@@ -33,6 +33,7 @@ import {
   IErrorObject,
   ConnectorAddFlyoutProps,
   ActionTypeModel,
+  ActionConnectorFieldsCallbacks,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
@@ -121,6 +122,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   };
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [callbacks, setCallbacks] = useState<ActionConnectorFieldsCallbacks>(null);
 
   const closeFlyout = useCallback(() => {
     onClose();
@@ -155,6 +157,8 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
         errors={errors.connectorErrors}
         actionTypeRegistry={actionTypeRegistry}
         consumer={consumer}
+        setCallbacks={setCallbacks}
+        isEdit={false}
       />
     );
 
@@ -199,10 +203,21 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
         );
         return;
       }
+
       setIsSaving(true);
+      // Do not allow to save the connector if there is an error
+      try {
+        await callbacks?.beforeActionConnectorSave?.();
+      } catch (e) {
+        setIsSaving(false);
+        return;
+      }
+
       const savedAction = await onActionConnectorSave();
+
       setIsSaving(false);
       if (savedAction) {
+        await callbacks?.afterActionConnectorSave?.(savedAction);
         closeFlyout();
         if (reloadConnectors) {
           await reloadConnectors();

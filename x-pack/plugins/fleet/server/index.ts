@@ -43,8 +43,7 @@ export const config: PluginConfigDescriptor = {
     epm: true,
     agents: true,
   },
-  deprecations: ({ deprecate, renameFromRoot, unused, unusedFromRoot }) => [
-    deprecate('enabled', '8.0.0'),
+  deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Fleet plugin was named ingestManager before
     renameFromRoot('xpack.ingestManager.enabled', 'xpack.fleet.enabled'),
     renameFromRoot('xpack.ingestManager.registryUrl', 'xpack.fleet.registryUrl'),
@@ -89,6 +88,7 @@ export const config: PluginConfigDescriptor = {
         delete fullConfig.xpack.fleet.agents.elasticsearch.host;
         fullConfig.xpack.fleet.agents.elasticsearch.hosts = [oldValue];
         addDeprecation({
+          configPath: 'xpack.fleet.agents.elasticsearch.host',
           message: `Config key [xpack.fleet.agents.elasticsearch.host] is deprecated and replaced by [xpack.fleet.agents.elasticsearch.hosts]`,
           correctiveActions: {
             manualSteps: [
@@ -102,7 +102,6 @@ export const config: PluginConfigDescriptor = {
     },
   ],
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     agents: schema.object({
