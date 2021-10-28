@@ -2302,10 +2302,6 @@
     is-absolute "^1.0.0"
     is-negated-glob "^1.0.0"
 
-"@elastic/apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace":
-  version "0.0.0"
-  uid ""
-
 "@elastic/apm-rum-core@^5.12.1":
   version "5.12.1"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.12.1.tgz#ad78787876c68b9ce718d1c42b8e7b12b12eaa69"
@@ -2329,6 +2325,10 @@
   integrity sha512-NJAdzxXxf+LeCI0Dz3P+RMVY66C8sAztIg4tvnrhvBqxf8d7se+FpYw3oYjw3BZ8UDycmXEaIqEGcynUUndgqA==
   dependencies:
     "@elastic/apm-rum-core" "^5.12.1"
+
+"@elastic/apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace":
+  version "0.0.0"
+  uid ""
 
 "@elastic/app-search-javascript@^7.13.1":
   version "7.13.1"
@@ -2412,10 +2412,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@39.1.1":
-  version "39.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-39.1.1.tgz#52e59f1dd6448b2e80047259ca60c6c87e9873f0"
-  integrity sha512-zYCNitpp6Ds7U6eaa9QkJqc20ZMo2wjpZokNtd1WalFV22vdfiVizFg7DMtDjJrCDLmoXcLOOCMasKlmmJ1cRg==
+"@elastic/eui@39.1.2":
+  version "39.1.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-39.1.2.tgz#8eb1684a7a406bc13b8514a366d450e964dbf56f"
+  integrity sha512-R3MqXcLOYMe/nlm+KG0TGrAjTCmpuwNkh7iKGUxVXZIRkzkgp2wyGmoX1qZnKTogN3OSEf7kKEq1JeivPYWBOA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
