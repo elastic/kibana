@@ -98,7 +98,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/perl-api/branch/index.html',
+            'https://www.elastic.co/guide/en/elasticsearch/client/perl-api/master/index.html',
           isBeta: false,
           icons: [{ type: 'svg' }],
           categories: ['elastic_stack', 'custom', 'language_client'],
