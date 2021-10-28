@@ -284,12 +284,9 @@ const handleIsolateEndpointHost = async (
 
   dispatch({
     type: 'endpointIsolationRequestStateChange',
-    payload: {
-      type: 'LoadingResourceState',
-      previousState: asStaleResourceState<HostIsolationResponse>(
-        getCurrentIsolationRequestState(state)
-      ),
-    },
+    payload: createLoadingResourceState<HostIsolationResponse>(
+      asStaleResourceState(getCurrentIsolationRequestState(state))
+    ),
   });
 
   try {
@@ -323,10 +320,7 @@ async function getEndpointPackageInfo(
 
   dispatch({
     type: 'endpointPackageInfoStateChanged',
-    payload: {
-      type: 'LoadingResourceState',
-      previousState: asStaleResourceState(endpointPackageInfo(state)),
-    },
+    payload: createLoadingResourceState(asStaleResourceState(endpointPackageInfo(state))),
   });
 
   try {
@@ -654,9 +648,9 @@ async function endpointDetailsActivityLogChangedMiddleware({
   const { getState, dispatch } = store;
   dispatch({
     type: 'endpointDetailsActivityLogChanged',
-    // ts error to be fixed when AsyncResourceState is refactored (#830)
-    // @ts-expect-error
-    payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+    payload: createLoadingResourceState<ActivityLog>(
+      asStaleResourceState(getActivityLogData(getState()))
+    ),
   });
 
   try {
@@ -711,9 +705,9 @@ async function endpointDetailsActivityLogPagingMiddleware({
     });
     dispatch({
       type: 'endpointDetailsActivityLogChanged',
-      // ts error to be fixed when AsyncResourceState is refactored (#830)
-      // @ts-expect-error
-      payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+      payload: createLoadingResourceState<ActivityLog>(
+        asStaleResourceState(getActivityLogData(getState()))
+      ),
     });
     const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
       agent_id: selectedAgent(getState()),
@@ -784,9 +778,9 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 
   dispatch({
     type: 'metadataTransformStatsChanged',
-    // ts error to be fixed when AsyncResourceState is refactored (#830)
-    // @ts-expect-error
-    payload: createLoadingResourceState<TransformStats[]>(getMetadataTransformStats(state)),
+    payload: createLoadingResourceState<TransformStats[]>(
+      asStaleResourceState(getMetadataTransformStats(state))
+    ),
   });
 
   try {
