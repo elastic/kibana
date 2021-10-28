@@ -7,7 +7,7 @@
 
 import { EuiAccordion } from '@elastic/eui';
 import React, { FC } from 'react';
-import { filterToView } from '../../lib/filter';
+import { getFilterFormatter } from '../../lib/filter';
 import { Filter } from './filter';
 import { FiltersGroup as FiltersGroupType } from './types';
 
@@ -19,7 +19,10 @@ const panelStyle = {
 };
 
 export const FiltersGroup: FC<Props> = ({ name, filters }) => {
-  const filterViews: Array<Record<string, string>> = filters.map(filterToView);
+  const filterViews: Array<Record<string, string>> = filters.map((filter) =>
+    getFilterFormatter(filter.type)(filter)
+  );
+
   const filtersComponents = filterViews.map((filter, index) => (
     <Filter key={`filter-${name}-${index}`} filter={filter} />
   ));

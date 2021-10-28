@@ -32,7 +32,7 @@ const formatFilterView = (filterValue: any) => (filterView: any) =>
 export const transformFilterView = (filterView: any) => (filterValue: any) =>
   flowRight(formatFilterView(filterValue), flattenFilterView(filterValue))(filterView);
 
-export const filterToView = (filter: any): Record<string, string> => {
-  const filterView = filterViewsRegistry.get(filter.type) ?? filterViewsRegistry.get('default');
-  return transformFilterView(filterView.view())(filter);
+export const getFilterFormatter = (type: string = '') => {
+  const filterView = filterViewsRegistry.get(type) ?? filterViewsRegistry.get('default');
+  return transformFilterView(filterView.view());
 };
