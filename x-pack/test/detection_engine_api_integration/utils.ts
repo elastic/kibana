@@ -1111,7 +1111,7 @@ export const createExceptionList = async (
 };
 
 /**
- * Helper to cut down on the noise in some of the tests. Does a delete of a rule.
+ * Helper to cut down on the noise in some of the tests. Does a delete of an exception list.
  * It does not check for a 200 "ok" on this.
  * @param supertest The supertest deps
  * @param id The rule id to delete
@@ -1143,12 +1143,45 @@ export const createExceptionListItem = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   exceptionListItem: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {
-  const { body } = await supertest
+  const response = await supertest
     .post(EXCEPTION_LIST_ITEM_URL)
     .set('kbn-xsrf', 'true')
-    .send(exceptionListItem)
-    .expect(200);
-  return body;
+    .send(exceptionListItem);
+
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when creating an exception list item. CI issues could happen. Suspect this line if you are seeing CI issues. ${JSON.stringify(
+        response.body
+      )}`
+    );
+  }
+  return response.body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. Does a delete of an exception list item.
+ * It does not check for a 200 "ok" on this.
+ * @param supertest The supertest deps
+ * @param id The rule id to delete
+ */
+export const deleteExceptionListItem = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  listId: string
+): Promise<FullResponseSchema> => {
+  const response = await supertest
+    .delete(`${EXCEPTION_LIST_ITEM_URL}?list_id=${listId}`)
+    .set('kbn-xsrf', 'true');
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when deleting an exception list. CI issues could happen. Suspect this line if you are seeing CI issues.${JSON.stringify(
+        response.body
+      )}`
+    );
+  }
+
+  return response.body;
 };
 
 /**
