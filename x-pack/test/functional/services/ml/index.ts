@@ -24,6 +24,7 @@ import { MachineLearningDataVisualizerProvider } from './data_visualizer';
 import { MachineLearningDataVisualizerFileBasedProvider } from './data_visualizer_file_based';
 import { MachineLearningDataVisualizerIndexBasedProvider } from './data_visualizer_index_based';
 import { MachineLearningDataVisualizerIndexPatternManagementProvider } from './data_visualizer_index_pattern_management';
+import { MachineLearningForecastProvider } from './forecast';
 import { MachineLearningJobManagementProvider } from './job_management';
 import { MachineLearningJobSelectionProvider } from './job_selection';
 import { MachineLearningJobSourceSelectionProvider } from './job_source_selection';
@@ -92,6 +93,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataVisualizerIndexPatternManagement =
     MachineLearningDataVisualizerIndexPatternManagementProvider(context, dataVisualizerTable);
 
+  const forecast = MachineLearningForecastProvider(context);
   const jobAnnotations = MachineLearningJobAnnotationsProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
@@ -145,6 +147,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizerIndexBased,
     dataVisualizerIndexPatternManagement,
     dataVisualizerTable,
+    forecast,
     jobAnnotations,
     jobManagement,
     jobSelection,
