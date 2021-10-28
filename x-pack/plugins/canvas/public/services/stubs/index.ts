@@ -22,7 +22,6 @@ import { navLinkServiceFactory } from './nav_link';
 import { notifyServiceFactory } from './notify';
 import { platformServiceFactory } from './platform';
 import { reportingServiceFactory } from './reporting';
-import { visualizationsServiceFactory } from './visualizations';
 import { workpadServiceFactory } from './workpad';
 
 export { customElementServiceFactory } from './custom_element';
@@ -32,7 +31,6 @@ export { navLinkServiceFactory } from './nav_link';
 export { notifyServiceFactory } from './notify';
 export { platformServiceFactory } from './platform';
 export { reportingServiceFactory } from './reporting';
-export { visualizationsServiceFactory } from './visualizations';
 export { workpadServiceFactory } from './workpad';
 
 export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
@@ -44,7 +42,6 @@ export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices
   notify: new PluginServiceProvider(notifyServiceFactory),
   platform: new PluginServiceProvider(platformServiceFactory),
   reporting: new PluginServiceProvider(reportingServiceFactory),
-  visualizations: new PluginServiceProvider(visualizationsServiceFactory),
   workpad: new PluginServiceProvider(workpadServiceFactory),
 };
 
