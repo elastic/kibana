@@ -6,7 +6,7 @@
  */
 
 import axios, { AxiosResponse } from 'axios';
-import { get } from 'lodash';
+import { get, last } from 'lodash';
 import { execSync } from 'child_process';
 import { writeFileSync, unlinkSync, rmdirSync } from 'fs';
 import { resolve } from 'path';
@@ -18,6 +18,12 @@ const archMap: { [key: string]: string } = {
 };
 
 type ArtifactName = 'elastic-agent' | 'fleet-server';
+
+export async function getLatestVersion(): Promise<string> {
+  const response: any = await axios('https://artifacts-api.elastic.co/v1/versions');
+  // console.log(response);
+  return last(response.versions as string[]) || ''; // || '8.0.0-SNAPSHOT';
+}
 
 async function getArtifact(
   artifact: string,
@@ -62,33 +68,28 @@ const fetchers: ArtifactFetchers = {
   ),
 };
 
-export type FetchArtifactsParams = {
+export type ArtifactPaths = {
   [artifactName in ArtifactName]?: string;
 };
 
-type ArtifactPaths = FetchArtifactsParams;
 export class ArtifactManager extends Manager {
   private artifacts: ArtifactPaths;
-  private versions: FetchArtifactsParams;
+  private artifactNames: string[];
   private log: ToolingLog;
 
-  constructor(versions: FetchArtifactsParams, log: ToolingLog) {
+  constructor(artifactNames: string[], log: ToolingLog) {
     super();
-    this.versions = versions;
+    this.artifactNames = artifactNames;
     this.log = log;
     this.artifacts = {};
   }
 
   public fetchArtifacts = async () => {
     this.log.info('Fetching artifacts');
+    const version = await getLatestVersion();
     await Promise.all(
-      Object.keys(this.versions).map(async (name: string) => {
+      this.artifactNames.map(async (name: string) => {
         const artifactName = name as ArtifactName;
-        const version = this.versions[artifactName];
-        if (!version) {
-          this.log.warning(`No version is specified for ${artifactName}, skipping`);
-          return;
-        }
         const fetcher = fetchers[artifactName];
         if (!fetcher) {
           this.log.warning(`No fetcher is defined for ${artifactName}, skipping`);

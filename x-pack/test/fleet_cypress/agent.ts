@@ -8,8 +8,8 @@
 import { ToolingLog } from '@kbn/dev-utils';
 import axios, { AxiosRequestConfig } from 'axios';
 import { ChildProcess, spawn } from 'child_process';
-import { resolve } from 'path';
 import { networkInterfaces } from 'os';
+import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
 
 interface AgentManagerParams {
@@ -20,15 +20,12 @@ interface AgentManagerParams {
 }
 
 export class AgentManager extends Manager {
-  private directoryPath: string;
   private params: AgentManagerParams;
   private log: ToolingLog;
   private agentProcess?: ChildProcess;
   private requestOptions: AxiosRequestConfig;
-  constructor(directoryPath: string, params: AgentManagerParams, log: ToolingLog) {
+  constructor(params: AgentManagerParams, log: ToolingLog) {
     super();
-    // TODO: check if the file exists
-    this.directoryPath = directoryPath;
     this.log = log;
     this.params = params;
     this.requestOptions = {
@@ -40,10 +37,6 @@ export class AgentManager extends Manager {
         password: this.params.password,
       },
     };
-  }
-
-  public getBinaryPath() {
-    return resolve(this.directoryPath, 'elastic-agent');
   }
 
   public async setup() {
@@ -89,7 +82,7 @@ export class AgentManager extends Manager {
       `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
       '--env',
       'FLEET_INSECURE=true',
-      'docker.elastic.co/beats/elastic-agent:8.0.0-SNAPSHOT',
+      `docker.elastic.co/beats/elastic-agent:${getLatestVersion()}`,
     ];
 
     this.agentProcess = spawn('docker', args, { stdio: 'inherit' });

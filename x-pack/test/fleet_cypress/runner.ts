@@ -12,12 +12,12 @@ import { withProcRunner } from '@kbn/dev-utils';
 
 import { FtrProviderContext } from './ftr_provider_context';
 
-import { ArtifactManager, FetchArtifactsParams } from './artifact_manager';
+import { ArtifactManager } from './artifact_manager';
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
 
 interface SetupParams {
-  artifacts: FetchArtifactsParams;
+  artifacts: string[];
 }
 
 async function withFleetAgent(
@@ -44,8 +44,6 @@ async function withFleetAgent(
   );
 
   const agentManager = new AgentManager(
-    '',
-    // artifactManager.getArtifactDirectory('elastic-agent'),
     {
       ...esConfig,
       kibanaUrl: Url.format({
@@ -91,11 +89,7 @@ function startFleetAgent(context: FtrProviderContext, cypressCommand: string) {
   return withFleetAgent(
     context,
     {
-      artifacts: {
-        // TODO take latest version dynamically from https://artifacts-api.elastic.co/v1/versions/
-        // 'elastic-agent': '8.0.0-SNAPSHOT',
-        'fleet-server': '8.0.0-SNAPSHOT',
-      },
+      artifacts: ['fleet-server'],
     },
     (runnerEnv) =>
       withProcRunner(log, async (procs) => {
