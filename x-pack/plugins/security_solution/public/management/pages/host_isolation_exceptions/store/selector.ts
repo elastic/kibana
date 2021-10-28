@@ -48,6 +48,13 @@ export const getListItems: HostIsolationExceptionsSelector<Immutable<ExceptionLi
     return apiResponseData?.data || [];
   });
 
+export const getTotalListItems: HostIsolationExceptionsSelector<Immutable<number>> = createSelector(
+  getListApiSuccessResponse,
+  (apiResponseData) => {
+    return apiResponseData?.total || 0;
+  }
+);
+
 export const getListPagination: HostIsolationExceptionsSelector<Pagination> = createSelector(
   getListApiSuccessResponse,
   // memoized via `reselect` until the API response changes

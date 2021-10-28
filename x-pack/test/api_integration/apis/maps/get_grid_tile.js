@@ -35,7 +35,11 @@ export default function ({ getService }) {
       expect(clusterFeature.type).to.be(1);
       expect(clusterFeature.extent).to.be(4096);
       expect(clusterFeature.id).to.be(undefined);
-      expect(clusterFeature.properties).to.eql({ _count: 1, 'avg_of_bytes.value': 9252 });
+      expect(clusterFeature.properties).to.eql({
+        _count: 1,
+        _key: '10/258/404',
+        'avg_of_bytes.value': 9252,
+      });
       expect(clusterFeature.loadGeometry()).to.eql([[{ x: 87, y: 667 }]]);
 
       // Metadata feature
@@ -91,7 +95,11 @@ export default function ({ getService }) {
       expect(gridFeature.type).to.be(3);
       expect(gridFeature.extent).to.be(4096);
       expect(gridFeature.id).to.be(undefined);
-      expect(gridFeature.properties).to.eql({ _count: 1, 'avg_of_bytes.value': 9252 });
+      expect(gridFeature.properties).to.eql({
+        _count: 1,
+        _key: '10/258/404',
+        'avg_of_bytes.value': 9252,
+      });
       expect(gridFeature.loadGeometry()).to.eql([
         [
           { x: 64, y: 672 },
