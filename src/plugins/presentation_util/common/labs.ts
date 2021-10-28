@@ -10,9 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 export const LABS_PROJECT_PREFIX = 'labs:';
 export const DEFER_BELOW_FOLD = `${LABS_PROJECT_PREFIX}dashboard:deferBelowFold` as const;
-export const BY_VALUE_EMBEDDABLE = `${LABS_PROJECT_PREFIX}canvas:byValueEmbeddable` as const;
-
-export const projectIDs = [DEFER_BELOW_FOLD, BY_VALUE_EMBEDDABLE] as const;
+export const DASHBOARD_CONTROLS = `${LABS_PROJECT_PREFIX}dashboard:dashboardControls` as const;
+export const projectIDs = [DEFER_BELOW_FOLD, DASHBOARD_CONTROLS] as const;
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
 export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
 
@@ -35,18 +34,19 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
     }),
     solutions: ['dashboard'],
   },
-  [BY_VALUE_EMBEDDABLE]: {
-    id: BY_VALUE_EMBEDDABLE,
-    isActive: true,
+  [DASHBOARD_CONTROLS]: {
+    id: DASHBOARD_CONTROLS,
+    isActive: false,
     isDisplayed: true,
     environments: ['kibana', 'browser', 'session'],
-    name: i18n.translate('presentationUtil.labs.enableByValueEmbeddableName', {
-      defaultMessage: 'By-Value Embeddables',
+    name: i18n.translate('presentationUtil.labs.enableDashboardControlsProjectName', {
+      defaultMessage: 'Enable dashboard controls',
     }),
-    description: i18n.translate('presentationUtil.labs.enableByValueEmbeddableDescription', {
-      defaultMessage: 'Enables support for by-value embeddables in Canvas',
+    description: i18n.translate('presentationUtil.labs.enableDashboardControlsProjectDescription', {
+      defaultMessage:
+        'Enables the controls system for dashboard, which allows dashboard authors to more easily build interactive elements for their users.',
     }),
-    solutions: ['canvas'],
+    solutions: ['dashboard'],
   },
 };
 
