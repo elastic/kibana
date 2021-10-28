@@ -289,6 +289,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         touched: true,
         valid,
         indexPatternTimeField,
+        _meta: defaults._meta,
       });
       // custom comparison
       /* eslint-disable react-hooks/exhaustive-deps */
