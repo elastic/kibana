@@ -151,7 +151,13 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
             params,
             percentileAggregationPercents
           );
-        const percentiles = Object.values(percentilesRecords);
+
+        // We need to round the percentiles values
+        // because the queries we're using based on it
+        // later on wouldn't allow numbers with decimals.
+        const percentiles = Object.values(percentilesRecords).map((p) =>
+          Math.round(p)
+        );
 
         addLogMessage(`Loaded percentiles.`);
 
