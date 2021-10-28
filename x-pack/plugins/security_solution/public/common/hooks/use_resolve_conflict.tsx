@@ -31,7 +31,7 @@ export const useResolveConflict = () => {
   const { search, pathname } = useLocation();
   const { spaces } = useKibana().services;
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { resolveTimelineConfig, savedObjectId, show, graphEventId, activeTab } =
+  const { resolveTimelineConfig, savedObjectId, show, graphEventInfo, activeTab } =
     useDeepEqualSelector((state) => getTimeline(state, TimelineId.active) ?? timelineDefaults);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
@@ -51,7 +51,7 @@ export const useResolveConflict = () => {
       id: savedObjectId ?? '',
       isOpen: !!show,
       activeTab,
-      graphEventId,
+      graphEventInfo,
     };
     let timelineSearch: TimelineUrl = currentTimelineState;
     try {
@@ -86,7 +86,7 @@ export const useResolveConflict = () => {
     );
   }, [
     activeTab,
-    graphEventId,
+    graphEventInfo,
     pathname,
     resolveTimelineConfig?.alias_target_id,
     resolveTimelineConfig?.outcome,

@@ -44,7 +44,7 @@ import {
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
-import { tGridActions, tGridSelectors } from '../../../store/t_grid';
+import { GraphEventInfo, tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
 import { StatefulBody } from '../body';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
@@ -113,7 +113,7 @@ export interface TGridIntegratedProps {
   filterStatus?: AlertStatus;
   globalFullScreen: boolean;
   // If truthy, the graph viewer (Resolver) is showing
-  graphEventId: string | undefined;
+  graphEventInfo: GraphEventInfo | undefined;
   graphOverlay?: React.ReactNode;
   hasAlertsCrud: boolean;
   height?: number;
@@ -153,7 +153,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   filters,
   filterStatus,
   globalFullScreen,
-  graphEventId,
+  graphEventInfo,
   graphOverlay = null,
   hasAlertsCrud,
   id,
@@ -328,7 +328,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
                 <UpdatedFlexItem grow={false} $show={!loading}>
-                  {!resolverIsShowing(graphEventId) && additionalFilters}
+                  {!resolverIsShowing(graphEventInfo) && additionalFilters}
                 </UpdatedFlexItem>
                 {tGridEventRenderedViewEnabled &&
                   ['detections-page', 'detections-rules-details-page'].includes(id) && (
@@ -337,12 +337,12 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     </UpdatedFlexItem>
                   )}
               </UpdatedFlexGroup>
-              {!graphEventId && graphOverlay == null && (
+              {!graphEventInfo && graphOverlay == null && (
                 <>
                   {!hasAlerts && !loading && <TGridEmpty height="short" />}
                   {hasAlerts && (
                     <FullWidthFlexGroup
-                      $visible={!graphEventId && graphOverlay == null}
+                      $visible={!graphEventInfo && graphOverlay == null}
                       gutterSize="none"
                     >
                       <ScrollableFlexItem grow={1}>

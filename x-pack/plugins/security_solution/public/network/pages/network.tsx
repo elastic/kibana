@@ -68,9 +68,10 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-    const graphEventId = useShallowEqualSelector(
+    const graphEventInfo = useShallowEqualSelector(
       (state) =>
-        (getTimeline(state, TimelineId.networkPageExternalAlerts) ?? timelineDefaults).graphEventId
+        (getTimeline(state, TimelineId.networkPageExternalAlerts) ?? timelineDefaults)
+          .graphEventInfo
     );
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
@@ -155,7 +156,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         {indicesExist ? (
           <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventInfo })}>
               <SiemSearchBar indexPattern={indexPattern} id="global" />
             </FiltersGlobal>
 

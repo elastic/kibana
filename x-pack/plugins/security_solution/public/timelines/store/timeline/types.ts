@@ -14,6 +14,7 @@ import { NotesById } from '../../../common/store/app/model';
 
 import { TimelineModel } from './model';
 import { CoreStart } from '../../../../../../../src/core/public';
+import { GraphEventInfo } from '../../../../../timelines/public';
 
 export interface AutoSavedWarningMsg {
   timelineId: string | null;
@@ -26,7 +27,7 @@ export interface TimelineById {
 }
 
 export interface InsertTimeline {
-  graphEventId?: string;
+  graphEventInfo?: GraphEventInfo;
   timelineId: string;
   timelineSavedObjectId: string | null;
   timelineTitle: string;

@@ -38,14 +38,14 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   } = useKibana().services;
   const dispatch = useDispatch();
   const {
-    graphEventId,
+    graphEventInfo,
     savedObjectId,
     status: timelineStatus,
     title: timelineTitle,
     timelineType,
   } = useDeepEqualSelector((state) =>
     pick(
-      ['graphEventId', 'savedObjectId', 'status', 'title', 'timelineType'],
+      ['graphEventInfo', 'savedObjectId', 'status', 'title', 'timelineType'],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
@@ -61,14 +61,14 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
       });
       dispatch(
         setInsertTimeline({
-          graphEventId,
+          graphEventInfo,
           timelineId,
           timelineSavedObjectId: savedObjectId,
           timelineTitle,
         })
       );
     },
-    [dispatch, graphEventId, navigateToApp, savedObjectId, timelineId, timelineTitle]
+    [dispatch, graphEventInfo, navigateToApp, savedObjectId, timelineId, timelineTitle]
   );
 
   const { formatUrl } = useFormatUrl(SecurityPageName.case);
@@ -96,7 +96,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     }).then(() => {
       dispatch(
         setInsertTimeline({
-          graphEventId,
+          graphEventInfo,
           timelineId,
           timelineSavedObjectId: savedObjectId,
           timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
@@ -106,7 +106,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     });
   }, [
     dispatch,
-    graphEventId,
+    graphEventInfo,
     navigateToApp,
     handlePopoverClose,
     savedObjectId,

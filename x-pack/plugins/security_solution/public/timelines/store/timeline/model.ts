@@ -14,7 +14,7 @@ import type {
   ScrollToTopEvent,
 } from '../../../../common/types/timeline';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
-import type { TGridModelForTimeline } from '../../../../../timelines/public';
+import type { GraphEventInfo, TGridModelForTimeline } from '../../../../../timelines/public';
 import { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
@@ -133,5 +133,5 @@ export interface TimelineUrl {
   activeTab?: TimelineTabs;
   id: string;
   isOpen: boolean;
-  graphEventId?: string;
+  graphEventInfo?: GraphEventInfo;
 }

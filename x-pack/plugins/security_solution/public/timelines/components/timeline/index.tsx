@@ -63,11 +63,12 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
-  const { graphEventId, savedObjectId, timelineType, description } = useDeepEqualSelector((state) =>
-    pick(
-      ['graphEventId', 'savedObjectId', 'timelineType', 'description'],
-      getTimeline(state, timelineId) ?? timelineDefaults
-    )
+  const { graphEventInfo, savedObjectId, timelineType, description } = useDeepEqualSelector(
+    (state) =>
+      pick(
+        ['graphEventInfo', 'savedObjectId', 'timelineType', 'description'],
+        getTimeline(state, timelineId) ?? timelineDefaults
+      )
   );
   const { timelineFullScreen } = useTimelineFullScreen();
 
@@ -144,7 +145,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         </HideShowContainer>
 
         <TabsContent
-          graphEventId={graphEventId}
+          graphEventInfo={graphEventInfo}
           renderCellValue={renderCellValue}
           rowRenderers={rowRenderers}
           timelineId={timelineId}

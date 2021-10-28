@@ -48,8 +48,8 @@ const ID = 'UebaDetailsQueryId';
 const UebaDetailsComponent: React.FC<UebaDetailsProps> = ({ detailName, uebaDetailsPagePath }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
+  const graphEventInfo = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventInfo
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -91,7 +91,7 @@ const UebaDetailsComponent: React.FC<UebaDetailsProps> = ({ detailName, uebaDeta
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventInfo })}>
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 

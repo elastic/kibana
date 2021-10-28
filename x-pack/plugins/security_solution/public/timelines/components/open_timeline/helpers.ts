@@ -69,6 +69,7 @@ import {
 import { resolveTimeline } from '../../containers/api';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import { NoteResult } from '../../../../common/types/timeline/note';
+import { GraphEventInfo } from '../../../../../timelines/public';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -318,7 +319,7 @@ export const formatTimelineResultToModel = (
 export interface QueryTimelineById<TCache> {
   activeTimelineTab?: TimelineTabs;
   duplicate?: boolean;
-  graphEventId?: string;
+  graphEventInfo?: GraphEventInfo;
   timelineId: string;
   timelineType?: TimelineType;
   onError?: TimelineErrorCallback;
@@ -337,7 +338,7 @@ export interface QueryTimelineById<TCache> {
 export const queryTimelineById = <TCache>({
   activeTimelineTab = TimelineTabs.query,
   duplicate = false,
-  graphEventId = '',
+  graphEventInfo = { id: '', index: '' },
   timelineId,
   timelineType,
   onError,
@@ -379,7 +380,7 @@ export const queryTimelineById = <TCache>({
           timeline: {
             ...timeline,
             activeTab: activeTimelineTab,
-            graphEventId,
+            graphEventInfo,
             show: openTimeline,
             dateRange: { start: from, end: to },
           },

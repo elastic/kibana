@@ -129,6 +129,7 @@ export const makeMapStateToProps = () => {
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
+    const emptyGraphEventInfo = { id: '', index: '' };
     const flyoutTimeline = getTimeline(state, TimelineId.active);
     const timeline =
       flyoutTimeline != null
@@ -136,9 +137,14 @@ export const makeMapStateToProps = () => {
             id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
             isOpen: flyoutTimeline.show,
             activeTab: flyoutTimeline.activeTab,
-            graphEventId: flyoutTimeline.graphEventId ?? '',
+            graphEventInfo: flyoutTimeline.graphEventInfo ?? emptyGraphEventInfo,
           }
-        : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
+        : {
+            id: '',
+            isOpen: false,
+            activeTab: TimelineTabs.query,
+            graphEventInfo: emptyGraphEventInfo,
+          };
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;

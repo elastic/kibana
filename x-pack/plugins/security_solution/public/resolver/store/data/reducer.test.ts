@@ -36,7 +36,10 @@ describe('Resolver Data Middleware', () => {
           dataSource,
           schema,
           parameters: {
-            databaseDocumentID: '',
+            originEventInfo: {
+              databaseDocumentID: '',
+              databaseDocumentIndex: '',
+            },
             indices: [],
             filters: {},
           },

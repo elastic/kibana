@@ -10,6 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { GraphEventInfo } from '../../../../../../timelines/public';
 
 import {
   RowRenderer,
@@ -58,7 +59,7 @@ interface BasicTimelineTab {
   timelineFullScreen?: boolean;
   timelineId: TimelineId;
   timelineType: TimelineType;
-  graphEventId?: string;
+  graphEventInfo?: GraphEventInfo;
   timelineDescription: string;
 }
 
@@ -222,7 +223,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineId,
   timelineFullScreen,
   timelineType,
-  graphEventId,
+  graphEventInfo,
   timelineDescription,
 }) => {
   const dispatch = useDispatch();
@@ -291,10 +292,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   }, [dispatch, timelineId]);
 
   useEffect(() => {
-    if (!graphEventId && activeTab === TimelineTabs.graph) {
+    // TODO: should I be checking for isEmpty for id and index here?
+    if (!graphEventInfo && activeTab === TimelineTabs.graph) {
       setQueryAsActiveTab();
     }
-  }, [activeTab, graphEventId, setQueryAsActiveTab]);
+  }, [activeTab, graphEventInfo, setQueryAsActiveTab]);
 
   return (
     <>
@@ -326,7 +328,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
             onClick={setGraphAsActiveTab}
             isSelected={activeTab === TimelineTabs.graph}
-            disabled={!graphEventId}
+            disabled={!graphEventInfo}
             key={TimelineTabs.graph}
           >
             {i18n.ANALYZER_TAB}

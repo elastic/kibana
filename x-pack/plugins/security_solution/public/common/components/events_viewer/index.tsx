@@ -107,7 +107,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   utilityBar,
   additionalFilters,
   // If truthy, the graph viewer (Resolver) is showing
-  graphEventId,
+  graphEventInfo,
   hasAlertsCrud = false,
   unit,
 }) => {
@@ -149,8 +149,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
   const graphOverlay = useMemo(
     () =>
-      graphEventId != null && graphEventId.length > 0 ? <GraphOverlay timelineId={id} /> : null,
-    [graphEventId, id]
+      graphEventInfo != null && graphEventInfo.id.length > 0 && graphEventInfo.index.length > 0 ? (
+        <GraphOverlay timelineId={id} />
+      ) : null,
+    [graphEventInfo, id]
   );
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
@@ -190,7 +192,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               filters: globalFilters,
               filterStatus: currentFilter,
               globalFullScreen,
-              graphEventId,
+              graphEventInfo,
               graphOverlay,
               hasAlertsCrud,
               id,
@@ -237,9 +239,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               rowRenderers={rowRenderers}
               start={start}
               sort={sort}
-              showTotalCount={isEmpty(graphEventId) ? true : false}
+              showTotalCount={
+                isEmpty(graphEventInfo?.id) || isEmpty(graphEventInfo?.index) ? true : false
+              }
               utilityBar={utilityBar}
-              graphEventId={graphEventId}
+              graphEventInfo={graphEventInfo}
             />
           )}
         </InspectButtonContainer>
@@ -271,7 +275,7 @@ const makeMapStateToProps = () => {
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
-      graphEventId,
+      graphEventInfo,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
@@ -296,7 +300,7 @@ const makeMapStateToProps = () => {
       showCheckboxes,
       // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
       // `getTimeline` actually returns `TimelineModel | undefined`
-      graphEventId,
+      graphEventInfo,
       globalQuery: getGlobalQueries(state),
       timelineQuery: getTimelineQuery(state, id),
     };
@@ -341,6 +345,7 @@ export const StatefulEventsViewer = connector(
       prevProps.start === nextProps.start &&
       prevProps.utilityBar === nextProps.utilityBar &&
       prevProps.additionalFilters === nextProps.additionalFilters &&
-      prevProps.graphEventId === nextProps.graphEventId
+      prevProps.graphEventInfo?.id === nextProps.graphEventInfo?.id &&
+      prevProps.graphEventInfo?.index === nextProps.graphEventInfo?.index
   )
 );

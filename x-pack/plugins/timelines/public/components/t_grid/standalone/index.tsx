@@ -33,7 +33,7 @@ import {
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { combineQueries, getCombinedFilterQuery } from '../helpers';
-import { tGridActions, tGridSelectors } from '../../../store/t_grid';
+import { GraphEventInfo, tGridActions, tGridSelectors } from '../../../store/t_grid';
 import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
@@ -110,7 +110,7 @@ export interface TGridStandaloneProps {
   setRefetch: (ref: () => void) => void;
   start: string;
   sort: SortColumnTimeline[];
-  graphEventId?: string;
+  graphEventInfo?: GraphEventInfo;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
   bulkActions?: BulkActionsProp;
@@ -141,7 +141,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   setRefetch,
   start,
   sort,
-  graphEventId,
+  graphEventInfo,
   leadingControlColumns,
   trailingControlColumns,
   data,
@@ -370,7 +370,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
               {!hasAlerts && !loading && <TGridEmpty />}
 
               {hasAlerts && (
-                <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">
+                <FullWidthFlexGroup direction="row" $visible={!graphEventInfo} gutterSize="none">
                   <ScrollableFlexItem grow={1}>
                     <StatefulBody
                       activePage={pageInfo.activePage}

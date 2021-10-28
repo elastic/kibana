@@ -175,9 +175,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
+  const graphEventInfo = useShallowEqualSelector(
     (state) =>
-      (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).graphEventId
+      (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).graphEventInfo
   );
   const updatedAt = useShallowEqualSelector(
     (state) =>
@@ -699,7 +699,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       {indicesExist ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventInfo })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 

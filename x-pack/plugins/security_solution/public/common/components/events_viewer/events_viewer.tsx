@@ -52,7 +52,7 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/component
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
-import { TimelineContext } from '../../../../../timelines/public';
+import { GraphEventInfo, TimelineContext } from '../../../../../timelines/public';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -138,7 +138,7 @@ interface Props {
   showTotalCount?: boolean;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   // If truthy, the graph viewer (Resolver) is showing
-  graphEventId: string | undefined;
+  graphEventInfo: GraphEventInfo | undefined;
 }
 
 const EventsViewerComponent: React.FC<Props> = ({
@@ -166,7 +166,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   sort,
   showTotalCount = true,
   utilityBar,
-  graphEventId,
+  graphEventInfo,
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
@@ -271,12 +271,12 @@ const EventsViewerComponent: React.FC<Props> = ({
       headerFilterGroup && (
         <HeaderFilterGroupWrapper
           data-test-subj="header-filter-group-wrapper"
-          show={!resolverIsShowing(graphEventId)}
+          show={!resolverIsShowing(graphEventInfo)}
         >
           {headerFilterGroup}
         </HeaderFilterGroupWrapper>
       ),
-    [graphEventId, headerFilterGroup]
+    [graphEventInfo, headerFilterGroup]
   );
 
   useEffect(() => {
@@ -296,7 +296,7 @@ const EventsViewerComponent: React.FC<Props> = ({
         <EventDetailsWidthProvider>
           <>
             <HeaderSection
-              id={!resolverIsShowing(graphEventId) ? id : undefined}
+              id={!resolverIsShowing(graphEventInfo) ? id : undefined}
               height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
               subtitle={utilityBar ? undefined : subtitle}
               title={globalFullScreen ? titleWithExitFullScreen : justTitle}
@@ -304,7 +304,7 @@ const EventsViewerComponent: React.FC<Props> = ({
             >
               {HeaderSectionContent}
             </HeaderSection>
-            {utilityBar && !resolverIsShowing(graphEventId) && (
+            {utilityBar && !resolverIsShowing(graphEventInfo) && (
               <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
             )}
             <TimelineContext.Provider value={timelineContext}>
@@ -320,8 +320,8 @@ const EventsViewerComponent: React.FC<Props> = ({
                   refetch={refetch}
                 />
 
-                {graphEventId && <GraphOverlay timelineId={id} />}
-                <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
+                {graphEventInfo && <GraphOverlay timelineId={id} />}
+                <FullWidthFlexGroup $visible={!graphEventInfo} gutterSize="none">
                   <ScrollableFlexItem grow={1}>
                     <StatefulBody
                       activePage={pageInfo.activePage}
@@ -391,5 +391,6 @@ export const EventsViewer = React.memo(
     prevProps.start === nextProps.start &&
     deepEqual(prevProps.sort, nextProps.sort) &&
     prevProps.utilityBar === nextProps.utilityBar &&
-    prevProps.graphEventId === nextProps.graphEventId
+    prevProps.graphEventInfo?.id === nextProps.graphEventInfo?.id &&
+    prevProps.graphEventInfo?.index === nextProps.graphEventInfo?.index
 );

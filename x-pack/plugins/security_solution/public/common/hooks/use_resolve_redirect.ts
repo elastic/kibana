@@ -28,7 +28,7 @@ export const useResolveRedirect = () => {
   const { spaces } = useKibana().services;
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { resolveTimelineConfig, savedObjectId, show, activeTab, graphEventId } =
+  const { resolveTimelineConfig, savedObjectId, show, activeTab, graphEventInfo } =
     useDeepEqualSelector((state) => getTimeline(state, TimelineId.active) ?? timelineDefaults);
 
   const redirect = useCallback(() => {
@@ -40,7 +40,7 @@ export const useResolveRedirect = () => {
       id: savedObjectId ?? '',
       isOpen: !!show,
       activeTab,
-      graphEventId,
+      graphEventInfo,
     };
     let timelineSearch: TimelineUrl = currentTimelineState;
     try {
@@ -72,7 +72,7 @@ export const useResolveRedirect = () => {
     updateHasRedirected(true);
   }, [
     activeTab,
-    graphEventId,
+    graphEventInfo,
     hasRedirected,
     pathname,
     resolveTimelineConfig?.outcome,

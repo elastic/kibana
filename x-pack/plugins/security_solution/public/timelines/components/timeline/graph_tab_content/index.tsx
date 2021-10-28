@@ -18,11 +18,11 @@ interface GraphTabContentProps {
 
 const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
-    (state) => getTimeline(state, timelineId)?.graphEventId
+  const graphEventInfo = useShallowEqualSelector(
+    (state) => getTimeline(state, timelineId)?.graphEventInfo
   );
 
-  if (!graphEventId) {
+  if (!graphEventInfo) {
     return null;
   }
 

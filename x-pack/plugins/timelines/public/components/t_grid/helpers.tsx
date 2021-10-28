@@ -24,6 +24,7 @@ import type { DataProvider, DataProvidersAnd } from '../../../common/types/timel
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
+import { GraphEventInfo } from '../../types';
 
 const isNumber = (value: string | number) => !isNaN(Number(value));
 
@@ -254,16 +255,16 @@ export const STATEFUL_EVENT_CSS_CLASS_NAME = 'event-column-view';
 
 export const DEFAULT_ICON_BUTTON_WIDTH = 24;
 
-export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
-  graphEventId != null && graphEventId !== '';
+export const resolverIsShowing = (graphEventInfo: GraphEventInfo | undefined): boolean =>
+  graphEventInfo != null && graphEventInfo.id !== '' && graphEventInfo.index !== '';
 
 export const showGlobalFilters = ({
   globalFullScreen,
-  graphEventId,
+  graphEventInfo,
 }: {
   globalFullScreen: boolean;
-  graphEventId: string | undefined;
-}): boolean => (globalFullScreen && resolverIsShowing(graphEventId) ? false : true);
+  graphEventInfo: GraphEventInfo | undefined;
+}): boolean => (globalFullScreen && resolverIsShowing(graphEventInfo) ? false : true);
 
 /**
  * The `aria-colindex` of the Timeline actions column

@@ -111,7 +111,7 @@ export const useSetInitialStateFromUrl = () => {
             queryTimelineById({
               activeTimelineTab: timeline.activeTab,
               duplicate: false,
-              graphEventId: timeline.graphEventId,
+              graphEventInfo: timeline.graphEventInfo,
               timelineId: timeline.id,
               openTimeline: timeline.isOpen,
               updateIsLoading: updateTimelineIsLoading,

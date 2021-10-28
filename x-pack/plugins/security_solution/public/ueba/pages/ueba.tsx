@@ -61,9 +61,9 @@ const StyledFullHeightContainer = styled.div`
 const UebaComponent = () => {
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
+  const graphEventInfo = useShallowEqualSelector(
     (state) =>
-      (getTimeline(state, TimelineId.uebaPageExternalAlerts) ?? timelineDefaults).graphEventId
+      (getTimeline(state, TimelineId.uebaPageExternalAlerts) ?? timelineDefaults).graphEventInfo
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -131,7 +131,7 @@ const UebaComponent = () => {
       {indicesExist ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventInfo })}>
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 

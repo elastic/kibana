@@ -68,13 +68,13 @@ const HostsComponent = () => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
+  const graphEventInfo = useShallowEqualSelector(
     (state) =>
       (
         getTimeline(state, TimelineId.hostsPageEvents) ??
         getTimeline(state, TimelineId.hostsPageExternalAlerts) ??
         timelineDefaults
-      ).graphEventId
+      ).graphEventInfo
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -164,7 +164,7 @@ const HostsComponent = () => {
       {indicesExist ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventInfo })}>
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
