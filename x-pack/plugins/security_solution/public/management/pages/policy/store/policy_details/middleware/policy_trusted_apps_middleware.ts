@@ -31,6 +31,7 @@ import {
   getDoesAnyTrustedAppExistsIsLoading,
 } from '../selectors';
 import {
+  GetTrustedAppsListResponse,
   Immutable,
   MaybeImmutable,
   PutTrustedAppUpdateResponse,
@@ -39,6 +40,7 @@ import {
 import { ImmutableMiddlewareAPI } from '../../../../../../common/store';
 import { TrustedAppsService } from '../../../../trusted_apps/service';
 import {
+  asStaleResourceState,
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
@@ -113,9 +115,9 @@ const checkIfThereAreAssignableTrustedApps = async (
 
   store.dispatch({
     type: 'policyArtifactsAssignableListExistDataChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+    payload: {
+      type: 'LoadingResourceState',
+    },
   });
   try {
     const trustedApps = await trustedAppsService.getTrustedAppsList({
@@ -131,9 +133,7 @@ const checkIfThereAreAssignableTrustedApps = async (
   } catch (err) {
     store.dispatch({
       type: 'policyArtifactsAssignableListExistDataChanged',
-      // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-      // @ts-ignore
-      payload: createFailedResourceState(err.body ?? err),
+      payload: createFailedResourceState<boolean>(err.body ?? err),
     });
   }
 };
@@ -148,9 +148,9 @@ const checkIfAnyTrustedApp = async (
   }
   store.dispatch({
     type: 'policyArtifactsDeosAnyTrustedAppExists',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+    payload: {
+      type: 'LoadingResourceState',
+    },
   });
   try {
     const trustedApps = await trustedAppsService.getTrustedAppsList({
@@ -180,9 +180,9 @@ const searchTrustedApps = async (
 
   store.dispatch({
     type: 'policyArtifactsAssignableListPageDataChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+    payload: {
+      type: 'LoadingResourceState',
+    },
   });
 
   try {
@@ -212,9 +212,7 @@ const searchTrustedApps = async (
   } catch (err) {
     store.dispatch({
       type: 'policyArtifactsAssignableListPageDataChanged',
-      // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-      // @ts-ignore
-      payload: createFailedResourceState(err.body ?? err),
+      payload: createFailedResourceState<GetTrustedAppsListResponse>(err.body ?? err),
     });
   }
 };
@@ -229,9 +227,9 @@ const updateTrustedApps = async (
 
   store.dispatch({
     type: 'policyArtifactsUpdateTrustedAppsChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-expect-error
-    payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+    payload: {
+      type: 'LoadingResourceState',
+    },
   });
 
   try {
@@ -268,8 +266,9 @@ const fetchPolicyTrustedAppsIfNeeded = async (
   if (forceFetch || doesPolicyTrustedAppsListNeedUpdate(state)) {
     dispatch({
       type: 'assignedTrustedAppsListStateChanged',
-      // @ts-ignore will be fixed when AsyncResourceState is refactored (#830)
-      payload: createLoadingResourceState(getCurrentPolicyAssignedTrustedAppsState(state)),
+      payload: createLoadingResourceState<PolicyAssignedTrustedApps>(
+        asStaleResourceState(getCurrentPolicyAssignedTrustedAppsState(state))
+      ),
     });
 
     try {
@@ -320,8 +319,9 @@ const fetchAllPoliciesIfNeeded = async (
 
   dispatch({
     type: 'policyDetailsListOfAllPoliciesStateChanged',
-    // @ts-ignore will be fixed when AsyncResourceState is refactored (#830)
-    payload: createLoadingResourceState(currentPoliciesState),
+    payload: createLoadingResourceState<GetPolicyListResponse>(
+      asStaleResourceState(currentPoliciesState)
+    ),
   });
 
   try {
@@ -357,8 +357,9 @@ const removeTrustedAppsFromPolicy = async (
 
   dispatch({
     type: 'policyDetailsTrustedAppsRemoveListStateChanged',
-    // @ts-expect-error will be fixed when AsyncResourceState is refactored (#830)
-    payload: createLoadingResourceState(getCurrentTrustedAppsRemoveListState(state)),
+    payload: createLoadingResourceState<PolicyRemoveTrustedApps>(
+      asStaleResourceState(getCurrentTrustedAppsRemoveListState(state))
+    ),
   });
 
   try {
