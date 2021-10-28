@@ -155,7 +155,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     ],
   }),
   listeners: ({ actions, values }) => ({
-    initializeSources: async () => {
+    initializeSources: async (_, breakpoint) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? '/internal/workplace_search/org/sources'
@@ -163,10 +163,15 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
 
       try {
         const response = await HttpLogic.values.http.get(route);
+        breakpoint(); // Prevents errors if logic unmounts while fetching
         actions.pollForSourceStatusChanges();
         actions.onInitializeSources(response);
       } catch (e) {
-        flashAPIErrors(e);
+        if (isBreakpoint(e)) {
+          return; // do not continue if logic is unmounted
+        } else {
+          flashAPIErrors(e);
+        }
       }
 
       if (isOrganization && !values.serverStatuses) {

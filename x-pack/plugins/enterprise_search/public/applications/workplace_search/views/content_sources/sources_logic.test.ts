@@ -193,6 +193,30 @@ describe('SourcesLogic', () => {
 
         expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
+
+      it('handles early logic unmount gracefully in org context', async () => {
+        AppLogic.values.isOrganization = true;
+        const promise = Promise.resolve(contentSource);
+        http.get.mockReturnValue(promise);
+
+        SourcesLogic.actions.initializeSources();
+        unmount();
+        await promise;
+
+        expect(flashAPIErrors).not.toHaveBeenCalled();
+      });
+
+      it('handles early logic unmount gracefully in account context', async () => {
+        AppLogic.values.isOrganization = false;
+        const promise = Promise.resolve(contentSource);
+        http.get.mockReturnValue(promise);
+
+        SourcesLogic.actions.initializeSources();
+        unmount();
+        await promise;
+
+        expect(flashAPIErrors).not.toHaveBeenCalled();
+      });
     });
 
     describe('setSourceSearchability', () => {
