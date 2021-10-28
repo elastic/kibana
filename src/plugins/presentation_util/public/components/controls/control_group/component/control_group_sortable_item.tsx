@@ -122,7 +122,7 @@ export const ControlClone = ({ draggingId }: { draggingId: string }) => {
         </EuiFlexItem>
         {controlStyle === 'oneLine' ? (
           <EuiFlexItem>
-            <label>{title}</label>
+            <label className="controlFrameCloneWrapper__label">{title}</label>
           </EuiFlexItem>
         ) : undefined}
       </EuiFlexGroup>
