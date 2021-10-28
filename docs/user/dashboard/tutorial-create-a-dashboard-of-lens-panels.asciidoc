@@ -34,6 +34,8 @@ Create the dashboard where you'll display the visualization panels.
 [[open-and-set-up-lens]]
 === Open the visualization editor and get familiar with the data
 
+Open the visualization editor, then make sure the correct fields appear.
+
 . On the dashboard, click *Create visualization*.
 
 . Make sure the *kibana_sample_data_logs* index appears.
