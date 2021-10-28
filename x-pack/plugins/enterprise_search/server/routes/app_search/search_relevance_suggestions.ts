@@ -83,7 +83,7 @@ export function registerSearchRelevanceSuggestionsRoutes({
 
   router.get(
     {
-      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/{query}',
+      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/queries/{query}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -95,7 +95,7 @@ export function registerSearchRelevanceSuggestionsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/as/engines/:engineName/search_relevance_suggestions/:query',
+      path: '/as/engines/:engineName/search_relevance_suggestions/queries/:query',
     })
   );
 }
