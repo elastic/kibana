@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useUptimeStartPlugins } from '../../../contexts/uptime_startup_plugins_context';
 import { JourneyStep } from '../../../../common/runtime_types';
-import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { AllSeries, createExploratoryViewUrl } from '../../../../../observability/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const getLast48Intervals = (activeStep: JourneyStep) => {
   const { lt, gte } = activeStep.monitor.timespan!;
@@ -47,9 +47,9 @@ export function StepFieldTrend({
 }) {
   const { observability } = useUptimeStartPlugins();
 
-  const EmbeddableExpVIew = observability!.ExploratoryViewEmbeddable;
+  const EmbeddableExpView = observability!.ExploratoryViewEmbeddable;
 
-  const { basePath } = useUptimeSettingsContext();
+  const basePath = useKibana().services.http?.basePath?.get();
 
   const allSeries: AllSeries = [
     {
@@ -76,7 +76,7 @@ export function StepFieldTrend({
 
   return (
     <Wrapper>
-      <EmbeddableExpVIew
+      <EmbeddableExpView
         title={title}
         appendTitle={
           <EuiButton iconType={'visArea'} href={href} target="_blank" size="s">
