@@ -166,11 +166,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const saveButton = await uptimePage.syntheticsIntegration.findSaveButton();
         await saveButton.click();
 
-        await testSubjects.missingOrFail('packagePolicyCreateSuccessToast');
+        await testSubjects.missingOrFail('postInstallAddAgentModal');
       });
     });
 
-    describe('create new policy', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/109329
+    describe.skip('create new policy', () => {
       let version: string;
 
       beforeEach(async () => {

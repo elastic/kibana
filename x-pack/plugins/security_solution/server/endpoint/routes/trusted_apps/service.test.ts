@@ -85,9 +85,10 @@ const TRUSTED_APP: TrustedApp = {
   ],
 };
 
-describe('service', () => {
+describe('TrustedApps service', () => {
   beforeEach(() => {
     exceptionsListClient.deleteExceptionListItem.mockReset();
+    exceptionsListClient.getExceptionListItem.mockReset();
     exceptionsListClient.createExceptionListItem.mockReset();
     exceptionsListClient.findExceptionListItem.mockReset();
     exceptionsListClient.createTrustedAppsList.mockReset();
@@ -96,6 +97,7 @@ describe('service', () => {
 
   describe('deleteTrustedApp', () => {
     it('should delete existing trusted app', async () => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
       exceptionsListClient.deleteExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
 
       expect(await deleteTrustedApp(exceptionsListClient, { id: '123' })).toBeUndefined();
@@ -107,6 +109,7 @@ describe('service', () => {
     });
 
     it('should throw for non existing trusted app', async () => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
       exceptionsListClient.deleteExceptionListItem.mockResolvedValue(null);
 
       await expect(deleteTrustedApp(exceptionsListClient, { id: '123' })).rejects.toBeInstanceOf(
@@ -393,7 +396,7 @@ describe('service', () => {
     });
 
     it('should throw a Not Found error if trusted app is not found prior to making update', async () => {
-      exceptionsListClient.getExceptionListItem.mockResolvedValueOnce(null);
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
       await expect(
         updateTrustedApp(
           exceptionsListClient,
@@ -488,6 +491,23 @@ describe('service', () => {
       await expect(getTrustedApp(exceptionsListClient, '123')).rejects.toBeInstanceOf(
         TrustedAppNotFoundError
       );
+    });
+
+    it('should try to find trusted app by `itemId` and then by `id`', async () => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
+      await getTrustedApp(exceptionsListClient, '123').catch(() => Promise.resolve());
+
+      expect(exceptionsListClient.getExceptionListItem).toHaveBeenCalledTimes(2);
+      expect(exceptionsListClient.getExceptionListItem).toHaveBeenNthCalledWith(1, {
+        itemId: '123',
+        id: undefined,
+        namespaceType: 'agnostic',
+      });
+      expect(exceptionsListClient.getExceptionListItem).toHaveBeenNthCalledWith(2, {
+        itemId: undefined,
+        id: '123',
+        namespaceType: 'agnostic',
+      });
     });
   });
 });

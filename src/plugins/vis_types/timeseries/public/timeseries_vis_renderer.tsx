@@ -10,7 +10,6 @@ import React, { lazy } from 'react';
 import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient } from 'kibana/public';
 
@@ -48,10 +47,6 @@ export const getTimeseriesVisRenderer: (deps: {
   name: 'timeseries_vis',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
-    // Build optimization. Move app styles from main bundle
-    // @ts-expect-error TS error, cannot find type declaration for scss
-    await import('./application/index.scss');
-
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
@@ -60,34 +55,50 @@ export const getTimeseriesVisRenderer: (deps: {
     const { indexPatterns } = getDataStart();
 
     const showNoResult = !checkIfDataExists(visData, model);
-    const [palettesService, { indexPattern }] = await Promise.all([
+
+    let servicesLoaded;
+
+    Promise.all([
       palettes.getPalettes(),
       fetchIndexPattern(model.index_pattern, indexPatterns),
-    ]);
+    ]).then(([palettesService, { indexPattern }]) => {
+      servicesLoaded = true;
+
+      unmountComponentAtNode(domNode);
     const isModelInvalid = 'isModelInvalid' in visData && visData.isModelInvalid;
 
-    render(
-      <I18nProvider>
-        <VisualizationContainer
-          data-test-subj="timeseriesVis"
-          handlers={handlers}
-          showNoResult={showNoResult}
-          error={isModelInvalid ? invalidModelMessage : get(visData, [model.id, 'error'])}
-        >
-          <TimeseriesVisualization
-            // it is mandatory to bind uiSettings because of "this" usage inside "get" method
-            getConfig={uiSettings.get.bind(uiSettings)}
+      render(
+        <I18nProvider>
+          <VisualizationContainer
+            data-test-subj="timeseriesVis"
             handlers={handlers}
-            indexPattern={indexPattern}
-            model={model}
-            visData={visData as TimeseriesVisData}
-            syncColors={syncColors}
-            uiState={handlers.uiState! as PersistedState}
-            palettesService={palettesService}
-          />
-        </VisualizationContainer>
-      </I18nProvider>,
-      domNode
-    );
+            showNoResult={showNoResult}
+            error={isModelInvalid ? invalidModelMessage : get(visData, [model.id, 'error'])}
+          >
+            <TimeseriesVisualization
+              // it is mandatory to bind uiSettings because of "this" usage inside "get" method
+              getConfig={uiSettings.get.bind(uiSettings)}
+              handlers={handlers}
+              indexPattern={indexPattern}
+              model={model}
+              visData={visData as TimeseriesVisData}
+              syncColors={syncColors}
+              uiState={handlers.uiState! as PersistedState}
+              palettesService={palettesService}
+            />
+          </VisualizationContainer>
+        </I18nProvider>,
+        domNode
+      );
+    });
+
+    if (!servicesLoaded) {
+      render(
+        <div className="visChart__spinner">
+          <EuiLoadingChart mono size="l" />
+        </div>,
+        domNode
+      );
+    }
   },
 });

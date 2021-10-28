@@ -216,9 +216,9 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
                 </EuiTitle>
 
                 <FormattedMessage
-                  id="xpack.ml.newJob.page.createJob.indexPatternTitle"
-                  defaultMessage="Using index pattern {index}"
-                  values={{ index: jobCreator.indexPatternTitle }}
+                  id="xpack.ml.newJob.page.createJob.dataViewName"
+                  defaultMessage="Using data view {dataViewName}"
+                  values={{ dataViewName: jobCreator.indexPatternTitle }}
                 />
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>

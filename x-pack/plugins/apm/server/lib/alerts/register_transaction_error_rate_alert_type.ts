@@ -46,7 +46,7 @@ import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
-import { getDocumentTypeFilterForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getDocumentTypeFilterForTransactions } from '../helpers/transactions';
 import { asPercent } from '../../../../observability/common/utils/formatters';
 
 const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
@@ -110,12 +110,12 @@ export function registerTransactionErrorRateAlertType({
         // to prevent (likely) unnecessary blocking request
         // in rule execution
         const searchAggregatedTransactions =
-          config['xpack.apm.searchAggregatedTransactions'] !==
+          config.searchAggregatedTransactions !==
           SearchAggregatedTransactionSetting.never;
 
         const index = searchAggregatedTransactions
-          ? indices['apm_oss.metricsIndices']
-          : indices['apm_oss.transactionIndices'];
+          ? indices.metric
+          : indices.transaction;
 
         const searchParams = {
           index,
@@ -131,7 +131,7 @@ export function registerTransactionErrorRateAlertType({
                       },
                     },
                   },
-                  ...getDocumentTypeFilterForAggregatedTransactions(
+                  ...getDocumentTypeFilterForTransactions(
                     searchAggregatedTransactions
                   ),
                   {

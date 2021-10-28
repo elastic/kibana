@@ -9,7 +9,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiTextAlign } from '@elastic/eui';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getOverlays } from '../../services';
 import { toMountPoint } from '../../../../kibana_react/public';

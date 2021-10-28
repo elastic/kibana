@@ -193,7 +193,7 @@ const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = (
   </EuiText>
 );
 
-export function decodeEnrollmentToken(enrollmentToken: string) {
+export function decodeEnrollmentToken(enrollmentToken: string): EnrollmentToken | undefined {
   try {
     const json = JSON.parse(atob(enrollmentToken)) as EnrollmentToken;
     if (
@@ -205,10 +205,24 @@ export function decodeEnrollmentToken(enrollmentToken: string) {
     ) {
       return;
     }
+    json.adr.sort(compareAddresses);
     return {
       ...json,
       adr: json.adr.map((host) => `https://${host}`),
       key: btoa(json.key),
     };
   } catch (error) {} // eslint-disable-line no-empty
+}
+
+/**
+ * Compares two Elasticsearch addresses. Sorts IPv4 addresses before IPv6 addresses.
+ */
+export function compareAddresses(a: string, b: string) {
+  if (a.indexOf('[') === -1 && b.indexOf('[') !== -1) {
+    return -1;
+  }
+  if (a.indexOf('[') !== -1 && b.indexOf('[') === -1) {
+    return 1;
+  }
+  return 0;
 }
