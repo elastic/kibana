@@ -29,7 +29,7 @@ const strings = {
 export const GlobalConfig: FunctionComponent = () => {
   const tabs = [
     {
-      id: 'gereral',
+      id: 'general',
       name: strings.getGeneralLabel(),
       content: (
         <div className="canvasSidebar__pop">
