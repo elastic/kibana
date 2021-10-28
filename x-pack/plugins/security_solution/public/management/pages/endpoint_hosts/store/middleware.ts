@@ -57,7 +57,7 @@ import {
   sendGetAgentPolicyList,
   sendGetFleetAgentsWithEndpoint,
 } from '../../policy/store/services/ingest';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, PackageListItem } from '../../../../../../fleet/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import {
   ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_ROUTE,
@@ -68,6 +68,7 @@ import {
 } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 import {
+  asStaleResourceState,
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
@@ -283,9 +284,12 @@ const handleIsolateEndpointHost = async (
 
   dispatch({
     type: 'endpointIsolationRequestStateChange',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState(getCurrentIsolationRequestState(state)),
+    payload: {
+      type: 'LoadingResourceState',
+      previousState: asStaleResourceState<HostIsolationResponse>(
+        getCurrentIsolationRequestState(state)
+      ),
+    },
   });
 
   try {
@@ -319,9 +323,10 @@ async function getEndpointPackageInfo(
 
   dispatch({
     type: 'endpointPackageInfoStateChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState<PackageListItem>(endpointPackageInfo(state)),
+    payload: {
+      type: 'LoadingResourceState',
+      previousState: asStaleResourceState(endpointPackageInfo(state)),
+    },
   });
 
   try {
