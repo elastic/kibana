@@ -50,8 +50,8 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has logged in successfully.
 | `failure` | Failed login attempt (e.g. due to invalid credentials).
 
-.2+| `access_agreement_acknowledged`
-| | User has acknowledged the access agreement.
+| `access_agreement_acknowledged`
+| N/A | User has acknowledged the access agreement.
 
 3+a|
 ===== Category: database
