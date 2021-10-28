@@ -89,7 +89,7 @@ describe('suggestion_panel', () => {
         vis2: createMockVisualization(),
       },
       ExpressionRenderer: expressionRendererMock,
-      frame: createMockFramePublicAPI(),
+      frame: { ...createMockFramePublicAPI(), activeData: {} },
     };
   });
 
@@ -112,6 +112,8 @@ describe('suggestion_panel', () => {
     const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
       preloadedState,
     });
+
+    instance.update();
 
     expect(
       instance
@@ -172,6 +174,9 @@ describe('suggestion_panel', () => {
       const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
         preloadedState,
       });
+
+      instance.update();
+
       act(() => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
@@ -187,6 +192,8 @@ describe('suggestion_panel', () => {
       const { instance, lensStore } = await mountWithProvider(
         <SuggestionPanel {...defaultProps} />
       );
+
+      instance.update();
 
       act(() => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
@@ -210,6 +217,8 @@ describe('suggestion_panel', () => {
     const { instance, lensStore } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
       preloadedState,
     });
+
+    instance.update();
 
     act(() => {
       instance.find('button[data-test-subj="lnsSuggestion"]').at(1).simulate('click');
@@ -264,6 +273,8 @@ describe('suggestion_panel', () => {
       preloadedState,
     });
 
+    instance.update();
+
     expect(instance.find(EuiIcon)).toHaveLength(1);
     expect(instance.find(EuiIcon).prop('type')).toEqual(LensIconChartDatatable);
   });
@@ -289,10 +300,13 @@ describe('suggestion_panel', () => {
     const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
       preloadedState: newPreloadedState,
     });
+
+    instance.update();
+
     expect(instance.html()).toEqual(null);
   });
 
-  it('should render preview expression if there is one', () => {
+  it('should render preview expression if there is one', async () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
     (getSuggestions as jest.Mock).mockReturnValue([
       {
@@ -317,7 +331,14 @@ describe('suggestion_panel', () => {
     (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    mountWithProvider(<SuggestionPanel {...defaultProps} frame={createMockFramePublicAPI()} />);
+    const { instance } = await mountWithProvider(
+      <SuggestionPanel
+        {...defaultProps}
+        frame={{ ...createMockFramePublicAPI(), activeData: {} }}
+      />
+    );
+
+    instance.update();
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
     const passedExpression = (expressionRendererMock as jest.Mock).mock.calls[0][0].expression;
