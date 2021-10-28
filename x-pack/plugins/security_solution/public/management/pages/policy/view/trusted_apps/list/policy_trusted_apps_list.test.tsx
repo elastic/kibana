@@ -15,7 +15,6 @@ import React from 'react';
 import { policyDetailsPageAllApiHttpMocks } from '../../../test_utils';
 import {
   createLoadingResourceState,
-  createUninitialisedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
 } from '../../../../../state';
