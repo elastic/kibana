@@ -331,6 +331,10 @@ export const legacyMigrate = async ({
     }),
     savedObjectsClient.find({
       type: legacyRuleActionsSavedObjectType,
+      hasReference: {
+        type: 'alert',
+        id: rule.id,
+      },
     }),
   ]);
 
@@ -341,19 +345,16 @@ export const legacyMigrate = async ({
 
   if (siemNotification != null && siemNotification.data.length > 0) {
     console.error('BEFORE DELETE');
-    try {
-      await Promise.all([
-        rulesClient.delete({ id: siemNotification.data[0].id }),
-        legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0
-          ? savedObjectsClient.delete(
-              legacyRuleActionsSavedObjectType,
-              legacyRuleActionsSO.saved_objects[0].id
-            )
-          : null,
-      ]);
-    } catch (exc) {
-      console.error('there was an exception', exc);
-    }
+    await Promise.all([
+      rulesClient.delete({ id: siemNotification.data[0].id }),
+      legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0
+        ? savedObjectsClient.delete(
+            legacyRuleActionsSavedObjectType,
+            legacyRuleActionsSO.saved_objects[0].id
+          )
+        : null,
+    ]);
+
     console.error('AFTER DELETE');
     const { id, ...restOfRule } = rule;
     const migratedRule = {

@@ -445,7 +445,9 @@ export const deleteAllAlerts = async (
   );
 };
 
-export const deleteAllLegacyActions = async (soClient: unknown): Promise<void> => {};
+// export const deleteAllLegacyActions = async (soClient: unknown): Promise<void> => {
+//   soClient.
+// };
 
 export const downgradeImmutableRule = async (es: Client, ruleId: string): Promise<void> => {
   return countDownES(async () => {

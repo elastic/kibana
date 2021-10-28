@@ -128,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare2).to.eql(outputRule2);
       });
 
-      it.only('should bulk disable two rules and migrate their actions', async () => {
+      it('should bulk disable two rules and migrate their actions', async () => {
         const [connector, rule1, rule2] = await Promise.all([
           supertest
             .post(`/api/actions/connector`)

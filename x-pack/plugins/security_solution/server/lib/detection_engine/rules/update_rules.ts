@@ -7,9 +7,12 @@
 
 /* eslint-disable complexity */
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { isEqual } from 'lodash';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../alerting/server';
+import { AlertAction } from '../../../../../alerting/common';
+
 import { readRules } from './read_rules';
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
@@ -32,18 +35,78 @@ export const updateRules = async ({
   rulesClient,
   ruleStatusClient,
   defaultOutputIndex,
+  existingRule,
+  migratedRule,
   ruleUpdate,
   savedObjectsClient,
 }: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
-  const existingRule = await readRules({
-    isRuleRegistryEnabled,
-    rulesClient,
-    ruleId: ruleUpdate.rule_id,
-    id: ruleUpdate.id,
-  });
+  // const existingRule = await readRules({
+  //   isRuleRegistryEnabled,
+  //   rulesClient,
+  //   ruleId: ruleUpdate.rule_id,
+  //   id: ruleUpdate.id,
+  // });
   if (existingRule == null) {
     return null;
   }
+
+  const updateNotifyWhen = (
+    transform: typeof transformToAlertThrottle | typeof transformToNotifyWhen,
+    migratedRuleThrottle: string | null | undefined,
+    existingRuleThrottle: string | null | undefined,
+    ruleUpdateThrottle: string | null | undefined
+  ) => {
+    console.error(`migratedRuleThrottle ${migratedRuleThrottle}`);
+    console.error(`existingRuleThrottle ${existingRuleThrottle}`);
+    console.error(`ruleUpdateThrottle ${ruleUpdateThrottle}`);
+    if (
+      existingRuleThrottle == null &&
+      ruleUpdateThrottle == null &&
+      migratedRuleThrottle != null
+    ) {
+      return migratedRuleThrottle;
+    }
+    return transform(ruleUpdate.throttle);
+  };
+
+  const updateThrottle = (
+    transform: typeof transformToAlertThrottle | typeof transformToNotifyWhen,
+    migratedRuleThrottle: string | null | undefined,
+    existingRuleThrottle: string | null | undefined,
+    ruleUpdateThrottle: string | null | undefined
+  ) => {
+    if (
+      existingRuleThrottle == null &&
+      ruleUpdateThrottle == null &&
+      migratedRuleThrottle != null
+    ) {
+      return migratedRuleThrottle;
+    }
+    return transform(ruleUpdate.throttle);
+  };
+
+  const updateActions = (
+    transform: typeof transformRuleToAlertAction,
+    migratedRuleActions: AlertAction[] | null | undefined,
+    existingRuleActions: AlertAction[] | null | undefined,
+    ruleUpdateActions: AlertAction[] | null | undefined
+  ) => {
+    // console.error('migratedRuleActions', JSON.stringify(migratedRuleActions, null, 2));
+    // console.error('existingRuleActions', JSON.stringify(existingRuleActions, null, 2));
+    // console.error('ruleUpdateActions', JSON.stringify(ruleUpdateActions, null, 2));
+    // if the existing rule actions and the rule update actions are equivalent (aka no change)
+    // but the migrated actions and the ruleUpdateActions (or existing rule actions, associatively)
+    // are not equivalent, we know that the rules' actions were migrated and we need to apply
+    // that change to the update request so it is not overwritten by the rule update payload
+    if (
+      existingRuleActions?.length === 0 &&
+      ruleUpdateActions == null &&
+      !isEqual(existingRuleActions, migratedRuleActions)
+    ) {
+      return migratedRuleActions;
+    }
+    return ruleUpdateActions != null ? ruleUpdateActions.map(transform) : [];
+  };
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
@@ -86,9 +149,24 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
-    throttle: transformToAlertThrottle(ruleUpdate.throttle),
-    notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
+    actions: updateActions(
+      transformRuleToAlertAction,
+      migratedRule?.actions,
+      existingRule.actions,
+      ruleUpdate?.actions
+    ),
+    throttle: updateThrottle(
+      transformToAlertThrottle,
+      migratedRule?.throttle,
+      existingRule.throttle,
+      ruleUpdate?.throttle
+    ),
+    notifyWhen: updateNotifyWhen(
+      transformToNotifyWhen,
+      migratedRule?.notifyWhen,
+      existingRule.notifyWhen,
+      ruleUpdate?.throttle
+    ),
   };
 
   const [validated, errors] = validate(newInternalRule, internalRuleUpdate);

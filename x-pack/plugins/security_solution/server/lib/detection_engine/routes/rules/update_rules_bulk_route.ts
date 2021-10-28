@@ -78,7 +78,7 @@ export const updateRulesBulkRoute = (
               id: payloadRule.id,
             });
 
-            await legacyMigrate({
+            const migratedRule = await legacyMigrate({
               rulesClient,
               savedObjectsClient,
               rule: existingRule,
@@ -90,6 +90,8 @@ export const updateRulesBulkRoute = (
               ruleStatusClient,
               savedObjectsClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
+              existingRule,
+              migratedRule,
               ruleUpdate: payloadRule,
               isRuleRegistryEnabled,
             });
