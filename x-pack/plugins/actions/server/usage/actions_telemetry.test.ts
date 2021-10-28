@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
-import { getInUseTotalCount, getTotalCount } from './actions_telemetry';
+import { getExecutionsTotalCount, getInUseTotalCount, getTotalCount } from './actions_telemetry';
 
 describe('actions telemetry', () => {
   test('getTotalCount should replace first symbol . to __ for action types names', async () => {
@@ -629,6 +629,38 @@ Object {
             },
           },
           avgDuration: { value: 10 },
+          avgDurationByType: {
+            doc_count: 216,
+            actionSavedObjects: {
+              doc_count: 108,
+              byTypeId: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [
+                  {
+                    key: '.server-log',
+                    doc_count: 99,
+                    refs: {
+                      doc_count: 99,
+                      avgDuration: {
+                        value: 919191.9191919192,
+                      },
+                    },
+                  },
+                  {
+                    key: '.email',
+                    doc_count: 9,
+                    refs: {
+                      doc_count: 9,
+                      avgDuration: {
+                        value: 4.196666666666667e8,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
         },
       })
     );
@@ -652,7 +684,7 @@ Object {
         },
       })
     );
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
+    const telemetry = await getExecutionsTotalCount(mockEsClient, 'test');
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`

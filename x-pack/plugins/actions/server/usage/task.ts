@@ -53,7 +53,7 @@ function registerActionsTelemetryTask(
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
-      timeout: '5m',
+      timeout: '5s',
       createTaskRunner: telemetryTaskRunner(
         logger,
         core,
@@ -138,5 +138,5 @@ export function telemetryTaskRunner(
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
+  return moment().add(1, 'm').startOf('m').toDate();
 }
