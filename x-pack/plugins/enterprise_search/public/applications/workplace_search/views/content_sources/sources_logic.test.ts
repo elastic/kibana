@@ -276,7 +276,25 @@ describe('SourcesLogic', () => {
     });
 
     describe('pollForSourceStatusChanges', () => {
-      it('calls API and sets values', async () => {
+      it('calls API and sets values if there are no server statuses yet in the logic', async () => {
+        AppLogic.values.isOrganization = true;
+
+        const setServerSourceStatusesSpy = jest.spyOn(
+          SourcesLogic.actions,
+          'setServerSourceStatuses'
+        );
+        const promise = Promise.resolve(contentSources);
+        http.get.mockReturnValue(promise);
+        SourcesLogic.actions.pollForSourceStatusChanges();
+
+        jest.advanceTimersByTime(POLLING_INTERVAL);
+
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/sources/status');
+        await promise;
+        expect(setServerSourceStatusesSpy).toHaveBeenCalledWith(contentSources);
+      });
+
+      it('calls API and sets values if server statuses are already in the logic', async () => {
         AppLogic.values.isOrganization = true;
         SourcesLogic.actions.setServerSourceStatuses(serverStatuses);
 
