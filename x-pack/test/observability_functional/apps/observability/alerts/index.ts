@@ -188,13 +188,15 @@ export default ({ getService }: FtrProviderContext) => {
             const alertStatusCell = cells[2];
             await alertStatusCell.moveMouseTo();
             await retry.waitFor('cell actions visible', async () => {
+              let buttonsExist = false;
               try {
-                await observability.alerts.common.filterForValueButtonExists();
-                await observability.alerts.common.filterOutValueButtonExists();
+                buttonsExist = await observability.alerts.common.filterForValueButtonExists();
+                buttonsExist =
+                  buttonsExist && (await observability.alerts.common.filterOutValueButtonExists());
               } catch (_e) {
                 return false;
               }
-              return true;
+              return buttonsExist;
             });
           });
         });

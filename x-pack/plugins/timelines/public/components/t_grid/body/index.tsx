@@ -151,6 +151,7 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
   '@timestamp',
   'signal.rule.risk_score',
   'signal.reason',
+  'kibana.alert.duration.us',
   'kibana.alert.reason',
 ];
 const hasCellActions = (columnId?: string) =>
