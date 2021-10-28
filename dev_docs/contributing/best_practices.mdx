@@ -29,7 +29,7 @@ Refer to [divio documentation](https://documentation.divio.com/) for guidance on
 
 #### Location
 
-If the information spans multiple plugins, consider adding it to the [dev_docs](https://github.com/elastic/kibana/tree/master/dev_docs) folder. If it is plugin specific, consider adding it inside the plugin folder. Write it in an mdx file if you would like it to show up in our new (beta) documentation system.
+If the information spans multiple plugins, consider adding it to the [dev_docs](https://github.com/elastic/kibana/tree/main/dev_docs) folder. If it is plugin specific, consider adding it inside the plugin folder. Write it in an mdx file if you would like it to show up in our new (beta) documentation system.
 
 <DocCallOut title="internal only">
 
@@ -139,7 +139,7 @@ export type foo: string | AnInterface;
 
 ### Example plugins
 
-Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/master/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or <DocLink id="kibBuildingBlocks" text="building block"/> to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
+Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or <DocLink id="kibBuildingBlocks" text="building block"/> to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
 
 ## Performance
 
@@ -153,7 +153,7 @@ Build with scalability in mind.
 ## Accessibility
 
 Did you know Kibana makes a public statement about our commitment to creating an accessible product for people
-with disabilities? [We do](https://www.elastic.co/guide/en/kibana/master/accessibility.html)! It's very important
+with disabilities? [We do](https://www.elastic.co/guide/en/kibana/main/accessibility.html)! It's very important
 all of our apps are accessible.
 
 - Learn how [EUI tackles accessibility](https://elastic.github.io/eui/#/guidelines/accessibility)
@@ -165,7 +165,7 @@ all of our apps are accessible.
 
 ## Localization
 
-Kibana is translated into other languages. Use our i18n utilities to ensure your public facing strings will be translated to ensure all Kibana apps are localized. Read and adhere to our [i18n guidelines](https://github.com/elastic/kibana/blob/master/packages/kbn-i18n/GUIDELINE.md)
+Kibana is translated into other languages. Use our i18n utilities to ensure your public facing strings will be translated to ensure all Kibana apps are localized. Read and adhere to our [i18n guidelines](https://github.com/elastic/kibana/blob/main/packages/kbn-i18n/GUIDELINE.md)
 
 <DocCallOut title="Internal only">
   Elasticians, check out the #kibana-localization channel to ask questions and receive guidance.
@@ -173,7 +173,7 @@ Kibana is translated into other languages. Use our i18n utilities to ensure your
 
 ## Styleguide
 
-We use es-lint rules when possible, but please review our [styleguide](https://github.com/elastic/kibana/blob/master/STYLEGUIDE.mdx), which includes recommendations that can't be linted on.
+We use es-lint rules when possible, but please review our [styleguide](https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx), which includes recommendations that can't be linted on.
 
 Es-lint overrides on a per-plugin level are discouraged.
 
@@ -208,7 +208,7 @@ your large change right _after_ feature freeze. If you are worried about missing
 
 ### Size
 
-When possible, build features with incrementals sets of small and focused PRs, but don't check in unused code, and don't expose any feature on master that you would not be comfortable releasing.
+When possible, build features with incrementals sets of small and focused PRs, but don't check in unused code, and don't expose any feature on main that you would not be comfortable releasing.
 
 ![product_stages](../assets/product_stages.png)
 
@@ -231,7 +231,7 @@ Consider how you want to handle the PR review. Reviewing each PR going into the 
 
 **3. Use an example plugin**
 
-If you are building a service for developers, create an [example plugin](https://github.com/elastic/kibana/tree/master/examples) to showcase and test intended usage. This is a great way for reviewers and PMs to play around with a feature through the UI, before the production UI is ready. This can also help developers consuming your services get hands on.
+If you are building a service for developers, create an [example plugin](https://github.com/elastic/kibana/tree/main/examples) to showcase and test intended usage. This is a great way for reviewers and PMs to play around with a feature through the UI, before the production UI is ready. This can also help developers consuming your services get hands on.
 
 ## Embrace the monorepo
 
@@ -241,7 +241,7 @@ When experimenting with code, it's completely fine to create a separate GitHub r
 
 There are some exceptions where a separate repo makes sense. However, they are exceptions to the rule. A separate repo has proven beneficial when there's a dedicated team collaborating on a package which has multiple consumers, for example [EUI](https://github.com/elastic/eui).
 
-It may be tempting to get caught up in the dream of writing the next package which is published to npm and downloaded millions of times a week. Knowing the quality of developers that are working on Kibana, this is a real possibility. However, knowing which packages will see mass adoption is impossible to predict. Instead of jumping directly to writing code in a separate repo and accepting all of the complications that come along with it, prefer keeping code inside the Kibana repo. A [Kibana package](https://github.com/elastic/kibana/tree/master/packages) can be used to publish a package to npm, while still keeping the code inside the Kibana repo. Move code to an external repo only when there is a good reason, for example to enable external contributions.
+It may be tempting to get caught up in the dream of writing the next package which is published to npm and downloaded millions of times a week. Knowing the quality of developers that are working on Kibana, this is a real possibility. However, knowing which packages will see mass adoption is impossible to predict. Instead of jumping directly to writing code in a separate repo and accepting all of the complications that come along with it, prefer keeping code inside the Kibana repo. A [Kibana package](https://github.com/elastic/kibana/tree/main/packages) can be used to publish a package to npm, while still keeping the code inside the Kibana repo. Move code to an external repo only when there is a good reason, for example to enable external contributions.
 
 ## Security best practices
 
@@ -278,11 +278,11 @@ CSRF is a class of attacks where a user is forced to execute an action on a vuln
 their knowledge. Kibana defends against this by requiring [custom request
 headers](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#use-of-custom-request-headers)
 for API endpoints. For more information, see [API Request
-Headers](https://www.elastic.co/guide/en/kibana/master/api.html#api-request-headers).
+Headers](https://www.elastic.co/guide/en/kibana/main/api.html#api-request-headers).
 
 **Best practices**
 
-- Ensure all HTTP routes are registered with the [Kibana HTTP service](https://www.elastic.co/guide/en/kibana/master/http-service.html) to
+- Ensure all HTTP routes are registered with the [Kibana HTTP service](https://www.elastic.co/guide/en/kibana/main/http-service.html) to
   take advantage of the custom request header security control.
   - Note that HTTP GET requests do **not** require the custom request header; any routes that change data should [adhere to the HTTP
     specification and use a different method (PUT, POST, etc.)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods)

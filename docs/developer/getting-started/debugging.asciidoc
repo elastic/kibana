@@ -85,7 +85,7 @@ cd apm-integration-testing
 +
 [source,bash]
 ----
-./scripts/compose.py start master --no-kibana
+./scripts/compose.py start main --no-kibana
 ----
 
 . Change into the {kib} repo:
