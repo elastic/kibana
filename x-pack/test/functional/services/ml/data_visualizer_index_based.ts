@@ -16,6 +16,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
   const retry = getService('retry');
   const PageObjects = getPageObjects(['discover']);
   const queryBar = getService('queryBar');
+  const filterBar = getService('filterBar');
 
   return {
     async assertTimeRangeSelectorSectionExists() {
@@ -205,6 +206,24 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         expect(hitCount).to.eql(
           expectedHitCountFormatted,
           `Expected Discover hit count to be '${expectedHitCountFormatted}' (got '${hitCount}')`
+        );
+      });
+    },
+
+    async assertFilterBarFilterContent(filter: {
+      key: string;
+      value: string;
+      enabled?: boolean;
+      pinned?: boolean;
+      negated?: boolean;
+    }) {
+      await retry.tryForTime(2000, async () => {
+        await filterBar.hasFilter(
+          filter.key,
+          filter.value,
+          filter.enabled,
+          filter.pinned,
+          filter.negated
         );
       });
     },
