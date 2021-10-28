@@ -11,7 +11,10 @@ steps:
       queue: ci-group-6
     timeout_in_minutes: 1440
     key: default-cigroup
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
+    label: 'Default CI Group'
+    agents:
+      queue: ci-group-6
+    timeout_in_minutes: 1440
+    parallelism: 12
