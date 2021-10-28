@@ -43,32 +43,32 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('create pipeline', () => {
       it('Creates a pipeline', async () => {
         await pageObjects.ingestPipelines.createNewPipeline(PIPELINE);
-  
+
         const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
         const newPipelineExists = Boolean(
           pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
         );
-  
+
         expect(newPipelineExists).to.be(true);
       });
-  
+
       it('Creates a pipeline from CSV', async () => {
         await pageObjects.ingestPipelines.navigateToCreateFromCsv();
-  
+
         await pageObjects.common.setFileInputPath(
           path.join(__dirname, 'exports', 'example_mapping.csv')
         );
-  
+
         await pageObjects.ingestPipelines.createPipelineFromCsv(PIPELINE_CSV);
-  
+
         const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
         const newPipelineExists = Boolean(
           pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
         );
-  
+
         expect(newPipelineExists).to.be(true);
       });
-  
+
       afterEach(async () => {
         // Close details flyout
         await pageObjects.ingestPipelines.closePipelineDetailsFlyout();

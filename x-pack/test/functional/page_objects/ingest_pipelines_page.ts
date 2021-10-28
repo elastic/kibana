@@ -79,7 +79,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.exists('createFromCsvInstructions');
     },
 
-    async createPipelineFromCsv({ name }: { name: string; }) {
+    async createPipelineFromCsv({ name }: { name: string }) {
       await testSubjects.click('processFileButton');
 
       await testSubjects.exists('pipelineMappingsJSONEditor');
@@ -97,7 +97,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
-    async closePipelineDetailsFlyout () {
+    async closePipelineDetailsFlyout() {
       await testSubjects.click('euiFlyoutCloseButton');
     },
   };
