@@ -40,13 +40,14 @@ const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const useGetUrlSearchMock = jest.fn();
 const useActionTypesMock = useActionTypes as jest.Mock;
 
-describe.only('ConfigureCases', () => {
+describe('ConfigureCases', () => {
   beforeAll(() => {
     useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
       actionTypeTitle: '.servicenow',
       iconClass: 'logoSecurity',
     });
   });
+
   beforeEach(() => {
     useActionTypesMock.mockImplementation(() => useActionTypesResponse);
   });
