@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, Ping } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
@@ -62,6 +62,7 @@ export const getMonitorAlerts = async ({
                   'monitor.id': monitorId,
                 },
               },
+              ...([parsedFilters] || []),
             ] as QueryDslQueryContainer[],
           },
         },
@@ -76,10 +77,6 @@ export const getMonitorAlerts = async ({
         },
       },
     });
-
-    if (parsedFilters) {
-      esParams.body.query.bool.filter.push(parsedFilters);
-    }
 
     const { body: result } = await uptimeEsClient.search(
       esParams,
