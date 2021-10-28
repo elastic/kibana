@@ -40,7 +40,8 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./logstash/nodes_mb'));
     loadTestFile(require.resolve('./logstash/pipelines'));
     loadTestFile(require.resolve('./logstash/pipelines_mb'));
-
+    loadTestFile(require.resolve('./logstash/node_detail'));
+    loadTestFile(require.resolve('./logstash/node_detail_mb'));
     loadTestFile(require.resolve('./beats/cluster'));
     loadTestFile(require.resolve('./beats/overview'));
     loadTestFile(require.resolve('./beats/listing'));

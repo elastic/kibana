@@ -27,10 +27,18 @@ export function MonitoringLogstashNodesProvider({ getService, getPageObjects }) 
   const SUBJ_NODE_CONFIG_RELOADS_FAILURE = `${SUBJ_TABLE_CONTAINER} > configReloadsFailure`;
   const SUBJ_NODE_VERSION = `${SUBJ_TABLE_CONTAINER} > version`;
 
+  const SUBJ_NODE_LINK_PREFIX = `${SUBJ_TABLE_CONTAINER} > nodeLink-`;
+
   return new (class LogstashNodes {
     async isOnNodesListing() {
       const pageId = await retry.try(() => testSubjects.find(SUBJ_OVERVIEW_PAGE));
       return pageId !== null;
+    }
+    async clickRowByResolver(nodeResolver) {
+      await retry.waitForWithTimeout('redirection to node detail', 30000, async () => {
+        await testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver, 5000);
+        return testSubjects.exists('logstashDetailStatus', { timeout: 5000 });
+      });
     }
     getRows() {
       return PageObjects.monitoring.tableGetRowsFromContainer(SUBJ_TABLE_CONTAINER);

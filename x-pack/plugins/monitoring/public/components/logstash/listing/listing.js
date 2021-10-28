@@ -66,10 +66,10 @@ export class Listing extends PureComponent {
 
           return (
             <div>
-              <div>
+              <div data-test-subj="name">
                 <EuiLink
                   href={getSafeForExternalLink(`#/logstash/node/${node.logstash.uuid}`)}
-                  data-test-subj="name"
+                  data-test-subj={`nodeLink-${node.logstash.uuid}`}
                 >
                   {name}
                 </EuiLink>
