@@ -135,7 +135,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const generateCsv = async (
     job: JobParamsCSV,
     username = 'elastic',
-    password = process.env.TEST_KIBANA_PASS
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
   ) => {
     const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
