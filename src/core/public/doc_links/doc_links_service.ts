@@ -479,6 +479,7 @@ export class DocLinksService {
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
           elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
+          beatsAgentComparison: `${FLEET_DOCS}beats-agent-comparison.html`,
           datastreams: `${FLEET_DOCS}data-streams.html`,
           datastreamsILM: `${FLEET_DOCS}data-streams.html#data-streams-ilm`,
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
@@ -736,6 +737,7 @@ export interface DocLinksStart {
     readonly ingest: Record<string, string>;
     readonly fleet: Readonly<{
       datastreamsILM: string;
+      beatsAgentComparison: string;
       guide: string;
       fleetServer: string;
       fleetServerAddFleetServer: string;
