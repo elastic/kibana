@@ -5,38 +5,22 @@
  * 2.0.
  */
 
+import { groupBy } from 'lodash';
 import React, { FC } from 'react';
 import { Filter } from '../../../types';
+import { useCanvasFilters } from '../hooks/sidebar/use_filters';
 import { WorkpadFilters as Component } from './workpad_filters.component';
 
+const groupFiltersBy = (filters: Filter[], groupByField: keyof Filter) => {
+  const groupedFilters = groupBy(filters, (filter) => filter[groupByField]);
+  return Object.keys(groupedFilters).map((key) => {
+    return { name: key, filters: groupedFilters[key] };
+  });
+};
+
 export const WorkpadFilters: FC = () => {
-  const filters: Filter[] = [
-    { type: 'exactly', column: 'project', value: 'logstash', filterGroup: 'Gamma' },
-    {
-      type: 'time',
-      column: '@timestamp',
-      value: { from: '....', to: '...' },
-      filterGroup: 'Gamma',
-    },
+  const { filters: canvasFilters } = useCanvasFilters();
+  const filtersGroups = groupFiltersBy(canvasFilters, 'type');
 
-    { type: 'exactly', column: 'project', value: 'beats', filterGroup: 'Alpha' },
-    {
-      type: 'time',
-      column: '@timestamp',
-      value: { from: '....', to: '...' },
-      filterGroup: 'Alpha',
-    },
-  ];
-
-  const filtersGroups = [
-    {
-      name: filters[0].filterGroup,
-      filters: [filters[0], filters[1]],
-    },
-    {
-      name: filters[2].filterGroup,
-      filters: [filters[2], filters[3]],
-    },
-  ];
   return <Component filtersGroups={filtersGroups} />;
 };

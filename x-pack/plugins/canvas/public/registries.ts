@@ -22,7 +22,7 @@ import {
   viewRegistry,
 } from './expression_types';
 import { SetupRegistries } from './plugin_api';
-import { filterViewsRegistry } from './filter_view_types/intex';
+import { filterViewsRegistry } from './filter_view_types';
 
 export let registries = {};
 

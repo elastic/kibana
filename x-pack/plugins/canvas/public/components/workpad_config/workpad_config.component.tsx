@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiTitle,
   EuiToolTip,
   EuiTextArea,
   EuiAccordion,
