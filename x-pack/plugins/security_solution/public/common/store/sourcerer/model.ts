@@ -46,12 +46,12 @@ export interface ManageScopeInit extends Partial<ManageScope> {
 export type SourcererScopeById = Record<SourcererScopeName, ManageScope>;
 
 export interface KibanaDataView {
-  /** Uniquely identifies a Kibana Index Pattern */
+  /** Uniquely identifies a Kibana Data View  */
   id: string;
   /**  list of active patterns that return data  */
   patternList: string[];
   /**
-   * title of Kibana Index Pattern
+   * title of Kibana Data View
    * title also serves as "all pattern list", including inactive
    */
   title: string;

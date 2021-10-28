@@ -14,7 +14,7 @@ export const SOURCERER = i18n.translate('xpack.securitySolution.indexPatterns.da
 export const SIEM_DATA_VIEW_LABEL = i18n.translate(
   'xpack.securitySolution.indexPatterns.kipLabel',
   {
-    defaultMessage: 'Default Security Kibana Index Pattern',
+    defaultMessage: 'Default Security Data View',
   }
 );
 
