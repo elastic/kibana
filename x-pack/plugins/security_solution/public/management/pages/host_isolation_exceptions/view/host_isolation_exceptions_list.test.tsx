@@ -95,10 +95,13 @@ describe('When on the host isolation exceptions page', () => {
         expect(renderResult.container.querySelector('.euiProgress')).toBeNull();
       });
 
-      it('should display the search bar', async () => {
+      it('should display the search bar and item count', async () => {
         render();
         await dataReceived();
         expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
+        expect(renderResult.getByTestId('hostIsolationExceptions-totalCount').textContent).toBe(
+          'Showing 1 exception'
+        );
       });
 
       it('should show items on the list', async () => {
@@ -128,22 +131,24 @@ describe('When on the host isolation exceptions page', () => {
     });
 
     describe('has canIsolateHost privileges', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: true });
+        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
       });
 
       it('should show the create flyout when the add button is pressed', async () => {
         render();
         await dataReceived();
         act(() => {
-          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsEmptyStateAddButton'));
+          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
         });
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
 
-      it('should show the create flyout when the show location is create', () => {
+      it('should show the create flyout when the show location is create', async () => {
         history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
         render();
+        await dataReceived();
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
         expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
