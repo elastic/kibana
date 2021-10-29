@@ -61,141 +61,145 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('when data is loaded', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
-    describe('errors distribution', () => {
-      const appleTransaction = {
-        name: 'GET /apple 🍎 ',
-        successRate: 75,
-        failureRate: 25,
-      };
-      const bananaTransaction = {
-        name: 'GET /banana 🍌',
-        successRate: 50,
-        failureRate: 50,
-      };
+  registry.when(
+    'when data is loaded',
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    () => {
+      describe('errors distribution', () => {
+        const appleTransaction = {
+          name: 'GET /apple 🍎 ',
+          successRate: 75,
+          failureRate: 25,
+        };
+        const bananaTransaction = {
+          name: 'GET /banana 🍌',
+          successRate: 50,
+          failureRate: 50,
+        };
 
-      before(async () => {
-        const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
-          'instance-a'
-        );
-
-        const interval = '1m';
-
-        const indices = [appleTransaction, bananaTransaction]
-          .map((transaction, index) => {
-            return [
-              ...timerange(start, end)
-                .interval(interval)
-                .rate(transaction.successRate)
-                .flatMap((timestamp) =>
-                  serviceGoProdInstance
-                    .transaction(transaction.name)
-                    .timestamp(timestamp)
-                    .duration(1000)
-                    .success()
-                    .serialize()
-                ),
-              ...timerange(start, end)
-                .interval(interval)
-                .rate(transaction.failureRate)
-                .flatMap((timestamp) =>
-                  serviceGoProdInstance
-                    .transaction(transaction.name)
-                    .errors(
-                      serviceGoProdInstance
-                        .error(`Error ${index}`, transaction.name)
-                        .timestamp(timestamp)
-                    )
-                    .duration(1000)
-                    .timestamp(timestamp)
-                    .failure()
-                    .serialize()
-                ),
-            ];
-          })
-          .flatMap((_) => _);
-
-        await synthtraceEsClient.index(indices);
-      });
-
-      after(() => synthtraceEsClient.clean());
-
-      describe('without comparison', () => {
-        let errorsDistribution: ErrorsDistribution;
         before(async () => {
-          const response = await callApi();
-          errorsDistribution = response.body;
-        });
-
-        it('displays combined number of occurrences', () => {
-          const countSum = sumBy(errorsDistribution.currentPeriod, 'y');
-          const numberOfBuckets = 15;
-          expect(countSum).to.equal(
-            (appleTransaction.failureRate + bananaTransaction.failureRate) * numberOfBuckets
+          const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
+            'instance-a'
           );
-        });
-      });
 
-      describe('displays occurrences for type "apple transaction" only', () => {
-        let errorsDistribution: ErrorsDistribution;
-        before(async () => {
-          const response = await callApi({
-            query: { kuery: `error.exception.type:"${appleTransaction.name}"` },
+          const interval = '1m';
+
+          const indices = [appleTransaction, bananaTransaction]
+            .map((transaction, index) => {
+              return [
+                ...timerange(start, end)
+                  .interval(interval)
+                  .rate(transaction.successRate)
+                  .flatMap((timestamp) =>
+                    serviceGoProdInstance
+                      .transaction(transaction.name)
+                      .timestamp(timestamp)
+                      .duration(1000)
+                      .success()
+                      .serialize()
+                  ),
+                ...timerange(start, end)
+                  .interval(interval)
+                  .rate(transaction.failureRate)
+                  .flatMap((timestamp) =>
+                    serviceGoProdInstance
+                      .transaction(transaction.name)
+                      .errors(
+                        serviceGoProdInstance
+                          .error(`Error ${index}`, transaction.name)
+                          .timestamp(timestamp)
+                      )
+                      .duration(1000)
+                      .timestamp(timestamp)
+                      .failure()
+                      .serialize()
+                  ),
+              ];
+            })
+            .flatMap((_) => _);
+
+          await synthtraceEsClient.index(indices);
+        });
+
+        after(() => synthtraceEsClient.clean());
+
+        describe('without comparison', () => {
+          let errorsDistribution: ErrorsDistribution;
+          before(async () => {
+            const response = await callApi();
+            errorsDistribution = response.body;
           });
-          errorsDistribution = response.body;
-        });
-        it('displays combined number of occurrences', () => {
-          const countSum = sumBy(errorsDistribution.currentPeriod, 'y');
-          const numberOfBuckets = 15;
-          expect(countSum).to.equal(appleTransaction.failureRate * numberOfBuckets);
-        });
-      });
 
-      describe('with comparison', () => {
-        let errorsDistribution: ErrorsDistribution;
-        before(async () => {
-          const fiveMinutes = 5 * 60 * 1000;
-          const response = await callApi({
-            query: {
-              start: new Date(end - fiveMinutes).toISOString(),
-              end: new Date(end).toISOString(),
-              comparisonStart: new Date(start).toISOString(),
-              comparisonEnd: new Date(start + fiveMinutes).toISOString(),
-            },
+          it('displays combined number of occurrences', () => {
+            const countSum = sumBy(errorsDistribution.currentPeriod, 'y');
+            const numberOfBuckets = 15;
+            expect(countSum).to.equal(
+              (appleTransaction.failureRate + bananaTransaction.failureRate) * numberOfBuckets
+            );
           });
-          errorsDistribution = response.body;
-        });
-        it('returns some data', () => {
-          const hasCurrentPeriodData = errorsDistribution.currentPeriod.some(({ y }) =>
-            isFiniteNumber(y)
-          );
-
-          const hasPreviousPeriodData = errorsDistribution.previousPeriod.some(({ y }) =>
-            isFiniteNumber(y)
-          );
-
-          expect(hasCurrentPeriodData).to.equal(true);
-          expect(hasPreviousPeriodData).to.equal(true);
         });
 
-        it('has same start time for both periods', () => {
-          expect(first(errorsDistribution.currentPeriod)?.x).to.equal(
-            first(errorsDistribution.previousPeriod)?.x
-          );
+        describe('displays occurrences for type "apple transaction" only', () => {
+          let errorsDistribution: ErrorsDistribution;
+          before(async () => {
+            const response = await callApi({
+              query: { kuery: `error.exception.type:"${appleTransaction.name}"` },
+            });
+            errorsDistribution = response.body;
+          });
+          it('displays combined number of occurrences', () => {
+            const countSum = sumBy(errorsDistribution.currentPeriod, 'y');
+            const numberOfBuckets = 15;
+            expect(countSum).to.equal(appleTransaction.failureRate * numberOfBuckets);
+          });
         });
 
-        it('has same end time for both periods', () => {
-          expect(last(errorsDistribution.currentPeriod)?.x).to.equal(
-            last(errorsDistribution.previousPeriod)?.x
-          );
-        });
+        describe('with comparison', () => {
+          let errorsDistribution: ErrorsDistribution;
+          before(async () => {
+            const fiveMinutes = 5 * 60 * 1000;
+            const response = await callApi({
+              query: {
+                start: new Date(end - fiveMinutes).toISOString(),
+                end: new Date(end).toISOString(),
+                comparisonStart: new Date(start).toISOString(),
+                comparisonEnd: new Date(start + fiveMinutes).toISOString(),
+              },
+            });
+            errorsDistribution = response.body;
+          });
+          it('returns some data', () => {
+            const hasCurrentPeriodData = errorsDistribution.currentPeriod.some(({ y }) =>
+              isFiniteNumber(y)
+            );
 
-        it('returns same number of buckets for both periods', () => {
-          expect(errorsDistribution.currentPeriod.length).to.equal(
-            errorsDistribution.previousPeriod.length
-          );
+            const hasPreviousPeriodData = errorsDistribution.previousPeriod.some(({ y }) =>
+              isFiniteNumber(y)
+            );
+
+            expect(hasCurrentPeriodData).to.equal(true);
+            expect(hasPreviousPeriodData).to.equal(true);
+          });
+
+          it('has same start time for both periods', () => {
+            expect(first(errorsDistribution.currentPeriod)?.x).to.equal(
+              first(errorsDistribution.previousPeriod)?.x
+            );
+          });
+
+          it('has same end time for both periods', () => {
+            expect(last(errorsDistribution.currentPeriod)?.x).to.equal(
+              last(errorsDistribution.previousPeriod)?.x
+            );
+          });
+
+          it('returns same number of buckets for both periods', () => {
+            expect(errorsDistribution.currentPeriod.length).to.equal(
+              errorsDistribution.previousPeriod.length
+            );
+          });
         });
       });
-    });
-  });
+    }
+  );
 }
