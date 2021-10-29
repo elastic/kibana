@@ -6,10 +6,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { first, map, share } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { combineLatest } from 'rxjs';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -61,11 +60,7 @@ import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
 } from './invalidate_pending_api_keys/task';
-import {
-  getHealthStatusStream,
-  scheduleAlertingHealthCheck,
-  initializeAlertingHealth,
-} from './health';
+import { scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
 import { AlertsConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -236,33 +231,33 @@ export class AlertingPlugin {
     );
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
-      level: ServiceStatusLevels.degraded,
-      summary: 'Alerting is initializing',
+      level: ServiceStatusLevels.available,
+      summary: 'Alerting is (probably) ready',
     });
     core.status.set(serviceStatus$);
 
-    core.getStartServices().then(async ([coreStart, startPlugins]) => {
-      combineLatest([
-        core.status.derivedStatus$,
-        getHealthStatusStream(
-          startPlugins.taskManager,
-          this.logger,
-          coreStart.savedObjects,
-          this.config
-        ),
-      ])
-        .pipe(
-          map(([derivedStatus, healthStatus]) => {
-            if (healthStatus.level > derivedStatus.level) {
-              return healthStatus as ServiceStatus;
-            } else {
-              return derivedStatus;
-            }
-          }),
-          share()
-        )
-        .subscribe(serviceStatus$);
-    });
+    // core.getStartServices().then(async ([coreStart, startPlugins]) => {
+    //   combineLatest([
+    //     core.status.derivedStatus$,
+    //     getHealthStatusStream(
+    //       startPlugins.taskManager,
+    //       this.logger,
+    //       coreStart.savedObjects,
+    //       this.config
+    //     ),
+    //   ])
+    //     .pipe(
+    //       map(([derivedStatus, healthStatus]) => {
+    //         if (healthStatus.level > derivedStatus.level) {
+    //           return healthStatus as ServiceStatus;
+    //         } else {
+    //           return derivedStatus;
+    //         }
+    //       }),
+    //       share()
+    //     )
+    //     .subscribe(serviceStatus$);
+    // });
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
