@@ -45,7 +45,7 @@ export class FleetManager extends Manager {
           '--env',
           'FLEET_SERVER_ENABLE=true',
           '--env',
-          `FLEET_SERVER_ELASTICSEARCH_HOST=http://host.docker.internal:${this.esConfig.port}`,
+          `FLEET_SERVER_ELASTICSEARCH_HOST=http://172.17.0.1:${this.esConfig.port}`,
           '--env',
           `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
           '--rm',
