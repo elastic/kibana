@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
@@ -48,6 +49,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.getWaffleMapTooltips();
+      });
+
+      it('sort nodes by descending value', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.sortNodesBy('value');
+        const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
+        expect(nodesWithValue).to.eql([
+          { name: 'demo-stack-apache-01', value: 1.4 },
+          { name: 'demo-stack-mysql-01', value: 1.2 },
+          { name: 'demo-stack-nginx-01', value: 1.1 },
+          { name: 'demo-stack-redis-01', value: 1 },
+          { name: 'demo-stack-haproxy-01', value: 0.8 },
+          { name: 'demo-stack-client-01', value: 0.6 },
+        ]);
+      });
+
+      it('sort nodes by ascending value', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.sortNodesBy('value');
+        await pageObjects.infraHome.toggleReverseSort();
+        const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
+        expect(nodesWithValue).to.eql([
+          { name: 'demo-stack-client-01', value: 0.6 },
+          { name: 'demo-stack-haproxy-01', value: 0.8 },
+          { name: 'demo-stack-redis-01', value: 1 },
+          { name: 'demo-stack-nginx-01', value: 1.1 },
+          { name: 'demo-stack-mysql-01', value: 1.2 },
+          { name: 'demo-stack-apache-01', value: 1.4 },
+        ]);
+      });
+
+      it('group nodes by custom field', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.groupByCustomField('host.os.platform');
       });
 
       it('renders an empty data prompt for dates with no data', async () => {

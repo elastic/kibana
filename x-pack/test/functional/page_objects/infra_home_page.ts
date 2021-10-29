@@ -16,6 +16,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
   const find = getService('find');
   const browser = getService('browser');
   const pageObjects = getPageObjects(['common']);
+  const comboBox = getService('comboBox');
 
   return {
     async goToTime(time: string) {
@@ -63,6 +64,50 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       expect(await values2[2].getVisibleText()).to.be('256.3kbit/s');
       expect(await metrics2[3].getVisibleText()).to.be('Inbound traffic');
       expect(await values2[3].getVisibleText()).to.be('255.1kbit/s');
+    },
+
+    async getNodesWithValues() {
+      const nodes = await testSubjects.findAll('nodeContainer');
+      const promises = nodes.map(async (node) => {
+        const nodeName = await node.findByTestSubject('nodeName');
+        const name = await nodeName.getVisibleText();
+        const nodeValue = await node.findByTestSubject('nodeValue');
+        const value = await nodeValue.getVisibleText();
+        return { name, value: parseFloat(value) };
+      });
+      return await Promise.all(promises);
+    },
+
+    async sortNodesBy(sort: string) {
+      await testSubjects.click('waffleSortByDropdown');
+      if (sort === 'value') {
+        await testSubjects.find('waffleSortByValue');
+        await testSubjects.click('waffleSortByValue');
+      } else {
+        await testSubjects.find('waffleSortByName');
+        await testSubjects.click('waffleSortByName');
+      }
+    },
+
+    async groupByCustomField(field: string) {
+      await testSubjects.click('waffleGroupByDropdown');
+      const contextMenu = await testSubjects.find('groupByContextMenu');
+      const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
+      await menuItems[0].click();
+      const groupByCustomField = await testSubjects.find('groupByCustomField');
+      await comboBox.setElement(groupByCustomField, field);
+      await testSubjects.click('groupByCustomFieldAddButton');
+      await this.waitForLoading();
+      const groupNameLink = await testSubjects.find('groupNameLink');
+      const groupName = await groupNameLink.getVisibleText();
+      expect(groupName).to.be('ubuntu');
+    },
+
+    async toggleReverseSort() {
+      await testSubjects.click('waffleSortByDropdown');
+      await testSubjects.find('waffleSortByDirection');
+      await testSubjects.click('waffleSortByDirection');
+      await browser.pressKeys(browser.keys.ESCAPE);
     },
 
     async openInvenotrySwitcher() {
