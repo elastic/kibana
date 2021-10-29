@@ -40,6 +40,8 @@ export class FleetManager extends Manager {
 
         const args = [
           'run',
+          '--add-host',
+          'host.docker.internal:host-gateway',
           '--env',
           'FLEET_SERVER_ENABLE=true',
           '--env',
