@@ -51,9 +51,9 @@ export function runFailedTestsReporterCli() {
           branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH || '';
           isPr = !!process.env.ghprbPullId;
 
-          const isMasterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
-          if (!isMasterOrVersion || isPr) {
-            log.info('Failure issues only created on master/version branch jobs');
+          const isMainOrVersion = branch === 'main' || branch.match(/^\d+\.(x|\d+)$/);
+          if (!isMainOrVersion || isPr) {
+            log.info('Failure issues only created on main/version branch jobs');
             updateGithub = false;
           }
         }
