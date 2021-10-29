@@ -6,21 +6,22 @@
  */
 
 import React, { memo, PropsWithChildren, useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import { CommonProps, EuiText } from '@elastic/eui';
 import classNames from 'classnames';
 
-export type TextValueDisplayProps = PropsWithChildren<{
-  bold?: boolean;
-  truncate?: boolean;
-  size?: 'xs' | 's' | 'm' | 'relative';
-}>;
+export type TextValueDisplayProps = Pick<CommonProps, 'data-test-subj'> &
+  PropsWithChildren<{
+    bold?: boolean;
+    truncate?: boolean;
+    size?: 'xs' | 's' | 'm' | 'relative';
+  }>;
 
 /**
  * Common component for displaying consistent text across the card. Changes here could impact all of
  * display of values on the card
  */
 export const TextValueDisplay = memo<TextValueDisplayProps>(
-  ({ bold, truncate, size = 's', children }) => {
+  ({ bold, truncate, size = 's', 'data-test-subj': dataTestSubj, children }) => {
     const cssClassNames = useMemo(() => {
       return classNames({
         'eui-textTruncate': truncate,
@@ -29,7 +30,7 @@ export const TextValueDisplay = memo<TextValueDisplayProps>(
     }, [truncate]);
 
     return (
-      <EuiText size={size} className={cssClassNames}>
+      <EuiText size={size} className={cssClassNames} data-test-subj={dataTestSubj}>
         {bold ? <strong>{children}</strong> : children}
       </EuiText>
     );

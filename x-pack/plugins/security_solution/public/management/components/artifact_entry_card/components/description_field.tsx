@@ -17,7 +17,7 @@ export const DescriptionField = memo<DescriptionFieldProps>(
   ({ truncate, children, 'data-test-subj': dataTestSubj }) => {
     return (
       <TextValueDisplay size="m" truncate={truncate}>
-        <p data-test-subj={dataTestSubj}>{children || getEmptyValue()}</p>
+        {children || getEmptyValue()}
       </TextValueDisplay>
     );
   }
