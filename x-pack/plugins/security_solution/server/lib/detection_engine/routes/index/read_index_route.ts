@@ -32,7 +32,6 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: Con
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const siemClient = context.securitySolution?.getAppClient();
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
