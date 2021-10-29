@@ -17,6 +17,7 @@ export const setDataView = actionCreator<{
   docValueFields: SourcererDataView['docValueFields'];
   id: SourcererDataView['id'];
   indexFields: SourcererDataView['indexFields'];
+  loading: SourcererDataView['loading'];
   runtimeMappings: SourcererDataView['runtimeMappings'];
 }>('SET_DATA_VIEW');
 

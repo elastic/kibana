@@ -13,6 +13,7 @@ import {
   setSelectedDataView,
   setSignalIndexName,
   setDataView,
+  setDataViewLoading,
 } from './actions';
 import { initialSourcererState, SourcererModel, SourcererScopeName } from './model';
 import { validateSelectedPatterns } from './helpers';
@@ -23,6 +24,15 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
   .case(setSignalIndexName, (state, { signalIndexName }) => ({
     ...state,
     signalIndexName,
+  }))
+  .case(setDataViewLoading, (state, { id, loading }) => ({
+    ...state,
+    ...(id === state.defaultDataView.id
+      ? {
+          defaultDataView: { ...state.defaultDataView, loading },
+        }
+      : {}),
+    kibanaDataViews: state.kibanaDataViews.map((dv) => (dv.id === id ? { ...dv, loading } : dv)),
   }))
   .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => ({
     ...state,

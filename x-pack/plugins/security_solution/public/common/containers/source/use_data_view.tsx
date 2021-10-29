@@ -78,6 +78,7 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
                     docValueFields: getDocValueFields(patternString, response.indexFields),
                     id: selectedDataViewId,
                     indexFields: getEsFields(response.indexFields),
+                    loading: false,
                     runtimeMappings: response.runtimeMappings,
                   })
                 );

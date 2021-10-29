@@ -147,18 +147,8 @@ describe('Sourcerer Hooks', () => {
   });
   it('sets signal index name', async () => {
     const mockNewDataViews = {
-      defaultDataView: {
-        id: DEFAULT_DATA_VIEW_ID,
-        title: mockSourcererState.defaultDataView.title,
-        patternList: mockSourcererState.defaultDataView.patternList,
-      },
-      kibanaDataViews: [
-        {
-          id: DEFAULT_DATA_VIEW_ID,
-          title: mockSourcererState.defaultDataView.title,
-          patternList: mockSourcererState.defaultDataView.patternList,
-        },
-      ],
+      defaultDataView: mockSourcererState.defaultDataView,
+      kibanaDataViews: [mockSourcererState.defaultDataView],
     };
     (postSourcererDataView as jest.Mock).mockResolvedValue(mockNewDataViews);
 
