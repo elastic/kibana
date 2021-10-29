@@ -17,12 +17,13 @@ import { removeBoundsFromSavedObject } from '../../common/migrations/remove_boun
 import { setDefaultAutoFitToBounds } from '../../common/migrations/set_default_auto_fit_to_bounds';
 import { addTypeToTermJoin } from '../../common/migrations/add_type_to_termjoin';
 import { moveAttribution } from '../../common/migrations/move_attribution';
+import { setEmsTmsDefaultModes } from '../../common/migrations/set_ems_tms_default_modes';
 
 /*
  * Embeddables such as Maps, Lens, and Visualize can be embedded by value or by reference on a dashboard.
  * To ensure that any migrations (>7.12) are run correctly in both cases,
  * the migration function must be registered as both a saved object migration and an embeddable migration
-
+ *
  * This is the saved object migration registry.
  */
 export const savedObjectMigrations = {
@@ -103,6 +104,14 @@ export const savedObjectMigrations = {
   },
   '7.14.0': (doc) => {
     const attributes = moveAttribution(doc);
+
+    return {
+      ...doc,
+      attributes,
+    };
+  },
+  '8.0.0': (doc) => {
+    const attributes = setEmsTmsDefaultModes(doc);
 
     return {
       ...doc,
