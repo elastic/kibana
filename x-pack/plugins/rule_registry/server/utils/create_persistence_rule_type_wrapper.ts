@@ -30,7 +30,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   .getWriter({ namespace: options.spaceId })
                   .bulk({
                     body: alerts.flatMap((alert) => [
-                      { index: {} },
+                      { index: { _id: alert.id } },
                       {
                         [VERSION]: ruleDataClient.kibanaVersion,
                         ...commonRuleFields,
