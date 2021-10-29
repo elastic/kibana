@@ -490,6 +490,7 @@ export class DocLinksService {
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
           elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
+          beatsAgentComparison: `${FLEET_DOCS}beats-agent-comparison.html`,
           datastreams: `${FLEET_DOCS}data-streams.html`,
           datastreamsILM: `${FLEET_DOCS}data-streams.html#data-streams-ilm`,
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
@@ -507,7 +508,7 @@ export class DocLinksService {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/index.html`,
           goOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/overview.html`,
           javaIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/index.html`,
-          jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/7.x/introduction.html`,
+          jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/introduction.html`,
           netGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/7.x/index.html`,
           perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/current/index.html`,
           phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/7.x/index.html`,
@@ -754,6 +755,7 @@ export interface DocLinksStart {
     readonly ingest: Record<string, string>;
     readonly fleet: Readonly<{
       datastreamsILM: string;
+      beatsAgentComparison: string;
       guide: string;
       fleetServer: string;
       fleetServerAddFleetServer: string;
