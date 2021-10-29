@@ -13,3 +13,7 @@ export { getSpanDestinationMetrics } from './lib/utils/get_span_destination_metr
 export { getObserverDefaults } from './lib/defaults/get_observer_defaults';
 export { toElasticsearchOutput } from './lib/output/to_elasticsearch_output';
 export { getBreakdownMetrics } from './lib/utils/get_breakdown_metrics';
+export { cleanWriteTargets } from './lib/utils/clean_write_targets';
+export { getWriteTargets } from './lib/utils/get_write_targets';
+export { SynthtraceEsClient } from './lib/client/synthtrace_es_client';
+export { createLogger, LogLevel } from './lib/utils/create_logger';

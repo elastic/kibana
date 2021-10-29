@@ -8,9 +8,9 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { getScenario } from './get_scenario';
-import { getWriteTargets } from './get_write_targets';
+import { getWriteTargets } from '../../lib/utils/get_write_targets';
 import { intervalToMs } from './interval_to_ms';
-import { createLogger, LogLevel } from './logger';
+import { createLogger, LogLevel } from '../../lib/utils/create_logger';
 
 export async function getCommonResources({
   file,
