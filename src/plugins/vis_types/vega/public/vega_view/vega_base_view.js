@@ -249,7 +249,7 @@ export class VegaBaseView {
     }
     const isMessageAlreadyDisplayed = this._$messages
       .find(`pre.vgaVis__messageCode`)
-      .filter((node) => node.text() === text).length;
+      .filter((index, element) => element.textContent === text).length;
     if (!isMessageAlreadyDisplayed) {
       this._$messages.append(
         $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
