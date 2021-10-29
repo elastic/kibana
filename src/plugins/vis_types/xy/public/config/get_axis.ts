@@ -167,26 +167,15 @@ function getAxisStyle(
         tickLabel: {
           visible: Boolean(ticks?.show),
           rotation: 0, // rotation is disabled on new time axis
-          fontSize: 11,
           padding: 0,
           alignment: {
             vertical: Position.Bottom,
             horizontal: Position.Left,
           },
-          offset: {
-            x: 1.5,
-            y: 0,
-          },
-        },
-        axisLine: {
-          stroke: darkMode ? 'lightgray' : 'darkgray',
-          strokeWidth: 1,
         },
         tickLine: {
-          size: 12,
-          strokeWidth: 0.15,
-          stroke: darkMode ? 'white' : 'black',
-          padding: -10,
+          size: 0.0001,
+          padding: 4,
           visible: Boolean(ticks?.show),
         },
         axisTitle: {
