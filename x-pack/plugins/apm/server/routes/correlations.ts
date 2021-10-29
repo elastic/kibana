@@ -113,9 +113,9 @@ const fieldStatsRoute = createApmServerRoute({
 });
 
 const fieldValuePairsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/correlations/field_value_pairs',
+  endpoint: 'POST /internal/apm/correlations/field_value_pairs',
   params: t.type({
-    query: t.intersection([
+    body: t.intersection([
       t.partial({
         serviceName: t.string,
         transactionName: t.string,
@@ -139,7 +139,7 @@ const fieldValuePairsRoute = createApmServerRoute({
     const { indices } = await setupRequest(resources);
     const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
 
-    const { fieldCandidates, ...params } = resources.params.query;
+    const { fieldCandidates, ...params } = resources.params.body;
 
     return withApmSpan('get_correlations_field_value_pairs', async () => ({
       fieldValuePairs: await fetchTransactionDurationFieldValuePairs(

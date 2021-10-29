@@ -12,11 +12,11 @@ import { registry } from '../../common/registry';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
 
-  const endpoint = 'GET /internal/apm/correlations/field_value_pairs';
+  const endpoint = 'POST /internal/apm/correlations/field_value_pairs';
 
   const getOptions = () => ({
     params: {
-      query: {
+      body: {
         environment: 'ENVIRONMENT_ALL',
         start: '2020',
         end: '2021',

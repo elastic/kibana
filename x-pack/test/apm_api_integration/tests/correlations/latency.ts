@@ -57,9 +57,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         const fieldValuePairsResponse = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/correlations/field_value_pairs',
+          endpoint: 'POST /internal/apm/correlations/field_value_pairs',
           params: {
-            query: {
+            body: {
               ...getOptions(),
               fieldCandidates: fieldCandidatesResponse.body?.fieldCandidates,
             },
@@ -140,9 +140,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         const fieldValuePairsResponse = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/correlations/field_value_pairs',
+          endpoint: 'POST /internal/apm/correlations/field_value_pairs',
           params: {
-            query: {
+            body: {
               ...getOptions(),
               fieldCandidates: fieldCandidatesResponse.body?.fieldCandidates,
             },
