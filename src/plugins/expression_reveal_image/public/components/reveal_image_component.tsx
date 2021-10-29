@@ -136,7 +136,7 @@ function RevealImageComponent({
   return (
     <div
       className="revealImageAligner"
-      css={{
+      style={{
         ...revealImageAlignerStyle,
         ...additionalAlignerStyles,
       }}
