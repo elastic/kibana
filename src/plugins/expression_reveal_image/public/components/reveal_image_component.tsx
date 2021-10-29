@@ -22,7 +22,7 @@ const revealImageParentStyle = css`
   pointer-events: none;
 `;
 
-const revealImageAlignerStyle: CSSObject = {
+const revealImageAlignerStyle = {
   backgroundSize: 'contain',
   backgroundRepeat: 'no-repeat',
 };
