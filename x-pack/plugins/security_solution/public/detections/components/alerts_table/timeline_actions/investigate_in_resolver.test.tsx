@@ -31,6 +31,7 @@ describe('InvestigateInResolverAction', () => {
     it('returns true if agent.type has endpoint in first array index', () => {
       const data: Ecs = {
         _id: '1',
+        _index: 'index',
         agent: { type: ['endpoint', 'blah'] },
         process: { entity_id: ['5'] },
       };

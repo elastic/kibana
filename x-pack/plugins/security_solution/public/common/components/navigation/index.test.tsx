@@ -122,7 +122,7 @@ describe('SIEM Navigation', () => {
           activeTab: TimelineTabs.query,
           id: '',
           isOpen: false,
-          graphEventId: '',
+          graphEventInfo: { id: '', index: '' },
         },
         timerange: {
           global: {
@@ -174,7 +174,12 @@ describe('SIEM Navigation', () => {
         sourcerer: {},
         state: undefined,
         tabName: 'authentications',
-        timeline: { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' },
+        timeline: {
+          id: '',
+          isOpen: false,
+          activeTab: TimelineTabs.query,
+          graphEventInfo: { id: '', index: '' },
+        },
         timerange: {
           global: {
             linkTo: ['timeline'],

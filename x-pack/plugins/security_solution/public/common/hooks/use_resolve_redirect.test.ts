@@ -36,7 +36,7 @@ describe('useResolveRedirect', () => {
     (useLocation as jest.Mock).mockReturnValue({
       pathname: 'my/cool/path',
       search:
-        'timeline=(activeTab:query,graphEventId:%27%27,id:%2704e8ffb0-2c2a-11ec-949c-39005af91f70%27,isOpen:!t)',
+        'timeline=(activeTab:query,graphEventInfo:(id:%27%27,index:%27%27),id:%2704e8ffb0-2c2a-11ec-949c-39005af91f70%27,isOpen:!t)',
     });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -58,7 +58,7 @@ describe('useResolveRedirect', () => {
       (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
         savedObjectId: 'current-saved-object-id',
         activeTab: 'some-tab',
-        graphEventId: 'current-graph-event-id',
+        graphEventInfo: { id: 'current-graph-event-id', index: 'graph-index' },
         show: false,
       }));
       renderHook(() => useResolveRedirect());
@@ -74,7 +74,7 @@ describe('useResolveRedirect', () => {
         },
         savedObjectId: 'current-saved-object-id',
         activeTab: 'some-tab',
-        graphEventId: 'current-graph-event-id',
+        graphEventInfo: { id: 'current-graph-event-id', index: 'graph-index' },
         show: false,
       }));
       renderHook(() => useResolveRedirect());
@@ -92,7 +92,7 @@ describe('useResolveRedirect', () => {
       }));
       renderHook(() => useResolveRedirect());
       expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(
-        'my/cool/path?timeline=%28activeTab%3Aquery%2CgraphEventId%3A%27%27%2Cid%3Anew-id%2CisOpen%3A%21t%29',
+        'my/cool/path?timeline=%28activeTab%3Aquery%2CgraphEventInfo%3A%28id%3A%27%27%2Cindex%3A%27%27%29%2Cid%3Anew-id%2CisOpen%3A%21t%29',
         'timeline'
       );
     });
@@ -113,12 +113,12 @@ describe('useResolveRedirect', () => {
           },
           savedObjectId: 'current-saved-object-id',
           activeTab: 'some-tab',
-          graphEventId: 'current-graph-event-id',
+          graphEventInfo: { id: 'current-graph-event-id', index: 'graph-index' },
           show: false,
         }));
         renderHook(() => useResolveRedirect());
         expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(
-          'my/cool/path?foo=bar&timeline=%28activeTab%3Asome-tab%2CgraphEventId%3Acurrent-graph-event-id%2Cid%3Anew-id%2CisOpen%3A%21f%29',
+          'my/cool/path?foo=bar&timeline=%28activeTab%3Asome-tab%2CgraphEventInfo%3A%28id%3Acurrent-graph-event-id%2Cindex%3Agraph-index%29%2Cid%3Anew-id%2CisOpen%3A%21f%29',
           'timeline'
         );
       });

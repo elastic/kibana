@@ -188,6 +188,7 @@ describe('Actions', () => {
     test('it shows the analyze event button when the event is from an endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
+        _index: 'index',
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
         process: { entity_id: ['1'] },
@@ -203,6 +204,7 @@ describe('Actions', () => {
     test('it does not render the analyze event button when the event is from an unsupported source', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
+        _index: 'index',
         event: { kind: ['alert'] },
         agent: { type: ['notendpoint'] },
       };

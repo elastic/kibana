@@ -129,7 +129,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
       expect(queryTimelineById).toBeCalledWith({
         activeTimelineTab: 'query',
         duplicate: false,
-        graphEventId: '',
+        graphEventInfo: { id: '', index: '' },
         timelineId: newTestTimelineId,
         openTimeline: true,
         updateIsLoading: mockUpdateTimelineIsLoading,

@@ -441,12 +441,12 @@ describe('EventsViewer', () => {
       expect(wrapper.find(`[data-test-subj="mock-utility-bar"]`).exists()).toBe(true);
     });
 
-    test('it does NOT render the provided utilityBar when Resolver is showing, because graphEventInfo has a valid id', () => {
+    test('it does NOT render the provided utilityBar when Resolver is showing, because graphEventInfo has a valid id and index', () => {
       const wrapper = mount(
         <TestProviders>
           <EventsViewer
             {...eventsViewerDefaultProps}
-            graphEventInfo={{ id: 'a valid id', index: '' }}
+            graphEventInfo={{ id: 'a valid id', index: 'index' }}
           />
         </TestProviders>
       );
