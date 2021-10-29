@@ -88,19 +88,6 @@ export const ControlEditor = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm>
-          <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
-            <EuiButtonGroup
-              color="primary"
-              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-              options={CONTROL_WIDTH_OPTIONS}
-              idSelected={currentWidth}
-              onChange={(newWidth: string) => {
-                setCurrentWidth(newWidth as ControlWidth);
-                updateWidth(newWidth as ControlWidth);
-              }}
-            />
-          </EuiFormRow>
-
           <EuiSpacer size="l" />
           {ControlTypeEditor && (
             <ControlTypeEditor
@@ -123,6 +110,18 @@ export const ControlEditor = ({
               onChange={(e) => {
                 updateTitle(e.target.value || defaultTitle);
                 setCurrentTitle(e.target.value);
+              }}
+            />
+          </EuiFormRow>
+          <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
+            <EuiButtonGroup
+              color="primary"
+              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+              options={CONTROL_WIDTH_OPTIONS}
+              idSelected={currentWidth}
+              onChange={(newWidth: string) => {
+                setCurrentWidth(newWidth as ControlWidth);
+                updateWidth(newWidth as ControlWidth);
               }}
             />
           </EuiFormRow>
