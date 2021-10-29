@@ -23,7 +23,6 @@ import {
   Settings,
   TooltipType,
   XYChartElementEvent,
-  GridLineStyle,
   AxisStyle,
   RecursivePartial,
 } from '@elastic/charts';
@@ -184,43 +183,21 @@ export function DiscoverHistogram({
   const xAxisFormatter = services.data.fieldFormats.deserialize(chartData.yAxisFormat);
 
   const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
-  const gridLineStyle: RecursivePartial<GridLineStyle> = useLegacyTimeAxis
-    ? {}
-    : { strokeWidth: 0.1, stroke: isDarkMode ? 'white' : 'black' };
-  const verticalAxisStyle: RecursivePartial<AxisStyle> = useLegacyTimeAxis
-    ? {}
-    : {
-        axisLine: {
-          visible: false,
-        },
-        tickLabel: {
-          fontSize: 11,
-        },
-      };
+
   const xAxisStyle: RecursivePartial<AxisStyle> = useLegacyTimeAxis
     ? {}
     : {
-        axisLine: {
-          stroke: isDarkMode ? 'lightgray' : 'darkgray',
-          strokeWidth: 1,
-        },
         tickLine: {
-          size: 12,
-          strokeWidth: 0.15,
-          stroke: isDarkMode ? 'white' : 'black',
-          padding: -10,
+          size: 0.0001,
+          strokeWidth: 1,
+          padding: 4,
           visible: true,
         },
         tickLabel: {
-          fontSize: 11,
           padding: 0,
           alignment: {
             vertical: Position.Bottom,
             horizontal: Position.Left,
-          },
-          offset: {
-            x: 1.5,
-            y: 0,
           },
         },
       };
@@ -244,15 +221,12 @@ export function DiscoverHistogram({
             ticks={2}
             integersOnly
             tickFormat={(value) => xAxisFormatter.convert(value)}
-            gridLine={gridLineStyle}
-            style={verticalAxisStyle}
           />
           <Axis
             id="discover-histogram-bottom-axis"
             position={Position.Bottom}
             tickFormat={formatXValue}
             timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-            gridLine={gridLineStyle}
             style={xAxisStyle}
           />
           <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
