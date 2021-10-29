@@ -53,12 +53,7 @@ export const config: PluginConfigDescriptor = {
           schema.object({
             fields: schema.maybe(
               schema.object({
-                timestamp: schema.maybe(schema.string()),
                 message: schema.maybe(schema.arrayOf(schema.string())),
-                tiebreaker: schema.maybe(schema.string()),
-                host: schema.maybe(schema.string()),
-                container: schema.maybe(schema.string()),
-                pod: schema.maybe(schema.string()),
               })
             ),
           })
