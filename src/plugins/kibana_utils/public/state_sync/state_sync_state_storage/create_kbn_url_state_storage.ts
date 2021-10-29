@@ -27,7 +27,7 @@ import {
  * 3. Takes care of listening to the URL updates and notifies state about the updates.
  * 4. Takes care of batching URL updates to prevent redundant browser history records.
  *
- * {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}
+ * {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}
  * @public
  */
 export interface IKbnUrlStateStorage extends IStateStorage {
