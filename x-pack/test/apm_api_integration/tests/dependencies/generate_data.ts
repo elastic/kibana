@@ -9,6 +9,8 @@ import type { SynthtraceEsClient } from '../../common/synthtrace_es_client';
 
 export const dataConfig = {
   spanType: 'db',
+  duration: 1000,
+  rate: 20,
 };
 
 export async function generateData({
@@ -29,17 +31,17 @@ export async function generateData({
   await synthtraceEsClient.index(
     timerange(start, end)
       .interval('1m')
-      .rate(10)
+      .rate(dataConfig.rate)
       .flatMap((timestamp) =>
         instance
           .transaction(transactionName)
           .timestamp(timestamp)
-          .duration(1000)
+          .duration(dataConfig.duration)
           .success()
           .children(
             instance
               .span(spanName, dataConfig.spanType, backendName)
-              .duration(1000)
+              .duration(dataConfig.duration)
               .success()
               .destination(backendName)
               .timestamp(timestamp)

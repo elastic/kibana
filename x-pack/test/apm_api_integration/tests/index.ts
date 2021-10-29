@@ -250,6 +250,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./dependencies/metadata'));
     });
 
+    describe('dependencies/top_dependencies', function () {
+      loadTestFile(require.resolve('./dependencies/top_dependencies'));
+    });
+
     registry.run(providerContext);
   });
 }
