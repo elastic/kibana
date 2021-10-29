@@ -20,3 +20,6 @@ export type { CaseViewProps } from './components/case_view';
 export type { ConfigureCasesProps } from './components/configure_cases';
 export type { CreateCaseProps } from './components/create';
 export type { RecentCasesProps } from './components/recent_cases';
+
+export { getCasesDeepLinks, casesDeepLinkIds } from './common/navigation';
+export type { CASES_DEEP_LINK_ID } from './common/navigation';

@@ -21,7 +21,7 @@ import { APP_UI_ID } from '../../../common/constants';
 
 export const CreateCasePage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
-  const search = useGetUrlSearch(navTabs.case);
+  const search = useGetUrlSearch(navTabs.cases);
   const {
     application: { navigateToApp },
   } = useKibana().services;

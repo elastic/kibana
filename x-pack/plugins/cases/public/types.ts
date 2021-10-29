@@ -19,12 +19,13 @@ import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public'
 import type { SpacesPluginStart } from '../../spaces/public';
 import type { Storage } from '../../../../src/plugins/kibana_utils/public';
 
+import { CasesProps } from './components/app';
 import { AllCasesProps } from './components/all_cases';
 import { CaseViewProps } from './components/case_view';
 import { ConfigureCasesProps } from './components/configure_cases';
 import { CreateCaseProps } from './components/create';
 import { RecentCasesProps } from './components/recent_cases';
-import { AllCasesSelectorModalProps } from './components/all_cases/selector_modal';
+import { GetAllCasesSelectorModalProps, GetCreateCaseFlyoutProps } from './methods';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -57,19 +58,31 @@ export interface Owner {
 
 export interface CasesUiStart {
   /**
+   * Get cases
+   * @param props CasesProps
+   * @return {ReactElement<CasesProps>}
+   */
+  getCases: (props: CasesProps) => ReactElement<CasesProps>;
+  /**
    * Get the all cases table
    * @param props AllCasesProps
    * @returns A react component that displays all cases
    */
   getAllCases: (props: AllCasesProps) => ReactElement<AllCasesProps>;
   /**
-   * use Modal hook for all cases selector
-   * @param props UseAllCasesSelectorModalProps
+   * Modal to select a case in a list of all owner cases
+   * @param props GetAllCasesSelectorModalProps
    * @returns A react component that is a modal for selecting a case
    */
   getAllCasesSelectorModal: (
-    props: AllCasesSelectorModalProps
-  ) => ReactElement<AllCasesSelectorModalProps>;
+    props: GetAllCasesSelectorModalProps
+  ) => ReactElement<GetAllCasesSelectorModalProps>;
+  /**
+   * Flyout with the form to create a case for the owner
+   * @param props GetCreateCaseFlyoutProps
+   * @returns A react component that is a flyout for creating a case
+   */
+  getCreateCaseFlyout: (props: GetCreateCaseFlyoutProps) => ReactElement<GetCreateCaseFlyoutProps>;
   /**
    * Get the case view component
    * @param props CaseViewProps

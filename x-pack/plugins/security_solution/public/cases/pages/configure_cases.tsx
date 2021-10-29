@@ -26,7 +26,7 @@ const ConfigureCasesPageComponent: React.FC = () => {
     cases,
   } = useKibana().services;
   const userPermissions = useGetUserCasesPermissions();
-  const search = useGetUrlSearch(navTabs.case);
+  const search = useGetUrlSearch(navTabs.cases);
 
   const backOptions = useMemo(
     () => ({

@@ -6,12 +6,18 @@
  */
 
 import React from 'react';
+import { Owner } from '../../types';
 import { OwnerProvider } from '../owner_context';
 import { CasesRoutes } from './routes';
+import { CasesRoutesProps } from './types';
 
-// eslint-disable-next-line import/no-default-export
-export default (props) => (
-  <OwnerProvider owner={props.owner}>
+export type CasesProps = CasesRoutesProps & Owner;
+
+export const Cases: React.FC<CasesProps> = ({ owner, ...props }) => (
+  <OwnerProvider owner={owner}>
     <CasesRoutes {...props} />
   </OwnerProvider>
 );
+
+// eslint-disable-next-line import/no-default-export
+export { Cases as default };

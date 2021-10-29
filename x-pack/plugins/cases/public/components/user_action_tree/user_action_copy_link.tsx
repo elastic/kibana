@@ -7,9 +7,12 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
 import copy from 'copy-to-clipboard';
 
+import { useAppUrl } from '../../common/lib/kibana';
 import * as i18n from './translations';
+import { casesDeepLinkIds } from '../../common/navigation';
 
 interface UserActionCopyLinkProps {
   id: string;
@@ -20,9 +23,21 @@ const UserActionCopyLinkComponent = ({
   id: commentId,
   getCaseDetailHrefWithCommentId,
 }: UserActionCopyLinkProps) => {
+  const { getAppUrl } = useAppUrl('securitySolutionUI');
+  const { detailName: caseId, subCaseId } = useParams<{
+    detailName: string;
+    subCaseId?: string;
+  }>();
+
   const handleAnchorLink = useCallback(() => {
-    copy(getCaseDetailHrefWithCommentId(commentId));
-  }, [getCaseDetailHrefWithCommentId, commentId]);
+    copy(
+      getAppUrl({
+        deepLinkId: casesDeepLinkIds.cases,
+        path: `${caseId}/${commentId}`,
+        absolute: true,
+      })
+    );
+  }, [caseId, commentId, getAppUrl]);
 
   return (
     <EuiToolTip position="top" content={<p>{i18n.COPY_REFERENCE_LINK}</p>}>

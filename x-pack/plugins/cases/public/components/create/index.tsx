@@ -20,8 +20,6 @@ import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../t
 import { fieldName as descriptionFieldName } from './description';
 import { InsertTimeline } from '../insert_timeline';
 import { UsePostComment } from '../../containers/use_post_comment';
-import { Owner } from '../../types';
-import { OwnerProvider } from '../owner_context';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -31,7 +29,7 @@ const Container = styled.div`
   `}
 `;
 
-export interface CreateCaseProps extends Owner {
+export interface CreateCaseProps {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   caseType?: CaseType;
   disableAlerts?: boolean;
@@ -42,61 +40,57 @@ export interface CreateCaseProps extends Owner {
   withSteps?: boolean;
 }
 
-const CreateCaseComponent = ({
-  afterCaseCreated,
-  caseType,
-  hideConnectorServiceNowSir,
-  disableAlerts,
-  onCancel,
-  onSuccess,
-  timelineIntegration,
-  withSteps,
-}: Omit<CreateCaseProps, 'owner'>) => (
-  <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-    <FormContext
-      afterCaseCreated={afterCaseCreated}
-      caseType={caseType}
-      hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-      onSuccess={onSuccess}
-      // if we are disabling alerts, then we should not sync alerts
-      syncAlertsDefaultValue={!disableAlerts}
-    >
-      <CreateCaseForm
+export const CreateCase = React.memo<CreateCaseProps>(
+  ({
+    afterCaseCreated,
+    caseType,
+    hideConnectorServiceNowSir,
+    disableAlerts,
+    onCancel,
+    onSuccess,
+    timelineIntegration,
+    withSteps,
+  }) => (
+    <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
+      <FormContext
+        afterCaseCreated={afterCaseCreated}
+        caseType={caseType}
         hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-        disableAlerts={disableAlerts}
-        withSteps={withSteps}
-      />
-      <Container>
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="flexEnd"
-          gutterSize="xs"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="create-case-cancel"
-              iconType="cross"
-              onClick={onCancel}
-              size="s"
-            >
-              {i18n.CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SubmitCaseButton />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Container>
-      <InsertTimeline fieldName={descriptionFieldName} />
-    </FormContext>
-  </CasesTimelineIntegrationProvider>
+        onSuccess={onSuccess}
+        // if we are disabling alerts, then we should not sync alerts
+        syncAlertsDefaultValue={!disableAlerts}
+      >
+        <CreateCaseForm
+          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+          disableAlerts={disableAlerts}
+          withSteps={withSteps}
+        />
+        <Container>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="xs"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="create-case-cancel"
+                iconType="cross"
+                onClick={onCancel}
+                size="s"
+              >
+                {i18n.CANCEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SubmitCaseButton />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Container>
+        <InsertTimeline fieldName={descriptionFieldName} />
+      </FormContext>
+    </CasesTimelineIntegrationProvider>
+  )
 );
 
-export const CreateCase: React.FC<CreateCaseProps> = React.memo((props) => (
-  <OwnerProvider owner={props.owner}>
-    <CreateCaseComponent {...props} />
-  </OwnerProvider>
-));
-// eslint-disable-next-line import/no-default-export
-export { CreateCase as default };
+CreateCase.displayName = 'CreateCase';

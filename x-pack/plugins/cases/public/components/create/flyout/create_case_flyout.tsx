@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
 import * as i18n from '../translations';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { Case } from '../../../../../../../cases/common';
-import type { TimelinesStartServices } from '../../../../../types';
+import { Case } from '../../../../common';
+import { CreateCase } from '..';
 
-export interface CreateCaseModalProps {
+export interface CreateCaseFlyoutProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
-  onCloseFlyout: () => void;
+  onClose: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
-  useInsertTimeline?: Function;
-  appId: string;
-  disableAlerts?: boolean;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
   ${({ theme }) => `
-    z-index: ${theme.eui.euiZLevel5};
-  `}
+      z-index: ${theme.eui.euiZModal};
+    `}
 `;
 
 const maskOverlayClassName = 'create-case-flyout-mask-overlay';
@@ -47,64 +43,50 @@ const GlobalStyle = createGlobalStyle<{ theme: { eui: { euiZLevel5: number } } }
 
 // Adding bottom padding because timeline's
 // bottom bar gonna hide the submit button.
+// might not need for obs, test this when implementing this component
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   ${({ theme }) => `
-    && .euiFlyoutBody__overflow {
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    && .euiFlyoutBody__overflowContent {
-      display: block;
-      padding: ${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 70px;
-      height: auto;
-    }
-  `}
+      && .euiFlyoutBody__overflow {
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+  
+      && .euiFlyoutBody__overflowContent {
+        display: block;
+        padding: ${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 70px;
+        height: auto;
+      }
+    `}
 `;
 
 const FormWrapper = styled.div`
   width: 100%;
 `;
 
-const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
-  afterCaseCreated,
-  onCloseFlyout,
-  onSuccess,
-  appId,
-  disableAlerts,
-}) => {
-  const { cases } = useKibana<TimelinesStartServices>().services;
-  const createCaseProps = useMemo(() => {
-    return {
-      afterCaseCreated,
-      onCancel: onCloseFlyout,
-      onSuccess,
-      withSteps: false,
-      owner: [appId],
-      disableAlerts,
-    };
-  }, [afterCaseCreated, onCloseFlyout, onSuccess, appId, disableAlerts]);
-  return (
+export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
+  ({ afterCaseCreated, onClose, onSuccess }) => (
     <>
       <GlobalStyle />
-      <StyledFlyout
-        onClose={onCloseFlyout}
-        data-test-subj="create-case-flyout"
-        maskProps={{ className: maskOverlayClassName }}
-      >
+      <StyledFlyout onClose={onClose} data-test-subj="create-case-flyout">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>{i18n.CREATE_TITLE}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <StyledEuiFlyoutBody>
-          <FormWrapper>{cases.getCreateCase(createCaseProps)}</FormWrapper>
+          <FormWrapper>
+            <CreateCase
+              afterCaseCreated={afterCaseCreated}
+              onCancel={onClose}
+              onSuccess={onSuccess}
+              withSteps={false}
+              disableAlerts={true}
+            />
+          </FormWrapper>
         </StyledEuiFlyoutBody>
       </StyledFlyout>
     </>
-  );
-};
-
-export const CreateCaseFlyout = memo(CreateCaseFlyoutComponent);
+  )
+);
 
 CreateCaseFlyout.displayName = 'CreateCaseFlyout';

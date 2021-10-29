@@ -12,12 +12,9 @@ import { TimelineItem } from '../../../../../common/';
 import { useAddToCase, normalizedEventFields } from '../../../../hooks/use_add_to_case';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimelinesStartServices } from '../../../../types';
-import { CreateCaseFlyout } from './create/flyout';
 import { tGridActions } from '../../../../';
-import * as i18n from './translations';
 
 export interface AddToCaseActionProps {
-  ariaLabel?: string;
   event?: TimelineItem;
   useInsertTimeline?: Function;
   casePermissions: {
@@ -30,7 +27,6 @@ export interface AddToCaseActionProps {
 }
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
-  ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
   event,
   useInsertTimeline,
   casePermissions,
@@ -52,7 +48,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     isCreateCaseFlyoutOpen,
   } = useAddToCase({ event, useInsertTimeline, casePermissions, appId, onClose });
 
-  const getAllCasesSelectorModalProps = useMemo(() => {
+  const allCasesSelectorModalProps = useMemo(() => {
     const { ruleId, ruleName } = normalizedEventFields(event);
     return {
       alertData: {
@@ -97,19 +93,28 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     dispatch(tGridActions.setOpenAddToNewCase({ id: eventId, isOpen: false }));
   }, [dispatch, eventId]);
 
+  const createCaseFlyoutProps = useMemo(() => {
+    return {
+      afterCaseCreated: attachAlertToCase,
+      onClose: closeCaseFlyoutOpen,
+      onSuccess: onCaseSuccess,
+      useInsertTimeline,
+      owner: [appId],
+      disableAlerts,
+    };
+  }, [
+    attachAlertToCase,
+    closeCaseFlyoutOpen,
+    onCaseSuccess,
+    useInsertTimeline,
+    appId,
+    disableAlerts,
+  ]);
+
   return (
     <>
-      {isCreateCaseFlyoutOpen && (
-        <CreateCaseFlyout
-          afterCaseCreated={attachAlertToCase}
-          onCloseFlyout={closeCaseFlyoutOpen}
-          onSuccess={onCaseSuccess}
-          useInsertTimeline={useInsertTimeline}
-          appId={appId}
-          disableAlerts={disableAlerts}
-        />
-      )}
-      {isAllCaseModalOpen && cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
+      {isCreateCaseFlyoutOpen && cases.getCreateCaseFlyout(createCaseFlyoutProps)}
+      {isAllCaseModalOpen && cases.getAllCasesSelectorModal(allCasesSelectorModalProps)}
     </>
   );
 };

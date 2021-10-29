@@ -21,7 +21,7 @@ export const Create = React.memo(() => {
     cases,
     application: { navigateToApp },
   } = useKibana().services;
-  const search = useGetUrlSearch(navTabs.case);
+  const search = useGetUrlSearch(navTabs.cases);
   const onSuccess = useCallback(
     async ({ id }) =>
       navigateToApp(APP_UI_ID, {

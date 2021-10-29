@@ -11,7 +11,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
-import { Case } from '.';
+import { Cases } from '.';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../common/lib/kibana');
@@ -33,7 +33,7 @@ describe('CaseContainerComponent', () => {
     mount(
       <Router>
         <TestProviders>
-          <Case />
+          <Cases />
         </TestProviders>
       </Router>
     );
@@ -50,7 +50,7 @@ describe('CaseContainerComponent', () => {
     mount(
       <Router>
         <TestProviders>
-          <Case />
+          <Cases />
         </TestProviders>
       </Router>
     );
@@ -64,7 +64,7 @@ describe('CaseContainerComponent', () => {
     mount(
       <Router>
         <TestProviders>
-          <Case />
+          <Cases />
         </TestProviders>
       </Router>
     );
@@ -81,7 +81,7 @@ describe('CaseContainerComponent', () => {
     mount(
       <Router>
         <TestProviders>
-          <Case />
+          <Cases />
         </TestProviders>
       </Router>
     );

@@ -19,7 +19,7 @@ import { Case, CaseViewRefreshPropInterface } from '../../../../../cases/common'
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
-import { APP_UI_ID } from '../../../../common/constants';
+import { APP_ID, APP_UI_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -142,96 +142,148 @@ export const CaseView = React.memo(
     }, [dispatch]);
 
     const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
+    const newComponent = true;
 
     return (
       <CaseDetailsRefreshContext.Provider value={refreshRef}>
-        {casesUi.getCaseView({
-          refreshRef,
-          allCasesNavigation: {
-            href: formattedAllCasesLink,
-            onClick: async (e) => {
-              if (e) {
-                e.preventDefault();
-              }
-              return navigateToApp(APP_UI_ID, {
-                deepLinkId: SecurityPageName.case,
-                path: allCasesLink,
-              });
-            },
-          },
-          caseDetailsNavigation: {
-            href: caseDetailsLink,
-            onClick: async (e) => {
-              if (e) {
-                e.preventDefault();
-              }
-              return navigateToApp(APP_UI_ID, {
-                deepLinkId: SecurityPageName.case,
-                path: getCaseDetailsUrl({ id: caseId }),
-              });
-            },
-          },
-          caseId,
-          configureCasesNavigation: {
-            href: configureCasesHref,
-            onClick: async (e) => {
-              if (e) {
-                e.preventDefault();
-              }
-              return navigateToApp(APP_UI_ID, {
-                deepLinkId: SecurityPageName.case,
-                path: getConfigureCasesUrl(search),
-              });
-            },
-          },
-          getCaseDetailHrefWithCommentId,
-          onCaseDataSuccess,
-          onComponentInitialized,
-          actionsNavigation: {
-            href: endpointDetailsHref,
-            onClick: (endpointId: string, e) => {
-              if (e) {
-                e.preventDefault();
-              }
-              return navigateToApp(APP_UI_ID, {
-                path: getEndpointDetailsPath({
-                  name: 'endpointActivityLog',
-                  selected_endpoint: endpointId,
-                }),
-              });
-            },
-          },
-          ruleDetailsNavigation: {
-            href: getDetectionsRuleDetailsHref,
-            onClick: async (ruleId: string | null | undefined, e) => {
-              if (e) {
-                e.preventDefault();
-              }
-              return navigateToApp(APP_UI_ID, {
-                deepLinkId: SecurityPageName.rules,
-                path: getRuleDetailsUrl(ruleId ?? ''),
-              });
-            },
-          },
-          showAlertDetails,
-          subCaseId,
-          timelineIntegration: {
-            editor_plugins: {
-              parsingPlugin: timelineMarkdownPlugin.parser,
-              processingPluginRenderer: timelineMarkdownPlugin.renderer,
-              uiPlugin: timelineMarkdownPlugin.plugin,
-            },
-            hooks: {
-              useInsertTimeline,
-            },
-            ui: {
-              renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
-              renderTimelineDetailsPanel: TimelineDetailsPanel,
-            },
-          },
-          useFetchAlertData,
-          userCanCrud,
-        })}
+        {!newComponent
+          ? casesUi.getCaseView({
+              refreshRef,
+              allCasesNavigation: {
+                href: formattedAllCasesLink,
+                onClick: async (e) => {
+                  if (e) {
+                    e.preventDefault();
+                  }
+                  return navigateToApp(APP_UI_ID, {
+                    deepLinkId: SecurityPageName.case,
+                    path: allCasesLink,
+                  });
+                },
+              },
+              caseDetailsNavigation: {
+                href: caseDetailsLink,
+                onClick: async (e) => {
+                  if (e) {
+                    e.preventDefault();
+                  }
+                  return navigateToApp(APP_UI_ID, {
+                    deepLinkId: SecurityPageName.case,
+                    path: getCaseDetailsUrl({ id: caseId }),
+                  });
+                },
+              },
+              configureCasesNavigation: {
+                href: configureCasesHref,
+                onClick: async (e) => {
+                  if (e) {
+                    e.preventDefault();
+                  }
+                  return navigateToApp(APP_UI_ID, {
+                    deepLinkId: SecurityPageName.case,
+                    path: getConfigureCasesUrl(search),
+                  });
+                },
+              },
+              getCaseDetailHrefWithCommentId,
+              onCaseDataSuccess,
+              onComponentInitialized,
+              actionsNavigation: {
+                href: endpointDetailsHref,
+                onClick: (endpointId: string, e) => {
+                  if (e) {
+                    e.preventDefault();
+                  }
+                  return navigateToApp(APP_UI_ID, {
+                    path: getEndpointDetailsPath({
+                      name: 'endpointActivityLog',
+                      selected_endpoint: endpointId,
+                    }),
+                  });
+                },
+              },
+              ruleDetailsNavigation: {
+                href: getDetectionsRuleDetailsHref,
+                onClick: async (ruleId: string | null | undefined, e) => {
+                  if (e) {
+                    e.preventDefault();
+                  }
+                  return navigateToApp(APP_UI_ID, {
+                    deepLinkId: SecurityPageName.rules,
+                    path: getRuleDetailsUrl(ruleId ?? ''),
+                  });
+                },
+              },
+              showAlertDetails,
+              timelineIntegration: {
+                editor_plugins: {
+                  parsingPlugin: timelineMarkdownPlugin.parser,
+                  processingPluginRenderer: timelineMarkdownPlugin.renderer,
+                  uiPlugin: timelineMarkdownPlugin.plugin,
+                },
+                hooks: {
+                  useInsertTimeline,
+                },
+                ui: {
+                  renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
+                  renderTimelineDetailsPanel: TimelineDetailsPanel,
+                },
+              },
+              useFetchAlertData,
+              userCanCrud,
+            })
+          : casesUi.getCases({
+            path: '',
+              owner: [APP_ID],
+              appId: APP_UI_ID,
+              refreshRef,
+              onCaseDataSuccess,
+              onComponentInitialized,
+              actionsNavigation: {
+                href: endpointDetailsHref,
+                onClick: (endpointId: string, e) => {
+                  if (e) {
+                    e.preventDefault();
+                  }
+                  return navigateToApp(APP_UI_ID, {
+                    path: getEndpointDetailsPath({
+                      name: 'endpointActivityLog',
+                      selected_endpoint: endpointId,
+                    }),
+                  });
+                },
+              },
+              ruleDetailsNavigation: {
+                href: getDetectionsRuleDetailsHref,
+                onClick: async (ruleId: string | null | undefined, e) => {
+                  if (e) {
+                    e.preventDefault();
+                  }
+                  return navigateToApp(APP_UI_ID, {
+                    deepLinkId: SecurityPageName.rules,
+                    path: getRuleDetailsUrl(ruleId ?? ''),
+                  });
+                },
+              },
+              showAlertDetails,
+              subCaseId,
+              timelineIntegration: {
+                editor_plugins: {
+                  parsingPlugin: timelineMarkdownPlugin.parser,
+                  processingPluginRenderer: timelineMarkdownPlugin.renderer,
+                  uiPlugin: timelineMarkdownPlugin.plugin,
+                },
+                hooks: {
+                  useInsertTimeline,
+                },
+                ui: {
+                  renderInvestigateInTimelineActionComponent: InvestigateInTimelineActionComponent,
+                  renderTimelineDetailsPanel: TimelineDetailsPanel,
+                },
+              },
+              useFetchAlertData,
+              userCanCrud,
+            })}
       </CaseDetailsRefreshContext.Provider>
     );
   }

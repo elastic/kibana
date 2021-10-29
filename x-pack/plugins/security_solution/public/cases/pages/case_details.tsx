@@ -28,7 +28,7 @@ export const CaseDetailsPage = React.memo(() => {
     detailName?: string;
     subCaseId?: string;
   }>();
-  const search = useGetUrlSearch(navTabs.case);
+  const search = useGetUrlSearch(navTabs.cases);
 
   useEffect(() => {
     if (userPermissions != null && !userPermissions.read) {

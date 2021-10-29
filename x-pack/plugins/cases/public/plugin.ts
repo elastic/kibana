@@ -17,6 +17,7 @@ import {
   getCreateCaseLazy,
   getRecentCasesLazy,
   getAllCasesSelectorModalLazy,
+  getCreateCaseFlyoutLazy,
 } from './methods';
 import { CasesUiConfigType, ENABLE_CASE_CONNECTOR } from '../common';
 
@@ -41,9 +42,9 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
     return {
       /**
-       * Get the all cases table
-       * @param props AllCasesProps
-       * @return {ReactElement<AllCasesProps>}
+       * Get the cases
+       * @param props CasesProps
+       * @return {ReactElement<CasesProps>}
        */
       getCases: getCasesLazy,
       /**
@@ -76,11 +77,7 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
        * @return {ReactElement<RecentCasesProps>}
        */
       getRecentCases: getRecentCasesLazy,
-      /**
-       * use Modal hook for all cases selector
-       * @param props UseAllCasesSelectorModalProps
-       * @return UseAllCasesSelectorModalReturnedValues
-       */
+      getCreateCaseFlyout: getCreateCaseFlyoutLazy,
       getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
     };
   }

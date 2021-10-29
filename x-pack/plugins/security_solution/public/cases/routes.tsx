@@ -10,11 +10,11 @@ import React from 'react';
 import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
 import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { CASES_PATH } from '../../common/constants';
-import { Case } from './pages';
+import { Cases } from './pages';
 
 export const CasesRoutes = () => (
   <TrackApplicationView viewId={SecurityPageName.case}>
-    <Case />
+    <Cases />
   </TrackApplicationView>
 );
 

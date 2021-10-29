@@ -4,5 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { CreateCaseFlyout, CreateCaseFlyoutProps } from './create_case_flyout';
 
-export { getCasesDeepLink } from './cases_deep_links';
+export { CreateCaseFlyout, CreateCaseFlyoutProps };
+// eslint-disable-next-line import/no-default-export
+export default CreateCaseFlyout;

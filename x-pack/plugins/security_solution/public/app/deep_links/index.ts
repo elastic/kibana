@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { get } from 'lodash';
 import { LicenseType } from '../../../../licensing/common/types';
+import { getCasesDeepLinks } from '../../../../cases/public';
 import { SecurityPageName } from '../types';
 import { AppDeepLink, AppNavLinkStatus, Capabilities } from '../../../../../../src/core/public';
 import {
@@ -22,7 +23,6 @@ import {
   INVESTIGATE,
   NETWORK,
   TIMELINES,
-  CASE,
   MANAGE,
   UEBA,
   HOST_ISOLATION_EXCEPTIONS,
@@ -289,44 +289,23 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           },
         ],
       },
-      // getCasesDeepLink({ extend: {
-      //   [SecurityPageName.case]: {
-      //     navLinkStatus: AppNavLinkStatus.visible,
-      //     order: 9006,
-      //   }
-      // }}),
-      {
-        id: SecurityPageName.case,
-        title: CASE,
+      getCasesDeepLinks<SecuritySolutionDeepLink>({
         path: CASES_PATH,
-        navLinkStatus: AppNavLinkStatus.visible,
-        features: [FEATURE.casesRead],
-        keywords: [
-          i18n.translate('xpack.securitySolution.search.cases', {
-            defaultMessage: 'Cases',
-          }),
-        ],
-        order: 9006,
-        deepLinks: [
-          {
-            id: SecurityPageName.caseCreate,
-            title: i18n.translate('xpack.securitySolution.search.cases.create', {
-              defaultMessage: 'Create New Case',
-            }),
-            path: `${CASES_PATH}/create`,
+        extend: {
+          [SecurityPageName.case]: {
+            navLinkStatus: AppNavLinkStatus.visible,
+            order: 9006,
+            features: [FEATURE.casesRead],
+          },
+          [SecurityPageName.caseConfigure]: {
+            features: [FEATURE.casesCrud],
+            // isPremium: true,
+          },
+          [SecurityPageName.caseCreate]: {
             features: [FEATURE.casesCrud],
           },
-          {
-            id: SecurityPageName.caseConfigure,
-            title: i18n.translate('xpack.securitySolution.search.cases.configure', {
-              defaultMessage: 'Configure Cases',
-            }),
-            path: `${CASES_PATH}/configure`,
-            features: [FEATURE.casesCrud],
-            isPremium: true,
-          },
-        ],
-      },
+        },
+      }),
     ],
   },
   {

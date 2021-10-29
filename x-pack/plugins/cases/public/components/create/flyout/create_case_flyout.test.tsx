@@ -8,13 +8,13 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CreateCaseFlyout } from './flyout';
-import { TestProviders } from '../../../../../mock';
+import { CreateCaseFlyout } from './create_case_flyout';
+import { TestProviders } from '../../../common/mock';
 
-const onCloseFlyout = jest.fn();
+const onClose = jest.fn();
 const onSuccess = jest.fn();
 const defaultProps = {
-  onCloseFlyout,
+  onClose,
   onSuccess,
   appId: 'securitySolution',
 };
@@ -42,6 +42,6 @@ describe('CreateCaseFlyout', () => {
     );
 
     wrapper.find(`[data-test-subj='euiFlyoutCloseButton']`).first().simulate('click');
-    expect(onCloseFlyout).toBeCalled();
+    expect(onClose).toBeCalled();
   });
 });

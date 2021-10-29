@@ -117,18 +117,7 @@ export const useAddToCase = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const isAlert = useMemo(() => {
-    if (event !== undefined) {
-      const data = [...event.data];
-      return data.some(({ field }) => field === 'kibana.alert.rule.uuid');
-    } else {
-      return false;
-    }
-  }, [event]);
-  const isSecurityAlert = useMemo(() => {
-    return !isEmpty(event?.ecs.signal?.rule?.id);
-  }, [event]);
-  const isEventSupported = isSecurityAlert || isAlert;
+  const isEventSupported = useMemo(() => !isEmpty(event?.ecs.kibana?.alert?.rule?.uuid), [event]);
   const userCanCrud = casePermissions?.crud ?? false;
   const isDisabled = !userCanCrud || !isEventSupported;
 

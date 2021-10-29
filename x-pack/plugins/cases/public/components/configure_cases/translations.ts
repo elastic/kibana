@@ -176,3 +176,7 @@ export const DEPRECATED_TOOLTIP_CONTENT = i18n.translate(
     defaultMessage: 'This connector is deprecated. Update it, or create a new one.',
   }
 );
+
+export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureCases.headerTitle', {
+  defaultMessage: 'Configure cases',
+});

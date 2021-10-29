@@ -5,83 +5,195 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import { useNavigation } from '../../common/lib/kibana';
+import { AllCases, AllCasesProps } from '../all_cases';
 
-import * as i18n from './translations';
-import { CaseDetailsPage } from './case_details';
-import { CasesPage } from './case';
-import { CreateCasePage } from './create_case';
-import { ConfigureCasesPage } from './configure_cases';
-import { useKibana } from '../../common/lib/kibana';
+import { CaseView, CaseViewProps } from '../case_view';
+import { CreateCase, CreateCaseProps } from '../create';
+import { ConfigureCase, ConfigureCaseProps } from '../configure_cases';
 import {
+  casesDeepLinkIds,
   getCasesConfigurePath,
   getCasesCreatePath,
   getCasesDetailPath,
   getCasesDetailWithCommentPath,
-  getCasesPath,
   getCasesSubCaseDetailPath,
   getCasesSubCaseDetailWithCommentPath,
-} from './paths';
+} from '../../common/navigation';
+import { CasesRoutesProps } from './types';
 
-export interface UserPermissions {
-  crud: boolean;
-  read: boolean;
-}
-export interface CasesRoutesProps {
-  basePath?: string;
-  userPermissions: UserPermissions;
-}
+const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ path, appId, ...props }) => {
+  const { userCanCrud } = props;
+  const { getAppUrl, navigateTo } = useNavigation(appId);
 
-const CasesRoutesComponent: React.FC<CasesRoutesProps> = (props) => {
-  const { basePath, userPermissions } = props;
-  const chrome = useKibana().services.chrome;
+  const viewProps = useMemo(
+    (): Omit<CaseViewProps, 'caseId' | 'subCaseId'> => ({
+      ...props,
+      allCasesNavigation: {
+        href: getAppUrl({
+          deepLinkId: casesDeepLinkIds.cases,
+        }),
+        onClick: async (e) => {
+          if (e) {
+            e.preventDefault();
+          }
+          navigateTo({
+            deepLinkId: casesDeepLinkIds.cases,
+          });
+        },
+      },
+      caseDetailsNavigation: {
+        href: getAppUrl({
+          deepLinkId: casesDeepLinkIds.cases,
+        }),
+        onClick: async (e) => {
+          if (e) {
+            e.preventDefault();
+          }
+          navigateTo({
+            deepLinkId: casesDeepLinkIds.cases,
+          });
+        },
+      },
+      configureCasesNavigation: {
+        href: getAppUrl({
+          deepLinkId: casesDeepLinkIds.casesConfigure,
+        }),
+        onClick: async (e) => {
+          if (e) {
+            e.preventDefault();
+          }
+          navigateTo({
+            deepLinkId: casesDeepLinkIds.casesConfigure,
+          });
+        },
+      },
+      getCaseDetailHrefWithCommentId: (commentId: string) => '',
+    }),
+    [props, getAppUrl, navigateTo]
+  );
 
-  useEffect(() => {
-    // if the user is read only then display the glasses badge in the global navigation header
-    if (userPermissions != null && !userPermissions.crud && userPermissions.read) {
-      chrome.setBadge({
-        text: i18n.READ_ONLY_BADGE_TEXT,
-        tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
-        iconType: 'glasses',
-      });
-    }
+  const allCasesProps = useMemo(
+    (): AllCasesProps => ({
+      ...props,
+      createCaseNavigation: {
+        href: getAppUrl({
+          deepLinkId: casesDeepLinkIds.casesCreate,
+        }),
+        onClick: async (e) => {
+          if (e) {
+            e.preventDefault();
+          }
+          navigateTo({
+            deepLinkId: casesDeepLinkIds.casesCreate,
+          });
+        },
+      },
+      caseDetailsNavigation: {
+        href: ({ detailName, subCaseId }) =>
+          getAppUrl({
+            deepLinkId: casesDeepLinkIds.cases,
+            path: `/${detailName}${subCaseId ? `/sub-cases/${subCaseId}` : ''}`,
+          }),
+        onClick: async ({ detailName, subCaseId }, e) => {
+          if (e) {
+            e.preventDefault();
+          }
+          navigateTo({
+            deepLinkId: casesDeepLinkIds.cases,
+            path: `/${detailName}${subCaseId ? `/sub-cases/${subCaseId}` : ''}`,
+          });
+        },
+      },
+      configureCasesNavigation: {
+        href: getAppUrl({
+          deepLinkId: casesDeepLinkIds.casesConfigure,
+        }),
+        onClick: async (e) => {
+          if (e) {
+            e.preventDefault();
+          }
+          navigateTo({
+            deepLinkId: casesDeepLinkIds.casesConfigure,
+          });
+        },
+      },
+    }),
+    [props, getAppUrl, navigateTo]
+  );
 
-    // remove the icon after the component unmounts
-    return () => {
-      chrome.setBadge();
-    };
-  }, [userPermissions, chrome]);
+  const createCaseProps = useMemo(
+    (): CreateCaseProps => ({
+      onCancel: async () =>
+        navigateTo({
+          deepLinkId: casesDeepLinkIds.cases,
+        }),
+      onSuccess: async ({ id }) =>
+        navigateTo({
+          deepLinkId: casesDeepLinkIds.cases,
+          path: `/${id}`,
+        }),
+      timelineIntegration: props.timelineIntegration,
+    }),
+    [props, navigateTo]
+  );
+
+  const configureCaseProps = useMemo(
+    (): ConfigureCaseProps => ({
+      userCanCrud: props.userCanCrud,
+      allCasesNavigation: {
+        href: getAppUrl({
+          deepLinkId: casesDeepLinkIds.cases,
+        }),
+        onClick: async (e) => {
+          if (e) {
+            e.preventDefault();
+          }
+          navigateTo({
+            deepLinkId: casesDeepLinkIds.cases,
+          });
+        },
+      },
+    }),
+    [props.userCanCrud, getAppUrl, navigateTo]
+  );
 
   return (
     <Switch>
-      {userPermissions.crud && (
-        <>
-          <Route path={getCasesCreatePath(basePath)}>
-            <CreateCasePage {...props} />
-          </Route>
-          <Route path={getCasesConfigurePath(basePath)}>
-            <ConfigureCasesPage {...props} />
-          </Route>
-          <Route exact path={getCasesSubCaseDetailWithCommentPath(basePath)}>
-            <CaseDetailsPage {...props} />
-          </Route>
-          <Route exact path={getCasesDetailWithCommentPath(basePath)}>
-            <CaseDetailsPage {...props} />
-          </Route>
-          <Route exact path={getCasesSubCaseDetailPath(basePath)}>
-            <CaseDetailsPage {...props} />
-          </Route>
-          <Route path={getCasesDetailPath(basePath)}>
-            <CaseDetailsPage {...props} />
-          </Route>
-        </>
-      )}
-      {userPermissions.read && (
-        <Route strict exact path={getCasesPath(basePath)}>
-          <CasesPage {...props} />
+      <Route strict exact path={path}>
+        <AllCases {...allCasesProps} />
+      </Route>
+
+      {/* Using individual conditionals since Switch don't work well with Fragment wrapped Routes */}
+      {userCanCrud && (
+        <Route path={getCasesCreatePath(path)}>
+          <CreateCase {...createCaseProps} />
         </Route>
       )}
+      {userCanCrud && (
+        <Route path={getCasesConfigurePath(path)}>
+          <ConfigureCase {...configureCaseProps} />
+        </Route>
+      )}
+      {userCanCrud && (
+        <Route
+          exact
+          path={[
+            getCasesSubCaseDetailWithCommentPath(path),
+            getCasesDetailWithCommentPath(path),
+            getCasesSubCaseDetailPath(path),
+            getCasesDetailPath(path),
+          ]}
+        >
+          <CaseView {...viewProps} />
+        </Route>
+      )}
+
+      <Route path={path}>
+        <Redirect to={path} />
+      </Route>
     </Switch>
   );
 };

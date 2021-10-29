@@ -7,22 +7,19 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { AllCasesSelectorModalProps } from '../components/all_cases/selector_modal';
+import { CreateCaseFlyoutProps } from '../components/create/flyout';
 import { OwnerProvider } from '../components/owner_context';
 import { Owner } from '../types';
 
-export type GetAllCasesSelectorModalProps = AllCasesSelectorModalProps & Owner;
+export type GetCreateCaseFlyoutProps = CreateCaseFlyoutProps & Owner;
 
-const AllCasesSelectorModalLazy: React.FC<AllCasesSelectorModalProps> = lazy(
-  () => import('../components/all_cases/selector_modal')
+const CreateCaseFlyout: React.FC<CreateCaseFlyoutProps> = lazy(
+  () => import('../components/create/flyout')
 );
-export const getAllCasesSelectorModalLazy = ({
-  owner,
-  ...props
-}: GetAllCasesSelectorModalProps) => (
+export const getCreateCaseFlyoutLazy = ({ owner, ...props }: GetCreateCaseFlyoutProps) => (
   <OwnerProvider owner={owner}>
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <AllCasesSelectorModalLazy {...props} />
+      <CreateCaseFlyout {...props} />
     </Suspense>
   </OwnerProvider>
 );

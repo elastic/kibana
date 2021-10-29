@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState, useRef, MutableRefObj
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
 
+import { useParams } from 'react-router-dom';
 import {
   CaseStatuses,
   CaseAttributes,
@@ -63,7 +64,7 @@ export interface CaseViewComponentProps {
   hideSyncAlerts?: boolean;
 }
 
-export interface CaseViewProps extends CaseViewComponentProps {
+export interface CaseViewProps extends Omit<CaseViewComponentProps, 'caseId' | 'subCaseId'> {
   onCaseDataSuccess?: (data: Case) => void;
   timelineIntegration?: CasesTimelineIntegration;
 }
@@ -523,7 +524,6 @@ export const CaseView = React.memo(
   ({
     allCasesNavigation,
     caseDetailsNavigation,
-    caseId,
     configureCasesNavigation,
     getCaseDetailHrefWithCommentId,
     onCaseDataSuccess,
@@ -531,16 +531,19 @@ export const CaseView = React.memo(
     actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
-    subCaseId,
     timelineIntegration,
     useFetchAlertData,
     userCanCrud,
     refreshRef,
     hideSyncAlerts,
   }: CaseViewProps) => {
+    const { spaces: spacesApi, http } = useKibana().services;
+    const { detailName: caseId, subCaseId } = useParams<{
+      detailName: string;
+      subCaseId?: string;
+    }>();
     const { data, resolveOutcome, resolveAliasId, isLoading, isError, fetchCase, updateCase } =
       useGetCase(caseId, subCaseId);
-    const { spaces: spacesApi, http } = useKibana().services;
 
     useEffect(() => {
       if (onCaseDataSuccess && data) {
