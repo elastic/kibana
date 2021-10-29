@@ -7,7 +7,6 @@
 
 import { SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
 import { FieldMigrator } from '../../utils/migrator';
-import { defaultDataViewRef } from '../../../../../common/constants';
 
 /**
  * A migrator to handle moving specific fields that reference other saved objects to the references field within a saved
@@ -15,5 +14,4 @@ import { defaultDataViewRef } from '../../../../../common/constants';
  */
 export const timelineFieldsMigrator = new FieldMigrator([
   { path: 'savedQueryId', type: SAVED_QUERY_TYPE, name: SAVED_QUERY_ID_REF_NAME },
-  { ...defaultDataViewRef, path: 'dataViewId' },
 ]);

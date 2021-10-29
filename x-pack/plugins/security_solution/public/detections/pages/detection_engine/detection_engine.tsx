@@ -78,6 +78,7 @@ import {
   FILTER_OPEN,
 } from '../../components/alerts_table/alerts_filter_group';
 import { EmptyPage } from '../../../common/components/empty_page';
+import { sourcererSelectors } from '../../../common/store';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -237,6 +238,26 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const { indicesExist, indexPattern } = useSourcererDataView(SourcererScopeName.detections);
 
+  // TODO: Steph/sourcerer, get below values from useSourcererDataView in issue#1730
+  const getDefaultDataViewSelector = useMemo(
+    () => sourcererSelectors.defaultDataViewSelector(),
+    []
+  );
+  const getSignalIndexNameSelector = useMemo(
+    () => sourcererSelectors.signalIndexNameSelector(),
+    []
+  );
+  const signalIndexNameSourcerer = useDeepEqualSelector(getSignalIndexNameSelector);
+  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
+  const { isSignalIndexNeedsInit, showResults } = useMemo(
+    () => ({
+      isSignalIndexNeedsInit:
+        indicesExist === false && !defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
+      showResults: indicesExist || defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
+    }),
+    [defaultDataView.title, indicesExist, signalIndexNameSourcerer]
+  );
+
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     focusUtilityBarAction(containerElement.current);
   }, [containerElement]);
@@ -291,31 +312,30 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     );
   }
 
-  if (!loading && (indicesExist === false || needsListsConfiguration)) {
+  if ((!loading && isSignalIndexNeedsInit) || needsListsConfiguration) {
     return (
       <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
         <DetectionEngineNoIndex
-          needsSignalsIndex={indicesExist === false}
+          needsSignalsIndex={isSignalIndexNeedsInit}
           needsListsIndex={needsListsConfiguration}
         />
       </SecuritySolutionPageWrapper>
     );
   }
-
   return (
     <>
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {indicesExist && (hasIndexRead === false || canUserREAD === false) ? (
+      {showResults && (hasIndexRead === false || canUserREAD === false) ? (
         <EmptyPage
           actions={emptyPageActions}
           message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
           data-test-subj="no_feature_permissions-alerts"
           title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
         />
-      ) : indicesExist && hasIndexRead && canUserREAD ? (
+      ) : showResults && hasIndexRead && canUserREAD ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>

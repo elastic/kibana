@@ -8,11 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { StartServicesAccessor } from 'kibana/server';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import {
-  DEFAULT_DATA_VIEW_ID,
-  DEFAULT_TIME_FIELD,
-  SOURCERER_API_URL,
-} from '../../../../common/constants';
+import { DEFAULT_TIME_FIELD, SOURCERER_API_URL } from '../../../../common/constants';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { sourcererSchema } from './schema';
@@ -35,6 +31,8 @@ export const createSourcererDataViewRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+      const siemClient = context.securitySolution?.getAppClient();
+      const dataViewId = siemClient.getSourcererDataViewId();
       try {
         const [
           ,
@@ -49,18 +47,18 @@ export const createSourcererDataViewRoute = (
 
         let allDataViews = await dataViewService.getIdsWithTitle();
         const { patternList } = request.body;
-        const siemDataView = allDataViews.find((v) => v.id === DEFAULT_DATA_VIEW_ID);
+        const siemDataView = allDataViews.find((v) => v.id === dataViewId);
         const patternListAsTitle = patternList.join();
 
         if (siemDataView == null) {
           const defaultDataView = await dataViewService.createAndSave({
             allowNoIndex: true,
-            id: DEFAULT_DATA_VIEW_ID,
+            id: dataViewId,
             title: patternListAsTitle,
             timeFieldName: DEFAULT_TIME_FIELD,
           });
-          // ?? DEFAULT_DATA_VIEW_ID -> type thing here, should never happen
-          allDataViews.push({ ...defaultDataView, id: defaultDataView.id ?? DEFAULT_DATA_VIEW_ID });
+          // ?? dataViewId -> type thing here, should never happen
+          allDataViews.push({ ...defaultDataView, id: defaultDataView.id ?? dataViewId });
         } else if (patternListAsTitle !== siemDataView.title) {
           const defaultDataView = { ...siemDataView, id: siemDataView.id ?? '' };
           const wholeDataView = await dataViewService.get(defaultDataView.id);
@@ -68,7 +66,7 @@ export const createSourcererDataViewRoute = (
           await dataViewService.updateSavedObject(wholeDataView);
           // update the data view in allDataViews
           allDataViews = allDataViews.map((v) =>
-            v.id === DEFAULT_DATA_VIEW_ID ? { ...v, title: patternListAsTitle } : v
+            v.id === dataViewId ? { ...v, title: patternListAsTitle } : v
           );
         }
 
@@ -89,7 +87,7 @@ export const createSourcererDataViewRoute = (
           patternList: activePatternLists[i],
         }));
         const body = {
-          defaultDataView: kibanaDataViews.find((p) => p.id === DEFAULT_DATA_VIEW_ID) ?? {},
+          defaultDataView: kibanaDataViews.find((p) => p.id === dataViewId) ?? {},
           kibanaDataViews,
         };
         return response.ok({ body });

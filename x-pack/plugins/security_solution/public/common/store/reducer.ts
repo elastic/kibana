@@ -58,17 +58,20 @@ export const createInitialState = (
     [SourcererScopeName.default]: getScopePatternListSelection(
       fullDefaultDataView,
       SourcererScopeName.default,
-      signalIndexName
+      signalIndexName,
+      true
     ),
     [SourcererScopeName.detections]: getScopePatternListSelection(
       fullDefaultDataView,
       SourcererScopeName.detections,
-      signalIndexName
+      signalIndexName,
+      true
     ),
     [SourcererScopeName.timeline]: getScopePatternListSelection(
       fullDefaultDataView,
       SourcererScopeName.timeline,
-      signalIndexName
+      signalIndexName,
+      true
     ),
   };
 

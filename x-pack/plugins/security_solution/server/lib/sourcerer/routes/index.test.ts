@@ -12,7 +12,7 @@ import {
   requestContextMock,
 } from '../../detection_engine/routes/__mocks__';
 
-import { DEFAULT_DATA_VIEW_ID, SOURCERER_API_URL } from '../../../../common/constants';
+import { SOURCERER_API_URL } from '../../../../common/constants';
 import { StartServicesAccessor } from 'kibana/server';
 import { StartPlugins } from '../../../plugin';
 
@@ -75,7 +75,7 @@ const getStartServicesNotSiem = jest.fn().mockReturnValue([
       indexPatterns: {
         indexPatternsServiceFactory: () => ({
           getIdsWithTitle: () =>
-            new Promise((rs) => rs(mockDataViews.filter((v) => v.id !== DEFAULT_DATA_VIEW_ID))),
+            new Promise((rs) => rs(mockDataViews.filter((v) => v.id !== mockPattern.id))),
           get: () => new Promise((rs) => rs(mockPattern)),
           createAndSave: () => new Promise((rs) => rs(mockPattern)),
           updateSavedObject: () => new Promise((rs) => rs(mockPattern)),

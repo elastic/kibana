@@ -136,20 +136,21 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         getScopePatternListSelection(
           kibanaDataViews.find((dataView) => dataView.id === newSelectedOption),
           scopeId,
-          signalIndexName
+          signalIndexName,
+          newSelectedOption === defaultDataView.id
         ).map((indexSelected: string) => ({
           label: indexSelected,
           value: indexSelected,
         }))
       );
     },
-    [kibanaDataViews, scopeId, signalIndexName]
+    [defaultDataView.id, kibanaDataViews, scopeId, signalIndexName]
   );
 
   const resetDataSources = useCallback(() => {
     setDataViewId(defaultDataView.id);
     setSelectedOptions(
-      getScopePatternListSelection(defaultDataView, scopeId, signalIndexName).map(
+      getScopePatternListSelection(defaultDataView, scopeId, signalIndexName, true).map(
         (indexSelected: string) => ({
           label: indexSelected,
           value: indexSelected,

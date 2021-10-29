@@ -98,7 +98,8 @@ export const useInitSourcerer = (
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
             SourcererScopeName.timeline,
-            signalIndexName
+            signalIndexName,
+            true
           ),
         })
       );
@@ -115,7 +116,8 @@ export const useInitSourcerer = (
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
             SourcererScopeName.timeline,
-            signalIndexNameSelector
+            signalIndexNameSelector,
+            true
           ),
         })
       );
@@ -129,10 +131,54 @@ export const useInitSourcerer = (
     signalIndexNameSelector,
   ]);
 
+  const pollForSignalIndex = useCallback(
+    (newPatternList: string[], newSignalsIndex: string, ms: number) => {
+      let doesIndexExist = false;
+      const asyncSearch = async () => {
+        abortCtrl.current = new AbortController();
+        try {
+          const response = await postSourcererDataView({
+            body: { patternList: newPatternList },
+            signal: abortCtrl.current.signal,
+          });
+
+          if (response.defaultDataView.patternList.includes(newSignalsIndex)) {
+            // first time signals is defined and validated in the sourcerer
+            // redo indexFieldsSearch
+            indexFieldsSearch(response.defaultDataView.id);
+            dispatch(sourcererActions.setSourcererDataViews(response));
+            doesIndexExist = true;
+          }
+        } catch (err) {
+          addError(err, {
+            title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
+              defaultMessage: 'Error updating Security Data View',
+            }),
+            toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
+              defaultMessage: 'Refresh the page',
+            }),
+          });
+        }
+      };
+
+      const poll = () => {
+        abortCtrl.current.abort();
+        asyncSearch();
+        setTimeout(function () {
+          if (!doesIndexExist) {
+            poll();
+          }
+        }, ms);
+      };
+      poll();
+    },
+    [addError, dispatch, indexFieldsSearch]
+  );
   const updateSourcererDataView = useCallback(
     (newSignalsIndex: string) => {
       const asyncSearch = async (newPatternList: string[]) => {
         abortCtrl.current = new AbortController();
+
         dispatch(sourcererActions.setSourcererScopeLoading({ loading: true }));
         try {
           const response = await postSourcererDataView({
@@ -144,6 +190,9 @@ export const useInitSourcerer = (
             // first time signals is defined and validated in the sourcerer
             // redo indexFieldsSearch
             indexFieldsSearch(response.defaultDataView.id);
+          } else {
+            // signals index does not yet exist, check every 10 seconds
+            pollForSignalIndex(newPatternList, newSignalsIndex, 10000);
           }
           dispatch(sourcererActions.setSourcererDataViews(response));
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
@@ -165,7 +214,7 @@ export const useInitSourcerer = (
         asyncSearch([...defaultDataView.title.split(','), newSignalsIndex]);
       }
     },
-    [defaultDataView.title, dispatch, indexFieldsSearch, addError]
+    [defaultDataView.title, dispatch, indexFieldsSearch, pollForSignalIndex, addError]
   );
   useEffect(() => {
     if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {
@@ -200,7 +249,8 @@ export const useInitSourcerer = (
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
             SourcererScopeName.detections,
-            signalIndexName
+            signalIndexName,
+            true
           ),
         })
       );
@@ -216,7 +266,8 @@ export const useInitSourcerer = (
         selectedPatterns: getScopePatternListSelection(
           defaultDataView,
           SourcererScopeName.detections,
-          signalIndexNameSelector
+          signalIndexNameSelector,
+          true
         ),
       });
     }

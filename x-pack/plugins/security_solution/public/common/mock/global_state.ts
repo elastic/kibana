@@ -337,7 +337,8 @@ export const mockGlobalState: State = {
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
           SourcererScopeName.default,
-          mockSourcererState.signalIndexName
+          mockSourcererState.signalIndexName,
+          true
         ),
       },
       [SourcererScopeName.detections]: {
@@ -346,7 +347,8 @@ export const mockGlobalState: State = {
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
           SourcererScopeName.detections,
-          mockSourcererState.signalIndexName
+          mockSourcererState.signalIndexName,
+          true
         ),
       },
       [SourcererScopeName.timeline]: {
@@ -355,7 +357,8 @@ export const mockGlobalState: State = {
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
           SourcererScopeName.timeline,
-          mockSourcererState.signalIndexName
+          mockSourcererState.signalIndexName,
+          true
         ),
       },
     },

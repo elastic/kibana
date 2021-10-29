@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
-
 export const mockTemplate = {
   columns: [
     {
@@ -195,7 +193,7 @@ export const mockTimeline = {
     { columnHeaderType: 'not-filtered', id: 'user.name' },
   ],
   dataProviders: [],
-  dataViewId: DEFAULT_DATA_VIEW_ID,
+  dataViewId: 'security-solution',
   description: '',
   eventType: 'all',
   excludedRowRendererIds: [],
