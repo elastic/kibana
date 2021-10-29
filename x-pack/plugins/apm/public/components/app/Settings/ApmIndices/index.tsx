@@ -30,40 +30,40 @@ import {
 
 const APM_INDEX_LABELS = [
   {
-    configurationName: 'apm_oss.sourcemapIndices',
+    configurationName: 'sourcemap',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.sourcemapIndicesLabel',
       { defaultMessage: 'Sourcemap Indices' }
     ),
   },
   {
-    configurationName: 'apm_oss.errorIndices',
+    configurationName: 'error',
     label: i18n.translate('xpack.apm.settings.apmIndices.errorIndicesLabel', {
       defaultMessage: 'Error Indices',
     }),
   },
   {
-    configurationName: 'apm_oss.onboardingIndices',
+    configurationName: 'onboarding',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.onboardingIndicesLabel',
       { defaultMessage: 'Onboarding Indices' }
     ),
   },
   {
-    configurationName: 'apm_oss.spanIndices',
+    configurationName: 'span',
     label: i18n.translate('xpack.apm.settings.apmIndices.spanIndicesLabel', {
       defaultMessage: 'Span Indices',
     }),
   },
   {
-    configurationName: 'apm_oss.transactionIndices',
+    configurationName: 'transaction',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.transactionIndicesLabel',
       { defaultMessage: 'Transaction Indices' }
     ),
   },
   {
-    configurationName: 'apm_oss.metricsIndices',
+    configurationName: 'metric',
     label: i18n.translate('xpack.apm.settings.apmIndices.metricsIndicesLabel', {
       defaultMessage: 'Metrics Indices',
     }),
@@ -145,7 +145,7 @@ export function ApmIndices() {
           }
         ),
       });
-    } catch (error) {
+    } catch (error: any) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.settings.apmIndices.applyChanges.failed.title',
@@ -178,7 +178,7 @@ export function ApmIndices() {
     <>
       <EuiText color="subdued">
         {i18n.translate('xpack.apm.settings.apmIndices.description', {
-          defaultMessage: `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
+          defaultMessage: `The APM UI uses data views to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
         })}
       </EuiText>
 
@@ -215,7 +215,10 @@ export function ApmIndices() {
                     {
                       defaultMessage:
                         'Overrides {configurationName}: {defaultValue}',
-                      values: { configurationName, defaultValue },
+                      values: {
+                        configurationName: `xpack.apm.indices.${configurationName}`,
+                        defaultValue,
+                      },
                     }
                   )}
                   fullWidth

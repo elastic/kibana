@@ -37,6 +37,7 @@ interface IntegrationsAppProps {
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 const IntegrationsApp = ({
   basepath,
@@ -45,6 +46,7 @@ const IntegrationsApp = ({
   history,
   kibanaVersion,
   extensions,
+  setHeaderActionMenu,
 }: IntegrationsAppProps) => {
   return (
     <IntegrationsAppContext
@@ -54,6 +56,7 @@ const IntegrationsApp = ({
       history={history}
       kibanaVersion={kibanaVersion}
       extensions={extensions}
+      setHeaderActionMenu={setHeaderActionMenu}
     >
       <WithPermissionsAndSetup>
         <AppRoutes />
@@ -64,20 +67,24 @@ const IntegrationsApp = ({
 
 export function renderApp(
   startServices: FleetStartServices,
-  { element, appBasePath, history }: AppMountParameters,
+  { element, appBasePath, history, setHeaderActionMenu }: AppMountParameters,
   config: FleetConfigType,
   kibanaVersion: string,
-  extensions: UIExtensionsStorage
+  extensions: UIExtensionsStorage,
+  UsageTracker: React.FC
 ) {
   ReactDOM.render(
-    <IntegrationsApp
-      basepath={appBasePath}
-      startServices={startServices}
-      config={config}
-      history={history}
-      kibanaVersion={kibanaVersion}
-      extensions={extensions}
-    />,
+    <UsageTracker>
+      <IntegrationsApp
+        basepath={appBasePath}
+        startServices={startServices}
+        config={config}
+        history={history}
+        kibanaVersion={kibanaVersion}
+        extensions={extensions}
+        setHeaderActionMenu={setHeaderActionMenu}
+      />
+    </UsageTracker>,
     element
   );
 

@@ -49,6 +49,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         loadTestFile(require.resolve('./pages'));
         loadTestFile(require.resolve('./data_visualizer'));
         loadTestFile(require.resolve('./data_frame_analytics'));
+        loadTestFile(require.resolve('./model_management'));
       });
 
       describe('', function () {

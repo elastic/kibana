@@ -38,7 +38,7 @@ import {
 } from '../../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../../migrations/core';
 import { TaskEither } from 'fp-ts/lib/TaskEither';
 import Path from 'path';
@@ -60,7 +60,7 @@ describe('migration actions', () => {
 
   beforeAll(async () => {
     esServer = await startES();
-    client = esServer.es.getClient();
+    client = esServer.es.getKibanaEsClient();
 
     // Create test fixture data:
     await createIndex({
@@ -280,7 +280,7 @@ describe('migration actions', () => {
         index: 'red_then_yellow_index',
         body: {
           // Enable all shard allocation so that the index status turns yellow
-          settings: { routing: { allocation: { enable: 'all' } } },
+          routing: { allocation: { enable: 'all' } },
         },
       });
 
@@ -350,7 +350,7 @@ describe('migration actions', () => {
           index: 'clone_red_then_yellow_index',
           body: {
             // Enable all shard allocation so that the index status goes yellow
-            settings: { routing: { allocation: { enable: 'all' } } },
+            routing: { allocation: { enable: 'all' } },
           },
         });
         indexYellow = true;
@@ -412,7 +412,7 @@ describe('migration actions', () => {
       await expect(cloneIndexPromise).resolves.toMatchObject({
         _tag: 'Left',
         left: {
-          error: expect.any(ResponseError),
+          error: expect.any(errors.ResponseError),
           message: expect.stringMatching(/\"timed_out\":true/),
           type: 'retryable_es_client_error',
         },
@@ -810,7 +810,7 @@ describe('migration actions', () => {
       await expect(task()).resolves.toMatchObject({
         _tag: 'Left',
         left: {
-          error: expect.any(ResponseError),
+          error: expect.any(errors.ResponseError),
           message: expect.stringMatching(
             /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
           ),
@@ -1157,7 +1157,7 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'existing_index_with_docs'
+        '.kibana_1'
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1169,7 +1169,7 @@ describe('migration actions', () => {
       await expect(task()).resolves.toMatchObject({
         _tag: 'Left',
         left: {
-          error: expect.any(ResponseError),
+          error: expect.any(errors.ResponseError),
           message: expect.stringMatching(
             /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
           ),
@@ -1444,7 +1444,7 @@ describe('migration actions', () => {
           index: 'red_then_yellow_index',
           body: {
             // Disable all shard allocation so that the index status is red
-            settings: { routing: { allocation: { enable: 'all' } } },
+            routing: { allocation: { enable: 'all' } },
           },
         });
         indexYellow = true;
@@ -1538,7 +1538,8 @@ describe('migration actions', () => {
         }
       `);
     });
-    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
+    // TODO: unskip after https://github.com/elastic/kibana/issues/116111
+    it.skip('resolves left request_entity_too_large_exception when the payload is too large', async () => {
       const newDocs = new Array(10000).fill({
         _source: {
           title:

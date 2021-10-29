@@ -14,6 +14,7 @@ import { allowedExperimentalValues } from '../../../../../common/experimental_fe
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
+import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
 import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../utils/get_list_client', () => ({
@@ -26,17 +27,22 @@ jest.mock('../utils/get_list_client', () => ({
 jest.mock('../../rule_execution_log/rule_execution_log_client');
 
 describe('Custom Query Alerts', () => {
+  const { services, dependencies, executor } = createRuleTypeMocks();
+  const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+    lists: dependencies.lists,
+    logger: dependencies.logger,
+    config: createMockConfig(),
+    ruleDataClient: dependencies.ruleDataClient,
+    eventLogService: dependencies.eventLogService,
+  });
   it('does not send an alert when no events found', async () => {
-    const { services, dependencies, executor } = createRuleTypeMocks();
-    const queryAlertType = createQueryAlertType({
-      experimentalFeatures: allowedExperimentalValues,
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      config: createMockConfig(),
-      ruleDataClient: dependencies.ruleDataClient,
-      eventLogService: dependencies.eventLogService,
-      version: '1.0.0',
-    });
+    const queryAlertType = securityRuleTypeWrapper(
+      createQueryAlertType({
+        experimentalFeatures: allowedExperimentalValues,
+        logger: dependencies.logger,
+        version: '1.0.0',
+      })
+    );
 
     dependencies.alerting.registerType(queryAlertType);
 
@@ -45,6 +51,7 @@ describe('Custom Query Alerts', () => {
       index: ['*'],
       from: 'now-1m',
       to: 'now',
+      language: 'kuery',
     };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
@@ -74,16 +81,13 @@ describe('Custom Query Alerts', () => {
   });
 
   it('sends a properly formatted alert when events are found', async () => {
-    const { services, dependencies, executor } = createRuleTypeMocks();
-    const queryAlertType = createQueryAlertType({
-      experimentalFeatures: allowedExperimentalValues,
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      config: createMockConfig(),
-      ruleDataClient: dependencies.ruleDataClient,
-      eventLogService: dependencies.eventLogService,
-      version: '1.0.0',
-    });
+    const queryAlertType = securityRuleTypeWrapper(
+      createQueryAlertType({
+        experimentalFeatures: allowedExperimentalValues,
+        logger: dependencies.logger,
+        version: '1.0.0',
+      })
+    );
 
     dependencies.alerting.registerType(queryAlertType);
 
@@ -92,6 +96,8 @@ describe('Custom Query Alerts', () => {
       index: ['*'],
       from: 'now-1m',
       to: 'now',
+      language: 'kuery',
+      type: 'query',
     };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(

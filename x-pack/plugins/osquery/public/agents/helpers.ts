@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
   PaginationInputPaginated,
@@ -87,9 +87,10 @@ export const getNumAgentsInGrouping = (selectedGroups: SelectedGroups) => {
   return sum;
 };
 
-export const generateAgentCheck = (selectedGroups: SelectedGroups) => {
-  return ({ groups }: AgentOptionValue) => {
-    return Object.keys(groups)
+export const generateAgentCheck =
+  (selectedGroups: SelectedGroups) =>
+  ({ groups }: AgentOptionValue) =>
+    Object.keys(groups)
       .map((group) => {
         const selectedGroup = selectedGroups[group];
         const agentGroup = groups[group];
@@ -97,8 +98,6 @@ export const generateAgentCheck = (selectedGroups: SelectedGroups) => {
         return selectedGroup[agentGroup];
       })
       .every((a) => !a);
-  };
-};
 
 export const generateAgentSelection = (selection: GroupOption[]) => {
   const newAgentSelection: AgentSelection = {

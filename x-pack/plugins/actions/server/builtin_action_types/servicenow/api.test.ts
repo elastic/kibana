@@ -25,6 +25,7 @@ describe('api', () => {
       const res = await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -57,6 +58,7 @@ describe('api', () => {
       const res = await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -78,6 +80,7 @@ describe('api', () => {
       await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: { username: 'elastic', password: 'elastic' },
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -93,6 +96,9 @@ describe('api', () => {
           caller_id: 'elastic',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'ruleId',
+          opened_by: 'elastic',
         },
       });
       expect(externalService.updateIncident).not.toHaveBeenCalled();
@@ -103,6 +109,7 @@ describe('api', () => {
       await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -118,6 +125,8 @@ describe('api', () => {
           comments: 'A comment',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-1',
       });
@@ -132,6 +141,8 @@ describe('api', () => {
           comments: 'Another comment',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-1',
       });
@@ -142,6 +153,7 @@ describe('api', () => {
       await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
@@ -157,6 +169,8 @@ describe('api', () => {
           work_notes: 'A comment',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-1',
       });
@@ -171,6 +185,8 @@ describe('api', () => {
           work_notes: 'Another comment',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-1',
       });
@@ -182,6 +198,7 @@ describe('api', () => {
       const res = await api.pushToService({
         externalService,
         params: apiParams,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -210,6 +227,7 @@ describe('api', () => {
       const res = await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -228,6 +246,7 @@ describe('api', () => {
       await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -243,6 +262,8 @@ describe('api', () => {
           subcategory: 'os',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'ruleId',
         },
       });
       expect(externalService.createIncident).not.toHaveBeenCalled();
@@ -253,6 +274,7 @@ describe('api', () => {
       await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'comments',
@@ -267,6 +289,8 @@ describe('api', () => {
           subcategory: 'os',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-3',
       });
@@ -281,6 +305,8 @@ describe('api', () => {
           comments: 'A comment',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-2',
       });
@@ -291,6 +317,7 @@ describe('api', () => {
       await api.pushToService({
         externalService,
         params,
+        config: {},
         secrets: {},
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
@@ -305,6 +332,8 @@ describe('api', () => {
           subcategory: 'os',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-3',
       });
@@ -319,6 +348,8 @@ describe('api', () => {
           work_notes: 'A comment',
           description: 'Incident description',
           short_description: 'Incident title',
+          correlation_display: 'Alerting',
+          correlation_id: 'ruleId',
         },
         incidentId: 'incident-2',
       });
@@ -330,6 +361,7 @@ describe('api', () => {
       const res = await api.getFields({
         externalService,
         params: {},
+        logger: mockedLogger,
       });
       expect(res).toEqual(serviceNowCommonFields);
     });
@@ -340,8 +372,29 @@ describe('api', () => {
       const res = await api.getChoices({
         externalService,
         params: { fields: ['priority'] },
+        logger: mockedLogger,
       });
       expect(res).toEqual(serviceNowChoices);
+    });
+  });
+
+  describe('getIncident', () => {
+    test('it gets the incident correctly', async () => {
+      const res = await api.getIncident({
+        externalService,
+        params: {
+          externalId: 'incident-1',
+        },
+        logger: mockedLogger,
+      });
+      expect(res).toEqual({
+        description: 'description from servicenow',
+        id: 'incident-1',
+        pushedDate: '2020-03-10T12:24:20.000Z',
+        short_description: 'title from servicenow',
+        title: 'INC01',
+        url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
+      });
     });
   });
 });

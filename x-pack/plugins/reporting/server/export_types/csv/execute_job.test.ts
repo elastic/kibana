@@ -12,6 +12,7 @@ import { ElasticsearchClient, IUiSettingsClient } from 'kibana/server';
 import moment from 'moment';
 import Puid from 'puid';
 import sinon from 'sinon';
+import type { DataView, DataViewsService } from 'src/plugins/data/common';
 import { ReportingConfig, ReportingCore } from '../../';
 import {
   FieldFormatsRegistry,
@@ -56,6 +57,8 @@ describe('CSV Execute Job', function () {
   let encryptedHeaders: any;
 
   let configGetStub: any;
+  let mockDataView: jest.Mocked<DataView>;
+  let mockDataViewsService: jest.Mocked<DataViewsService>;
   let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
   let mockReportingConfig: ReportingConfig;
   let mockReportingCore: ReportingCore;
@@ -81,10 +84,15 @@ describe('CSV Execute Job', function () {
     configGetStub.withArgs('csv', 'maxSizeBytes').returns(1024 * 1000); // 1mB
     configGetStub.withArgs('csv', 'scroll').returns({});
     mockReportingConfig = { get: configGetStub, kbnConfig: { get: configGetStub } };
+    mockDataView = { fieldFormatMap: {}, fields: [] } as unknown as typeof mockDataView;
+    mockDataViewsService = {
+      get: jest.fn().mockResolvedValue(mockDataView),
+    } as unknown as typeof mockDataViewsService;
 
     mockReportingCore = await createMockReportingCore(createMockConfigSchema());
     mockReportingCore.getUiSettingsServiceFactory = () =>
       Promise.resolve(mockUiSettingsClient as unknown as IUiSettingsClient);
+    mockReportingCore.getDataViewsService = jest.fn().mockResolvedValue(mockDataViewsService);
     mockReportingCore.setConfig(mockReportingConfig);
 
     mockEsClient = (await mockReportingCore.getEsClient()).asScoped({} as any)
@@ -182,7 +190,7 @@ describe('CSV Execute Job', function () {
       );
 
       expect(mockEsClient.scroll).toHaveBeenCalledWith(
-        expect.objectContaining({ body: { scroll_id: scrollId } })
+        expect.objectContaining({ scroll_id: scrollId })
       );
     });
 
@@ -271,7 +279,7 @@ describe('CSV Execute Job', function () {
       );
 
       expect(mockEsClient.clearScroll).toHaveBeenCalledWith(
-        expect.objectContaining({ body: { scroll_id: lastScrollId } })
+        expect.objectContaining({ scroll_id: lastScrollId })
       );
     });
 
@@ -302,10 +310,12 @@ describe('CSV Execute Job', function () {
       });
       await expect(
         runTask('job123', jobParams, cancellationToken, stream)
-      ).rejects.toMatchInlineSnapshot(`[TypeError: Cannot read property 'indexOf' of undefined]`);
+      ).rejects.toMatchInlineSnapshot(
+        `[TypeError: Cannot read properties of undefined (reading 'indexOf')]`
+      );
 
       expect(mockEsClient.clearScroll).toHaveBeenCalledWith(
-        expect.objectContaining({ body: { scroll_id: lastScrollId } })
+        expect.objectContaining({ scroll_id: lastScrollId })
       );
     });
   });
@@ -778,9 +788,7 @@ describe('CSV Execute Job', function () {
       await delay(100);
 
       expect(mockEsClient.clearScroll).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: { scroll_id: scrollId },
-        })
+        expect.objectContaining({ scroll_id: scrollId })
       );
     });
   });
@@ -929,16 +937,14 @@ describe('CSV Execute Job', function () {
         fields: ['one', 'two'],
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
-        indexPatternSavedObject: {
-          id: 'logstash-*',
-          type: 'index-pattern',
-          attributes: {
-            title: 'logstash-*',
-            fields: '[{"name":"one","type":"string"}, {"name":"two","type":"string"}]',
-            fieldFormatMap: '{"one":{"id":"string","params":{"transform": "upper"}}}',
-          },
-        },
+        indexPatternId: 'something',
       });
+
+      mockDataView.fieldFormatMap = { one: { id: 'string', params: { transform: 'upper' } } };
+      mockDataView.fields = [
+        { name: 'one', type: 'string' },
+        { name: 'two', type: 'string' },
+      ] as typeof mockDataView.fields;
       await runTask('job123', jobParams, cancellationToken, stream);
       expect(content).not.toBe(null);
       const lines = content!.split('\n');
@@ -1176,7 +1182,7 @@ describe('CSV Execute Job', function () {
       await runTask('job123', jobParams, cancellationToken, stream);
 
       expect(mockEsClient.scroll).toHaveBeenCalledWith(
-        expect.objectContaining({ body: { scroll: scrollDuration, scroll_id: 'scrollId' } })
+        expect.objectContaining({ scroll: scrollDuration, scroll_id: 'scrollId' })
       );
     });
   });

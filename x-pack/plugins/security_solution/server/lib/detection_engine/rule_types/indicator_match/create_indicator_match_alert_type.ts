@@ -6,24 +6,18 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { INDICATOR_RULE_TYPE_ID } from '../../../../../common/constants';
-import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
-import { threatMatchExecutor } from '../../signals/executors/threat_match';
-import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { CreateRuleOptions } from '../types';
+import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 
-export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) => {
-  const { experimentalFeatures, lists, logger, config, ruleDataClient, version, eventLogService } =
-    createOptions;
-  const createSecurityRuleType = createSecurityRuleTypeFactory({
-    lists,
-    logger,
-    config,
-    ruleDataClient,
-    eventLogService,
-  });
-  return createSecurityRuleType<ThreatRuleParams, {}, PersistenceServices, {}>({
+import { CompleteRule, threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
+import { threatMatchExecutor } from '../../signals/executors/threat_match';
+import { CreateRuleOptions, SecurityAlertType } from '../types';
+
+export const createIndicatorMatchAlertType = (
+  createOptions: CreateRuleOptions
+): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
+  const { experimentalFeatures, logger, version } = createOptions;
+  return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
     validate: {
@@ -52,7 +46,7 @@ export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) 
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {
@@ -60,7 +54,7 @@ export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) 
           bulkCreate,
           exceptionItems,
           listClient,
-          rule,
+          completeRule,
           searchAfterSize,
           tuple,
           wrapHits,
@@ -77,7 +71,7 @@ export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) 
         eventsTelemetry: undefined,
         listClient,
         logger,
-        rule,
+        completeRule: completeRule as CompleteRule<ThreatRuleParams>,
         searchAfterSize,
         services,
         tuple,
@@ -86,5 +80,5 @@ export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) 
       });
       return { ...result, state };
     },
-  });
+  };
 };

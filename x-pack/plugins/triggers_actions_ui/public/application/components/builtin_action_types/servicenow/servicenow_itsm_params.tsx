@@ -13,14 +13,17 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
-import { ServiceNowITSMActionParams, Choice, Fields } from './types';
+import { ServiceNowITSMActionParams, Choice, Fields, ServiceNowActionConnector } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { useGetChoices } from './use_get_choices';
-import { choicesToEuiOptions } from './helpers';
+import { choicesToEuiOptions, DEFAULT_CORRELATION_ID, isDeprecatedConnector } from './helpers';
 
 import * as i18n from './translations';
 
@@ -38,6 +41,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowITSMActionParams>
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
   const {
+    docLinks,
     http,
     notifications: { toasts },
   } = useKibana().services;
@@ -119,7 +123,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { correlation_id: DEFAULT_CORRELATION_ID },
           comments: [],
         },
         index
@@ -136,7 +140,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { correlation_id: DEFAULT_CORRELATION_ID },
           comments: [],
         },
         index
@@ -236,25 +240,70 @@ const ServiceNowParamsFields: React.FunctionComponent<
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
-        error={errors['subActionParams.incident.short_description']}
-        isInvalid={
-          errors['subActionParams.incident.short_description'] !== undefined &&
-          errors['subActionParams.incident.short_description'].length > 0 &&
-          incident.short_description !== undefined
-        }
-        label={i18n.SHORT_DESCRIPTION_LABEL}
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'short_description'}
-          inputTargetValue={incident?.short_description ?? undefined}
-          errors={errors['subActionParams.incident.short_description'] as string[]}
-        />
-      </EuiFormRow>
+      {!isDeprecatedConnector(actionConnector as unknown as ServiceNowActionConnector) && (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                fullWidth
+                label={i18n.CORRELATION_ID}
+                helpText={
+                  <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.correlationIDHelpLabel"
+                      defaultMessage="Identifier for updating incidents"
+                    />
+                  </EuiLink>
+                }
+              >
+                <TextFieldWithMessageVariables
+                  index={index}
+                  editAction={editSubActionProperty}
+                  messageVariables={messageVariables}
+                  paramsProperty={'correlation_id'}
+                  inputTargetValue={incident?.correlation_id ?? undefined}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.CORRELATION_DISPLAY}>
+                <TextFieldWithMessageVariables
+                  index={index}
+                  editAction={editSubActionProperty}
+                  messageVariables={messageVariables}
+                  paramsProperty={'correlation_display'}
+                  inputTargetValue={incident?.correlation_display ?? undefined}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            error={errors['subActionParams.incident.short_description']}
+            isInvalid={
+              errors['subActionParams.incident.short_description'] !== undefined &&
+              errors['subActionParams.incident.short_description'].length > 0 &&
+              incident.short_description !== undefined
+            }
+            label={i18n.SHORT_DESCRIPTION_LABEL}
+          >
+            <TextFieldWithMessageVariables
+              index={index}
+              editAction={editSubActionProperty}
+              messageVariables={messageVariables}
+              paramsProperty={'short_description'}
+              inputTargetValue={incident?.short_description ?? undefined}
+              errors={errors['subActionParams.incident.short_description'] as string[]}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <TextAreaWithMessageVariables
         index={index}
         editAction={editSubActionProperty}

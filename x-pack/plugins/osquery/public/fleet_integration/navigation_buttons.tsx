@@ -14,13 +14,11 @@ import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kiba
 
 interface NavigationButtonsProps {
   isDisabled?: boolean;
-  integrationPolicyId?: string | undefined;
   agentPolicyId?: string | undefined;
 }
 
 const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
   isDisabled = false,
-  integrationPolicyId,
   agentPolicyId,
 }) => {
   const {
@@ -51,24 +49,20 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     [agentPolicyId, navigateToApp]
   );
 
-  const scheduleQueryGroupsHref = getUrlForApp(PLUGIN_ID, {
-    path: integrationPolicyId
-      ? `/scheduled_query_groups/${integrationPolicyId}/edit`
-      : `/scheduled_query_groups`,
+  const packsHref = getUrlForApp(PLUGIN_ID, {
+    path: `/packs`,
   });
 
-  const scheduleQueryGroupsClick = useCallback(
+  const packsClick = useCallback(
     (event) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
         navigateToApp(PLUGIN_ID, {
-          path: integrationPolicyId
-            ? `/scheduled_query_groups/${integrationPolicyId}/edit`
-            : `/scheduled_query_groups`,
+          path: `/packs`,
         });
       }
     },
-    [navigateToApp, integrationPolicyId]
+    [navigateToApp]
   );
 
   return (
@@ -88,13 +82,13 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
       <EuiFlexItem>
         <EuiCard
           icon={<EuiIcon size="xl" type="clock" />}
-          title={i18n.translate('xpack.osquery.fleetIntegration.scheduleQueryGroupsButtonText', {
-            defaultMessage: 'Schedule query groups',
+          title={i18n.translate('xpack.osquery.fleetIntegration.packsButtonText', {
+            defaultMessage: 'Packs',
           })}
           description={''}
           isDisabled={isDisabled}
-          href={scheduleQueryGroupsHref}
-          onClick={scheduleQueryGroupsClick}
+          href={packsHref}
+          onClick={packsClick}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

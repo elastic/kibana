@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { filter } from 'rxjs/operators';
 import { Adapters } from '../../../../../../inspector/common';
-import { isCompleteResponse, SearchSource } from '../../../../../../data/common';
+import { isCompleteResponse, ISearchSource } from '../../../../../../data/common';
 import { FetchStatus } from '../../../types';
 import { SavedSearchData } from '../services/use_saved_search';
 import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
@@ -17,7 +17,7 @@ import { DiscoverServices } from '../../../../build_services';
 
 export const fetchDocuments = (
   data$: SavedSearchData,
-  searchSource: SearchSource,
+  searchSource: ISearchSource,
   {
     abortController,
     inspectorAdapters,

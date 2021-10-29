@@ -2962,7 +2962,7 @@
               "section": "def-public.LayerWizard",
               "text": "LayerWizard"
             },
-            ") => Promise<void>"
+            ") => void"
           ],
           "path": "x-pack/plugins/maps/public/api/setup_api.ts",
           "deprecated": false,
@@ -3000,7 +3000,7 @@
           "signature": [
             "(entry: ",
             "SourceRegistryEntry",
-            ") => Promise<void>"
+            ") => void"
           ],
           "path": "x-pack/plugins/maps/public/api/setup_api.ts",
           "deprecated": false,

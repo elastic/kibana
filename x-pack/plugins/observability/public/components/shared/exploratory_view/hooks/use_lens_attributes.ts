@@ -94,7 +94,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
     if (isEmpty(indexPatterns) || isEmpty(allSeries) || !reportType) {
       return null;
     }
-
+    // we only use the data from url to apply, since that get's updated to apply changes
     const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
 
     const layerConfigs = getLayerConfigs(allSeriesT, reportType, theme, indexPatterns);
