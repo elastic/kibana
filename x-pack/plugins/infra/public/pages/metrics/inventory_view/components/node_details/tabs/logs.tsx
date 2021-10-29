@@ -25,13 +25,15 @@ const TabComponent = (props: TabProps) => {
   const endTimestamp = props.currentTime;
   const startTimestamp = endTimestamp - 60 * 60 * 1000; // 60 minutes
   const { nodeType } = useWaffleOptionsContext();
-  const { node } = props;
+  const { options, node } = props;
 
   const throttledTextQuery = useThrottle(textQuery, textQueryThrottleInterval);
 
   const filter = useMemo(() => {
     const query = [
-      `${findInventoryFields(nodeType).id}: "${node.id}"`,
+      ...(options.fields != null
+        ? [`${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`]
+        : []),
       ...(throttledTextQuery !== '' ? [throttledTextQuery] : []),
     ].join(' and ');
 
@@ -39,7 +41,7 @@ const TabComponent = (props: TabProps) => {
       language: 'kuery',
       query,
     };
-  }, [nodeType, node.id, throttledTextQuery]);
+  }, [options.fields, nodeType, node.id, throttledTextQuery]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);

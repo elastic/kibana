@@ -101,7 +101,12 @@ const sourceConfigurationWithIndexPatternReference: InfraSourceConfiguration = {
   name: 'NAME',
   description: 'DESCRIPTION',
   fields: {
+    container: 'CONTAINER_FIELD',
+    host: 'HOST_FIELD',
     message: ['MESSAGE_FIELD'],
+    pod: 'POD_FIELD',
+    tiebreaker: 'TIEBREAKER_FIELD',
+    timestamp: 'TIMESTAMP_FIELD',
   },
   logColumns: [],
   logIndices: {

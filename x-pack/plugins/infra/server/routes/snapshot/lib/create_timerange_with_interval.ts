@@ -25,6 +25,7 @@ const createInterval = async (client: ESSearchClient, options: InfraSnapshotRequ
       client,
       {
         indexPattern: options.sourceConfiguration.metricAlias,
+        timestampField: options.sourceConfiguration.fields.timestamp,
         timerange: { from: timerange.from, to: timerange.to },
       },
       modules,
@@ -80,6 +81,7 @@ const aggregationsToModules = async (
       async (field) =>
         await getDatasetForField(client, field as string, options.sourceConfiguration.metricAlias, {
           ...options.timerange,
+          field: options.sourceConfiguration.fields.timestamp,
         })
     )
   );
