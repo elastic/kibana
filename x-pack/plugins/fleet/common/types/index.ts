@@ -32,6 +32,9 @@ export interface FleetConfigType {
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
   agentIdVerificationEnabled?: boolean;
+  developer?: {
+    disableRegistryVersionCheck?: boolean;
+  };
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

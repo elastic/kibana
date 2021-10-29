@@ -120,6 +120,10 @@ export const config: PluginConfigDescriptor = {
     agentPolicies: PreconfiguredAgentPoliciesSchema,
     outputs: PreconfiguredOutputsSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+    developer: schema.object({
+      // TODO: change default to false as soon as EPR issue fixed. Blocker for 8.0.
+      disableRegistryVersionCheck: schema.boolean({ defaultValue: true }),
+    }),
   }),
 };
 
