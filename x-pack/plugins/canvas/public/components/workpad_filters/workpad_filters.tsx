@@ -21,7 +21,7 @@ const groupFiltersBy = (filters: Filter[], groupByField: FilterField) => {
   });
 };
 
-const DEFAULT_GROUP_BY = 'type';
+const DEFAULT_GROUP_BY: FilterField = 'type';
 
 export const WorkpadFilters: FC = () => {
   const groupFiltersByField: FilterField | undefined = useSelector((state: State) =>
