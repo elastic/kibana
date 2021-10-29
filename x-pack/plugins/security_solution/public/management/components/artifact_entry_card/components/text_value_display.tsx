@@ -6,13 +6,15 @@
  */
 
 import React, { memo, PropsWithChildren, useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
+import { getEmptyValue } from '../../../../common/components/empty_value';
 
 export type TextValueDisplayProps = PropsWithChildren<{
   bold?: boolean;
   truncate?: boolean;
   size?: 'xs' | 's' | 'm' | 'relative';
+  withTooltip?: boolean;
 }>;
 
 /**
@@ -20,16 +22,29 @@ export type TextValueDisplayProps = PropsWithChildren<{
  * display of values on the card
  */
 export const TextValueDisplay = memo<TextValueDisplayProps>(
-  ({ bold, truncate, size = 's', children }) => {
+  ({ bold, truncate, size = 's', withTooltip = false, children }) => {
     const cssClassNames = useMemo(() => {
       return classNames({
         'eui-textTruncate': truncate,
       });
     }, [truncate]);
 
+    const textContent = useMemo(() => {
+      return bold ? <strong>{children}</strong> : children;
+    }, [bold, children]);
+
     return (
       <EuiText size={size} className={cssClassNames}>
-        {bold ? <strong>{children}</strong> : children}
+        {withTooltip &&
+        'string' === typeof children &&
+        children.length > 0 &&
+        children !== getEmptyValue() ? (
+          <EuiToolTip content={children} position="top">
+            <>{textContent}</>
+          </EuiToolTip>
+        ) : (
+          textContent
+        )}
       </EuiText>
     );
   }

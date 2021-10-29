@@ -56,12 +56,12 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
           />
         }
         name={
-          <TextValueDisplay bold truncate={!expanded}>
+          <TextValueDisplay bold truncate={!expanded} withTooltip={!expanded}>
             {artifact.name}
           </TextValueDisplay>
         }
         description={
-          <TextValueDisplay truncate={!expanded}>
+          <TextValueDisplay truncate={!expanded} withTooltip={!expanded}>
             {artifact.description || getEmptyValue()}
           </TextValueDisplay>
         }
