@@ -50,8 +50,8 @@ async function withFleetAgent(
     process.exit(1);
   });
 
-  await fleetManager.setup();
   await agentManager.setup();
+  await fleetManager.setup();
   try {
     await runner({});
   } finally {

@@ -66,6 +66,7 @@ describe('Add Integration', () => {
     navigateTo(INTEGRATIONS);
     cy.wait('@packages');
     cy.get('.euiLoadingSpinner').should('not.exist');
+    cy.get('input[placeholder="Search for integrations"]').type('Apache');
     cy.get(INTEGRATIONS_CARD).contains(integration).click();
     addIntegration();
     cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-');

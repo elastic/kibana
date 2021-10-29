@@ -40,20 +40,24 @@ export class AgentManager extends Manager {
 
   public async setup() {
     this.log.info('Running agent preconfig');
-    await axios.post(`${this.params.kibanaUrl}/api/fleet/agents/setup`, {}, this.requestOptions);
-
-    this.log.info('Updating the default agent output');
-    const {
-      data: {
-        items: [defaultOutput],
-      },
-    } = await axios.get(this.params.kibanaUrl + '/api/fleet/outputs', this.requestOptions);
-
-    await axios.put(
-      `${this.params.kibanaUrl}/api/fleet/outputs/${defaultOutput.id}`,
-      { hosts: [this.params.esHost] },
+    return await axios.post(
+      `${this.params.kibanaUrl}/api/fleet/agents/setup`,
+      {},
       this.requestOptions
     );
+
+    // this.log.info('Updating the default agent output');
+    // const {
+    //   data: {
+    //     items: [defaultOutput],
+    //   },
+    // } = await axios.get(this.params.kibanaUrl + '/api/fleet/outputs', this.requestOptions);
+
+    // await axios.put(
+    //   `${this.params.kibanaUrl}/api/fleet/outputs/${defaultOutput.id}`,
+    //   { hosts: [this.params.esHost] },
+    //   this.requestOptions
+    // );
   }
 
   public async startAgent() {
