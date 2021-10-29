@@ -260,6 +260,9 @@ export const Expressions: React.FC<Props> = (props) => {
     [alertParams.groupBy]
   );
 
+  // Test to see if any of the group fields in groupBy are already filtered down to a single
+  // group by the filterQuery. If this is the case, then a groupBy is unnecessary, as it would only
+  // ever produce one group instance
   const groupByFilterTestPatterns = useMemo(() => {
     if (!alertParams.groupBy) return null;
     const groups = !Array.isArray(alertParams.groupBy)
@@ -267,7 +270,7 @@ export const Expressions: React.FC<Props> = (props) => {
       : alertParams.groupBy;
     return groups.map((group: string) => ({
       groupName: group,
-      pattern: new RegExp(`{"match(_phrase)?":{"${group}":"(.*?)"}}`),
+      pattern: new RegExp(`{"match(_phrase)?":{"${group}":"(.*?)"}}`, 'g'),
     }));
   }, [alertParams.groupBy]);
 
@@ -275,7 +278,11 @@ export const Expressions: React.FC<Props> = (props) => {
     if (!alertParams.filterQuery || !groupByFilterTestPatterns) return [];
     return groupByFilterTestPatterns
       .map(({ groupName, pattern }) => {
-        if (pattern.test(alertParams.filterQuery!)) {
+        // Test to see if there is ONLY ONE match for this group in the query
+        // If there are 0 matches, then this query isn't filtering out any groups at all
+        // If there are 2+ matches, the query is using OR logic (e.g. group:a OR group:b) and will
+        // still allow for more than one groupBy alert instance.
+        if (alertParams.filterQuery!.match(pattern)?.length === 1) {
           return groupName;
         }
       })
