@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
+import { transformError, getBootstrapIndexExists } from '@kbn/securitysolution-es-utils';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 import { ConfigType } from '../../../../config';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -32,6 +32,7 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: Con
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const siemClient = context.securitySolution?.getAppClient();
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
@@ -41,7 +42,10 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: Con
         const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
 
         const index = siemClient.getSignalsIndex();
-        const indexExists = await getIndexExists(esClient, index);
+        const indexExists = await getBootstrapIndexExists(
+          context.core.elasticsearch.client.asInternalUser,
+          index
+        );
 
         if (indexExists) {
           let mappingOutdated: boolean | null = null;
