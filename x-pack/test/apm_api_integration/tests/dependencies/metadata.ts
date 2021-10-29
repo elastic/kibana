@@ -15,7 +15,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
-  const backendName = 'elasticsearh';
+  const backendName = 'elasticsearch';
 
   async function callApi() {
     return await apmApiClient.readUser({
