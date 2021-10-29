@@ -14,6 +14,10 @@ mkdir -p "$destination"
 mkdir -p elasticsearch && cd elasticsearch
 
 export ELASTICSEARCH_BRANCH="${ELASTICSEARCH_BRANCH:-$BUILDKITE_BRANCH}"
+# Until ES renames their master branch to main...
+if [[ "$ELASTICSEARCH_BRANCH" == "main" ]]; then
+  export ELASTICSEARCH_BRANCH="master"
+fi
 
 if [[ ! -d .git ]]; then
   git init
