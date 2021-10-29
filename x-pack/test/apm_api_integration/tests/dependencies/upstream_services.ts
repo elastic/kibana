@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { ServiceNode } from '../../../../plugins/apm/common/connections';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 import { generateData } from './generate_data';
@@ -61,7 +62,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const { status, body } = await callApi();
 
           expect(status).to.be(200);
-          expect(body.services.map(({ location }) => location.serviceName)).to.eql(['synth-go']);
+          expect(body.services.map(({ location }) => (location as ServiceNode).serviceName)).to.eql(
+            ['synth-go']
+          );
 
           const currentStatsLatencyValues = body.services[0].currentStats.latency.timeseries;
           expect(currentStatsLatencyValues.every(({ y }) => y === 1000000)).to.be(true);
