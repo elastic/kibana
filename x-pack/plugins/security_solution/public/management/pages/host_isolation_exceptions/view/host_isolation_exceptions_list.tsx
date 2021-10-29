@@ -8,7 +8,7 @@
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
 import React, { Dispatch, useCallback, useEffect } from 'react';
-import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -21,7 +21,6 @@ import {
   getListIsLoading,
   getListItems,
   getListPagination,
-  getTotalListItems,
 } from '../store/selector';
 import {
   useHostIsolationExceptionsNavigateCallback,
@@ -49,7 +48,6 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
 
 export const HostIsolationExceptionsList = () => {
   const listItems = useHostIsolationExceptionsSelector(getListItems);
-  const totalCountListItems = useHostIsolationExceptionsSelector(getTotalListItems);
   const pagination = useHostIsolationExceptionsSelector(getListPagination);
   const isLoading = useHostIsolationExceptionsSelector(getListIsLoading);
   const fetchError = useHostIsolationExceptionsSelector(getListFetchError);
@@ -76,7 +74,7 @@ export const HostIsolationExceptionsList = () => {
 
   function handleItemComponentProps(element: ExceptionListItemSchema): ArtifactEntryCardProps {
     const editAction = {
-      icon: 'controlsHorizontal',
+      icon: 'trash',
       onClick: () => {
         navigateCallback({
           show: 'edit',
@@ -132,14 +130,8 @@ export const HostIsolationExceptionsList = () => {
           defaultMessage="Host isolation exceptions"
         />
       }
-      subtitle={
-        <FormattedMessage
-          id="xpack.securitySolution.hostIsolationExceptions.list.pageSubTitle"
-          defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
-        />
-      }
       actions={
-        license.isPlatinumPlus() && listItems.length > 0 ? (
+        license.isPlatinumPlus() ? (
           <EuiButton
             fill
             iconType="plusInCircle"
@@ -163,27 +155,16 @@ export const HostIsolationExceptionsList = () => {
       {itemToDelete ? <HostIsolationExceptionDeleteModal /> : null}
 
       {!isLoading && listItems.length ? (
-        <>
-          <SearchExceptions
-            defaultValue={location.filter}
-            onSearch={handleOnSearch}
-            placeholder={i18n.translate(
-              'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
-              {
-                defaultMessage: 'Search on the fields below: name, description, ip',
-              }
-            )}
-          />
-          <EuiSpacer size="m" />
-          <EuiText color="subdued" size="xs" data-test-subj="hostIsolationExceptions-totalCount">
-            <FormattedMessage
-              id="xpack.securitySolution.hostIsolationExceptions.list.totalCount"
-              defaultMessage="Showing {total, plural, one {# exception} other {# exceptions}}"
-              values={{ total: totalCountListItems }}
-            />
-          </EuiText>
-          <EuiSpacer size="s" />
-        </>
+        <SearchExceptions
+          defaultValue={location.filter}
+          onSearch={handleOnSearch}
+          placeholder={i18n.translate(
+            'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
+            {
+              defaultMessage: 'Search on the fields below: name, description, ip',
+            }
+          )}
+        />
       ) : null}
 
       <PaginatedContent<ExceptionListItemSchema, typeof ArtifactEntryCard>
