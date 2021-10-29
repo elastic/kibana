@@ -19,6 +19,7 @@ import { CardSectionPanel } from './components/card_section_panel';
 import { CardComments } from './components/card_comments';
 import { usePolicyNavLinks } from './hooks/use_policy_nav_links';
 import { MaybeImmutable } from '../../../../common/endpoint/types';
+import { DescriptionField } from './components/description_field';
 
 export interface CommonArtifactEntryCardProps extends CommonProps {
   item: MaybeImmutable<AnyArtifact>;
@@ -82,13 +83,12 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
 
           <EuiSpacer size="l" />
 
-          {!hideDescription ? (
-            <EuiText>
-              <p data-test-subj={getTestId('description')}>
-                {artifact.description || getEmptyValue()}
-              </p>
-            </EuiText>
-          ) : null}
+          {!hideDescription && (
+            <DescriptionField data-test-subj={getTestId('description')}>
+              {artifact.description}
+            </DescriptionField>
+          )}
+
           {!hideComments ? (
             <CardComments comments={artifact.comments} data-test-subj={getTestId('comments')} />
           ) : null}
