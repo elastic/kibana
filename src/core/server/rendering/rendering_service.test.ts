@@ -112,9 +112,6 @@ function renderTestCases(
         if (settingName === 'theme:darkMode') {
           return true;
         }
-        if (settingName === 'theme:version') {
-          return 'v8';
-        }
         return settingName;
       });
 
