@@ -295,7 +295,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   ?.kibana_siem_app_url,
               });
 
-              logger.info(
+              logger.debug(
                 buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`)
               );
 
@@ -346,8 +346,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
             }
 
-            // adding this log line so we can get some information from cloud
-            logger.info(
+            logger.debug(
               buildRuleMessage(
                 `[+] Finished indexing ${createdSignalsCount} ${
                   !isEmpty(tuples)
