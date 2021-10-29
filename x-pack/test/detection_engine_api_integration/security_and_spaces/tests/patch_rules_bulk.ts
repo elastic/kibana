@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // @ts-expect-error
         body.forEach((response) => {
-          const outputRule = getSimpleRuleOutput(response.rule_id);
+          const outputRule = getSimpleRuleOutput(response.rule_id, false);
           outputRule.actions = [
             {
               action_type_id: '.slack',

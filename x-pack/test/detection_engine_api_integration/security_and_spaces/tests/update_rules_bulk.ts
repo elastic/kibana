@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare2).to.eql(outputRule2);
       });
 
-      it('should update two rule properties of name using the two rules rule_id and migrate', async () => {
+      it('should update two rule properties of name using the two rules rule_id and migrate actions', async () => {
         const [connector, rule1, rule2] = await Promise.all([
           supertest
             .post(`/api/actions/connector`)
@@ -114,6 +114,9 @@ export default ({ getService }: FtrProviderContext) => {
           createLegacyRuleAction(supertest, rule1.id, connector.body.id),
           createLegacyRuleAction(supertest, rule2.id, connector.body.id),
         ]);
+
+        expect(rule1.actions).to.eql([]);
+        expect(rule2.actions).to.eql([]);
 
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';

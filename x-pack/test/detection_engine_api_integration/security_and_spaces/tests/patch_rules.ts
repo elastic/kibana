@@ -188,7 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should return the migrated rule after the enable patch', async () => {
+      it('should return the rule with migrated actions after the enable patch', async () => {
         const [connector, rule] = await Promise.all([
           supertest
             .post(`/api/actions/connector`)
