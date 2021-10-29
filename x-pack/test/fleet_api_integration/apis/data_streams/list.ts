@@ -72,8 +72,8 @@ export default function (providerContext: FtrProviderContext) {
     return responses as IndexResponse[];
   };
 
-  const getSeedDocsFromResponse = async (indexResponses: IndexResponse[]) => {
-    const docs = await Promise.all(
+  const getSeedDocsFromResponse = async (indexResponses: IndexResponse[]) =>
+    Promise.all(
       indexResponses.map((indexResponse) =>
         es.transport.request({
           method: 'GET',
@@ -81,9 +81,6 @@ export default function (providerContext: FtrProviderContext) {
         })
       )
     );
-
-    return docs.map((doc) => doc._source);
-  };
 
   const getDataStreams = async () => {
     return await supertest.get(`/api/fleet/data_streams`).set('kbn-xsrf', 'xxxx');
@@ -120,7 +117,9 @@ export default function (providerContext: FtrProviderContext) {
     it('should return correct data stream information', async function () {
       const seedResponse = await seedDataStreams();
       const docs = await getSeedDocsFromResponse(seedResponse);
-      const ingestedTimestamps = docs.map((doc) => new Date(doc?.event?.ingested).getTime()); // sort ascending
+      const ingestedTimestamps = docs.map((doc: any) =>
+        new Date(doc?._source?.event?.ingested).getTime()
+      ); // sort ascending
 
       await retry.tryForTime(10000, async () => {
         const { body } = await getDataStreams();
