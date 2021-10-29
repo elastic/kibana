@@ -22,6 +22,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
+import { useStartServices } from '../../../hooks';
+
 export type IntegrationPreferenceType = 'recommended' | 'beats' | 'agent';
 
 interface Option {
@@ -33,23 +35,6 @@ export interface Props {
   initialType: IntegrationPreferenceType;
   onChange: (type: IntegrationPreferenceType) => void;
 }
-
-const link = (
-  <EuiLink href="#">
-    <FormattedMessage
-      id="xpack.fleet.epm.integrationPreference.titleLink"
-      defaultMessage="Elastic Agent and Beats"
-    />
-  </EuiLink>
-);
-
-const title = (
-  <FormattedMessage
-    id="xpack.fleet.epm.integrationPreference.title"
-    defaultMessage="If an integration is available for {link}, show:"
-    values={{ link }}
-  />
-);
 
 const recommendedTooltip = (
   <FormattedMessage
@@ -94,6 +79,26 @@ const options: Option[] = [
 
 export const IntegrationPreference = ({ initialType, onChange }: Props) => {
   const [idSelected, setIdSelected] = React.useState<IntegrationPreferenceType>(initialType);
+
+  const { docLinks } = useStartServices();
+
+  const link = (
+    <EuiLink href={docLinks.links.fleet.beatsAgentComparison}>
+      <FormattedMessage
+        id="xpack.fleet.epm.integrationPreference.titleLink"
+        defaultMessage="Elastic Agent and Beats"
+      />
+    </EuiLink>
+  );
+
+  const title = (
+    <FormattedMessage
+      id="xpack.fleet.epm.integrationPreference.title"
+      defaultMessage="If an integration is available for {link}, show:"
+      values={{ link }}
+    />
+  );
+
   const radios = options.map((option) => ({
     id: option.type,
     value: option.type,

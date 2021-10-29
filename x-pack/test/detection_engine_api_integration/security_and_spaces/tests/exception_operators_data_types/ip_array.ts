@@ -508,6 +508,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
