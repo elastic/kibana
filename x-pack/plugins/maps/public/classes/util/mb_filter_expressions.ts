@@ -97,10 +97,7 @@ export function getPointFilterExpression(
   timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
   return getFilterExpression(
-    [
-      EXCLUDE_CENTROID_FEATURES,
-      IS_POINT_FEATURE,
-    ],
+    [EXCLUDE_CENTROID_FEATURES, IS_POINT_FEATURE],
     hasJoins,
     timesliceMaskConfig
   );
