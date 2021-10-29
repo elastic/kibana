@@ -99,7 +99,7 @@ async function getUsersDeprecations(
   }
 
   // TODO: remove when docs support "main"
-  const docsBranch = packageInfo.branch === 'main' ? 'master' : 'main';
+  const docsBranch = packageInfo.branch === 'main' ? 'master' : packageInfo.branch;
 
   return [
     {
@@ -163,7 +163,7 @@ async function getRoleMappingsDeprecations(
   }
 
   // TODO: remove when docs support "main"
-  const docsBranch = packageInfo.branch === 'main' ? 'master' : 'main';
+  const docsBranch = packageInfo.branch === 'main' ? 'master' : packageInfo.branch;
 
   return [
     {
@@ -200,7 +200,7 @@ function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsD
   const title = getDeprecationTitle();
 
   // TODO: remove when docs support "main"
-  const docsBranch = packageInfo.branch === 'main' ? 'master' : 'main';
+  const docsBranch = packageInfo.branch === 'main' ? 'master' : packageInfo.branch;
 
   if (getErrorStatusCode(error) === 403) {
     return [
