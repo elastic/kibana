@@ -50,12 +50,7 @@ export const sourceConfigurationConfigFilePropertiesRT = rt.type({
   sources: rt.type({
     default: rt.partial({
       fields: rt.partial({
-        timestamp: rt.string,
         message: rt.array(rt.string),
-        tiebreaker: rt.string,
-        host: rt.string,
-        container: rt.string,
-        pod: rt.string,
       }),
     }),
   }),
@@ -113,11 +108,6 @@ export type InfraSourceConfigurationColumn = rt.TypeOf<typeof SourceConfiguratio
  */
 
 const SourceConfigurationFieldsRT = rt.type({
-  container: rt.string,
-  host: rt.string,
-  pod: rt.string,
-  tiebreaker: rt.string,
-  timestamp: rt.string,
   message: rt.array(rt.string),
 });
 
