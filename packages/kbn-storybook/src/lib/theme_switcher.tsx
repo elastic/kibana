@@ -25,14 +25,12 @@ export function ThemeSwitcher() {
     const links: Link[] = [
       {
         id: 'v8.light',
-        title: 'Amsterdam: Light',
+        title: 'Light',
       },
       {
         id: 'v8.dark',
-        title: 'Amsterdam: Dark',
+        title: 'Dark',
       },
-      { id: 'v7.light', title: 'Light' },
-      { id: 'v7.dark', title: 'Dark' },
     ].map((link) => ({
       ...link,
       onClick: (_event, item) => {
