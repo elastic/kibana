@@ -7,6 +7,9 @@
 
 import { FilterViewSpec } from '../../../public/filter_view_types';
 import { defaultFilter } from './default_filter';
-import { timeFilter } from './time_filter';
+import { timeFilter, TimeFilterValue } from './time_filter';
 
-export const filterViewsSpecs: FilterViewSpec[] = [defaultFilter, timeFilter];
+export const filterViewsSpecs: Array<FilterViewSpec | FilterViewSpec<TimeFilterValue>> = [
+  defaultFilter,
+  timeFilter,
+];

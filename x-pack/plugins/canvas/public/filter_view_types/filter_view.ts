@@ -5,31 +5,11 @@
  * 2.0.
  */
 
-import { Filter } from '../../types';
+import { FilterViewInstance } from '../../types';
 
-export type ComplexFilterViewField = (value: unknown) => Record<string, SimpleFilterViewField>;
-
-export interface SimpleFilterViewField {
-  label: string;
-  formatter?: (value: unknown) => string;
-}
-
-export interface FormattedFilterViewField {
-  label: string;
-  formattedValue: string;
-}
-
-export type FilterViewInstance = Record<
-  keyof Filter,
-  SimpleFilterViewField | ComplexFilterViewField
->;
-
-export type FlattenFilterViewInstance = Record<string, SimpleFilterViewField>;
-export type FormattedFilterViewInstance = Record<string, FormattedFilterViewField>;
-
-export interface FilterViewSpec {
+export interface FilterViewSpec<FilterValue = unknown> {
   name: string;
-  view: (...args: unknown[]) => FilterViewInstance;
+  view: (...args: unknown[]) => FilterViewInstance<FilterValue>;
 }
 
 export class FilterView implements FilterViewSpec {

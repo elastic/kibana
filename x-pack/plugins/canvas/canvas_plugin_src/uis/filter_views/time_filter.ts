@@ -5,25 +5,39 @@
  * 2.0.
  */
 
+import dateMath from '@elastic/datemath';
 import { FilterType } from '../../../types';
 import { FilterViewSpec } from '../../../public/filter_view_types';
 import { defaultFilter } from './default_filter';
 
+export interface TimeFilterValue {
+  to: string;
+  from: string;
+}
+
 const defConfig = defaultFilter.view();
 
-export const timeFilter: FilterViewSpec = {
+const formatTime = (str: string, roundUp: boolean) => {
+  const moment = dateMath.parse(str, { roundUp });
+  if (!moment || !moment.isValid()) {
+    return `Invalid date: ${str}`;
+  }
+
+  return moment.toISOString();
+};
+
+export const timeFilter: FilterViewSpec<TimeFilterValue> = {
   name: FilterType.time,
   view: () => ({
     ...defConfig,
-    value: (val: any) => ({
+    value: ({ to, from }) => ({
       to: {
         label: 'To',
-        formatter: () => 'some date to',
+        formatter: () => formatTime(to, true),
       },
       from: {
         label: 'From',
-        // formatter: () => moment(val.from),
-        formatter: () => 'some date from',
+        formatter: () => formatTime(from, false),
       },
     }),
   }),

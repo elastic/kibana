@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
-import { FormattedFilterViewInstance } from '../../filter_view_types';
+import { FormattedFilterViewInstance } from '../../../types';
 
 interface Props {
   filter: FormattedFilterViewInstance;

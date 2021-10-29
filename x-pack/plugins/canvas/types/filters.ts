@@ -38,3 +38,25 @@ export interface Filter {
   value: unknown;
   filterGroup: string;
 }
+
+export type ComplexFilterViewField<FilterValue> = (
+  value: FilterValue
+) => Record<string, SimpleFilterViewField>;
+
+export interface SimpleFilterViewField {
+  label: string;
+  formatter?: (value: unknown) => string;
+}
+
+export interface FormattedFilterViewField {
+  label: string;
+  formattedValue: string;
+}
+
+export type FilterViewInstance<FilterValue = unknown> = Record<
+  keyof Filter,
+  SimpleFilterViewField | ComplexFilterViewField<FilterValue>
+>;
+
+export type FlattenFilterViewInstance = Record<string, SimpleFilterViewField>;
+export type FormattedFilterViewInstance = Record<string, FormattedFilterViewField>;

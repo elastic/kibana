@@ -7,7 +7,7 @@
 
 import { EuiAccordion } from '@elastic/eui';
 import React, { FC } from 'react';
-import { FormattedFilterViewInstance } from '../../filter_view_types/filter_view';
+import { FormattedFilterViewInstance } from '../../../types';
 import { getFilterFormatter } from '../../lib/filter';
 import { Filter } from './filter';
 import { FiltersGroup as FiltersGroupType } from './types';

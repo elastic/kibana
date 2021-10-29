@@ -5,13 +5,29 @@
  * 2.0.
  */
 
-import { flowRight, identity } from 'lodash';
-import { Filter as FilterType } from '../../types/filters';
+import { flowRight } from 'lodash';
 import {
+  Filter as FilterType,
   FilterViewInstance,
   FlattenFilterViewInstance,
-  filterViewsRegistry,
-} from '../filter_view_types';
+} from '../../types/filters';
+import { filterViewsRegistry } from '../filter_view_types';
+
+const defaultFormatter = (value: unknown) => (value ? `${value}` : '-');
+
+const formatFilterView = (filterValue: FilterType) => (filterView: FlattenFilterViewInstance) => {
+  const filterViewKeys = Object.keys(filterView) as Array<keyof FilterViewInstance>;
+  return filterViewKeys.reduce(
+    (acc, key) => ({
+      ...acc,
+      [key]: {
+        label: filterView[key].label,
+        formattedValue: (filterView[key].formatter ?? defaultFormatter)(filterValue[key]),
+      },
+    }),
+    {}
+  );
+};
 
 const flattenFilterView = (filterValue: FilterType) => (filterView: FilterViewInstance) => {
   const filterViewKeys = Object.keys(filterView) as Array<keyof FilterViewInstance>;
@@ -23,20 +39,6 @@ const flattenFilterView = (filterValue: FilterType) => (filterView: FilterViewIn
     }
     return { ...acc, [key]: filterField };
   }, {});
-};
-
-const formatFilterView = (filterValue: FilterType) => (filterView: FlattenFilterViewInstance) => {
-  const filterViewKeys = Object.keys(filterView) as Array<keyof FilterViewInstance>;
-  return filterViewKeys.reduce(
-    (acc, key) => ({
-      ...acc,
-      [key]: {
-        label: filterView[key].label,
-        formattedValue: (filterView[key].formatter ?? identity)(filterValue[key]),
-      },
-    }),
-    {}
-  );
 };
 
 export const transformFilterView = (filterView: FilterViewInstance) => (filterValue: FilterType) =>
