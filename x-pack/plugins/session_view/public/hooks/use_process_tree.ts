@@ -220,6 +220,7 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
     } else {
       for (let processId in processMap) {
         processMap[processId].searchMatched = null;
+        processMap[processId].autoExpand = false;
       }
     }
 

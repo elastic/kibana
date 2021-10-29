@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, MouseEvent } from 'react';
+import React, { useState, useEffect, MouseEvent } from 'react';
 import { IProcess } from '../../hooks/use_process_tree';
 import { EuiButton, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,6 +25,10 @@ interface IProcessDeps {
 function Process({ process, isSessionLeader = false, depth = 0, onProcessSelected }: IProcessDeps) {
   const { euiTheme } = useEuiTheme();
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
+
+  useEffect(() => {
+    setChildrenExpanded(isSessionLeader || process.autoExpand);
+  }, [process.autoExpand]);
 
   const darkTextCSS = `
     color: ${euiTheme.colors.text};
