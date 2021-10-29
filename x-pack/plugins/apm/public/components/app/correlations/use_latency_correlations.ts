@@ -83,7 +83,7 @@ export function useLatencyCorrelations() {
         params: {
           body: {
             ...fetchParams,
-            percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD + '',
+            percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
           },
         },
       })) as Response;
