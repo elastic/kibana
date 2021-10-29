@@ -40,6 +40,7 @@ describe('getDeprecations', () => {
       });
       const deprecations = await deprecationsCallback(deprecationContext);
       expect(deprecations).not.toEqual([]);
+      // TODO: remove when docs support "main"
       if (kibanaPackageJson.branch === 'main') {
         for (const { documentationUrl } of deprecations) {
           expect(documentationUrl).toMatch(/\/master\//);
