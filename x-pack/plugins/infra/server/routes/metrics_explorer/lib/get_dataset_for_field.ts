@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { ESSearchClient } from '../../../lib/metrics/types';
 
 interface EventDatasetHit {
@@ -20,7 +19,7 @@ export const getDatasetForField = async (
   client: ESSearchClient,
   field: string,
   indexPattern: string,
-  timerange: { to: number; from: number }
+  timerange: { field: string; to: number; from: number }
 ) => {
   const params = {
     allow_no_indices: true,
@@ -34,7 +33,7 @@ export const getDatasetForField = async (
             { exists: { field } },
             {
               range: {
-                [TIMESTAMP_FIELD]: {
+                [timerange.field]: {
                   gte: timerange.from,
                   lte: timerange.to,
                   format: 'epoch_millis',
@@ -46,7 +45,7 @@ export const getDatasetForField = async (
       },
       size: 1,
       _source: ['event.dataset'],
-      sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
+      sort: [{ [timerange.field]: { order: 'desc' } }],
     },
   };
 

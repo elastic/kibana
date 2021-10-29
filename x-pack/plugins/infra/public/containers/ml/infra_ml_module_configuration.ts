@@ -45,7 +45,8 @@ export const isJobConfigurationOutdated =
       isSubset(
         new Set(jobConfiguration.indexPattern.split(',')),
         new Set(currentSourceConfiguration.indices)
-      )
+      ) &&
+      jobConfiguration.timestampField === currentSourceConfiguration.timestampField
     );
   };
 
