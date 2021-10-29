@@ -36,6 +36,8 @@ const LOADED_DONE = 1;
 const PROGRESS_STEP_P_VALUES = 0.8;
 
 export function useFailedTransactionsCorrelations() {
+  const abortCtrl = useRef(new AbortController());
+
   const fetchParams = useFetchParams();
 
   // This use of useReducer (the dispatch function won't get reinstantiated
@@ -54,6 +56,8 @@ export function useFailedTransactionsCorrelations() {
   const isCancelledRef = useRef(false);
 
   const startFetch = useCallback(async () => {
+    abortCtrl.current.abort();
+    abortCtrl.current = new AbortController();
     isCancelledRef.current = false;
 
     setResponse({
@@ -80,7 +84,7 @@ export function useFailedTransactionsCorrelations() {
       // Initial call to fetch the overall distribution for the log-log plot.
       const { overallHistogram } = await callApmApi({
         endpoint: 'POST /internal/apm/latency/overall_distribution',
-        signal: null,
+        signal: abortCtrl.current.signal,
         params: {
           body: {
             ...fetchParams,
@@ -92,7 +96,7 @@ export function useFailedTransactionsCorrelations() {
 
       const { overallHistogram: errorHistogram } = await callApmApi({
         endpoint: 'POST /internal/apm/latency/overall_distribution',
-        signal: null,
+        signal: abortCtrl.current.signal,
         params: {
           body: {
             ...fetchParams,
@@ -117,7 +121,7 @@ export function useFailedTransactionsCorrelations() {
 
       const { fieldCandidates: candidates } = await callApmApi({
         endpoint: 'GET /internal/apm/correlations/field_candidates',
-        signal: null,
+        signal: abortCtrl.current.signal,
         params: {
           query: fetchParams,
         },
@@ -144,7 +148,7 @@ export function useFailedTransactionsCorrelations() {
       for (const fieldCandidatesChunk of fieldCandidatesChunks) {
         const pValues = await callApmApi({
           endpoint: 'POST /internal/apm/correlations/p_values',
-          signal: null,
+          signal: abortCtrl.current.signal,
           params: {
             body: { ...fetchParams, fieldCandidates: fieldCandidatesChunk },
           },
@@ -180,7 +184,7 @@ export function useFailedTransactionsCorrelations() {
 
       const fieldStats = await callApmApi({
         endpoint: 'POST /internal/apm/correlations/field_stats',
-        signal: null,
+        signal: abortCtrl.current.signal,
         params: {
           body: {
             ...fetchParams,
@@ -206,6 +210,7 @@ export function useFailedTransactionsCorrelations() {
 
   const cancelFetch = useCallback(() => {
     isCancelledRef.current = true;
+    abortCtrl.current.abort();
     setResponse({
       isRunning: false,
     });

@@ -38,6 +38,8 @@ const PROGRESS_STEP_FIELD_VALUE_PAIRS = 0.3;
 const PROGRESS_STEP_CORRELATIONS = 0.6;
 
 export function useLatencyCorrelations() {
+  const abortCtrl = useRef(new AbortController());
+
   const fetchParams = useFetchParams();
 
   // This use of useReducer (the dispatch function won't get reinstantiated
@@ -56,6 +58,8 @@ export function useLatencyCorrelations() {
   const isCancelledRef = useRef(false);
 
   const startFetch = useCallback(async () => {
+    abortCtrl.current.abort();
+    abortCtrl.current = new AbortController();
     isCancelledRef.current = false;
 
     setResponse({
@@ -81,7 +85,7 @@ export function useLatencyCorrelations() {
       // Initial call to fetch the overall distribution for the log-log plot.
       const { overallHistogram } = await callApmApi({
         endpoint: 'POST /internal/apm/latency/overall_distribution',
-        signal: null,
+        signal: abortCtrl.current.signal,
         params: {
           body: {
             ...fetchParams,
@@ -103,7 +107,7 @@ export function useLatencyCorrelations() {
 
       const { fieldCandidates } = await callApmApi({
         endpoint: 'GET /internal/apm/correlations/field_candidates',
-        signal: null,
+        signal: abortCtrl.current.signal,
         params: {
           query: fetchParams,
         },
@@ -125,10 +129,10 @@ export function useLatencyCorrelations() {
 
       for (const fieldCandidateChunk of fieldCandidateChunks) {
         const fieldValuePairChunkResponse = await callApmApi({
-          endpoint: 'GET /internal/apm/correlations/field_value_pairs',
-          signal: null,
+          endpoint: 'POST /internal/apm/correlations/field_value_pairs',
+          signal: abortCtrl.current.signal,
           params: {
-            query: {
+            body: {
               ...fetchParams,
               fieldCandidates: fieldCandidateChunk,
             },
@@ -168,7 +172,7 @@ export function useLatencyCorrelations() {
       for (const fieldValuePairChunk of fieldValuePairChunks) {
         const significantCorrelations = await callApmApi({
           endpoint: 'POST /internal/apm/correlations/significant_correlations',
-          signal: null,
+          signal: abortCtrl.current.signal,
           params: {
             body: { ...fetchParams, fieldValuePairs: fieldValuePairChunk },
           },
@@ -202,7 +206,7 @@ export function useLatencyCorrelations() {
 
       const fieldStats = await callApmApi({
         endpoint: 'POST /internal/apm/correlations/field_stats',
-        signal: null,
+        signal: abortCtrl.current.signal,
         params: {
           body: {
             ...fetchParams,
@@ -232,6 +236,7 @@ export function useLatencyCorrelations() {
 
   const cancelFetch = useCallback(() => {
     isCancelledRef.current = true;
+    abortCtrl.current.abort();
     setResponse({
       isRunning: false,
     });
