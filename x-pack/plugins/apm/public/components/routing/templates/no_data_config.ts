@@ -35,7 +35,7 @@ export function getNoDataConfig({
                 'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
             }
           ),
-          href: basePath + `/app/integrations/detail/apm`,
+          href: `${basePath}/app/home#/tutorial/apm`,
         },
       },
       docsLink,
