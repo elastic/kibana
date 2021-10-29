@@ -81,7 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           const interval = '1m';
 
-          const indices = [appleTransaction, bananaTransaction]
+          const documents = [appleTransaction, bananaTransaction]
             .map((transaction, index) => {
               return [
                 ...timerange(start, end)
@@ -115,7 +115,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             })
             .flatMap((_) => _);
 
-          await synthtraceEsClient.index(indices);
+          await synthtraceEsClient.index(documents);
         });
 
         after(() => synthtraceEsClient.clean());
