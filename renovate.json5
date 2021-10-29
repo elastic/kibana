@@ -11,7 +11,7 @@
     'npm',
   ],
   baseBranches: [
-    'master',
+    'main',
     '7.16',
     '7.15',
   ],

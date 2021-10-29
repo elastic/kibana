@@ -18,6 +18,7 @@ import {
   MetricsHostsJobType,
   bucketSpan,
 } from '../../../../../common/infra_ml';
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import MemoryJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_memory_usage.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -68,7 +69,7 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
     start,
     end,
     filter,
-    moduleSourceConfiguration: { spaceId, sourceId, indices, timestampField },
+    moduleSourceConfiguration: { spaceId, sourceId, indices },
     partitionField,
   } = setUpModuleArgs;
 
@@ -93,13 +94,13 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
     return {
       job_id: id,
       data_description: {
-        time_field: timestampField,
+        time_field: TIMESTAMP_FIELD,
       },
       analysis_config,
       custom_settings: {
         metrics_source_config: {
           indexPattern: indexNamePattern,
-          timestampField,
+          timestampField: TIMESTAMP_FIELD,
           bucketSpan,
         },
       },

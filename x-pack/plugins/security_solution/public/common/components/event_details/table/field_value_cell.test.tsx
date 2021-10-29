@@ -180,6 +180,12 @@ describe('FieldValueCell', () => {
       );
     });
 
+    test('it aligns items at the start of the group to prevent content from stretching (by default)', () => {
+      expect(screen.getByTestId(`event-field-${hostIpData.field}`)).toHaveClass(
+        'euiFlexGroup--alignItemsFlexStart'
+      );
+    });
+
     test('it renders link buttons for each of the host ip addresses', () => {
       expect(screen.getAllByRole('button').length).toBe(hostIpValues.length);
     });
