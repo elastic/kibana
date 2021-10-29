@@ -154,7 +154,11 @@ export class MockResponse {
       action_data: {
         command: this.command,
         comment: this.comment,
-        ack: this.ack,
+      },
+      action_response: {
+        endpoint: {
+          ack: this.ack,
+        },
       },
     };
   }
