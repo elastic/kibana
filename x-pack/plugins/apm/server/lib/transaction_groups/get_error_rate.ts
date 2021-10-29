@@ -173,14 +173,14 @@ export async function getErrorRatePeriods({
     previousPeriodPromise,
   ]);
 
-  const firstCurrentPeriod = currentPeriod.timeseries;
+  const currentPeriodTimeseries = currentPeriod.timeseries;
 
   return {
     currentPeriod,
     previousPeriod: {
       ...previousPeriod,
       timeseries: offsetPreviousPeriodCoordinates({
-        currentPeriodTimeseries: firstCurrentPeriod,
+        currentPeriodTimeseries,
         previousPeriodTimeseries: previousPeriod.timeseries,
       }),
     },

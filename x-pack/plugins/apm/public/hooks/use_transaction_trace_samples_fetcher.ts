@@ -70,15 +70,7 @@ export function useTransactionTraceSamplesFetcher({
           },
         });
 
-        if (response.traceSamples.length === 0) {
-          return response;
-        }
-
-        const { traceSamples } = response;
-
-        return {
-          traceSamples,
-        };
+        return response;
       }
     },
     // the samples should not be refetched if the transactionId or traceId changes

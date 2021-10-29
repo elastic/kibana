@@ -104,7 +104,7 @@ async function getErrorStats({
   end,
 }: Options) {
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
-    const { timeseries, average } = await getErrorRate({
+    const { average } = await getErrorRate({
       environment,
       setup,
       serviceName,
@@ -113,7 +113,7 @@ async function getErrorStats({
       end,
       kuery: '',
     });
-    return { avgErrorRate: timeseries.length === 0 ? null : average };
+    return { avgErrorRate: average };
   });
 }
 
