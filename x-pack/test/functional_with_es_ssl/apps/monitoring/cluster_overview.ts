@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const setupMode = getService('monitoringSetupMode');
 
-  describe('Cluster overview', () => {
+  describe('Cluster overview alerts', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
@@ -37,10 +37,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       await Promise.all(
-        monitoringAlerts.map(async (alert) =>
+        monitoringAlerts.map(async (alert: { id: string }) =>
           supertest.delete(`/api/alerts/alert/${alert.id}`).set('kbn-xsrf', 'true').expect(204)
         )
       );
+
+      await browser.clearLocalStorage();
     });
 
     describe('when create alerts options is selected in the alerts modal', () => {
@@ -52,9 +54,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('alertsCreatedToast', { timeout: 10000 })).to.be(true);
       });
 
-      it.skip('should show badges when entering setup mode', async () => {
+      it('should show badges when entering setup mode', async () => {
         await setupMode.clickSetupModeBtn();
-        await PageObjects.common.sleep(10000);
+        await PageObjects.common.sleep(50000);
         expect(await testSubjects.exists('alertsBadge')).to.be(true);
       });
     });

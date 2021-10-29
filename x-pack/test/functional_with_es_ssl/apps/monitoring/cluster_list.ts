@@ -13,7 +13,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const clusterList = getService('monitoringClusterList');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['monitoring']);
   const supertest = getService('supertest');
   const browser = getService('browser');
 
@@ -36,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       await Promise.all(
-        monitoringAlerts.map(async (alert) =>
+        monitoringAlerts.map(async (alert: { id: string }) =>
           supertest.delete(`/api/alerts/alert/${alert.id}`).set('kbn-xsrf', 'true').expect(204)
         )
       );
