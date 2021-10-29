@@ -83,3 +83,4 @@ export const KS_TEST_THRESHOLD = 0.1;
 export const ERROR_CORRELATION_THRESHOLD = 0.02;
 
 export const DEFAULT_PERCENTILE_THRESHOLD = 95;
+export const DEBOUNCE_INTERVAL = 100;

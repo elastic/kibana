@@ -10,7 +10,10 @@ import { chunk, debounce } from 'lodash';
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
+import {
+  DEBOUNCE_INTERVAL,
+  DEFAULT_PERCENTILE_THRESHOLD,
+} from '../../../../common/correlations/constants';
 import type {
   FailedTransactionsCorrelation,
   FailedTransactionsCorrelationsResponse,
@@ -28,6 +31,12 @@ import { useFetchParams } from './use_fetch_params';
 
 type Response = FailedTransactionsCorrelationsResponse;
 
+// Overall progress is a float from 0 to 1.
+const LOADED_OVERALL_HISTOGRAM = 0.05;
+const LOADED_FIELD_CANDIDATES = LOADED_OVERALL_HISTOGRAM + 0.05;
+const LOADED_DONE = 1;
+const PROGRESS_STEP_P_VALUES = 0.8;
+
 export function useFailedTransactionsCorrelations() {
   const fetchParams = useFetchParams();
 
@@ -37,7 +46,10 @@ export function useFailedTransactionsCorrelations() {
     getReducer<Response & CorrelationsProgress>(),
     getInitialResponse()
   );
-  const setResponse = useMemo(() => debounce(setResponseUnDebounced, 50), []);
+  const setResponse = useMemo(
+    () => debounce(setResponseUnDebounced, DEBOUNCE_INTERVAL),
+    []
+  );
 
   // We're using a ref here because otherwise the startFetch function might have
   // a stale value for checking if the task has been cancelled.
@@ -92,7 +104,7 @@ export function useFailedTransactionsCorrelations() {
       setResponse({
         ...responseUpdate,
         errorHistogram,
-        loaded: 0.05,
+        loaded: LOADED_OVERALL_HISTOGRAM,
       });
       setResponse.flush();
 
@@ -111,7 +123,7 @@ export function useFailedTransactionsCorrelations() {
       const fieldCandidates = candidates.filter((t) => !(t === EVENT_OUTCOME));
 
       setResponse({
-        loaded: 0.1,
+        loaded: LOADED_FIELD_CANDIDATES,
       });
 
       const failedTransactionsCorrelations: FailedTransactionsCorrelation[] =
@@ -142,16 +154,15 @@ export function useFailedTransactionsCorrelations() {
             getFailedTransactionsCorrelationsSortedByScore([
               ...failedTransactionsCorrelations,
             ]);
-          setResponse({
-            ...responseUpdate,
-            loaded:
-              0.2 +
-              Math.round(
-                (chunkLoadCounter / fieldCandidatesChunks.length) * 80
-              ) /
-                100,
-          });
         }
+
+        setResponse({
+          ...responseUpdate,
+          loaded:
+            LOADED_FIELD_CANDIDATES +
+            (chunkLoadCounter / fieldCandidatesChunks.length) *
+              PROGRESS_STEP_P_VALUES,
+        });
 
         if (isCancelledRef.current) {
           return;
@@ -172,7 +183,7 @@ export function useFailedTransactionsCorrelations() {
       });
 
       responseUpdate.fieldStats = fieldStats.stats;
-      setResponse({ ...responseUpdate, loaded: 1, isRunning: false });
+      setResponse({ ...responseUpdate, loaded: LOADED_DONE, isRunning: false });
       setResponse.flush();
     } catch (e) {
       // TODO Improve error handling

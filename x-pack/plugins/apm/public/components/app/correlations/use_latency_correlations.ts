@@ -8,7 +8,10 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
+import {
+  DEBOUNCE_INTERVAL,
+  DEFAULT_PERCENTILE_THRESHOLD,
+} from '../../../../common/correlations/constants';
 import type { FieldValuePair } from '../../../../common/correlations/types';
 import { getPrioritizedFieldValuePairs } from '../../../../common/correlations/utils';
 import type {
@@ -28,6 +31,14 @@ import { useFetchParams } from './use_fetch_params';
 
 type Response = LatencyCorrelationsResponse;
 
+// Overall progress is a float from 0 to 1.
+const LOADED_OVERALL_HISTOGRAM = 0.05;
+const LOADED_FIELD_CANDIDATES = LOADED_OVERALL_HISTOGRAM + 0.05;
+const LOADED_FIELD_VALUE_PAIRS = LOADED_FIELD_CANDIDATES + 0.3;
+const LOADED_DONE = 1;
+const PROGRESS_STEP_FIELD_VALUE_PAIRS = 0.3;
+const PROGRESS_STEP_CORRELATIONS = 0.6;
+
 export function useLatencyCorrelations() {
   const fetchParams = useFetchParams();
 
@@ -37,7 +48,10 @@ export function useLatencyCorrelations() {
     getReducer<Response & CorrelationsProgress>(),
     getInitialResponse()
   );
-  const setResponse = useMemo(() => debounce(setResponseUnDebounced, 100), []);
+  const setResponse = useMemo(
+    () => debounce(setResponseUnDebounced, DEBOUNCE_INTERVAL),
+    []
+  );
 
   // We're using a ref here because otherwise the startFetch function might have
   // a stale value for checking if the task has been cancelled.
@@ -76,7 +90,7 @@ export function useLatencyCorrelations() {
 
       setResponse({
         ...responseUpdate,
-        loaded: 0.05,
+        loaded: LOADED_OVERALL_HISTOGRAM,
       });
       setResponse.flush();
 
@@ -93,7 +107,7 @@ export function useLatencyCorrelations() {
       }
 
       setResponse({
-        loaded: 0.1,
+        loaded: LOADED_FIELD_CANDIDATES,
       });
 
       const chunkSize = 10;
@@ -124,9 +138,9 @@ export function useLatencyCorrelations() {
 
         setResponse({
           loaded:
-            0.1 +
-            Math.round((chunkLoadCounter / fieldCandidateChunks.length) * 30) /
-              100,
+            LOADED_FIELD_CANDIDATES +
+            (chunkLoadCounter / fieldCandidateChunks.length) *
+              PROGRESS_STEP_FIELD_VALUE_PAIRS,
         });
         chunkLoadCounter++;
       }
@@ -162,16 +176,15 @@ export function useLatencyCorrelations() {
           );
           responseUpdate.latencyCorrelations =
             getLatencyCorrelationsSortedByCorrelation([...latencyCorrelations]);
-          setResponse({
-            ...responseUpdate,
-            loaded:
-              0.4 +
-              Math.round(
-                (chunkLoadCounter / fieldValuePairChunks.length) * 60
-              ) /
-                100,
-          });
         }
+
+        setResponse({
+          ...responseUpdate,
+          loaded:
+            LOADED_FIELD_VALUE_PAIRS +
+            (chunkLoadCounter / fieldValuePairChunks.length) *
+              PROGRESS_STEP_CORRELATIONS,
+        });
 
         if (isCancelledRef.current) {
           return;
@@ -192,7 +205,11 @@ export function useLatencyCorrelations() {
       });
 
       responseUpdate.fieldStats = fieldStats.stats;
-      setResponse({ ...responseUpdate, loaded: 1, isRunning: false });
+      setResponse({
+        ...responseUpdate,
+        loaded: LOADED_DONE,
+        isRunning: false,
+      });
       setResponse.flush();
     } catch (e) {
       // TODO Improve error handling
@@ -223,7 +240,7 @@ export function useLatencyCorrelations() {
   const progress = useMemo(
     () => ({
       error,
-      loaded,
+      loaded: Math.round(loaded * 100) / 100,
       isRunning,
     }),
     [error, loaded, isRunning]
