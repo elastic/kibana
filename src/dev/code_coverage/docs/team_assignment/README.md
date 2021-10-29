@@ -3,7 +3,7 @@
 Team assignment occurs once per ci run.
 
 The "orchestration" entry point is a [Jenkinsfile Scripted Pipeline](https://github.com/elastic/kibana/blob/f73bc48b3bbbb5ad2042c1aa267aea2150b7b742/.ci/Jenkinsfile_coverage#L21)  
-This Jenkinsfile runs a [shell script](https://github.com/elastic/kibana/blob/master/src/dev/code_coverage/shell_scripts/generate_team_assignments_and_ingest_coverage.sh#L33) that kicks everything off.  
+This Jenkinsfile runs a [shell script](https://github.com/elastic/kibana/blob/main/src/dev/code_coverage/shell_scripts/generate_team_assignments_and_ingest_coverage.sh#L33) that kicks everything off.  
 The end result is the data is ingested to our [Kibana Stats Cluster](https://kibana-stats.elastic.dev/app/dashboards#/view/58b8db70-62f9-11ea-8312-7f2d69b79843?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-7d%2Cto%3Anow)))
 
 ## Team Assignment Parsing (from .github/CODEOWNERS)  
