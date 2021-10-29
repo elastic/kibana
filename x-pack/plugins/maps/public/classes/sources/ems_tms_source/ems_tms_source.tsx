@@ -6,18 +6,21 @@
  */
 
 import React from 'react';
-import { AbstractTMSSource } from '../tms_source';
+import { Adapters } from 'src/plugins/inspector/public';
+import { i18n } from '@kbn/i18n';
+import { AbstractSource, SourceEditorArgs } from '../source';
+import { ITMSSource } from '../tms_source';
 import { getEmsTmsServices } from '../../../util';
 import { UpdateSourceEditor } from './update_source_editor';
-import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
+import { EMSTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { getEmsTileLayerId, getIsDarkMode, getEMSSettings } from '../../../kibana_services';
 import { registerSource } from '../source_registry';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
-function getErrorInfo(emsTileLayerId) {
+function getErrorInfo(emsTileLayerId: string) {
   return i18n.translate('xpack.maps.source.emsTile.unableToFindTileIdErrorMessage', {
     defaultMessage: `Unable to find EMS tile configuration for id: {id}. {info}`,
     values: { id: emsTileLayerId, info: getEmsUnavailableMessage() },
@@ -37,8 +40,8 @@ export function getSourceTitle() {
   }
 }
 
-export class EMSTMSSource extends AbstractTMSSource {
-  static createDescriptor(descriptor) {
+export class EMSTMSSource extends AbstractSource implements ITMSSource {
+  static createDescriptor(descriptor: Partial<EMSTMSSourceDescriptor>): EMSTMSSourceDescriptor {
     return {
       type: SOURCE_TYPES.EMS_TMS,
       id: descriptor.id,
@@ -51,12 +54,15 @@ export class EMSTMSSource extends AbstractTMSSource {
     };
   }
 
-  constructor(descriptor, inspectorAdapters) {
-    descriptor = EMSTMSSource.createDescriptor(descriptor);
-    super(descriptor, inspectorAdapters);
+  readonly _descriptor: EMSTMSSourceDescriptor;
+
+  constructor(descriptor: Partial<EMSTMSSourceDescriptor>, inspectorAdapters?: Adapters) {
+    const emsTmsDescriptor = EMSTMSSource.createDescriptor(descriptor);
+    super(emsTmsDescriptor, inspectorAdapters);
+    this._descriptor = emsTmsDescriptor;
   }
 
-  renderSourceSettingsEditor({ onChange }) {
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     return <UpdateSourceEditor onChange={onChange} config={this._descriptor} />;
   }
 
@@ -100,12 +106,12 @@ export class EMSTMSSource extends AbstractTMSSource {
     } catch (e) {
       throw new Error(`${getErrorInfo(emsTileLayerId)} - ${e.message}`);
     }
-    const tmsService = emsTMSServices.find((tmsService) => tmsService.getId() === emsTileLayerId);
-    if (tmsService) {
-      return tmsService;
+    const tmsService = emsTMSServices.find((service) => service.getId() === emsTileLayerId);
+    if (!tmsService) {
+      throw new Error(getErrorInfo(emsTileLayerId));
     }
 
-    throw new Error(getErrorInfo(emsTileLayerId));
+    return tmsService;
   }
 
   async getDisplayName() {
@@ -120,15 +126,11 @@ export class EMSTMSSource extends AbstractTMSSource {
   getAttributionProvider() {
     return async () => {
       const emsTMSService = await this._getEMSTMSService();
-      const markdown = emsTMSService.getMarkdownAttribution();
-      if (!markdown) {
-        return [];
-      }
-      return this.convertMarkdownLinkToObjectArr(markdown);
+      return emsTMSService.getAttributions();
     };
   }
 
-  async getUrlTemplate() {
+  async getUrlTemplate(): Promise<string> {
     const emsTMSService = await this._getEMSTMSService();
     return await emsTMSService.getUrlTemplate();
   }
@@ -137,13 +139,13 @@ export class EMSTMSSource extends AbstractTMSSource {
     return 'ems/' + this.getTileLayerId();
   }
 
-  async getVectorStyleSheetAndSpriteMeta(isRetina) {
+  async getVectorStyleSheetAndSpriteMeta(isRetina: boolean) {
     const emsTMSService = await this._getEMSTMSService();
     const styleSheet = await emsTMSService.getVectorStyleSheet();
     const spriteMeta = await emsTMSService.getSpriteSheetMeta(isRetina);
     return {
       vectorStyleSheet: styleSheet,
-      spriteMeta: spriteMeta,
+      spriteMeta,
     };
   }
 
