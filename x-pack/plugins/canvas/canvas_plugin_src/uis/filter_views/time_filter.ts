@@ -25,6 +25,13 @@ const strings = {
     i18n.translate('xpack.canvas.workpad_filters.timeFilter.to', {
       defaultMessage: 'To',
     }),
+  getInvalidDateLabel: (date: string) =>
+    i18n.translate('xpack.canvas.workpad_filters.timeFilter.to', {
+      defaultMessage: 'Invalid date: {date}',
+      values: {
+        date,
+      },
+    }),
 };
 
 const defConfig = defaultFilter.view();
@@ -32,7 +39,7 @@ const defConfig = defaultFilter.view();
 const formatTime = (str: string, roundUp: boolean) => {
   const moment = dateMath.parse(str, { roundUp });
   if (!moment || !moment.isValid()) {
-    return `Invalid date: ${str}`;
+    return strings.getInvalidDateLabel(str);
   }
 
   return moment.format('YYYY-mm-DD HH:mm:ss');
