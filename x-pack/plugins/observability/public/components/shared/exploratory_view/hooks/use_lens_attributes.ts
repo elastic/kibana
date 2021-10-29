@@ -91,12 +91,12 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
   const theme = useTheme();
 
   return useMemo(() => {
-    if (isEmpty(indexPatterns) || isEmpty(allSeries) || !reportType) {
-      return null;
-    }
-    // we only use the data from url to apply, since that get's updated to apply changes
+    // we only use the data from url to apply, since that gets updated to apply changes
     const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
 
+    if (isEmpty(indexPatterns) || isEmpty(allSeriesT) || !reportType) {
+      return null;
+    }
     const layerConfigs = getLayerConfigs(allSeriesT, reportType, theme, indexPatterns);
 
     if (layerConfigs.length < 1) {
@@ -106,5 +106,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
     const lensAttributes = new LensAttributes(layerConfigs);
 
     return lensAttributes.getJSON(lastRefresh);
-  }, [indexPatterns, allSeries, reportType, storage, theme, lastRefresh]);
+    // we also want to check the state on allSeries changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexPatterns, reportType, storage, theme, lastRefresh, allSeries]);
 };
