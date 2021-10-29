@@ -35,7 +35,7 @@ export async function cleanWriteTargets({
     wait_for_completion: false,
   });
 
-  const task = response.body.task;
+  const task = response.task;
 
   if (task) {
     await new Promise<void>((resolve, reject) => {
@@ -45,13 +45,13 @@ export async function cleanWriteTargets({
         });
 
         logger.debug(
-          `Polled for task:\n${JSON.stringify(taskResponse.body, ['completed', 'error'], 2)}`
+          `Polled for task:\n${JSON.stringify(taskResponse, ['completed', 'error'], 2)}`
         );
 
-        if (taskResponse.body.completed) {
+        if (taskResponse.completed) {
           resolve();
-        } else if (taskResponse.body.error) {
-          reject(taskResponse.body.error);
+        } else if (taskResponse.error) {
+          reject(taskResponse.error);
         } else {
           setTimeout(pollForTaskCompletion, 2500);
         }

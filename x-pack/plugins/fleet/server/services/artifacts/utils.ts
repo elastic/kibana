@@ -8,5 +8,9 @@
 import { isESClientError } from '../../errors';
 
 export const isElasticsearchItemNotFoundError = (error: Error): boolean => {
-  return isESClientError(error) && error.meta.statusCode === 404 && error.meta.body.found === false;
+  return (
+    isESClientError(error) &&
+    error.meta.statusCode === 404 &&
+    (error.meta.body as any).found === false
+  );
 };
