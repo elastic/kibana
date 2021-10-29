@@ -111,6 +111,113 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
       });
 
+      it('should export multiple actions attached to 1 rule', async () => {
+        // 1st action
+        const { body: hookAction1 } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        // 2nd action
+        const { body: hookAction2 } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        const action1 = {
+          group: 'default',
+          id: hookAction1.id,
+          action_type_id: hookAction1.actionTypeId,
+          params: {},
+        };
+        const action2 = {
+          group: 'default',
+          id: hookAction2.id,
+          action_type_id: hookAction2.actionTypeId,
+          params: {},
+        };
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [action1, action2],
+        };
+
+        await createRule(supertest, rule1);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200)
+          .parse(binaryToString);
+
+        const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
+        const firstRule = removeServerGeneratedProperties(firstRuleParsed);
+
+        const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
+          ...getSimpleRuleOutput('rule-1'),
+          actions: [action1, action2],
+          throttle: 'rule',
+        };
+        expect(firstRule).to.eql(outputRule1);
+      });
+
+      it('should export actions attached to 2 rules', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        const action = {
+          group: 'default',
+          id: hookAction.id,
+          action_type_id: hookAction.actionTypeId,
+          params: {},
+        };
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [action],
+        };
+
+        const rule2: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-2'),
+          actions: [action],
+        };
+
+        await createRule(supertest, rule1);
+        await createRule(supertest, rule2);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200)
+          .parse(binaryToString);
+
+        const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
+        const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
+        const firstRule = removeServerGeneratedProperties(firstRuleParsed);
+        const secondRule = removeServerGeneratedProperties(secondRuleParsed);
+
+        const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
+          ...getSimpleRuleOutput('rule-2'),
+          actions: [action],
+          throttle: 'rule',
+        };
+        const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
+          ...getSimpleRuleOutput('rule-1'),
+          actions: [action],
+          throttle: 'rule',
+        };
+        expect(firstRule).to.eql(outputRule1);
+        expect(secondRule).to.eql(outputRule2);
+      });
+
       /**
        * Tests the legacy actions to ensure we can export legacy notifications
        * @deprecated Once the legacy notification system is removed, remove this test too.
