@@ -8,6 +8,6 @@
 import { Filter } from '../../../types';
 
 export interface FiltersGroup {
-  name: string;
+  name: string | null;
   filters: Filter[];
 }

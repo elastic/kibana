@@ -6,6 +6,7 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { i18n } from '@kbn/i18n';
 import { FilterType } from '../../../types';
 import { FilterViewSpec } from '../../../public/filter_view_types';
 import { defaultFilter } from './default_filter';
@@ -15,6 +16,17 @@ export interface TimeFilterValue {
   from: string;
 }
 
+const strings = {
+  getFromLabel: () =>
+    i18n.translate('xpack.canvas.workpad_filters.timeFilter.from', {
+      defaultMessage: 'From',
+    }),
+  getToLabel: () =>
+    i18n.translate('xpack.canvas.workpad_filters.timeFilter.to', {
+      defaultMessage: 'To',
+    }),
+};
+
 const defConfig = defaultFilter.view();
 
 const formatTime = (str: string, roundUp: boolean) => {
@@ -23,7 +35,7 @@ const formatTime = (str: string, roundUp: boolean) => {
     return `Invalid date: ${str}`;
   }
 
-  return moment.toISOString();
+  return moment.format('YYYY-mm-DD HH:mm:ss');
 };
 
 export const timeFilter: FilterViewSpec<TimeFilterValue> = {
@@ -31,13 +43,13 @@ export const timeFilter: FilterViewSpec<TimeFilterValue> = {
   view: () => ({
     ...defConfig,
     value: ({ to, from }) => ({
-      to: {
-        label: 'To',
-        formatter: () => formatTime(to, true),
-      },
       from: {
-        label: 'From',
+        label: strings.getFromLabel(),
         formatter: () => formatTime(from, false),
+      },
+      to: {
+        label: strings.getToLabel(),
+        formatter: () => formatTime(to, true),
       },
     }),
   }),

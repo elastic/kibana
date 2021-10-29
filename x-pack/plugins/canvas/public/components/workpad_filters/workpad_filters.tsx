@@ -16,12 +16,13 @@ import { WorkpadFilters as Component } from './workpad_filters.component';
 
 const groupFiltersBy = (filters: Filter[], groupByField: FilterField) => {
   const groupedFilters = groupBy(filters, (filter) => filter[groupByField]);
-  return Object.keys(groupedFilters).map((key) => {
-    return { name: key, filters: groupedFilters[key] };
-  });
+  return Object.keys(groupedFilters).map((key) => ({
+    name: groupedFilters[key][0]?.[groupByField] ? key : null,
+    filters: groupedFilters[key],
+  }));
 };
 
-const DEFAULT_GROUP_BY: FilterField = 'type';
+const DEFAULT_GROUP_BY: FilterField = 'filterGroup';
 
 export const WorkpadFilters: FC = () => {
   const groupFiltersByField: FilterField | undefined = useSelector((state: State) =>

@@ -6,6 +6,7 @@
  */
 
 import { EuiAccordion } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { FormattedFilterViewInstance } from '../../../types';
 import { getFilterFormatter } from '../../lib/filter';
@@ -17,6 +18,13 @@ type Props = FiltersGroupType;
 const panelStyle = {
   paddingRight: '12px',
   paddingTop: '15px',
+};
+
+const strings = {
+  getWithoutGroupLabel: () =>
+    i18n.translate('xpack.canvas.workpad_filters.filters_group.withoutGroup', {
+      defaultMessage: 'Without group',
+    }),
 };
 
 export const FiltersGroup: FC<Props> = ({ name, filters }) => {
@@ -32,7 +40,7 @@ export const FiltersGroup: FC<Props> = ({ name, filters }) => {
     <div>
       <EuiAccordion
         id="canvas-element-stats"
-        buttonContent={name}
+        buttonContent={name ?? strings.getWithoutGroupLabel()}
         initialIsOpen={false}
         className="canvasSidebar__accordion"
         style={{ marginLeft: '0px' }}
