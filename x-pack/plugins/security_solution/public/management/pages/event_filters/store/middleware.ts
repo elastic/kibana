@@ -204,7 +204,7 @@ const checkIfEventFilterDataExist: MiddlewareActionHandler = async (
 ) => {
   dispatch({
     type: 'eventFiltersListPageDataExistsChanged',
-    payload: createLoadingResourceState<boolean>(
+    payload: createLoadingResourceState(
       asStaleResourceState(getListPageDataExistsState(getState()))
     ),
   });
@@ -234,9 +234,7 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
       type: 'eventFiltersListPageDataChanged',
       payload: {
         type: 'LoadingResourceState',
-        previousState: asStaleResourceState<EventFiltersListPageData>(
-          getCurrentListPageDataState(state)
-        ),
+        previousState: asStaleResourceState(getCurrentListPageDataState(state)),
       },
     });
 
@@ -301,9 +299,7 @@ const eventFilterDeleteEntry: MiddlewareActionHandler = async (
 
   dispatch({
     type: 'eventFilterDeleteStatusChanged',
-    payload: createLoadingResourceState<ExceptionListItemSchema>(
-      asStaleResourceState(getDeletionState(state).status)
-    ),
+    payload: createLoadingResourceState(asStaleResourceState(getDeletionState(state).status)),
   });
 
   try {

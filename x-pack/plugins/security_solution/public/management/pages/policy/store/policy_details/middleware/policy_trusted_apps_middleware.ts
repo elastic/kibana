@@ -257,7 +257,7 @@ const fetchPolicyTrustedAppsIfNeeded = async (
   if (forceFetch || doesPolicyTrustedAppsListNeedUpdate(state)) {
     dispatch({
       type: 'assignedTrustedAppsListStateChanged',
-      payload: createLoadingResourceState<PolicyAssignedTrustedApps>(
+      payload: createLoadingResourceState(
         asStaleResourceState(getCurrentPolicyAssignedTrustedAppsState(state))
       ),
     });
@@ -310,9 +310,7 @@ const fetchAllPoliciesIfNeeded = async (
 
   dispatch({
     type: 'policyDetailsListOfAllPoliciesStateChanged',
-    payload: createLoadingResourceState<GetPolicyListResponse>(
-      asStaleResourceState(currentPoliciesState)
-    ),
+    payload: createLoadingResourceState(asStaleResourceState(currentPoliciesState)),
   });
 
   try {
@@ -348,7 +346,7 @@ const removeTrustedAppsFromPolicy = async (
 
   dispatch({
     type: 'policyDetailsTrustedAppsRemoveListStateChanged',
-    payload: createLoadingResourceState<PolicyRemoveTrustedApps>(
+    payload: createLoadingResourceState(
       asStaleResourceState(getCurrentTrustedAppsRemoveListState(state))
     ),
   });

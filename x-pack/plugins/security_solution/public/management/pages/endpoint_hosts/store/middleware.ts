@@ -284,7 +284,7 @@ const handleIsolateEndpointHost = async (
 
   dispatch({
     type: 'endpointIsolationRequestStateChange',
-    payload: createLoadingResourceState<HostIsolationResponse>(
+    payload: createLoadingResourceState(
       asStaleResourceState(getCurrentIsolationRequestState(state))
     ),
   });
@@ -648,9 +648,7 @@ async function endpointDetailsActivityLogChangedMiddleware({
   const { getState, dispatch } = store;
   dispatch({
     type: 'endpointDetailsActivityLogChanged',
-    payload: createLoadingResourceState<ActivityLog>(
-      asStaleResourceState(getActivityLogData(getState()))
-    ),
+    payload: createLoadingResourceState(asStaleResourceState(getActivityLogData(getState()))),
   });
 
   try {
@@ -705,9 +703,7 @@ async function endpointDetailsActivityLogPagingMiddleware({
     });
     dispatch({
       type: 'endpointDetailsActivityLogChanged',
-      payload: createLoadingResourceState<ActivityLog>(
-        asStaleResourceState(getActivityLogData(getState()))
-      ),
+      payload: createLoadingResourceState(asStaleResourceState(getActivityLogData(getState()))),
     });
     const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
       agent_id: selectedAgent(getState()),
@@ -778,9 +774,7 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 
   dispatch({
     type: 'metadataTransformStatsChanged',
-    payload: createLoadingResourceState<TransformStats[]>(
-      asStaleResourceState(getMetadataTransformStats(state))
-    ),
+    payload: createLoadingResourceState(asStaleResourceState(getMetadataTransformStats(state))),
   });
 
   try {

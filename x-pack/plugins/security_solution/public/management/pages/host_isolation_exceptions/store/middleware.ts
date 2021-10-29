@@ -128,12 +128,9 @@ async function loadHostIsolationExceptionsList(
 
     dispatch({
       type: 'hostIsolationExceptionsPageDataChanged',
-      payload: {
-        type: 'LoadingResourceState',
-        previousState: asStaleResourceState<FoundExceptionListItemSchema>(
-          getCurrentListPageDataState(store.getState())
-        ),
-      },
+      payload: createLoadingResourceState(
+        asStaleResourceState(getCurrentListPageDataState(store.getState()))
+      ),
     });
 
     const entries = await getHostIsolationExceptionItems(query);
