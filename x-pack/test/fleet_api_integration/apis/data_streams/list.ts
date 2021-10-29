@@ -9,6 +9,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
+interface IndexResponse {
+  _id: string;
+  _index: string;
+}
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -33,32 +37,52 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   const seedDataStreams = async () => {
-    await es.transport.request({
-      method: 'POST',
-      path: `/${logsTemplateName}-default/_doc`,
-      body: {
-        '@timestamp': '2015-01-01',
-        logs_test_name: 'test',
-        data_stream: {
-          dataset: `${pkgName}.test_logs`,
-          namespace: 'default',
-          type: 'logs',
+    const responses = [];
+    responses.push(
+      await es.transport.request({
+        method: 'POST',
+        path: `/${logsTemplateName}-default/_doc`,
+        body: {
+          '@timestamp': '2015-01-01',
+          logs_test_name: 'test',
+          data_stream: {
+            dataset: `${pkgName}.test_logs`,
+            namespace: 'default',
+            type: 'logs',
+          },
         },
-      },
-    });
-    await es.transport.request({
-      method: 'POST',
-      path: `/${metricsTemplateName}-default/_doc`,
-      body: {
-        '@timestamp': '2015-01-01',
-        logs_test_name: 'test',
-        data_stream: {
-          dataset: `${pkgName}.test_metrics`,
-          namespace: 'default',
-          type: 'metrics',
+      })
+    );
+    responses.push(
+      await es.transport.request({
+        method: 'POST',
+        path: `/${metricsTemplateName}-default/_doc`,
+        body: {
+          '@timestamp': '2015-01-01',
+          logs_test_name: 'test',
+          data_stream: {
+            dataset: `${pkgName}.test_metrics`,
+            namespace: 'default',
+            type: 'metrics',
+          },
         },
-      },
-    });
+      })
+    );
+
+    return responses as IndexResponse[];
+  };
+
+  const getSeedDocsFromResponse = async (indexResponses: IndexResponse[]) => {
+    const docs = await Promise.all(
+      indexResponses.map((indexResponse) =>
+        es.transport.request({
+          method: 'GET',
+          path: `/${indexResponse._index}/_doc/${indexResponse._id}`,
+        })
+      )
+    );
+
+    return docs.map((doc) => doc._source);
   };
 
   const getDataStreams = async () => {
@@ -94,7 +118,10 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should return correct data stream information', async function () {
-      await seedDataStreams();
+      const seedResponse = await seedDataStreams();
+      const docs = await getSeedDocsFromResponse(seedResponse);
+      const ingestedTimestamps = docs.map((doc) => new Date(doc?.event?.ingested).getTime()); // sort ascending
+
       await retry.tryForTime(10000, async () => {
         const { body } = await getDataStreams();
         return expect(
@@ -105,21 +132,21 @@ export default function (providerContext: FtrProviderContext) {
           })
         ).to.eql([
           {
-            dataset: 'datastreams.test_logs',
-            namespace: 'default',
-            type: 'logs',
-            package: 'datastreams',
-            package_version: '0.1.0',
-            last_activity_ms: 1420070400000,
-            dashboards: [],
-          },
-          {
             dataset: 'datastreams.test_metrics',
             namespace: 'default',
             type: 'metrics',
             package: 'datastreams',
             package_version: '0.1.0',
-            last_activity_ms: 1420070400000,
+            last_activity_ms: ingestedTimestamps[1],
+            dashboards: [],
+          },
+          {
+            dataset: 'datastreams.test_logs',
+            namespace: 'default',
+            type: 'logs',
+            package: 'datastreams',
+            package_version: '0.1.0',
+            last_activity_ms: ingestedTimestamps[0],
             dashboards: [],
           },
         ]);
