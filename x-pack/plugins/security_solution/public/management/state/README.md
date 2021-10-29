@@ -187,7 +187,11 @@ try {
 } catch(e) {
   dispatch({type: 'MyAction', payload: createFailedResourceState(e, isLoadedResourceState(entries) ? entries : undefined));
 }
+```
 
+If you don't want to define a previous state for `FailedResourceState` you will need to pass the correct type to the `createFailedResourceState` to instruct Typescript the possible data contained inside
+```typescript
+  dispatch({type: 'MyAction', payload: createFailedResourceState<MyItemType[]>(e); // Note <MyItemType>
 ```
 
 ## The ImmutableObject problem
