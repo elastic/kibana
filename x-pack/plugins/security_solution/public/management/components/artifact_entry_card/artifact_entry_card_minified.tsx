@@ -24,6 +24,7 @@ import { CriteriaConditions, CriteriaConditionsProps } from './components/criter
 import { AnyArtifact } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { DESCRIPTION_LABEL } from './components/translations';
 
 const CardContainerPanel = styled(EuiSplitPanel.Outer)`
   &.artifactEntryCardMinified + &.artifactEntryCardMinified {
@@ -103,7 +104,7 @@ export const ArtifactEntryCardMinified = memo(
         <EuiSplitPanel.Inner paddingSize="s">
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
             <EuiTitle size="xxs">
-              <h5 data-test-subj={getTestId('descriptionTitle')}>{'Description'}</h5>
+              <h5 data-test-subj={getTestId('descriptionTitle')}>{DESCRIPTION_LABEL}</h5>
             </EuiTitle>
             <EuiText>
               <p data-test-subj={getTestId('description')}>

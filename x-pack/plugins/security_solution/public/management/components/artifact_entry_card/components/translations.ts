@@ -134,3 +134,10 @@ export const HIDE_COMMENTS_LABEL = (count: number = 0) =>
     defaultMessage: 'Hide comments ({count})',
     values: { count },
   });
+
+export const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.securitySolution.artifactMinifiedCard.descriptionLabel',
+  {
+    defaultMessage: 'Description',
+  }
+);
