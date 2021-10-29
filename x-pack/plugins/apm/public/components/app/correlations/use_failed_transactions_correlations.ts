@@ -72,6 +72,10 @@ export function useFailedTransactionsCorrelations() {
     setResponse.flush();
 
     try {
+      // Initial call to fetch the overall distribution for the log-log plot.
+      // `responseUpdate` will be enriched with additional data with subsequent
+      // calls to fetch error histograms, field candidates, field value pairs, correlation results
+      // and histogram data for statistically significant results.
       const responseUpdate = (await callApmApi({
         endpoint: 'POST /internal/apm/latency/overall_distribution',
         signal: null,
