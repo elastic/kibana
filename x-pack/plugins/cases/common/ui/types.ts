@@ -255,10 +255,13 @@ export interface SignalEcs {
   threshold_result?: unknown;
 }
 
+type SearchTypes = string | number | boolean | object | SearchTypes[] | undefined;
+
 export interface Ecs {
   _id: string;
   _index?: string;
   signal?: SignalEcs;
+  kibana?: SearchTypes;
 }
 
 export type CaseActionConnector = ActionConnector;
