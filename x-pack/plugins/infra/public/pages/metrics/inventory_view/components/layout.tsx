@@ -18,7 +18,6 @@ import { PageContent } from '../../../../components/page';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../hooks/use_waffle_options';
-import { useSourceContext } from '../../../../containers/metrics_source';
 import { InfraFormatterType } from '../../../../lib/lib';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Toolbar } from './toolbars/toolbar';
@@ -41,7 +40,6 @@ interface Props {
 export const Layout = React.memo(
   ({ shouldLoadDefault, currentView, reload, interval, nodes, loading }: Props) => {
     const [showLoading, setShowLoading] = useState(true);
-    const { source } = useSourceContext();
     const {
       metric,
       groupBy,
@@ -65,7 +63,6 @@ export const Layout = React.memo(
       legend: createLegend(legendPalette, legendSteps, legendReverseColors),
       metric,
       sort,
-      fields: source?.configuration?.fields,
       groupBy,
     };
 

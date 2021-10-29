@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { InventoryCloudAccount } from '../../../../common/http_api/inventory_meta_api';
 import {
   InfraMetadataAggregationResponse,
@@ -49,7 +50,7 @@ export const getCloudMetadata = async (
           must: [
             {
               range: {
-                [sourceConfiguration.fields.timestamp]: {
+                [TIMESTAMP_FIELD]: {
                   gte: currentTime - 86400000, // 24 hours ago
                   lte: currentTime,
                   format: 'epoch_millis',

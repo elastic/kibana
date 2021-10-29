@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { TIEBREAKER_FIELD } from '../../../../common/constants';
 import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
@@ -19,9 +20,6 @@ import {
 } from './common';
 import { InfluencerFilter } from '../common';
 import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
-
-// TODO: Reassess validity of this against ML docs
-const TIEBREAKER_FIELD = '_doc';
 
 const sortToMlFieldMap = {
   dataset: 'partition_field_value',

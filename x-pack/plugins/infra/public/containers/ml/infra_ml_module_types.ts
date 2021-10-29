@@ -49,12 +49,10 @@ export interface ModuleDescriptor<JobType extends string> {
   ) => Promise<DeleteJobsResponsePayload>;
   validateSetupIndices?: (
     indices: string[],
-    timestampField: string,
     fetch: HttpHandler
   ) => Promise<ValidationIndicesResponsePayload>;
   validateSetupDatasets?: (
     indices: string[],
-    timestampField: string,
     startTime: number,
     endTime: number,
     fetch: HttpHandler
@@ -65,7 +63,6 @@ export interface ModuleSourceConfiguration {
   indices: string[];
   sourceId: string;
   spaceId: string;
-  timestampField: string;
 }
 
 interface ManyCategoriesWarningReason {
