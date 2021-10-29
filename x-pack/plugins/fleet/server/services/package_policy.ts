@@ -366,14 +366,14 @@ class PackagePolicyService {
     if (!oldPackagePolicy) {
       throw new Error('Package policy not found');
     }
-
+    // Check that the name does not exist already but exclude the current package policy
     const existingPoliciesWithName = await this.list(soClient, {
       perPage: 1,
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
     });
+    const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
-    // Check that the name does not exist already
-    if ((existingPoliciesWithName?.items || []).length > 0) {
+    if (filtered.length > 0) {
       throw new IngestManagerError('There is already a package with the same name');
     }
 
