@@ -42,7 +42,10 @@ export const applyMetadataToLastPath = (
     if (firstMetaDoc && lastPath) {
       // We will need the inventory fields so we can use the field paths to get
       // the values from the metadata document
-      const inventoryFields = findInventoryFields(snapshotRequest.nodeType);
+      const inventoryFields = findInventoryFields(
+        snapshotRequest.nodeType,
+        source.configuration.fields
+      );
       // Set the label as the name and fallback to the id OR path.value
       lastPath.label = (firstMetaDoc[inventoryFields.name] ?? lastPath.value) as string;
       // If the inventory fields contain an ip address, we need to try and set that
