@@ -242,6 +242,12 @@ export interface SystemIndicesMigrationFeature {
   indices: Array<{
     index: string;
     version: string;
+    failure_cause?: {
+      error: {
+        type: string;
+        reason: string;
+      };
+    };
   }>;
 }
 export interface SystemIndicesMigrationStatus {

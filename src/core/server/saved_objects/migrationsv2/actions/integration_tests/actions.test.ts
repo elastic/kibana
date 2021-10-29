@@ -55,8 +55,7 @@ const { startES } = kbnTestServer.createTestServers({
 });
 let esServer: kbnTestServer.TestElasticsearchUtils;
 
-// Failing: See https://github.com/elastic/kibana/issues/113697
-describe.skip('migration actions', () => {
+describe('migration actions', () => {
   let client: ElasticsearchClient;
 
   beforeAll(async () => {
@@ -1159,7 +1158,7 @@ describe.skip('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'existing_index_with_docs'
+        '.kibana_1'
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1540,7 +1539,8 @@ describe.skip('migration actions', () => {
         }
       `);
     });
-    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
+    // TODO: unskip after https://github.com/elastic/kibana/issues/116111
+    it.skip('resolves left request_entity_too_large_exception when the payload is too large', async () => {
       const newDocs = new Array(10000).fill({
         _source: {
           title:
