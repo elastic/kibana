@@ -26,6 +26,18 @@ const baseUrl = url.format({
 });
 
 describe('Service Inventory', () => {
+  before(() => {
+    cy.task('getConfigEnv').then((envStr: any) => {
+      cy.log(envStr);
+    });
+    // const envStr =
+    //   '{ ' +
+    //   Object.entries(env)
+    //     .map(([key, value]) => `${key}: ${value}`)
+    //     .join(', ') +
+    //   ' }';
+    // cy.log(envStr);
+  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
     cy.task('synthtrace:index:service_inventory', { from, to });

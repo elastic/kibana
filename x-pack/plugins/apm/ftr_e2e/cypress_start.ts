@@ -66,6 +66,9 @@ async function cypressStart(
       START_DATE: start,
       END_DATE: end,
       KIBANA_URL: kibanaUrl,
+      ES_HOST: `${config.get('servers.elasticsearch.hostname')}:${config.get('servers.elasticsearch.port')}`,
+      ES_USERNAME: config.get('servers.elasticsearch.username'),
+      ES_PASSWORD: config.get('servers.elasticsearch.password'),
     },
   });
 

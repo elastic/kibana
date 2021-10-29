@@ -37,7 +37,7 @@ module.exports = async (on: any, config: any) => {
     {
       getService: () => client,
     } as any,
-    { useClassicIndices: false }
+    { useClassicIndices: true }
   );
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
@@ -69,6 +69,10 @@ module.exports = async (on: any, config: any) => {
       const events = generateDataServiceInventory(range);
       await synthtraceEsClient.index(events);
       return null;
+    },
+    getConfigEnv: () => {
+      console.log(config.env);
+      return JSON.stringify(config.env);
     },
   });
 };
