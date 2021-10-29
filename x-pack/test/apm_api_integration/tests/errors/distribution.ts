@@ -7,7 +7,6 @@
 import { service, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { first, last, sumBy } from 'lodash';
-import moment from 'moment';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import {
   APIClientRequestParamsOf,
