@@ -6,6 +6,7 @@
  */
 
 import { ExpressionFunctionAST, fromExpression } from '@kbn/interpreter/common';
+import { useCallback } from 'react';
 import { shallowEqual, useSelector } from 'react-redux';
 import { Filter, FilterType, State } from '../../../../types';
 import { getGlobalFilters } from '../../../state/selectors/workpad';
@@ -41,7 +42,13 @@ export function useCanvasFilters() {
   const expression = extractExpressionAST(filterExpressions);
   const filters = expression.chain.map(adaptCanvasFilter);
 
+  return { filters };
+}
+
+export function useCanvasFiltersActions() {
   return {
-    filters,
+    updateFilter: useCallback((value: any) => {
+      console.log(value);
+    }, []),
   };
 }

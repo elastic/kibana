@@ -52,6 +52,7 @@ export const WorkpadFilters: FC = () => {
   return (
     <Component
       filtersGroups={filtersGroups}
+      filters={canvasFilters}
       onGroupByChange={onGroupByChange}
       groupFiltersByField={groupFiltersByField}
     />

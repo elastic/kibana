@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useCanvasFilters } from './use_canvas_filters';
+export { useCanvasFilters, useCanvasFiltersActions } from './use_canvas_filters';

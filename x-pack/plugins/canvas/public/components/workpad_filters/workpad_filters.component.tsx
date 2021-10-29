@@ -10,12 +10,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FiltersGroup as FiltersGroupType } from './types';
 import { FiltersGroup } from './filters_group';
-import { FilterField } from '../../../types';
+import { FilterField, Filter } from '../../../types';
 
 interface Props {
   filtersGroups: FiltersGroupType[];
-  onGroupByChange: (groupBy: FilterField) => void;
   groupFiltersByField?: FilterField;
+  filters: Filter[];
+  onGroupByChange: (groupBy: FilterField) => void;
 }
 
 const strings = {
@@ -47,9 +48,10 @@ export const WorkpadFilters: FC<Props> = ({
   filtersGroups,
   onGroupByChange,
   groupFiltersByField,
+  filters,
 }) => {
   const filtersGroupsComponents = filtersGroups.map((filtersGroup, index) => (
-    <FiltersGroup key={`filter-group-${index}`} {...filtersGroup} />
+    <FiltersGroup key={`filter-group-${index}`} filtersGroup={filtersGroup} filters={filters} />
   ));
 
   return (

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FC } from 'react';
 import { ExpressionValueFilter } from '.';
 
 export enum FilterType {
@@ -46,11 +47,13 @@ export type ComplexFilterViewField<FilterValue> = (
 export interface SimpleFilterViewField {
   label: string;
   formatter?: (value: unknown) => string;
+  component?: FC<any>;
 }
 
 export interface FormattedFilterViewField {
   label: string;
   formattedValue: string;
+  component?: FC<any>;
 }
 
 export type FilterViewInstance<FilterValue = unknown> = Record<

@@ -6,35 +6,16 @@
  */
 
 import React, { FC } from 'react';
-import { EuiDescriptionList, EuiPanel } from '@elastic/eui';
-import { FormattedFilterViewInstance } from '../../../types';
+import { Filter as FilterType, FormattedFilterViewInstance } from '../../../types';
+import { Filter as Component } from './filter.component';
 
 interface Props {
   filter: FormattedFilterViewInstance;
+  filters: FilterType[];
 }
 
-const titleStyle = {
-  width: '40%',
-};
+export const Filter: FC<Props> = (props) => {
+  const { updateFilter } = useCanvasFiltersActions();
 
-const descriptionStyle = {
-  width: '60%',
-};
-
-export const Filter: FC<Props> = ({ filter }) => {
-  const filterView = Object.values(filter).map((filterValue) => ({
-    title: filterValue.label,
-    description: filterValue.formattedValue,
-  }));
-
-  return (
-    <EuiPanel grow={false} hasShadow={false}>
-      <EuiDescriptionList
-        type="column"
-        listItems={filterView}
-        titleProps={{ style: titleStyle, className: 'eui-textBreakWord' }}
-        descriptionProps={{ style: descriptionStyle, className: 'eui-textBreakWord' }}
-      />
-    </EuiPanel>
-  );
+  return <Component {...props} updateFilter={updateFilter} />;
 };

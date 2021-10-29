@@ -8,12 +8,15 @@
 import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { FormattedFilterViewInstance } from '../../../types';
+import { FormattedFilterViewInstance, Filter as FilterType } from '../../../types';
 import { getFilterFormatter } from '../../lib/filter';
 import { Filter } from './filter';
 import { FiltersGroup as FiltersGroupType } from './types';
 
-type Props = FiltersGroupType;
+interface Props {
+  filtersGroup: FiltersGroupType;
+  filters: FilterType[];
+}
 
 const panelStyle = {
   paddingRight: '12px',
@@ -27,13 +30,15 @@ const strings = {
     }),
 };
 
-export const FiltersGroup: FC<Props> = ({ name, filters }) => {
-  const filterViews: FormattedFilterViewInstance[] = filters.map((filter) =>
+export const FiltersGroup: FC<Props> = ({ filtersGroup, filters }) => {
+  const { name, filters: groupFilters } = filtersGroup;
+
+  const filterViews: FormattedFilterViewInstance[] = groupFilters.map((filter) =>
     getFilterFormatter(filter.type)(filter)
   );
 
   const filtersComponents = filterViews.map((filter, index) => (
-    <Filter key={`filter-${name}-${index}`} filter={filter} />
+    <Filter key={`filter-${name}-${index}`} filter={filter} filters={filters} />
   ));
 
   return (
@@ -41,7 +46,7 @@ export const FiltersGroup: FC<Props> = ({ name, filters }) => {
       <EuiAccordion
         id="canvas-element-stats"
         buttonContent={name ?? strings.getWithoutGroupLabel()}
-        initialIsOpen={false}
+        initialIsOpen={true}
         className="canvasSidebar__accordion"
         style={{ marginLeft: '0px' }}
       >

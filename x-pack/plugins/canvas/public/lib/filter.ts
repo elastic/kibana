@@ -23,6 +23,7 @@ const formatFilterView = (filterValue: FilterType) => (filterView: FlattenFilter
       [key]: {
         label: filterView[key].label,
         formattedValue: (filterView[key].formatter ?? defaultFormatter)(filterValue[key]),
+        component: filterView[key].component,
       },
     }),
     {}
