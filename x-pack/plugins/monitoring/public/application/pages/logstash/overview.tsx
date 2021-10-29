@@ -85,10 +85,9 @@ export const LogStashOverviewPage: React.FC<ComponentProps> = ({ clusters }) => 
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
-      data-test-subj="elasticsearchOverviewPage"
       cluster={cluster}
     >
-      <div data-test-subj="elasticsearchOverviewPage">{renderOverview(data)}</div>
+      <div data-test-subj="logstashOverviewPage">{renderOverview(data)}</div>
     </LogstashTemplate>
   );
 };

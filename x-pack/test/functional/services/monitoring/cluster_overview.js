@@ -45,6 +45,7 @@ export function MonitoringClusterOverviewProvider({ getService }) {
   const SUBJ_LS_UPTIME = `${SUBJ_LS_PANEL} > lsUptime`;
   const SUBJ_LS_JVM_HEAP = `${SUBJ_LS_PANEL} > lsJvmHeap`;
   const SUBJ_LS_PIPELINES = `${SUBJ_LS_PANEL} > lsPipelines`;
+  const SUBJ_LS_OVERVIEW = `${SUBJ_LS_PANEL} > lsOverview`;
 
   const SUBJ_BEATS_PANEL = `clusterItemContainerBeats`;
   const SUBJ_BEATS_OVERVIEW = `${SUBJ_BEATS_PANEL} > beatsOverview`;
@@ -178,6 +179,12 @@ export function MonitoringClusterOverviewProvider({ getService }) {
     }
     getLsJvmHeap() {
       return testSubjects.getVisibleText(SUBJ_LS_JVM_HEAP);
+    }
+    clickLsOverview() {
+      return testSubjects.click(SUBJ_LS_OVERVIEW);
+    }
+    clickLsNodes() {
+      return testSubjects.click(SUBJ_LS_NODES);
     }
     getLsPipelines() {
       return testSubjects.getVisibleText(SUBJ_LS_PIPELINES);
