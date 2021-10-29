@@ -158,6 +158,28 @@ const ListComponent = () => {
 }
 ```
 
+## Types error with `LoadingResourceState` and `FailedResourceState`
+
+You might encounter types problems with the `LoadingResourceState` and `FailedResourceState` because they only work with specific subtypes of the `AsyncResourceState`:
+
+`LoadingResourceState` only accepts a `StaleResourceState`. If you try to assign a variable with type `AsyncResourceState` it will give you a type error because `AsyncResourceState` could also be a `LoadingResourceState`. Use the `asStaleResourceState` helper to convert an object into a correct StaleResourceState
+
+`FailedResourceState` only accepts a `LoadedResourceState` as `lastLoadedState`. You can use the `isLoadedResourceState` to decide if you need to pass it. e.g:
+
+
+```typescript
+const entries = store.getState().entries;
+try {
+  const data = await fetchData(...)
+  //..other code
+} catch(e) {
+  createFailedResourceState(e, isLoadedResourceState(entries) ? entries : undefined);
+}
+
+```
+
 ## The ImmutableObject problem
 
 If you are using redux, all the data coming from selectors is wrapped around an `ImmutableObject` data type. The `AsyncResourceState` is prepared to deal with this scenario, provided you use the helpers and builders available.
+
+
