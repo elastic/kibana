@@ -24,6 +24,7 @@ export const TextValueDisplay = memo<TextValueDisplayProps>(
     const cssClassNames = useMemo(() => {
       return classNames({
         'eui-textTruncate': truncate,
+        'eui-textBreakWord': true,
       });
     }, [truncate]);
 
