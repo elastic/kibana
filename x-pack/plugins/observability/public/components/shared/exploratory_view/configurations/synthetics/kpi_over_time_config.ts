@@ -16,7 +16,6 @@ import {
 import {
   CLS_LABEL,
   DCL_LABEL,
-  DOCUMENT_ONLOAD_LABEL,
   DOWN_LABEL,
   FCP_LABEL,
   LCP_LABEL,
