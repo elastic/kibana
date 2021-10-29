@@ -39,6 +39,7 @@ function createApiExtraction(
         name: 'GENERATED-BY-BAZEL',
         description: 'This is a dummy package.json as API Extractor always requires one.',
         types: './index.d.ts',
+        private: true,
         license: 'SSPL-1.0 OR Elastic License 2.0',
         version: '1.0.0',
       })
