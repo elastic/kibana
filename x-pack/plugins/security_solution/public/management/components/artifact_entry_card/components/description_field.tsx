@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, PropsWithChildren } from 'react';
 import { CommonProps } from '@elastic/eui';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { TextValueDisplay, TextValueDisplayProps } from './text_value_display';
 
-export type DescriptionFieldProps = Pick<CommonProps, 'data-test-subj'> &
+export type DescriptionFieldProps = PropsWithChildren<{}> &
+  Pick<CommonProps, 'data-test-subj'> &
   Pick<TextValueDisplayProps, 'truncate'>;
 
 export const DescriptionField = memo<DescriptionFieldProps>(
   ({ truncate, children, 'data-test-subj': dataTestSubj }) => {
     return (
-      <TextValueDisplay size="m" truncate={truncate}>
+      <TextValueDisplay size="m" truncate={truncate} data-test-subj={dataTestSubj}>
         {children || getEmptyValue()}
       </TextValueDisplay>
     );

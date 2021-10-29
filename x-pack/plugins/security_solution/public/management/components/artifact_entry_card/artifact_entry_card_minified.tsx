@@ -9,7 +9,6 @@ import React, { memo, useCallback, useState, useMemo } from 'react';
 import {
   CommonProps,
   EuiPanel,
-  EuiText,
   EuiAccordion,
   EuiTitle,
   EuiCheckbox,
@@ -19,7 +18,6 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { getEmptyValue } from '../../../common/components/empty_value';
 import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
 import { AnyArtifact } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';

@@ -6,10 +6,9 @@
  */
 
 import React, { memo } from 'react';
-import { CommonProps, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
+import { CommonProps, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { CardHeader, CardHeaderProps } from './components/card_header';
 import { CardSubHeader } from './components/card_sub_header';
-import { getEmptyValue } from '../../../common/components/empty_value';
 import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
 import { AnyArtifact, MenuItemPropsByPolicyId } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
