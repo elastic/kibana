@@ -18,7 +18,9 @@ export class DocLinksService {
   public setup() {}
 
   public start({ injectedMetadata }: StartDeps): DocLinksStart {
-    const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
+    const kibanaBranch = injectedMetadata.getKibanaBranch();
+    // Documentation for `main` branches is still published at a `master` URL.
+    const DOC_LINK_VERSION = kibanaBranch === 'main' ? 'master' : kibanaBranch;
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
     const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
