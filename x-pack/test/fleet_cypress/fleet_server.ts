@@ -38,6 +38,8 @@ export class FleetManager extends Manager {
         const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
         this.log.info(artifact);
 
+        spawn('docker', ['version'], { stdio: 'inherit' });
+
         const args = [
           'run',
           '--add-host',
