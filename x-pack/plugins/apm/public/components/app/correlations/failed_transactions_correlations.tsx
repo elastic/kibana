@@ -46,7 +46,6 @@ import { push } from '../../shared/Links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
-import { isErrorMessage } from './utils/is_error_message';
 import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { getOverallHistogram } from './utils/get_overall_histogram';
 import {
@@ -355,7 +354,7 @@ export function FailedTransactionsCorrelations({
   }, [fieldStats, onAddFilter, showStats]);
 
   useEffect(() => {
-    if (isErrorMessage(progress.error)) {
+    if (progress.error) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.correlations.failedTransactions.errorTitle',
@@ -364,7 +363,7 @@ export function FailedTransactionsCorrelations({
               'An error occurred performing correlations on failed transactions',
           }
         ),
-        text: progress.error.toString(),
+        text: progress.error,
       });
     }
   }, [progress.error, notifications.toasts]);

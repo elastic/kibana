@@ -43,7 +43,6 @@ import { push } from '../../shared/Links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
-import { isErrorMessage } from './utils/is_error_message';
 import { getOverallHistogram } from './utils/get_overall_histogram';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
@@ -75,7 +74,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   }, [response?.fieldStats]);
 
   useEffect(() => {
-    if (isErrorMessage(progress.error)) {
+    if (progress.error) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.correlations.latencyCorrelations.errorTitle',
@@ -83,7 +82,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             defaultMessage: 'An error occurred fetching correlations',
           }
         ),
-        text: progress.error.toString(),
+        text: progress.error,
       });
     }
   }, [progress.error, notifications.toasts]);

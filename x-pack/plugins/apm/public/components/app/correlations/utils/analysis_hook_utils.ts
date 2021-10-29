@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from 'src/core/public';
-
 import type { FailedTransactionsCorrelation } from '../../../../../common/correlations/failed_transactions_correlations/types';
 import type { LatencyCorrelation } from '../../../../../common/correlations/latency_correlations/types';
 
 export interface CorrelationsProgress {
-  error?: Error | IHttpFetchError;
+  error?: string;
   isRunning: boolean;
   loaded: number;
 }

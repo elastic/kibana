@@ -8,6 +8,8 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
+import { IHttpFetchError } from 'src/core/public';
+
 import {
   DEBOUNCE_INTERVAL,
   DEFAULT_PERCENTILE_THRESHOLD,
@@ -223,11 +225,12 @@ export function useLatencyCorrelations() {
       });
       setResponse.flush();
     } catch (e) {
-      // TODO Improve error handling
-      // const err = e as Error | IHttpFetchError;
-      // const message = error.body?.message ?? error.response?.statusText;
+      const err = e as Error | IHttpFetchError;
       setResponse({
-        error: e as Error,
+        error:
+          'response' in err
+            ? err.body?.message ?? err.response?.statusText
+            : err.message,
         isRunning: false,
       });
       setResponse.flush();
