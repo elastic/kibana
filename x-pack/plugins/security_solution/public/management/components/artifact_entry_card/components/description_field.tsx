@@ -8,17 +8,16 @@
 import React, { memo } from 'react';
 import { CommonProps } from '@elastic/eui';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { TextValueDisplay } from './text_value_display';
+import { TextValueDisplay, TextValueDisplayProps } from './text_value_display';
 
-export type DescriptionFieldProps = Pick<CommonProps, 'data-test-subj'>;
+export type DescriptionFieldProps = Pick<CommonProps, 'data-test-subj'> &
+  Pick<TextValueDisplayProps, 'truncate'>;
 
 export const DescriptionField = memo<DescriptionFieldProps>(
-  ({ children, 'data-test-subj': dataTestSubj }) => {
+  ({ truncate, children, 'data-test-subj': dataTestSubj }) => {
     return (
-      <TextValueDisplay size="m">
-        <p data-test-subj={dataTestSubj} className="eui-textBreakWord">
-          {children || getEmptyValue()}
-        </p>
+      <TextValueDisplay size="m" truncate={truncate}>
+        <p data-test-subj={dataTestSubj}>{children || getEmptyValue()}</p>
       </TextValueDisplay>
     );
   }
