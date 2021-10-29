@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Dependency metadata when data is loaded',
-    { config: 'basic', archives: ['apm_8.0.0_empty'] },
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       it('returns correct metadata for the dependency', async () => {
         await generateData({ synthtraceEsClient, backendName, start, end });
