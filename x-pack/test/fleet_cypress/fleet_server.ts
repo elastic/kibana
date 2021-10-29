@@ -40,10 +40,11 @@ export class FleetManager extends Manager {
 
         const args = [
           'run',
+          '--add-host=elasticsearch:host-gateway',
           '--env',
           'FLEET_SERVER_ENABLE=true',
           '--env',
-          `FLEET_SERVER_ELASTICSEARCH_HOST=http://host.docker.internal:${this.esConfig.port}`,
+          `FLEET_SERVER_ELASTICSEARCH_HOST=http://elasticsearch:${this.esConfig.port}`,
           '--env',
           `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
           '--rm',
