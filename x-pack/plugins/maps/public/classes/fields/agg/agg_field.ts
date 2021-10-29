@@ -36,8 +36,8 @@ export class AggField extends CountAggField {
   }
 
   supportsFieldMetaFromLocalData(): boolean {
-    // Elasticsearch vector tile search API returns meta tiles for aggregation metrics
-    return true;
+    // Elasticsearch vector tile search API returns meta tiles with numeric aggregation metrics.
+    return this._getDataTypeSynchronous() === 'number';
   }
 
   isValid(): boolean {
@@ -78,8 +78,12 @@ export class AggField extends CountAggField {
         );
   }
 
-  async getDataType(): Promise<string> {
+  _getDataTypeSynchronous(): string {
     return this._getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
+  }
+
+  async getDataType(): Promise<string> {
+    return this._getDataTypeSynchronous();
   }
 
   getBucketCount(): number {
