@@ -8,7 +8,7 @@
 import { groupBy } from 'lodash';
 import React, { FC } from 'react';
 import { Filter } from '../../../types';
-import { useCanvasFilters } from '../hooks/sidebar/use_filters';
+import { useCanvasFilters } from '../hooks/sidebar/use_canvas_filters';
 import { WorkpadFilters as Component } from './workpad_filters.component';
 
 const groupFiltersBy = (filters: Filter[], groupByField: keyof Filter) => {
