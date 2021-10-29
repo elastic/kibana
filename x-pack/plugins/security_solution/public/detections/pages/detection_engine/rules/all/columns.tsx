@@ -174,7 +174,6 @@ export const getColumns = ({
           {value}
         </LinkAnchor>
       ),
-      truncateText: true,
       width: '20%',
       sortable: true,
     },
@@ -186,14 +185,12 @@ export const getColumns = ({
           {value}
         </EuiText>
       ),
-      truncateText: true,
       width: '10%',
     },
     {
       field: 'severity',
       name: i18n.COLUMN_SEVERITY,
       render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-      truncateText: true,
       width: '12%',
     },
     {
@@ -208,7 +205,6 @@ export const getColumns = ({
           </LocalizedDateTooltip>
         );
       },
-      truncateText: true,
       width: '14%',
     },
     {
@@ -224,7 +220,6 @@ export const getColumns = ({
         );
       },
       width: '12%',
-      truncateText: true,
     },
     {
       field: 'updated_at',
@@ -239,7 +234,6 @@ export const getColumns = ({
         );
       },
       sortable: true,
-      truncateText: true,
       width: '14%',
     },
     {
@@ -254,7 +248,6 @@ export const getColumns = ({
           </EuiText>
         );
       },
-      truncateText: true,
       width: '8%',
     },
     {
@@ -266,7 +259,6 @@ export const getColumns = ({
         }
         return getEmptyTagValue();
       },
-      truncateText: true,
       width: '20%',
     },
     {
@@ -344,7 +336,6 @@ export const getMonitoringColumns = (
           </LinkAnchor>
         );
       },
-      truncateText: true,
       width: '24%',
     },
     {
@@ -362,7 +353,6 @@ export const getMonitoringColumns = (
           {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
         </EuiText>
       ),
-      truncateText: true,
       width: '14%',
     },
     {
@@ -380,7 +370,6 @@ export const getMonitoringColumns = (
           {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
         </EuiText>
       ),
-      truncateText: true,
       width: '14%',
     },
     {
@@ -412,7 +401,6 @@ export const getMonitoringColumns = (
           {value ?? getEmptyTagValue()}
         </EuiText>
       ),
-      truncateText: true,
       width: '14%',
     },
     {
@@ -427,7 +415,6 @@ export const getMonitoringColumns = (
           </LocalizedDateTooltip>
         );
       },
-      truncateText: true,
       width: '20%',
     },
     {
@@ -443,7 +430,6 @@ export const getMonitoringColumns = (
         );
       },
       width: '16%',
-      truncateText: true,
     },
     {
       field: 'activate',
