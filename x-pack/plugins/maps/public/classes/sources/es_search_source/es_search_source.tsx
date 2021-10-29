@@ -154,7 +154,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       fieldName,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
-      canReadFromGeoJson: this._descriptor.scalingType !== SCALING_TYPES.MVT,
     });
   }
 

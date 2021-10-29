@@ -152,20 +152,4 @@ describe('ESSearchSource', () => {
       );
     });
   });
-
-  describe('getFields', () => {
-    it('default', () => {
-      const esSearchSource = new ESSearchSource(mockDescriptor);
-      const docField = esSearchSource.createField({ fieldName: 'prop1' });
-      expect(docField.canReadFromGeoJson()).toBe(true);
-    });
-    it('mvt', () => {
-      const esSearchSource = new ESSearchSource({
-        ...mockDescriptor,
-        scalingType: SCALING_TYPES.MVT,
-      });
-      const docField = esSearchSource.createField({ fieldName: 'prop1' });
-      expect(docField.canReadFromGeoJson()).toBe(false);
-    });
-  });
 });
