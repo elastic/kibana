@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { EditorMenu } from './editor_menu';
-export { EditorMenu as EditorMenuComponent } from './editor_menu.component';
+export { memoryOverviewServiceProvider } from './memory_overview_service';

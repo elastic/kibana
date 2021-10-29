@@ -6,10 +6,4 @@
  */
 
 export * from './models_list';
-
-export const ModelsTableToConfigMapping = {
-  id: 'model_id',
-  description: 'description',
-  createdAt: 'create_time',
-  type: 'type',
-} as const;
+export * from './nodes_list';
