@@ -33,7 +33,6 @@ export const updateRules = async ({
   ruleStatusClient,
   defaultOutputIndex,
   ruleUpdate,
-  savedObjectsClient,
 }: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
   const existingRule = await readRules({
     isRuleRegistryEnabled,
