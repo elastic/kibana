@@ -4,3 +4,5 @@ steps:
 
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
+    env:
+      GITHUB_STEP_COMMIT_STATUS_ENABLED: 'false'
