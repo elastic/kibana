@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { getOr, isEmpty } from 'lodash/fp';
+import { get, getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import dateMath from '@elastic/datemath';
@@ -20,6 +20,7 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
   ALERT_RULE_TIMELINE_ID,
+  ALERT_THRESHOLD_RESULT,
 } from '../../../../common/field_maps/field_names';
 import {
   KueryFilterQueryKind,
@@ -194,9 +195,14 @@ export const getThresholdAggregationData = (
       };
 
       try {
-        thresholdResult = JSON.parse((thresholdData.signal?.threshold_result as string[])[0]);
+        try {
+          thresholdResult = JSON.parse((thresholdData.signal?.threshold_result as string[])[0]);
+        } catch (err) {
+          thresholdResult = JSON.parse((get(ALERT_THRESHOLD_RESULT, thresholdData) as string[])[0]);
+        }
         aggField = JSON.parse(threshold[0]).field;
       } catch (err) {
+        // Legacy support
         thresholdResult = {
           terms: [
             {
@@ -209,13 +215,15 @@ export const getThresholdAggregationData = (
         };
       }
 
-      const originalTimeStr = getField(thresholdData, ALERT_ORIGINAL_TIME)[0];
-      const originalTime = moment(originalTimeStr);
-      const now = moment();
+      // Legacy support
       const ruleFromStr = getField(thresholdData, ALERT_RULE_FROM)[0];
-      const ruleFrom = dateMath.parse(ruleFromStr);
-      const ruleInterval = moment.duration(now.diff(ruleFrom));
+      const ruleFrom = dateMath.parse(ruleFromStr) ?? moment(); // The fallback here will essentially ensure 0 results
+      const originalTimeStr = getField(thresholdData, ALERT_ORIGINAL_TIME)[0];
+      const originalTime = originalTimeStr != null ? moment(originalTimeStr) : ruleFrom;
+      const ruleInterval = moment.duration(moment().diff(ruleFrom));
       const fromOriginalTime = originalTime.clone().subtract(ruleInterval); // This is the default... can overshoot
+      // End legacy support
+
       const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
 
       return {
@@ -405,7 +413,7 @@ export const sendAlertToTimelineAction = async ({
   const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
   const ruleNote = getField(ecsData, ALERT_RULE_NOTE)[0];
   const noteContent = ruleNote ?? '';
-  const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
+  const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID)[0];
   const timelineId = ruleTimelineId ?? '';
   const { to, from } = determineToAndFrom({ ecs });
 
