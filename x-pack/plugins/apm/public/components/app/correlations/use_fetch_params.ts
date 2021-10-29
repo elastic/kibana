@@ -8,19 +8,22 @@
 import { useMemo } from 'react';
 
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
 export const useFetchParams = () => {
-  const { serviceName, transactionType } = useApmServiceContext();
-
-  const { urlParams } = useUrlParams();
-  const { transactionName } = urlParams;
+  const { serviceName } = useApmServiceContext();
 
   const {
-    query: { kuery, environment, rangeFrom, rangeTo },
+    query: {
+      kuery,
+      environment,
+      rangeFrom,
+      rangeTo,
+      transactionName,
+      transactionType,
+    },
   } = useApmParams('/services/{serviceName}/transactions/view');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
