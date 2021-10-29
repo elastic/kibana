@@ -48,7 +48,7 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
   INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
-  updateOrCreateLegacyActions,
+  UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '../../plugins/security_solution/common/constants';
 import { RACAlert } from '../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
 
@@ -523,7 +523,7 @@ export const createLegacyRuleAction = async (
   connectorId: string
 ): Promise<unknown> =>
   supertest
-    .post(`${updateOrCreateLegacyActions}`)
+    .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}`)
     .set('kbn-xsrf', 'true')
     .query({ alert_id: alertId })
     .send({

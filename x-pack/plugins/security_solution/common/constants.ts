@@ -228,7 +228,7 @@ export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable` as cons
 /**
  * Internal actions route
  */
-export const updateOrCreateLegacyActions = '/internal/api/detection/legacy/notifications';
+export const UPDATE_OR_CREATE_LEGACY_ACTIONS = '/internal/api/detection/legacy/notifications';
 
 /**
  * Detection engine routes
