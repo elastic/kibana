@@ -164,6 +164,18 @@ You might encounter types problems with the `LoadingResourceState` and `FailedRe
 
 `LoadingResourceState` only accepts a `StaleResourceState`. If you try to assign a variable with type `AsyncResourceState` it will give you a type error because `AsyncResourceState` could also be a `LoadingResourceState`. Use the `asStaleResourceState` helper to convert an object into a correct StaleResourceState
 
+```typescript
+const entries = store.getState().entries;
+dispatch({type: 'MyAction', payload: createLoadingResourceState(asStaleResourceState(entries)); //NOTE the asStaleResourceState
+try {
+  const data = await fetchData(...)
+  dispatch({type: 'MyAction', payload: createLoadedResourceState(entries);
+} catch(e) {
+  dispatch({type: 'MyAction', payload: createFailedResourceState(e, isLoadedResourceState(entries) ? entries : undefined));
+}
+
+```
+
 `FailedResourceState` only accepts a `LoadedResourceState` as `lastLoadedState`. You can use the `isLoadedResourceState` to decide if you need to pass it. e.g:
 
 
@@ -171,9 +183,9 @@ You might encounter types problems with the `LoadingResourceState` and `FailedRe
 const entries = store.getState().entries;
 try {
   const data = await fetchData(...)
-  //..other code
+  dispatch({type: 'MyAction', payload: createLoadedResourceState(entries);
 } catch(e) {
-  createFailedResourceState(e, isLoadedResourceState(entries) ? entries : undefined);
+  dispatch({type: 'MyAction', payload: createFailedResourceState(e, isLoadedResourceState(entries) ? entries : undefined));
 }
 
 ```
