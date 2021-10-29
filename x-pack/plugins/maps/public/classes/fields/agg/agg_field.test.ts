@@ -48,6 +48,8 @@ describe('supportsFieldMetaFromLocalData', () => {
     expect(maxMetric.supportsFieldMetaFromLocalData()).toBe(true);
     const minMetric = new AggField({ ...defaultParams, aggType: AGG_TYPE.MIN });
     expect(minMetric.supportsFieldMetaFromLocalData()).toBe(true);
+    const sumMetric = new AggField({ ...defaultParams, aggType: AGG_TYPE.SUM });
+    expect(sumMetric.supportsFieldMetaFromLocalData()).toBe(true);
     const uniqueCountMetric = new AggField({
       ...defaultParams,
       aggType: AGG_TYPE.UNIQUE_COUNT,
@@ -56,7 +58,7 @@ describe('supportsFieldMetaFromLocalData', () => {
   });
 
   test('Non number metrics should not support field meta from local', () => {
-    const sumMetric = new AggField({ ...defaultParams, aggType: AGG_TYPE.TERMS });
-    expect(sumMetric.supportsFieldMetaFromLocalData()).toBe(false);
+    const termMetric = new AggField({ ...defaultParams, aggType: AGG_TYPE.TERMS });
+    expect(termMetric.supportsFieldMetaFromLocalData()).toBe(false);
   });
 });
