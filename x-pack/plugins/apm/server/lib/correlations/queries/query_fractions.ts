@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { CorrelationsParams } from '../../../../common/correlations/types';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';

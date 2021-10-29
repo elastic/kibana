@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { SearchRequest } from '@elastic/elasticsearch/api/types';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { buildSamplerAggregation } from '../../utils/field_stats_utils';
 import { FieldValuePair } from '../../../../../common/correlations/types';
 import {
@@ -22,7 +22,7 @@ export const getBooleanFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fieldName: string,
   termFilters?: FieldValuePair[]
-): SearchRequest => {
+): estypes.SearchRequest => {
   const query = getQueryWithParams({ params, termFilters });
 
   const { index, samplerShardSize } = params;

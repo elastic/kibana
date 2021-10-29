@@ -134,6 +134,7 @@
         "uiStateJSON": "{}",
         "version": 1
       },
+      "namespaces": ["default"],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:57:40.826Z"
     },
@@ -205,7 +206,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "space_1:dashboard:space1-dashboard-id",
+    "id": "dashboard:space1-dashboard-id",
     "index": ".kibana",
     "source": {
       "dashboard": {
@@ -228,7 +229,7 @@
         "uiStateJSON": "{}",
         "version": 1
       },
-      "namespace": "space_1",
+      "namespaces": ["space_1"],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:57:40.826Z"
     },
@@ -300,7 +301,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "space_2:dashboard:space2-dashboard-id",
+    "id": "dashboard:space2-dashboard-id",
     "index": ".kibana",
     "source": {
       "dashboard": {
@@ -323,7 +324,7 @@
         "uiStateJSON": "{}",
         "version": 1
       },
-      "namespace": "space_2",
+      "namespaces": ["space_2"],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:57:40.826Z"
     },
@@ -566,6 +567,43 @@
         "targetNamespace": "space_1",
         "targetType": "resolvetype",
         "targetId": "alias-match-newid",
+        "disabled": true
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:space_x:resolvetype:alias-match",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "alias-match",
+        "targetNamespace": "space_x",
+        "targetType": "resolvetype",
+        "targetId": "doesnt-matter"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:space_y:resolvetype:alias-match",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "alias-match",
+        "targetNamespace": "space_y",
+        "targetType": "resolvetype",
+        "targetId": "doesnt-matter",
         "disabled": true
       }
     }
