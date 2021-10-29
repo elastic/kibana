@@ -84,7 +84,7 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
   ): Promise<IRuleStatusSOAttributes | undefined> {
     const result = await this.findRuleStatusSavedObjects(args.ruleId, 1);
     const currentStatusSavedObject = result[0];
-    return currentStatusSavedObject ? currentStatusSavedObject.attributes : undefined;
+    return currentStatusSavedObject?.attributes;
   }
 
   public async getCurrentStatusBulk(
@@ -92,11 +92,7 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
   ): Promise<GetCurrentStatusBulkResult> {
     const { ruleIds } = args;
     const result = await this.ruleStatusClient.findBulk(ruleIds, 1);
-
-    return mapValues(result, (value) => {
-      const arrayOfAttributes = value ?? [];
-      return arrayOfAttributes[0];
-    });
+    return mapValues(result, (attributes = []) => attributes[0]);
   }
 
   public async deleteCurrentStatus(ruleId: string): Promise<void> {

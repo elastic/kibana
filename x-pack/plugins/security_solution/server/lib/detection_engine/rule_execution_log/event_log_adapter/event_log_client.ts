@@ -13,6 +13,7 @@ import {
   SAVED_OBJECT_REL_PRIMARY,
 } from '../../../../../../event_log/server';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { invariant } from '../../../../../common/utils/invariant';
 import { IRuleStatusSOAttributes } from '../../rules/types';
 import { LogStatusChangeArgs } from '../types';
 import {
@@ -22,6 +23,8 @@ import {
 } from './constants';
 
 const spaceIdToNamespace = SavedObjectsUtils.namespaceStringToId;
+
+const now = () => new Date().toISOString();
 
 const statusSeverityDict: Record<RuleExecutionStatus, number> = {
   [RuleExecutionStatus.succeeded]: 0,
@@ -104,19 +107,23 @@ export class EventLogClient implements IExecLogEventLogClient {
     });
 
     return findResult.data.map((event) => {
-      const statusDate = event?.['@timestamp'] ?? new Date().toISOString();
-      const status = event?.kibana?.alert?.rule?.execution?.status as
+      invariant(event, 'Event not found');
+      invariant(event['@timestamp'], 'Required "@timestamp" field is not found');
+
+      const statusDate = event['@timestamp'];
+      const status = event.kibana?.alert?.rule?.execution?.status as
         | RuleExecutionStatus
         | undefined;
-      const message = event?.message ?? '';
+      const isStatusFailed = status === RuleExecutionStatus.failed;
+      const message = event.message ?? '';
 
       return {
         statusDate,
         status,
-        lastFailureAt: status === RuleExecutionStatus.failed ? statusDate : undefined,
-        lastFailureMessage: status === RuleExecutionStatus.failed ? message : undefined,
-        lastSuccessAt: status !== RuleExecutionStatus.failed ? statusDate : undefined,
-        lastSuccessMessage: status !== RuleExecutionStatus.failed ? message : undefined,
+        lastFailureAt: isStatusFailed ? statusDate : undefined,
+        lastFailureMessage: isStatusFailed ? message : undefined,
+        lastSuccessAt: !isStatusFailed ? statusDate : undefined,
+        lastSuccessMessage: !isStatusFailed ? message : undefined,
         lastLookBackDate: undefined,
         gap: undefined,
         bulkCreateTimeDurations: undefined,
@@ -133,6 +140,7 @@ export class EventLogClient implements IExecLogEventLogClient {
     spaceId,
   }: LogExecutionMetricsArgs) {
     this.eventLogger.logEvent({
+      '@timestamp': now(),
       rule: {
         id: ruleId,
         name: ruleName,
@@ -177,6 +185,8 @@ export class EventLogClient implements IExecLogEventLogClient {
     spaceId,
   }: LogStatusChangeArgs) {
     this.eventLogger.logEvent({
+      '@timestamp': now(),
+      message,
       rule: {
         id: ruleId,
         name: ruleName,
@@ -187,7 +197,6 @@ export class EventLogClient implements IExecLogEventLogClient {
         action: RuleExecutionLogAction['status-change'],
         sequence: this.sequence++,
       },
-      message,
       kibana: {
         alert: {
           rule: {

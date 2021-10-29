@@ -13,7 +13,7 @@ import {
   getRuleExecutionStatusFailed,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
-import { internalFindRuleStatusRoute } from './internal_find_rule_status_route';
+import { findRuleStatusInternalRoute } from './find_rule_status_internal_route';
 import { RuleStatusResponse } from '../../rules/types';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
@@ -39,7 +39,7 @@ describe.each([
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
 
-    internalFindRuleStatusRoute(server.router);
+    findRuleStatusInternalRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -86,7 +86,7 @@ describe.each([
       });
 
       const request = internalRuleStatusRequest();
-      const ruleId = request.body.ids[0];
+      const { ruleId } = request.body;
 
       const response = await server.inject(request, context);
       const responseBody: RuleStatusResponse = response.body;
@@ -107,7 +107,9 @@ describe.each([
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "undefined" supplied to "ids"');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'Invalid value "undefined" supplied to "ruleId"'
+      );
     });
   });
 });

@@ -375,7 +375,7 @@ export const getRuleStatusById = async ({
 }): Promise<RuleStatusResponse> =>
   KibanaServices.get().http.fetch<RuleStatusResponse>(INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL, {
     method: 'POST',
-    body: JSON.stringify({ ids: [id] }),
+    body: JSON.stringify({ ruleId: id }),
     signal,
   });
 
