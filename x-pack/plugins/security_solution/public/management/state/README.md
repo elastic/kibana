@@ -85,7 +85,7 @@ const ListComponent = () => {
 
 The previous example is not too realistic because using react hooks there are easier ways to know if a resource is available or not and there are libraries that could handle this state for us. 
 
-A betters suited case for `AsyncResourceState` is using redux and actions when you want to keep all your state in a single place but you need a dedicated type to keep your resource loading/loaded state. This requires more boilerplace code to setup and it looks like this:
+A more suited case for `AsyncResourceState` is using redux and actions when you want to keep all your state in a single place but you need a dedicated type to keep your resource loading/loaded state. This requires more boilerplate code to setup and it looks like this:
 
 
 *State type definition*
