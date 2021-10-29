@@ -29,8 +29,6 @@ import {
 } from './utils/analysis_hook_utils';
 import { useFetchParams } from './use_fetch_params';
 
-type Response = LatencyCorrelationsResponse;
-
 // Overall progress is a float from 0 to 1.
 const LOADED_OVERALL_HISTOGRAM = 0.05;
 const LOADED_FIELD_CANDIDATES = LOADED_OVERALL_HISTOGRAM + 0.05;
@@ -45,7 +43,7 @@ export function useLatencyCorrelations() {
   // This use of useReducer (the dispatch function won't get reinstantiated
   // on every update) and debounce avoids flooding consuming components with updates.
   const [response, setResponseUnDebounced] = useReducer(
-    getReducer<Response & CorrelationsProgress>(),
+    getReducer<LatencyCorrelationsResponse & CorrelationsProgress>(),
     getInitialResponse()
   );
   const setResponse = useMemo(
@@ -73,11 +71,15 @@ export function useLatencyCorrelations() {
     setResponse.flush();
 
     try {
-      // Initial call to fetch the overall distribution for the log-log plot.
       // `responseUpdate` will be enriched with additional data with subsequent
-      // calls to fetch field candidates, field value pairs, correlation results
+      // calls to the overall histogram, field candidates, field value pairs, correlation results
       // and histogram data for statistically significant results.
-      const responseUpdate = (await callApmApi({
+      const responseUpdate: LatencyCorrelationsResponse = {
+        ccsWarning: false,
+      };
+
+      // Initial call to fetch the overall distribution for the log-log plot.
+      const { overallHistogram } = await callApmApi({
         endpoint: 'POST /internal/apm/latency/overall_distribution',
         signal: null,
         params: {
@@ -86,7 +88,8 @@ export function useLatencyCorrelations() {
             percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
           },
         },
-      })) as Response;
+      });
+      responseUpdate.overallHistogram = overallHistogram;
 
       if (isCancelledRef.current) {
         return;
