@@ -17,7 +17,7 @@ import { RecursivePartial } from '../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
-type ErrorsDistributionReturn =
+type ErrorsDistribution =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -63,110 +63,104 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('when data is loaded', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
     describe('errors distribution', () => {
-      const PROD_LIST_RATE = 75;
-      const PROD_LIST_ERROR_RATE = 25;
-      const PROD_ID_RATE = 50;
-      const PROD_ID_ERROR_RATE = 50;
-      const ERROR_NAME_1 = 'Error test 1';
-      const ERROR_NAME_2 = 'Error test 2';
+      const appleTransaction = {
+        name: 'GET /apple 🍎 ',
+        successRate: 75,
+        failureRate: 25,
+      };
+      const bananaTransaction = {
+        name: 'GET /banana 🍌',
+        successRate: 50,
+        failureRate: 50,
+      };
+
       before(async () => {
         const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
           'instance-a'
         );
 
-        const transactionNameProductList = 'GET /api/product/list';
-        const transactionNameProductId = 'GET /api/product/:id';
+        const interval = '1m';
 
-        await synthtraceEsClient.index([
-          ...timerange(start, end)
-            .interval('1m')
-            .rate(PROD_LIST_RATE)
-            .flatMap((timestamp) =>
-              serviceGoProdInstance
-                .transaction(transactionNameProductList)
-                .timestamp(timestamp)
-                .duration(1000)
-                .success()
-                .serialize()
-            ),
-          ...timerange(start, end)
-            .interval('1m')
-            .rate(PROD_LIST_ERROR_RATE)
-            .flatMap((timestamp) =>
-              serviceGoProdInstance
-                .transaction(transactionNameProductList)
-                .errors(serviceGoProdInstance.error(ERROR_NAME_1, 'foo').timestamp(timestamp))
-                .duration(1000)
-                .timestamp(timestamp)
-                .failure()
-                .serialize()
-            ),
-          ...timerange(start, end)
-            .interval('1m')
-            .rate(PROD_ID_RATE)
-            .flatMap((timestamp) =>
-              serviceGoProdInstance
-                .transaction(transactionNameProductId)
-                .timestamp(timestamp)
-                .duration(1000)
-                .success()
-                .serialize()
-            ),
-          ...timerange(start, end)
-            .interval('1m')
-            .rate(PROD_ID_ERROR_RATE)
-            .flatMap((timestamp) =>
-              serviceGoProdInstance
-                .transaction(transactionNameProductId)
-                .errors(serviceGoProdInstance.error(ERROR_NAME_2, 'bar').timestamp(timestamp))
-                .duration(1000)
-                .timestamp(timestamp)
-                .failure()
-                .serialize()
-            ),
-        ]);
+        const indices = [appleTransaction, bananaTransaction]
+          .map((transaction, index) => {
+            return [
+              ...timerange(start, end)
+                .interval(interval)
+                .rate(transaction.successRate)
+                .flatMap((timestamp) =>
+                  serviceGoProdInstance
+                    .transaction(transaction.name)
+                    .timestamp(timestamp)
+                    .duration(1000)
+                    .success()
+                    .serialize()
+                ),
+              ...timerange(start, end)
+                .interval(interval)
+                .rate(transaction.failureRate)
+                .flatMap((timestamp) =>
+                  serviceGoProdInstance
+                    .transaction(transaction.name)
+                    .errors(
+                      serviceGoProdInstance
+                        .error(`Error ${index}`, transaction.name)
+                        .timestamp(timestamp)
+                    )
+                    .duration(1000)
+                    .timestamp(timestamp)
+                    .failure()
+                    .serialize()
+                ),
+            ];
+          })
+          .flatMap((_) => _);
+
+        await synthtraceEsClient.index(indices);
       });
 
       after(() => synthtraceEsClient.clean());
 
       describe('without comparison', () => {
-        let errorsDistribution: ErrorsDistributionReturn;
+        let errorsDistribution: ErrorsDistribution;
         before(async () => {
           const response = await callApi();
           errorsDistribution = response.body;
         });
 
-        it('has correct number of occurences', () => {
+        it('displays combined number of occurrences', () => {
           const countSum = sumBy(errorsDistribution.currentPeriod, 'y');
           const numberOfBuckets = 15;
-          expect(countSum).to.equal((PROD_ID_ERROR_RATE + PROD_LIST_ERROR_RATE) * numberOfBuckets);
+          expect(countSum).to.equal(
+            (appleTransaction.failureRate + bananaTransaction.failureRate) * numberOfBuckets
+          );
         });
       });
 
-      describe('group id Error test 2', () => {
-        let errorsDistribution: ErrorsDistributionReturn;
+      describe('displays occurrences for type "apple transaction" only', () => {
+        let errorsDistribution: ErrorsDistribution;
         before(async () => {
           const response = await callApi({
-            query: { kuery: 'error.exception.type:"foo"' },
+            query: { kuery: `error.exception.type:"${appleTransaction.name}"` },
           });
           errorsDistribution = response.body;
         });
-        it('has correct number of occurences', () => {
+        it('displays combined number of occurrences', () => {
           const countSum = sumBy(errorsDistribution.currentPeriod, 'y');
           const numberOfBuckets = 15;
-          expect(countSum).to.equal(PROD_LIST_ERROR_RATE * numberOfBuckets);
+          expect(countSum).to.equal(appleTransaction.failureRate * numberOfBuckets);
         });
       });
 
       describe('with comparison', () => {
-        let errorsDistribution: ErrorsDistributionReturn;
+        let errorsDistribution: ErrorsDistribution;
         before(async () => {
+          const fiveMinutes = 5 * 60 * 1000;
           const response = await callApi({
             query: {
-              start: moment(end).subtract(7, 'minutes').toISOString(),
+              start: new Date(end - fiveMinutes).toISOString(),
               end: new Date(end).toISOString(),
               comparisonStart: new Date(start).toISOString(),
-              comparisonEnd: moment(start).add(7, 'minutes').toISOString(),
+              comparisonEnd: new Date(start + fiveMinutes).toISOString(),
             },
           });
           errorsDistribution = response.body;
