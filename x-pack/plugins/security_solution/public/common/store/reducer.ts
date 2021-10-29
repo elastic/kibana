@@ -21,7 +21,7 @@ import { SecuritySubPlugins } from '../../app/types';
 import { ManagementPluginReducer } from '../../management';
 import { State } from './types';
 import { AppAction } from './actions';
-import { initDataView, SourcererDataView, SourcererScopeName } from './sourcerer/model';
+import { initDataView, SourcererModel, SourcererScopeName } from './sourcerer/model';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 
@@ -44,31 +44,27 @@ export const createInitialState = (
     signalIndexName,
     enableExperimental,
   }: {
-    defaultDataView: Pick<SourcererDataView, 'id' | 'title' | 'patternList'>;
-    kibanaDataViews: Array<Pick<SourcererDataView, 'id' | 'title' | 'patternList'>>;
-    signalIndexName: string | null;
+    defaultDataView: SourcererModel['defaultDataView'];
+    kibanaDataViews: SourcererModel['kibanaDataViews'];
+    signalIndexName: SourcererModel['signalIndexName'];
     enableExperimental: ExperimentalFeatures;
   }
 ): State => {
-  const fullDefaultDataView = {
-    ...initDataView,
-    ...defaultDataView,
-  };
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
-      fullDefaultDataView,
+      defaultDataView,
       SourcererScopeName.default,
       signalIndexName,
       true
     ),
     [SourcererScopeName.detections]: getScopePatternListSelection(
-      fullDefaultDataView,
+      defaultDataView,
       SourcererScopeName.detections,
       signalIndexName,
       true
     ),
     [SourcererScopeName.timeline]: getScopePatternListSelection(
-      fullDefaultDataView,
+      defaultDataView,
       SourcererScopeName.timeline,
       signalIndexName,
       true
@@ -100,7 +96,7 @@ export const createInitialState = (
           selectedPatterns: initialPatterns[SourcererScopeName.timeline],
         },
       },
-      defaultDataView: fullDefaultDataView,
+      defaultDataView,
       kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
       signalIndexName,
     },

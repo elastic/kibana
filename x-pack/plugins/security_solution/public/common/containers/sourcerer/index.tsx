@@ -38,10 +38,8 @@ export const useInitSourcerer = (
   const { addError } = useAppToasts();
 
   useEffect(() => {
-    const { id, ...rest } = defaultDataView;
-    if (id === null) {
-      // if id is null, rest is error
-      addError(rest, {
+    if (defaultDataView.error != null) {
+      addError(defaultDataView.error, {
         title: i18n.translate('xpack.securitySolution.sourcerer.permissions.title', {
           defaultMessage: 'Write role required to generate data',
         }),
@@ -51,7 +49,7 @@ export const useInitSourcerer = (
         }),
       });
     }
-  }, [addError, defaultDataView]);
+  }, [addError, defaultDataView.error]);
 
   const getSignalIndexNameSelector = useMemo(
     () => sourcererSelectors.signalIndexNameSelector(),
@@ -77,7 +75,7 @@ export const useInitSourcerer = (
   const { indexFieldsSearch } = useDataView();
 
   useEffect(
-    () => activeDataViewIds.forEach((id) => indexFieldsSearch(id)),
+    () => activeDataViewIds.forEach((id) => id != null && id.length > 0 && indexFieldsSearch(id)),
     [activeDataViewIds, indexFieldsSearch]
   );
 
@@ -88,7 +86,8 @@ export const useInitSourcerer = (
       signalIndexName != null &&
       signalIndexNameSelector == null &&
       (activeTimeline == null || activeTimeline.savedObjectId == null) &&
-      initialTimelineSourcerer.current
+      initialTimelineSourcerer.current &&
+      defaultDataView.id.length > 0
     ) {
       initialTimelineSourcerer.current = false;
       dispatch(
@@ -106,7 +105,8 @@ export const useInitSourcerer = (
     } else if (
       signalIndexNameSelector != null &&
       (activeTimeline == null || activeTimeline.savedObjectId == null) &&
-      initialTimelineSourcerer.current
+      initialTimelineSourcerer.current &&
+      defaultDataView.id.length > 0
     ) {
       initialTimelineSourcerer.current = false;
       dispatch(
@@ -217,7 +217,12 @@ export const useInitSourcerer = (
     [defaultDataView.title, dispatch, indexFieldsSearch, pollForSignalIndex, addError]
   );
   useEffect(() => {
-    if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {
+    if (
+      !loadingSignalIndex &&
+      signalIndexName != null &&
+      signalIndexNameSelector == null &&
+      defaultDataView.id.length > 0
+    ) {
       // update signal name also updates sourcerer
       // we hit this the first time signal index is created
       updateSourcererDataView(signalIndexName);
@@ -239,7 +244,8 @@ export const useInitSourcerer = (
       scopeId === SourcererScopeName.detections &&
       isSignalIndexExists &&
       signalIndexName != null &&
-      initialDetectionSourcerer.current
+      initialDetectionSourcerer.current &&
+      defaultDataView.id.length > 0
     ) {
       initialDetectionSourcerer.current = false;
       dispatch(
@@ -257,7 +263,8 @@ export const useInitSourcerer = (
     } else if (
       scopeId === SourcererScopeName.detections &&
       signalIndexNameSelector != null &&
-      initialTimelineSourcerer.current
+      initialTimelineSourcerer.current &&
+      defaultDataView.id.length > 0
     ) {
       initialDetectionSourcerer.current = false;
       sourcererActions.setSelectedDataView({

@@ -36,7 +36,6 @@ export interface SourcererScope {
 }
 
 export type SourcererScopeById = Record<SourcererScopeName, SourcererScope>;
-
 /**
  * DataView from Kibana + timelines/index_fields enhanced field data
  */
@@ -94,7 +93,7 @@ export interface SelectedDataView {
  */
 export interface SourcererModel {
   /** default security-solution data view */
-  defaultDataView: SourcererDataView;
+  defaultDataView: SourcererDataView & { error?: unknown };
   /** all Kibana data views, including security-solution */
   kibanaDataViews: SourcererDataView[];
   /** security solution signals index name */

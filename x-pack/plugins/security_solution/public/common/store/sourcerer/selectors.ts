@@ -15,14 +15,16 @@ import {
   SourcererScopeName,
 } from './model';
 
-export const sourcererKibanaDataViewsSelector = ({ sourcerer }: State): SourcererDataView[] =>
-  sourcerer.kibanaDataViews;
+export const sourcererKibanaDataViewsSelector = ({
+  sourcerer,
+}: State): SourcererModel['kibanaDataViews'] => sourcerer.kibanaDataViews;
 
 export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string | null =>
   sourcerer.signalIndexName;
 
-export const sourcererDefaultDataViewSelector = ({ sourcerer }: State): SourcererDataView =>
-  sourcerer.defaultDataView;
+export const sourcererDefaultDataViewSelector = ({
+  sourcerer,
+}: State): SourcererModel['defaultDataView'] => sourcerer.defaultDataView;
 
 export const dataViewSelector = ({ sourcerer }: State, id: string): SourcererDataView =>
   sourcerer.kibanaDataViews.find((dataView) => dataView.id === id) ?? sourcerer.defaultDataView;

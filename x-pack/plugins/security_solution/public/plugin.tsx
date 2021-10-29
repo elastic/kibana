@@ -62,7 +62,7 @@ import {
 } from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-import { SourcererDataView } from './common/store/sourcerer/model';
+import { initDataView, SourcererModel, SourcererDataView } from './common/store/sourcerer/model';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -355,8 +355,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
 
       const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      let defaultDataView: Pick<SourcererDataView, 'id' | 'title' | 'patternList'>;
-      let kibanaDataViews: Array<Pick<SourcererDataView, 'id' | 'title' | 'patternList'>>;
+      let defaultDataView: SourcererModel['defaultDataView'];
+      let kibanaDataViews: SourcererModel['kibanaDataViews'];
       try {
         // check for/generate default Security Solution Kibana index pattern
         const sourcererDataViews = await coreStart.http.fetch(SOURCERER_API_URL, {
@@ -365,10 +365,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
           }),
         });
-        defaultDataView = sourcererDataViews.defaultDataView;
-        kibanaDataViews = sourcererDataViews.kibanaDataViews;
+        defaultDataView = { ...initDataView, ...sourcererDataViews.defaultDataView };
+        kibanaDataViews = sourcererDataViews.kibanaDataViews.map((dataView: SourcererDataView) => ({
+          ...initDataView,
+          ...dataView,
+        }));
       } catch (error) {
-        defaultDataView = { id: null, ...error };
+        defaultDataView = { ...initDataView, error };
         kibanaDataViews = [];
       }
       const { createStore, createInitialState } = await this.lazyApplicationDependencies();
