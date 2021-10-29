@@ -68,14 +68,14 @@ Before you upgrade to 8.0.0, remove `xpack.actions.enabled` from kibana.yml.
 
 [discrete]
 [[breaking-113516]]
-.Removes fontAwesome usage
+.Removes display options from legacy gauge
 [%collapsible]
 ====
 *Details* +
-fontAwesome has been removed from the vislib plugin. For more information, refer to {kibana-pull}113516[#113516].
+The *Display warnings* option has been removed from the aggregation-based gauge visualization. For more information, refer to {kibana-pull}113516[#113516].
 
 *Impact* +
-The *Display warnings* option is no longer available in the legacy Gauge visualization.
+When you create aggregation-based gauge visualizations, the *Display warnings* option is no longer available in *Options > Labels*.
 ====
 
 [discrete]
@@ -84,10 +84,43 @@ The *Display warnings* option is no longer available in the legacy Gauge visuali
 [%collapsible]
 ====
 *Details* +
-All deprecated visEditors plugin settings have been removed. For more information, refer to {kibana-pull}112643[#112643].
+The following deprecated visEditors plugin settings have been removed:
+
+* `metric_vis.enabled`
+* `table_vis.enabled`
+* `tagcloud.enabled`
+* `metrics.enabled`
+* `metrics.chartResolution`
+* `chartResolution`
+* `metrics.minimumBucketSize`
+* `minimumBucketSize`
+* `vega.enabled`
+* `vega.enableExternalUrls`
+* `vis_type_table.legacyVisEnabled`
+* `timelion_vis.enabled`
+* `timelion.enabled`
+* `timelion.graphiteUrls`
+* `timelion.ui.enabled`
+
+For more information, refer to {kibana-pull}112643[#112643].
 
 *Impact* +
-Use the new settings in kibana.yml.
+Before you upgrade, make the following changes in kibana.yml:
+
+* Replace `metric_vis.enabled` with `vis_type_metric.enabled`
+* Replace `table_vis.enabled` with `vis_type_table.enabled`
+* Replace `tagcloud.enabled` with `vis_type_tagcloud.enabled`
+* Replace `metrics.enabled` with `vis_type_timeseries.enabled`
+* Replace `metrics.chartResolution` and `chartResolution` with `vis_type_timeseries.chartResolution`
+* Replace `metrics.minimumBucketSize` and `minimumBucketSize` with `vis_type_timeseries.minimumBucketSize`
+* Replace `vega.enabled` with `vis_type_vega.enabled`
+* Replace `vega.enableExternalUrls` with `vis_type_vega.enableExternalUrls`
+* Remove `vis_type_table.legacyVisEnabled`
+* Replace `timelion_vis.enabled` with `vis_type_timelion.enabled`
+* Replace `timelion.enabled` with `vis_type_timelion.enabled`
+* Replace `timelion.graphiteUrls` with `vis_type_timelion.graphiteUrls`
+* Remove `timelion.ui.enabled`
+
 ====
 
 [discrete]
@@ -104,14 +137,14 @@ When you upgrade to 8.0.0, you are no longer able to configure the dimming opact
 
 [discrete]
 [[breaking-110985]]
-.Removes less support from markdown editor
+.Removes Less stylesheet support
 [%collapsible]
 ====
 *Details* +
-`markdown_less` has been removed from saved_object, and markdown id has been removed from `markdown_css`. For more information, refer to {kibana-pull}110985[#110985].
+In *TSVB*, custom Less stylesheets have been removed. For more information, refer to {kibana-pull}110985[#110985].
 
 *Impact* +
-A migration script is used for `markdown_less` and `markdown_css`, and `@emotion/react` is now used to encapsulate styles inside markdown instead of using the ID.
+Existing less stylesheets are automatically converted to CSS stylesheets. 
 ====
 
 [discrete]
