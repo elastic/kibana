@@ -34,6 +34,8 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation, { branch }) => {
     const auditLoggingEnabled = settings?.xpack?.security?.audit?.enabled ?? false;
     const legacyAuditLoggerEnabled = !settings?.xpack?.security?.audit?.appender;
+    // TODO: remove when docs support "main"
+    const docsBranch = branch === 'main' ? 'master' : 'main';
     if (auditLoggingEnabled && legacyAuditLoggerEnabled) {
       addDeprecation({
         configPath: 'xpack.security.audit.appender',
@@ -44,7 +46,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           defaultMessage:
             'The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.',
         }),
-        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#audit-logging-settings`,
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${docsBranch}/security-settings-kb.html#audit-logging-settings`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.auditLogger.manualStepOneMessage', {
@@ -60,6 +62,8 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   // Deprecation warning for the old array-based format of `xpack.security.authc.providers`.
   (settings, _fromPath, addDeprecation, { branch }) => {
     if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
+      // TODO: remove when docs support "main"
+      const docsBranch = branch === 'main' ? 'master' : 'main';
       addDeprecation({
         configPath: 'xpack.security.authc.providers',
         title: i18n.translate('xpack.security.deprecations.authcProvidersTitle', {
@@ -69,7 +73,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           defaultMessage: 'Use the new object format instead of an array of provider types.',
         }),
         level: 'warning',
-        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#authentication-security-settings`,
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${docsBranch}/security-settings-kb.html#authentication-security-settings`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.authcProviders.manualSteps1', {
@@ -85,6 +89,9 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     }
   },
   (settings, _fromPath, addDeprecation, { branch }) => {
+    // TODO: remove when docs support "main"
+    const docsBranch = branch === 'main' ? 'master' : 'main';
+
     const hasProviderType = (providerType: string) => {
       const providers = settings?.xpack?.security?.authc?.providers;
       if (Array.isArray(providers)) {
@@ -112,7 +119,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           values: { tokenProvider },
         }),
         level: 'warning',
-        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#authentication-security-settings`,
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${docsBranch}/security-settings-kb.html#authentication-security-settings`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.basicAndTokenProviders.manualSteps1', {
@@ -126,6 +133,8 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     }
   },
   (settings, _fromPath, addDeprecation, { branch }) => {
+    // TODO: remove when docs support "main"
+    const docsBranch = branch === 'main' ? 'master' : 'main';
     const samlProviders = (settings?.xpack?.security?.authc?.providers?.saml ?? {}) as Record<
       string,
       any
@@ -145,7 +154,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           defaultMessage: 'This setting is no longer used.',
         }),
         level: 'warning',
-        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#authentication-security-settings`,
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${docsBranch}/security-settings-kb.html#authentication-security-settings`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.maxRedirectURLSize.manualSteps1', {
