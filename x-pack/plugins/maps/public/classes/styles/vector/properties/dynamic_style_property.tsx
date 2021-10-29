@@ -260,7 +260,7 @@ export class DynamicStyleProperty<T>
   }
 
   supportsFieldMeta() {
-    return this.isComplete() && !!this._field && this._field.supportsFieldMeta();
+    return this.isComplete() && !!this._field && this._field.supportsFieldMetaFromEs();
   }
 
   async getFieldMetaRequest() {
@@ -287,7 +287,7 @@ export class DynamicStyleProperty<T>
   }
 
   supportsMbFeatureState() {
-    return !!this._field && this._field.canReadFromGeoJson();
+    return !!this._field && !this._field.getSource().isMvt();
   }
 
   getMbLookupFunction(): MB_LOOKUP_FUNCTION {
@@ -466,13 +466,14 @@ export class DynamicStyleProperty<T>
   }
 
   renderDataMappingPopover(onChange: (updatedOptions: Partial<T>) => void) {
-    if (!this.supportsFieldMeta()) {
+    if (!this._field || !this.supportsFieldMeta()) {
       return null;
     }
     return this.isCategorical() ? (
       <CategoricalDataMappingPopover<T>
         fieldMetaOptions={this.getFieldMetaOptions()}
         onChange={onChange}
+        supportsFieldMetaFromLocalData={this._field.supportsFieldMetaFromLocalData()}
       />
     ) : (
       <OrdinalDataMappingPopover<T>
@@ -481,6 +482,7 @@ export class DynamicStyleProperty<T>
         onChange={onChange}
         dataMappingFunction={this.getDataMappingFunction()}
         supportedDataMappingFunctions={this._getSupportedDataMappingFunctions()}
+        supportsFieldMetaFromLocalData={this._field.supportsFieldMetaFromLocalData()}
       />
     );
   }
@@ -502,7 +504,7 @@ export class DynamicStyleProperty<T>
       // They just re-use the original property-name
       targetName = this._field.getName();
     } else {
-      if (this._field.canReadFromGeoJson() && this._field.supportsAutoDomain()) {
+      if (!this._field.getSource().isMvt() && this._field.supportsFieldMetaFromLocalData()) {
         // Geojson-sources can support rewrite
         // e.g. field-formatters will create duplicate field
         targetName = getComputedFieldName(this.getStyleName(), this._field.getName());

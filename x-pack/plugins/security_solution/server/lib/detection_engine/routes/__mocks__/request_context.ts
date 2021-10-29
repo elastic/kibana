@@ -11,6 +11,7 @@ import { coreMock } from 'src/core/server/mocks';
 import { ActionsApiRequestHandlerContext } from '../../../../../../actions/server';
 import { AlertingApiRequestHandlerContext } from '../../../../../../alerting/server';
 import { rulesClientMock } from '../../../../../../alerting/server/mocks';
+import { actionsClientMock } from '../../../../../../actions/server/mocks';
 import { licensingMock } from '../../../../../../licensing/server/mocks';
 import { listMock } from '../../../../../../lists/server/mocks';
 import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
@@ -44,6 +45,7 @@ const createMockClients = () => {
       exceptionListClient: listMock.getExceptionListClient(core.savedObjects.client),
     },
     rulesClient: rulesClientMock.create(),
+    actionsClient: actionsClientMock.create(),
     ruleDataService: ruleRegistryMocks.createRuleDataService(),
 
     config: createMockConfig(),
@@ -65,7 +67,9 @@ const createRequestContextMock = (
   return {
     core: clients.core,
     securitySolution: createSecuritySolutionRequestContextMock(clients),
-    actions: {} as unknown as jest.Mocked<ActionsApiRequestHandlerContext>,
+    actions: {
+      getActionsClient: jest.fn(() => clients.actionsClient),
+    } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>,
     alerting: {
       getRulesClient: jest.fn(() => clients.rulesClient),
     } as unknown as jest.Mocked<AlertingApiRequestHandlerContext>,
