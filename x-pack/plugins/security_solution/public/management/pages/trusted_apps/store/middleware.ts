@@ -63,14 +63,12 @@ import {
   editItemId,
   editingTrustedApp,
   getListItems,
-  editItemState,
   getCurrentLocationIncludedPolicies,
   getCurrentLocationExcludedPolicies,
 } from './selectors';
 import { parsePoliciesToKQL, parseQueryFilterToKQL } from '../../../common/utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { SEARCHABLE_FIELDS } from '../constants';
-import { asStaleResourceState } from '../../../state';
 
 const createTrustedAppsListResourceStateChangedAction = (
   newState: Immutable<AsyncResourceState<TrustedAppsListData>>
@@ -415,8 +413,6 @@ const fetchEditTrustedAppIfNeeded = async (
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
             type: 'LoadingResourceState',
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            previousState: asStaleResourceState<TrustedApp>(editItemState(currentState)!),
           },
         });
 
