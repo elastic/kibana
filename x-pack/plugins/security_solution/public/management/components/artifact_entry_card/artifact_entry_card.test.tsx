@@ -65,12 +65,11 @@ describe.each([
     );
   });
 
-  // FLAKY https://github.com/elastic/kibana/issues/113892
-  it.skip('should display dates in expected format', () => {
+  it('should display dates in expected format', () => {
     render();
 
     expect(renderResult.getByTestId('testCard-header-updated').textContent).toEqual(
-      expect.stringMatching(/Last updated(\s seconds? ago|now)/)
+      expect.stringMatching(/Last updated(?:(\s*\d+ seconds? ago)|now)/)
     );
   });
 
