@@ -80,7 +80,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             errorGroupMainStatistics = response.body;
           });
 
-          it('returns correct number of occurrencies', () => {
+          it('returns correct number of occurrences', () => {
             expect(errorGroupMainStatistics.error_groups.length).to.equal(2);
             expect(errorGroupMainStatistics.error_groups.map((error) => error.name).sort()).to.eql([
               ERROR_NAME_1,

@@ -245,6 +245,9 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     describe('dependencies/metadata', function () {
       loadTestFile(require.resolve('./dependencies/metadata'));
     });
+    describe('dependencies/upstream_services', function () {
+      loadTestFile(require.resolve('./dependencies/upstream_services'));
+    });
 
     registry.run(providerContext);
   });
