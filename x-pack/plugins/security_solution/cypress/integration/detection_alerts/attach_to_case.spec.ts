@@ -54,7 +54,7 @@ describe('Alerts timeline', () => {
       loadDetectionsPage(ROLES.platform_engineer);
     });
 
-    it.skip('should allow a user with crud privileges to attach alerts to cases', () => {
+    it('should allow a user with crud privileges to attach alerts to cases', () => {
       cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
       cy.get(ATTACH_ALERT_TO_CASE_BUTTON).first().should('not.be.disabled');
     });

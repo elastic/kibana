@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { get, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { matchPath, RouteProps, Redirect } from 'react-router-dom';
 
@@ -22,6 +23,7 @@ import {
   OVERVIEW_PATH,
   CASES_PATH,
 } from '../common/constants';
+import { Ecs } from '../common/ecs';
 import {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -208,3 +210,13 @@ export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capab
   return <Redirect to={OVERVIEW_PATH} />;
 });
 RedirectRoute.displayName = 'RedirectRoute';
+
+const racFieldMappings: Record<string, string> = {
+  'signal.rule.id': ALERT_RULE_UUID,
+};
+
+export const getField = (ecsData: Ecs, field: string) => {
+  return (
+    get(field, ecsData) ?? get(racFieldMappings[field].replace('signal', 'kibana.alert'), ecsData)
+  );
+};
