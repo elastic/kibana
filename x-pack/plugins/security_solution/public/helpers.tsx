@@ -215,8 +215,14 @@ const racFieldMappings: Record<string, string> = {
   'signal.rule.id': ALERT_RULE_UUID,
 };
 
+/*
+ * @deprecated This functionality should be removed when support for signal.* is no longer
+ * supported.
+ *
+ * Selectively returns the AAD field value (kibana.alert.*) or the legacy field value
+ * (signal.*), whichever is present. For backwards compatibility.
+ */
 export const getField = (ecsData: Ecs, field: string) => {
-  return (
-    get(field, ecsData) ?? get(racFieldMappings[field].replace('signal', 'kibana.alert'), ecsData)
-  );
+  const aadField = (racFieldMappings[field] ?? field).replace('signal', 'kibana.alert');
+  return get(aadField, ecsData) ?? get(field, ecsData);
 };

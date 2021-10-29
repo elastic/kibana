@@ -24,3 +24,4 @@ export const ALERT_ORIGINAL_EVENT_TYPE = `${ALERT_ORIGINAL_EVENT}.type` as const
 
 export const ALERT_RULE_THRESHOLD = `${ALERT_RULE_NAMESPACE}.threshold` as const;
 export const ALERT_RULE_THRESHOLD_FIELD = `${ALERT_RULE_THRESHOLD}.field` as const;
+export const ALERT_RULE_TIMELINE_ID = `${ALERT_RULE_NAMESPACE}.timeline_id` as const;

@@ -41,6 +41,7 @@ import {
 import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
 import { ENRICHMENT_TYPES } from '../../../../plugins/security_solution/common/cti/constants';
+import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -48,8 +49,7 @@ import {
   ALERT_ORIGINAL_EVENT_CATEGORY,
   ALERT_ORIGINAL_EVENT_MODULE,
   ALERT_ORIGINAL_TIME,
-} from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
-import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
+} from '../../../../plugins/security_solution/common/field_maps/field_names';
 
 const format = (value: unknown): string => JSON.stringify(value, null, 2);
 
