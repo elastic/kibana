@@ -140,46 +140,24 @@ export const TimeSeries = ({
     [palettesService, series, syncColors]
   );
 
-  const darkMode = uiSettings.get('theme:darkMode');
-  const gridLineStyle = !useLegacyTimeAxis
-    ? {
-        visible: showGrid,
-        strokeWidth: 0.1,
-        stroke: darkMode ? 'white' : 'black',
-      }
-    : {
-        ...GRID_LINE_CONFIG,
-        visible: showGrid,
-      };
+  const gridLineStyle = {
+    ...GRID_LINE_CONFIG,
+    visible: showGrid,
+  };
   const xAxisStyle = !useLegacyTimeAxis
     ? {
         tickLabel: {
           visible: true,
-          fontSize: 11,
           padding: 0,
           alignment: {
             vertical: Position.Bottom,
             horizontal: Position.Left,
           },
-          offset: {
-            x: 1.5,
-            y: 0,
-          },
-        },
-        axisLine: {
-          stroke: darkMode ? 'lightgray' : 'darkgray',
-          strokeWidth: 1,
         },
         tickLine: {
-          size: 12,
-          strokeWidth: 0.15,
-          stroke: darkMode ? 'white' : 'black',
-          padding: -10,
+          size: 0.0001,
+          padding: 4,
           visible: true,
-        },
-        axisTitle: {
-          visible: true,
-          padding: 0,
         },
       }
     : {};
