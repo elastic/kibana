@@ -7,6 +7,7 @@
 
 import type { ExportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
 
+import { ExportRulesDetails } from '../../../../common/detection_engine/schemas/response/export_rules_details_schema';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 
 export const getExportDetailsNdjson = (
@@ -14,7 +15,7 @@ export const getExportDetailsNdjson = (
   missingRules: Array<{ rule_id: string }> = [],
   exceptionDetails?: ExportExceptionDetails
 ): string => {
-  const stringified = JSON.stringify({
+  const stringified: ExportRulesDetails = {
     exported_count:
       exceptionDetails == null
         ? rules.length
@@ -25,6 +26,6 @@ export const getExportDetailsNdjson = (
     missing_rules: missingRules,
     missing_rules_count: missingRules.length,
     ...exceptionDetails,
-  });
-  return `${stringified}\n`;
+  };
+  return `${JSON.stringify(stringified)}\n`;
 };
