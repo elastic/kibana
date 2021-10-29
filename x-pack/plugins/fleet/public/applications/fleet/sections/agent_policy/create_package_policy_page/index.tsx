@@ -19,15 +19,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiLink,
   EuiErrorBoundary,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import type { ApplicationStart } from 'kibana/public';
 import { safeLoad } from 'js-yaml';
 
-import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import type { AgentPolicy, NewPackagePolicy, CreatePackagePolicyRouteState } from '../../../types';
+import type {
+  AgentPolicy,
+  NewPackagePolicy,
+  PackagePolicy,
+  CreatePackagePolicyRouteState,
+  OnSaveQueryParamKeys,
+} from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
@@ -42,13 +45,13 @@ import { ConfirmDeployAgentPolicyModal } from '../components';
 import { useIntraAppState, useUIExtension } from '../../../hooks';
 import { ExtensionWrapper } from '../../../components';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { PLUGIN_ID } from '../../../../../../common/constants';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
-import { CreatePackagePolicyPageLayout } from './components';
+import { CreatePackagePolicyPageLayout, PostInstallAddAgentModal } from './components';
 import type { EditPackagePolicyFrom, PackagePolicyFormState } from './types';
 import type { PackagePolicyValidationResults } from './services';
 import { validatePackagePolicy, validationHasErrors } from './services';
+import { appendOnSaveQueryParamsToPath } from './utils';
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
 import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
@@ -71,14 +74,16 @@ interface AddToPolicyParams {
 }
 
 export const CreatePackagePolicyPage: React.FunctionComponent = () => {
-  const { notifications } = useStartServices();
+  const {
+    application: { navigateToApp },
+    notifications,
+  } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const { params } = useRouteMatch<AddToPolicyParams>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
-  const handleNavigateTo = useNavigateToCallback();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
 
   const { search } = useLocation();
@@ -104,6 +109,9 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
   // Agent policy state
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
+
+  // only used to store the resulting package policy once saved
+  const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
 
   // Retrieve agent count
   const agentPolicyId = agentPolicy?.id;
@@ -246,19 +254,19 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     (ev) => {
       if (routeState && routeState.onCancelNavigateTo) {
         ev.preventDefault();
-        handleNavigateTo(routeState.onCancelNavigateTo);
+        navigateToApp(...routeState.onCancelNavigateTo);
       }
     },
-    [routeState, handleNavigateTo]
+    [routeState, navigateToApp]
   );
 
   // Save package policy
   const savePackagePolicy = useCallback(async () => {
     setFormState('LOADING');
     const result = await sendCreatePackagePolicy(packagePolicy);
-    setFormState('SUBMITTED');
+    setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
     return result;
-  }, [packagePolicy]);
+  }, [packagePolicy, agentCount]);
   const doOnSaveNavigation = useRef<boolean>(true);
 
   // Detect if user left page
@@ -267,6 +275,39 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       doOnSaveNavigation.current = false;
     };
   }, []);
+
+  const navigateAddAgent = (policy?: PackagePolicy) =>
+    onSaveNavigate(policy, ['openEnrollmentFlyout']);
+
+  const navigateAddAgentHelp = (policy?: PackagePolicy) =>
+    onSaveNavigate(policy, ['showAddAgentHelp']);
+
+  const onSaveNavigate = useCallback(
+    (policy?: PackagePolicy, paramsToApply: OnSaveQueryParamKeys[] = []) => {
+      if (!doOnSaveNavigation.current) {
+        return;
+      }
+
+      if (routeState?.onSaveNavigateTo && policy) {
+        const [appId, options] = routeState.onSaveNavigateTo;
+
+        if (options?.path) {
+          const pathWithQueryString = appendOnSaveQueryParamsToPath({
+            path: options.path,
+            policy,
+            mappingOptions: routeState.onSaveQueryParams,
+            paramsToApply,
+          });
+          navigateToApp(appId, { ...options, path: pathWithQueryString });
+        } else {
+          navigateToApp(...routeState.onSaveNavigateTo);
+        }
+      } else {
+        history.push(getPath('policy_details', { policyId: agentPolicy!.id }));
+      }
+    },
+    [agentPolicy, getPath, navigateToApp, history, routeState]
+  );
 
   const onSubmit = useCallback(async () => {
     if (formState === 'VALID' && hasErrors) {
@@ -279,27 +320,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     }
     const { error, data } = await savePackagePolicy();
     if (!error) {
-      if (doOnSaveNavigation.current) {
-        if (routeState && routeState.onSaveNavigateTo) {
-          handleNavigateTo(
-            typeof routeState.onSaveNavigateTo === 'function'
-              ? routeState.onSaveNavigateTo(data!.item)
-              : routeState.onSaveNavigateTo
-          );
-        } else {
-          history.push(
-            getPath('policy_details', {
-              policyId: agentPolicy!.id,
-            })
-          );
-        }
-      }
-
-      const fromPolicyWithoutAgentsAssigned = from === 'policy' && agentPolicy && agentCount === 0;
-
-      const fromPackageWithoutAgentsAssigned = packageInfo && agentPolicy && agentCount === 0;
+      setSavedPackagePolicy(data!.item);
 
       const hasAgentsAssigned = agentCount && agentPolicy;
+      if (!hasAgentsAssigned) {
+        setFormState('SUBMITTED_NO_AGENTS');
+        return;
+      }
+      onSaveNavigate(data!.item);
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
@@ -308,40 +336,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             packagePolicyName: packagePolicy.name,
           },
         }),
-        text: fromPolicyWithoutAgentsAssigned
-          ? i18n.translate(
-              'xpack.fleet.createPackagePolicy.policyContextAddAgentNextNotificationMessage',
-              {
-                defaultMessage: `The policy has been updated. Add an agent to the '{agentPolicyName}' policy to deploy this policy.`,
-                values: {
-                  agentPolicyName: agentPolicy!.name,
-                },
-              }
-            )
-          : fromPackageWithoutAgentsAssigned
-          ? toMountPoint(
-              // To render the link below we need to mount this JSX in the success toast
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.integrationsContextaddAgentNextNotificationMessage"
-                defaultMessage="Next, {link} to start ingesting data."
-                values={{
-                  link: (
-                    <EuiLink
-                      href={getHref('integration_details_policies', {
-                        pkgkey: `${packageInfo!.name}-${packageInfo!.version}`,
-                        addAgentToPolicyId: agentPolicy!.id,
-                      })}
-                    >
-                      {i18n.translate(
-                        'xpack.fleet.createPackagePolicy.integrationsContextAddAgentLinkMessage',
-                        { defaultMessage: 'add an agent' }
-                      )}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            )
-          : hasAgentsAssigned
+        text: hasAgentsAssigned
           ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
               defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
               values: {
@@ -362,16 +357,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     hasErrors,
     agentCount,
     savePackagePolicy,
-    from,
+    onSaveNavigate,
     agentPolicy,
-    packageInfo,
     notifications.toasts,
     packagePolicy.name,
-    getHref,
-    routeState,
-    handleNavigateTo,
-    history,
-    getPath,
   ]);
 
   const integrationInfo = useMemo(
@@ -508,6 +497,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             onCancel={() => setFormState('VALID')}
           />
         )}
+        {formState === 'SUBMITTED_NO_AGENTS' && agentPolicy && packageInfo && (
+          <PostInstallAddAgentModal
+            packageInfo={packageInfo}
+            agentPolicy={agentPolicy}
+            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+          />
+        )}
         {packageInfo && (
           <IntegrationBreadcrumb
             pkgTitle={integrationInfo?.title || packageInfo.title}
@@ -556,7 +553,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                   >
                     <FormattedMessage
                       id="xpack.fleet.createPackagePolicy.saveButton"
-                      defaultMessage="Save integration"
+                      defaultMessage="Save and continue"
                     />
                   </EuiButton>
                 </EuiFlexItem>
@@ -580,30 +577,4 @@ const IntegrationBreadcrumb: React.FunctionComponent<{
     ...(integration ? { integration } : {}),
   });
   return null;
-};
-
-const useNavigateToCallback = () => {
-  const history = useHistory();
-  const {
-    application: { navigateToApp },
-  } = useStartServices();
-
-  return useCallback(
-    (navigateToProps: Parameters<ApplicationStart['navigateToApp']>) => {
-      // If navigateTo appID is `fleet`, then don't use Kibana's navigateTo method, because that
-      // uses BrowserHistory but within fleet, we are using HashHistory.
-      // This temporary workaround hook can be removed once this issue is addressed:
-      // https://github.com/elastic/kibana/issues/70358
-      if (navigateToProps[0] === PLUGIN_ID) {
-        const { path = '', state } = navigateToProps[1] || {};
-        history.push({
-          pathname: path.charAt(0) === '#' ? path.substr(1) : path,
-          state,
-        });
-      }
-
-      return navigateToApp(...navigateToProps);
-    },
-    [history, navigateToApp]
-  );
 };

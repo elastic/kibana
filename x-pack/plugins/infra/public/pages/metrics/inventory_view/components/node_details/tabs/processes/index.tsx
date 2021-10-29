@@ -17,6 +17,7 @@ import {
   EuiIconTip,
   Query,
 } from '@elastic/eui';
+import { getFieldByType } from '../../../../../../../../common/inventory_models';
 import {
   useProcessList,
   SortBy,
@@ -28,7 +29,7 @@ import { SummaryTable } from './summary_table';
 import { ProcessesTable } from './processes_table';
 import { parseSearchString } from './parse_search_string';
 
-const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
+const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
   const [searchBarState, setSearchBarState] = useState<Query>(Query.MATCH_ALL);
   const [searchFilter, setSearchFilter] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortBy>({
@@ -36,22 +37,17 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
     isAscending: false,
   });
 
-  const timefield = options.fields!.timestamp;
-
   const hostTerm = useMemo(() => {
-    const field =
-      options.fields && Reflect.has(options.fields, nodeType)
-        ? Reflect.get(options.fields, nodeType)
-        : nodeType;
+    const field = getFieldByType(nodeType) ?? nodeType;
     return { [field]: node.name };
-  }, [options, node, nodeType]);
+  }, [node, nodeType]);
 
   const {
     loading,
     error,
     response,
     makeRequest: reload,
-  } = useProcessList(hostTerm, timefield, currentTime, sortBy, parseSearchString(searchFilter));
+  } = useProcessList(hostTerm, currentTime, sortBy, parseSearchString(searchFilter));
 
   const debouncedSearchOnChange = useMemo(
     () => debounce<(queryText: string) => void>((queryText) => setSearchFilter(queryText), 500),
@@ -73,7 +69,7 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
 
   return (
     <TabContent>
-      <ProcessListContextProvider hostTerm={hostTerm} to={currentTime} timefield={timefield}>
+      <ProcessListContextProvider hostTerm={hostTerm} to={currentTime}>
         <SummaryTable
           isLoading={loading}
           processSummary={(!error ? response?.summary : null) ?? { total: 0 }}

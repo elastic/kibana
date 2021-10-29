@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable complexity */
-
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../alerting/server';
@@ -14,9 +14,17 @@ import { readRules } from './read_rules';
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
-import { RuleParams } from '../schemas/rule_schemas';
+import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
 import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
+
+class UpdateError extends Error {
+  public readonly statusCode: number;
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+  }
+}
 
 export const updateRules = async ({
   isRuleRegistryEnabled,
@@ -82,9 +90,14 @@ export const updateRules = async ({
     notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
   };
 
+  const [validated, errors] = validate(newInternalRule, internalRuleUpdate);
+  if (errors != null || validated === null) {
+    throw new UpdateError(`Applying update would create invalid rule: ${errors}`, 400);
+  }
+
   const update = await rulesClient.update({
     id: existingRule.id,
-    data: newInternalRule,
+    data: validated,
   });
 
   await maybeMute({

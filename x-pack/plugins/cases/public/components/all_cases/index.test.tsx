@@ -32,8 +32,8 @@ import { useKibana } from '../../common/lib/kibana';
 import { AllCasesGeneric as AllCases } from './all_cases_generic';
 import { AllCasesProps } from '.';
 import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
-import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
@@ -148,14 +148,10 @@ describe('AllCasesGeneric', () => {
     userCanCrud: true,
   };
 
-  const { createMockActionTypeModel } = actionTypeRegistryMock;
+  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
 
   beforeAll(() => {
-    connectorsMock.forEach((connector) =>
-      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.register(
-        createMockActionTypeModel({ id: connector.actionTypeId, iconClass: 'logoSecurity' })
-      )
-    );
+    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
 
   beforeEach(() => {

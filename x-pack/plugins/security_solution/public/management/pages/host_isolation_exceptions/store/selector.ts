@@ -9,6 +9,7 @@ import { Pagination } from '@elastic/eui';
 import {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createSelector } from 'reselect';
 import { Immutable } from '../../../../../common/endpoint/types';
@@ -46,6 +47,13 @@ export const getListItems: HostIsolationExceptionsSelector<Immutable<ExceptionLi
   createSelector(getListApiSuccessResponse, (apiResponseData) => {
     return apiResponseData?.data || [];
   });
+
+export const getTotalListItems: HostIsolationExceptionsSelector<Immutable<number>> = createSelector(
+  getListApiSuccessResponse,
+  (apiResponseData) => {
+    return apiResponseData?.total || 0;
+  }
+);
 
 export const getListPagination: HostIsolationExceptionsSelector<Pagination> = createSelector(
   getListApiSuccessResponse,
@@ -108,3 +116,18 @@ export const getDeleteError: HostIsolationExceptionsSelector<ServerApiError | un
       return status.error;
     }
   });
+
+const getFormState: HostIsolationExceptionsSelector<StoreState['form']> = (state) => {
+  return state.form;
+};
+
+export const getFormStatusFailure: HostIsolationExceptionsSelector<ServerApiError | undefined> =
+  createSelector(getFormState, (form) => {
+    if (isFailedResourceState(form.status)) {
+      return form.status.error;
+    }
+  });
+
+export const getExceptionToEdit: HostIsolationExceptionsSelector<
+  UpdateExceptionListItemSchema | undefined
+> = (state) => (state.form.entry ? (state.form.entry as UpdateExceptionListItemSchema) : undefined);

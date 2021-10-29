@@ -15,16 +15,7 @@ import {
   PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-
-export interface CorrelationsOptions {
-  environment: string;
-  kuery: string;
-  serviceName: string | undefined;
-  transactionType: string | undefined;
-  transactionName: string | undefined;
-  start: number;
-  end: number;
-}
+import { SearchStrategyClientParams } from '../../../../common/search_strategies/types';
 
 export function getCorrelationsFilters({
   environment,
@@ -34,7 +25,7 @@ export function getCorrelationsFilters({
   transactionName,
   start,
   end,
-}: CorrelationsOptions) {
+}: SearchStrategyClientParams) {
   const correlationsFilters: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     ...rangeQuery(start, end),

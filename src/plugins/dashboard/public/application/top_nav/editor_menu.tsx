@@ -238,16 +238,18 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
       panelPaddingSize="none"
       data-test-subj="dashboardEditorMenuButton"
     >
-      <EuiContextMenu
-        initialPanelId={0}
-        panels={editorMenuPanels}
-        className={`dshSolutionToolbar__editorContextMenu ${
-          IS_DARK_THEME
-            ? 'dshSolutionToolbar__editorContextMenu--dark'
-            : 'dshSolutionToolbar__editorContextMenu--light'
-        }`}
-        data-test-subj="dashboardEditorContextMenu"
-      />
+      {() => (
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={editorMenuPanels}
+          className={`dshSolutionToolbar__editorContextMenu ${
+            IS_DARK_THEME
+              ? 'dshSolutionToolbar__editorContextMenu--dark'
+              : 'dshSolutionToolbar__editorContextMenu--light'
+          }`}
+          data-test-subj="dashboardEditorContextMenu"
+        />
+      )}
     </SolutionToolbarPopover>
   );
 };

@@ -24,7 +24,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { getAPMHref } from '../Links/apm/APMLink';
+import { getLegacyApmHref } from '../Links/apm/APMLink';
 
 export type AnomalyDetectionApiResponse =
   APIReturnType<'GET /internal/apm/settings/anomaly-detection/jobs'>;
@@ -47,7 +47,7 @@ export function AnomalyDetectionSetupLink() {
   return (
     <EuiHeaderLink
       color="text"
-      href={getAPMHref({ basePath, path: '/settings/anomaly-detection' })}
+      href={getLegacyApmHref({ basePath, path: '/settings/anomaly-detection' })}
       style={{ whiteSpace: 'nowrap' }}
     >
       {canGetJobs && hasValidLicense ? (

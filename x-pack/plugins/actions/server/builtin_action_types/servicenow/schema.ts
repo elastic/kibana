@@ -6,10 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_ALERTS_GROUPING_KEY } from './config';
 
-export const ExternalIncidentServiceConfiguration = {
+export const ExternalIncidentServiceConfigurationBase = {
   apiUrl: schema.string(),
 };
+
+export const ExternalIncidentServiceConfiguration = {
+  ...ExternalIncidentServiceConfigurationBase,
+  usesTableApi: schema.boolean({ defaultValue: true }),
+};
+
+export const ExternalIncidentServiceConfigurationBaseSchema = schema.object(
+  ExternalIncidentServiceConfigurationBase
+);
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(
   ExternalIncidentServiceConfiguration
@@ -39,6 +49,8 @@ const CommonAttributes = {
   externalId: schema.nullable(schema.string()),
   category: schema.nullable(schema.string()),
   subcategory: schema.nullable(schema.string()),
+  correlation_id: schema.nullable(schema.string({ defaultValue: DEFAULT_ALERTS_GROUPING_KEY })),
+  correlation_display: schema.nullable(schema.string()),
 };
 
 // Schema for ServiceNow Incident Management (ITSM)
@@ -56,13 +68,40 @@ export const ExecutorSubActionPushParamsSchemaITSM = schema.object({
 export const ExecutorSubActionPushParamsSchemaSIR = schema.object({
   incident: schema.object({
     ...CommonAttributes,
-    dest_ip: schema.nullable(schema.string()),
-    malware_hash: schema.nullable(schema.string()),
-    malware_url: schema.nullable(schema.string()),
-    source_ip: schema.nullable(schema.string()),
+    dest_ip: schema.oneOf(
+      [schema.nullable(schema.string()), schema.nullable(schema.arrayOf(schema.string()))],
+      { defaultValue: null }
+    ),
+    malware_hash: schema.oneOf(
+      [schema.nullable(schema.string()), schema.nullable(schema.arrayOf(schema.string()))],
+      { defaultValue: null }
+    ),
+    malware_url: schema.oneOf(
+      [schema.nullable(schema.string()), schema.nullable(schema.arrayOf(schema.string()))],
+      { defaultValue: null }
+    ),
+    source_ip: schema.oneOf(
+      [schema.nullable(schema.string()), schema.nullable(schema.arrayOf(schema.string()))],
+      { defaultValue: null }
+    ),
     priority: schema.nullable(schema.string()),
   }),
   comments: CommentsSchema,
+});
+
+// Schema for ServiceNow ITOM
+export const ExecutorSubActionAddEventParamsSchema = schema.object({
+  source: schema.nullable(schema.string()),
+  event_class: schema.nullable(schema.string()),
+  resource: schema.nullable(schema.string()),
+  node: schema.nullable(schema.string()),
+  metric_name: schema.nullable(schema.string()),
+  type: schema.nullable(schema.string()),
+  severity: schema.nullable(schema.string()),
+  description: schema.nullable(schema.string()),
+  additional_info: schema.nullable(schema.string()),
+  message_key: schema.nullable(schema.string({ defaultValue: DEFAULT_ALERTS_GROUPING_KEY })),
+  time_of_event: schema.nullable(schema.string()),
 });
 
 export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
@@ -117,6 +156,18 @@ export const ExecutorParamsSchemaSIR = schema.oneOf([
   schema.object({
     subAction: schema.literal('pushToService'),
     subActionParams: ExecutorSubActionPushParamsSchemaSIR,
+  }),
+  schema.object({
+    subAction: schema.literal('getChoices'),
+    subActionParams: ExecutorSubActionGetChoicesParamsSchema,
+  }),
+]);
+
+// Executor parameters for ITOM
+export const ExecutorParamsSchemaITOM = schema.oneOf([
+  schema.object({
+    subAction: schema.literal('addEvent'),
+    subActionParams: ExecutorSubActionAddEventParamsSchema,
   }),
   schema.object({
     subAction: schema.literal('getChoices'),

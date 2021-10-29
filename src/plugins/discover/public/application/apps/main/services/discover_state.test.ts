@@ -14,7 +14,7 @@ import {
 } from './discover_state';
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
-import { SavedSearch } from '../../../../saved_searches';
+import type { SavedSearch } from '../../../../saved_searches';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 
 let history: History;
@@ -183,7 +183,7 @@ describe('createSearchSessionRestorationDataProvider', () => {
       (mockDataPlugin.search.session.getSessionId as jest.Mock).mockImplementation(
         () => searchSessionId
       );
-      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.searchSessionId).toBeUndefined();
       expect(restoreState.searchSessionId).toBe(searchSessionId);
     });
@@ -197,15 +197,20 @@ describe('createSearchSessionRestorationDataProvider', () => {
       (mockDataPlugin.query.timefilter.timefilter.getAbsoluteTime as jest.Mock).mockImplementation(
         () => absoluteTime
       );
-      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.timeRange).toBe(relativeTime);
       expect(restoreState.timeRange).toBe(absoluteTime);
     });
 
     test('restoreState has paused autoRefresh', async () => {
-      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.refreshInterval).toBe(undefined);
-      expect(restoreState.refreshInterval?.pause).toBe(true);
+      expect(restoreState.refreshInterval).toMatchInlineSnapshot(`
+        Object {
+          "pause": true,
+          "value": 0,
+        }
+      `);
     });
   });
 });

@@ -15,6 +15,7 @@ import { getPodNodeName } from './get_pod_node_name';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
 import { findInventoryFields } from '../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export const getNodeInfo = async (
   framework: KibanaFramework,
@@ -50,24 +51,23 @@ export const getNodeInfo = async (
     }
     return {};
   }
-  const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
-  const timestampField = sourceConfiguration.fields.timestamp;
+  const fields = findInventoryFields(nodeType);
   const params = {
-    allowNoIndices: true,
-    ignoreUnavailable: true,
-    terminateAfter: 1,
+    allow_no_indices: true,
+    ignore_unavailable: true,
+    terminate_after: 1,
     index: sourceConfiguration.metricAlias,
     body: {
       size: 1,
       _source: ['host.*', 'cloud.*', 'agent.*'],
-      sort: [{ [timestampField]: 'desc' }],
+      sort: [{ [TIMESTAMP_FIELD]: 'desc' }],
       query: {
         bool: {
           filter: [
             { match: { [fields.id]: nodeId } },
             {
               range: {
-                [timestampField]: {
+                [TIMESTAMP_FIELD]: {
                   gte: timeRange.from,
                   lte: timeRange.to,
                   format: 'epoch_millis',

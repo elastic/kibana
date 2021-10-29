@@ -48,6 +48,7 @@ export interface RegistryRuleType
     | 'producer'
     | 'minimumLicenseRequired'
     | 'isExportable'
+    | 'ruleTaskTimeout'
     | 'minimumScheduleInterval'
     | 'defaultScheduleInterval'
   > {
@@ -327,6 +328,7 @@ export class RuleTypeRegistry {
             producer,
             minimumLicenseRequired,
             isExportable,
+            ruleTaskTimeout,
             minimumScheduleInterval,
             defaultScheduleInterval,
           },
@@ -340,6 +342,7 @@ export class RuleTypeRegistry {
           producer,
           minimumLicenseRequired,
           isExportable,
+          ruleTaskTimeout,
           minimumScheduleInterval,
           defaultScheduleInterval,
           enabledInLicense: !!this.licenseState.getLicenseCheckForAlertType(

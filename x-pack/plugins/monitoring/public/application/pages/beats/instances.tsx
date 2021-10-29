@@ -15,7 +15,7 @@ import { useTable } from '../../hooks/use_table';
 import { BeatsTemplate } from './beats_template';
 // @ts-ignore
 import { Listing } from '../../../components/beats/listing';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';
@@ -71,12 +71,7 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   ]);
 
   return (
-    <BeatsTemplate
-      title={title}
-      pageTitle={pageTitle}
-      getPageData={getPageData}
-      data-test-subj="beatsListingPage"
-    >
+    <BeatsTemplate title={title} pageTitle={pageTitle} getPageData={getPageData}>
       <div data-test-subj="monitoringBeatsInstancesApp">
         <SetupModeRenderer
           productName={BEATS_SYSTEM_ID}
