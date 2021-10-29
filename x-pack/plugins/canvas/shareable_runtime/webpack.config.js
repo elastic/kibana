@@ -150,7 +150,7 @@ module.exports = {
               additionalData(content, loaderContext) {
                 return `@import ${stringifyRequest(
                   loaderContext,
-                  path.resolve(KIBANA_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
+                  path.resolve(KIBANA_ROOT, 'src/core/public/core_app/styles/_globals_v8light.scss')
                 )};\n${content}`;
               },
               implementation: require('node-sass'),
