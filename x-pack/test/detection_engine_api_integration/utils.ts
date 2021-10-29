@@ -912,6 +912,18 @@ export const createRule = async (
     .post(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')
     .send(rule);
+  // eslint-disable-next-line no-console
+  console.log(
+    `TEST FRANK - When creating a rule found an unexpected conflict (409), will attempt a cleanup and one time re-try. This usually indicates a bad cleanup or race condition within the tests: ${JSON.stringify(
+      response.body
+    )}`
+  );
+  throw new Error(
+    `TEST FRANK - Unexpected non 200 ok when attempting to create a rule (second try): ${JSON.stringify(
+      response.body
+    )}`
+  );
+
   if (response.status === 409) {
     if (rule.rule_id != null) {
       // eslint-disable-next-line no-console
