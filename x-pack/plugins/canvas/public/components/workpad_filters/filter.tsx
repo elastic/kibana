@@ -5,43 +5,36 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
+import { EuiDescriptionList, EuiPanel } from '@elastic/eui';
 import { FormattedFilterViewInstance } from '../../../types';
 
 interface Props {
   filter: FormattedFilterViewInstance;
 }
 
-export const Filter: FC<Props> = ({ filter }) => {
-  const fields = Object.values(filter).map((filterView, index) => (
-    <EuiFlexItem key={`fields-${index}`}>
-      <EuiText size="m">
-        <strong>{filterView.label}</strong>
-      </EuiText>
-    </EuiFlexItem>
-  ));
+const titleStyle = {
+  width: '40%',
+};
 
-  const values = Object.values(filter).map((filterView, index) => (
-    <EuiFlexItem key={`values-${index}`}>
-      <EuiText>{filterView.formattedValue}</EuiText>
-    </EuiFlexItem>
-  ));
+const descriptionStyle = {
+  width: '60%',
+};
+
+export const Filter: FC<Props> = ({ filter }) => {
+  const filterView = Object.values(filter).map((filterValue) => ({
+    title: filterValue.label,
+    description: filterValue.formattedValue,
+  }));
 
   return (
     <EuiPanel grow={false} hasShadow={false}>
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            {fields}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            {values}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiDescriptionList
+        type="column"
+        listItems={filterView}
+        titleProps={{ style: titleStyle, className: 'eui-textBreakWord' }}
+        descriptionProps={{ style: descriptionStyle, className: 'eui-textBreakWord' }}
+      />
     </EuiPanel>
   );
 };
