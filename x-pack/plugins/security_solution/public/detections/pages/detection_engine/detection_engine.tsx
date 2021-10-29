@@ -238,7 +238,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const { indicesExist, indexPattern } = useSourcererDataView(SourcererScopeName.detections);
 
-  // TODO: Steph/sourcerer, get below values from useSourcererDataView in issue#1730
   const getDefaultDataViewSelector = useMemo(
     () => sourcererSelectors.defaultDataViewSelector(),
     []
@@ -249,12 +248,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   );
   const signalIndexNameSourcerer = useDeepEqualSelector(getSignalIndexNameSelector);
   const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
-  const { isSignalIndexNeedsInit, showResults } = useMemo(
-    () => ({
-      isSignalIndexNeedsInit:
-        indicesExist === false && !defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
-      showResults: indicesExist || defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
-    }),
+  const isSignalIndexNeedsInit = useMemo(
+    () => !indicesExist && !defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
     [defaultDataView.title, indicesExist, signalIndexNameSourcerer]
   );
 
@@ -328,14 +323,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {showResults && (hasIndexRead === false || canUserREAD === false) ? (
+      {!isSignalIndexNeedsInit && (hasIndexRead === false || canUserREAD === false) ? (
         <EmptyPage
           actions={emptyPageActions}
           message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
           data-test-subj="no_feature_permissions-alerts"
           title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
         />
-      ) : showResults && hasIndexRead && canUserREAD ? (
+      ) : !isSignalIndexNeedsInit && hasIndexRead && canUserREAD ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
