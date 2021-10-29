@@ -79,7 +79,6 @@ export const updateRulesRoute = (
           isRuleRegistryEnabled,
           rulesClient,
           ruleStatusClient,
-          savedObjectsClient,
           existingRule,
           migratedRule,
           ruleUpdate: request.body,

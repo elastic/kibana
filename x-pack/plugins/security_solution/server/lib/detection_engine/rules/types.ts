@@ -277,7 +277,6 @@ export interface UpdateRulesOptions {
   existingRule: SanitizedAlert<RuleParams> | null | undefined;
   migratedRule: SanitizedAlert<RuleParams> | null | undefined;
   ruleUpdate: UpdateRulesSchema;
-  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export interface PatchRulesOptions {

@@ -88,7 +88,6 @@ export const updateRulesBulkRoute = (
               spaceId: context.securitySolution.getSpaceId(),
               rulesClient,
               ruleStatusClient,
-              savedObjectsClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
               existingRule,
               migratedRule,
