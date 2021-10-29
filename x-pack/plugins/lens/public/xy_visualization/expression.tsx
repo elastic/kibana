@@ -32,7 +32,6 @@ import {
   DisplayValueStyle,
   RecursivePartial,
   AxisStyle,
-  GridLineStyle,
   ScaleType,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -564,50 +563,28 @@ export function XYChart({
   // todo be moved in the chart plugin
   const shouldUseNewTimeAxis = isTimeViz && !useLegacyTimeAxis && !shouldRotate;
 
-  const gridLineStyle: RecursivePartial<GridLineStyle> = shouldUseNewTimeAxis
-    ? {
-        visible: gridlinesVisibilitySettings?.x,
-        strokeWidth: 0.1,
-        stroke: darkMode ? 'white' : 'black',
-      }
-    : {
-        visible: gridlinesVisibilitySettings?.x,
-        strokeWidth: 2,
-      };
+  const gridLineStyle = {
+    visible: gridlinesVisibilitySettings?.x,
+    strokeWidth: 1,
+  };
   const xAxisStyle: RecursivePartial<AxisStyle> = shouldUseNewTimeAxis
     ? {
         tickLabel: {
           visible: Boolean(tickLabelsVisibilitySettings?.x),
           rotation: 0, // rotation is disabled on new time axis
-          fontSize: 11,
-          padding:
-            referenceLinePaddings.bottom != null ? { inner: referenceLinePaddings.bottom } : 0,
+          padding: 0,
           alignment: {
             vertical: Position.Bottom,
             horizontal: Position.Left,
           },
-          offset: {
-            x: 1.5,
-            y: 0,
-          },
-        },
-        axisLine: {
-          stroke: darkMode ? 'lightgray' : 'darkgray',
-          strokeWidth: 1,
         },
         tickLine: {
-          size: 12,
-          strokeWidth: 0.15,
-          stroke: darkMode ? 'white' : 'black',
-          padding: -10,
+          size: 0.0001,
+          padding: 4,
           visible: Boolean(tickLabelsVisibilitySettings?.x),
         },
         axisTitle: {
           visible: axisTitlesVisibilitySettings.x,
-          padding:
-            !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
-              ? { inner: referenceLinePaddings.bottom }
-              : undefined,
         },
       }
     : {
@@ -715,6 +692,7 @@ export function XYChart({
             tickFormat={(d) => axis.formatter?.convert(d) || ''}
             style={getYAxesStyle(axis.groupId as 'left' | 'right')}
             domain={getYAxisDomain(axis)}
+            ticks={5}
           />
         );
       })}
