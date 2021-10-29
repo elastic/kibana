@@ -8,10 +8,16 @@
 import React, { Fragment } from 'react';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TileServiceSelect } from './tile_service_select';
+import { EmsTmsSourceConfig, TileServiceSelect } from './tile_service_select';
+import { OnSourceChangeArgs } from '../source';
 
-export function UpdateSourceEditor({ onChange, config }) {
-  const _onTileSelect = ({ id, isAutoSelect }) => {
+interface Props {
+  onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
+  config: EmsTmsSourceConfig;
+}
+
+export function UpdateSourceEditor({ onChange, config }: Props) {
+  const _onTileSelect = ({ id, isAutoSelect }: EmsTmsSourceConfig) => {
     onChange({ propName: 'id', value: id });
     onChange({ propName: 'isAutoSelect', value: isAutoSelect });
   };
