@@ -278,6 +278,7 @@ export class SavedObjectsService
   implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart>
 {
   private logger: Logger;
+  private readonly kibanaVersion: string;
 
   private setupDeps?: SavedObjectsSetupDeps;
   private config?: SavedObjectConfig;
@@ -290,6 +291,9 @@ export class SavedObjectsService
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
+    this.kibanaVersion = SavedObjectsService.stripVersionQualifier(
+      this.coreContext.env.packageInfo.version
+    );
   }
 
   public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
@@ -312,7 +316,7 @@ export class SavedObjectsService
       getSavedObjectsDeprecationsProvider({
         kibanaIndex,
         savedObjectsConfig: this.config,
-        kibanaVersion: this.coreContext.env.packageInfo.version,
+        kibanaVersion: this.kibanaVersion,
         typeRegistry: this.typeRegistry,
       })
     );
@@ -326,7 +330,7 @@ export class SavedObjectsService
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
       kibanaIndex,
-      kibanaVersion: this.coreContext.env.packageInfo.version,
+      kibanaVersion: this.kibanaVersion,
     });
 
     registerCoreObjectTypes(this.typeRegistry);
@@ -502,11 +506,19 @@ export class SavedObjectsService
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
       logger: this.logger,
-      kibanaVersion: this.coreContext.env.packageInfo.version,
+      kibanaVersion: this.kibanaVersion,
       soMigrationsConfig,
       kibanaIndex,
       client,
       migrationsRetryDelay,
     });
+  }
+
+  /**
+   * Coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha)
+   * to regular semver (x.y.z).
+   */
+  private static stripVersionQualifier(version: string) {
+    return version.split('-')[0];
   }
 }
