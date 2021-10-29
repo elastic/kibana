@@ -141,7 +141,7 @@ export class UiActionsEnhancedExamplesPlugin
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/master/x-pack/examples/ui_actions_enhanced_examples#ui-actions-enhanced-examples',
+          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/ui_actions_enhanced_examples#ui-actions-enhanced-examples',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

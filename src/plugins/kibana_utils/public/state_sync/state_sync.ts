@@ -42,7 +42,7 @@ export interface ISyncStateRef<StateStorage extends IStateStorage = IStateStorag
  * Utility for syncing application state wrapped in state container
  * with some kind of storage (e.g. URL)
  *
- * Go {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.
+ * Go {@link https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.
  *
  * @example
  *

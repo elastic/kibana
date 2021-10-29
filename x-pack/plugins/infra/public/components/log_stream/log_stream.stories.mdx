@@ -172,7 +172,7 @@ To use the component your plugin needs to follow certain criteria:
 
 - Ensure `"infra"` and `"data"` are specified as a `requiredPlugins` in your plugin's `kibana.json`.
 - Ensure the `<LogStream />` component is mounted inside the hierachy of a [`kibana-react` provider](https://github.com/elastic/kibana/blob/b2d0aa7b7fae1c89c8f9e8854ae73e71be64e765/src/plugins/kibana_react/README.md#L45). At a minimum, the kibana-react provider must pass `http` (from core start services) and `data` (from core plugin start dependencies).
-- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`EuiThemeProvider`](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_react/common/eui_styled_components.tsx).
+- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`EuiThemeProvider`](https://github.com/elastic/kibana/blob/main/src/plugins/kibana_react/common/eui_styled_components.tsx).
 
 ## Usage
 

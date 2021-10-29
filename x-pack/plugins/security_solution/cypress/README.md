@@ -357,7 +357,7 @@ Note that the command will create the folder if it does not exist.
 
 ### Using an archive from within the Cypress tests
 
-Task [cypress/tasks/es_archiver.ts](https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/cypress/tasks/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
+Task [cypress/tasks/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/cypress/tasks/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
 
 Because of `cy.exec`, used to invoke `es_archiver`, it's necessary to override its environment with `NODE_TLS_REJECT_UNAUTHORIZED=1`. It indeed would inject `NODE_TLS_REJECT_UNAUTHORIZED=0` and make `es_archive` otherwise abort with the following warning if used over https:
 
@@ -374,7 +374,7 @@ Incorrect handling of the above points might result in false positives, in that 
 
 #### Remote data loading
 
-Helpers `esArchiverCCSLoad` and `esArchiverCCSUnload` are provided by [cypress/tasks/es_archiver.ts](https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/cypress/tasks/es_archiver.ts):
+Helpers `esArchiverCCSLoad` and `esArchiverCCSUnload` are provided by [cypress/tasks/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/cypress/tasks/es_archiver.ts):
 
 ```javascript
 import { esArchiverCCSLoad, esArchiverCCSUnload } from '../../tasks/es_archiver';

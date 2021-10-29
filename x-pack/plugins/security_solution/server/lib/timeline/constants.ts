@@ -12,7 +12,7 @@ export const SAVED_QUERY_ID_REF_NAME = 'savedQueryId';
 
 /**
  * This needs to match the type of the saved query saved object. That type is defined here:
- * https://github.com/elastic/kibana/blob/master/src/plugins/data/public/query/saved_query/saved_query_service.ts#L54
+ * https://github.com/elastic/kibana/blob/main/src/plugins/data/public/query/saved_query/saved_query_service.ts#L54
  */
 export const SAVED_QUERY_TYPE = 'query';
 

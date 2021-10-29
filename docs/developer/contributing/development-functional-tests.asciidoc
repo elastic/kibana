@@ -114,7 +114,7 @@ Use the `--help` flag for more options.
 [discrete]
 ==== Environment
 
-The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/master/packages/kbn-expect[@kbn/expect] for assertions.
+The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/main/packages/kbn-expect[@kbn/expect] for assertions.
 
 We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, remote service creates a new webdriver session, which starts the driver and a stripped-down browser instance. We use `browser` service and `webElementWrapper` class to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
 
@@ -204,7 +204,7 @@ Tests should normally setRoles() in the before() and restoreDefaults() in the af
 [discrete]
 ==== Anatomy of a test file
 
-This annotated example file shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/master/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
+This annotated example file shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/main/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
 
 ["source","js"]
 ----

@@ -42,7 +42,7 @@ export const notifyServiceFactory: CanvasNotifyServiceFactory = ({ coreStart }) 
   return {
     /*
      * @param {(string | Object)} err: message or Error object
-     * @param {Object} opts: option to override toast title or icon, see https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/notify/toasts/TOAST_NOTIFICATIONS.md
+     * @param {Object} opts: option to override toast title or icon, see https://github.com/elastic/kibana/blob/main/src/legacy/ui/public/notify/toasts/TOAST_NOTIFICATIONS.md
      */
     error(err, opts) {
       toasts.addDanger(getToast(err, opts));

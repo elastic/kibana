@@ -27,7 +27,7 @@ const LINKS: ExampleLink[] = [
     title: 'Search Sessions',
   },
   {
-    path: 'https://github.com/elastic/kibana/blob/master/src/plugins/data/README.mdx',
+    path: 'https://github.com/elastic/kibana/blob/main/src/plugins/data/README.mdx',
     title: 'README (GitHub)',
   },
 ];

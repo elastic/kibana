@@ -59,7 +59,7 @@ export class SearchExamplesPlugin
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/master/src/plugins/data/README.mdx',
+          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/data/README.mdx',
           iconType: 'logoGithub',
           target: '_blank',
           size: 's',
