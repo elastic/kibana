@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
           expect(body).to.eql({ acknowledged: true });
 
-          const mappings = await es.indices.get({
+          const { body: mappings } = await es.indices.get({
             index: '.siem-signals-default-000001',
           });
           // Make sure that aliases_version has been updated on the existing index
