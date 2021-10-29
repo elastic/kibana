@@ -10,9 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FiltersGroup as FiltersGroupType } from './types';
 import { FiltersGroup } from './filters_group';
+import { FilterField } from '../../../types';
 
 interface Props {
   filtersGroups: FiltersGroupType[];
+  onGroupByChange: (groupBy: FilterField) => void;
+  groupFiltersByField?: FilterField;
 }
 
 const strings = {
@@ -34,15 +37,19 @@ const strings = {
     }),
 };
 
-export const WorkpadFilters: FC<Props> = ({ filtersGroups }) => {
-  const groupByOptions = [
-    { value: 'filter_group', text: strings.getGroupByFilterGroupLabel() },
-    { value: 'filter_type', text: strings.getGroupByFilterTypeLabel() },
-    { value: 'column', text: strings.getGroupByColumnLabel() },
-  ];
+const groupByOptions: Array<{ value: FilterField; text: string }> = [
+  { value: 'filterGroup', text: strings.getGroupByFilterGroupLabel() },
+  { value: 'type', text: strings.getGroupByFilterTypeLabel() },
+  { value: 'column', text: strings.getGroupByColumnLabel() },
+];
 
-  const filtersGroupsComponents = filtersGroups.map((filtersGroup) => (
-    <FiltersGroup {...filtersGroup} />
+export const WorkpadFilters: FC<Props> = ({
+  filtersGroups,
+  onGroupByChange,
+  groupFiltersByField,
+}) => {
+  const filtersGroupsComponents = filtersGroups.map((filtersGroup, index) => (
+    <FiltersGroup key={`filter-group-${index}`} {...filtersGroup} />
   ));
 
   return (
@@ -58,8 +65,8 @@ export const WorkpadFilters: FC<Props> = ({ filtersGroups }) => {
             <EuiSelect
               compressed
               options={groupByOptions}
-              // value={'group'}
-              // onChange={e => onChange(e)}
+              value={groupFiltersByField}
+              onChange={(e) => onGroupByChange(e.target.value as FilterField)}
               aria-label="Use aria labels when no actual label is in use"
             />
           </EuiFlexItem>

@@ -1646,5 +1646,6 @@ export const pitch: CanvasTemplate = {
     },
     css: ".canvasPage h1, .canvasPage h2, .canvasPage h3, .canvasPage h4, .canvasPage h5 {\nfont-family: 'Futura';\ncolor: #444444;\n}\n\n.canvasPage h1 {\nfont-size: 112px;\nfont-weight: bold;\ncolor: #FFFFFF;\n}\n\n.canvasPage h2 {\nfont-size: 48px;\nfont-weight: bold;\n}\n\n.canvasPage h3 {\nfont-size: 30px;\nfont-weight: 300;\ntext-transform: uppercase;\ncolor: #FFFFFF;\n}\n\n.canvasPage h5 {\nfont-size: 24px;\nfont-style: italic;\n}",
     variables: [],
+    sidebar: {},
   },
 };

@@ -60,3 +60,5 @@ export type FilterViewInstance<FilterValue = unknown> = Record<
 
 export type FlattenFilterViewInstance = Record<string, SimpleFilterViewField>;
 export type FormattedFilterViewInstance = Record<string, FormattedFilterViewField>;
+
+export type FilterField = keyof Filter;
