@@ -17,8 +17,28 @@ import { inspect } from 'util';
 import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
-export async function synthtraceEsClient(context: InheritedFtrProviderContext) {
+const writeTargetsDatastreams = {
+  transaction: 'traces-apm-test',
+  span: 'traces-apm-test',
+  error: 'logs-apm-test',
+  metric: 'metrics-apm-test',
+};
+const writeTargetsClassicIndices = {
+  transaction: 'apm-7.14.0-transaction',
+  span: 'apm-7.14.0-span',
+  error: 'apm-7.14.0-error',
+  metric: 'apm-7.14.0-metric',
+};
+interface Options {
+  useClassicIndices?: boolean;
+}
+export async function synthtraceEsClient(
+  context: InheritedFtrProviderContext,
+  options: Options | undefined = {}
+) {
   const es = context.getService('es');
+
+  const useClassicIndices = Boolean(options.useClassicIndices);
   return {
     index: (events: any[]) => {
       const esEvents = toElasticsearchOutput({
@@ -28,12 +48,7 @@ export async function synthtraceEsClient(context: InheritedFtrProviderContext) {
           ...getSpanDestinationMetrics(events),
           ...getBreakdownMetrics(events),
         ],
-        writeTargets: {
-          transaction: 'apm-7.14.0-transaction',
-          span: 'apm-7.14.0-span',
-          error: 'apm-7.14.0-error',
-          metric: 'apm-7.14.0-metric',
-        },
+        writeTargets: useClassicIndices ? writeTargetsClassicIndices : writeTargetsDatastreams,
       });
 
       const batches = chunk(esEvents, 1000);
@@ -65,7 +80,7 @@ export async function synthtraceEsClient(context: InheritedFtrProviderContext) {
     },
     clean: () => {
       return es.deleteByQuery({
-        index: 'apm-*',
+        index: useClassicIndices ? 'apm-*' : 'traces-apm*,traces-apm*,logs-apm*,metrics-apm*',
         body: {
           query: {
             match_all: {},

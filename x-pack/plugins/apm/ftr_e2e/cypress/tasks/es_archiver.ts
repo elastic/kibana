@@ -13,11 +13,17 @@ const ES_ARCHIVE_DIR = './cypress/fixtures/es_archiver';
 // Otherwise execSync would inject NODE_TLS_REJECT_UNAUTHORIZED=0 and node would abort if used over https
 const NODE_TLS_REJECT_UNAUTHORIZED = '1';
 
+const e2eDir = Path.resolve(__dirname, '../..');
+
 export const esArchiverLoad = (folder: string) => {
   const path = Path.join(ES_ARCHIVE_DIR, folder);
   execSync(
     `node ../../../../scripts/es_archiver load "${path}" --config ../../../test/functional/config.js`,
-    { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED }, stdio: 'inherit' }
+    {
+      cwd: e2eDir,
+      env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED },
+      stdio: 'inherit',
+    }
   );
 };
 
@@ -25,13 +31,21 @@ export const esArchiverUnload = (folder: string) => {
   const path = Path.join(ES_ARCHIVE_DIR, folder);
   execSync(
     `node ../../../../scripts/es_archiver unload "${path}" --config ../../../test/functional/config.js`,
-    { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED }, stdio: 'inherit' }
+    {
+      cwd: e2eDir,
+      env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED },
+      stdio: 'inherit',
+    }
   );
 };
 
 export const esArchiverResetKibana = () => {
   execSync(
     `node ../../../../scripts/es_archiver empty-kibana-index --config ../../../test/functional/config.js`,
-    { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED }, stdio: 'inherit' }
+    {
+      cwd: e2eDir,
+      env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED },
+      stdio: 'inherit',
+    }
   );
 };

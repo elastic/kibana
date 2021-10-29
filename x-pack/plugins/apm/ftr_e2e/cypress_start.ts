@@ -57,7 +57,7 @@ async function cypressStart(
   });
 
   console.log('Loading esArchiver...');
-  await esArchiverLoad('apm_8.0.0');
+  await esArchiverLoad(archiveName);
 
   const res = await cypressExecution({
     ...(spec !== undefined ? { spec } : {}),
@@ -70,7 +70,7 @@ async function cypressStart(
   });
 
   console.log('Removing esArchiver...');
-  await esArchiverUnload('apm_8.0.0');
+  await esArchiverUnload(archiveName);
 
   return res;
 }

@@ -62,9 +62,15 @@ const apisToIntercept = [
 ];
 
 describe('Service overview - header filters', () => {
+  // before(() => {
+  //   cy.task('esArchiver:load');
+  // });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
+  // after(() => {
+  //   cy.task('esArchiver:unload');
+  // });
 
   describe('Filtering by transaction type', () => {
     it('changes url when selecting different value', () => {
