@@ -87,7 +87,7 @@ export const integrations: LanguageIntegration[] = [
     description: i18n.translate('customIntegrations.languageclients.PerlDescription', {
       defaultMessage: 'Index data to Elasticsearch with the Perl client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/perl-api/master/index.html`,
+    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/perl-api/{branch}/index.html`,
   },
   {
     id: 'python',
