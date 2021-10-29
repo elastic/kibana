@@ -79,4 +79,4 @@ All files with a .stories.tsx extension will be loaded. You can access the devel
 ## Data generation
 For end-to-end (e.g. agent -> apm server -> elasticsearch <- kibana) development and testing of Elastic APM please check the the [APM Integration Testing repository](https://github.com/elastic/apm-integration-testing).
 
-Data can also be generate using the [elastic-apm-synthtrace](../../../../packages/elastic-apm-synthtrace/README.md) CLI.
+Data can also be generated using the [elastic-apm-synthtrace](../../../../packages/elastic-apm-synthtrace/README.md) CLI.
