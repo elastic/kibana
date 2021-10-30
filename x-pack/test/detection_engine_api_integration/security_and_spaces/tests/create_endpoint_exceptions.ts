@@ -69,6 +69,7 @@ export const getHostHits = async (
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('Rule exception operators for endpoints', () => {
     before(async () => {
@@ -86,21 +87,21 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
-      await createListsIndex(supertest);
+      await createSignalsIndex(supertest, log);
+      await createListsIndex(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(supertest);
-      await deleteAllExceptions(supertest);
-      await deleteListsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log);
+      await deleteAllExceptions(supertest, log);
+      await deleteListsIndex(supertest, log);
     });
 
     describe('no exceptions set', () => {
       it('should find all the "hosts" from a "agent" index when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['agent']);
-        const { id } = await createRule(supertest, rule);
+        const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const hits = await getHostHits(supertest, id);
@@ -122,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should find all the "hosts" from a "endpoint_without_host_type" index when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['endpoint_without_host_type']);
-        const { id } = await createRule(supertest, rule);
+        const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const hits = await getHostHits(supertest, id);
@@ -149,6 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['endpoint_without_host_type']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
+            log,
             rule,
             [],
             [
@@ -185,6 +187,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['endpoint_without_host_type']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
+            log,
             rule,
             [],
             [
@@ -221,6 +224,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['endpoint_without_host_type']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
+            log,
             rule,
             [],
             [
@@ -265,6 +269,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['endpoint_without_host_type']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
+            log,
             rule,
             [],
             [
@@ -311,6 +316,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['agent']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
+            log,
             rule,
             [],
             [
@@ -347,6 +353,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['agent']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
+            log,
             rule,
             [],
             [
@@ -383,6 +390,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['agent']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
+            log,
             rule,
             [],
             [
@@ -427,6 +435,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['agent']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
+            log,
             rule,
             [],
             [
@@ -473,6 +482,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['agent', 'endpoint_without_host_type']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
+            log,
             rule,
             [],
             [
@@ -518,6 +528,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['agent', 'endpoint_without_host_type']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
+            log,
             rule,
             [],
             [
@@ -563,6 +574,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['agent', 'endpoint_without_host_type']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
+            log,
             rule,
             [],
             [
@@ -613,6 +625,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['agent', 'endpoint_without_host_type']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
+            log,
             rule,
             [],
             [
@@ -666,6 +679,7 @@ export default ({ getService }: FtrProviderContext) => {
         const rule = getRuleForSignalTesting(['agent']);
         const { id } = await createRuleWithExceptionEntries(
           supertest,
+          log,
           rule,
           [
             [
@@ -705,6 +719,7 @@ export default ({ getService }: FtrProviderContext) => {
         const rule = getRuleForSignalTesting(['agent']);
         const { id } = await createRuleWithExceptionEntries(
           supertest,
+          log,
           rule,
           [
             [
@@ -746,6 +761,7 @@ export default ({ getService }: FtrProviderContext) => {
         const rule = getRuleForSignalTesting(['agent']);
         const { id } = await createRuleWithExceptionEntries(
           supertest,
+          log,
           rule,
           [],
           [
@@ -782,6 +798,7 @@ export default ({ getService }: FtrProviderContext) => {
         const rule = getRuleForSignalTesting(['agent']);
         const { id } = await createRuleWithExceptionEntries(
           supertest,
+          log,
           rule,
           [],
           [
@@ -815,6 +832,7 @@ export default ({ getService }: FtrProviderContext) => {
         const rule = getRuleForSignalTesting(['agent']);
         const { id } = await createRuleWithExceptionEntries(
           supertest,
+          log,
           rule,
           [],
           [
@@ -848,6 +866,7 @@ export default ({ getService }: FtrProviderContext) => {
         const rule = getRuleForSignalTesting(['agent']);
         const { id } = await createRuleWithExceptionEntries(
           supertest,
+          log,
           rule,
           [],
           [

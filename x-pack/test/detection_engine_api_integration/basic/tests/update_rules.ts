@@ -26,20 +26,21 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('update_rules', () => {
     describe('update rules', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should update a single rule property of name using a rule_id', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's name
         const updatedRule = getSimpleRuleUpdate('rule-1');
@@ -61,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return a 403 forbidden if it is a machine learning job', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's type to try to be a machine learning job type
         const updatedRule = getSimpleMlRuleUpdate('rule-1');
@@ -84,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should update a single rule property of name using an auto-generated rule_id', async () => {
         const rule = getSimpleRule('rule-1');
         delete rule.rule_id;
-        const createRuleBody = await createRule(supertest, rule);
+        const createRuleBody = await createRule(supertest, log, rule);
 
         // update a simple rule's name
         const updatedRule = getSimpleRuleUpdate('rule-1');
@@ -106,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update a single rule property of name using the auto-generated id', async () => {
-        const createdBody = await createRule(supertest, getSimpleRule('rule-1'));
+        const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's name
         const updatedRule = getSimpleRuleUpdate('rule-1');
@@ -128,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should change the version of a rule when it updates enabled and another property', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's enabled to false and another property
         const updatedRule = getSimpleRuleUpdate('rule-1');
@@ -151,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should change other properties when it does updates and effectively delete them such as timeline_title', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         const ruleUpdate = getSimpleRuleUpdate('rule-1');
         ruleUpdate.timeline_title = 'some title';

@@ -23,6 +23,8 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
+
   interface HostAlias {
     name: string;
   }
@@ -37,17 +39,17 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(supertest);
+      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log);
     });
 
     it('should keep the original alias value such as "host_alias" from a source index when the value is indexed', async () => {
       const rule = getRuleForSignalTesting(['host_alias']);
-      const { id } = await createRule(supertest, rule);
+      const { id } = await createRule(supertest, log, rule);
       await waitForRuleSuccessOrStatus(supertest, id);
       await waitForSignalsToBePresent(supertest, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, id);
@@ -59,7 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should copy alias data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
       const rule = getRuleForSignalTesting(['host_alias']);
-      const { id } = await createRule(supertest, rule);
+      const { id } = await createRule(supertest, log, rule);
       await waitForRuleSuccessOrStatus(supertest, id);
       await waitForSignalsToBePresent(supertest, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, id);

@@ -26,26 +26,27 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   describe('check_privileges', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     beforeEach(async () => {
-      await deleteAllAlerts(supertest);
+      await deleteAllAlerts(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteAllAlerts(supertest);
+      await deleteAllAlerts(supertest, log);
     });
 
     describe('should set status to partial failure when user has no access', () => {

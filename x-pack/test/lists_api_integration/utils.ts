@@ -20,6 +20,7 @@ import {
   LIST_INDEX,
   LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
+import { ToolingLog } from '@kbn/dev-utils';
 import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
 import { countDownTest } from '../detection_engine_api_integration/utils';
 
@@ -29,12 +30,17 @@ import { countDownTest } from '../detection_engine_api_integration/utils';
  * @param supertest The supertest client library
  */
 export const createListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
-  return countDownTest(async () => {
-    await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
-    return true;
-  }, 'createListsIndex');
+  return countDownTest(
+    async () => {
+      await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
+      return true;
+    },
+    'createListsIndex',
+    log
+  );
 };
 
 /**
@@ -42,12 +48,17 @@ export const createListsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
-  return countDownTest(async () => {
-    await supertest.delete(LIST_INDEX).set('kbn-xsrf', 'true').send();
-    return true;
-  }, 'deleteListsIndex');
+  return countDownTest(
+    async () => {
+      await supertest.delete(LIST_INDEX).set('kbn-xsrf', 'true').send();
+      return true;
+    },
+    'deleteListsIndex',
+    log
+  );
 };
 
 /**
@@ -56,12 +67,17 @@ export const deleteListsIndex = async (
  * @param supertest The supertest client library
  */
 export const createExceptionListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
-  return countDownTest(async () => {
-    await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
-    return true;
-  }, 'createListsIndex');
+  return countDownTest(
+    async () => {
+      await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
+      return true;
+    },
+    'createListsIndex',
+    log
+  );
 };
 
 /**
@@ -169,7 +185,8 @@ export const binaryToString = (res: any, callback: any): void => {
  * @param supertest The supertest handle
  */
 export const deleteAllExceptions = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
   await countDownTest(
     async () => {
@@ -189,6 +206,7 @@ export const deleteAllExceptions = async (
       return finalCheck.data.length === 0;
     },
     'deleteAllExceptions',
+    log,
     50,
     1000
   );

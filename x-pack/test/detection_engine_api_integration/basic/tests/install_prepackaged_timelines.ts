@@ -21,16 +21,17 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const log = getService('log');
 
   describe('install_prepackaged_timelines', () => {
     describe('creating prepackaged rules', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
         await deleteAllTimelines(es);
       });
 

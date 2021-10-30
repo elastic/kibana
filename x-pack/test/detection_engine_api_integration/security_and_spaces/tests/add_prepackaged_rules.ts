@@ -23,16 +23,17 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('add_prepackaged_rules', () => {
     describe('creating prepackaged rules', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
         await deleteAllTimelines(es);
       });
 
@@ -61,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should be possible to call the API twice and the second time the number of rules installed should be zero as well as timeline', async () => {
-        await installPrePackagedRules(supertest);
+        await installPrePackagedRules(supertest, log);
 
         // NOTE: I call the GET call until eventually it becomes consistent and that the number of rules to install are zero.
         // This is to reduce flakiness where it can for a short period of time try to install the same rule twice.

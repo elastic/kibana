@@ -24,11 +24,12 @@ import { getUpdateMinimalExceptionListItemSchemaMock } from '../../../../plugins
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('update_exception_list_items', () => {
     describe('update exception list items', () => {
       afterEach(async () => {
-        await deleteAllExceptions(supertest);
+        await deleteAllExceptions(supertest, log);
       });
 
       it('should update a single exception list item property of name using an id', async () => {

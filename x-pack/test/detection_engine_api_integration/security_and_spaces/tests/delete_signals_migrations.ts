@@ -34,6 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   describe('deleting signals migrations', () => {
     let outdatedSignalsIndexName: string;
@@ -45,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
 
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
 
       ({
         body: {
@@ -74,7 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     it('returns the deleted migration SavedObjects', async () => {

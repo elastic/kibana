@@ -46,6 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const kbnClient = getService('kibanaServer');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   describe('Finalizing signals migrations', () => {
     let legacySignalsIndexName: string;
@@ -61,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
       outdatedSignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
 
       ({
         body: { indices: createdMigrations },
@@ -88,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
       });
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     it('replaces the original index alias with the migrated one', async () => {

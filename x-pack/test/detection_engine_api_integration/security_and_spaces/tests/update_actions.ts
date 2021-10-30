@@ -33,6 +33,7 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('update_actions', () => {
     describe('updating actions', () => {
@@ -45,18 +46,18 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should be able to create a new webhook action and update a rule with the webhook action', async () => {
         const hookAction = await createNewAction(supertest);
         const rule = getSimpleRule();
-        await createRule(supertest, rule);
+        await createRule(supertest, log, rule);
         const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, false, rule);
         const updatedRule = await updateRule(supertest, ruleToUpdate);
         const bodyToCompare = removeServerGeneratedProperties(updatedRule);
@@ -71,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able to add a new webhook action and then remove the action from the rule again', async () => {
         const hookAction = await createNewAction(supertest);
         const rule = getSimpleRule();
-        await createRule(supertest, rule);
+        await createRule(supertest, log, rule);
         const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, false, rule);
         await updateRule(supertest, ruleToUpdate);
         const ruleAfterActionRemoved = await updateRule(supertest, rule);
@@ -86,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able to create a new webhook action and attach it to a rule without a meta field and run it correctly', async () => {
         const hookAction = await createNewAction(supertest);
         const rule = getSimpleRule();
-        await createRule(supertest, rule);
+        await createRule(supertest, log, rule);
         const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const updatedRule = await updateRule(supertest, ruleToUpdate);
         await waitForRuleSuccessOrStatus(supertest, updatedRule.id);
@@ -103,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
         const hookAction = await createNewAction(supertest);
         const rule = getSimpleRule();
-        await createRule(supertest, rule);
+        await createRule(supertest, log, rule);
         const ruleToUpdate: CreateRulesSchema = {
           ...getRuleWithWebHookAction(hookAction.id, true, rule),
           meta: {}, // create a rule with the action attached and a meta field
@@ -121,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be able to create a new webhook action and attach it to an immutable rule', async () => {
-        await installPrePackagedRules(supertest);
+        await installPrePackagedRules(supertest, log);
         // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
         // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
         const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
@@ -141,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be able to create a new webhook action, attach it to an immutable rule and the count of prepackaged rules should not increase. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
-        await installPrePackagedRules(supertest);
+        await installPrePackagedRules(supertest, log);
         // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
         // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
         const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
@@ -155,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be able to create a new webhook action, attach it to an immutable rule and the rule should stay immutable when searching against immutable tags', async () => {
-        await installPrePackagedRules(supertest);
+        await installPrePackagedRules(supertest, log);
         // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
         // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
         const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');

@@ -67,6 +67,7 @@ const assertContains = (subject: unknown[], expected: unknown[]) =>
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const log = getService('log');
 
   /**
    * Specific api integration tests for threat matching rule type
@@ -82,16 +83,20 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should create a single rule with a rule_id', async () => {
-        const ruleResponse = await createRule(supertest, getCreateThreatMatchRulesSchemaMock());
+        const ruleResponse = await createRule(
+          supertest,
+          log,
+          getCreateThreatMatchRulesSchemaMock()
+        );
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock());
       });
@@ -99,6 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
         const ruleResponse = await createRule(
           supertest,
+          log,
           getCreateThreatMatchRulesSchemaMock('rule-1', true)
         );
 
@@ -126,13 +132,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await deleteAllAlerts(supertest);
-        await createSignalsIndex(supertest);
+        await deleteAllAlerts(supertest, log);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should be able to execute and get 10 signals when doing a specific query', async () => {
@@ -164,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
           threat_filters: [],
         };
 
-        const createdRule = await createRule(supertest, rule);
+        const createdRule = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, createdRule.id);
         await waitForSignalsToBePresent(supertest, 10, [createdRule.id]);
         const signalsOpen = await getSignalsByIds(supertest, [createdRule.id]);
@@ -368,7 +374,7 @@ export default ({ getService }: FtrProviderContext) => {
           threat_filters: [],
         };
 
-        const ruleResponse = await createRule(supertest, rule);
+        const ruleResponse = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
         const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
@@ -407,7 +413,7 @@ export default ({ getService }: FtrProviderContext) => {
           threat_filters: [],
         };
 
-        const ruleResponse = await createRule(supertest, rule);
+        const ruleResponse = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
         const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
@@ -446,7 +452,7 @@ export default ({ getService }: FtrProviderContext) => {
           threat_filters: [],
         };
 
-        const ruleResponse = await createRule(supertest, rule);
+        const ruleResponse = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
         const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
@@ -485,7 +491,7 @@ export default ({ getService }: FtrProviderContext) => {
             items_per_search: 1, // iterate only 1 threat item per loop to ensure we're slow
           };
 
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, id, 'failed');
 
           const { body } = await supertest
@@ -537,7 +543,7 @@ export default ({ getService }: FtrProviderContext) => {
             threat_filters: [],
           };
 
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 2, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
@@ -626,7 +632,7 @@ export default ({ getService }: FtrProviderContext) => {
             threat_filters: [],
           };
 
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
@@ -713,7 +719,7 @@ export default ({ getService }: FtrProviderContext) => {
             threat_filters: [],
           };
 
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);
@@ -827,7 +833,7 @@ export default ({ getService }: FtrProviderContext) => {
             threat_filters: [],
           };
 
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 2, [id]);
           const signalsOpen = await getSignalsByIds(supertest, [id]);

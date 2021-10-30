@@ -30,6 +30,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('create_rules_bulk', () => {
     describe('creating rules in bulk', () => {
@@ -42,12 +43,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should create a single rule with a rule_id', async () => {

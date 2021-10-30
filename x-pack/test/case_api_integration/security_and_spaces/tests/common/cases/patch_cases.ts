@@ -67,6 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const log = getService('log');
 
   describe('patch_cases', () => {
     afterEach(async () => {
@@ -792,12 +793,12 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('detections rule', () => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest);
+          await createSignalsIndex(supertest, log);
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest);
-          await deleteAllAlerts(supertest);
+          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
@@ -805,7 +806,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const postedCase = await createCase(supertest, postCaseReq);
 
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signals = await getSignalsByIds(supertest, [id]);
@@ -865,7 +866,7 @@ export default ({ getService }: FtrProviderContext): void => {
             settings: { syncAlerts: false },
           });
 
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signals = await getSignalsByIds(supertest, [id]);
@@ -918,7 +919,7 @@ export default ({ getService }: FtrProviderContext): void => {
             settings: { syncAlerts: false },
           });
 
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signals = await getSignalsByIds(supertest, [id]);
@@ -987,7 +988,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
 
           const postedCase = await createCase(supertest, postCaseReq);
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signals = await getSignalsByIds(supertest, [id]);

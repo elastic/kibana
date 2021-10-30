@@ -24,6 +24,7 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { ToolingLog } from '@kbn/dev-utils';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
 import {
   CreateRulesSchema,
@@ -414,7 +415,8 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
  * @param supertest The supertest agent.
  */
 export const deleteAllAlerts = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
   await countDownTest(
     async () => {
@@ -439,33 +441,42 @@ export const deleteAllAlerts = async (
       return finalCheck.data.length === 0;
     },
     'deleteAllAlerts',
+    log,
     50,
     1000
   );
 };
 
-export const downgradeImmutableRule = async (es: Client, ruleId: string): Promise<void> => {
-  return countDownES(async () => {
-    return es.updateByQuery(
-      {
-        index: '.kibana',
-        refresh: true,
-        wait_for_completion: true,
-        body: {
-          script: {
-            lang: 'painless',
-            source: 'ctx._source.alert.params.version--',
-          },
-          query: {
-            term: {
-              'alert.tags': `${INTERNAL_RULE_ID_KEY}:${ruleId}`,
+export const downgradeImmutableRule = async (
+  es: Client,
+  log: ToolingLog,
+  ruleId: string
+): Promise<void> => {
+  return countDownES(
+    async () => {
+      return es.updateByQuery(
+        {
+          index: '.kibana',
+          refresh: true,
+          wait_for_completion: true,
+          body: {
+            script: {
+              lang: 'painless',
+              source: 'ctx._source.alert.params.version--',
+            },
+            query: {
+              term: {
+                'alert.tags': `${INTERNAL_RULE_ID_KEY}:${ruleId}`,
+              },
             },
           },
         },
-      },
-      { meta: true }
-    );
-  }, 'downgradeImmutableRule');
+        { meta: true }
+      );
+    },
+    'downgradeImmutableRule',
+    log
+  );
 };
 
 /**
@@ -486,20 +497,25 @@ export const deleteAllTimelines = async (es: Client): Promise<void> => {
  * Remove all rules statuses from the .kibana index
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
+ * @param log The tooling logger
  */
-export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
-  return countDownES(async () => {
-    return es.deleteByQuery(
-      {
-        index: '.kibana',
-        q: 'type:siem-detection-engine-rule-status',
-        wait_for_completion: true,
-        refresh: true,
-        body: {},
-      },
-      { meta: true }
-    );
-  }, 'deleteAllRulesStatuses');
+export const deleteAllRulesStatuses = async (es: Client, log: ToolingLog): Promise<void> => {
+  return countDownES(
+    async () => {
+      return es.deleteByQuery(
+        {
+          index: '.kibana',
+          q: 'type:siem-detection-engine-rule-status',
+          wait_for_completion: true,
+          refresh: true,
+          body: {},
+        },
+        { meta: true }
+      );
+    },
+    'deleteAllRulesStatuses',
+    log
+  );
 };
 
 /**
@@ -508,12 +524,17 @@ export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
-  await countDownTest(async () => {
-    await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-    return true;
-  }, 'createSignalsIndex');
+  await countDownTest(
+    async () => {
+      await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+      return true;
+    },
+    'createSignalsIndex',
+    log
+  );
 };
 
 /**
@@ -521,12 +542,17 @@ export const createSignalsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteSignalsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
-  await countDownTest(async () => {
-    await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-    return true;
-  }, 'deleteSignalsIndex');
+  await countDownTest(
+    async () => {
+      await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+      return true;
+    },
+    'deleteSignalsIndex',
+    log
+  );
 };
 
 /**
@@ -812,12 +838,14 @@ export const waitFor = async (
  * reliant.
  * @param esFunction The function to test against
  * @param esFunctionName The name of the function to print if we encounter errors
+ * @param log The tooling logger
  * @param retryCount The number of times to retry before giving up (has default)
  * @param timeoutWait Time to wait before trying again (has default)
  */
 export const countDownES = async (
   esFunction: () => Promise<TransportResult<Record<string, any>, unknown>>,
   esFunctionName: string,
+  log: ToolingLog,
   retryCount: number = 20,
   timeoutWait = 250
 ): Promise<void> => {
@@ -825,14 +853,14 @@ export const countDownES = async (
     async () => {
       const result = await esFunction();
       if (result.body.version_conflicts !== 0) {
-        // eslint-disable-next-line no-console
-        console.log(`Version conflicts for ${result.body.version_conflicts}`);
+        log.error(`Version conflicts for ${result.body.version_conflicts}`);
         return false;
       } else {
         return true;
       }
     },
     esFunctionName,
+    log,
     retryCount,
     timeoutWait
   );
@@ -855,12 +883,14 @@ export const refreshIndex = async (es: Client, index?: string) => {
  * for testing resiliency.
  * @param functionToTest The function to test against
  * @param name The name of the function to print if we encounter errors
+ * @param log The tooling logger
  * @param retryCount The number of times to retry before giving up (has default)
  * @param timeoutWait Time to wait before trying again (has default)
  */
 export const countDownTest = async (
   functionToTest: () => Promise<boolean>,
   name: string,
+  log: ToolingLog,
   retryCount: number = 20,
   timeoutWait = 250,
   ignoreThrow: boolean = false
@@ -869,30 +899,27 @@ export const countDownTest = async (
     try {
       const passed = await functionToTest();
       if (!passed) {
-        // eslint-disable-next-line no-console
-        console.log(`Failure trying to ${name}, retries left are: ${retryCount - 1}`);
+        log.error(`Failure trying to ${name}, retries left are: ${retryCount - 1}`);
         // retry, counting down, and delay a bit before
         await new Promise((resolve) => setTimeout(resolve, timeoutWait));
-        await countDownTest(functionToTest, name, retryCount - 1, timeoutWait, ignoreThrow);
+        await countDownTest(functionToTest, name, log, retryCount - 1, timeoutWait, ignoreThrow);
       }
     } catch (err) {
       if (ignoreThrow) {
         throw err;
       } else {
-        // eslint-disable-next-line no-console
-        console.log(
-          `Failure trying to ${name}, with exception message of:`,
-          err.message,
-          `retries left are: ${retryCount - 1}`
+        log.error(
+          `Failure trying to ${name}, with exception message of: ${
+            err.message
+          }, retries left are: ${retryCount - 1}`
         );
         // retry, counting down, and delay a bit before
         await new Promise((resolve) => setTimeout(resolve, timeoutWait));
-        await countDownTest(functionToTest, name, retryCount - 1, timeoutWait, ignoreThrow);
+        await countDownTest(functionToTest, name, log, retryCount - 1, timeoutWait, ignoreThrow);
       }
     }
   } else {
-    // eslint-disable-next-line no-console
-    console.log(`Could not ${name}, no retries are left`);
+    log.error(`Could not ${name}, no retries are left`);
   }
 };
 
@@ -903,9 +930,11 @@ export const countDownTest = async (
  * rule a second attempt. It only re-tries adding the rule if it encounters a conflict once.
  * @param supertest The supertest deps
  * @param rule The rule to create
+ * @param log The tooling logger
  */
 export const createRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   rule: CreateRulesSchema
 ): Promise<FullResponseSchema> => {
   const response = await supertest
@@ -914,13 +943,12 @@ export const createRule = async (
     .send(rule);
   if (response.status === 409) {
     if (rule.rule_id != null) {
-      // eslint-disable-next-line no-console
-      console.log(
+      log.error(
         `When creating a rule found an unexpected conflict (409), will attempt a cleanup and one time re-try. This usually indicates a bad cleanup or race condition within the tests: ${JSON.stringify(
           response.body
         )}`
       );
-      await deleteRule(supertest, rule.rule_id);
+      await deleteRule(supertest, log, rule.rule_id);
       const secondResponseTry = await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
@@ -950,18 +978,19 @@ export const createRule = async (
  * Helper to cut down on the noise in some of the tests. Does a delete of a rule.
  * It does not check for a 200 "ok" on this.
  * @param supertest The supertest deps
- * @param id The rule id to delete
+ * @param ruleId The rule id to delete
+ * @param log The tooling logger
  */
 export const deleteRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   ruleId: string
 ): Promise<FullResponseSchema> => {
   const response = await supertest
     .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
     .set('kbn-xsrf', 'true');
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when deleting the rule. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1065,10 +1094,12 @@ export const getPrePackagedRulesStatus = async (
  * Helper to cut down on the noise in some of the tests. This checks for
  * an expected 200 still and does not try to any retries. Creates exception lists
  * @param supertest The supertest deps
- * @param rule The rule to create
+ * @param exceptionList The exception list to create
+ * @param log The tooling logger
  */
 export const createExceptionList = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   exceptionList: CreateExceptionListSchema
 ): Promise<ExceptionListSchema> => {
   const response = await supertest
@@ -1078,13 +1109,12 @@ export const createExceptionList = async (
 
   if (response.status === 409) {
     if (exceptionList.list_id != null) {
-      // eslint-disable-next-line no-console
-      console.log(
+      log.error(
         `When creating an exception list found an unexpected conflict (409), will attempt a cleanup and one time re-try. This usually indicates a bad cleanup or race condition within the tests: ${JSON.stringify(
           response.body
         )}`
       );
-      await deleteExceptionList(supertest, exceptionList.list_id);
+      await deleteExceptionList(supertest, log, exceptionList.list_id);
       const secondResponseTry = await supertest
         .post(EXCEPTION_LIST_URL)
         .set('kbn-xsrf', 'true')
@@ -1116,18 +1146,19 @@ export const createExceptionList = async (
  * Helper to cut down on the noise in some of the tests. Does a delete of an exception list.
  * It does not check for a 200 "ok" on this.
  * @param supertest The supertest deps
- * @param id The rule id to delete
+ * @param listId The exception list to delete
+ * @param log The tooling logger
  */
 export const deleteExceptionList = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   listId: string
 ): Promise<FullResponseSchema> => {
   const response = await supertest
     .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}`)
     .set('kbn-xsrf', 'true');
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when deleting an exception list. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1141,10 +1172,12 @@ export const deleteExceptionList = async (
  * Helper to cut down on the noise in some of the tests. This checks for
  * an expected 200 still and does not try to any retries. Creates exception lists
  * @param supertest The supertest deps
- * @param rule The rule to create
+ * @param exceptionListItem The exception list item to create
+ * @param log The tooling logger
  */
 export const createExceptionListItem = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   exceptionListItem: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {
   const response = await supertest
@@ -1153,8 +1186,7 @@ export const createExceptionListItem = async (
     .send(exceptionListItem);
 
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when creating an exception list item. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1295,15 +1327,20 @@ export const getSignalsById = async (
 };
 
 export const installPrePackagedRules = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
-  await countDownTest(async () => {
-    const { status } = await supertest
-      .put(DETECTION_ENGINE_PREPACKAGED_URL)
-      .set('kbn-xsrf', 'true')
-      .send();
-    return status === 200;
-  }, 'installPrePackagedRules');
+  await countDownTest(
+    async () => {
+      const { status } = await supertest
+        .put(DETECTION_ENGINE_PREPACKAGED_URL)
+        .set('kbn-xsrf', 'true')
+        .send();
+      return status === 200;
+    },
+    'installPrePackagedRules',
+    log
+  );
 };
 
 /**
@@ -1315,6 +1352,7 @@ export const installPrePackagedRules = async (
  */
 export const createContainerWithEndpointEntries = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   endpointEntries: Array<{
     entries: NonEmptyEntriesArray;
     osTypes: OsTypeArray | undefined;
@@ -1327,7 +1365,7 @@ export const createContainerWithEndpointEntries = async (
 
   // create the endpoint exception list container
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { id, list_id, namespace_type, type } = await createExceptionList(supertest, {
+  const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
     description: 'endpoint description',
     list_id: 'endpoint_list',
     name: 'endpoint_list',
@@ -1345,7 +1383,7 @@ export const createContainerWithEndpointEntries = async (
         os_types: endpointEntry.osTypes,
         type: 'simple',
       };
-      return createExceptionListItem(supertest, exceptionListItem);
+      return createExceptionListItem(supertest, log, exceptionListItem);
     })
   );
 
@@ -1375,6 +1413,7 @@ export const createContainerWithEndpointEntries = async (
  */
 export const createContainerWithEntries = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   entries: NonEmptyEntriesArray[]
 ): Promise<ListArray> => {
   // If not given any endpoint entries, return without any
@@ -1383,7 +1422,7 @@ export const createContainerWithEntries = async (
   }
   // Create the rule exception list container
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { id, list_id, namespace_type, type } = await createExceptionList(supertest, {
+  const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
     description: 'some description',
     list_id: 'some-list-id',
     name: 'some name',
@@ -1400,7 +1439,7 @@ export const createContainerWithEntries = async (
         type: 'simple',
         entries: entry,
       };
-      return createExceptionListItem(supertest, exceptionListItem);
+      return createExceptionListItem(supertest, log, exceptionListItem);
     })
   );
 
@@ -1433,6 +1472,7 @@ export const createContainerWithEntries = async (
  */
 export const createRuleWithExceptionEntries = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   rule: CreateRulesSchema,
   entries: NonEmptyEntriesArray[],
   endpointEntries?: Array<{
@@ -1440,9 +1480,10 @@ export const createRuleWithExceptionEntries = async (
     osTypes: OsTypeArray | undefined;
   }>
 ): Promise<FullResponseSchema> => {
-  const maybeExceptionList = await createContainerWithEntries(supertest, entries);
+  const maybeExceptionList = await createContainerWithEntries(supertest, log, entries);
   const maybeEndpointList = await createContainerWithEndpointEntries(
     supertest,
+    log,
     endpointEntries ?? []
   );
 
@@ -1455,7 +1496,7 @@ export const createRuleWithExceptionEntries = async (
     enabled: false,
     exceptions_list: [...maybeExceptionList, ...maybeEndpointList],
   };
-  const ruleResponse = await createRule(supertest, ruleWithException);
+  const ruleResponse = await createRule(supertest, log, ruleWithException);
   await supertest
     .patch(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')

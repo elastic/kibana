@@ -29,6 +29,7 @@ import { RACAlert } from '../../../../plugins/security_solution/server/lib/detec
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('open_close_signals', () => {
     describe('tests with auditbeat data', () => {
@@ -39,17 +40,17 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
       beforeEach(async () => {
-        await deleteAllAlerts(supertest);
-        await createSignalsIndex(supertest);
+        await deleteAllAlerts(supertest, log);
+        await createSignalsIndex(supertest, log);
       });
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should be able to execute and get 10 signals', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
+        const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
@@ -58,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be have set the signals in an open state initially', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
+        const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
@@ -70,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be able to get a count of 10 closed signals when closing 10', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
+        const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
@@ -95,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be able close 10 signals immediately and they all should be closed', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
+        const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
@@ -124,7 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be able mark 10 signals as acknowledged immediately and they all should be acknowledged', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
+        const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);

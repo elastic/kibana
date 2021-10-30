@@ -44,6 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   describe('create_rules', () => {
     describe('creating rules', () => {
@@ -56,12 +57,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       describe('elastic admin', () => {
@@ -289,7 +290,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('missing timestamps', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
         // to edit these files run the following script
         // cd $HOME/kibana/x-pack && nvm use && node ../scripts/es_archiver edit security_solution/timestamp_override
         await esArchiver.load(
@@ -297,8 +298,8 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override'
         );

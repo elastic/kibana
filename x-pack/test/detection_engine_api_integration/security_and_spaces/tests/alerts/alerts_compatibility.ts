@@ -26,6 +26,7 @@ import { ThreatEcs } from '../../../../../plugins/security_solution/common/ecs/t
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('Alerts Compatibility', function () {
     describe('CTI', () => {
@@ -43,14 +44,14 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
         );
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
         );
-        await deleteSignalsIndex(supertest);
+        await deleteSignalsIndex(supertest, log);
       });
 
       it('allows querying of legacy enriched signals by threat.indicator', async () => {
