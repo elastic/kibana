@@ -151,8 +151,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         // update a simple rule's name
 
-        // This updatedRule _actually_ is telling the system to _remove_ any actions
-        // but since we have migrated actions we are preserving them when we shouldn't be.
+        // This updatedRule actually is telling the system to remove any actions
+        // but since we have migrated actions we are preserving them when we shouldn't preserving them.
         const updatedRule = getSimpleRuleUpdate('rule-1');
         updatedRule.rule_id = createRuleBody.rule_id;
         updatedRule.name = 'some other name';
