@@ -79,7 +79,6 @@ export const updateRulesRoute = (
           isRuleRegistryEnabled,
           rulesClient,
           ruleStatusClient,
-          savedObjectsClient,
           ruleUpdate: request.body,
           spaceId: context.securitySolution.getSpaceId(),
         });
