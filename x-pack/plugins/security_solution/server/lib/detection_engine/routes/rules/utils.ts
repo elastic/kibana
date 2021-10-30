@@ -208,7 +208,7 @@ export const getInvalidConnectors = async (
   actionsClient: ActionsClient
 ): Promise<[BulkError[], PromiseFromStreams[]]> => {
   const actionsFind = await actionsClient.getAll();
-  const actionIds = actionsFind.map((action) => action.id);
+  const actionIds = new Set(actionsFind.map((action) => action.id));
   const { errors, rulesAcc } = rules.reduce(
     (acc, parsedRule) => {
       if (parsedRule instanceof Error) {
@@ -216,7 +216,7 @@ export const getInvalidConnectors = async (
       } else {
         const { rule_id: ruleId, actions } = parsedRule;
         const missingActionIds = actions.flatMap((action) => {
-          if (actionIds.find((actionsId) => actionsId === action.id) == null) {
+          if (!actionIds.has(action.id)) {
             return [action.id];
           } else {
             return [];
