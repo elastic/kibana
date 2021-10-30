@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_INSTANCE_ID, VERSION } from '@kbn/rule-data-utils';
+import { VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 
@@ -26,18 +26,19 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               if (ruleDataClient.isWriteEnabled() && numAlerts) {
                 const commonRuleFields = getCommonAlertFields(options);
 
-                const response = await ruleDataClient.getWriter().bulk({
-                  body: alerts.flatMap((alert) => [
-                    { index: {} },
-                    {
-                      [ALERT_INSTANCE_ID]: alert.id,
-                      [VERSION]: ruleDataClient.kibanaVersion,
-                      ...commonRuleFields,
-                      ...alert.fields,
-                    },
-                  ]),
-                  refresh,
-                });
+                const response = await ruleDataClient
+                  .getWriter({ namespace: options.spaceId })
+                  .bulk({
+                    body: alerts.flatMap((alert) => [
+                      { index: { _id: alert.id } },
+                      {
+                        [VERSION]: ruleDataClient.kibanaVersion,
+                        ...commonRuleFields,
+                        ...alert.fields,
+                      },
+                    ]),
+                    refresh,
+                  });
                 return response;
               } else {
                 logger.debug('Writing is disabled.');

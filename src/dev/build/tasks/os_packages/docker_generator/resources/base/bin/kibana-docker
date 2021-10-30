@@ -85,8 +85,6 @@ kibana_vars=(
     logging.root.appenders
     logging.root.level
     map.includeElasticMapsService
-    map.proxyElasticMapsServiceInMaps
-    map.regionmap
     map.tilemap.options.attribution
     map.tilemap.options.maxZoom
     map.tilemap.options.minZoom
@@ -343,7 +341,6 @@ kibana_vars=(
     xpack.security.authc.saml.realm
     xpack.security.authc.selector.enabled
     xpack.security.cookieName
-    xpack.security.enabled
     xpack.security.encryptionKey
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
@@ -366,7 +363,6 @@ kibana_vars=(
     xpack.securitySolution.prebuiltRulesFromFileSystem
     xpack.securitySolution.prebuiltRulesFromSavedObjects
     xpack.spaces.maxSpaces
-    xpack.task_manager.index
     xpack.task_manager.max_attempts
     xpack.task_manager.max_poll_inactivity_cycles
     xpack.task_manager.max_workers
@@ -379,6 +375,7 @@ kibana_vars=(
     xpack.task_manager.poll_interval
     xpack.task_manager.request_capacity
     xpack.task_manager.version_conflict_threshold
+    xpack.uptime.index
 )
 
 longopts=''

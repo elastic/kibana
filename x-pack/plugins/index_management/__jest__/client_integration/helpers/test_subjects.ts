@@ -59,4 +59,5 @@ export type TestSubjects =
   | 'templatesTab'
   | 'templateTable'
   | 'title'
+  | 'unfreezeIndexMenuButton'
   | 'viewButton';

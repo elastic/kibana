@@ -13,7 +13,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 import Semver from 'semver';
-import { KibanaConfigType } from '../../../kibana_config';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
@@ -35,7 +34,7 @@ export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
   soMigrationsConfig: SavedObjectsMigrationConfigType;
-  kibanaConfig: KibanaConfigType;
+  kibanaIndex: string;
   kibanaVersion: string;
   logger: Logger;
   migrationsRetryDelay?: number;
@@ -55,7 +54,7 @@ export interface KibanaMigratorStatus {
 export class KibanaMigrator {
   private readonly client: ElasticsearchClient;
   private readonly documentMigrator: VersionedTransformer;
-  private readonly kibanaConfig: KibanaConfigType;
+  private readonly kibanaIndex: string;
   private readonly log: Logger;
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
@@ -76,20 +75,20 @@ export class KibanaMigrator {
   constructor({
     client,
     typeRegistry,
-    kibanaConfig,
+    kibanaIndex,
     soMigrationsConfig,
     kibanaVersion,
     logger,
     migrationsRetryDelay,
   }: KibanaMigratorOptions) {
     this.client = client;
-    this.kibanaConfig = kibanaConfig;
+    this.kibanaIndex = kibanaIndex;
     this.soMigrationsConfig = soMigrationsConfig;
     this.typeRegistry = typeRegistry;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
     this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
     this.log = logger;
-    this.kibanaVersion = kibanaVersion.split('-')[0]; // coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha) to a regular semver (x.y.z);
+    this.kibanaVersion = kibanaVersion;
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion: this.kibanaVersion,
       typeRegistry,
@@ -148,9 +147,8 @@ export class KibanaMigrator {
   }
 
   private runMigrationsInternal() {
-    const kibanaIndexName = this.kibanaConfig.index;
     const indexMap = createIndexMap({
-      kibanaIndexName,
+      kibanaIndexName: this.kibanaIndex,
       indexMap: this.mappingProperties,
       registry: this.typeRegistry,
     });
