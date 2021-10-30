@@ -25,8 +25,7 @@ import {
 import { Immutable } from '../../../../../../../common/endpoint/types';
 import { HttpFetchOptionsWithPath } from 'kibana/public';
 
-// FLAKY https://github.com/elastic/kibana/issues/115100
-describe.skip('When using the RemoveTrustedAppFromPolicyModal component', () => {
+describe('When using the RemoveTrustedAppFromPolicyModal component', () => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: (waitForLoadedState?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -50,7 +49,7 @@ describe.skip('When using the RemoveTrustedAppFromPolicyModal component', () => 
     mockedApis.responseProvider.trustedAppUpdate.mockDelay.mockImplementation(
       () =>
         new Promise((resolve) => {
-          setTimeout(resolve, 20);
+          setTimeout(resolve, 100);
         })
     );
 
