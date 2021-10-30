@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { inspect } from 'util';
+
 import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
 import { AgentConfigurationIntake } from '../../../../plugins/apm/common/agent_configuration/configuration_types';
@@ -464,10 +466,23 @@ async function expectStatusCode(
   }>,
   statusCode: number
 ) {
+  let res;
   try {
-    const res = await fn();
-    expect(res.status).to.be(statusCode);
+    res = await fn();
   } catch (e) {
-    expect(e.res.status).to.be(statusCode);
+    if (e && e.res && e.res.status) {
+      if (e.res.status === statusCode) {
+        return;
+      }
+      throw new Error(
+        `Expected a [${statusCode}] response, got [${e.res.status}]: ${inspect(e.res)}`
+      );
+    } else {
+      throw new Error(
+        `Unexpected rejection value, expected error with .res response property: ${inspect(e)}`
+      );
+    }
   }
+
+  expect(res.status).to.be(statusCode);
 }
