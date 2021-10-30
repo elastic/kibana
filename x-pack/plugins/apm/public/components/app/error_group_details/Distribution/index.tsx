@@ -22,7 +22,6 @@ import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED } from '@kbn/rule-da
 import { i18n } from '@kbn/i18n';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
 import { useTheme } from '../../../../hooks/use_theme';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { AlertType } from '../../../../../common/alert_types';
@@ -31,7 +30,7 @@ import { ChartContainer } from '../../../shared/charts/chart_container';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { LazyAlertsFlyout } from '../../../../../../observability/public';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { Coordinate } from '../../../../../typings/timeseries';
+import { getTimeZone } from '../../../shared/charts/helper/timezone';
 
 const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
   ALERT_RULE_TYPE_ID_NON_TYPED;
@@ -39,18 +38,6 @@ const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
 type ErrorDistributionAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
 
-export function getCoordinatedBuckets(
-  buckets:
-    | ErrorDistributionAPIResponse['currentPeriod']
-    | ErrorDistributionAPIResponse['previousPeriod']
-): Coordinate[] {
-  return buckets.map(({ count, key }) => {
-    return {
-      x: key,
-      y: count,
-    };
-  });
-}
 interface Props {
   fetchStatus: FETCH_STATUS;
   distribution: ErrorDistributionAPIResponse;
@@ -58,16 +45,15 @@ interface Props {
 }
 
 export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
+  const { core } = useApmPluginContext();
   const theme = useTheme();
-  const currentPeriod = getCoordinatedBuckets(distribution.currentPeriod);
-  const previousPeriod = getCoordinatedBuckets(distribution.previousPeriod);
 
   const { urlParams } = useUrlParams();
   const { comparisonEnabled } = urlParams;
 
   const timeseries = [
     {
-      data: currentPeriod,
+      data: distribution.currentPeriod,
       color: theme.eui.euiColorVis1,
       title: i18n.translate('xpack.apm.errorGroup.chart.ocurrences', {
         defaultMessage: 'Occurences',
@@ -76,10 +62,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
     ...(comparisonEnabled
       ? [
           {
-            data: offsetPreviousPeriodCoordinates({
-              currentPeriodTimeseries: currentPeriod,
-              previousPeriodTimeseries: previousPeriod,
-            }),
+            data: distribution.previousPeriod,
             color: theme.eui.euiColorMediumShade,
             title: i18n.translate(
               'xpack.apm.errorGroup.chart.ocurrences.previousPeriodLabel',
@@ -102,6 +85,8 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
     undefined
   );
+
+  const timeZone = getTimeZone(core.uiSettings);
 
   return (
     <>
@@ -138,6 +123,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
           {timeseries.map((serie) => {
             return (
               <BarSeries
+                timeZone={timeZone}
                 key={serie.title}
                 id={serie.title}
                 minBarHeight={2}
