@@ -11,6 +11,34 @@ import { DeprecationsServiceSetup, PackageInfo } from 'src/core/server';
 import type { PrivilegeDeprecationsService, Role } from '../../../security/common/model';
 import { DEFAULT_SIGNALS_INDEX } from '../../common/constants';
 
+const buildManualSteps = (roleNames: string[]): string[] => {
+  const baseSteps = [
+    i18n.translate('xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep1', {
+      defaultMessage:
+        'Update your roles to include read privileges for the signals preview indices appropriate for that role and space(s).',
+    }),
+    i18n.translate('xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep2', {
+      defaultMessage:
+        'In 8.0, users will be unable to view preview results until those permissions are added.',
+    }),
+  ];
+  const informationalStep = i18n.translate(
+    'xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep3',
+    {
+      defaultMessage: 'The roles that currently have read access to signals indices are: {roles}',
+      values: {
+        roles: roleNames.join(', '),
+      },
+    }
+  );
+
+  if (roleNames.length === 0) {
+    return baseSteps;
+  } else {
+    return [...baseSteps, informationalStep];
+  }
+};
+
 interface Dependencies {
   deprecationsService: DeprecationsServiceSetup;
   getKibanaRoles?: PrivilegeDeprecationsService['getKibanaRoles'];
@@ -52,32 +80,7 @@ export const registerRulePreviewPrivilegeDeprecations = ({
           deprecationType: 'feature',
           documentationUrl: `https://www.elastic.co/guide/en/security/${packageInfo.branch}/rules-ui-create.html#preview-rules`,
           correctiveActions: {
-            manualSteps: [
-              i18n.translate(
-                'xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep1',
-                {
-                  defaultMessage:
-                    'Update your roles to include read privileges for the signals preview indices appropriate for that role and space(s).',
-                }
-              ),
-              i18n.translate(
-                'xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep2',
-                {
-                  defaultMessage:
-                    'In 8.0, users will be unable to view preview results until those permissions are added.',
-                }
-              ),
-              i18n.translate(
-                'xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep3',
-                {
-                  defaultMessage:
-                    'The roles that currently have read access to signals indices are: {roles}',
-                  values: {
-                    roles: roleNamesWhichReadSignals.join(', '),
-                  },
-                }
-              ),
-            ],
+            manualSteps: buildManualSteps(roleNamesWhichReadSignals),
           },
         },
       ];
@@ -87,7 +90,7 @@ export const registerRulePreviewPrivilegeDeprecations = ({
 
 const READ_PRIVILEGES = ['all', 'read'];
 
-const roleHasSignalsReadAccess = (role: Role): boolean =>
+export const roleHasSignalsReadAccess = (role: Role): boolean =>
   role.elasticsearch.indices.some(
     (index) =>
       index.names.some((indexName) => indexName.startsWith(DEFAULT_SIGNALS_INDEX)) &&

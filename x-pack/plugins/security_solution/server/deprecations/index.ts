@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './rule_preview_privileges';
+export { registerRulePreviewPrivilegeDeprecations } from './rule_preview_privileges';
