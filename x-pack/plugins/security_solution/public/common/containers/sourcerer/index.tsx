@@ -329,7 +329,7 @@ export const useSourcererDataView = (
       // all active & inactive patterns in DATA_VIEW
       patternList: selectedDataView.title.split(','),
       // selected patterns in DATA_VIEW
-      selectedPatterns,
+      selectedPatterns: selectedPatterns.sort(),
     }),
     [loading, selectedPatterns, signalIndexName, scopeId, selectedDataView]
   );
