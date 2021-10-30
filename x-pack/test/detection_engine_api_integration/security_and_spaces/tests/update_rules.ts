@@ -23,6 +23,7 @@ import {
   getSimpleMlRuleUpdate,
   createRule,
   getSimpleRule,
+  createLegacyRuleAction,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -126,6 +127,55 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
         outputRule.version = 2;
+        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it('should update a single rule property of name using an auto-generated rule_id and migrate the actions', async () => {
+        const rule = getSimpleRule('rule-1');
+        delete rule.rule_id;
+        const [connector, createRuleBody] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          createRule(supertest, rule),
+        ]);
+        await createLegacyRuleAction(supertest, createRuleBody.id, connector.body.id);
+
+        // update a simple rule's name
+        const updatedRule = getSimpleRuleUpdate('rule-1');
+        updatedRule.rule_id = createRuleBody.rule_id;
+        updatedRule.name = 'some other name';
+        delete updatedRule.id;
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(updatedRule)
+          .expect(200);
+
+        const outputRule = getSimpleRuleOutputWithoutRuleId();
+        outputRule.name = 'some other name';
+        outputRule.version = 2;
+        outputRule.actions = [
+          {
+            action_type_id: '.slack',
+            group: 'default',
+            id: connector.body.id,
+            params: {
+              message:
+                'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+          },
+        ];
+        outputRule.throttle = '1m';
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
