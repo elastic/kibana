@@ -33,7 +33,6 @@ describe('Security UsageCollector', () => {
     license.getFeatures.mockReturnValue({
       allowAccessAgreement,
       allowAuditLogging,
-      allowLegacyAuditLogging: allowAuditLogging,
       allowRbac,
     } as SecurityLicenseFeatures);
     return license;
@@ -343,19 +342,17 @@ describe('Security UsageCollector', () => {
   });
 
   describe('audit logging', () => {
-    it('reports when ECS audit logging is enabled', async () => {
+    it('reports when audit logging is enabled', async () => {
       const config = createSecurityConfig(
         ConfigSchema.validate({
           audit: {
             enabled: true,
-            appender: { type: 'console', layout: { type: 'json' } },
           },
         })
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
       const license = createSecurityLicense({
         isLicenseAvailable: true,
-        allowLegacyAuditLogging: true,
         allowAuditLogging: true,
       });
       registerSecurityUsageCollector({ usageCollection, config, license });
@@ -367,7 +364,6 @@ describe('Security UsageCollector', () => {
       expect(usage).toEqual({
         ...DEFAULT_USAGE,
         auditLoggingEnabled: true,
-        auditLoggingType: 'ecs',
       });
     });
 
@@ -376,6 +372,7 @@ describe('Security UsageCollector', () => {
         ConfigSchema.validate({
           audit: {
             enabled: true,
+            appender: { type: 'console', layout: { type: 'json' } },
           },
         })
       );
@@ -390,7 +387,6 @@ describe('Security UsageCollector', () => {
       expect(usage).toEqual({
         ...DEFAULT_USAGE,
         auditLoggingEnabled: false,
-        auditLoggingType: undefined,
       });
     });
   });
