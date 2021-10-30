@@ -180,6 +180,153 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
+      it('should be able to update an action', async () => {
+        const [connector1, connector2] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+        ]);
+
+        const action1 = {
+          group: 'default',
+          id: connector1.body.id,
+          action_type_id: connector1.body.connector_type_id,
+          params: {
+            message: 'message',
+          },
+        };
+
+        const ruleWithConnector: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [action1],
+        };
+        delete ruleWithConnector.rule_id;
+        const createRuleBody = await createRule(supertest, ruleWithConnector);
+
+        const updatedRule1 = getSimpleRuleUpdate('rule-1');
+        updatedRule1.rule_id = createRuleBody.rule_id;
+        delete updatedRule1.id;
+
+        updatedRule1.throttle = '1w';
+        updatedRule1.actions = [
+          {
+            action_type_id: '.slack',
+            group: 'default',
+            id: connector2.body.id, // <-- We update with the second connector id
+            params: {
+              message: 'Some other message', // <-- We update with a different message
+            },
+          },
+        ];
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(updatedRule1)
+          .expect(200);
+
+        const outputRule = getSimpleRuleOutput(body.rule_id);
+        outputRule.version = 2;
+        outputRule.throttle = '1w';
+        outputRule.actions = [
+          {
+            action_type_id: '.slack',
+            group: 'default',
+            id: connector2.body.id, // <-- We update with the second connector id
+            params: {
+              message: 'Some other message', // <-- We update with a different message
+            },
+          },
+        ];
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it('should update an action after migrating the rule and use the updated action (not the migrated action)', async () => {
+        const rule = getSimpleRule('rule-1');
+        delete rule.rule_id;
+
+        const [connector1, connector2, createRuleBody] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          createRule(supertest, rule),
+        ]);
+        await createLegacyRuleAction(supertest, createRuleBody.id, connector1.body.id);
+
+        const updatedRule1 = getSimpleRuleUpdate('rule-1');
+        updatedRule1.rule_id = createRuleBody.rule_id;
+        delete updatedRule1.id;
+
+        updatedRule1.throttle = '1w';
+        updatedRule1.actions = [
+          {
+            action_type_id: '.slack',
+            group: 'default',
+            id: connector2.body.id, // <-- We update with the second connector id
+            params: {
+              message: 'Some other message', // <-- We update with a different message
+            },
+          },
+        ];
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(updatedRule1)
+          .expect(200);
+
+        const outputRule = getSimpleRuleOutput(body.rule_id);
+        outputRule.version = 2;
+        outputRule.throttle = '1w';
+        outputRule.actions = [
+          {
+            action_type_id: '.slack',
+            group: 'default',
+            id: connector2.body.id, // <-- We update with the second connector id
+            params: {
+              message: 'Some other message', // <-- We update with a different message
+            },
+          },
+        ];
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
       it('should update a single rule property of name using the auto-generated id', async () => {
         const createdBody = await createRule(supertest, getSimpleRule('rule-1'));
 

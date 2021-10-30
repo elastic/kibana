@@ -963,7 +963,7 @@ export const createRule = async (
     }
   } else if (response.status !== 200) {
     throw new Error(
-      `Unexpected non 200 ok when attempting to create a rule: ${JSON.stringify(response.status)}`
+      `Unexpected non 200 ok when attempting to create a rule: ${JSON.stringify(response.body)}`
     );
   } else {
     return response.body;

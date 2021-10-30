@@ -386,7 +386,7 @@ export const updateActions = (
   migratedRuleActions: AlertAction[] | null | undefined,
   existingRuleActions: AlertAction[] | null | undefined,
   ruleUpdateActions: RuleAlertAction[] | null | undefined
-) => {
+): AlertAction[] | null | undefined => {
   // if the existing rule actions and the rule update actions are equivalent (aka no change)
   // but the migrated actions and the ruleUpdateActions (or existing rule actions, associatively)
   // are not equivalent, we know that the rules' actions were migrated and we need to apply
