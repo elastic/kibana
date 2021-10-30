@@ -150,6 +150,9 @@ export default ({ getService }: FtrProviderContext) => {
         await createLegacyRuleAction(supertest, createRuleBody.id, connector.body.id);
 
         // update a simple rule's name
+
+        // This updatedRule _actually_ is telling the system to _remove_ any actions
+        // but since we have migrated actions we are preserving them when we shouldn't be.
         const updatedRule = getSimpleRuleUpdate('rule-1');
         updatedRule.rule_id = createRuleBody.rule_id;
         updatedRule.name = 'some other name';
@@ -164,6 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
         outputRule.version = 2;
+        // This should be an empty array
         outputRule.actions = [
           {
             action_type_id: '.slack',
@@ -175,7 +179,61 @@ export default ({ getService }: FtrProviderContext) => {
             },
           },
         ];
+        // This should be "no_actions"
         outputRule.throttle = '1m';
+        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it('should update a single rule property and remove the action', async () => {
+        const [connector1] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+        ]);
+
+        const action1 = {
+          group: 'default',
+          id: connector1.body.id,
+          action_type_id: connector1.body.connector_type_id,
+          params: {
+            message: 'message',
+          },
+        };
+
+        const ruleWithConnector: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [action1],
+        };
+        const createdRule = await createRule(supertest, ruleWithConnector);
+        expect(createdRule.actions.length).to.eql(1);
+
+        // update a simple rule's name and remove the actions
+        const updatedRule = getSimpleRuleUpdate('rule-1');
+        updatedRule.rule_id = ruleWithConnector.rule_id;
+        updatedRule.name = 'some other name';
+        delete updatedRule.id;
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(updatedRule)
+          .expect(200);
+
+        const outputRule = getSimpleRuleOutputWithoutRuleId();
+        outputRule.name = 'some other name';
+        outputRule.version = 2;
+        // Expect an empty array
+        outputRule.actions = [];
+        // Expect "no_actions"
+        outputRule.throttle = 'no_actions';
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -217,6 +275,7 @@ export default ({ getService }: FtrProviderContext) => {
           ...getSimpleRule('rule-1'),
           actions: [action1],
         };
+
         delete ruleWithConnector.rule_id;
         const createRuleBody = await createRule(supertest, ruleWithConnector);
 
