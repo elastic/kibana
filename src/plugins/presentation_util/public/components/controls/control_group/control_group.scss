@@ -4,7 +4,6 @@ $largeControl: $euiSize * 50;
 $controlMinWidth: $euiSize * 14;
 
 .controlGroup {
-  overflow-x: clip; // sometimes when using auto width, removing a control can cause a horizontal scrollbar to appear.
   min-height: $euiSize * 4;
 }
 
@@ -40,10 +39,6 @@ $controlMinWidth: $euiSize * 14;
 .controlFrameCloneWrapper {
   width: max-content;
 
-  .euiFormLabel {
-    padding-bottom: $euiSizeXS;
-  }
-
   &--small {
     width: $smallControl;
   }
@@ -60,7 +55,7 @@ $controlMinWidth: $euiSize * 14;
     margin-top: -$euiSize * 1.25;
   }
 
-  .euiFormLabel, div {
+  &__label {
     cursor: grabbing !important; // prevents cursor flickering while dragging the clone
   }
 
@@ -69,20 +64,14 @@ $controlMinWidth: $euiSize * 14;
     height: $euiButtonHeight;
     align-items: center;
     border-radius: $euiBorderRadius;
-    @include euiFontSizeS;
     font-weight: $euiFontWeightSemiBold;
     @include euiFormControlDefaultShadow;
     background-color: $euiFormInputGroupLabelBackground;
     min-width: $controlMinWidth;
+    @include euiFontSizeXS;
   }
 
   .controlFrame__formControlLayout, .controlFrame__draggable {
-    &-clone {
-      box-shadow: 0 0 0 1px $euiShadowColor,
-        0 1px 6px 0 $euiShadowColor;
-      cursor: grabbing !important;
-    }
-
     .controlFrame__dragHandle {
       cursor: grabbing;
     }
@@ -92,7 +81,6 @@ $controlMinWidth: $euiSize * 14;
 .controlFrameWrapper {
   flex-basis: auto;
   position: relative;
-  display: block;
 
   .controlFrame__formControlLayout {
     width: 100%;
@@ -102,6 +90,7 @@ $controlMinWidth: $euiSize * 14;
     &Label {
       @include euiTextTruncate;
       max-width: 50%;
+      border-radius: $euiBorderRadius;
     }
 
     &:not(.controlFrame__formControlLayout-clone) {
@@ -148,19 +137,20 @@ $controlMinWidth: $euiSize * 14;
       border-radius: $euiBorderRadius;
       top: 0;
       bottom: 0;
-      width: 2px;
+      width: $euiSizeXS * .5;
     }
   }
 
   &--insertBefore {
     .controlFrame__formControlLayout:after {
-      left: -$euiSizeS;
+      left: -$euiSizeXS - 1;
+
     }
   }
 
   &--insertAfter {
     .controlFrame__formControlLayout:after {
-      right: -$euiSizeS;
+      right: -$euiSizeXS - 1;
     }
   }
 
@@ -202,7 +192,7 @@ $controlMinWidth: $euiSize * 14;
       opacity: 0;
     }
     .controlFrame__formControlLayout {
-      background-color: $euiColorEmptyShade !important;
+      background-color: tintOrShade($euiColorSuccess, 90%, 70%);
       color: transparent !important;
       box-shadow: none;
 
