@@ -16,8 +16,5 @@ export * from './t2_analyst';
 
 // TODO: Steph/sourcerer remove from detections_role.json once we have our internal saved object client
 // https://github.com/elastic/security-team/issues/1978
-// the detections tests actually all pass without these,
-// but I set them here to avoid the error message mentioned in the issue
-// and avoid possible failures that will be cleared when the issue is fixed
 // "indexPatterns": ["read"],
 // "savedObjectsManagement": ["read"],

@@ -89,11 +89,12 @@ jest.mock('../../lib/kibana', () => ({
 
 describe('Sourcerer Hooks', () => {
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store: ReturnType<typeof createStore>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
+    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     mockUseUserInfo.mockImplementation(() => userInfoState);
   });
   it('initializes loading default and timeline index patterns', async () => {
@@ -217,7 +218,6 @@ describe('Sourcerer Hooks', () => {
   });
 
   describe('useSourcererDataView', () => {
-    // TODO: Steph/sourcerer fix these
     it('Should exclude elastic cloud alias when selected patterns include "logs-*" as an alias', async () => {
       await act(async () => {
         const { result, rerender, waitForNextUpdate } = renderHook<
@@ -283,7 +283,6 @@ describe('Sourcerer Hooks', () => {
       });
     });
 
-    // TODO: Steph/sourcerer fix these
     it('Should NOT exclude elastic cloud alias when selected patterns include "logs-endpoint.event-*" as an alias', async () => {
       await act(async () => {
         store = createStore(
