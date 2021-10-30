@@ -132,7 +132,7 @@ export function TransactionDistributionChart({
     Math.max(
       ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
     ) ?? 0;
-  const yTicks = Math.ceil(Math.log10(yMax));
+  const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
   const yAxisDomain = {
     min: 0.5,
     max: Math.pow(10, yTicks),
