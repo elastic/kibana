@@ -8,7 +8,14 @@
 import './histogram.scss';
 import moment, { unitOfTime } from 'moment-timezone';
 import React, { useCallback, useMemo } from 'react';
-import { EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiLoadingChart,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import dateMath from '@elastic/datemath';
 import {
@@ -28,6 +35,7 @@ import {
   RecursivePartial,
 } from '@elastic/charts';
 import { IUiSettingsClient } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
   CurrentTime,
   Endzones,
@@ -68,7 +76,7 @@ export function DiscoverHistogram({
 
   const uiSettings = services.uiSettings;
   const timeZone = getTimezone(uiSettings);
-  const { chartData, fetchStatus } = dataState;
+  const { chartData, fetchStatus, bucketInterval } = dataState;
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {
@@ -225,6 +233,47 @@ export function DiscoverHistogram({
         },
       };
 
+  const toolTiTitle = i18n.translate('discover.timeIntervalWithValueWarning', {
+    defaultMessage: 'Warning',
+  });
+
+  const toolTipContent = i18n.translate('discover.bucketIntervalTooltip', {
+    defaultMessage:
+      'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
+    values: {
+      bucketsDescription:
+        bucketInterval!.scale && bucketInterval!.scale > 1
+          ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
+              defaultMessage: 'buckets that are too large',
+            })
+          : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
+              defaultMessage: 'too many buckets',
+            }),
+      bucketIntervalDescription: bucketInterval?.description,
+    },
+  });
+
+  let timeRange = (
+    <EuiText size="xs" className="dscHistogramTimeRange" textAlign="center">
+      {timeRangeText}
+    </EuiText>
+  );
+  if (bucketInterval?.scaled) {
+    timeRange = (
+      <EuiFlexGroup
+        alignItems="baseline"
+        justifyContent="center"
+        gutterSize="none"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>{timeRange}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip type="alert" color="warning" title={toolTiTitle} content={toolTipContent} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <React.Fragment>
       <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
@@ -278,9 +327,7 @@ export function DiscoverHistogram({
           />
         </Chart>
       </div>
-      <EuiText size="xs" className="dscHistogramTimeRange" textAlign="center">
-        {timeRangeText}
-      </EuiText>
+      {timeRange}
     </React.Fragment>
   );
 }
