@@ -123,29 +123,31 @@ export function DiscoverChart({
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-            <EuiPopover
-              id="dscChartOptions"
-              button={
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="gear"
-                  onClick={onShowChartOptions}
-                  data-test-subj="discoverChartOptionsToggle"
-                >
-                  {i18n.translate('discover.chartOptionsButton', {
-                    defaultMessage: 'Chart options',
-                  })}
-                </EuiButtonEmpty>
-              }
-              isOpen={showChartOptionsPopover}
-              closePopover={closeChartOptions}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenu initialPanelId={0} panels={panels} />
-            </EuiPopover>
-          </EuiFlexItem>
+          {timefield && (
+            <EuiFlexItem className="dscResultCount__toggle" grow={false}>
+              <EuiPopover
+                id="dscChartOptions"
+                button={
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="gear"
+                    onClick={onShowChartOptions}
+                    data-test-subj="discoverChartOptionsToggle"
+                  >
+                    {i18n.translate('discover.chartOptionsButton', {
+                      defaultMessage: 'Chart options',
+                    })}
+                  </EuiButtonEmpty>
+                }
+                isOpen={showChartOptionsPopover}
+                closePopover={closeChartOptions}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenu initialPanelId={0} panels={panels} />
+              </EuiPopover>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       {timefield && !state.hideChart && (
