@@ -69,7 +69,7 @@ export const updateRulesRoute = (
           id: request.body.id,
         });
 
-        await legacyMigrate({
+        const migratedRule = await legacyMigrate({
           rulesClient,
           savedObjectsClient,
           rule: existingRule,
@@ -79,6 +79,8 @@ export const updateRulesRoute = (
           isRuleRegistryEnabled,
           rulesClient,
           ruleStatusClient,
+          existingRule,
+          migratedRule,
           ruleUpdate: request.body,
           spaceId: context.securitySolution.getSpaceId(),
         });

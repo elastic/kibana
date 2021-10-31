@@ -24,7 +24,6 @@ import {
 import { SortedSearchHit } from '../framework';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { ResolvedLogSourceConfiguration } from '../../../../common/log_sources';
-import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../../../../common/constants';
 
 const TIMESTAMP_FORMAT = 'epoch_millis';
 
@@ -65,8 +64,8 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       : {};
 
     const sort = {
-      [TIMESTAMP_FIELD]: sortDirection,
-      [TIEBREAKER_FIELD]: sortDirection,
+      [resolvedLogSourceConfiguration.timestampField]: sortDirection,
+      [resolvedLogSourceConfiguration.tiebreakerField]: sortDirection,
     };
 
     const esQuery = {
@@ -84,7 +83,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
               ...createFilterClauses(query, highlightQuery),
               {
                 range: {
-                  [TIMESTAMP_FIELD]: {
+                  [resolvedLogSourceConfiguration.timestampField]: {
                     gte: startTimestamp,
                     lte: endTimestamp,
                     format: TIMESTAMP_FORMAT,
@@ -147,7 +146,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
         aggregations: {
           count_by_date: {
             date_range: {
-              field: TIMESTAMP_FIELD,
+              field: resolvedLogSourceConfiguration.timestampField,
               format: TIMESTAMP_FORMAT,
               ranges: bucketIntervalStarts.map((bucketIntervalStart) => ({
                 from: bucketIntervalStart.getTime(),
@@ -158,7 +157,10 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
               top_hits_by_key: {
                 top_hits: {
                   size: 1,
-                  sort: [{ [TIMESTAMP_FIELD]: 'asc' }, { [TIEBREAKER_FIELD]: 'asc' }],
+                  sort: [
+                    { [resolvedLogSourceConfiguration.timestampField]: 'asc' },
+                    { [resolvedLogSourceConfiguration.tiebreakerField]: 'asc' },
+                  ],
                   _source: false,
                 },
               },
@@ -171,7 +173,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
               ...createQueryFilterClauses(filterQuery),
               {
                 range: {
-                  [TIMESTAMP_FIELD]: {
+                  [resolvedLogSourceConfiguration.timestampField]: {
                     gte: startTimestamp,
                     lte: endTimestamp,
                     format: TIMESTAMP_FORMAT,

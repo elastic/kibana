@@ -6,7 +6,6 @@
  */
 
 import { first } from 'lodash';
-import { TIMESTAMP_FIELD } from '../../../common/constants';
 import {
   ProcessListAPIChartRequest,
   ProcessListAPIChartQueryAggregation,
@@ -18,7 +17,7 @@ import { CMDLINE_FIELD } from './common';
 
 export const getProcessListChart = async (
   search: ESSearchClient,
-  { hostTerm, indexPattern, to, command }: ProcessListAPIChartRequest
+  { hostTerm, timefield, indexPattern, to, command }: ProcessListAPIChartRequest
 ) => {
   const body = {
     size: 0,
@@ -27,7 +26,7 @@ export const getProcessListChart = async (
         filter: [
           {
             range: {
-              [TIMESTAMP_FIELD]: {
+              [timefield]: {
                 gte: to - 60 * 1000, // 1 minute
                 lte: to,
               },
@@ -61,7 +60,7 @@ export const getProcessListChart = async (
             aggs: {
               timeseries: {
                 date_histogram: {
-                  field: TIMESTAMP_FIELD,
+                  field: timefield,
                   fixed_interval: '1m',
                   extended_bounds: {
                     min: to - 60 * 15 * 1000, // 15 minutes,
