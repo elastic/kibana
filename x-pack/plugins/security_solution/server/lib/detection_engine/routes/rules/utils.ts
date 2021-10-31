@@ -13,6 +13,7 @@ import { RulesSchema } from '../../../../../common/detection_engine/schemas/resp
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerting/server';
+import { ActionsClient } from '../../../../../../actions/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -184,6 +185,60 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
         acc.rulesAcc.set(ruleId, parsedRule);
       }
 
+      return acc;
+    }, // using map (preserves ordering)
+    {
+      errors: new Map<string, BulkError>(),
+      rulesAcc: new Map<string, PromiseFromStreams>(),
+    }
+  );
+
+  return [Array.from(errors.values()), Array.from(rulesAcc.values())];
+};
+
+/**
+ * Given a set of rules and an actions client this will return connectors that are invalid
+ * such as missing connectors and filter out the rules that have invalid connectors.
+ * @param rules The rules to check for invalid connectors
+ * @param actionsClient The actions client to get all the connectors.
+ * @returns An array of connector errors if it found any and then the promise stream of valid and invalid connectors.
+ */
+export const getInvalidConnectors = async (
+  rules: PromiseFromStreams[],
+  actionsClient: ActionsClient
+): Promise<[BulkError[], PromiseFromStreams[]]> => {
+  const actionsFind = await actionsClient.getAll();
+  const actionIds = new Set(actionsFind.map((action) => action.id));
+  const { errors, rulesAcc } = rules.reduce(
+    (acc, parsedRule) => {
+      if (parsedRule instanceof Error) {
+        acc.rulesAcc.set(uuid.v4(), parsedRule);
+      } else {
+        const { rule_id: ruleId, actions } = parsedRule;
+        const missingActionIds = actions.flatMap((action) => {
+          if (!actionIds.has(action.id)) {
+            return [action.id];
+          } else {
+            return [];
+          }
+        });
+        if (missingActionIds.length === 0) {
+          acc.rulesAcc.set(ruleId, parsedRule);
+        } else {
+          const errorMessage =
+            missingActionIds.length > 1
+              ? 'connectors are missing. Connector ids missing are:'
+              : 'connector is missing. Connector id missing is:';
+          acc.errors.set(
+            uuid.v4(),
+            createBulkErrorObject({
+              ruleId,
+              statusCode: 404,
+              message: `${missingActionIds.length} ${errorMessage} ${missingActionIds.join(', ')}`,
+            })
+          );
+        }
+      }
       return acc;
     }, // using map (preserves ordering)
     {
