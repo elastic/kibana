@@ -9,13 +9,12 @@
 import type { RegisterDeprecationsConfig } from '../../deprecations';
 import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectConfig } from '../saved_objects_config';
-import type { KibanaConfigType } from '../../kibana_config';
 import { getUnknownTypesDeprecations } from './unknown_object_types';
 
 interface GetDeprecationProviderOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsConfig: SavedObjectConfig;
-  kibanaConfig: KibanaConfigType;
+  kibanaIndex: string;
   kibanaVersion: string;
 }
 
