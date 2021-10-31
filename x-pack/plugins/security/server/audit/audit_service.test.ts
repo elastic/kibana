@@ -67,7 +67,6 @@ describe('#setup', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "asScoped": [Function],
-        "getLogger": [Function],
       }
     `);
     audit.stop();
