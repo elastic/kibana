@@ -21,7 +21,7 @@ import { SERVICE_NODE_NAME_MISSING } from '../../../../plugins/apm/common/servic
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
-  const traceData = getService('traceData');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -285,7 +285,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Service overview instances main statistics when data is generated',
-    { config: 'basic', archives: ['apm_8.0.0_empty'] },
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       describe('for two go instances and one java instance', () => {
         const GO_A_INSTANCE_RATE_SUCCESS = 10;
@@ -320,7 +320,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             );
           }
 
-          return traceData.index([
+          return synthtraceEsClient.index([
             ...interval.rate(GO_A_INSTANCE_RATE_SUCCESS).flatMap((timestamp) =>
               goInstanceA
                 .transaction('GET /api/product/list')
@@ -361,7 +361,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         after(async () => {
-          return traceData.clean();
+          return synthtraceEsClient.clean();
         });
 
         describe('for the go service', () => {

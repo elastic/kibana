@@ -15,7 +15,7 @@ import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
-  const traceData = getService('traceData');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -114,7 +114,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let errorRateMetricValues: PromiseReturnType<typeof getErrorRateValues>;
   let errorTransactionValues: PromiseReturnType<typeof getErrorRateValues>;
 
-  registry.when('Services APIs', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
+  registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_LIST_RATE = 75;
       const GO_PROD_LIST_ERROR_RATE = 25;
@@ -128,7 +128,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const transactionNameProductList = 'GET /api/product/list';
         const transactionNameProductId = 'GET /api/product/:id';
 
-        await traceData.index([
+        await synthtraceEsClient.index([
           ...timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_RATE)
@@ -176,7 +176,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => traceData.clean());
+      after(() => synthtraceEsClient.clean());
 
       describe('compare error rate value between service inventory, error rate chart, service inventory and transactions apis', () => {
         before(async () => {

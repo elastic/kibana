@@ -553,7 +553,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                   >
                     <FormattedMessage
                       id="xpack.fleet.createPackagePolicy.saveButton"
-                      defaultMessage="Save integration"
+                      defaultMessage="Save and continue"
                     />
                   </EuiButton>
                 </EuiFlexItem>
