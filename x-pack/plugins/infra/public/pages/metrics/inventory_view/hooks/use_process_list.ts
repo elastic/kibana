@@ -22,6 +22,7 @@ export interface SortBy {
 
 export function useProcessList(
   hostTerm: Record<string, string>,
+  timefield: string,
   to: number,
   sortBy: SortBy,
   searchFilter: object
@@ -50,6 +51,7 @@ export function useProcessList(
     'POST',
     JSON.stringify({
       hostTerm,
+      timefield,
       indexPattern,
       to,
       sortBy: parsedSortBy,
@@ -73,11 +75,15 @@ export function useProcessList(
   };
 }
 
-function useProcessListParams(props: { hostTerm: Record<string, string>; to: number }) {
-  const { hostTerm, to } = props;
+function useProcessListParams(props: {
+  hostTerm: Record<string, string>;
+  timefield: string;
+  to: number;
+}) {
+  const { hostTerm, timefield, to } = props;
   const { createDerivedIndexPattern } = useSourceContext();
   const indexPattern = createDerivedIndexPattern('metrics').title;
-  return { hostTerm, indexPattern, to };
+  return { hostTerm, indexPattern, timefield, to };
 }
 const ProcessListContext = createContainter(useProcessListParams);
 export const [ProcessListContextProvider, useProcessListContext] = ProcessListContext;

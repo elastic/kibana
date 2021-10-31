@@ -12,7 +12,7 @@
   ],
   "private": true,
   "version": "8.1.0",
-  "branch": "master",
+  "branch": "main",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
@@ -192,7 +192,7 @@
     "brace": "0.11.1",
     "broadcast-channel": "^4.2.0",
     "chalk": "^4.1.0",
-    "cheerio": "^1.0.0-rc.9",
+    "cheerio": "^1.0.0-rc.10",
     "chokidar": "^3.4.3",
     "chroma-js": "^1.4.1",
     "classnames": "2.2.6",
