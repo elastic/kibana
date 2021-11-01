@@ -113,11 +113,11 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     });
 
     describe('services/error_groups_main_statistics', function () {
-      loadTestFile(require.resolve('./services/error_groups_main_statistics'));
+      loadTestFile(require.resolve('./services/error_groups/error_groups_main_statistics'));
     });
 
     describe('services/error_groups_detailed_statistics', function () {
-      loadTestFile(require.resolve('./services/error_groups_detailed_statistics'));
+      loadTestFile(require.resolve('./services/error_groups/error_groups_detailed_statistics'));
     });
 
     describe('services/detailed_statistics', function () {
