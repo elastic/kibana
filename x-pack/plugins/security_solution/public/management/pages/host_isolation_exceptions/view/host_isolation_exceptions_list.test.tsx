@@ -127,6 +127,36 @@ describe('When on the host isolation exceptions page', () => {
           renderResult.getByTestId('hostIsolationExceptionsContent-error').textContent
         ).toEqual(' Server is too far away');
       });
+
+      it('should show the searchbar when no results from search', async () => {
+        // render the page with data
+        render();
+        await dataReceived();
+
+        // check if the searchbar is there
+        expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
+
+        // simulate a no-data scenario
+        getHostIsolationExceptionItemsMock.mockReturnValueOnce({
+          data: [],
+          page: 1,
+          per_page: 10,
+          total: 0,
+        });
+
+        // type something to search and press the button
+        userEvent.type(renderResult.getByTestId('searchField'), 'this does not exists');
+        userEvent.click(renderResult.getByTestId('searchButton'));
+
+        // wait for the page render
+        await dataReceived();
+
+        // check the url changed
+        expect(mockedContext.history.location.search).toBe('?filter=this%20does%20not%20exists');
+
+        // check the searchbar is still there
+        expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
+      });
     });
 
     describe('has canIsolateHost privileges', () => {
