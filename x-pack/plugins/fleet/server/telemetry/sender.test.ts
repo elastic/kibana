@@ -6,13 +6,14 @@
  */
 
 /* eslint-disable dot-notation */
-import { URL } from 'url';
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { URL } from 'url';
 
 import axios from 'axios';
 
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 import { TelemetryEventsSender } from './sender';
 

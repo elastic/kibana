@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export const TELEMETRY_MAX_BUFFER_SIZE = 100;
+export const TELEMETRY_MAX_QUEUE_SIZE = 100;
 
 export class TelemetryQueue<T> {
-  private maxQueueSize = TELEMETRY_MAX_BUFFER_SIZE;
+  private maxQueueSize = TELEMETRY_MAX_QUEUE_SIZE;
   private queue: T[] = [];
 
   public addEvents(events: T[]) {
