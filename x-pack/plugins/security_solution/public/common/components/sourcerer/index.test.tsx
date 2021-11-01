@@ -568,7 +568,7 @@ describe('Sourcerer component', () => {
   });
 });
 
-describe('sourcer on alerts page or rules details page', () => {
+describe('sourcerer on alerts page or rules details page', () => {
   let wrapper: ReactWrapper;
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
@@ -589,12 +589,6 @@ describe('sourcer on alerts page or rules details page', () => {
     );
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="sourcerer-advanced-options-toggle"]`).first().simulate('click');
-  });
-
-  afterAll(() => {
-    (useRouteSpy as jest.Mock).mockImplementation(() => [
-      { pageName: SecurityPageName.overview, detailName: undefined },
-    ]);
   });
 
   it('renders an alerts badge in sourcerer button', () => {
