@@ -7,13 +7,16 @@
 
 import { SavedObjectsFindResult } from 'kibana/server';
 import {
-  LogExecutionMetricsArgs,
   IRuleExecutionLogClient,
+  LogStatusChangeArgs,
+  LogExecutionMetricsArgs,
   FindBulkExecutionLogArgs,
   FindBulkExecutionLogResponse,
   FindExecutionLogArgs,
-  LogStatusChangeArgs,
-  UpdateExecutionLogArgs,
+  GetLastFailuresArgs,
+  GetCurrentStatusArgs,
+  GetCurrentStatusBulkArgs,
+  GetCurrentStatusBulkResult,
 } from '../../rule_execution_log';
 import { IRuleStatusSOAttributes } from '../../rules/types';
 
@@ -21,26 +24,50 @@ export const createWarningsAndErrors = () => {
   const warningsAndErrorsStore: LogStatusChangeArgs[] = [];
 
   const previewRuleExecutionLogClient: IRuleExecutionLogClient = {
-    async delete(id: string): Promise<void> {
-      return Promise.resolve(undefined);
-    },
-    async find(
+    find(
       args: FindExecutionLogArgs
     ): Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>> {
       return Promise.resolve([]);
     },
-    async findBulk(args: FindBulkExecutionLogArgs): Promise<FindBulkExecutionLogResponse> {
+
+    findBulk(args: FindBulkExecutionLogArgs): Promise<FindBulkExecutionLogResponse> {
       return Promise.resolve({});
     },
-    async logStatusChange(args: LogStatusChangeArgs): Promise<void> {
+
+    getLastFailures(args: GetLastFailuresArgs): Promise<IRuleStatusSOAttributes[]> {
+      return Promise.resolve([]);
+    },
+
+    getCurrentStatus(args: GetCurrentStatusArgs): Promise<IRuleStatusSOAttributes> {
+      return Promise.resolve({
+        statusDate: new Date().toISOString(),
+        status: null,
+        lastFailureAt: null,
+        lastFailureMessage: null,
+        lastSuccessAt: null,
+        lastSuccessMessage: null,
+        lastLookBackDate: null,
+        gap: null,
+        bulkCreateTimeDurations: null,
+        searchAfterTimeDurations: null,
+      });
+    },
+
+    getCurrentStatusBulk(args: GetCurrentStatusBulkArgs): Promise<GetCurrentStatusBulkResult> {
+      return Promise.resolve({});
+    },
+
+    deleteCurrentStatus(ruleId: string): Promise<void> {
+      return Promise.resolve();
+    },
+
+    logStatusChange(args: LogStatusChangeArgs): Promise<void> {
       warningsAndErrorsStore.push(args);
-      return Promise.resolve(undefined);
+      return Promise.resolve();
     },
-    async update(args: UpdateExecutionLogArgs): Promise<void> {
-      return Promise.resolve(undefined);
-    },
-    async logExecutionMetrics(args: LogExecutionMetricsArgs): Promise<void> {
-      return Promise.resolve(undefined);
+
+    logExecutionMetrics(args: LogExecutionMetricsArgs): Promise<void> {
+      return Promise.resolve();
     },
   };
 

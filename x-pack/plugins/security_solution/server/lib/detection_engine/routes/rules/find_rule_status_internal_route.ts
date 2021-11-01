@@ -8,33 +8,32 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL } from '../../../../../common/constants';
 import { buildSiemResponse, mergeStatuses, getFailingRules } from '../utils';
 import {
-  findRulesStatusesSchema,
-  FindRulesStatusesSchemaDecoded,
+  findRuleStatusSchema,
+  FindRuleStatusSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/find_rule_statuses_schema';
 import { mergeAlertWithSidecarStatus } from '../../schemas/rule_converters';
 
 /**
- * Returns the current execution status and metrics for N rules.
- * Accepts an array of rule ids.
+ * Returns the current execution status and metrics + last five failed statuses of a given rule.
+ * Accepts a rule id.
  *
- * NOTE: This endpoint is used on the Rule Management page and will be reworked.
+ * NOTE: This endpoint is a raw implementation of an endpoint for reading rule execution
+ * status and logs for a given rule (e.g. for use on the Rule Details page). It will be reworked.
  * See the plan in https://github.com/elastic/kibana/pull/115574
  *
  * @param router
- * @returns RuleStatusResponse containing data for N requested rules.
- * RuleStatusResponse[ruleId].failures is always an empty array, because
- * we don't need failure history of every rule when we render tables with rules.
+ * @returns RuleStatusResponse containing data only for the given rule (normally it contains data for N rules).
  */
-export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => {
+export const findRuleStatusInternalRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
     {
-      path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
+      path: INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
       validate: {
-        body: buildRouteValidation<typeof findRulesStatusesSchema, FindRulesStatusesSchemaDecoded>(
-          findRulesStatusesSchema
+        body: buildRouteValidation<typeof findRuleStatusSchema, FindRuleStatusSchemaDecoded>(
+          findRuleStatusSchema
         ),
       },
       options: {
@@ -42,7 +41,8 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
       },
     },
     async (context, request, response) => {
-      const { body } = request;
+      const { ruleId } = request.body;
+
       const siemResponse = buildSiemResponse(response);
       const rulesClient = context.alerting?.getRulesClient();
 
@@ -50,32 +50,27 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
         return siemResponse.error({ statusCode: 404 });
       }
 
-      const ids = body.ids;
       try {
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
-        const [currentStatusesByRuleId, failingRules] = await Promise.all([
-          ruleStatusClient.getCurrentStatusBulk({
-            ruleIds: ids,
-            spaceId: context.securitySolution.getSpaceId(),
-          }),
-          getFailingRules(ids, rulesClient),
+        const spaceId = context.securitySolution.getSpaceId();
+
+        const [currentStatus, lastFailures, failingRules] = await Promise.all([
+          ruleStatusClient.getCurrentStatus({ ruleId, spaceId }),
+          ruleStatusClient.getLastFailures({ ruleId, spaceId }),
+          getFailingRules([ruleId], rulesClient),
         ]);
 
-        const statuses = ids.reduce((acc, id) => {
-          const currentStatus = currentStatusesByRuleId[id];
-          const failingRule = failingRules[id];
+        const failingRule = failingRules[ruleId];
+        let statuses = {};
 
-          if (currentStatus == null) {
-            return acc;
-          }
-
+        if (currentStatus != null) {
           const finalCurrentStatus =
             failingRule != null
               ? mergeAlertWithSidecarStatus(failingRule, currentStatus)
               : currentStatus;
 
-          return mergeStatuses(id, [finalCurrentStatus], acc);
-        }, {});
+          statuses = mergeStatuses(ruleId, [finalCurrentStatus, ...lastFailures], statuses);
+        }
 
         return response.ok({ body: statuses });
       } catch (err) {

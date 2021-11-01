@@ -19,6 +19,7 @@ import {
   DETECTION_ENGINE_TAGS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
+  INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
 } from '../../../../../common/constants';
 import {
   UpdateRulesProps,
@@ -372,9 +373,9 @@ export const getRuleStatusById = async ({
   id: string;
   signal: AbortSignal;
 }): Promise<RuleStatusResponse> =>
-  KibanaServices.get().http.fetch<RuleStatusResponse>(DETECTION_ENGINE_RULES_STATUS_URL, {
+  KibanaServices.get().http.fetch<RuleStatusResponse>(INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL, {
     method: 'POST',
-    body: JSON.stringify({ ids: [id] }),
+    body: JSON.stringify({ ruleId: id }),
     signal,
   });
 

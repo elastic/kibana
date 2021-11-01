@@ -11,8 +11,13 @@ export const ruleExecutionLogClientMock = {
   create: (): jest.Mocked<IRuleExecutionLogClient> => ({
     find: jest.fn(),
     findBulk: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+
+    getLastFailures: jest.fn(),
+    getCurrentStatus: jest.fn(),
+    getCurrentStatusBulk: jest.fn(),
+
+    deleteCurrentStatus: jest.fn(),
+
     logStatusChange: jest.fn(),
     logExecutionMetrics: jest.fn(),
   }),
