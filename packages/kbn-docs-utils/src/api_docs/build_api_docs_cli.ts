@@ -145,7 +145,7 @@ export function runBuildApiDocsCli() {
         ]);
 
         const getLink = (d: ApiDeclaration) =>
-          `https://github.com/elastic/kibana/tree/master/${d.path}#:~:text=${encodeURIComponent(
+          `https://github.com/elastic/kibana/tree/main/${d.path}#:~:text=${encodeURIComponent(
             d.label
           )}`;
 

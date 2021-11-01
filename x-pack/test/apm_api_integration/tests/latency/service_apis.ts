@@ -116,7 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let latencyMetricValues: PromiseReturnType<typeof getLatencyValues>;
   let latencyTransactionValues: PromiseReturnType<typeof getLatencyValues>;
 
-  registry.when('Services APIs', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
+  registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
