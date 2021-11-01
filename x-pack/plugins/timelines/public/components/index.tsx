@@ -41,6 +41,7 @@ export const TGrid = (props: TGridComponent) => {
     browserFields = (tGridProps as TGridIntegratedProps).browserFields;
   }
   return (
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     <Provider store={tGridStore!}>
       <I18nProvider>
         <DragDropContextWrapper browserFields={browserFields} defaultsHeader={props.columns}>

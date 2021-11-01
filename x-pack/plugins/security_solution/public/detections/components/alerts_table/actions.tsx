@@ -192,8 +192,10 @@ export const getThresholdAggregationData = (
         };
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const originalTime = moment(thresholdData.signal?.original_time![0]);
       const now = moment();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const ruleFrom = dateMath.parse(thresholdData.signal?.rule?.from![0]!);
       const ruleInterval = moment.duration(now.diff(ruleFrom));
       const fromOriginalTime = originalTime.clone().subtract(ruleInterval); // This is the default... can overshoot

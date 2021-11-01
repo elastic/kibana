@@ -24,6 +24,7 @@ export function handleSourceColumnState<TState extends { columns?: string[] }>(
   }
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING);
+
   if (useNewFieldsApi) {
     // if fields API is used, filter out the source column
     let cleanedColumns = state.columns.filter((column) => column !== '_source');
@@ -39,9 +40,13 @@ export function handleSourceColumnState<TState extends { columns?: string[] }>(
   } else if (state.columns.length === 0) {
     // if _source fetching is used and there are no column, switch back to default columns
     // this can happen if the fields API was previously used
+    const columns = defaultColumns;
+    if (columns.length === 0) {
+      columns.push('_source');
+    }
     return {
       ...state,
-      columns: [...defaultColumns],
+      columns: [...columns],
     };
   }
 

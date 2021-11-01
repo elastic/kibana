@@ -29,6 +29,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { HostLink } from './host_link';
 import { formatDuration } from './lib/format_duration';
 import { MetricWithSparkline } from './metric_with_sparkline';
+import { BucketSize } from '../../../../pages/overview';
 
 const COLOR_ORANGE = 7;
 const COLOR_BLUE = 1;
@@ -36,7 +37,7 @@ const COLOR_GREEN = 0;
 const COLOR_PURPLE = 3;
 
 interface Props {
-  bucketSize?: string;
+  bucketSize: BucketSize;
 }
 
 const percentFormatter = (value: NumberOrNull) =>
@@ -61,7 +62,7 @@ export function MetricsSection({ bucketSize }: Props) {
         return getDataHandler('infra_metrics')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
-          bucketSize,
+          ...bucketSize,
         });
       }
     },

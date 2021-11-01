@@ -14,6 +14,7 @@ import dateMath from '@elastic/datemath';
 import {
   Axis,
   BrushEndListener,
+  XYBrushEvent,
   Chart,
   ElementClickListener,
   HistogramBarSeries,
@@ -22,6 +23,9 @@ import {
   Settings,
   TooltipType,
   XYChartElementEvent,
+  GridLineStyle,
+  AxisStyle,
+  RecursivePartial,
 } from '@elastic/charts';
 import { IUiSettingsClient } from 'kibana/public';
 import {
@@ -34,6 +38,7 @@ import { DataCharts$, DataChartsMessage } from '../../services/use_saved_search'
 import { FetchStatus } from '../../../../types';
 import { DiscoverServices } from '../../../../../build_services';
 import { useDataState } from '../../utils/use_data_state';
+import { LEGACY_TIME_AXIS } from '../../../../../../../charts/common';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
@@ -65,8 +70,8 @@ export function DiscoverHistogram({
   const timeZone = getTimezone(uiSettings);
   const { chartData, fetchStatus } = dataState;
 
-  const onBrushEnd: BrushEndListener = useCallback(
-    ({ x }) => {
+  const onBrushEnd = useCallback(
+    ({ x }: XYBrushEvent) => {
       if (!x) {
         return;
       }
@@ -178,31 +183,77 @@ export function DiscoverHistogram({
 
   const xAxisFormatter = services.data.fieldFormats.deserialize(chartData.yAxisFormat);
 
+  const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
+  const gridLineStyle: RecursivePartial<GridLineStyle> = useLegacyTimeAxis
+    ? {}
+    : { strokeWidth: 0.1, stroke: isDarkMode ? 'white' : 'black' };
+  const verticalAxisStyle: RecursivePartial<AxisStyle> = useLegacyTimeAxis
+    ? {}
+    : {
+        axisLine: {
+          visible: false,
+        },
+        tickLabel: {
+          fontSize: 11,
+        },
+      };
+  const xAxisStyle: RecursivePartial<AxisStyle> = useLegacyTimeAxis
+    ? {}
+    : {
+        axisLine: {
+          stroke: isDarkMode ? 'lightgray' : 'darkgray',
+          strokeWidth: 1,
+        },
+        tickLine: {
+          size: 12,
+          strokeWidth: 0.15,
+          stroke: isDarkMode ? 'white' : 'black',
+          padding: -10,
+          visible: true,
+        },
+        tickLabel: {
+          fontSize: 11,
+          padding: 0,
+          alignment: {
+            vertical: Position.Bottom,
+            horizontal: Position.Left,
+          },
+          offset: {
+            x: 1.5,
+            y: 0,
+          },
+        },
+      };
+
   return (
     <React.Fragment>
       <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
         <Chart size="100%">
           <Settings
             xDomain={xDomain}
-            onBrushEnd={onBrushEnd}
+            onBrushEnd={onBrushEnd as BrushEndListener}
             onElementClick={onElementClick(xInterval)}
             tooltip={tooltipProps}
             theme={chartTheme}
             baseTheme={chartBaseTheme}
-            allowBrushingLastHistogramBucket={true}
+            allowBrushingLastHistogramBin={true}
           />
           <Axis
             id="discover-histogram-left-axis"
             position={Position.Left}
-            ticks={5}
+            ticks={2}
             integersOnly
             tickFormat={(value) => xAxisFormatter.convert(value)}
+            gridLine={gridLineStyle}
+            style={verticalAxisStyle}
           />
           <Axis
             id="discover-histogram-bottom-axis"
             position={Position.Bottom}
             tickFormat={formatXValue}
-            ticks={10}
+            timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
+            gridLine={gridLineStyle}
+            style={xAxisStyle}
           />
           <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
           <Endzones
@@ -221,6 +272,7 @@ export function DiscoverHistogram({
             xAccessor="x"
             yAccessors={['y']}
             data={data}
+            yNice
             timeZone={timeZone}
             name={chartData.yAxisLabel}
           />

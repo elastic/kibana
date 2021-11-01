@@ -227,7 +227,12 @@ export const WatchVisualization = () => {
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
-            <Axis domain={{ max: maxY }} id="left" title={aggLabel} position={Position.Left} />
+            <Axis
+              domain={{ max: maxY, min: NaN }}
+              id="left"
+              title={aggLabel}
+              position={Position.Left}
+            />
             {watchVisualizationDataKeys.map((key: string) => {
               return (
                 <LineSeries

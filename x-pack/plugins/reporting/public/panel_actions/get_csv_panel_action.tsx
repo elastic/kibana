@@ -117,12 +117,12 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     }
 
     const savedSearch = embeddable.getSavedSearch();
-    const { columns, searchSource } = await this.getSearchSource(savedSearch, embeddable);
+    const { columns, getSearchSource } = await this.getSearchSource(savedSearch, embeddable);
 
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
-      searchSource,
+      searchSource: getSearchSource(true),
       columns,
-      title: savedSearch.title,
+      title: savedSearch.title || '',
       objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType
     });
 

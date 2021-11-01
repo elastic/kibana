@@ -6,7 +6,7 @@
  */
 
 declare module 'puid' {
-  declare class Puid {
+  class Puid {
     generate(): string;
   }
 

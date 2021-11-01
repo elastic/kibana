@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pickBy, isEmpty } from 'lodash/fp';
+import { pickBy, isEmpty, isEqual } from 'lodash/fp';
 import type {
   FromOrUndefined,
   MachineLearningJobIdOrUndefined,
@@ -64,7 +64,14 @@ import { RulesClient } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleActions } from '../rule_actions/legacy_types';
 import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
-import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
+import {
+  transformAlertToRuleAction,
+  transformRuleToAlertAction,
+} from '../../../../common/detection_engine/transform_actions';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRuleActionsSavedObjectType } from '../rule_actions/legacy_saved_object_mappings';
+import { LegacyMigrateParams } from './types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -295,4 +302,101 @@ export const maybeMute = async ({
   } else {
     // Do nothing, no-operation
   }
+};
+
+/**
+ * Determines if rule needs to be migrated from legacy actions
+ * and returns necessary pieces for the updated rule
+ */
+export const legacyMigrate = async ({
+  rulesClient,
+  savedObjectsClient,
+  rule,
+}: LegacyMigrateParams): Promise<SanitizedAlert<RuleParams> | null | undefined> => {
+  if (rule == null || rule.id == null) {
+    return rule;
+  }
+  /**
+   * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
+   * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actualy value (1hr etc..)
+   * Then use the rules client to delete the siem.notification
+   * Then with the legacy Rule Actions saved object type, just delete it.
+   */
+
+  // find it using the references array, not params.ruleAlertId
+  const [siemNotification, legacyRuleActionsSO] = await Promise.all([
+    rulesClient.find({
+      options: {
+        hasReference: {
+          type: 'alert',
+          id: rule.id,
+        },
+      },
+    }),
+    savedObjectsClient.find({
+      type: legacyRuleActionsSavedObjectType,
+      hasReference: {
+        type: 'alert',
+        id: rule.id,
+      },
+    }),
+  ]);
+
+  if (siemNotification != null && siemNotification.data.length > 0) {
+    await Promise.all([
+      rulesClient.delete({ id: siemNotification.data[0].id }),
+      legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0
+        ? savedObjectsClient.delete(
+            legacyRuleActionsSavedObjectType,
+            legacyRuleActionsSO.saved_objects[0].id
+          )
+        : null,
+    ]);
+
+    const { id, ...restOfRule } = rule;
+    const migratedRule = {
+      ...restOfRule,
+      actions: siemNotification.data[0].actions,
+      throttle: siemNotification.data[0].schedule.interval,
+      notifyWhen: transformToNotifyWhen(siemNotification.data[0].throttle),
+    };
+    await rulesClient.update({
+      id: rule.id,
+      data: migratedRule,
+    });
+    return { id: rule.id, ...migratedRule };
+  }
+  return rule;
+};
+
+export const updateThrottleNotifyWhen = (
+  transform: typeof transformToAlertThrottle | typeof transformToNotifyWhen,
+  migratedRuleThrottle: string | null | undefined,
+  existingRuleThrottle: string | null | undefined,
+  ruleUpdateThrottle: string | null | undefined
+) => {
+  if (existingRuleThrottle == null && ruleUpdateThrottle == null && migratedRuleThrottle != null) {
+    return migratedRuleThrottle;
+  }
+  return transform(ruleUpdateThrottle);
+};
+
+export const updateActions = (
+  transform: typeof transformRuleToAlertAction,
+  migratedRuleActions: AlertAction[] | null | undefined,
+  existingRuleActions: AlertAction[] | null | undefined,
+  ruleUpdateActions: RuleAlertAction[] | null | undefined
+) => {
+  // if the existing rule actions and the rule update actions are equivalent (aka no change)
+  // but the migrated actions and the ruleUpdateActions (or existing rule actions, associatively)
+  // are not equivalent, we know that the rules' actions were migrated and we need to apply
+  // that change to the update request so it is not overwritten by the rule update payload
+  if (
+    existingRuleActions?.length === 0 &&
+    ruleUpdateActions == null &&
+    !isEqual(existingRuleActions, migratedRuleActions)
+  ) {
+    return migratedRuleActions;
+  }
+  return ruleUpdateActions != null ? ruleUpdateActions.map(transform) : [];
 };

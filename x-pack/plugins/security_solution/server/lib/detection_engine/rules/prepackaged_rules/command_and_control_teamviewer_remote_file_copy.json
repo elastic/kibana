@@ -39,11 +39,16 @@
           "id": "T1105",
           "name": "Ingress Tool Transfer",
           "reference": "https://attack.mitre.org/techniques/T1105/"
+        },
+        {
+          "id": "T1219",
+          "name": "Remote Access Software",
+          "reference": "https://attack.mitre.org/techniques/T1219/"
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

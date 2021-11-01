@@ -11,16 +11,15 @@ import noDataResponse from './mock_responses/no_data.json';
 import dataResponse from './mock_responses/data.json';
 import { APMConfig } from '../../..';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 
-const mockIndices = {
-  /* eslint-disable @typescript-eslint/naming-convention */
-  'apm_oss.sourcemapIndices': 'myIndex',
-  'apm_oss.errorIndices': 'myIndex',
-  'apm_oss.onboardingIndices': 'myIndex',
-  'apm_oss.spanIndices': 'myIndex',
-  'apm_oss.transactionIndices': 'myIndex',
-  'apm_oss.metricsIndices': 'myIndex',
-  /* eslint-enable @typescript-eslint/naming-convention */
+const mockIndices: ApmIndicesConfig = {
+  sourcemap: 'myIndex',
+  error: 'myIndex',
+  onboarding: 'myIndex',
+  span: 'myIndex',
+  transaction: 'myIndex',
+  metric: 'myIndex',
   apmAgentConfigurationIndex: 'myIndex',
   apmCustomLinkIndex: 'myIndex',
 };
@@ -38,7 +37,6 @@ function getMockSetup(esResponse: any) {
     ) as APMConfig,
     uiFilters: {},
     indices: mockIndices,
-    dynamicIndexPattern: null as any,
   };
 }
 

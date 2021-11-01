@@ -71,7 +71,11 @@ describe('FetcherTask', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const fetcherTask = new FetcherTask(initializerContext);
       const mockTelemetryUrl = 'mock_telemetry_url';
-      const mockClusters = ['cluster_1', 'cluster_2'];
+      const mockClusters = [
+        { clusterUuid: 'mk_uuid_1', stats: 'cluster_1' },
+        { clusterUuid: 'mk_uuid_2', stats: 'cluster_2' },
+      ];
+
       const getCurrentConfigs = jest.fn().mockResolvedValue({
         telemetryUrl: mockTelemetryUrl,
       });
@@ -95,9 +99,8 @@ describe('FetcherTask', () => {
 
       expect(areAllCollectorsReady).toBeCalledTimes(1);
       expect(fetchTelemetry).toBeCalledTimes(1);
-      expect(sendTelemetry).toBeCalledTimes(2);
-      expect(sendTelemetry).toHaveBeenNthCalledWith(1, mockTelemetryUrl, mockClusters[0]);
-      expect(sendTelemetry).toHaveBeenNthCalledWith(2, mockTelemetryUrl, mockClusters[1]);
+      expect(sendTelemetry).toBeCalledTimes(1);
+      expect(sendTelemetry).toHaveBeenNthCalledWith(1, mockTelemetryUrl, mockClusters);
       expect(updateReportFailure).toBeCalledTimes(0);
     });
   });

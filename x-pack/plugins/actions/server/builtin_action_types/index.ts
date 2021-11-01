@@ -16,10 +16,15 @@ import { getActionType as getSwimlaneActionType } from './swimlane';
 import { getActionType as getServerLogActionType } from './server_log';
 import { getActionType as getSlackActionType } from './slack';
 import { getActionType as getWebhookActionType } from './webhook';
-import { getServiceNowITSMActionType, getServiceNowSIRActionType } from './servicenow';
+import {
+  getServiceNowITSMActionType,
+  getServiceNowSIRActionType,
+  getServiceNowITOMActionType,
+} from './servicenow';
 import { getActionType as getJiraActionType } from './jira';
 import { getActionType as getResilientActionType } from './resilient';
 import { getActionType as getTeamsActionType } from './teams';
+import { ENABLE_ITOM } from '../constants/connectors';
 export { ActionParamsType as EmailActionParams, ActionTypeId as EmailActionTypeId } from './email';
 export {
   ActionParamsType as IndexActionParams,
@@ -42,6 +47,7 @@ export {
   ActionParamsType as ServiceNowActionParams,
   ServiceNowITSMActionTypeId,
   ServiceNowSIRActionTypeId,
+  ServiceNowITOMActionTypeId,
 } from './servicenow';
 export { ActionParamsType as JiraActionParams, ActionTypeId as JiraActionTypeId } from './jira';
 export {
@@ -75,4 +81,9 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getJiraActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getResilientActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getTeamsActionType({ logger, configurationUtilities }));
+
+  // TODO: Remove when ITOM is ready
+  if (ENABLE_ITOM) {
+    actionTypeRegistry.register(getServiceNowITOMActionType({ logger, configurationUtilities }));
+  }
 }

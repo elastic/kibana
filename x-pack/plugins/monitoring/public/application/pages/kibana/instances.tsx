@@ -16,7 +16,7 @@ import { KibanaTemplate } from './kibana_template';
 // @ts-ignore
 import { KibanaInstances } from '../../../components/kibana/instances';
 // @ts-ignore
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { AlertsByName } from '../../../alerts/types';
@@ -87,12 +87,7 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   ]);
 
   return (
-    <KibanaTemplate
-      title={title}
-      pageTitle={pageTitle}
-      getPageData={getPageData}
-      data-test-subj="kibanaInstancesPage"
-    >
+    <KibanaTemplate title={title} pageTitle={pageTitle} getPageData={getPageData}>
       <div data-test-subj="monitoringKibanaInstancesApp">
         <SetupModeRenderer
           productName={KIBANA_SYSTEM_ID}

@@ -155,3 +155,40 @@ describe('#getWritten$()', () => {
     await testWrittenMsgs([{ write: jest.fn(() => false) }, { write: jest.fn(() => false) }]);
   });
 });
+
+describe('#withType()', () => {
+  it('creates a child logger with a unique type that respects all other settings', () => {
+    const writerA = new ToolingLogCollectingWriter();
+    const writerB = new ToolingLogCollectingWriter();
+    const log = new ToolingLog();
+    log.setWriters([writerA]);
+
+    const fork = log.withType('someType');
+    log.info('hello');
+    fork.info('world');
+    fork.indent(2);
+    log.debug('indented');
+    fork.indent(-2);
+    log.debug('not-indented');
+
+    log.setWriters([writerB]);
+    fork.info('to new writer');
+    fork.indent(5);
+    log.info('also to new writer');
+
+    expect(writerA.messages).toMatchInlineSnapshot(`
+      Array [
+        " info hello",
+        " info source[someType] world",
+        " │ debg indented",
+        " debg not-indented",
+      ]
+    `);
+    expect(writerB.messages).toMatchInlineSnapshot(`
+      Array [
+        " info source[someType] to new writer",
+        "    │ info also to new writer",
+      ]
+    `);
+  });
+});

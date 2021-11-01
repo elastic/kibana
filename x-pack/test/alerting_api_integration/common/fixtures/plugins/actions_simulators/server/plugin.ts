@@ -42,14 +42,6 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   const allPaths = Object.values(ExternalServiceSimulator).map((service) =>
     getExternalServiceSimulatorPath(service)
   );
-  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/incident`);
-  allPaths.push(
-    `/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/incident/123`
-  );
-  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/sys_choice`);
-  allPaths.push(
-    `/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/sys_dictionary`
-  );
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/issue`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/createmeta`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.RESILIENT}/rest/orgs/201/incidents`);
@@ -74,6 +66,10 @@ export async function getSlackServer(): Promise<http.Server> {
 
 export async function getSwimlaneServer(): Promise<http.Server> {
   return await initSwimlane();
+}
+
+export async function getServiceNowServer(): Promise<http.Server> {
+  return await initServiceNow();
 }
 
 interface FixtureSetupDeps {
@@ -127,7 +123,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     const router: IRouter = core.http.createRouter();
 
     initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
-    initServiceNow(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW));
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
     initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
     initMSExchange(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE));

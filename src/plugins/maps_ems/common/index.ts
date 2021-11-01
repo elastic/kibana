@@ -10,7 +10,7 @@ export const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
 export const DEFAULT_EMS_FILE_API_URL = 'https://vector.maps.elastic.co';
 export const DEFAULT_EMS_TILE_API_URL = 'https://tiles.maps.elastic.co';
-export const DEFAULT_EMS_LANDING_PAGE_URL = 'https://maps.elastic.co/v7.15';
+export const DEFAULT_EMS_LANDING_PAGE_URL = 'https://maps.elastic.co/v8.0';
 export const DEFAULT_EMS_FONT_LIBRARY_URL =
   'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf';
 

@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 
 import { extractErrorMessage } from '../../../../common/util/errors';
 
@@ -34,7 +34,7 @@ export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();
   const trainedModelsApiService = useTrainedModelsApiService();
 
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
+  const [indexPattern, setIndexPattern] = useState<DataView | undefined>(undefined);
   const [indexPatternErrorMessage, setIndexPatternErrorMessage] = useState<undefined | string>(
     undefined
   );
@@ -52,7 +52,7 @@ export const useResultsViewConfig = (jobId: string) => {
     TotalFeatureImportance[] | undefined
   >(undefined);
 
-  // get analytics configuration, index pattern and field caps
+  // get analytics configuration, data view and field caps
   useEffect(() => {
     (async function () {
       setIsLoadingJobConfig(false);
@@ -99,14 +99,14 @@ export const useResultsViewConfig = (jobId: string) => {
               ? jobConfigUpdate.dest.index[0]
               : jobConfigUpdate.dest.index;
             const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
-            let indexP: IndexPattern | undefined;
+            let indexP: DataView | undefined;
 
             try {
               indexP = await mlContext.indexPatterns.get(destIndexPatternId);
 
               // Force refreshing the fields list here because a user directly coming
               // from the job creation wizard might land on the page without the
-              // index pattern being fully initialized because it was created
+              // data view being fully initialized because it was created
               // before the analytics job populated the destination index.
               await mlContext.indexPatterns.refreshFields(indexP);
             } catch (e) {
@@ -132,13 +132,10 @@ export const useResultsViewConfig = (jobId: string) => {
               setIsLoadingJobConfig(false);
             } else {
               setIndexPatternErrorMessage(
-                i18n.translate(
-                  'xpack.ml.dataframe.analytics.results.indexPatternsMissingErrorMessage',
-                  {
-                    defaultMessage:
-                      'To view this page, a Kibana index pattern is necessary for either the destination or source index of this analytics job.',
-                  }
-                )
+                i18n.translate('xpack.ml.dataframe.analytics.results.dataViewMissingErrorMessage', {
+                  defaultMessage:
+                    'To view this page, a Kibana data view is necessary for either the destination or source index of this analytics job.',
+                })
               );
             }
           } catch (e) {

@@ -55,8 +55,10 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   filters: Filter[];
   indexPattern: IIndexPattern;
   options: TopNOption[];
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
+  showLegend?: boolean;
   timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -72,7 +74,9 @@ const TopNComponent: React.FC<Props> = ({
   from,
   indexPattern,
   options,
+  paddingSize,
   query,
+  showLegend,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   timelineId,
@@ -127,7 +131,9 @@ const TopNComponent: React.FC<Props> = ({
             indexPattern={indexPattern}
             indexNames={view === 'raw' ? rawIndices : allIndices}
             onlyField={field}
+            paddingSize={paddingSize}
             query={query}
+            showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             showSpacer={false}
@@ -141,7 +147,9 @@ const TopNComponent: React.FC<Props> = ({
             filters={filters}
             headerChildren={headerChildren}
             onlyField={field}
+            paddingSize={paddingSize}
             query={query}
+            showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             timelineId={timelineId}
           />

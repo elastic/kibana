@@ -226,10 +226,8 @@ export const UserActionTree = React.memo(
 
     const handleManageQuote = useCallback(
       (quote: string) => {
-        const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '  \n> ');
-
         if (commentRefs.current[NEW_ID]) {
-          commentRefs.current[NEW_ID].addQuote(`> ${addCarrots} \n`);
+          commentRefs.current[NEW_ID].addQuote(quote);
         }
 
         handleOutlineComment('add-comment');
