@@ -237,6 +237,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         }
       >
         <EuiCheckboxGroup
+          disabled={agentPolicy.is_managed === true}
           options={[
             {
               id: dataTypes.Logs,
