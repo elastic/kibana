@@ -25,3 +25,8 @@ export const typeRegistryInstanceMock = typeRegistryMock.create();
 jest.doMock('./saved_objects_type_registry', () => ({
   SavedObjectTypeRegistry: jest.fn().mockImplementation(() => typeRegistryInstanceMock),
 }));
+
+export const registerRoutesMock = jest.fn();
+jest.doMock('./routes', () => ({
+  registerRoutes: registerRoutesMock,
+}));
