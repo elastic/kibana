@@ -6,7 +6,6 @@
  */
 
 import { countBy } from 'lodash/fp';
-import { SavedObject } from 'kibana/server';
 import uuid from 'uuid';
 
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
@@ -18,8 +17,7 @@ import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
   isAlertType,
-  IRuleSavedAttributesSavedObjectAttributes,
-  isRuleStatusSavedObjectType,
+  isRuleStatusSavedObjectAttributes,
   IRuleStatusSOAttributes,
 } from '../../rules/types';
 import { createBulkErrorObject, BulkError, OutputError } from '../utils';
@@ -98,10 +96,10 @@ export const transformTags = (tags: string[]): string[] => {
 // those on the export
 export const transformAlertToRule = (
   alert: SanitizedAlert<RuleParams>,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
+  ruleStatus?: IRuleStatusSOAttributes,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> => {
-  return internalRuleToAPIResponse(alert, ruleStatus?.attributes, legacyRuleActions);
+  return internalRuleToAPIResponse(alert, ruleStatus, legacyRuleActions);
 };
 
 export const transformAlertsToRules = (
@@ -113,7 +111,7 @@ export const transformAlertsToRules = (
 
 export const transformFindAlerts = (
   findResults: FindResult<RuleParams>,
-  ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined },
+  currentStatusesByRuleId: { [key: string]: IRuleStatusSOAttributes | undefined },
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined>
 ): {
   page: number;
@@ -126,8 +124,7 @@ export const transformFindAlerts = (
     perPage: findResults.perPage,
     total: findResults.total,
     data: findResults.data.map((alert) => {
-      const statuses = ruleStatuses[alert.id];
-      const status = statuses ? statuses[0] : undefined;
+      const status = currentStatusesByRuleId[alert.id];
       return internalRuleToAPIResponse(alert, status, legacyRuleActions[alert.id]);
     }),
   };
@@ -135,14 +132,14 @@ export const transformFindAlerts = (
 
 export const transform = (
   alert: PartialAlert<RuleParams>,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
+  ruleStatus?: IRuleStatusSOAttributes,
   isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> | null => {
   if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
     return transformAlertToRule(
       alert,
-      isRuleStatusSavedObjectType(ruleStatus) ? ruleStatus : undefined,
+      isRuleStatusSavedObjectAttributes(ruleStatus) ? ruleStatus : undefined,
       legacyRuleActions
     );
   }
