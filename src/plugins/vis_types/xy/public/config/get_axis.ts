@@ -12,7 +12,7 @@ import { AxisSpec, TickFormatter, YDomainRange, ScaleType as ECScaleType } from 
 
 import { LabelRotation } from '../../../../charts/public';
 import { BUCKET_TYPES } from '../../../../data/public';
-import { MULTILAYER_TIMEAXIS_STYLE } from '../../../../charts/common';
+import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../charts/common';
 
 import {
   Aspect,
@@ -159,13 +159,13 @@ function getAxisStyle(
 ): AxisSpec['style'] {
   return isMultiLayerTimeAxis
     ? {
-        ...MULTILAYER_TIMEAXIS_STYLE,
+        ...MULTILAYER_TIME_AXIS_STYLE,
         tickLabel: {
-          ...MULTILAYER_TIMEAXIS_STYLE.tickLabel,
+          ...MULTILAYER_TIME_AXIS_STYLE.tickLabel,
           visible: Boolean(ticks?.show),
         },
         tickLine: {
-          ...MULTILAYER_TIMEAXIS_STYLE.tickLine,
+          ...MULTILAYER_TIME_AXIS_STYLE.tickLine,
           visible: Boolean(ticks?.show),
         },
         axisTitle: {
