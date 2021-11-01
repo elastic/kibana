@@ -70,7 +70,7 @@ export default function (providerContext: FtrProviderContext) {
       })
     );
 
-    return responses as IndexResponse[];
+    return responses as any;
   };
 
   const getSeedDocsFromResponse = async (indexResponses: IndexResponse[]) =>
@@ -154,7 +154,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should use event.ingested instead of @timestamp for last_activity_ms', async function () {
-      const seedResponse = await seedDataStreams();
+      const seedResponse: IndexResponse[] = await seedDataStreams();
       const docs = await getSeedDocsFromResponse(seedResponse);
       const docsByDataset: Record<string, any> = keyBy(docs, '_source.data_stream.dataset');
       await retry.tryForTime(10000, async () => {
