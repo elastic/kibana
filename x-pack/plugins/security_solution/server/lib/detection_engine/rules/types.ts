@@ -275,6 +275,8 @@ export interface UpdateRulesOptions {
   ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
   defaultOutputIndex: string;
+  existingRule: SanitizedAlert<RuleParams> | null | undefined;
+  migratedRule: SanitizedAlert<RuleParams> | null | undefined;
   ruleUpdate: UpdateRulesSchema;
 }
 
