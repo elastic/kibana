@@ -55,7 +55,7 @@ export const getNodeInfo = async (
   const params = {
     allow_no_indices: true,
     ignore_unavailable: true,
-    terminateAfter: 1,
+    terminate_after: 1,
     index: sourceConfiguration.metricAlias,
     body: {
       size: 1,

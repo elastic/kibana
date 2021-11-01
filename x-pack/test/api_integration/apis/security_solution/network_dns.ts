@@ -11,6 +11,7 @@ import {
   NetworkDnsEdges,
   Direction,
   NetworkDnsFields,
+  NetworkDnsStrategyResponse,
 } from '../../../../plugins/security_solution/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -18,20 +19,24 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   describe('Network DNS', () => {
     describe('With packetbeat', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/dns'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/dns'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/dns')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/dns')
+      );
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
 
       it('Make sure that we get Dns data and sorting by uniqueDomains ascending', async () => {
-        const { body: networkDns } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const networkDns = await bsearch.send<NetworkDnsStrategyResponse>({
+          supertest,
+          options: {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             factoryQueryType: NetworkQueries.dns,
@@ -45,9 +50,9 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
 
         expect(networkDns.edges.length).to.be(10);
         expect(networkDns.totalCount).to.be(44);
@@ -58,10 +63,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Make sure that we get Dns data and sorting by uniqueDomains descending', async () => {
-        const { body: networkDns } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const networkDns = await bsearch.send<NetworkDnsStrategyResponse>({
+          supertest,
+          options: {
             ip: '151.205.0.17',
             defaultIndex: ['packetbeat-*'],
             factoryQueryType: NetworkQueries.dns,
@@ -80,9 +84,9 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
 
         expect(networkDns.edges.length).to.be(10);
         expect(networkDns.totalCount).to.be(44);

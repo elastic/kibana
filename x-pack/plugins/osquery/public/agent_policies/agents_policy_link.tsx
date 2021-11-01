@@ -28,13 +28,12 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
   const {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
-
   const { data } = useAgentPolicy({ policyId });
 
   const href = useMemo(
     () =>
       getUrlForApp(PLUGIN_ID, {
-        path: `#` + pagePathGetters.policy_details({ policyId })[1],
+        path: pagePathGetters.policy_details({ policyId })[1],
       }),
     [getUrlForApp, policyId]
   );
@@ -45,7 +44,7 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
         event.preventDefault();
 
         return navigateToApp(PLUGIN_ID, {
-          path: `#` + pagePathGetters.policy_details({ policyId })[1],
+          path: pagePathGetters.policy_details({ policyId })[1],
         });
       }
     },

@@ -135,11 +135,9 @@ export async function aggregateLatencyMetrics() {
     destOptions = parseIndexUrl(dest);
     destClient = getEsClient({ node: destOptions.node });
 
-    const mappings = (
-      await sourceClient.indices.getMapping({
-        index: sourceOptions.index,
-      })
-    ).body;
+    const mappings = await sourceClient.indices.getMapping({
+      index: sourceOptions.index,
+    });
 
     const lastMapping = mappings[Object.keys(mappings)[0]];
 
