@@ -460,7 +460,7 @@ export const Expressions: React.FC<Props> = (props) => {
           <EuiText size="xs" color="danger">
             <FormattedMessage
               id="xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError"
-              defaultMessage="This rule may alert on less {matchedGroups} than expected, because the filter query contains a match for {groupCount, plural, one {this field} other {these fields}}. For more information, refer to {filteringAndGroupingLink}."
+              defaultMessage="This rule may alert on {matchedGroups} less than expected, because the filter query contains a match for {groupCount, plural, one {this field} other {these fields}}. For more information, refer to {filteringAndGroupingLink}."
               values={{
                 matchedGroups: <strong>{redundantFilterGroupBy.join(', ')}</strong>,
                 groupCount: redundantFilterGroupBy.length,
