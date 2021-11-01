@@ -12,12 +12,17 @@ import { TextValueDisplay, TextValueDisplayProps } from './text_value_display';
 
 export type DescriptionFieldProps = PropsWithChildren<{}> &
   Pick<CommonProps, 'data-test-subj'> &
-  Pick<TextValueDisplayProps, 'truncate'>;
+  Pick<TextValueDisplayProps, 'truncate' | 'withTooltip'>;
 
 export const DescriptionField = memo<DescriptionFieldProps>(
-  ({ truncate, children, 'data-test-subj': dataTestSubj }) => {
+  ({ truncate, children, 'data-test-subj': dataTestSubj, withTooltip }) => {
     return (
-      <TextValueDisplay size="m" truncate={truncate} data-test-subj={dataTestSubj}>
+      <TextValueDisplay
+        size="m"
+        truncate={truncate}
+        data-test-subj={dataTestSubj}
+        withTooltip={withTooltip}
+      >
         {children || getEmptyValue()}
       </TextValueDisplay>
     );
