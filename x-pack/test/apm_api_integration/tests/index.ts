@@ -240,6 +240,10 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
       loadTestFile(require.resolve('./latency/service_apis'));
     });
 
+    describe('errors/group_id', function () {
+      loadTestFile(require.resolve('./errors/group_id'));
+    });
+
     describe('errors/distribution', function () {
       loadTestFile(require.resolve('./errors/distribution'));
     });
@@ -247,6 +251,10 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
     // Dependencies
     describe('dependencies/metadata', function () {
       loadTestFile(require.resolve('./dependencies/metadata'));
+    });
+
+    describe('dependencies/top_dependencies', function () {
+      loadTestFile(require.resolve('./dependencies/top_dependencies'));
     });
 
     registry.run();
