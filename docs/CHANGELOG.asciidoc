@@ -422,7 +422,7 @@ Use `/api/stats`.
 The legacy audit logger has been removed. For more information, refer to {kibana-pull}116191[#116191].
 
 *Impact* +
-To audit {kib} events, enable the <<xpack-security-ecs-audit-logging, ECS audit logger>>.
+Audit logs will be written to the default location in the new ECS format. To change the output file, filter events, and more, use the <<audit-logging-settings, audit logging settings>>.
 ====
 
 [discrete]
