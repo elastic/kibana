@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isRESTApiError, isFieldInvalid } from './helpers';
+import { isRESTApiError, isFieldInvalid, isDeprecatedConnector } from './helpers';
 
 describe('helpers', () => {
   describe('isRESTApiError', () => {
@@ -46,6 +46,12 @@ describe('helpers', () => {
 
     test('should return if false the error is empty', async () => {
       expect(isFieldInvalid('description', [])).toBeFalsy();
+    });
+  });
+
+  describe('isDeprecatedConnector', () => {
+    it('returns false if the connector is not defined', () => {
+      expect(isDeprecatedConnector()).toBe(false);
     });
   });
 });
