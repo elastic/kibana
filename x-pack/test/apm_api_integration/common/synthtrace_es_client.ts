@@ -71,6 +71,8 @@ export async function synthtraceEsClient(context: InheritedFtrProviderContext) {
             match_all: {},
           },
         },
+        conflicts: 'proceed',
+        refresh: true,
       });
     },
   };

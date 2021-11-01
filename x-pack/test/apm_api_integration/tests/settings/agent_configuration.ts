@@ -135,19 +135,19 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
         it('can create and delete config', async () => {
           // assert that config does not exist
-          await expectStatusCode(() => searchConfigurations(searchParams), 404);
+          await expectMissing(() => searchConfigurations(searchParams));
 
           // create config
           await createConfiguration(newConfig);
 
           // assert that config now exists
-          await expectStatusCode(() => searchConfigurations(searchParams), 200);
+          await expectExists(() => searchConfigurations(searchParams));
 
           // delete config
           await deleteConfiguration(newConfig);
 
           // assert that config was deleted
-          await expectStatusCode(() => searchConfigurations(searchParams), 404);
+          await expectMissing(() => searchConfigurations(searchParams));
         });
 
         describe('when a configuration exists', () => {
@@ -441,6 +441,16 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       });
     }
   );
+
+  async function expectExists(fn: () => ReturnType<typeof searchConfigurations>) {
+    const response = await fn();
+    expect(response.body).not.to.be.empty();
+  }
+
+  async function expectMissing(fn: () => ReturnType<typeof searchConfigurations>) {
+    const response = await fn();
+    expect(response.body).to.be.empty();
+  }
 }
 
 async function waitFor(cb: () => Promise<boolean>, retries = 50): Promise<boolean> {
