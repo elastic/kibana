@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import { chunk } from 'lodash/fp';
 import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
@@ -26,9 +25,8 @@ export const getRuleExceptionsForExport = async (
 
   if (exceptionsListClient != null) {
     const exceptionsWithoutUnexportableLists = exceptions.filter((list) => {
-      const listHash = createHash('sha256').update(JSON.stringify(list)).digest('hex');
-      if (!uniqueExceptionLists.has(listHash)) {
-        uniqueExceptionLists.add(listHash);
+      if (!uniqueExceptionLists.has(list.id)) {
+        uniqueExceptionLists.add(list.id);
         return !NON_EXPORTABLE_LIST_IDS.includes(list.list_id);
       } else {
         return false;
