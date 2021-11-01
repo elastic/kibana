@@ -42,7 +42,7 @@ describe('Indicator Match Alerts', () => {
           {
             field: 'file.hash.md5',
             type: 'mapping',
-            value: 'threatintel.indicator.file.hash.md5',
+            value: 'threat.indicator.file.hash.md5',
           },
         ],
       },
@@ -50,6 +50,8 @@ describe('Indicator Match Alerts', () => {
     threatQuery: '*:*',
     to: 'now',
     type: 'threat_match',
+    query: '*:*',
+    language: 'kuery',
   };
   const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
@@ -156,11 +158,11 @@ describe('Indicator Match Alerts', () => {
               ...sampleDocNoSortId(v4()),
               _source: {
                 ...sampleDocNoSortId(v4())._source,
-                'threatintel.indicator.file.hash.md5': 'a1b2c3',
+                'threat.indicator.file.hash.md5': 'a1b2c3',
               },
               fields: {
                 ...sampleDocNoSortId(v4()).fields,
-                'threatintel.indicator.file.hash.md5': ['a1b2c3'],
+                'threat.indicator.file.hash.md5': ['a1b2c3'],
               },
             },
           ],

@@ -70,18 +70,21 @@ export function renderApp(
   { element, appBasePath, history, setHeaderActionMenu }: AppMountParameters,
   config: FleetConfigType,
   kibanaVersion: string,
-  extensions: UIExtensionsStorage
+  extensions: UIExtensionsStorage,
+  UsageTracker: React.FC
 ) {
   ReactDOM.render(
-    <IntegrationsApp
-      basepath={appBasePath}
-      startServices={startServices}
-      config={config}
-      history={history}
-      kibanaVersion={kibanaVersion}
-      extensions={extensions}
-      setHeaderActionMenu={setHeaderActionMenu}
-    />,
+    <UsageTracker>
+      <IntegrationsApp
+        basepath={appBasePath}
+        startServices={startServices}
+        config={config}
+        history={history}
+        kibanaVersion={kibanaVersion}
+        extensions={extensions}
+        setHeaderActionMenu={setHeaderActionMenu}
+      />
+    </UsageTracker>,
     element
   );
 

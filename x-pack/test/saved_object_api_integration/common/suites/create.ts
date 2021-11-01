@@ -65,6 +65,7 @@ const INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES = Object.freeze({
   expectedNamespaces: [ALL_SPACES_ID], // expected namespaces of resulting object
   initialNamespaces: [ALL_SPACES_ID], // args passed to the bulkCreate method
 });
+const ALIAS_CONFLICT_OBJ = Object.freeze({ type: 'resolvetype', id: 'alias-match' }); // this fixture was created to test the resolve API, but we are reusing to test the alias conflict error
 const NEW_NAMESPACE_AGNOSTIC_OBJ = Object.freeze({ type: 'globaltype', id: 'new-globaltype-id' });
 export const TEST_CASES: Record<string, CreateTestCase> = Object.freeze({
   ...CASES,
@@ -74,6 +75,7 @@ export const TEST_CASES: Record<string, CreateTestCase> = Object.freeze({
   INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE,
   INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE,
   INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
+  ALIAS_CONFLICT_OBJ,
   NEW_NAMESPACE_AGNOSTIC_OBJ,
 });
 

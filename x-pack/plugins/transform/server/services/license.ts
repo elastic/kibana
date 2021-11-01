@@ -15,6 +15,7 @@ import {
 } from 'kibana/server';
 
 import { LicensingPluginSetup, LicenseType } from '../../../licensing/server';
+import type { AlertingApiRequestHandlerContext } from '../../../alerting/server';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -27,6 +28,10 @@ interface SetupSettings {
   minimumLicenseType: LicenseType;
   defaultErrorMessage: string;
 }
+
+type TransformRequestHandlerContext = RequestHandlerContext & {
+  alerting?: AlertingApiRequestHandlerContext;
+};
 
 export class License {
   private licenseStatus: LicenseStatus = {
@@ -64,7 +69,9 @@ export class License {
     });
   }
 
-  guardApiRoute<Params, Query, Body>(handler: RequestHandler<Params, Query, Body>) {
+  guardApiRoute<Params, Query, Body>(
+    handler: RequestHandler<Params, Query, Body, TransformRequestHandlerContext>
+  ) {
     const license = this;
 
     return function licenseCheck(

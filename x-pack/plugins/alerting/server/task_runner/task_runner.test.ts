@@ -1380,7 +1380,6 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
-                "action_subgroup": undefined,
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -1677,7 +1676,6 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "recovered",
-                "action_subgroup": undefined,
                 "instance_id": "2",
               },
               "saved_objects": Array [
@@ -1718,7 +1716,6 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
-                "action_subgroup": undefined,
                 "instance_id": "1",
               },
               "saved_objects": Array [

@@ -6,10 +6,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { first, map, share } from 'rxjs/operators';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { combineLatest } from 'rxjs';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -61,11 +60,7 @@ import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
 } from './invalidate_pending_api_keys/task';
-import {
-  getHealthStatusStream,
-  scheduleAlertingHealthCheck,
-  initializeAlertingHealth,
-} from './health';
+import { scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
 import { AlertsConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -109,10 +104,13 @@ export interface PluginSetupContract {
 
 export interface PluginStartContract {
   listTypes: RuleTypeRegistry['list'];
+
   getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
+
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
   ): PublicMethodsOf<AlertingAuthorization>;
+
   getFrameworkHealth: () => Promise<AlertsHealth>;
 }
 
@@ -126,6 +124,7 @@ export interface AlertingPluginsSetup {
   eventLog: IEventLogService;
   statusService: StatusServiceSetup;
 }
+
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
   taskManager: TaskManagerStartContract;
@@ -151,7 +150,6 @@ export class AlertingPlugin {
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
-  private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
   private kibanaBaseUrl: string | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -161,7 +159,6 @@ export class AlertingPlugin {
     this.rulesClientFactory = new RulesClientFactory();
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
-    this.kibanaIndexConfig = initializerContext.config.legacy.globalConfig$;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
@@ -169,6 +166,7 @@ export class AlertingPlugin {
     core: CoreSetup<AlertingPluginsStart, unknown>,
     plugins: AlertingPluginsSetup
   ): PluginSetupContract {
+    const kibanaIndex = core.savedObjects.getKibanaIndex();
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
@@ -212,14 +210,7 @@ export class AlertingPlugin {
         usageCollection,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
-      this.kibanaIndexConfig.subscribe((config) => {
-        initializeAlertingTelemetry(
-          this.telemetryLogger,
-          core,
-          plugins.taskManager,
-          config.kibana.index
-        );
-      });
+      initializeAlertingTelemetry(this.telemetryLogger, core, plugins.taskManager, kibanaIndex);
     }
 
     // Usage counter for telemetry
@@ -241,33 +232,33 @@ export class AlertingPlugin {
     );
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
-      level: ServiceStatusLevels.degraded,
-      summary: 'Alerting is initializing',
+      level: ServiceStatusLevels.available,
+      summary: 'Alerting is (probably) ready',
     });
     core.status.set(serviceStatus$);
 
-    core.getStartServices().then(async ([coreStart, startPlugins]) => {
-      combineLatest([
-        core.status.derivedStatus$,
-        getHealthStatusStream(
-          startPlugins.taskManager,
-          this.logger,
-          coreStart.savedObjects,
-          this.config
-        ),
-      ])
-        .pipe(
-          map(([derivedStatus, healthStatus]) => {
-            if (healthStatus.level > derivedStatus.level) {
-              return healthStatus as ServiceStatus;
-            } else {
-              return derivedStatus;
-            }
-          }),
-          share()
-        )
-        .subscribe(serviceStatus$);
-    });
+    // core.getStartServices().then(async ([coreStart, startPlugins]) => {
+    //   combineLatest([
+    //     core.status.derivedStatus$,
+    //     getHealthStatusStream(
+    //       startPlugins.taskManager,
+    //       this.logger,
+    //       coreStart.savedObjects,
+    //       this.config
+    //     ),
+    //   ])
+    //     .pipe(
+    //       map(([derivedStatus, healthStatus]) => {
+    //         if (healthStatus.level > derivedStatus.level) {
+    //           return healthStatus as ServiceStatus;
+    //         } else {
+    //           return derivedStatus;
+    //         }
+    //       }),
+    //       share()
+    //     )
+    //     .subscribe(serviceStatus$);
+    // });
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
@@ -376,6 +367,7 @@ export class AlertingPlugin {
       eventLog: plugins.eventLog,
       kibanaVersion: this.kibanaVersion,
       authorization: alertingAuthorizationClientFactory,
+      eventLogger: this.eventLogger,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {

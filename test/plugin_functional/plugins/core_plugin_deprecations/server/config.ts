@@ -22,6 +22,7 @@ type ConfigType = TypeOf<typeof configSchema>;
 const configSecretDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (get(settings, 'corePluginDeprecations.secret') !== 42) {
     addDeprecation({
+      configPath: 'corePluginDeprecations.secret',
       documentationUrl: 'config-secret-doc-url',
       message:
         'Kibana plugin functional tests will no longer allow corePluginDeprecations.secret ' +

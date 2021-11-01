@@ -53,11 +53,11 @@ describe('When on the host isolation exceptions delete modal', () => {
 
     const submitButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
     const cancelButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
     act(() => {
       fireEvent.click(submitButton);
@@ -72,7 +72,7 @@ describe('When on the host isolation exceptions delete modal', () => {
     render();
     const cancelButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
     const waiter = waitForAction('hostIsolationExceptionsMarkToDelete', {
       validate: ({ payload }) => {
@@ -96,7 +96,7 @@ describe('When on the host isolation exceptions delete modal', () => {
 
     const submitButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
     await act(async () => {
       fireEvent.click(submitButton);
@@ -104,7 +104,7 @@ describe('When on the host isolation exceptions delete modal', () => {
     });
 
     expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-      '"some name" has been removed from the Host Isolation Exceptions list.'
+      '"some name" has been removed from the Host isolation exceptions list.'
     );
   });
 
@@ -121,7 +121,7 @@ describe('When on the host isolation exceptions delete modal', () => {
 
     const submitButton = renderResult.baseElement.querySelector(
       '[data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"]'
-    )! as HTMLButtonElement;
+    ) as HTMLButtonElement;
 
     await act(async () => {
       fireEvent.click(submitButton);
@@ -129,7 +129,7 @@ describe('When on the host isolation exceptions delete modal', () => {
     });
 
     expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Unable to remove "some name" from the Host Isolation Exceptions list. Reason: That\'s not true. That\'s impossible'
+      'Unable to remove "some name" from the Host isolation exceptions list. Reason: That\'s not true. That\'s impossible'
     );
   });
 });

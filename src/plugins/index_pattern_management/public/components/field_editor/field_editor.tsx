@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
 
@@ -267,7 +267,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   renderName() {
     const { isCreating, spec } = this.state;
-    const isInvalid = !spec.name || !spec.name.trim();
+    const starCheck = spec?.name?.includes('*');
+    const isInvalid = !spec.name || !spec.name.trim() || starCheck;
 
     return isCreating ? (
       <EuiFormRow
@@ -298,11 +299,17 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         }
         isInvalid={isInvalid}
         error={
-          isInvalid
-            ? i18n.translate('indexPatternManagement.nameErrorMessage', {
+          isInvalid &&
+          (starCheck
+            ? i18n.translate(
+                'indexPatternManagement.starCharacterNotAllowedValidationErrorMessage',
+                {
+                  defaultMessage: 'The field cannot have * in the name.',
+                }
+              )
+            : i18n.translate('indexPatternManagement.nameErrorMessage', {
                 defaultMessage: 'Name is required',
-              })
-            : null
+              }))
         }
       >
         <EuiFieldText
@@ -506,8 +513,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           helpText={
             <FormattedMessage
               id="indexPatternManagement.formatLabel"
-              defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
-              completely changed and prevent highlighting in Discover from working."
+              defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
             />
           }
         >

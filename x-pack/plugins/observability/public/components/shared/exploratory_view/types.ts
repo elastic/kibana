@@ -56,7 +56,15 @@ export interface SeriesConfig {
   filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
   baseFilters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
-  definitionFields: string[];
+  definitionFields: Array<
+    | string
+    | {
+        field: string;
+        nested?: string;
+        singleSelection?: boolean;
+        filters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
+      }
+  >;
   metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;
@@ -89,6 +97,8 @@ export interface UrlFilter {
   field: string;
   values?: string[];
   notValues?: string[];
+  wildcards?: string[];
+  notWildcards?: string[];
 }
 
 export interface ConfigProps {

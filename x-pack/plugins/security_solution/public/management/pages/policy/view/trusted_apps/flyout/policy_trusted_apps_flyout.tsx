@@ -91,6 +91,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
       payload: {
         action: 'assign',
         artifacts: selectedArtifactIds.map<MaybeImmutable<TrustedApp>>((selectedId) => {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           return assignableArtifactsList?.data?.find((trustedApp) => trustedApp.id === selectedId)!;
         }),
       },
@@ -182,6 +183,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
               defaultMessage: 'Search trusted applications',
             }
           )}
+          hideRefreshButton
         />
         <EuiSpacer size="m" />
 
@@ -217,7 +219,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
             title={
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.noAssignable"
-                defaultMessage="There are no assignable Trused Apps to assign to this policy"
+                defaultMessage="There are no trusted applications that can be assigned to this policy."
               />
             }
           />
@@ -249,7 +251,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.confirm"
-                defaultMessage="Assing to {policyName}"
+                defaultMessage="Assign to {policyName}"
                 values={{
                   policyName,
                 }}

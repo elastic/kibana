@@ -23,6 +23,10 @@ export interface AlertInstanceSummary {
   lastRun?: string;
   errorMessages: Array<{ date: string; message: string }>;
   instances: Record<string, AlertInstanceStatus>;
+  executionDuration: {
+    average: number;
+    values: number[];
+  };
 }
 
 export interface AlertInstanceStatus {

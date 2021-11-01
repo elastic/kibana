@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   metadataCurrentIndexPattern,
@@ -53,8 +53,8 @@ export async function kibanaRequestToMetadataListESQuery(
     body: {
       query: buildQueryBody(
         request,
-        queryBuilderOptions?.unenrolledAgentIds!,
-        queryBuilderOptions?.statusAgentIds!
+        queryBuilderOptions?.unenrolledAgentIds,
+        queryBuilderOptions?.statusAgentIds
       ),
       track_total_hits: true,
       sort: MetadataSortMethod,

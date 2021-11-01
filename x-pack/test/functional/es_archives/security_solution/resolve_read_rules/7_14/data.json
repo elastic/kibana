@@ -30,7 +30,7 @@
       "alert": {
         "actions": [
         ],
-        "alertTypeId" : "siem.signals",
+        "alertTypeId" : "siem.queryRule",
         "consumer" : "siem",
         "apiKey": "QIUT8u0/kbOakEHSj50jDpVR90MrqOxanEscboYOoa8PxQvcA5jfHash+fqH3b+KNjJ1LpnBcisGuPkufY9j1e32gKzwGZV5Bfys87imHvygJvIM8uKiFF8bQ8Y4NTaxOJO9fAmZPrFy07ZcQMCAQz+DUTgBFqs=",
         "apiKeyOwner": "elastic",
@@ -49,7 +49,7 @@
           "from": "now-3615s",
           "immutable": false,
           "license": "",
-          "outputIndex": ".siem-signals-devin-hurley-714-space",
+          "outputIndex": "",
           "meta": {
             "from": "1h",
             "kibana_siem_app_url": "http://0.0.0.0:5601/s/714-space/app/security"
