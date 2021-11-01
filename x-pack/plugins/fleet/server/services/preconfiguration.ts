@@ -20,8 +20,12 @@ import type {
   PreconfigurationError,
   PreconfiguredOutput,
 } from '../../common';
-import { DEFAULT_PACKAGES } from '../../common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, normalizeHostsForAgents } from '../../common';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  DEFAULT_PACKAGES,
+  normalizeHostsForAgents,
+  SO_SEARCH_LIMIT,
+} from '../../common';
 import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_LATEST_KEYWORD,
@@ -34,7 +38,7 @@ import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
-import { overridePackageInputs } from './package_policy';
+import { overridePackageInputs, packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
@@ -351,14 +355,16 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     }
   }
 
-  const fulfilledPolicyPackagePolicyIds = fulfilledPolicies
-    .filter(({ policy }) => policy?.package_policies)
-    .flatMap<string>(({ policy }) => policy?.package_policies as string[]);
-
+  // Handle automatic package policy upgrades for managed packages and package with
+  // the `keep_policies_up_to_date` setting enabled
+  const allPackagePolicyIds = await packagePolicyService.listIds(soClient, {
+    page: 1,
+    perPage: SO_SEARCH_LIMIT,
+  });
   const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
     soClient,
     esClient,
-    fulfilledPolicyPackagePolicyIds
+    allPackagePolicyIds.items
   );
 
   // Ensure `keep_policies_up_to_date` is set to true for any package that appears in `DEFAULT_PACKAGES`
