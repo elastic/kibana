@@ -67,9 +67,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         const esClient = scopedClusterClient.asCurrentUser;
 
         const ruleStatusClient = new RuleExecutionLogClient({
+          underlyingClient: config.ruleExecutionLog.underlyingClient,
           savedObjectsClient,
           eventLogService,
-          underlyingClient: config.ruleExecutionLog.underlyingClient,
         });
 
         const completeRule = {
