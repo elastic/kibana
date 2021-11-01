@@ -15,9 +15,7 @@ require('./flot_charts');
 
 // stateful deps
 export const KbnI18n = require('@kbn/i18n');
-export const KbnI18nAngular = require('@kbn/i18n/angular');
 export const KbnI18nReact = require('@kbn/i18n/react');
-export const Angular = require('angular');
 export const EmotionReact = require('@emotion/react');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');

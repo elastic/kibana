@@ -23,7 +23,17 @@ import type { FleetAppContext } from '../plugin';
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
 
-export const createAppContextStartContractMock = (): FleetAppContext => {
+export interface MockedFleetAppContext extends FleetAppContext {
+  elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
+  data: ReturnType<typeof dataPluginMock.createStartContract>;
+  encryptedSavedObjectsStart?: ReturnType<typeof encryptedSavedObjectsMock.createStart>;
+  savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
+  securitySetup?: ReturnType<typeof securityMock.createSetup>;
+  securityStart?: ReturnType<typeof securityMock.createStart>;
+  logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
+}
+
+export const createAppContextStartContractMock = (): MockedFleetAppContext => {
   const config = {
     agents: { enabled: true, elasticsearch: {} },
     enabled: true,
@@ -37,7 +47,8 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
     data: dataPluginMock.createStartContract(),
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
-    security: securityMock.createStart(),
+    securitySetup: securityMock.createSetup(),
+    securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
     isProductionMode: true,
     configInitialValue: {
@@ -46,8 +57,8 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
       agentIdVerificationEnabled: true,
     },
     config$,
-    kibanaVersion: '8.0.0',
-    kibanaBranch: 'master',
+    kibanaVersion: '8.99.0', // Fake version :)
+    kibanaBranch: 'main',
   };
 };
 
@@ -64,7 +75,7 @@ export const xpackMocks = {
 
 export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServiceInterface> => {
   return {
-    compilePackagePolicyInputs: jest.fn(),
+    _compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
@@ -103,7 +114,6 @@ export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
     getAgentStatusById: jest.fn(),
     getAgentStatusForAgentPolicy: jest.fn(),
-    authenticateAgentWithAccessToken: jest.fn(),
     getAgent: jest.fn(),
     listAgents: jest.fn(),
   };

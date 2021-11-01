@@ -102,8 +102,8 @@ export const AdvancedSettings: FC<Props> = ({
         id="createIndexPattern"
         label={
           <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.createIndexPatternLabel"
-            defaultMessage="Create index pattern"
+            id="xpack.dataVisualizer.file.advancedImportSettings.createDataViewLabel"
+            defaultMessage="Create data view"
           />
         }
         checked={createIndexPattern === true}
@@ -116,8 +116,8 @@ export const AdvancedSettings: FC<Props> = ({
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.indexPatternNameLabel"
-            defaultMessage="Index pattern name"
+            id="xpack.dataVisualizer.file.advancedImportSettings.dataViewNameLabel"
+            defaultMessage="Data view name"
           />
         }
         isInvalid={indexPatternNameError !== ''}

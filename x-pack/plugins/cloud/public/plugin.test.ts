@@ -138,14 +138,22 @@ describe('Cloud Plugin', () => {
 
       describe('with memory', () => {
         beforeAll(() => {
-          // @ts-expect-error
+          // @ts-expect-error 2339
           window.performance.memory = {
-            someMetric: 1,
+            get jsHeapSizeLimit() {
+              return 3;
+            },
+            get totalJSHeapSize() {
+              return 2;
+            },
+            get usedJSHeapSize() {
+              return 1;
+            },
           };
         });
 
         afterAll(() => {
-          // @ts-expect-error
+          // @ts-expect-error 2339
           delete window.performance.memory;
         });
 
@@ -159,7 +167,9 @@ describe('Cloud Plugin', () => {
 
           expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
             kibana_version_str: initContext.env.packageInfo.version,
-            some_metric_int: 1,
+            memory_js_heap_size_limit_int: 3,
+            memory_js_heap_size_total_int: 2,
+            memory_js_heap_size_used_int: 1,
           });
         });
       });

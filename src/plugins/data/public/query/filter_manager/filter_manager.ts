@@ -26,13 +26,12 @@ import {
 import { PersistableStateService } from '../../../../kibana_utils/common/persistable_state';
 import {
   getAllMigrations,
-  migrateToLatest,
   inject,
   extract,
   telemetry,
 } from '../../../common/query/persistable_state';
 
-export class FilterManager implements PersistableStateService {
+export class FilterManager implements PersistableStateService<Filter[]> {
   private filters: Filter[] = [];
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
@@ -228,16 +227,11 @@ export class FilterManager implements PersistableStateService {
     });
   }
 
-  // Filter needs to implement SerializableRecord
-  public extract = extract as any;
+  public extract = extract;
 
-  // Filter needs to implement SerializableRecord
-  public inject = inject as any;
+  public inject = inject;
 
   public telemetry = telemetry;
-
-  // Filter needs to implement SerializableRecord
-  public migrateToLatest = migrateToLatest as any;
 
   public getAllMigrations = getAllMigrations;
 }

@@ -121,12 +121,21 @@ export async function storedPackagePoliciesToAgentPermissions(
             });
       }
 
+      let clusterRoleDescriptor = {};
+      const cluster = packagePolicy?.elasticsearch?.privileges?.cluster ?? [];
+      if (cluster.length > 0) {
+        clusterRoleDescriptor = {
+          cluster,
+        };
+      }
+
       return [
         packagePolicy.name,
         {
           indices: dataStreamsForPermissions.map((ds) =>
             getDataStreamPrivileges(ds, packagePolicy.namespace)
           ),
+          ...clusterRoleDescriptor,
         },
       ];
     }

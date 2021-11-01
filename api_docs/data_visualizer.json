@@ -574,7 +574,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
+              "\"number\" | \"boolean\" | \"keyword\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
             ],
             "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
@@ -1004,7 +1004,7 @@
         "label": "JobFieldType",
         "description": [],
         "signature": [
-          "\"number\" | \"boolean\" | \"date\" | \"keyword\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
+          "\"number\" | \"boolean\" | \"keyword\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
         ],
         "path": "x-pack/plugins/data_visualizer/common/types/job_field_type.ts",
         "deprecated": false,

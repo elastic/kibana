@@ -42,6 +42,7 @@
     { "path": "../../../src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/presentation_util/tsconfig.json" },
     { "path": "../../../src/plugins/saved_objects/tsconfig.json" },
     { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },

@@ -18,12 +18,12 @@ import {
   EuiConfirmModal,
   EuiSpacer,
 } from '@elastic/eui';
-import { sumBy } from 'lodash';
 
 import type {
   GetAgentPoliciesResponse,
   PackageInfo,
   UpgradePackagePolicyDryRunResponse,
+  PackagePolicy,
 } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
@@ -109,10 +109,26 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   }, [packagePolicyIds]);
 
   const packagePolicyCount = useMemo(() => packagePolicyIds.length, [packagePolicyIds]);
-  const agentCount = useMemo(
-    () => sumBy(agentPolicyData?.items, ({ agents }) => agents ?? 0),
-    [agentPolicyData]
-  );
+
+  function isStringArray(arr: unknown | string[]): arr is string[] {
+    return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
+  }
+
+  const agentCount = useMemo(() => {
+    if (!agentPolicyData?.items) return 0;
+
+    return agentPolicyData.items.reduce((acc, item) => {
+      const existingPolicies = item?.package_policies
+        ? isStringArray(item.package_policies)
+          ? (item.package_policies as string[]).filter((p) => packagePolicyIds.includes(p))
+          : (item.package_policies as PackagePolicy[]).filter((p) =>
+              packagePolicyIds.includes(p.id)
+            )
+        : [];
+      return (acc += existingPolicies.length > 0 && item?.agents ? item?.agents : 0);
+    }, 0);
+  }, [agentPolicyData, packagePolicyIds]);
+
   const conflictCount = useMemo(
     () => dryRunData?.filter((item) => item.hasErrors).length,
     [dryRunData]
@@ -138,6 +154,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       return;
     }
 
+    setIsUpdateModalVisible(false);
     setIsUpgradingPackagePolicies(true);
 
     await installPackage({ name, version, title });
@@ -150,7 +167,6 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     );
 
     setIsUpgradingPackagePolicies(false);
-    setIsUpdateModalVisible(false);
 
     notifications.toasts.addSuccess({
       title: toMountPoint(
@@ -269,15 +285,14 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButton
-            iconType={'refresh'}
-            isLoading={isInstalling}
+            isLoading={isInstalling || isUpgradingPackagePolicies}
             onClick={
               upgradePackagePolicies ? () => setIsUpdateModalVisible(true) : handleClickUpdate
             }
           >
             <FormattedMessage
               id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"
-              defaultMessage="Update to latest version"
+              defaultMessage="Upgrade to latest version"
             />
           </EuiButton>
         </EuiFlexItem>

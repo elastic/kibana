@@ -15,7 +15,7 @@ import { SavedObjectsErrorHelpers } from './errors';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';
 
 /**
- * Discriminated union (TypeScript approximation of an algebraic data type); this design pattern used for internal repository operations.
+ * Discriminated union (TypeScript approximation of an algebraic data type); this design pattern is used for internal repository operations.
  * @internal
  */
 export type Either<L = unknown, R = L> = Left<L> | Right<R>;
@@ -241,4 +241,27 @@ export function normalizeNamespace(namespace?: string) {
  */
 export function getCurrentTime() {
   return new Date(Date.now()).toISOString();
+}
+
+/**
+ * Takes an object with a `type` and `id` field and returns a key string.
+ *
+ * @internal
+ */
+export function getObjectKey({ type, id }: { type: string; id: string }) {
+  return `${type}:${id}`;
+}
+
+/**
+ * Parses a 'type:id' key string and returns an object with a `type` field and an `id` field.
+ *
+ * @internal
+ */
+export function parseObjectKey(key: string) {
+  const type = key.slice(0, key.indexOf(':'));
+  const id = key.slice(type.length + 1);
+  if (!type || !id) {
+    throw new Error('Malformed object key (should be "type:id")');
+  }
+  return { type, id };
 }

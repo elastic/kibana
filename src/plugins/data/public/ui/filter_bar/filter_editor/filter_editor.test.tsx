@@ -10,14 +10,14 @@ import { registerTestBed, TestBed } from '@kbn/test/jest';
 import { FilterEditor, Props } from '.';
 import React from 'react';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+jest.mock('../../../../../kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../kibana_react/public');
 
   return {
     ...original,
-    EuiCodeEditor: (props: any) => (
+    CodeEditor: (props: any) => (
       <input
-        data-test-subj={props['data-test-subj'] || 'mockEuiCodeEditor'}
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
         value={props.value}
         onChange={async (eve: any) => {
           props.onChange(eve.target.value);

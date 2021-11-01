@@ -358,7 +358,7 @@
       ],
       "fontSize": 20,
       "fontFamily": 2,
-      "text": "Fleet and Integrations are both Kibana applications. Kibana's architecture\nallows for many plugins/application to exist and register themselves as distinct\nexperiences. The Fleet team mainly works on these two Kibana applications \nwithin the `xpack/plugins/fleet` directory in the Kibana codebase.\n\nhttps://github.com/elastic/kibana/tree/master/x-pack/plugins/fleet\nhttps://www.elastic.co/guide/en/fleet/current/fleet-overview.html\n",
+      "text": "Fleet and Integrations are both Kibana applications. Kibana's architecture\nallows for many plugins/application to exist and register themselves as distinct\nexperiences. The Fleet team mainly works on these two Kibana applications \nwithin the `xpack/plugins/fleet` directory in the Kibana codebase.\n\nhttps://github.com/elastic/kibana/tree/main/x-pack/plugins/fleet\nhttps://www.elastic.co/guide/en/fleet/current/fleet-overview.html\n",
       "baseline": 179,
       "textAlign": "left",
       "verticalAlign": "top"

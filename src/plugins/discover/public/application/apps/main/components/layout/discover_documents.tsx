@@ -134,7 +134,7 @@ function DiscoverDocumentsComponent({
           sort={state.sort || []}
           isLoading={isLoading}
           searchDescription={savedSearch.description}
-          sharedItemTitle={savedSearch.lastSavedTitle}
+          sharedItemTitle={savedSearch.title}
           onAddColumn={onAddColumn}
           onFilter={onAddFilter as DocViewFilterFn}
           onMoveColumn={onMoveColumn}
@@ -156,7 +156,7 @@ function DiscoverDocumentsComponent({
             sort={(state.sort as SortPairArr[]) || []}
             sampleSize={sampleSize}
             searchDescription={savedSearch.description}
-            searchTitle={savedSearch.lastSavedTitle}
+            searchTitle={savedSearch.title}
             setExpandedDoc={setExpandedDoc}
             showTimeCol={showTimeCol}
             services={services}

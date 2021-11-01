@@ -18,7 +18,7 @@ Object {
     "isFullscreenDatasource": false,
     "isLinkedToOriginatingApp": false,
     "isLoading": false,
-    "isSaveable": false,
+    "isSaveable": true,
     "persistedDoc": Object {
       "exactMatchDoc": Object {
         "expression": "definitely a valid expression",

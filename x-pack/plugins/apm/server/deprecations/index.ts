@@ -15,9 +15,11 @@ import { APMRouteHandlerResources } from '../';
 export function getDeprecations({
   cloudSetup,
   fleet,
+  branch,
 }: {
   cloudSetup?: CloudSetup;
   fleet?: APMRouteHandlerResources['plugins']['fleet'];
+  branch: string;
 }) {
   return async ({
     savedObjectsClient,
@@ -46,8 +48,7 @@ export function getDeprecations({
           defaultMessage:
             'Running the APM Server binary directly is considered a legacy option and is deprecated since 7.16. Switch to APM Server managed by an Elastic Agent instead. Read our documentation to learn more.',
         }),
-        documentationUrl:
-          'https://www.elastic.co/guide/en/apm/server/current/apm-integration.html',
+        documentationUrl: `https://www.elastic.co/guide/en/apm/server/${branch}/apm-integration.html`,
         level: 'warning',
         correctiveActions: {
           manualSteps: [

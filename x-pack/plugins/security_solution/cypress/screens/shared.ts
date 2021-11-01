@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const NOTIFICATION_TOASTS = '[data-test-subj="globalToastList"]';
-
 export const TOAST_ERROR = '.euiToast--danger';

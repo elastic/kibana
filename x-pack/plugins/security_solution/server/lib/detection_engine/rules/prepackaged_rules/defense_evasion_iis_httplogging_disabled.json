@@ -34,14 +34,21 @@
       },
       "technique": [
         {
-          "id": "T1070",
-          "name": "Indicator Removal on Host",
-          "reference": "https://attack.mitre.org/techniques/T1070/"
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.002",
+              "name": "Disable Windows Event Logging",
+              "reference": "https://attack.mitre.org/techniques/T1562/002/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 6
 }

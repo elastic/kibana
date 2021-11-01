@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/104578
+  // FLAKY: https://github.com/elastic/kibana/issues/114002
   describe.skip('Discover Saved Searches', () => {
     before('initialize tests', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');

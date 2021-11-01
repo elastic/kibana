@@ -67,9 +67,9 @@ export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ indexPatternEx
     );
   } else if (!indexPatternExists) {
     disabledTransformMessage = i18n.translate(
-      'xpack.transform.transformList.discoverTransformNoIndexPatternToolTip',
+      'xpack.transform.transformList.discoverTransformNoDataViewToolTip',
       {
-        defaultMessage: `A Kibana index pattern is required for the destination index to be viewable in Discover`,
+        defaultMessage: `A Kibana data view is required for the destination index to be viewable in Discover`,
       }
     );
   } else if (transformNeverStarted) {
