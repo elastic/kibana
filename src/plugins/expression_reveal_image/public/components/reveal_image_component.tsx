@@ -22,7 +22,7 @@ const revealImageParentStyle = css`
   pointer-events: none;
 `;
 
-const revealImageAlignerStyle: CSSObject = {
+const revealImageAlignerStyle = {
   backgroundSize: 'contain',
   backgroundRepeat: 'no-repeat',
 };
@@ -118,11 +118,11 @@ function RevealImageComponent({
     return imgStyles;
   }
 
-  const additionaAlignerStyles: AlignerStyles = {};
+  const additionalAlignerStyles: AlignerStyles = {};
 
   if (isValidUrl(emptyImage ?? '')) {
     // only use empty image if one is provided
-    additionaAlignerStyles.backgroundImage = `url(${emptyImage})`;
+    additionalAlignerStyles.backgroundImage = `url(${emptyImage})`;
   }
 
   let additionalImgStyles: ImageStyles = {};
@@ -136,10 +136,10 @@ function RevealImageComponent({
   return (
     <div
       className="revealImageAligner"
-      css={css({
+      style={{
         ...revealImageAlignerStyle,
-        ...additionaAlignerStyles,
-      })}
+        ...additionalAlignerStyles,
+      }}
     >
       <img
         ref={imgRef}

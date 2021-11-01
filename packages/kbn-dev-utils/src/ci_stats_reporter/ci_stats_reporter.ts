@@ -12,6 +12,8 @@ import Fs from 'fs';
 import Path from 'path';
 
 import Axios from 'axios';
+// @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
+import httpAdapter from 'axios/lib/adapters/http';
 
 import { ToolingLog } from '../tooling_log';
 import { parseConfig, Config } from './ci_stats_config';
@@ -190,6 +192,7 @@ export class CiStatsReporter {
           baseURL: BASE_URL,
           headers,
           data: body,
+          adapter: httpAdapter,
         });
 
         return true;

@@ -44,6 +44,7 @@ const PackQueriesFieldComponent = ({ field }) => {
     (newQuery) =>
       setValue(
         produce((draft) => {
+          // @ts-expect-error update
           draft.push({
             interval: newQuery.interval,
             query: newQuery.query.attributes.query,
@@ -56,6 +57,7 @@ const PackQueriesFieldComponent = ({ field }) => {
   );
 
   const handleRemoveQuery = useCallback(
+    // @ts-expect-error update
     (query) => setValue(produce((draft) => reject(['id', query.id], draft))),
     [setValue]
   );

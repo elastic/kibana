@@ -6,7 +6,11 @@
  */
 
 import { getNewRule } from '../../objects/rule';
-import { ALERTS_COUNT, TAKE_ACTION_POPOVER_BTN } from '../../screens/alerts';
+import {
+  ALERTS_COUNT,
+  TAKE_ACTION_POPOVER_BTN,
+  ALERT_COUNT_TABLE_FIRST_ROW_COUNT,
+} from '../../screens/alerts';
 
 import {
   selectNumberOfAlerts,
@@ -50,11 +54,16 @@ describe('Marking alerts as acknowledged', () => {
         markAcknowledgedFirstAlert();
         const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
         cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should('have.text', `${expectedNumberOfAlerts}`);
 
         goToAcknowledgedAlerts();
         waitForAlerts();
 
         cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedAcknowledged} alert`);
+        cy.get(ALERT_COUNT_TABLE_FIRST_ROW_COUNT).should(
+          'have.text',
+          `${numberOfAlertsToBeMarkedAcknowledged}`
+        );
       });
   });
 });

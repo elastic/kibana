@@ -148,14 +148,13 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   // }, [editMode, replace]);
 
   const scheduledQueryGroupTableData = useMemo(() => {
-    const policyWithoutEmptyQueries = produce<
-      NewPackagePolicy,
-      OsqueryManagerPackagePolicy,
-      OsqueryManagerPackagePolicy
-    >(newPolicy, (draft) => {
-      draft.inputs[0].streams = filter(['compiled_stream.id', null], draft.inputs[0].streams);
-      return draft;
-    });
+    const policyWithoutEmptyQueries = produce<NewPackagePolicy, OsqueryManagerPackagePolicy>(
+      newPolicy,
+      (draft) => {
+        draft.inputs[0].streams = filter(['compiled_stream.id', null], draft.inputs[0].streams);
+        return draft;
+      }
+    );
 
     return policyWithoutEmptyQueries;
   }, [newPolicy]);
@@ -198,6 +197,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         <EuiFlexGroup>
           <EuiFlexItem>
             <ScheduledQueryGroupQueriesTable
+              // @ts-expect-error update
               data={scheduledQueryGroupTableData.inputs[0].streams}
             />
           </EuiFlexItem>
