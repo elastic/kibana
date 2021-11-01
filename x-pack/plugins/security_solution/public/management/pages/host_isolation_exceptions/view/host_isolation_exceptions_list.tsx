@@ -8,12 +8,11 @@
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
 import React, { Dispatch, useCallback, useEffect } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
-import { useLicense } from '../../../../common/hooks/use_license';
 import {
   getCurrentLocation,
   getItemToDelete,
@@ -21,6 +20,7 @@ import {
   getListIsLoading,
   getListItems,
   getListPagination,
+  getTotalListItems,
 } from '../store/selector';
 import {
   useHostIsolationExceptionsNavigateCallback,
@@ -40,6 +40,7 @@ import {
   EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
 } from './components/translations';
 import { getEndpointListPath } from '../../../common/routing';
+import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -48,6 +49,7 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
 
 export const HostIsolationExceptionsList = () => {
   const listItems = useHostIsolationExceptionsSelector(getListItems);
+  const totalCountListItems = useHostIsolationExceptionsSelector(getTotalListItems);
   const pagination = useHostIsolationExceptionsSelector(getListPagination);
   const isLoading = useHostIsolationExceptionsSelector(getListIsLoading);
   const fetchError = useHostIsolationExceptionsSelector(getListFetchError);
@@ -56,14 +58,14 @@ export const HostIsolationExceptionsList = () => {
   const itemToDelete = useHostIsolationExceptionsSelector(getItemToDelete);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
   const history = useHistory();
-  const license = useLicense();
-  const showFlyout = license.isPlatinumPlus() && !!location.show;
+  const privileges = useEndpointPrivileges();
+  const showFlyout = privileges.canIsolateHost && !!location.show;
 
   useEffect(() => {
-    if (!isLoading && listItems.length === 0 && !license.isPlatinumPlus()) {
+    if (!isLoading && listItems.length === 0 && !privileges.canIsolateHost) {
       history.replace(getEndpointListPath({ name: 'endpointList' }));
     }
-  }, [history, isLoading, license, listItems.length]);
+  }, [history, isLoading, listItems.length, privileges.canIsolateHost]);
 
   const handleOnSearch = useCallback(
     (query: string) => {
@@ -74,7 +76,7 @@ export const HostIsolationExceptionsList = () => {
 
   function handleItemComponentProps(element: ExceptionListItemSchema): ArtifactEntryCardProps {
     const editAction = {
-      icon: 'trash',
+      icon: 'controlsHorizontal',
       onClick: () => {
         navigateCallback({
           show: 'edit',
@@ -98,7 +100,7 @@ export const HostIsolationExceptionsList = () => {
     return {
       item: element,
       'data-test-subj': `hostIsolationExceptionsCard`,
-      actions: license.isPlatinumPlus() ? [editAction, deleteAction] : [deleteAction],
+      actions: privileges.canIsolateHost ? [editAction, deleteAction] : [deleteAction],
     };
   }
 
@@ -130,8 +132,14 @@ export const HostIsolationExceptionsList = () => {
           defaultMessage="Host isolation exceptions"
         />
       }
+      subtitle={
+        <FormattedMessage
+          id="xpack.securitySolution.hostIsolationExceptions.list.pageSubTitle"
+          defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
+        />
+      }
       actions={
-        license.isPlatinumPlus() ? (
+        privileges.canIsolateHost && listItems.length > 0 ? (
           <EuiButton
             fill
             iconType="plusInCircle"
@@ -155,16 +163,27 @@ export const HostIsolationExceptionsList = () => {
       {itemToDelete ? <HostIsolationExceptionDeleteModal /> : null}
 
       {!isLoading && listItems.length ? (
-        <SearchExceptions
-          defaultValue={location.filter}
-          onSearch={handleOnSearch}
-          placeholder={i18n.translate(
-            'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
-            {
-              defaultMessage: 'Search on the fields below: name, description, ip',
-            }
-          )}
-        />
+        <>
+          <SearchExceptions
+            defaultValue={location.filter}
+            onSearch={handleOnSearch}
+            placeholder={i18n.translate(
+              'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
+              {
+                defaultMessage: 'Search on the fields below: name, description, ip',
+              }
+            )}
+          />
+          <EuiSpacer size="m" />
+          <EuiText color="subdued" size="xs" data-test-subj="hostIsolationExceptions-totalCount">
+            <FormattedMessage
+              id="xpack.securitySolution.hostIsolationExceptions.list.totalCount"
+              defaultMessage="Showing {total, plural, one {# exception} other {# exceptions}}"
+              values={{ total: totalCountListItems }}
+            />
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
       ) : null}
 
       <PaginatedContent<ExceptionListItemSchema, typeof ArtifactEntryCard>

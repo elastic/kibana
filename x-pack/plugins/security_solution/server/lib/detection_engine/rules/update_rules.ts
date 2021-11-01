@@ -10,13 +10,19 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../alerting/server';
-import { readRules } from './read_rules';
+
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
-import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
+import {
+  maybeMute,
+  transformToAlertThrottle,
+  transformToNotifyWhen,
+  updateActions,
+  updateThrottleNotifyWhen,
+} from './utils';
 
 class UpdateError extends Error {
   public readonly statusCode: number;
@@ -27,20 +33,14 @@ class UpdateError extends Error {
 }
 
 export const updateRules = async ({
-  isRuleRegistryEnabled,
   spaceId,
   rulesClient,
   ruleStatusClient,
   defaultOutputIndex,
+  existingRule,
+  migratedRule,
   ruleUpdate,
-  savedObjectsClient,
 }: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
-  const existingRule = await readRules({
-    isRuleRegistryEnabled,
-    rulesClient,
-    ruleId: ruleUpdate.rule_id,
-    id: ruleUpdate.id,
-  });
   if (existingRule == null) {
     return null;
   }
@@ -86,9 +86,24 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
-    throttle: transformToAlertThrottle(ruleUpdate.throttle),
-    notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
+    actions: updateActions(
+      transformRuleToAlertAction,
+      migratedRule?.actions,
+      existingRule.actions,
+      ruleUpdate?.actions
+    ),
+    throttle: updateThrottleNotifyWhen(
+      transformToAlertThrottle,
+      migratedRule?.throttle,
+      existingRule.throttle,
+      ruleUpdate?.throttle
+    ),
+    notifyWhen: updateThrottleNotifyWhen(
+      transformToNotifyWhen,
+      migratedRule?.notifyWhen,
+      existingRule.notifyWhen,
+      ruleUpdate?.throttle
+    ),
   };
 
   const [validated, errors] = validate(newInternalRule, internalRuleUpdate);
