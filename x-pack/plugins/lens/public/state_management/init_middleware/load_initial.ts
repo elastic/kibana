@@ -6,13 +6,13 @@
  */
 
 import { MiddlewareAPI } from '@reduxjs/toolkit';
-import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { LensAppState, setState } from '..';
+import { setState } from '..';
 import { updateLayer, updateVisualizationState, LensStoreDeps } from '..';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
 import { initializeDatasources } from '../../editor_frame_service/editor_frame';
+import { getPreloadedState } from '../lens_slice';
 import { generateId } from '../../id_generator';
 import {
   getVisualizeFieldSuggestions,
@@ -55,17 +55,23 @@ export const getPersisted = async ({
 
 export function loadInitial(
   store: MiddlewareAPI,
-  {
+  storeDeps: LensStoreDeps,
+  redirectCallback: (savedObjectId?: string) => void,
+  initialInput?: LensEmbeddableInput
+) {
+  const {
     lensServices,
     datasourceMap,
-    visualizationMap,
     embeddableEditorIncomingState,
     initialContext,
-  }: LensStoreDeps,
-  redirectCallback: (savedObjectId?: string) => void,
-  initialInput?: LensEmbeddableInput,
-  emptyState?: LensAppState
-) {
+    visualizationMap,
+  } = storeDeps;
+  const {
+    resolvedDateRange,
+    searchSessionId,
+    isLinkedToOriginatingApp,
+    ...emptyState
+  } = getPreloadedState(storeDeps);
   const { getState, dispatch } = store;
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
   const { persistedDoc } = getState().lens;
@@ -115,11 +121,11 @@ export function loadInitial(
             switchToSuggestion(dispatch, selectedSuggestion, 'SWITCH_VISUALIZATION');
           }
         }
+
         const activeDatasourceId = getInitialDatasourceId(datasourceMap);
         const visualization = getState().lens.visualization;
         const activeVisualization =
           visualization.activeId && visualizationMap[visualization.activeId];
-
         if (visualization.state === null && activeVisualization) {
           const newLayerId = generateId();
 
@@ -158,10 +164,9 @@ export function loadInitial(
               initialInput.savedObjectId
             );
           }
+          const filters = injectFilterReferences(doc.state.filters, doc.references);
           // Don't overwrite any pinned filters
-          data.query.filterManager.setAppFilters(
-            injectFilterReferences(doc.state.filters, doc.references)
-          );
+          data.query.filterManager.setAppFilters(filters);
 
           const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(
             (stateMap, [datasourceId, datasourceState]) => ({
@@ -190,6 +195,8 @@ export function loadInitial(
 
               dispatch(
                 setState({
+                  isSaveable: true,
+                  filters,
                   query: doc.state.query,
                   searchSessionId:
                     dashboardFeatureFlag.allowByValueEmbeddables &&
@@ -198,7 +205,7 @@ export function loadInitial(
                     currentSessionId
                       ? currentSessionId
                       : data.search.session.start(),
-                  ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
+                  persistedDoc: doc,
                   activeDatasourceId,
                   visualization: {
                     activeId: doc.visualizationType,

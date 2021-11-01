@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+
 export const buildLastAlertsQuery = (ruleId: string | undefined | null) => {
   const queryFilter = [
     {
-      bool: { should: [{ match: { 'signal.status': 'open' } }], minimum_should_match: 1 },
+      bool: { should: [{ match: { [ALERT_WORKFLOW_STATUS]: 'open' } }], minimum_should_match: 1 },
     },
   ];
 

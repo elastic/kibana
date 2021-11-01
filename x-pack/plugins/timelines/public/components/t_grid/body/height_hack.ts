@@ -35,6 +35,11 @@ const DATA_GRID_HEIGHT_BY_PAGE_SIZE: { [key: number]: number } = {
  *
  * Please delete me and allow DataGrid to calculate its height when the bug is fixed.
  */
+
+const dataGridRowHeight = 36;
+const headerSectionHeight = 32;
+const additionalFiltersHeight = 44;
+
 export const useDataGridHeightHack = (pageSize: number, rowCount: number) => {
   const [height, setHeight] = useState(DATA_GRID_HEIGHT_BY_PAGE_SIZE[pageSize]);
 
@@ -44,7 +49,11 @@ export const useDataGridHeightHack = (pageSize: number, rowCount: number) => {
 
       if (rowCount === pageSize) {
         setHeight(DATA_GRID_HEIGHT_BY_PAGE_SIZE[pageSize]);
+      } else if (rowCount <= pageSize) {
+        // This is unnecessary if we add rowCount > pageSize below
+        setHeight(dataGridRowHeight * rowCount + (headerSectionHeight + additionalFiltersHeight));
       } else if (
+        // rowCount > pageSize && // This will fix the issue but is always full height so has a lot of empty state
         gridVirtualized &&
         gridVirtualized.children[0].clientHeight !== gridVirtualized.clientHeight // check if it has vertical scroll
       ) {

@@ -6,6 +6,7 @@
  */
 
 import { ExistsFilter, Filter } from '@kbn/es-query';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   buildAlertsRuleIdFilter,
   buildAlertStatusesFilter,
@@ -73,7 +74,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'signal.status',
+          key: ALERT_WORKFLOW_STATUS,
           negate: false,
           params: {
             query: 'acknowledged',
@@ -85,12 +86,12 @@ describe('alerts default_config', () => {
             should: [
               {
                 term: {
-                  'signal.status': 'acknowledged',
+                  [ALERT_WORKFLOW_STATUS]: 'acknowledged',
                 },
               },
               {
                 term: {
-                  'signal.status': 'in-progress',
+                  [ALERT_WORKFLOW_STATUS]: 'in-progress',
                 },
               },
             ],
@@ -107,7 +108,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'signal.status',
+          key: ALERT_WORKFLOW_STATUS,
           negate: false,
           params: {
             query: 'open',
@@ -116,7 +117,7 @@ describe('alerts default_config', () => {
         },
         query: {
           term: {
-            'signal.status': 'open',
+            [ALERT_WORKFLOW_STATUS]: 'open',
           },
         },
       };
@@ -139,17 +140,17 @@ describe('alerts default_config', () => {
             should: [
               {
                 term: {
-                  'signal.status': 'open',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
                 },
               },
               {
                 term: {
-                  'signal.status': 'acknowledged',
+                  [ALERT_WORKFLOW_STATUS]: 'acknowledged',
                 },
               },
               {
                 term: {
-                  'signal.status': 'in-progress',
+                  [ALERT_WORKFLOW_STATUS]: 'in-progress',
                 },
               },
             ],

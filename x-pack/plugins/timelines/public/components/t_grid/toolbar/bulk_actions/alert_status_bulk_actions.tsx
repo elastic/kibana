@@ -23,7 +23,7 @@ interface OwnProps {
   id: string;
   totalItems: number;
   filterStatus?: AlertStatus;
-  query: string;
+  query?: string;
   indexName: string;
   onActionSuccess?: OnUpdateAlertStatusSuccess;
   onActionFailure?: OnUpdateAlertStatusError;
