@@ -36,7 +36,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     name: 'SN',
     config: {
       apiUrl: 'https://test/',
-      isLegacy: true,
+      usesTableApi: true,
     },
   } as ServiceNowActionConnector;
 
@@ -44,7 +44,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     ...usesTableApiConnector,
     config: {
       ...usesTableApiConnector.config,
-      isLegacy: false,
+      usesTableApi: false,
     },
   } as ServiceNowActionConnector;
 
@@ -350,7 +350,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
           id: usesTableApiConnector.id,
           connector: {
             name: usesTableApiConnector.name,
-            config: { ...usesTableApiConnector.config, isLegacy: false },
+            config: { ...usesTableApiConnector.config, usesTableApi: false },
             secrets: usesTableApiConnector.secrets,
           },
         })
@@ -413,6 +413,44 @@ describe('ServiceNowActionConnectorFields renders', () => {
           .text()
           .includes(errorMessage)
       ).toBeTruthy();
+    });
+
+    test('should set the usesTableApi to false when creating a connector', async () => {
+      const newConnector = { ...usesTableApiConnector, config: {}, secrets: {} };
+      const editActionConfig = jest.fn();
+
+      mountWithIntl(
+        <ServiceNowConnectorFields
+          // @ts-expect-error
+          action={newConnector}
+          errors={{ apiUrl: [], username: [], password: [] }}
+          editActionConfig={editActionConfig}
+          editActionSecrets={() => {}}
+          readOnly={false}
+          setCallbacks={setCallbacks}
+          isEdit={false}
+        />
+      );
+
+      expect(editActionConfig).toHaveBeenCalledWith('usesTableApi', false);
+    });
+
+    test('it should set the legacy attribute if it is not undefined', async () => {
+      const editActionConfig = jest.fn();
+
+      mountWithIntl(
+        <ServiceNowConnectorFields
+          action={usesTableApiConnector}
+          errors={{ apiUrl: [], username: [], password: [] }}
+          editActionConfig={editActionConfig}
+          editActionSecrets={() => {}}
+          readOnly={false}
+          setCallbacks={setCallbacks}
+          isEdit={false}
+        />
+      );
+
+      expect(editActionConfig).not.toHaveBeenCalled();
     });
   });
 });

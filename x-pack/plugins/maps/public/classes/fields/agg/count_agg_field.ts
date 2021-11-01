@@ -18,13 +18,20 @@ export class CountAggField implements IESAggField {
   protected readonly _source: IESAggSource;
   private readonly _origin: FIELD_ORIGIN;
   protected readonly _label?: string;
-  private readonly _canReadFromGeoJson: boolean;
 
-  constructor({ label, source, origin, canReadFromGeoJson = true }: CountAggFieldParams) {
+  constructor({ label, source, origin }: CountAggFieldParams) {
     this._source = source;
     this._origin = origin;
     this._label = label;
-    this._canReadFromGeoJson = canReadFromGeoJson;
+  }
+
+  supportsFieldMetaFromEs(): boolean {
+    return false;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API returns meta tiles for aggregation metrics
+    return true;
   }
 
   _getAggType(): AGG_TYPE {
@@ -41,6 +48,10 @@ export class CountAggField implements IESAggField {
 
   getName(): string {
     return this._source.getAggKey(this._getAggType(), this.getRootName());
+  }
+
+  getMbFieldName(): string {
+    return this._source.isMvt() ? '_count' : this.getName();
   }
 
   getRootName(): string {
@@ -75,10 +86,6 @@ export class CountAggField implements IESAggField {
     return null;
   }
 
-  supportsFieldMeta(): boolean {
-    return false;
-  }
-
   getBucketCount() {
     return 0;
   }
@@ -97,14 +104,6 @@ export class CountAggField implements IESAggField {
 
   async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
     return null;
-  }
-
-  supportsAutoDomain(): boolean {
-    return true;
-  }
-
-  canReadFromGeoJson(): boolean {
-    return this._canReadFromGeoJson;
   }
 
   isEqual(field: IESAggField) {

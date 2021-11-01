@@ -136,6 +136,7 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
   ElasticsearchConfigPreboot,
+  ElasticsearchErrorDetails,
 } from './elasticsearch';
 
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';

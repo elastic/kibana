@@ -538,8 +538,8 @@ export const TimeseriesConfig = injectI18n(function (props) {
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            label={i18n.translate('visTypeTimeseries.timeSeries.overrideIndexPatternLabel', {
-              defaultMessage: 'Override Index Pattern?',
+            label={i18n.translate('visTypeTimeseries.timeSeries.overrideDataViewLabel', {
+              defaultMessage: 'Override data view?',
             })}
           >
             <YesNo

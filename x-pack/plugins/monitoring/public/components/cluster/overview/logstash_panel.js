@@ -98,6 +98,7 @@ export function LogstashPanel(props) {
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
                   href={goToLogstash()}
+                  data-test-subj="lsOverview"
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel',
                     {

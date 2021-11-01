@@ -50,6 +50,8 @@ describe('Indicator Match Alerts', () => {
     threatQuery: '*:*',
     to: 'now',
     type: 'threat_match',
+    query: '*:*',
+    language: 'kuery',
   };
   const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({

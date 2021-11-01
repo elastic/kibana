@@ -417,10 +417,10 @@ export const useNavigateToWizardWithClonedJob = () => {
         sourceIndexId = dv.id;
       } else {
         toasts.addDanger(
-          i18n.translate('xpack.ml.dataframe.analyticsList.noSourceIndexPatternForClone', {
+          i18n.translate('xpack.ml.dataframe.analyticsList.noSourceDataViewForClone', {
             defaultMessage:
-              'Unable to clone the analytics job. No index pattern exists for index {indexPattern}.',
-            values: { indexPattern: sourceIndex },
+              'Unable to clone the analytics job. No data view exists for index {dataView}.',
+            values: { dataView: sourceIndex },
           })
         );
       }
@@ -428,14 +428,10 @@ export const useNavigateToWizardWithClonedJob = () => {
       const error = extractErrorMessage(e);
 
       toasts.addDanger(
-        i18n.translate(
-          'xpack.ml.dataframe.analyticsList.fetchSourceIndexPatternForCloneErrorMessage',
-          {
-            defaultMessage:
-              'An error occurred checking if index pattern {indexPattern} exists: {error}',
-            values: { indexPattern: sourceIndex, error },
-          }
-        )
+        i18n.translate('xpack.ml.dataframe.analyticsList.fetchSourceDataViewForCloneErrorMessage', {
+          defaultMessage: 'An error occurred checking if data view {dataView} exists: {error}',
+          values: { dataView: sourceIndex, error },
+        })
       );
     }
 

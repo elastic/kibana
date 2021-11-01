@@ -101,7 +101,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   supportsFieldMeta() {
-    if (!this.isComplete() || !this._field || !this._field.supportsFieldMeta()) {
+    if (!this.isComplete() || !this._field || !this._field.supportsFieldMetaFromEs()) {
       return false;
     }
 
@@ -135,7 +135,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getMbColor() {
-    if (!this.getFieldName()) {
+    if (!this.getMbFieldName()) {
       return null;
     }
 
@@ -145,7 +145,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getOrdinalColorMbExpression() {
-    const targetName = this.getFieldName();
+    const targetName = this.getMbFieldName();
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
         // custom color ramp config is not complete
@@ -321,7 +321,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     }
 
     mbStops.push(defaultColor); // last color is default color
-    return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
+    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
 
   _getOrdinalBreaks(symbolId?: string): Break[] {
