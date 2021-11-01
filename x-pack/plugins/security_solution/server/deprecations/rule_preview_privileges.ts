@@ -74,7 +74,7 @@ export const registerRulePreviewPrivilegeDeprecations = ({
             'xpack.securitySolution.deprecations.rulePreviewPrivileges.message',
             {
               values: {
-                previewIndexPrefix: '.siem-preview-signals',
+                previewIndexPrefix: '.alerts-security.preview.alert',
                 signalsIndexPrefix: DEFAULT_SIGNALS_INDEX,
               },
               defaultMessage:
