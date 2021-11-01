@@ -74,7 +74,6 @@ import {
 import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
-import { ActionsAuthorizationAuditLogger } from './authorization/audit_logger';
 import { ActionExecutionSource } from './lib/action_execution_source';
 import {
   getAuthorizationModeBySource,
@@ -479,9 +478,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       authorizationMode,
       authorization: this.security?.authz,
       authentication: this.security?.authc,
-      auditLogger: new ActionsAuthorizationAuditLogger(
-        this.security?.audit.getLogger(ACTIONS_FEATURE.id)
-      ),
     });
   };
 
