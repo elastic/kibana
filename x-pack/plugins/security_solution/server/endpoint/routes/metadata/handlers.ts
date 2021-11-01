@@ -85,8 +85,8 @@ const errorHandler = <E extends Error>(
     return res.badRequest({ body: error });
   }
 
-  // legacy check for Boom errors. `ts-ignore` is for the errors around non-standard error properties
-  // @ts-ignore
+  // legacy check for Boom errors. for the errors around non-standard error properties
+  // @ts-expect-error TS2339
   const boomStatusCode = error.isBoom && error?.output?.statusCode;
   if (boomStatusCode) {
     return res.customError({
