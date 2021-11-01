@@ -222,8 +222,6 @@ export const getPendingActionCounts = async (
     agentIDs
   );
 
-  //
-
   const pending: EndpointPendingActions[] = [];
   for (const agentId of agentIDs) {
     const agentResponses = responses[agentId];
@@ -270,11 +268,11 @@ export const getPendingActionCounts = async (
 };
 
 /**
- * Returns a boolean for search result
+ * Returns a string of action ids for search result
  *
  * @param esClient
  * @param actionIds
- * @param agentIds
+ * @param agentId
  */
 const hasEndpointResponseDoc = async ({
   actionIds,
@@ -307,7 +305,7 @@ const hasEndpointResponseDoc = async ({
 };
 
 /**
- * Returns back a map of elastic Agent IDs to array of Action IDs that have received a response.
+ * Returns back a map of elastic Agent IDs to array of action responses that have a response.
  *
  * @param esClient
  * @param metadataService
