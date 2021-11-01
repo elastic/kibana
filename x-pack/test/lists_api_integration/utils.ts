@@ -279,10 +279,17 @@ export const waitForListItem = async (
   fileName: string
 ): Promise<void> => {
   await waitFor(async () => {
-    const { status } = await supertest
+    const { status, body } = await supertest
       .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${itemValue}`)
       .send();
-
+    if (status !== 200) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Did not get an expected 200 "ok" when waiting for a list item (waitForListItem). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+          body
+        )}, status: ${JSON.stringify(status)}`
+      );
+    }
     return status === 200;
   }, `waitForListItem fileName: "${fileName}" itemValue: "${itemValue}"`);
 };
@@ -318,9 +325,17 @@ export const waitForTextListItem = async (
   await waitFor(async () => {
     const promises = await Promise.all(
       tokens.map(async (token) => {
-        const { status } = await supertest
+        const { status, body } = await supertest
           .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${token}`)
           .send();
+        if (status !== 200) {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Did not get an expected 200 "ok" when waiting for a text list item (waitForTextListItem). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+              body
+            )}, status: ${JSON.stringify(status)}`
+          );
+        }
         return status === 200;
       })
     );
