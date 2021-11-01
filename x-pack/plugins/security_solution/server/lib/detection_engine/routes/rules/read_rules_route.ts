@@ -70,12 +70,10 @@ export const readRulesRoute = (
             ruleAlertId: rule.id,
             logger,
           });
-          const ruleStatuses = await ruleStatusClient.find({
-            logsCount: 1,
+          const currentStatus = await ruleStatusClient.getCurrentStatus({
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
-          const [currentStatus] = ruleStatuses;
           if (currentStatus != null && rule.executionStatus.status === 'error') {
             currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
             currentStatus.attributes.lastFailureAt =
