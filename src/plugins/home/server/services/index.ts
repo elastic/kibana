@@ -9,9 +9,9 @@
 // provided to other plugins as APIs
 // should model the plugin lifecycle
 
-export type { TutorialsRegistrySetup, TutorialsRegistryStart } from './tutorials';
+export { TutorialsRegistry, TutorialsCategory } from './tutorials';
 
-export { TutorialsCategory } from './tutorials';
+export type { TutorialsRegistrySetup, TutorialsRegistryStart } from './tutorials';
 
 export type {
   InstructionSetSchema,
@@ -26,7 +26,7 @@ export type {
   ScopedTutorialContextFactory,
 } from './tutorials';
 
-export { EmbeddableTypes } from './sample_data';
+export { EmbeddableTypes, SampleDataRegistry } from './sample_data';
 
 export type {
   AppLinkData,
