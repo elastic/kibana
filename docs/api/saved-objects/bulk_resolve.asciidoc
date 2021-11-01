@@ -46,7 +46,8 @@ that "exactMatch" is the default outcome, and the outcome only changes if an ali
 ==== Response code
 
 `200`::
-  Indicates a successful call.
+  Indicates a successful call. Note, this HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual
+  objects will be returned in the response body. See the example below for details.
 
 [[saved-objects-api-bulk-resolve-body-example]]
 ==== Example

@@ -12,7 +12,7 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { getAPMHref } from '../../shared/Links/apm/APMLink';
+import { getLegacyApmHref } from '../../shared/Links/apm/APMLink';
 import { APMQueryParams } from '../../shared/Links/url_helpers';
 import { CytoscapeContext } from './Cytoscape';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
@@ -112,7 +112,7 @@ export function Controls() {
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
   const duration = parseInt(theme.eui.euiAnimSpeedFast, 10);
   const downloadUrl = useDebugDownloadUrl(cy);
-  const viewFullMapUrl = getAPMHref({
+  const viewFullMapUrl = getLegacyApmHref({
     basePath,
     path: '/service-map',
     search: `kuery=${encodeURIComponent(kuery)}`,

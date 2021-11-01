@@ -108,7 +108,6 @@ Array [
   "Refresh indices",
   "Clear indices cache",
   "Flush indices",
-  "Freeze indices",
   "Delete indices",
 ]
 `;
@@ -134,7 +133,6 @@ Array [
   "Refresh index",
   "Clear index cache",
   "Flush index",
-  "Freeze index",
   "Delete index",
 ]
 `;
