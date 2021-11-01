@@ -36,8 +36,8 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
       loadTestFile(require.resolve('./correlations/latency'));
     });
 
-    describe('metadata/event_metadata', function () {
-      loadTestFile(require.resolve('./metadata/event_metadata'));
+    describe('event_metadata/event_metadata', function () {
+      loadTestFile(require.resolve('./event_metadata/event_metadata'));
     });
 
     describe('metrics_charts/metrics_charts', function () {
@@ -242,6 +242,11 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
 
     describe('errors/distribution', function () {
       loadTestFile(require.resolve('./errors/distribution'));
+    });
+
+    // Dependencies
+    describe('dependencies/metadata', function () {
+      loadTestFile(require.resolve('./dependencies/metadata'));
     });
 
     registry.run();
