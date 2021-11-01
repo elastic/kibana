@@ -5,66 +5,107 @@
  * 2.0.
  */
 
-import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../../../../../src/core/server/mocks';
+import type { MockedKeys } from '@kbn/utility-types/jest';
+import { coreMock } from 'src/core/server/mocks';
+
+import { ActionsApiRequestHandlerContext } from '../../../../../../actions/server';
+import { AlertingApiRequestHandlerContext } from '../../../../../../alerting/server';
 import { rulesClientMock } from '../../../../../../alerting/server/mocks';
+import { actionsClientMock } from '../../../../../../actions/server/mocks';
 import { licensingMock } from '../../../../../../licensing/server/mocks';
+import { listMock } from '../../../../../../lists/server/mocks';
+import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
+
 import { siemMock } from '../../../../mocks';
+import { createMockConfig } from '../../../../config.mock';
 import { ruleExecutionLogClientMock } from '../../rule_execution_log/__mocks__/rule_execution_log_client';
+import { requestMock } from './request';
+import { internalFrameworkRequest } from '../../../framework';
 
-const createMockClients = () => ({
-  rulesClient: rulesClientMock.create(),
-  licensing: { license: licensingMock.createLicenseMock() },
-  clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-  ruleExecutionLogClient: ruleExecutionLogClientMock.create(),
-  appClient: siemMock.createClient(),
-});
+import type {
+  SecuritySolutionApiRequestHandlerContext,
+  SecuritySolutionRequestHandlerContext,
+} from '../../../../types';
 
-/**
- * Adds mocking to the interface so we don't have to cast everywhere
- */
-type SecuritySolutionRequestHandlerContextMock = SecuritySolutionRequestHandlerContext & {
-  core: {
-    elasticsearch: {
-      client: {
-        asCurrentUser: {
-          updateByQuery: jest.Mock;
-          search: jest.Mock;
-          security: {
-            hasPrivileges: jest.Mock;
-          };
-        };
-      };
-    };
+const createMockClients = () => {
+  const core = coreMock.createRequestHandlerContext();
+  const license = licensingMock.createLicenseMock();
+
+  return {
+    core,
+    clusterClient: core.elasticsearch.client,
+    savedObjectsClient: core.savedObjects.client,
+
+    licensing: {
+      ...licensingMock.createRequestHandlerContext({ license }),
+      license,
+    },
+    lists: {
+      listClient: listMock.getListClient(),
+      exceptionListClient: listMock.getExceptionListClient(core.savedObjects.client),
+    },
+    rulesClient: rulesClientMock.create(),
+    actionsClient: actionsClientMock.create(),
+    ruleDataService: ruleRegistryMocks.createRuleDataService(),
+
+    config: createMockConfig(),
+    appClient: siemMock.createClient(),
+    ruleExecutionLogClient: ruleExecutionLogClientMock.create(),
   };
 };
 
+type MockClients = ReturnType<typeof createMockClients>;
+
+type SecuritySolutionRequestHandlerContextMock =
+  MockedKeys<SecuritySolutionRequestHandlerContext> & {
+    core: MockClients['core'];
+  };
+
 const createRequestContextMock = (
-  clients: ReturnType<typeof createMockClients> = createMockClients()
+  clients: MockClients = createMockClients()
 ): SecuritySolutionRequestHandlerContextMock => {
-  const coreContext = coreMock.createRequestHandlerContext();
   return {
-    alerting: { getRulesClient: jest.fn(() => clients.rulesClient) },
-    core: {
-      ...coreContext,
-      elasticsearch: {
-        ...coreContext.elasticsearch,
-        client: clients.clusterClient,
-      },
-      savedObjects: { client: clients.savedObjectsClient },
-    },
+    core: clients.core,
+    securitySolution: createSecuritySolutionRequestContextMock(clients),
+    actions: {
+      getActionsClient: jest.fn(() => clients.actionsClient),
+    } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>,
+    alerting: {
+      getRulesClient: jest.fn(() => clients.rulesClient),
+    } as unknown as jest.Mocked<AlertingApiRequestHandlerContext>,
     licensing: clients.licensing,
-    securitySolution: {
-      getAppClient: jest.fn(() => clients.appClient),
-      getExecutionLogClient: jest.fn(() => clients.ruleExecutionLogClient),
-      getSpaceId: jest.fn(() => 'default'),
+    lists: {
+      getListClient: jest.fn(() => clients.lists.listClient),
+      getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
     },
-  } as unknown as SecuritySolutionRequestHandlerContextMock;
+  };
+};
+
+const createSecuritySolutionRequestContextMock = (
+  clients: MockClients
+): jest.Mocked<SecuritySolutionApiRequestHandlerContext> => {
+  const core = clients.core;
+  const kibanaRequest = requestMock.create();
+
+  return {
+    core,
+    getConfig: jest.fn(() => clients.config),
+    getFrameworkRequest: jest.fn(() => {
+      return {
+        ...kibanaRequest.body,
+        [internalFrameworkRequest]: kibanaRequest,
+        context: { core },
+        user: {
+          username: 'mockUser',
+        },
+      };
+    }),
+    getAppClient: jest.fn(() => clients.appClient),
+    getSpaceId: jest.fn(() => 'default'),
+    getRuleDataService: jest.fn(() => clients.ruleDataService),
+    getExecutionLogClient: jest.fn(() => clients.ruleExecutionLogClient),
+    getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
+  };
 };
 
 const createTools = () => {

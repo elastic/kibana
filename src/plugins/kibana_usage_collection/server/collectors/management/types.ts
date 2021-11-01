@@ -31,6 +31,7 @@ export interface UsageStats {
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
+  'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
@@ -39,6 +40,7 @@ export interface UsageStats {
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
+  'visualization:useLegacyTimeAxis': boolean;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;
   'csv:separator': string;
@@ -123,4 +125,5 @@ export interface UsageStats {
   'labs:presentation:timeToPresent': boolean;
   'labs:dashboard:enable_ui': boolean;
   'labs:dashboard:deferBelowFold': boolean;
+  'labs:dashboard:dashboardControls': boolean;
 }

@@ -31,7 +31,7 @@ export const cli = () => {
       }
     },
     {
-      description: 'Load Host Isolation Exceptions',
+      description: 'Load Host isolation exceptions',
       flags: {
         string: ['kibana'],
         default: {

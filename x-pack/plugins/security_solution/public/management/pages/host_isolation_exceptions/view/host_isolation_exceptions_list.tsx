@@ -7,10 +7,11 @@
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
-import React, { Dispatch, useCallback } from 'react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import React, { Dispatch, useCallback, useEffect } from 'react';
+import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
 import {
   getCurrentLocation,
@@ -19,6 +20,7 @@ import {
   getListIsLoading,
   getListItems,
   getListPagination,
+  getTotalListItems,
 } from '../store/selector';
 import {
   useHostIsolationExceptionsNavigateCallback,
@@ -37,6 +39,8 @@ import {
   DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
   EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
 } from './components/translations';
+import { getEndpointListPath } from '../../../common/routing';
+import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -45,16 +49,23 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
 
 export const HostIsolationExceptionsList = () => {
   const listItems = useHostIsolationExceptionsSelector(getListItems);
+  const totalCountListItems = useHostIsolationExceptionsSelector(getTotalListItems);
   const pagination = useHostIsolationExceptionsSelector(getListPagination);
   const isLoading = useHostIsolationExceptionsSelector(getListIsLoading);
   const fetchError = useHostIsolationExceptionsSelector(getListFetchError);
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
   const itemToDelete = useHostIsolationExceptionsSelector(getItemToDelete);
-
-  const showFlyout = !!location.show;
-
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
+  const history = useHistory();
+  const privileges = useEndpointPrivileges();
+  const showFlyout = privileges.canIsolateHost && !!location.show;
+
+  useEffect(() => {
+    if (!isLoading && listItems.length === 0 && !privileges.canIsolateHost) {
+      history.replace(getEndpointListPath({ name: 'endpointList' }));
+    }
+  }, [history, isLoading, listItems.length, privileges.canIsolateHost]);
 
   const handleOnSearch = useCallback(
     (query: string) => {
@@ -63,34 +74,35 @@ export const HostIsolationExceptionsList = () => {
     [navigateCallback]
   );
 
-  const handleItemComponentProps = (element: ExceptionListItemSchema): ArtifactEntryCardProps => ({
-    item: element,
-    'data-test-subj': `hostIsolationExceptionsCard`,
-    actions: [
-      {
-        icon: 'trash',
-        onClick: () => {
-          navigateCallback({
-            show: 'edit',
-            id: element.id,
-          });
-        },
-        'data-test-subj': 'editHostIsolationException',
-        children: EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
+  function handleItemComponentProps(element: ExceptionListItemSchema): ArtifactEntryCardProps {
+    const editAction = {
+      icon: 'controlsHorizontal',
+      onClick: () => {
+        navigateCallback({
+          show: 'edit',
+          id: element.id,
+        });
       },
-      {
-        icon: 'trash',
-        onClick: () => {
-          dispatch({
-            type: 'hostIsolationExceptionsMarkToDelete',
-            payload: element,
-          });
-        },
-        'data-test-subj': 'deleteHostIsolationException',
-        children: DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
+      'data-test-subj': 'editHostIsolationException',
+      children: EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
+    };
+    const deleteAction = {
+      icon: 'trash',
+      onClick: () => {
+        dispatch({
+          type: 'hostIsolationExceptionsMarkToDelete',
+          payload: element,
+        });
       },
-    ],
-  });
+      'data-test-subj': 'deleteHostIsolationException',
+      children: DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
+    };
+    return {
+      item: element,
+      'data-test-subj': `hostIsolationExceptionsCard`,
+      actions: privileges.canIsolateHost ? [editAction, deleteAction] : [deleteAction],
+    };
+  }
 
   const handlePaginatedContentChange: HostIsolationExceptionPaginatedContent['onChange'] =
     useCallback(
@@ -117,38 +129,63 @@ export const HostIsolationExceptionsList = () => {
       title={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageTitle"
-          defaultMessage="Host Isolation Exceptions"
+          defaultMessage="Host isolation exceptions"
+        />
+      }
+      subtitle={
+        <FormattedMessage
+          id="xpack.securitySolution.hostIsolationExceptions.list.pageSubTitle"
+          defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
         />
       }
       actions={
-        <EuiButton
-          fill
-          iconType="plusInCircle"
-          isDisabled={showFlyout}
-          onClick={handleAddButtonClick}
-          data-test-subj="hostIsolationExceptionsListAddButton"
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.hostIsolationExceptions.list.addButton"
-            defaultMessage="Add Host Isolation Exception"
-          />
-        </EuiButton>
+        privileges.canIsolateHost && listItems.length > 0 ? (
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            isDisabled={showFlyout}
+            onClick={handleAddButtonClick}
+            data-test-subj="hostIsolationExceptionsListAddButton"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.hostIsolationExceptions.list.addButton"
+              defaultMessage="Add Host isolation exception"
+            />
+          </EuiButton>
+        ) : (
+          []
+        )
       }
+      hideHeader={isLoading || listItems.length === 0}
     >
       {showFlyout && <HostIsolationExceptionsFormFlyout />}
 
-      <SearchExceptions
-        defaultValue={location.filter}
-        onSearch={handleOnSearch}
-        placeholder={i18n.translate(
-          'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
-          {
-            defaultMessage: 'Search on the fields below: name, description, ip',
-          }
-        )}
-      />
-      <EuiSpacer size="l" />
       {itemToDelete ? <HostIsolationExceptionDeleteModal /> : null}
+
+      {!isLoading && listItems.length ? (
+        <>
+          <SearchExceptions
+            defaultValue={location.filter}
+            onSearch={handleOnSearch}
+            placeholder={i18n.translate(
+              'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
+              {
+                defaultMessage: 'Search on the fields below: name, description, ip',
+              }
+            )}
+          />
+          <EuiSpacer size="m" />
+          <EuiText color="subdued" size="xs" data-test-subj="hostIsolationExceptions-totalCount">
+            <FormattedMessage
+              id="xpack.securitySolution.hostIsolationExceptions.list.totalCount"
+              defaultMessage="Showing {total, plural, one {# exception} other {# exceptions}}"
+              values={{ total: totalCountListItems }}
+            />
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+
       <PaginatedContent<ExceptionListItemSchema, typeof ArtifactEntryCard>
         items={listItems}
         ItemComponent={ArtifactEntryCard}

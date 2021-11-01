@@ -13,10 +13,18 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export type SubHeaderProps = TouchedByUsersProps &
   EffectScopeProps &
-  Pick<CommonProps, 'data-test-subj'>;
+  Pick<CommonProps, 'data-test-subj'> & {
+    loadingPoliciesList?: boolean;
+  };
 
 export const CardSubHeader = memo<SubHeaderProps>(
-  ({ createdBy, updatedBy, policies, 'data-test-subj': dataTestSubj }) => {
+  ({
+    createdBy,
+    updatedBy,
+    policies,
+    loadingPoliciesList = false,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
@@ -29,7 +37,11 @@ export const CardSubHeader = memo<SubHeaderProps>(
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EffectScope policies={policies} data-test-subj={getTestId('effectScope')} />
+          <EffectScope
+            policies={policies}
+            loadingPoliciesList={loadingPoliciesList}
+            data-test-subj={getTestId('effectScope')}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

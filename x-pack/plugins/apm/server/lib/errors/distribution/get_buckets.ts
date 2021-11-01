@@ -80,13 +80,12 @@ export async function getBuckets({
 
   const buckets = (resp.aggregations?.distribution.buckets || []).map(
     (bucket) => ({
-      key: bucket.key,
-      count: bucket.doc_count,
+      x: bucket.key,
+      y: bucket.doc_count,
     })
   );
 
   return {
-    noHits: resp.hits.total.value === 0,
     buckets: resp.hits.total.value > 0 ? buckets : [],
   };
 }

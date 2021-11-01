@@ -22,7 +22,7 @@ describe('buildTimelineDetailsQuery', () => {
 
     expect(query).toMatchInlineSnapshot(`
       Object {
-        "allowNoIndices": true,
+        "allow_no_indices": true,
         "body": Object {
           "_source": true,
           "docvalue_fields": Array [
@@ -53,7 +53,7 @@ describe('buildTimelineDetailsQuery', () => {
             },
           },
         },
-        "ignoreUnavailable": true,
+        "ignore_unavailable": true,
         "index": ".siem-signals-default",
         "size": 1,
       }

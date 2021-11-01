@@ -28,7 +28,8 @@ type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const devtoolMessage = 'DevTools listening on (ws://localhost:4000)';
 const fontNotFoundMessage = 'Could not find the default font';
 
-describe('POST /diagnose/browser', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/89369
+describe.skip('POST /diagnose/browser', () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   const mockLogger = createMockLevelLogger();
@@ -52,11 +53,13 @@ describe('POST /diagnose/browser', () => {
       () => ({ usesUiCapabilities: () => false })
     );
 
-    const mockSetupDeps = createMockPluginSetup({
-      router: httpSetup.createRouter(''),
-    });
-
-    core = await createMockReportingCore(config, mockSetupDeps);
+    core = await createMockReportingCore(
+      config,
+      createMockPluginSetup({
+        router: httpSetup.createRouter(''),
+        security: null,
+      })
+    );
 
     mockedSpawn.mockImplementation(() => ({
       removeAllListeners: jest.fn(),

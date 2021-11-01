@@ -9,15 +9,16 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import {
+  ExperimentalFeatures,
   getExperimentalAllowedValues,
   isValidExperimentalValue,
+  parseExperimentalConfigValue,
 } from '../common/experimental_features';
 import { UnderlyingLogClient } from './lib/detection_engine/rule_execution_log/types';
 
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
   maxRuleImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
   maxTimelineImportExportSize: schema.number({ defaultValue: 10000 }),
@@ -113,7 +114,7 @@ export const configSchema = schema.object({
         schema.literal(UnderlyingLogClient.eventLog),
         schema.literal(UnderlyingLogClient.savedObjects),
       ],
-      { defaultValue: UnderlyingLogClient.savedObjects }
+      { defaultValue: UnderlyingLogClient.eventLog }
     ),
   }),
 
@@ -135,7 +136,18 @@ export const configSchema = schema.object({
   prebuiltRulesFromSavedObjects: schema.boolean({ defaultValue: true }),
 });
 
-export const createConfig = (context: PluginInitializerContext) =>
-  context.config.get<TypeOf<typeof configSchema>>();
+export type ConfigSchema = TypeOf<typeof configSchema>;
 
-export type ConfigType = TypeOf<typeof configSchema>;
+export type ConfigType = ConfigSchema & {
+  experimentalFeatures: ExperimentalFeatures;
+};
+
+export const createConfig = (context: PluginInitializerContext): ConfigType => {
+  const pluginConfig = context.config.get<TypeOf<typeof configSchema>>();
+  const experimentalFeatures = parseExperimentalConfigValue(pluginConfig.enableExperimental);
+
+  return {
+    ...pluginConfig,
+    experimentalFeatures,
+  };
+};

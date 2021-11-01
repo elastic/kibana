@@ -14,7 +14,7 @@ import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
@@ -147,7 +147,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const goToDetectionEngine = useCallback(
       (ev) => {
         ev.preventDefault();
-        navigateToApp(APP_ID, {
+        navigateToApp(APP_UI_ID, {
           deepLinkId: SecurityPageName.alerts,
           path: getDetectionEngineUrl(urlSearch),
         });
@@ -257,7 +257,11 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     }, [showLinkToAlerts, goToDetectionEngine, formatUrl]);
 
     const titleText = useMemo(
-      () => (onlyField == null ? title : i18n.TOP(onlyField)),
+      () => (
+        <span className="eui-textBreakNormal">
+          {onlyField == null ? title : i18n.TOP(onlyField)}
+        </span>
+      ),
       [onlyField, title]
     );
 

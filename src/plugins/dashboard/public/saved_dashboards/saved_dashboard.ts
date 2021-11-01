@@ -18,6 +18,8 @@ import { extractReferences, injectReferences } from '../../common/saved_dashboar
 import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 import { DashboardOptions } from '../types';
 
+import { ControlStyle } from '../../../presentation_util/public';
+
 export interface DashboardSavedObject extends SavedObject {
   id?: string;
   timeRestore: boolean;
@@ -36,6 +38,8 @@ export interface DashboardSavedObject extends SavedObject {
   getFullEditPath: (editMode?: boolean) => string;
   outcome?: string;
   aliasId?: string;
+
+  controlGroupInput?: { controlStyle?: ControlStyle; panelsJSON?: string };
 }
 
 const defaults = {
@@ -86,6 +90,13 @@ export function createSavedDashboardClass(
           value: { type: 'integer' },
         },
       },
+      controlGroupInput: {
+        type: 'object',
+        properties: {
+          controlStyle: { type: 'keyword' },
+          panelsJSON: { type: 'text' },
+        },
+      },
     };
     public static fieldOrder = ['title', 'description'];
     public static searchSource = true;
@@ -114,14 +125,14 @@ export function createSavedDashboardClass(
         },
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
-        id: typeof arg === 'string' ? arg : arg.id,
+        id: typeof arg === 'object' ? arg.id : arg,
 
         // default values that will get assigned if the doc is new
         defaults,
       });
 
-      const id: string = typeof arg === 'string' ? arg : arg.id;
-      const useResolve = typeof arg === 'string' ? false : arg.useResolve;
+      const id: string = typeof arg === 'object' ? arg.id : arg;
+      const useResolve = typeof arg === 'object' ? arg.useResolve : false;
 
       this.getFullPath = () => `/app/dashboards#${createDashboardEditUrl(this.aliasId || this.id)}`;
 
