@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback } from 'react';
 import styled from 'styled-components';
 import { TypedLensByValueInput } from '../../../../../lens/public';
-import { useUiTracker, TrackEvent, METRIC_TYPE } from '../../../hooks/use_track_metric';
+import { useUiTracker } from '../../../hooks/use_track_metric';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
