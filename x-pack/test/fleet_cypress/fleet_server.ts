@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChildProcess, exec, spawn } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import { ToolingLog } from '@kbn/dev-utils';
 import axios from 'axios';
 import { Manager } from './resource_manager';
@@ -40,12 +40,10 @@ export class FleetManager extends Manager {
 
         const host = 'host.docker.internal';
 
-        exec(`docker -v`, (error: any, stdout: string) => {
-          this.log.info(stdout);
-        });
-
         const args = [
           'run',
+          '-p',
+          `8220:8220`,
           '--add-host',
           'host.docker.internal:host-gateway',
           '--env',
