@@ -32,7 +32,11 @@ import { getBaseTheme, getChartClasses } from './utils/theme';
 import { TOOLTIP_MODES } from '../../../../../common/enums';
 import { getValueOrEmpty } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
-import { renderEndzoneTooltip, useActiveCursor } from '../../../../../../../charts/public';
+import {
+  MULTILAYER_TIME_AXIS_STYLE,
+  renderEndzoneTooltip,
+  useActiveCursor,
+} from '../../../../../../../charts/public';
 import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
 import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
@@ -147,23 +151,6 @@ export const TimeSeries = ({
 
   const shouldUseNewTimeAxis =
     series.some(({ stack }) => stack !== STACKED_OPTIONS.NONE) && !useLegacyTimeAxis;
-  const xAxisStyle = shouldUseNewTimeAxis
-    ? {
-        tickLabel: {
-          visible: true,
-          padding: 0,
-          alignment: {
-            vertical: Position.Bottom,
-            horizontal: Position.Left,
-          },
-        },
-        tickLine: {
-          size: 0.0001,
-          padding: 4,
-          visible: true,
-        },
-      }
-    : {};
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -354,7 +341,7 @@ export const TimeSeries = ({
         title={getAxisLabelString(interval)}
         tickFormat={xAxisFormatter}
         gridLine={gridLineStyle}
-        style={xAxisStyle}
+        style={shouldUseNewTimeAxis ? MULTILAYER_TIME_AXIS_STYLE : undefined}
         timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
       />
     </Chart>

@@ -23,8 +23,6 @@ import {
   Settings,
   TooltipType,
   XYChartElementEvent,
-  AxisStyle,
-  RecursivePartial,
 } from '@elastic/charts';
 import { IUiSettingsClient } from 'kibana/public';
 import {
@@ -37,7 +35,7 @@ import { DataCharts$, DataChartsMessage } from '../../services/use_saved_search'
 import { FetchStatus } from '../../../../types';
 import { DiscoverServices } from '../../../../../build_services';
 import { useDataState } from '../../utils/use_data_state';
-import { LEGACY_TIME_AXIS } from '../../../../../../../charts/common';
+import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../../charts/common';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
@@ -184,24 +182,6 @@ export function DiscoverHistogram({
 
   const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
 
-  const xAxisStyle: RecursivePartial<AxisStyle> = useLegacyTimeAxis
-    ? {}
-    : {
-        tickLine: {
-          size: 0.0001,
-          strokeWidth: 1,
-          padding: 4,
-          visible: true,
-        },
-        tickLabel: {
-          padding: 0,
-          alignment: {
-            vertical: Position.Bottom,
-            horizontal: Position.Left,
-          },
-        },
-      };
-
   return (
     <React.Fragment>
       <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
@@ -227,7 +207,7 @@ export function DiscoverHistogram({
             position={Position.Bottom}
             tickFormat={formatXValue}
             timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-            style={xAxisStyle}
+            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
           />
           <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
           <Endzones

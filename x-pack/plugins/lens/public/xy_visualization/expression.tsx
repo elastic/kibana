@@ -54,6 +54,7 @@ import { search } from '../../../../../src/plugins/data/public';
 import {
   ChartsPluginSetup,
   ChartsPluginStart,
+  MULTILAYER_TIME_AXIS_STYLE,
   PaletteRegistry,
   SeriesLayer,
   useActiveCursor,
@@ -569,18 +570,13 @@ export function XYChart({
   };
   const xAxisStyle: RecursivePartial<AxisStyle> = shouldUseNewTimeAxis
     ? {
+        ...MULTILAYER_TIME_AXIS_STYLE,
         tickLabel: {
+          ...MULTILAYER_TIME_AXIS_STYLE.tickLabel,
           visible: Boolean(tickLabelsVisibilitySettings?.x),
-          rotation: 0, // rotation is disabled on new time axis
-          padding: 0,
-          alignment: {
-            vertical: Position.Bottom,
-            horizontal: Position.Left,
-          },
         },
         tickLine: {
-          size: 0.0001,
-          padding: 4,
+          ...MULTILAYER_TIME_AXIS_STYLE.tickLine,
           visible: Boolean(tickLabelsVisibilitySettings?.x),
         },
         axisTitle: {

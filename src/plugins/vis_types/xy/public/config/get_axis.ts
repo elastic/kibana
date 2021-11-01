@@ -8,16 +8,11 @@
 
 import { identity } from 'lodash';
 
-import {
-  AxisSpec,
-  TickFormatter,
-  YDomainRange,
-  ScaleType as ECScaleType,
-  Position,
-} from '@elastic/charts';
+import { AxisSpec, TickFormatter, YDomainRange, ScaleType as ECScaleType } from '@elastic/charts';
 
 import { LabelRotation } from '../../../../charts/public';
 import { BUCKET_TYPES } from '../../../../data/public';
+import { MULTILAYER_TIMEAXIS_STYLE } from '../../../../charts/common';
 
 import {
   Aspect,
@@ -164,18 +159,13 @@ function getAxisStyle(
 ): AxisSpec['style'] {
   return isMultiLayerTimeAxis
     ? {
+        ...MULTILAYER_TIMEAXIS_STYLE,
         tickLabel: {
+          ...MULTILAYER_TIMEAXIS_STYLE.tickLabel,
           visible: Boolean(ticks?.show),
-          rotation: 0, // rotation is disabled on new time axis
-          padding: 0,
-          alignment: {
-            vertical: Position.Bottom,
-            horizontal: Position.Left,
-          },
         },
         tickLine: {
-          size: 0.0001,
-          padding: 4,
+          ...MULTILAYER_TIMEAXIS_STYLE.tickLine,
           visible: Boolean(ticks?.show),
         },
         axisTitle: {
@@ -187,7 +177,7 @@ function getAxisStyle(
           visible: (title ?? '').trim().length > 0,
         },
         tickLabel: {
-          visible: ticks?.show,
+          visible: Boolean(ticks?.show),
           rotation: -(ticks?.rotation ?? rotationFallback),
         },
       };
