@@ -15,7 +15,7 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 type ArchiveName =
   | 'apm_8.0.0'
-  | 'apm_8.0.0_empty'
+  | 'apm_mappings_only_8.0.0'
   | '8.0.0'
   | 'metrics_8.0.0'
   | 'ml_8.0.0'
