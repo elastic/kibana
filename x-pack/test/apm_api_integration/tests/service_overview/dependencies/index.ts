@@ -75,7 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         const allIndices = Object.values(indices).join(',');
-        const indexExists = (await es.indices.exists({ index: allIndices })).body;
+        const indexExists = await es.indices.exists({ index: allIndices });
         if (indexExists) {
           await es.indices.delete({
             index: allIndices,

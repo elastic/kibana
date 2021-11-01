@@ -6,19 +6,19 @@
  */
 
 import _ from 'lodash';
-import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
+import { TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { MigrationDeprecationInfoResponse } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getESUpgradeStatus } from './es_deprecations_status';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
 
-const asApiResponse = <T>(body: T): RequestEvent<T> =>
+const asApiResponse = <T>(body: T): TransportResult<T> =>
   ({
     body,
-  } as RequestEvent<T>);
+  } as TransportResult<T>);
 
 describe('getESUpgradeStatus', () => {
   const resolvedIndices = {
@@ -32,7 +32,7 @@ describe('getESUpgradeStatus', () => {
   };
 
   // @ts-expect-error mock data is too loosely typed
-  const deprecationsResponse: MigrationDeprecationInfoResponse = _.cloneDeep(fakeDeprecations);
+  const deprecationsResponse: estypes.MigrationDeprecationsResponse = _.cloneDeep(fakeDeprecations);
 
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
 

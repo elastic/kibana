@@ -33,6 +33,7 @@ export type MetricThresholdAlertTypeParams = Record<string, any>;
 export type MetricThresholdAlertTypeState = AlertTypeState & {
   groups: string[];
   groupBy?: string | string[];
+  filterQuery?: string;
 };
 export type MetricThresholdAlertInstanceState = AlertInstanceState; // no specific instace state used
 export type MetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instace state used
@@ -94,8 +95,11 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const config = source.configuration;
 
     const previousGroupBy = state.groupBy;
+    const previousFilterQuery = state.filterQuery;
     const prevGroups =
-      alertOnGroupDisappear && isEqual(previousGroupBy, params.groupBy)
+      alertOnGroupDisappear &&
+      isEqual(previousGroupBy, params.groupBy) &&
+      isEqual(previousFilterQuery, params.filterQuery)
         ? // Filter out the * key from the previous groups, only include it if it's one of
           // the current groups. In case of a groupBy alert that starts out with no data and no
           // groups, we don't want to persist the existence of the * alert instance
@@ -220,7 +224,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       }
     }
 
-    return { groups, groupBy: params.groupBy };
+    return { groups, groupBy: params.groupBy, filterQuery: params.filterQuery };
   });
 
 export const FIRED_ACTIONS = {

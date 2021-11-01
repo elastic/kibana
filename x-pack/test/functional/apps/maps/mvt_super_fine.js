@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }) {
       //Source should be correct
       expect(
         mapboxStyle.sources[MB_VECTOR_SOURCE_ID].tiles[0].startsWith(
-          `/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=geo.coordinates&index=logstash-*&requestBody=(_source:(excludes:!()),aggs:(gridSplit:(aggs:(gridCentroid:(geo_centroid:(field:geo.coordinates)),max_of_bytes:(max:(field:bytes))),geotile_grid:(bounds:!n,field:geo.coordinates,precision:!n,shard_size:65535,size:65535))),fields:!((field:'@timestamp',format:date_time),(field:'relatedContent.article:modified_time',format:date_time),(field:'relatedContent.article:published_time',format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((range:('@timestamp':(format:strict_date_optional_time,gte:'2015-09-20T00:00:00.000Z',lte:'2015-09-20T01:00:00.000Z')))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:'doc[!'@timestamp!'].value.getHour()'))),size:0,stored_fields:!('*'))&requestType=grid&geoFieldType=geo_point`
+          `/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=geo.coordinates&index=logstash-*&requestBody=(_source:(excludes:!()),aggs:(max_of_bytes:(max:(field:bytes))),fields:!((field:'@timestamp',format:date_time),(field:'relatedContent.article:modified_time',format:date_time),(field:'relatedContent.article:published_time',format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((range:('@timestamp':(format:strict_date_optional_time,gte:'2015-09-20T00:00:00.000Z',lte:'2015-09-20T01:00:00.000Z')))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:'doc[!'@timestamp!'].value.getHour()'))),size:0,stored_fields:!('*'))&requestType=grid`
         )
       ).to.equal(true);
 
@@ -51,9 +51,9 @@ export default function ({ getPageObjects, getService }) {
             'coalesce',
             [
               'case',
-              ['==', ['get', 'max_of_bytes'], null],
+              ['==', ['get', 'max_of_bytes.value'], null],
               1622,
-              ['max', ['min', ['to-number', ['get', 'max_of_bytes']], 9790], 1623],
+              ['max', ['min', ['to-number', ['get', 'max_of_bytes.value']], 9790], 1623],
             ],
             1622,
           ],

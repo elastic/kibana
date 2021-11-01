@@ -6,7 +6,9 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { ML_RULE_TYPE_ID } from '../../../../../common/constants';
+import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
+
 import {
   CompleteRule,
   machineLearningRuleParams,
@@ -48,7 +50,7 @@ export const createMlAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {

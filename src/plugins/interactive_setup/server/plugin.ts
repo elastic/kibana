@@ -10,6 +10,7 @@ import chalk from 'chalk';
 import type { Subscription } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
+import { getDataPath } from '@kbn/utils';
 import type { CorePreboot, Logger, PluginInitializerContext, PrebootPlugin } from 'src/core/server';
 
 import { ElasticsearchConnectionStatus } from '../common';
@@ -146,7 +147,11 @@ Go to ${chalk.cyanBright.underline(url)} to get started.
         basePath: core.http.basePath,
         logger: this.#logger.get('routes'),
         preboot: { ...core.preboot, completeSetup },
-        kibanaConfigWriter: new KibanaConfigWriter(configPath, this.#logger.get('kibana-config')),
+        kibanaConfigWriter: new KibanaConfigWriter(
+          configPath,
+          getDataPath(),
+          this.#logger.get('kibana-config')
+        ),
         elasticsearch,
         verificationCode,
         getConfig: this.#getConfig.bind(this),

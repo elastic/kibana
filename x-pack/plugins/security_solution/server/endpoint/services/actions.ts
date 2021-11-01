@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
-import { ApiResponse } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
 import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
@@ -89,8 +89,8 @@ const getActivityLog = async ({
   endDate: string;
   logger: Logger;
 }): Promise<ActivityLogEntry[]> => {
-  let actionsResult: ApiResponse<SearchResponse<unknown>, unknown>;
-  let responsesResult: ApiResponse<SearchResponse<unknown>, unknown>;
+  let actionsResult: TransportResult<estypes.SearchResponse<unknown>, unknown>;
+  let responsesResult: TransportResult<estypes.SearchResponse<unknown>, unknown>;
 
   try {
     // fetch actions with matching agent_id
@@ -126,14 +126,14 @@ const getActivityLog = async ({
   // label record as `action`, `fleetAction`
   const responses = categorizeResponseResults({
     results: responsesResult?.body?.hits?.hits as Array<
-      SearchHit<EndpointActionResponse | LogsEndpointActionResponse>
+      estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>
     >,
   });
 
   // label record as `response`, `fleetResponse`
   const actions = categorizeActionResults({
     results: actionsResult?.body?.hits?.hits as Array<
-      SearchHit<EndpointAction | LogsEndpointAction>
+      estypes.SearchHit<EndpointAction | LogsEndpointAction>
     >,
   });
 
@@ -148,7 +148,7 @@ const getActivityLog = async ({
 };
 
 const hasAckInResponse = (response: EndpointActionResponse): boolean => {
-  return typeof response.action_data.ack !== 'undefined';
+  return response.action_response?.endpoint?.ack ?? false;
 };
 
 // return TRUE if for given action_id/agent_id

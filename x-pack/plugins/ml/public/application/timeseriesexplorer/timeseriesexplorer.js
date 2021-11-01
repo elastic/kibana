@@ -104,7 +104,6 @@ function getTimeseriesexplorerDefaultState() {
     entitiesLoading: false,
     entityValues: {},
     focusAnnotationData: [],
-    focusAggregations: {},
     focusAggregationInterval: {},
     focusChartData: undefined,
     focusForecastData: undefined,
@@ -935,7 +934,6 @@ export class TimeSeriesExplorer extends React.Component {
       focusAggregationInterval,
       focusAnnotationError,
       focusAnnotationData,
-      focusAggregations,
       focusChartData,
       focusForecastData,
       fullRefresh,
@@ -1172,9 +1170,13 @@ export class TimeSeriesExplorer extends React.Component {
                     <EuiFlexItem grow={false}>
                       <EuiCheckbox
                         id="toggleShowForecastCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                          defaultMessage: 'show forecast',
-                        })}
+                        label={
+                          <span data-test-subj={'mlForecastCheckbox'}>
+                            {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                              defaultMessage: 'show forecast',
+                            })}
+                          </span>
+                        }
                         checked={showForecast}
                         onChange={this.toggleShowForecastHandler}
                       />
@@ -1257,7 +1259,6 @@ export class TimeSeriesExplorer extends React.Component {
                       detectors={detectors}
                       jobIds={[this.props.selectedJobId]}
                       annotations={focusAnnotationData}
-                      aggregations={focusAggregations}
                       isSingleMetricViewerLinkVisible={false}
                       isNumberBadgeVisible={true}
                     />

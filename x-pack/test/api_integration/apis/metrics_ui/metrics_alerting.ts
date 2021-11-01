@@ -42,8 +42,9 @@ export default function ({ getService }: FtrProviderContext) {
             '@timestamp',
             timeframe
           );
-          const { body: result } = await client.search({
+          const result = await client.search({
             index,
+            // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
             body: searchBody,
           });
 
@@ -65,8 +66,9 @@ export default function ({ getService }: FtrProviderContext) {
           undefined,
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
-        const { body: result } = await client.search({
+        const result = await client.search({
           index,
+          // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
           body: searchBody,
         });
 
@@ -87,8 +89,9 @@ export default function ({ getService }: FtrProviderContext) {
             timeframe,
             'agent.id'
           );
-          const { body: result } = await client.search({
+          const result = await client.search({
             index,
+            // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
             body: searchBody,
           });
 
@@ -108,8 +111,9 @@ export default function ({ getService }: FtrProviderContext) {
           'agent.id',
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
-        const { body: result } = await client.search({
+        const result = await client.search({
           index,
+          // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
           body: searchBody,
         });
 

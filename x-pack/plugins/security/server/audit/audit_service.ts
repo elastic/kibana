@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Subscription } from 'rxjs';
 import { distinctUntilKeyChanged, map } from 'rxjs/operators';
 
 import type {
@@ -26,20 +25,12 @@ import { httpRequestEvent } from './audit_events';
 export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
 
-/**
- * @deprecated
- */
-export interface LegacyAuditLogger {
-  log: (eventType: string, message: string, data?: Record<string, any>) => void;
-}
-
 export interface AuditLogger {
   log: (event: AuditEvent | undefined) => void;
 }
 
 export interface AuditServiceSetup {
   asScoped: (request: KibanaRequest) => AuditLogger;
-  getLogger: (id?: string) => LegacyAuditLogger;
 }
 
 interface AuditServiceSetupParams {
@@ -58,19 +49,11 @@ interface AuditServiceSetupParams {
 }
 
 export class AuditService {
-  /**
-   * @deprecated
-   */
-  private licenseFeaturesSubscription?: Subscription;
-  /**
-   * @deprecated
-   */
-  private allowLegacyAuditLogging = false;
-  private ecsLogger: Logger;
+  private logger: Logger;
   private usageIntervalId?: NodeJS.Timeout;
 
-  constructor(private readonly logger: Logger) {
-    this.ecsLogger = logger.get('ecs');
+  constructor(_logger: Logger) {
+    this.logger = _logger.get('ecs');
   }
 
   setup({
@@ -83,14 +66,6 @@ export class AuditService {
     getSpaceId,
     recordAuditLoggingUsage,
   }: AuditServiceSetupParams): AuditServiceSetup {
-    if (config.enabled && !config.appender) {
-      this.licenseFeaturesSubscription = license.features$.subscribe(
-        ({ allowLegacyAuditLogging }) => {
-          this.allowLegacyAuditLogging = allowLegacyAuditLogging;
-        }
-      );
-    }
-
     // Configure logging during setup and when license changes
     logging.configure(
       license.features$.pipe(
@@ -169,30 +144,10 @@ export class AuditService {
         };
         if (filterEvent(meta, config.ignore_filters)) {
           const { message, ...eventMeta } = meta;
-          this.ecsLogger.info(message, eventMeta);
+          this.logger.info(message, eventMeta);
         }
       };
       return { log };
-    };
-
-    /**
-     * @deprecated
-     * Use `audit.asScoped(request)` method instead to create an audit logger
-     */
-    const getLogger = (id?: string): LegacyAuditLogger => {
-      return {
-        log: (eventType: string, message: string, data?: Record<string, any>) => {
-          if (!this.allowLegacyAuditLogging) {
-            return;
-          }
-
-          this.logger.info(message, {
-            tags: id ? [id, eventType] : [eventType],
-            eventType,
-            ...data,
-          });
-        },
-      };
     };
 
     http.registerOnPostAuth((request, response, t) => {
@@ -202,14 +157,10 @@ export class AuditService {
       return t.next();
     });
 
-    return { asScoped, getLogger };
+    return { asScoped };
   }
 
   stop() {
-    if (this.licenseFeaturesSubscription) {
-      this.licenseFeaturesSubscription.unsubscribe();
-      this.licenseFeaturesSubscription = undefined;
-    }
     clearInterval(this.usageIntervalId!);
   }
 }

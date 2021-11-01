@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSuperSelect } from '@elastic/eui';
 
@@ -29,12 +29,6 @@ export function OperationTypeSelect({
   const onChange = (value: OperationType) => {
     setSeries(seriesId, { ...series, operationType: value });
   };
-
-  useEffect(() => {
-    setSeries(seriesId, { ...series, operationType: operationType || defaultOperationType });
-    // We only want to call this when defaultOperationType changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultOperationType]);
 
   return (
     <OperationTypeComponent

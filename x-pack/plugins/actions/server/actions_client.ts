@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 
 import { i18n } from '@kbn/i18n';
@@ -22,7 +22,7 @@ import {
 import { AuditLogger } from '../../security/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
-import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
+import { validateConfig, validateSecrets, ActionExecutorContract, validateConnector } from './lib';
 import {
   ActionResult,
   FindActionResult,
@@ -150,7 +150,9 @@ export class ActionsClient {
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
-
+    if (actionType.validate?.connector) {
+      validateConnector(actionType, { config, secrets });
+    }
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     this.auditLogger?.log(
@@ -221,6 +223,9 @@ export class ActionsClient {
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+    if (actionType.validate?.connector) {
+      validateConnector(actionType, { config, secrets });
+    }
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
