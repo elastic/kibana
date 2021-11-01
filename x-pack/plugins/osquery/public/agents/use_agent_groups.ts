@@ -35,7 +35,7 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
   const [loading, setLoading] = useState(true);
   const [overlap, setOverlap] = useState<Overlap>(() => ({}));
   const [totalCount, setTotalCount] = useState<number>(0);
-  useQuery(
+  const { isFetched } = useQuery(
     ['agentGroups'],
     async () => {
       const responseData = await data.search
@@ -110,6 +110,7 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
   );
 
   return {
+    isFetched,
     loading,
     totalCount,
     groups: {

@@ -27,7 +27,7 @@ import {
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
 } from './constants';
 import { MlResultsService } from '../application/services/results_service';
-import { IndexPattern } from '../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../src/plugins/data_views/common';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -110,7 +110,7 @@ export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, Anomal
 export interface AnomalyChartsCustomOutput {
   entityFields?: EntityField[];
   severity?: number;
-  indexPatterns?: IndexPattern[];
+  indexPatterns?: DataView[];
 }
 export type AnomalyChartsEmbeddableOutput = EmbeddableOutput & AnomalyChartsCustomOutput;
 export interface EditAnomalyChartsPanelContext {

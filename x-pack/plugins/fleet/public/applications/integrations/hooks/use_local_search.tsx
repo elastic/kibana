@@ -14,7 +14,7 @@ export const searchIdField = 'id';
 export const fieldsToSearch = ['name', 'title', 'description'];
 
 export function useLocalSearch(packageList: IntegrationCardItem[]) {
-  const localSearchRef = useRef<LocalSearch | null>(null);
+  const localSearchRef = useRef<LocalSearch>(new LocalSearch(searchIdField));
 
   useEffect(() => {
     const localSearch = new LocalSearch(searchIdField);

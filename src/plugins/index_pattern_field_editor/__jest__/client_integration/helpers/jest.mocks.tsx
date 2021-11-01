@@ -9,12 +9,6 @@ import React from 'react';
 
 const EDITOR_ID = 'testEditor';
 
-jest.mock('@elastic/eui/lib/services/accessibility', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
-
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
 

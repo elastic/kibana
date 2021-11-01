@@ -6,7 +6,12 @@
  */
 
 import { TCPFields, ConfigKeys } from '../types';
-import { Normalizer, commonNormalizers, getNormalizer } from '../common/normalizers';
+import {
+  Normalizer,
+  commonNormalizers,
+  getNormalizer,
+  getJsonToJavascriptNormalizer,
+} from '../common/normalizers';
 import { tlsNormalizers } from '../tls/normalizers';
 import { defaultTCPSimpleFields, defaultTCPAdvancedFields } from '../contexts';
 
@@ -21,7 +26,12 @@ export const getTCPNormalizer = (key: ConfigKeys) => {
   return getNormalizer(key, defaultTCPFields);
 };
 
+export const getTCPJsonToJavascriptNormalizer = (key: ConfigKeys) => {
+  return getJsonToJavascriptNormalizer(key, defaultTCPFields);
+};
+
 export const tcpNormalizers: TCPNormalizerMap = {
+  [ConfigKeys.METADATA]: getTCPJsonToJavascriptNormalizer(ConfigKeys.METADATA),
   [ConfigKeys.HOSTS]: getTCPNormalizer(ConfigKeys.HOSTS),
   [ConfigKeys.PROXY_URL]: getTCPNormalizer(ConfigKeys.PROXY_URL),
   [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: getTCPNormalizer(ConfigKeys.PROXY_USE_LOCAL_RESOLVER),

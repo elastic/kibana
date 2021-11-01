@@ -16,7 +16,7 @@ You also get a stack trace, which shows the SQL query in your code.
 Finally, APM knows which files are your code and which are just modules or libraries that you've installed.
 These library frames will be minimized by default in order to show you the most relevant stack trace.
 
-TIP: A {apm-overview-ref-v}/transaction-spans.html[span] is the duration of a single event.
+TIP: A {apm-guide-ref}/data-model-spans.html[span] is the duration of a single event.
 Spans are automatically captured by APM agents, and you can also define custom spans.
 Each span has a type and is defined by a different color in the timeline/waterfall visualization.
 

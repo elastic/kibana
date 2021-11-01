@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  fireEvent,
-  render,
-  waitFor,
-  waitForElementToBeRemoved,
-  within,
-} from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
@@ -35,11 +29,21 @@ const userMock = {
 };
 
 describe('EditUserPage', () => {
-  it('warns when viewing deactivated user', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
+  const coreStart = coreMock.createStart();
+  let history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
+  const authc = securityMock.createSetup().authc;
 
+  beforeEach(() => {
+    history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
+    authc.getCurrentUser.mockClear();
+    coreStart.http.delete.mockClear();
+    coreStart.http.get.mockClear();
+    coreStart.http.post.mockClear();
+    coreStart.notifications.toasts.addDanger.mockClear();
+    coreStart.notifications.toasts.addSuccess.mockClear();
+  });
+
+  it('warns when viewing deactivated user', async () => {
     coreStart.http.get.mockResolvedValueOnce({
       ...userMock,
       enabled: false,
@@ -56,10 +60,6 @@ describe('EditUserPage', () => {
   });
 
   it('warns when viewing deprecated user', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
-
     coreStart.http.get.mockResolvedValueOnce({
       ...userMock,
       metadata: {
@@ -81,14 +81,10 @@ describe('EditUserPage', () => {
 
     fireEvent.click(await findByRole('button', { name: 'Back to users' }));
 
-    await waitFor(() => expect(history.location.pathname).toBe('/'));
+    expect(history.location.pathname).toBe('/');
   });
 
   it('warns when viewing built-in user', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
-
     coreStart.http.get.mockResolvedValueOnce({
       ...userMock,
       metadata: { _reserved: true, _deprecated: false },
@@ -105,14 +101,10 @@ describe('EditUserPage', () => {
 
     fireEvent.click(await findByRole('button', { name: 'Back to users' }));
 
-    await waitFor(() => expect(history.location.pathname).toBe('/'));
+    expect(history.location.pathname).toBe('/');
   });
 
   it('warns when selecting deprecated role', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
-
     coreStart.http.get.mockResolvedValueOnce({
       ...userMock,
       enabled: false,
@@ -139,10 +131,6 @@ describe('EditUserPage', () => {
   });
 
   it('updates user when submitting form and redirects back', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
-
     coreStart.http.get.mockResolvedValueOnce(userMock);
     coreStart.http.get.mockResolvedValueOnce([]);
     coreStart.http.post.mockResolvedValueOnce({});
@@ -174,10 +162,6 @@ describe('EditUserPage', () => {
   });
 
   it('warns when user form submission fails', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
-
     coreStart.http.get.mockResolvedValueOnce(userMock);
     coreStart.http.get.mockResolvedValueOnce([]);
     coreStart.http.post.mockRejectedValueOnce(new Error('Error message'));
@@ -213,10 +197,6 @@ describe('EditUserPage', () => {
   });
 
   it('changes password of other user when submitting form and closes dialog', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
-
     coreStart.http.get.mockResolvedValueOnce(userMock);
     coreStart.http.get.mockResolvedValueOnce([]);
     authc.getCurrentUser.mockResolvedValueOnce(
@@ -224,24 +204,23 @@ describe('EditUserPage', () => {
     );
     coreStart.http.post.mockResolvedValueOnce({});
 
-    const { getByRole, findByRole } = render(
+    const { findByRole } = render(
       <Providers services={coreStart} authc={authc} history={history}>
         <EditUserPage username={userMock.username} />
       </Providers>
     );
 
     fireEvent.click(await findByRole('button', { name: 'Change password' }));
-
-    const dialog = getByRole('dialog');
+    const dialog = await findByRole('dialog');
     fireEvent.change(await within(dialog).findByLabelText('New password'), {
       target: { value: 'changeme' },
     });
-    fireEvent.change(within(dialog).getByLabelText('Confirm password'), {
+    fireEvent.change(await within(dialog).findByLabelText('Confirm password'), {
       target: { value: 'changeme' },
     });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Change password' }));
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Change password' }));
 
-    await waitForElementToBeRemoved(() => getByRole('dialog'));
+    expect(await findByRole('dialog')).not.toBeInTheDocument();
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/password', {
       body: JSON.stringify({
         newPassword: 'changeme',
@@ -250,23 +229,18 @@ describe('EditUserPage', () => {
   });
 
   it('changes password of current user when submitting form and closes dialog', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
-
     coreStart.http.get.mockResolvedValueOnce(userMock);
     coreStart.http.get.mockResolvedValueOnce([]);
     authc.getCurrentUser.mockResolvedValueOnce(mockAuthenticatedUser(userMock));
     coreStart.http.post.mockResolvedValueOnce({});
 
-    const { getByRole, findByRole } = render(
+    const { findByRole } = render(
       <Providers services={coreStart} authc={authc} history={history}>
         <EditUserPage username={userMock.username} />
       </Providers>
     );
 
     fireEvent.click(await findByRole('button', { name: 'Change password' }));
-
     const dialog = await findByRole('dialog');
     fireEvent.change(await within(dialog).findByLabelText('Current password'), {
       target: { value: '123456' },
@@ -279,7 +253,7 @@ describe('EditUserPage', () => {
     });
     fireEvent.click(await within(dialog).findByRole('button', { name: 'Change password' }));
 
-    await waitForElementToBeRemoved(() => getByRole('dialog'));
+    expect(await findByRole('dialog')).not.toBeInTheDocument();
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/password', {
       body: JSON.stringify({
         newPassword: 'changeme',
@@ -289,10 +263,6 @@ describe('EditUserPage', () => {
   });
 
   it('warns when change password form submission fails', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
-
     coreStart.http.get.mockResolvedValueOnce(userMock);
     coreStart.http.get.mockResolvedValueOnce([]);
     authc.getCurrentUser.mockResolvedValueOnce(
@@ -307,7 +277,6 @@ describe('EditUserPage', () => {
     );
 
     fireEvent.click(await findByRole('button', { name: 'Change password' }));
-
     const dialog = await findByRole('dialog');
     fireEvent.change(await within(dialog).findByLabelText('New password'), {
       target: { value: 'changeme' },
@@ -326,10 +295,6 @@ describe('EditUserPage', () => {
   });
 
   it('validates change password form', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
-
     coreStart.http.get.mockResolvedValueOnce(userMock);
     coreStart.http.get.mockResolvedValueOnce([]);
     authc.getCurrentUser.mockResolvedValueOnce(mockAuthenticatedUser(userMock));
@@ -342,21 +307,17 @@ describe('EditUserPage', () => {
     );
 
     fireEvent.click(await findByRole('button', { name: 'Change password' }));
-
     const dialog = await findByRole('dialog');
     fireEvent.click(await within(dialog).findByRole('button', { name: 'Change password' }));
-
     await within(dialog).findByText(/Enter your current password/i);
     await within(dialog).findByText(/Enter a new password/i);
 
     fireEvent.change(await within(dialog).findByLabelText('Current password'), {
       target: { value: 'changeme' },
     });
-
     fireEvent.change(await within(dialog).findByLabelText('New password'), {
       target: { value: '111' },
     });
-
     await within(dialog).findAllByText(/Password must be at least 6 characters/i);
 
     fireEvent.change(await within(dialog).findByLabelText('New password'), {
@@ -365,44 +326,34 @@ describe('EditUserPage', () => {
     fireEvent.change(await within(dialog).findByLabelText('Confirm password'), {
       target: { value: '111' },
     });
-
     await within(dialog).findAllByText(/Passwords do not match/i);
   });
 
   it('deactivates user when confirming and closes dialog', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
-
     coreStart.http.get.mockResolvedValueOnce(userMock);
     coreStart.http.get.mockResolvedValueOnce([]);
     coreStart.http.post.mockResolvedValueOnce({});
 
-    const { getByRole, findByRole } = render(
+    const { findByRole } = render(
       <Providers services={coreStart} authc={authc} history={history}>
         <EditUserPage username={userMock.username} />
       </Providers>
     );
 
     fireEvent.click(await findByRole('button', { name: 'Deactivate user' }));
+    const dialog = await findByRole('dialog');
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Deactivate user' }));
 
-    const dialog = getByRole('dialog');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Deactivate user' }));
-
-    await waitForElementToBeRemoved(() => getByRole('dialog'));
+    expect(await findByRole('dialog')).not.toBeInTheDocument();
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/_disable');
   });
 
   it('activates user when confirming and closes dialog', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
-
     coreStart.http.get.mockResolvedValueOnce({ ...userMock, enabled: false });
     coreStart.http.get.mockResolvedValueOnce([]);
     coreStart.http.post.mockResolvedValueOnce({});
 
-    const { getByRole, findAllByRole } = render(
+    const { findByRole, findAllByRole } = render(
       <Providers services={coreStart} authc={authc} history={history}>
         <EditUserPage username={userMock.username} />
       </Providers>
@@ -410,36 +361,30 @@ describe('EditUserPage', () => {
 
     const [enableButton] = await findAllByRole('button', { name: 'Activate user' });
     fireEvent.click(enableButton);
+    const dialog = await findByRole('dialog');
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Activate user' }));
 
-    const dialog = getByRole('dialog');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Activate user' }));
-
-    await waitForElementToBeRemoved(() => getByRole('dialog'));
+    expect(await findByRole('dialog')).not.toBeInTheDocument();
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/_enable');
   });
 
   it('deletes user when confirming and redirects back', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
-    const authc = securityMock.createSetup().authc;
-
     coreStart.http.get.mockResolvedValueOnce(userMock);
     coreStart.http.get.mockResolvedValueOnce([]);
     coreStart.http.delete.mockResolvedValueOnce({});
 
-    const { getByRole, findByRole } = render(
+    const { findByRole } = render(
       <Providers services={coreStart} authc={authc} history={history}>
         <EditUserPage username={userMock.username} />
       </Providers>
     );
 
     fireEvent.click(await findByRole('button', { name: 'Delete user' }));
+    const dialog = await findByRole('dialog');
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Delete user' }));
 
-    const dialog = getByRole('dialog');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete user' }));
-
-    expect(coreStart.http.delete).toHaveBeenLastCalledWith('/internal/security/users/jdoe');
     await waitFor(() => {
+      expect(coreStart.http.delete).toHaveBeenLastCalledWith('/internal/security/users/jdoe');
       expect(history.location.pathname).toBe('/');
     });
   });

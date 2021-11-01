@@ -25,6 +25,7 @@ import type {
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import { tGridActions } from '../../../../../timelines/public';
+import { ResolveTimelineConfig } from '../../components/open_timeline/types';
 export const {
   applyDeltaToColumnWidth,
   clearEventsDeleted,
@@ -37,7 +38,9 @@ export const {
   setSelected,
   setTGridSelectAll,
   toggleDetailPanel,
+  updateColumnOrder,
   updateColumns,
+  updateColumnWidth,
   updateIsLoading,
   updateItemsPerPage,
   updateItemsPerPageOptions,
@@ -89,6 +92,7 @@ export const updateTimeline = actionCreator<{
 export const addTimeline = actionCreator<{
   id: string;
   timeline: TimelineModel;
+  resolveTimelineConfig?: ResolveTimelineConfig;
   savedTimeline?: boolean;
 }>('ADD_TIMELINE');
 

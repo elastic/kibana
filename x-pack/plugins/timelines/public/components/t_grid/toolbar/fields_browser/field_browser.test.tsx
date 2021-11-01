@@ -235,7 +235,7 @@ describe('FieldsBrowser', () => {
 
     expect(
       wrapper.find('[data-test-subj="field-search"]').first().getDOMNode().id ===
-        document.activeElement!.id
+        document.activeElement?.id
     ).toBe(true);
   });
 
@@ -266,7 +266,7 @@ describe('FieldsBrowser', () => {
     const changeEvent: any = { target: { value: inputText } };
     const onChange = searchField.props().onChange;
 
-    onChange!(changeEvent);
+    onChange?.(changeEvent);
     searchField.simulate('change').update();
 
     expect(onSearchInputChange).toBeCalledWith(inputText);

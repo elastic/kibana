@@ -17,9 +17,10 @@ import {
 } from '@elastic/eui';
 
 export interface SectionItem {
-  title: string;
-  description: string;
+  title: string | JSX.Element;
+  description: string | number | JSX.Element;
 }
+
 export interface SectionConfig {
   title: string;
   position: 'left' | 'right';

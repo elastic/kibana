@@ -127,6 +127,11 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
     return uuid.v4();
   }
 
+  /** generate a seeded random UUID v4 */
+  protected seededUUIDv4(): string {
+    return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
+  }
+
   /** Generate a random number up to the max provided */
   protected randomN(max: number): number {
     return Math.floor(this.random() * max);

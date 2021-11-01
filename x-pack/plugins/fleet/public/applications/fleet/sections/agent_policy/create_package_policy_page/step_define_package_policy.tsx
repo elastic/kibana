@@ -105,11 +105,12 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             agentPolicy?.id || '',
             packagePolicy.output_id,
             packagePolicy.namespace,
-            `${packageInfo.name}-${
-              pkgPoliciesWithMatchingNames.length
-                ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-                : 1
-            }`,
+            packagePolicy.name ||
+              `${packageInfo.name}-${
+                pkgPoliciesWithMatchingNames.length
+                  ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
+                  : 1
+              }`,
             packagePolicy.description,
             integrationToEnable
           )
@@ -309,6 +310,34 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         });
                       }}
                     />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLabel"
+                        defaultMessage="Data retention settings"
+                      />
+                    }
+                    helpText={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText"
+                        defaultMessage="By default all logs and metrics data are stored on the hot tier. {learnMore} about changing the data retention policy for this integration."
+                        values={{
+                          learnMore: (
+                            <EuiLink href={docLinks.links.fleet.datastreamsILM} target="_blank">
+                              {i18n.translate(
+                                'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink',
+                                { defaultMessage: 'Learn more' }
+                              )}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    }
+                  >
+                    <div />
                   </EuiFormRow>
                 </EuiFlexItem>
                 {/* Advanced vars */}

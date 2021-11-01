@@ -15,13 +15,14 @@ import realHits from '../../../../../__fixtures__/real_hits.js';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
-import { IndexPatternAttributes } from '../../../../../../../data/common';
+import { flattenHit, IndexPatternAttributes } from '../../../../../../../data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../../__mocks__/services';
 import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
+import { VIEW_MODE } from '../view_mode_toggle';
 
 jest.mock('../../../../../kibana_services', () => ({
   getServices: () => mockDiscoverServices,
@@ -44,7 +45,7 @@ function getCompProps(): DiscoverSidebarProps {
   const fieldCounts: Record<string, number> = {};
 
   for (const hit of hits) {
-    for (const key of Object.keys(indexPattern.flattenHit(hit))) {
+    for (const key of Object.keys(flattenHit(hit, indexPattern))) {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
@@ -65,6 +66,7 @@ function getCompProps(): DiscoverSidebarProps {
     setFieldFilter: jest.fn(),
     onEditRuntimeField: jest.fn(),
     editField: jest.fn(),
+    viewMode: VIEW_MODE.DOCUMENT_LEVEL,
   };
 }
 

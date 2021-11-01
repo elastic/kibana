@@ -40,7 +40,8 @@ import {
   LensAppState,
   LensState,
 } from '../state_management';
-import { getPreloadedState } from '../state_management/lens_slice';
+import { getPreloadedState, setState } from '../state_management/lens_slice';
+import { getLensInspectorService } from '../lens_inspector_service';
 
 export async function getLensServices(
   coreStart: CoreStart,
@@ -65,7 +66,7 @@ export async function getLensServices(
   return {
     data,
     storage,
-    inspector,
+    inspector: getLensInspectorService(inspector),
     navigation,
     fieldFormats,
     stateTransfer,
@@ -170,13 +171,6 @@ export async function mountApp(
       ? historyLocationState.payload
       : undefined;
 
-  // Clear app-specific filters when navigating to Lens. Necessary because Lens
-  // can be loaded without a full page refresh. If the user navigates to Lens from Discover
-  // we keep the filters
-  if (!initialContext) {
-    data.query.filterManager.setAppFilters([]);
-  }
-
   if (embeddableEditorIncomingState?.searchSessionId) {
     data.search.session.continue(embeddableEditorIncomingState.searchSessionId);
   }
@@ -205,9 +199,14 @@ export async function mountApp(
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
 
-      lensStore.dispatch(
-        loadInitial({ redirectCallback, initialInput, emptyState, history: props.history })
-      );
+      // Clear app-specific filters when navigating to Lens. Necessary because Lens
+      // can be loaded without a full page refresh. If the user navigates to Lens from Discover
+      // we keep the filters
+      if (!initialContext) {
+        data.query.filterManager.setAppFilters([]);
+      }
+      lensStore.dispatch(setState(emptyState));
+      lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
 
       return (
         <Provider store={lensStore}>
@@ -278,6 +277,7 @@ export async function mountApp(
   return () => {
     data.search.session.clear();
     unmountComponentAtNode(params.element);
+    lensServices.inspector.close();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
   };

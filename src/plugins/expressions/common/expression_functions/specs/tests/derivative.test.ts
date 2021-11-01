@@ -14,10 +14,10 @@ import { Datatable } from '../../../expression_types/specs/datatable';
 describe('interpreter/functions#derivative', () => {
   const fn = functionWrapper(derivative);
   const runFn = (input: Datatable, args: DerivativeArgs) =>
-    fn(input, args, {} as ExecutionContext) as Datatable;
+    fn(input, args, {} as ExecutionContext) as Promise<Datatable>;
 
-  it('calculates derivative', () => {
-    const result = runFn(
+  it('calculates derivative', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -33,8 +33,8 @@ describe('interpreter/functions#derivative', () => {
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 2, -4, -1]);
   });
 
-  it('skips null or undefined values until there is real data', () => {
-    const result = runFn(
+  it('skips null or undefined values until there is real data', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -70,8 +70,8 @@ describe('interpreter/functions#derivative', () => {
     ]);
   });
 
-  it('treats 0 as real data', () => {
-    const result = runFn(
+  it('treats 0 as real data', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -108,8 +108,8 @@ describe('interpreter/functions#derivative', () => {
     ]);
   });
 
-  it('calculates derivative for multiple series', () => {
-    const result = runFn(
+  it('calculates derivative for multiple series', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -142,8 +142,8 @@ describe('interpreter/functions#derivative', () => {
     ]);
   });
 
-  it('treats missing split column as separate series', () => {
-    const result = runFn(
+  it('treats missing split column as separate series', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -175,8 +175,8 @@ describe('interpreter/functions#derivative', () => {
     ]);
   });
 
-  it('treats null like undefined and empty string for split columns', () => {
-    const result = runFn(
+  it('treats null like undefined and empty string for split columns', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -210,8 +210,8 @@ describe('interpreter/functions#derivative', () => {
     ]);
   });
 
-  it('calculates derivative for multiple series by multiple split columns', () => {
-    const result = runFn(
+  it('calculates derivative for multiple series by multiple split columns', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -244,8 +244,8 @@ describe('interpreter/functions#derivative', () => {
     ]);
   });
 
-  it('splits separate series by the string representation of the cell values', () => {
-    const result = runFn(
+  it('splits separate series by the string representation of the cell values', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -265,8 +265,8 @@ describe('interpreter/functions#derivative', () => {
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 2 - 1, undefined, 11 - 10]);
   });
 
-  it('casts values to number before calculating derivative', () => {
-    const result = runFn(
+  it('casts values to number before calculating derivative', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -277,8 +277,8 @@ describe('interpreter/functions#derivative', () => {
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 7 - 5, 3 - 7, 2 - 3]);
   });
 
-  it('casts values to number before calculating derivative for NaN like values', () => {
-    const result = runFn(
+  it('casts values to number before calculating derivative for NaN like values', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -289,8 +289,8 @@ describe('interpreter/functions#derivative', () => {
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 7 - 5, NaN, NaN, 5 - 2]);
   });
 
-  it('copies over meta information from the source column', () => {
-    const result = runFn(
+  it('copies over meta information from the source column', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -331,8 +331,8 @@ describe('interpreter/functions#derivative', () => {
     });
   });
 
-  it('sets output name on output column if specified', () => {
-    const result = runFn(
+  it('sets output name on output column if specified', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -355,7 +355,7 @@ describe('interpreter/functions#derivative', () => {
     });
   });
 
-  it('returns source table if input column does not exist', () => {
+  it('returns source table if input column does not exist', async () => {
     const input: Datatable = {
       type: 'datatable',
       columns: [
@@ -369,11 +369,13 @@ describe('interpreter/functions#derivative', () => {
       ],
       rows: [{ val: 5 }],
     };
-    expect(runFn(input, { inputColumnId: 'nonexisting', outputColumnId: 'output' })).toBe(input);
+    expect(await runFn(input, { inputColumnId: 'nonexisting', outputColumnId: 'output' })).toBe(
+      input
+    );
   });
 
-  it('throws an error if output column exists already', () => {
-    expect(() =>
+  it('throws an error if output column exists already', async () => {
+    await expect(
       runFn(
         {
           type: 'datatable',
@@ -390,6 +392,6 @@ describe('interpreter/functions#derivative', () => {
         },
         { inputColumnId: 'val', outputColumnId: 'val' }
       )
-    ).toThrow();
+    ).rejects.toBeDefined();
   });
 });

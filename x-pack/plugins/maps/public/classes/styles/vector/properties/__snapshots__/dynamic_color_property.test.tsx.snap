@@ -16,6 +16,7 @@ exports[`renderDataMappingPopover Should render OrdinalDataMappingPopover 1`] = 
       "PERCENTILES",
     ]
   }
+  supportsFieldMetaFromLocalData={true}
 />
 `;
 

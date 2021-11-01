@@ -7,7 +7,6 @@
 
 import * as t from 'io-ts';
 import React from 'react';
-import { alertWorkflowStatusRt } from '../../common/typings';
 import { ExploratoryViewPage } from '../components/shared/exploratory_view';
 import { AlertsPage } from '../pages/alerts';
 import { AllCasesPage } from '../pages/cases/all_cases';
@@ -85,18 +84,11 @@ export const routes = {
     },
   },
   '/alerts': {
-    handler: (routeParams: any) => {
-      return <AlertsPage routeParams={routeParams} />;
+    handler: () => {
+      return <AlertsPage />;
     },
     params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        kuery: t.string,
-        workflowStatus: alertWorkflowStatusRt,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
+      // Technically gets a '_a' param by using Kibana URL state sync helpers
     },
   },
   '/exploratory-view/': {

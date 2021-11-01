@@ -16,7 +16,7 @@ import { createAnomalyDetectionJobs } from '../../lib/anomaly_detection/create_a
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getAllEnvironments } from '../../lib/environments/get_all_environments';
 import { hasLegacyJobs } from '../../lib/anomaly_detection/has_legacy_jobs';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { notifyFeatureUsage } from '../../feature';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';

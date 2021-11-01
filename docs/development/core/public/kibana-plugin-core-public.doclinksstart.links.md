@@ -9,6 +9,7 @@
 ```typescript
 readonly links: {
         readonly settings: string;
+        readonly elasticStackGetStarted: string;
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
@@ -145,6 +146,9 @@ readonly links: {
             readonly networkMap: string;
             readonly troubleshootGaps: string;
         };
+        readonly securitySolution: {
+            readonly trustedApps: string;
+        };
         readonly query: {
             readonly eql: string;
             readonly kueryQuerySyntax: string;
@@ -207,6 +211,7 @@ readonly links: {
             clusterPrivileges: string;
             elasticsearchSettings: string;
             elasticsearchEnableSecurity: string;
+            elasticsearchEnableApiKeys: string;
             indicesPrivileges: string;
             kibanaTLS: string;
             kibanaPrivileges: string;
@@ -224,6 +229,8 @@ readonly links: {
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
+            datastreamsILM: string;
+            beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
             fleetServerAddFleetServer: string;
@@ -233,9 +240,11 @@ readonly links: {
             elasticAgent: string;
             datastreams: string;
             datastreamsNamingScheme: string;
+            installElasticAgent: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
+            apiKeysLearnMore: string;
         }>;
         readonly ecs: {
             readonly guide: string;

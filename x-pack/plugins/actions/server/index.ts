@@ -57,7 +57,9 @@ export const plugin = (initContext: PluginInitializerContext) => new ActionsPlug
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot, unused }) => [
-    renameFromRoot('xpack.actions.whitelistedHosts', 'xpack.actions.allowedHosts'),
+    renameFromRoot('xpack.actions.whitelistedHosts', 'xpack.actions.allowedHosts', {
+      level: 'warning',
+    }),
     (settings, fromPath, addDeprecation) => {
       const actions = get(settings, fromPath);
       const customHostSettings = actions?.customHostSettings ?? [];
@@ -69,6 +71,8 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
         )
       ) {
         addDeprecation({
+          level: 'warning',
+          configPath: 'xpack.actions.customHostSettings.ssl.rejectUnauthorized',
           message:
             `"xpack.actions.customHostSettings[<index>].ssl.rejectUnauthorized" is deprecated.` +
             `Use "xpack.actions.customHostSettings[<index>].ssl.verificationMode" instead, ` +
@@ -96,6 +100,8 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       const actions = get(settings, fromPath);
       if (actions?.hasOwnProperty('rejectUnauthorized')) {
         addDeprecation({
+          level: 'warning',
+          configPath: `${fromPath}.rejectUnauthorized`,
           message:
             `"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.verificationMode" instead, ` +
             `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
@@ -122,6 +128,8 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       const actions = get(settings, fromPath);
       if (actions?.hasOwnProperty('proxyRejectUnauthorizedCertificates')) {
         addDeprecation({
+          level: 'warning',
+          configPath: `${fromPath}.proxyRejectUnauthorizedCertificates`,
           message:
             `"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.proxyVerificationMode" instead, ` +
             `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +

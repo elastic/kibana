@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 import { getPolicyTrustedAppsPath, getTrustedAppsListPath } from '../../../../../common/routing';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 
 export const useGetLinkTo = (policyId: string, policyName: string) => {
   const { getAppUrl } = useAppUrl();
@@ -35,19 +35,19 @@ export const useGetLinkTo = (policyId: string, policyName: string) => {
         }
       ),
       onBackButtonNavigateTo: [
-        APP_ID,
+        APP_UI_ID,
         {
           path: policyTrustedAppsPath,
         },
       ],
       backButtonUrl: getAppUrl({
-        appId: APP_ID,
+        appId: APP_UI_ID,
         path: policyTrustedAppsPath,
       }),
     };
   }, [getAppUrl, policyName, policyTrustedAppsPath]);
 
-  const onClickHandler = useNavigateToAppEventHandler(APP_ID, {
+  const onClickHandler = useNavigateToAppEventHandler(APP_UI_ID, {
     state: policyTrustedAppRouteState,
     path: toRoutePath,
   });
