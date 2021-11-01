@@ -21,4 +21,7 @@ export type AlertsStackByField =
   | 'signal.rule.type'
   | 'signal.rule.name'
   | 'source.ip'
-  | 'user.name';
+  | 'user.name'
+  | 'process.name'
+  | 'file.name'
+  | 'hash.sha256';

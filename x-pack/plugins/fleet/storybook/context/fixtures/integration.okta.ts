@@ -105,6 +105,7 @@ export const response: GetInfoResponse['response'] = {
       lens: [],
       ml_module: [],
       security_rule: [],
+      tag: [],
     },
     elasticsearch: {
       ingest_pipeline: [

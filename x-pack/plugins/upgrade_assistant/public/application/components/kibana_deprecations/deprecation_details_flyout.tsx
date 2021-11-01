@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiButtonEmpty,
@@ -20,12 +21,12 @@ import {
   EuiTitle,
   EuiText,
   EuiCallOut,
-  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 
+import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../shared';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
-import { DeprecationBadge } from '../shared';
 
 import './_deprecation_details_flyout.scss';
 
@@ -37,12 +38,6 @@ export interface DeprecationDetailsFlyoutProps {
 }
 
 const i18nTexts = {
-  learnMoreLinkLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.flyout.learnMoreLinkLabel',
-    {
-      defaultMessage: 'Learn more about this deprecation',
-    }
-  ),
   closeButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.closeButtonLabel',
     {
@@ -73,22 +68,10 @@ const i18nTexts = {
       defaultMessage: 'Resolution in progress…',
     }
   ),
-  quickResolveCalloutTitle: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveCalloutTitle',
-    {
-      defaultMessage: 'Quick resolve action available',
-    }
-  ),
-  quickResolveErrorTitle: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveErrorTitle',
-    {
-      defaultMessage: 'Error resolving deprecation',
-    }
-  ),
-  quickResolveCalloutDescription: (
+  quickResolveCalloutTitle: (
     <FormattedMessage
-      id="xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveCalloutDescription"
-      defaultMessage="The steps to resolve this issue may be automated with {quickResolve} action below."
+      id="xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveCalloutTitle"
+      defaultMessage="Click {quickResolve} to fix this issue automatically."
       values={{
         quickResolve: (
           <strong>
@@ -100,10 +83,16 @@ const i18nTexts = {
       }}
     />
   ),
+  quickResolveErrorTitle: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveErrorTitle',
+    {
+      defaultMessage: 'Error resolving issue',
+    }
+  ),
   manualFixTitle: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.manualFixTitle',
     {
-      defaultMessage: 'Fix manually',
+      defaultMessage: 'How to fix',
     }
   ),
 };
@@ -134,6 +123,11 @@ export const DeprecationDetailsFlyout = ({
   const isCurrent = deprecationResolutionState?.id === deprecation.id;
   const isResolved = isCurrent && deprecationResolutionState?.resolveDeprecationStatus === 'ok';
 
+  const onResolveDeprecation = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_KIBANA_QUICK_RESOLVE_CLICK);
+    resolveDeprecation(deprecation);
+  }, [deprecation, resolveDeprecation]);
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -162,12 +156,9 @@ export const DeprecationDetailsFlyout = ({
 
         <EuiText>
           <p className="eui-textBreakWord">{message}</p>
-
           {documentationUrl && (
             <p>
-              <EuiLink target="_blank" data-test-subj="documentationLink" href={documentationUrl}>
-                {i18nTexts.learnMoreLinkLabel}
-              </EuiLink>
+              <DeprecationFlyoutLearnMoreLink documentationUrl={documentationUrl} />
             </p>
           )}
         </EuiText>
@@ -184,9 +175,7 @@ export const DeprecationDetailsFlyout = ({
                   color="primary"
                   iconType="iInCircle"
                   data-test-subj="quickResolveCallout"
-                >
-                  <p>{i18nTexts.quickResolveCalloutDescription}</p>
-                </EuiCallOut>
+                />
 
                 <EuiSpacer />
               </>
@@ -237,7 +226,7 @@ export const DeprecationDetailsFlyout = ({
               <EuiButton
                 fill
                 data-test-subj="resolveButton"
-                onClick={() => resolveDeprecation(deprecation)}
+                onClick={onResolveDeprecation}
                 isLoading={Boolean(
                   deprecationResolutionState?.resolveDeprecationStatus === 'in_progress'
                 )}

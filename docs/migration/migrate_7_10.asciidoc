@@ -79,7 +79,7 @@ To rename the Ingest Manger plugin to Fleet:
 ====
 
 Kibana plugins can no longer rely on their server code being automatically transpiled with Babel.
-The https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-helpers[`@kbn/plugin-helpers`]
+The https://github.com/elastic/kibana/tree/main/packages/kbn-plugin-helpers[`@kbn/plugin-helpers`]
 provide a build task that will transform a plugin's server code to plain JS via Babel,
 but plugin authors can use a tool of their choosing to accomplish the same result.
 
@@ -491,7 +491,7 @@ Resolves https://github.com/elastic/kibana/issues/73557[#73557].
 {kib} provides the new {es} client
 as a part of the {es} service on the server-side.
 The legacy client is deprecated on and subject for removal in `7.x`. Reference
-the https://github.com/elastic/kibana/blob/master/src/core/MIGRATION_EXAMPLES.md#elasticsearch-client[migration guide] to refactor your code
+the https://github.com/elastic/kibana/blob/main/src/core/MIGRATION_EXAMPLES.md#elasticsearch-client[migration guide] to refactor your code
 
 *via https://github.com/elastic/kibana/pull/73651[#73651]*
 

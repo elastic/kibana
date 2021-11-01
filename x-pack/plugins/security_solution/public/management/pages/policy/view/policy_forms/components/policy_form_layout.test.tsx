@@ -30,7 +30,6 @@ describe('Policy Form Layout', () => {
   const generator = new EndpointDocGenerator();
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
-  let middlewareSpy: AppContextTestRender['middlewareSpy'];
   let http: typeof coreStart.http;
   let render: (ui: Parameters<typeof mount>[0]) => ReturnType<typeof mount>;
   let policyPackagePolicy: ReturnType<typeof generator.generatePolicyPackagePolicy>;
@@ -40,7 +39,7 @@ describe('Policy Form Layout', () => {
     const appContextMockRenderer = createAppRootMockRenderer();
     const AppWrapper = appContextMockRenderer.AppWrapper;
 
-    ({ history, coreStart, middlewareSpy } = appContextMockRenderer);
+    ({ history, coreStart } = appContextMockRenderer);
     render = (ui) => mount(ui, { wrappingComponent: AppWrapper });
     http = coreStart.http;
   });
@@ -52,33 +51,6 @@ describe('Policy Form Layout', () => {
     jest.clearAllMocks();
   });
 
-  describe('when displayed with invalid id', () => {
-    let releaseApiFailure: () => void;
-    beforeEach(() => {
-      http.get.mockImplementation(async () => {
-        await new Promise((_, reject) => {
-          releaseApiFailure = reject.bind(null, new Error('policy not found'));
-        });
-      });
-      history.push(policyDetailsPathUrl);
-      policyFormLayoutView = render(<PolicyFormLayout />);
-    });
-
-    it('should NOT display timeline', async () => {
-      expect(policyFormLayoutView.find('flyoutOverlay')).toHaveLength(0);
-    });
-
-    it('should show loader followed by error message', async () => {
-      expect(policyFormLayoutView.find('EuiLoadingSpinner').length).toBe(1);
-      releaseApiFailure();
-      await middlewareSpy.waitForAction('serverFailedToReturnPolicyDetailsData');
-      policyFormLayoutView.update();
-      const callout = policyFormLayoutView.find('EuiCallOut');
-      expect(callout).toHaveLength(1);
-      expect(callout.prop('color')).toEqual('danger');
-      expect(callout.text()).toEqual('policy not found');
-    });
-  });
   describe('when displayed with valid id', () => {
     let asyncActions: Promise<unknown> = Promise.resolve();
 

@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
             savedObjectsTagging: ['all', 'read'],
             graph: ['all', 'read'],
             maps: ['all', 'read'],
+            observabilityCases: ['all', 'read'],
             canvas: ['all', 'read'],
             infrastructure: ['all', 'read'],
             logs: ['all', 'read'],
@@ -44,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
-          reserved: ['ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+          reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
         };
 
         await supertest

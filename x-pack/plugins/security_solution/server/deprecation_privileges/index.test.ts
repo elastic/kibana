@@ -324,7 +324,7 @@ describe('deprecations', () => {
       savedObjectsClient: jest.fn(),
     } as unknown as GetDeprecationsContext;
     const getDeprecations = jest.fn();
-    const getKibanaRolesByFeatureId = jest.fn();
+    const getKibanaRoles = jest.fn();
     const mockDeprecationsService: DeprecationsServiceSetup = {
       registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => {
         getDeprecations.mockImplementation(deprecationContext.getDeprecations);
@@ -334,15 +334,15 @@ describe('deprecations', () => {
     beforeAll(() => {
       registerPrivilegeDeprecations({
         deprecationsService: mockDeprecationsService,
-        getKibanaRolesByFeatureId,
+        getKibanaRoles,
         logger: loggingSystemMock.createLogger(),
       });
     });
     beforeEach(() => {
-      getKibanaRolesByFeatureId.mockReset();
+      getKibanaRoles.mockReset();
     });
 
-    test('getDeprecations return the errors from getKibanaRolesByFeatureId', async () => {
+    test('getDeprecations return the errors from getKibanaRoles', async () => {
       const errorResponse = {
         errors: [
           {
@@ -357,13 +357,13 @@ describe('deprecations', () => {
           },
         ],
       };
-      getKibanaRolesByFeatureId.mockResolvedValue(errorResponse);
+      getKibanaRoles.mockResolvedValue(errorResponse);
       const response = await getDeprecations(mockContext);
       expect(response).toEqual(errorResponse.errors);
     });
 
     test('getDeprecations return empty array when securitySolutionCases privileges are already set up', async () => {
-      getKibanaRolesByFeatureId.mockResolvedValue({
+      getKibanaRoles.mockResolvedValue({
         roles: [
           {
             _transform_error: [],
@@ -399,7 +399,7 @@ describe('deprecations', () => {
     });
 
     test('happy path build securitySolutionCases privileges from  siem privileges', async () => {
-      getKibanaRolesByFeatureId.mockResolvedValue({
+      getKibanaRoles.mockResolvedValue({
         roles: [
           {
             _transform_error: [],
@@ -473,15 +473,15 @@ describe('deprecations', () => {
             },
             "deprecationType": "feature",
             "level": "warning",
-            "message": "The \\"Security\\" feature will be split into two separate features in 8.0. The \\"first_role\\" role grants access to this feature, and it needs to be updated before you upgrade Kibana. This will ensure that users have access to the same features after the upgrade.",
-            "title": "The \\"first_role\\" role needs to be updated",
+            "message": "The Security feature will be split into the Security and Cases features in 8.0. The \\"first_role\\" role grants access to the Security feature only. Update the role to also grant access to the Cases feature.",
+            "title": "The Security feature is changing, and the \\"first_role\\" role requires an update",
           },
         ]
       `);
     });
 
     test('getDeprecations handles multiple roles and filters out any that have already been updated', async () => {
-      getKibanaRolesByFeatureId.mockResolvedValue({
+      getKibanaRoles.mockResolvedValue({
         roles: [
           {
             _transform_error: [],
@@ -608,15 +608,15 @@ describe('deprecations', () => {
             },
             "deprecationType": "feature",
             "level": "warning",
-            "message": "The \\"Security\\" feature will be split into two separate features in 8.0. The \\"second_role\\" role grants access to this feature, and it needs to be updated before you upgrade Kibana. This will ensure that users have access to the same features after the upgrade.",
-            "title": "The \\"second_role\\" role needs to be updated",
+            "message": "The Security feature will be split into the Security and Cases features in 8.0. The \\"second_role\\" role grants access to the Security feature only. Update the role to also grant access to the Cases feature.",
+            "title": "The Security feature is changing, and the \\"second_role\\" role requires an update",
           },
         ]
       `);
     });
 
     test('getDeprecations handles multiple roles and filters out any that do not grant access to Cases', async () => {
-      getKibanaRolesByFeatureId.mockResolvedValue({
+      getKibanaRoles.mockResolvedValue({
         roles: [
           {
             _transform_error: [],
@@ -772,13 +772,13 @@ describe('deprecations', () => {
       });
       const response = await getDeprecations(mockContext);
       expect(response).toEqual([
-        expect.objectContaining({ title: 'The "role_siem_all" role needs to be updated' }),
-        expect.objectContaining({ title: 'The "role_siem_read" role needs to be updated' }),
+        expect.objectContaining({ message: expect.stringMatching(/"role_siem_all"/) }),
+        expect.objectContaining({ message: expect.stringMatching(/"role_siem_read"/) }),
         expect.objectContaining({
-          title: 'The "role_siem_minimal_all_cases_all_cases_read" role needs to be updated',
+          message: expect.stringMatching(/"role_siem_minimal_all_cases_all_cases_read"/),
         }),
         expect.objectContaining({
-          title: 'The "role_siem_minimal_read_cases_read" role needs to be updated',
+          message: expect.stringMatching(/"role_siem_minimal_read_cases_read"/),
         }),
         // the fifth_role and sixth_role have been filtered out because they do not grant access to Cases
       ]);

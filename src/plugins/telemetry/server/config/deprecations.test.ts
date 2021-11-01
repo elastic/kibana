@@ -9,7 +9,7 @@
 import { configDeprecationsMock } from '../../../../core/server/mocks';
 import { deprecateEndpointConfigs } from './deprecations';
 import type { TelemetryConfigType } from './config';
-import { TELEMETRY_ENDPOINT } from '../../common/constants';
+import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 
 describe('deprecateEndpointConfigs', () => {
   const fromPath = 'telemetry';
@@ -43,7 +43,7 @@ describe('deprecateEndpointConfigs', () => {
 
   it('sets "telemetryConfig.sendUsageTo: staging" if "telemetry.url" uses the staging endpoint', () => {
     const rawConfig = createMockRawConfig({
-      url: TELEMETRY_ENDPOINT.MAIN_CHANNEL.STAGING,
+      url: getTelemetryChannelEndpoint({ channelName: 'snapshot', env: 'staging' }),
     });
     const result = deprecateEndpointConfigs(
       rawConfig,
@@ -97,7 +97,7 @@ describe('deprecateEndpointConfigs', () => {
 
   it('sets "telemetryConfig.sendUsageTo: staging" if "telemetry.optInStatusUrl" uses the staging endpoint', () => {
     const rawConfig = createMockRawConfig({
-      optInStatusUrl: TELEMETRY_ENDPOINT.MAIN_CHANNEL.STAGING,
+      optInStatusUrl: getTelemetryChannelEndpoint({ channelName: 'snapshot', env: 'staging' }),
     });
     const result = deprecateEndpointConfigs(
       rawConfig,
@@ -151,7 +151,7 @@ describe('deprecateEndpointConfigs', () => {
 
   it('registers deprecation when "telemetry.url" is set', () => {
     const rawConfig = createMockRawConfig({
-      url: TELEMETRY_ENDPOINT.MAIN_CHANNEL.PROD,
+      url: getTelemetryChannelEndpoint({ channelName: 'snapshot', env: 'prod' }),
     });
     deprecateEndpointConfigs(rawConfig, fromPath, mockAddDeprecation, deprecationContext);
     expect(mockAddDeprecation).toBeCalledTimes(1);
@@ -165,6 +165,7 @@ describe('deprecateEndpointConfigs', () => {
               "To send usage to the staging endpoint add \\"telemetry.sendUsageTo: staging\\" to the Kibana configuration.",
             ],
           },
+          "level": "critical",
           "message": "\\"telemetry.url\\" has been deprecated. Set \\"telemetry.sendUsageTo: staging\\" to the Kibana configurations to send usage to the staging endpoint.",
           "title": "Setting \\"telemetry.url\\" is deprecated",
         },
@@ -188,6 +189,7 @@ describe('deprecateEndpointConfigs', () => {
               "To send usage to the staging endpoint add \\"telemetry.sendUsageTo: staging\\" to the Kibana configuration.",
             ],
           },
+          "level": "critical",
           "message": "\\"telemetry.optInStatusUrl\\" has been deprecated. Set \\"telemetry.sendUsageTo: staging\\" to the Kibana configurations to send usage to the staging endpoint.",
           "title": "Setting \\"telemetry.optInStatusUrl\\" is deprecated",
         },

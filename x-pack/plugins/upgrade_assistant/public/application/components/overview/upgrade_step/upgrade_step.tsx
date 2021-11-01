@@ -20,20 +20,18 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { useAppContext } from '../../../app_context';
 
 const i18nTexts = {
-  upgradeStepTitle: (nextMajor: number) =>
-    i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
-      defaultMessage: 'Install {nextMajor}.0',
-      values: { nextMajor },
-    }),
+  upgradeStepTitle: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
+    defaultMessage: 'Upgrade to Elastic 8.x',
+  }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
     defaultMessage:
-      "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade the Elastic Stack. Be sure to back up your data again before upgrading.",
+      'Once you’ve resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic 8.x. Be sure to back up your data again before upgrading.',
   }),
   upgradeStepDescriptionForCloud: i18n.translate(
     'xpack.upgradeAssistant.overview.upgradeStepDescriptionForCloud',
     {
       defaultMessage:
-        "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade the Elastic Stack. Upgrade your deployment on Elastic Cloud.",
+        "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic 8.x. Be sure to back up your data again before upgrading. Upgrade your deployment on Elastic Cloud.",
     }
   ),
   upgradeStepLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepLink', {
@@ -75,7 +73,7 @@ const UpgradeStep = () => {
 
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            href={docLinks.links.elasticsearch.setupUpgrade}
+            href={docLinks.links.upgrade.upgradingElasticStack}
             target="_blank"
             data-test-subj="upgradeSetupDocsLink"
             iconSide="right"
@@ -89,7 +87,7 @@ const UpgradeStep = () => {
   } else {
     callToAction = (
       <EuiButton
-        href={docLinks.links.elasticsearch.setupUpgrade}
+        href={docLinks.links.upgrade.upgradingElasticStack}
         target="_blank"
         data-test-subj="upgradeSetupDocsLink"
         iconSide="right"
@@ -117,9 +115,9 @@ const UpgradeStep = () => {
   );
 };
 
-export const getUpgradeStep = ({ nextMajor }: { nextMajor: number }): EuiStepProps => {
+export const getUpgradeStep = (): EuiStepProps => {
   return {
-    title: i18nTexts.upgradeStepTitle(nextMajor),
+    title: i18nTexts.upgradeStepTitle,
     status: 'incomplete',
     'data-test-subj': 'upgradeStep',
     children: <UpgradeStep />,

@@ -26,6 +26,7 @@ import {
   insertOrReplaceColumn,
   replaceColumn,
   updateColumnParam,
+  updateDefaultLabels,
   resetIncomplete,
   FieldBasedIndexPatternColumn,
   canTransition,
@@ -151,13 +152,27 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const addStaticValueColumn = (prevLayer = props.state.layers[props.layerId]) => {
     if (selectedColumn?.operationType !== staticValueOperationName) {
       trackUiEvent(`indexpattern_dimension_operation_static_value`);
-      return insertOrReplaceColumn({
+      const layer = insertOrReplaceColumn({
         layer: prevLayer,
         indexPattern: currentIndexPattern,
         columnId,
         op: staticValueOperationName,
         visualizationGroups: dimensionGroups,
       });
+      const value = props.activeData?.[layerId]?.rows[0]?.[columnId];
+      // replace the default value with the one from the active data
+      if (value != null) {
+        return updateDefaultLabels(
+          updateColumnParam({
+            layer,
+            columnId,
+            paramName: 'value',
+            value: props.activeData?.[layerId]?.rows[0]?.[columnId],
+          }),
+          currentIndexPattern
+        );
+      }
+      return layer;
     }
     return prevLayer;
   };
@@ -173,7 +188,18 @@ export function DimensionEditor(props: DimensionEditorProps) {
     if (temporaryStaticValue) {
       setTemporaryState('none');
     }
-    return setStateWrapper(setter, { forceRender: true });
+    if (typeof setter === 'function') {
+      return setState(
+        (prevState) => {
+          const layer = setter(addStaticValueColumn(prevState.layers[layerId]));
+          return mergeLayer({ state: prevState, layerId, newLayer: layer });
+        },
+        {
+          isDimensionComplete: true,
+          forceRender: true,
+        }
+      );
+    }
   };
 
   const ParamEditor = getParamEditor(

@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-/**
- * getKibanaRolesByFeature
- */
-
 export { getPrivilegeDeprecationsService } from './privilege_deprecations';
+export {
+  registerKibanaDashboardOnlyRoleDeprecation,
+  KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME,
+} from './kibana_dashboard_only_role';
+export {
+  registerKibanaUserRoleDeprecation,
+  KIBANA_ADMIN_ROLE_NAME,
+  KIBANA_USER_ROLE_NAME,
+} from './kibana_user_role';
+export { registerMLPrivilegesDeprecation } from './ml_privileges';

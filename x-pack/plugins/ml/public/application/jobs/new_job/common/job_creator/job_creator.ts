@@ -502,6 +502,10 @@ export class JobCreator {
     return this._datafeed_config.indices;
   }
 
+  public set indices(indics: string[]) {
+    this._datafeed_config.indices = indics;
+  }
+
   public get scriptFields(): Field[] {
     return this._scriptFields;
   }

@@ -256,7 +256,7 @@ describe('endpoint list middleware', () => {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
         // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-        // @ts-ignore
+        // @ts-expect-error TS2345
         payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
       });
     };
@@ -389,7 +389,6 @@ describe('endpoint list middleware', () => {
 
     it('should call get Activity Log API with correct paging options', async () => {
       dispatchUserChangedUrl();
-
       const updatePagingDispatched = waitForAction('endpointDetailsActivityLogUpdatePaging');
       dispatchGetActivityLogPaging({ page: 3 });
 

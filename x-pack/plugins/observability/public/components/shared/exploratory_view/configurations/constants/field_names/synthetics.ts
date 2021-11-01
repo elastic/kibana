@@ -11,3 +11,5 @@ export const SYNTHETICS_LCP = 'browser.experience.lcp.us';
 export const SYNTHETICS_FCP = 'browser.experience.fcp.us';
 export const SYNTHETICS_DOCUMENT_ONLOAD = 'browser.experience.load.us';
 export const SYNTHETICS_DCL = 'browser.experience.dcl.us';
+export const SYNTHETICS_STEP_NAME = 'synthetics.step.name.keyword';
+export const SYNTHETICS_STEP_DURATION = 'synthetics.step.duration.us';

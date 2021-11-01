@@ -12,7 +12,11 @@ import { EuiSwitch, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { TLSOptions, TLSConfig } from '../common/tls_options';
-import { useBrowserSimpleFieldsContext, usePolicyConfigContext } from '../contexts';
+import {
+  useBrowserSimpleFieldsContext,
+  usePolicyConfigContext,
+  defaultTLSFields,
+} from '../contexts';
 
 import { ConfigKeys } from '../types';
 
@@ -67,12 +71,23 @@ export const ZipUrlTLSFields = () => {
         {isZipUrlTLSEnabled ? (
           <TLSOptions
             defaultValues={{
-              certificateAuthorities: defaultValues[ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES],
-              certificate: defaultValues[ConfigKeys.ZIP_URL_TLS_CERTIFICATE],
-              key: defaultValues[ConfigKeys.ZIP_URL_TLS_KEY],
-              keyPassphrase: defaultValues[ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE],
-              verificationMode: defaultValues[ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE],
-              version: defaultValues[ConfigKeys.ZIP_URL_TLS_VERSION],
+              certificateAuthorities:
+                defaultValues[ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES] ||
+                defaultTLSFields[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
+              certificate:
+                defaultValues[ConfigKeys.ZIP_URL_TLS_CERTIFICATE] ||
+                defaultTLSFields[ConfigKeys.TLS_CERTIFICATE],
+              key:
+                defaultValues[ConfigKeys.ZIP_URL_TLS_KEY] || defaultTLSFields[ConfigKeys.TLS_KEY],
+              keyPassphrase:
+                defaultValues[ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE] ||
+                defaultTLSFields[ConfigKeys.TLS_KEY_PASSPHRASE],
+              verificationMode:
+                defaultValues[ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE] ||
+                defaultTLSFields[ConfigKeys.TLS_VERIFICATION_MODE],
+              version:
+                defaultValues[ConfigKeys.ZIP_URL_TLS_VERSION] ||
+                defaultTLSFields[ConfigKeys.TLS_VERSION],
             }}
             onChange={handleOnChange}
             tlsRole="client"

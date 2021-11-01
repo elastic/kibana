@@ -1406,7 +1406,7 @@ export function isOperationAllowedAsReference({
 
 // Labels need to be updated when columns are added because reference-based column labels
 // are sometimes copied into the parents
-function updateDefaultLabels(
+export function updateDefaultLabels(
   layer: IndexPatternLayer,
   indexPattern: IndexPattern
 ): IndexPatternLayer {

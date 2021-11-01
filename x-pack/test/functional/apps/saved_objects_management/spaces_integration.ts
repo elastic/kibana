@@ -26,7 +26,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const spaceId = 'space_1';
 
-  describe('spaces integration', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/115303
+  describe.skip('spaces integration', () => {
     before(async () => {
       await spacesService.create({ id: spaceId, name: spaceId });
       await kibanaServer.importExport.load(

@@ -44,7 +44,7 @@ import {
 } from './migrations/to_v7_13_0';
 import { migratePackagePolicyToV7140, migrateInstallationToV7140 } from './migrations/to_v7_14_0';
 import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
-import { migrateInstallationToV7160 } from './migrations/to_v7_16_0';
+import { migrateInstallationToV7160, migratePackagePolicyToV7160 } from './migrations/to_v7_16_0';
 
 /*
  * Saved object types and mappings
@@ -236,6 +236,16 @@ const getSavedObjectTypes = (
             version: { type: 'keyword' },
           },
         },
+        elasticsearch: {
+          enabled: false,
+          properties: {
+            privileges: {
+              properties: {
+                cluster: { type: 'keyword' },
+              },
+            },
+          },
+        },
         vars: { type: 'flattened' },
         inputs: {
           type: 'nested',
@@ -284,6 +294,7 @@ const getSavedObjectTypes = (
       '7.13.0': migratePackagePolicyToV7130,
       '7.14.0': migratePackagePolicyToV7140,
       '7.15.0': migratePackagePolicyToV7150,
+      '7.16.0': migratePackagePolicyToV7160,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {

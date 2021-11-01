@@ -17,7 +17,11 @@ import type { SearchStrategyParams } from '../../../../common/search_strategies/
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
-const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
+export const getHistogramRangeSteps = (
+  min: number,
+  max: number,
+  steps: number
+) => {
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
   // We round the final values because the ES range agg we use won't accept numbers with decimals for `transaction.duration.us`.
   const logFn = scaleLog().domain([min, max]).range([1, steps]);

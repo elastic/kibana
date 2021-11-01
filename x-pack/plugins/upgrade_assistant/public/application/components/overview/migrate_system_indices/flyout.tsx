@@ -27,13 +27,12 @@ import {
 import {
   SystemIndicesMigrationStatus,
   SystemIndicesMigrationFeature,
-  UPGRADE_STATUS,
+  MIGRATION_STATUS,
 } from '../../../../../common/types';
 
 export interface SystemIndicesFlyoutProps {
   closeFlyout: () => void;
   data: SystemIndicesMigrationStatus;
-  nextMajor: number;
 }
 
 const i18nTexts = {
@@ -46,12 +45,13 @@ const i18nTexts = {
   flyoutTitle: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.flyoutTitle', {
     defaultMessage: 'Migrate system indices',
   }),
-  flyoutDescription: (nextMajor: number) =>
-    i18n.translate('xpack.upgradeAssistant.overview.systemIndices.flyoutDescription', {
+  flyoutDescription: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.flyoutDescription',
+    {
       defaultMessage:
-        'Migrate the indices that store information for the following features before you upgrade to {nextMajor}.0.',
-      values: { nextMajor },
-    }),
+        'Migrate the indices that store information for the following features before you upgrade.',
+    }
+  ),
   migrationCompleteLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.migrationCompleteLabel',
     {
@@ -84,8 +84,8 @@ const i18nTexts = {
   ),
 };
 
-const renderMigrationStatus = (status: UPGRADE_STATUS) => {
-  if (status === 'NO_UPGRADE_NEEDED') {
+const renderMigrationStatus = (status: MIGRATION_STATUS) => {
+  if (status === 'NO_MIGRATION_NEEDED') {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -100,7 +100,7 @@ const renderMigrationStatus = (status: UPGRADE_STATUS) => {
     );
   }
 
-  if (status === 'UPGRADE_NEEDED') {
+  if (status === 'MIGRATION_NEEDED') {
     return (
       <EuiText size="s" data-test-subj="featureUpgradeNeeded">
         <p>{i18nTexts.needsMigrationLabel}</p>
@@ -150,14 +150,14 @@ const columns = [
     render: (name: string) => startCase(name),
   },
   {
-    field: 'upgrade_status',
+    field: 'migration_status',
     name: i18nTexts.statusTableColumn,
     sortable: true,
     render: renderMigrationStatus,
   },
 ];
 
-export const SystemIndicesFlyout = ({ closeFlyout, data, nextMajor }: SystemIndicesFlyoutProps) => {
+export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutProps) => {
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -167,7 +167,7 @@ export const SystemIndicesFlyout = ({ closeFlyout, data, nextMajor }: SystemIndi
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="flyoutDetails">
         <EuiText>
-          <p>{i18nTexts.flyoutDescription(nextMajor)}</p>
+          <p>{i18nTexts.flyoutDescription}</p>
         </EuiText>
         <EuiSpacer size="l" />
         <EuiInMemoryTable<SystemIndicesMigrationFeature>

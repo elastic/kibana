@@ -170,6 +170,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     />
                   }
                   title={i18n.PAGE_TITLE}
+                  border
                 />
 
                 <EmbeddedMap
@@ -221,7 +222,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           </StyledFullHeightContainer>
         ) : (
           <SecuritySolutionPageWrapper>
-            <HeaderPage border title={i18n.PAGE_TITLE} />
             <OverviewEmpty />
           </SecuritySolutionPageWrapper>
         )}

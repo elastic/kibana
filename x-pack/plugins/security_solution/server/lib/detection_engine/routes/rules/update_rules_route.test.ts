@@ -44,7 +44,7 @@ describe.each([
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     ); // successful update
     clients.ruleExecutionLogClient.find.mockResolvedValue([]); // successful transform: ;
-
+    clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
     updateRulesRoute(server.router, ml, isRuleRegistryEnabled);
   });
 

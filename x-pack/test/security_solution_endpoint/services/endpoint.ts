@@ -18,7 +18,7 @@ import {
   IndexedHostsAndAlertsResponse,
   indexHostsAndAlerts,
 } from '../../../plugins/security_solution/common/endpoint/index_data';
-import { TransformPivotConfig } from '../../../plugins/transform/common/types/transform';
+import { TransformConfigUnion } from '../../../plugins/transform/common/types/transform';
 import { GetTransformsResponseSchema } from '../../../plugins/transform/common/api_schemas/transforms';
 import { catchAndWrapError } from '../../../plugins/security_solution/server/endpoint/utils';
 import { installOrUpgradeEndpointFleetPackage } from '../../../plugins/security_solution/common/endpoint/data_loaders/setup_fleet_for_endpoint';
@@ -38,9 +38,9 @@ export class EndpointTestResources extends FtrService {
    *
    * @param [endpointPackageVersion] if set, it will be used to get the specific transform this this package version. Else just returns first one found
    */
-  async getTransform(endpointPackageVersion?: string): Promise<TransformPivotConfig> {
+  async getTransform(endpointPackageVersion?: string): Promise<TransformConfigUnion> {
     const transformId = this.generateTransformId(endpointPackageVersion);
-    let transform: TransformPivotConfig | undefined;
+    let transform: TransformConfigUnion | undefined;
 
     if (endpointPackageVersion) {
       await this.transform.api.waitForTransformToExist(transformId);

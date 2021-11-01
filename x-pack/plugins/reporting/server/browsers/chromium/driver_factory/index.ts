@@ -25,18 +25,6 @@ import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { getMetrics, Metrics } from './metrics';
 
-// Puppeteer type definitions do not match the documentation.
-// See https://pptr.dev/#?product=Puppeteer&version=v8.0.0&show=api-puppeteerlaunchoptions
-interface ReportingLaunchOptions extends puppeteer.LaunchOptions {
-  userDataDir?: string;
-  ignoreHTTPSErrors?: boolean;
-  args?: string[];
-}
-
-declare module 'puppeteer' {
-  function launch(options: ReportingLaunchOptions): Promise<puppeteer.Browser>;
-}
-
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 
 export class HeadlessChromiumDriverFactory {

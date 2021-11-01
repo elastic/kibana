@@ -23,16 +23,16 @@ export function envoyproxyMetricsSpecProvider(context: TutorialContext): Tutoria
   return {
     id: 'envoyproxyMetrics',
     name: i18n.translate('home.tutorials.envoyproxyMetrics.nameTitle', {
-      defaultMessage: 'Envoy Proxy metrics',
+      defaultMessage: 'Envoy Proxy Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.envoyproxyMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from Envoy Proxy.',
+      defaultMessage: 'Collect metrics from Envoy Proxy with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.envoyproxyMetrics.longDescription', {
       defaultMessage:
-        'The `envoyproxy` Metricbeat module fetches monitoring metrics from Envoy Proxy. \
+        'The `envoyproxy` Metricbeat module fetches metrics from Envoy Proxy. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-envoyproxy.html',

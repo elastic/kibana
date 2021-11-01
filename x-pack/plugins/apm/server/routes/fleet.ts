@@ -92,7 +92,7 @@ const fleetAgentsRoute = createApmServerRoute({
 });
 
 const saveApmServerSchemaRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/fleet/apm_server_schema',
+  endpoint: 'POST /api/apm/fleet/apm_server_schema',
   options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     body: t.type({
@@ -143,11 +143,13 @@ const getMigrationCheckRoute = createApmServerRoute({
           fleetPluginStart,
         })
       : undefined;
+    const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
     return {
       has_cloud_agent_policy: !!cloudAgentPolicy,
-      has_cloud_apm_package_policy: !!getApmPackagePolicy(cloudAgentPolicy),
+      has_cloud_apm_package_policy: !!apmPackagePolicy,
       cloud_apm_migration_enabled: cloudApmMigrationEnabled,
       has_required_role: hasRequiredRole,
+      cloud_apm_package_policy: apmPackagePolicy,
     };
   },
 });

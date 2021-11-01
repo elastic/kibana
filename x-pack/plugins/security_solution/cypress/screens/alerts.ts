@@ -33,6 +33,8 @@ export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="close-alert-status"]'
 
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
+export const EMPTY_ALERT_TABLE = '[data-test-subj="tGridEmptyState"]';
+
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 
 export const ACKNOWLEDGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAlerts"]';
@@ -58,7 +60,7 @@ export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="selectedShowBulkActions
 
 export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu-button"]';
 
-export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="attach-alert-to-case-button"]';
+export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-existing-case-menu-item"]';
 
 export const ALERT_COUNT_TABLE_FIRST_ROW_COUNT =
   '[data-test-subj="alertsCountTable"] tr:nth-child(1) td:nth-child(2) .euiTableCellContent__text';

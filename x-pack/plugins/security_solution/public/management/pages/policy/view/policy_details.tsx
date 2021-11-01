@@ -8,8 +8,9 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
+import { EuiCallOut, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { usePolicyDetailsSelector } from './policy_hooks';
-import { policyDetails, agentStatusSummary } from '../store/policy_details/selectors';
+import { policyDetails, agentStatusSummary, apiError } from '../store/policy_details/selectors';
 import { AgentsSummary } from './agents_summary';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { PolicyTabs } from './tabs';
@@ -33,6 +34,7 @@ export const PolicyDetails = React.memo(() => {
   const { getAppUrl } = useAppUrl();
 
   // Store values
+  const policyApiError = usePolicyDetailsSelector(apiError);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const policyAgentStatusSummary = usePolicyDetailsSelector(agentStatusSummary);
 
@@ -81,22 +83,48 @@ export const PolicyDetails = React.memo(() => {
     <BackToExternalAppButton {...backLinkOptions} data-test-subj="policyDetailsBackLink" />
   );
 
+  const pageBody: React.ReactNode = useMemo(() => {
+    if (policyApiError) {
+      return (
+        <EuiPageTemplate template="centeredContent">
+          <EuiCallOut color="danger" title={policyApiError?.error}>
+            <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
+          </EuiCallOut>
+        </EuiPageTemplate>
+      );
+    }
+
+    if (!policyItem) {
+      return (
+        <EuiPageTemplate template="centeredContent">
+          <EuiLoadingSpinner
+            className="essentialAnimation"
+            size="xl"
+            data-test-subj="policyDetailsLoading"
+          />
+        </EuiPageTemplate>
+      );
+    }
+
+    // TODO: Remove this and related code when removing FF
+    if (isTrustedAppsByPolicyEnabled) {
+      return <PolicyTabs />;
+    }
+
+    return <PolicyFormLayout />;
+  }, [isTrustedAppsByPolicyEnabled, policyApiError, policyItem]);
+
   return (
     <AdministrationListPage
       data-test-subj="policyDetailsPage"
       title={policyName}
       subtitle={policyDescription}
       headerBackComponent={backToEndpointList}
-      actions={headerRightContent}
+      actions={policyApiError ? undefined : headerRightContent}
       restrictWidth={true}
       hasBottomBorder={!isTrustedAppsByPolicyEnabled} // TODO: Remove this and related code when removing FF
     >
-      {isTrustedAppsByPolicyEnabled ? (
-        <PolicyTabs />
-      ) : (
-        // TODO: Remove this and related code when removing FF
-        <PolicyFormLayout />
-      )}
+      {pageBody}
     </AdministrationListPage>
   );
 });

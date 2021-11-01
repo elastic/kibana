@@ -68,6 +68,15 @@ export class SecurityLicenseService {
     );
   }
 
+  private isMLEnabledFromRawLicense(rawLicense: Readonly<ILicense> | undefined) {
+    if (!rawLicense) {
+      return false;
+    }
+
+    const mlFeature = rawLicense.getFeature('ml');
+    return mlFeature !== undefined && mlFeature.isAvailable && mlFeature.isEnabled;
+  }
+
   private calculateFeaturesFromRawLicense(
     rawLicense: Readonly<ILicense> | undefined
   ): SecurityLicenseFeatures {
@@ -85,6 +94,7 @@ export class SecurityLicenseService {
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
+        allowML: false,
         allowSubFeaturePrivileges: false,
         layout:
           rawLicense !== undefined && !rawLicense?.isAvailable
@@ -92,6 +102,8 @@ export class SecurityLicenseService {
             : 'error-es-unavailable',
       };
     }
+
+    const allowML = this.isMLEnabledFromRawLicense(rawLicense);
 
     if (!this.isSecurityEnabledFromRawLicense(rawLicense)) {
       return {
@@ -105,6 +117,7 @@ export class SecurityLicenseService {
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
+        allowML,
         allowSubFeaturePrivileges: false,
       };
     }
@@ -124,6 +137,7 @@ export class SecurityLicenseService {
       // Only platinum and trial licenses are compliant with field- and document-level security.
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,
       allowRoleFieldLevelSecurity: isLicensePlatinumOrBetter,
+      allowML,
       allowRbac: true,
     };
   }

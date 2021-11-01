@@ -402,6 +402,10 @@ export class SavedSearchEmbeddable
     return this.inspectorAdapters;
   }
 
+  public getDescription() {
+    return this.savedSearch.description;
+  }
+
   public destroy() {
     super.destroy();
     if (this.searchProps) {

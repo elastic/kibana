@@ -15,10 +15,13 @@ import { HttpService, IRouter } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { ServerMetricsCollector } from '../collectors/server';
+import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
 const requestWaitDelay = 25;
 
-describe('ServerMetricsCollector', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/59234
+// FLAKY: https://github.com/elastic/kibana/issues/59235
+describe.skip('ServerMetricsCollector', () => {
   let server: HttpService;
   let collector: ServerMetricsCollector;
   let hapiServer: HapiServer;
@@ -195,6 +198,9 @@ describe('ServerMetricsCollector', () => {
 
     waitSubject.next('go');
     await Promise.all([res1, res2]);
+    // Give the event-loop one more cycle to allow concurrent connections to be
+    // up to date before collecting
+    await setTimeoutPromise(0);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
   });

@@ -37,7 +37,7 @@ describe('ThreatDetailsView', () => {
   it('renders an anchor link for indicator.reference', () => {
     const enrichments = [
       buildEventEnrichmentMock({
-        'threat.indicator.reference': ['http://foo.baz'],
+        'threatintel.indicator.reference': ['http://foo.baz'],
       }),
     ];
     const wrapper = mount(
@@ -60,10 +60,10 @@ describe('ThreatDetailsView', () => {
     const existingEnrichment = buildEventEnrichmentMock({
       'indicator.first_seen': [mostRecentDate],
     });
-    delete existingEnrichment['threat.indicator.first_seen'];
+    delete existingEnrichment['threatintel.indicator.first_seen'];
     const newEnrichment = buildEventEnrichmentMock({
       'matched.id': ['other.id'],
-      'threat.indicator.first_seen': [olderDate],
+      'threatintel.indicator.first_seen': [olderDate],
     });
     const enrichments = [existingEnrichment, newEnrichment];
 

@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
-import { EuiButtonEmpty, EuiPanel, EuiResizableContainer, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
+import { EuiButtonEmpty, EuiResizableContainer, EuiTitle, EuiPanel } from '@elastic/eui';
 import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
@@ -20,6 +20,7 @@ import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
 import { SeriesViews } from './views/series_views';
 import { LensEmbeddable } from './lens_embeddable';
 import { EmptyView } from './components/empty_view';
+import type { ChartTimeRange } from './header/last_updated';
 
 export type PanelId = 'seriesPanel' | 'chartPanel';
 
@@ -37,7 +38,7 @@ export function ExploratoryView({
 
   const [height, setHeight] = useState<string>('100vh');
 
-  const [lastUpdated, setLastUpdated] = useState<number | undefined>();
+  const [chartTimeRangeContext, setChartTimeRangeContext] = useState<ChartTimeRange | undefined>();
 
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null
@@ -96,7 +97,10 @@ export function ExploratoryView({
     <Wrapper>
       {lens ? (
         <>
-          <ExploratoryViewHeader lensAttributes={lensAttributes} lastUpdated={lastUpdated} />
+          <ExploratoryViewHeader
+            lensAttributes={lensAttributes}
+            chartTimeRange={chartTimeRangeContext}
+          />
           <LensWrapper ref={wrapperRef} height={height}>
             <EuiResizableContainer
               style={{ height: '100%' }}
@@ -116,7 +120,7 @@ export function ExploratoryView({
                     >
                       {lensAttributes ? (
                         <LensEmbeddable
-                          setLastUpdated={setLastUpdated}
+                          setChartTimeRangeContext={setChartTimeRangeContext}
                           lensAttributes={lensAttributes}
                         />
                       ) : (

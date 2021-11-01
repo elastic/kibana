@@ -15,7 +15,7 @@ import { useTable } from '../../hooks/use_table';
 import { BeatsTemplate } from './beats_template';
 // @ts-ignore
 import { Listing } from '../../../components/beats/listing';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';

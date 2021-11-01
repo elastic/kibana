@@ -10,6 +10,7 @@ import { sampleSignalHit } from '../__mocks__/es_results';
 import { ThreatMatchNamedQuery } from './types';
 
 import {
+  buildExecutionIntervalValidator,
   calculateAdditiveMax,
   calculateMax,
   calculateMaxLookBack,
@@ -710,6 +711,28 @@ describe('utils', () => {
           'Decoded query is invalid. Decoded value: {"id":"my_id","index":"index","field":"","value":"host.name"}'
         );
       });
+    });
+  });
+
+  describe('buildExecutionIntervalValidator', () => {
+    it('succeeds if the validator is called within the specified interval', () => {
+      const validator = buildExecutionIntervalValidator('1m');
+      expect(() => validator()).not.toThrowError();
+    });
+
+    it('throws an error if the validator is called after the specified interval', async () => {
+      const validator = buildExecutionIntervalValidator('1s');
+
+      await new Promise((r) => setTimeout(r, 1001));
+      expect(() => validator()).toThrowError(
+        'Current rule execution has exceeded its allotted interval (1s) and has been stopped.'
+      );
+    });
+
+    it('throws an error if the interval cannot be parsed', () => {
+      expect(() => buildExecutionIntervalValidator('badString')).toThrowError(
+        'Unable to parse rule interval (badString); stopping rule execution since allotted duration is undefined'
+      );
     });
   });
 });

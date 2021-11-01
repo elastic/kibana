@@ -179,7 +179,7 @@ export const HostIsolationExceptionsForm: React.FC<{
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.form.description"
-          defaultMessage="Add an IP to the Host Isolation Exceptions. Only accepts IPv4 with optional CIDR"
+          defaultMessage="Add an IP to the Host isolation exceptions. Only accepts IPv4 with optional CIDR"
         />
       </EuiText>
       <EuiSpacer size="m" />

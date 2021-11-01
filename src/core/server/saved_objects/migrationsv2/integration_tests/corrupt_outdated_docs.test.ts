@@ -154,7 +154,6 @@ function createRoot() {
     {
       migrations: {
         skip: false,
-        enableV2: true,
         batchSize: 5,
       },
       logging: {

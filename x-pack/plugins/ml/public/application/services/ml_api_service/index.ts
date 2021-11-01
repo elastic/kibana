@@ -43,6 +43,7 @@ import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_bas
 import type { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
 import type { RuntimeMappings } from '../../../../common/types/fields';
+import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
@@ -194,7 +195,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     validateJob(payload: {
-      job: Job;
+      job: CombinedJob;
       duration: {
         start?: number;
         end?: number;
@@ -204,6 +205,15 @@ export function mlApiServicesProvider(httpService: HttpService) {
       const body = JSON.stringify(payload);
       return httpService.http<any>({
         path: `${basePath()}/validate/job`,
+        method: 'POST',
+        body,
+      });
+    },
+
+    validateDatafeedPreview(payload: { job: CombinedJob }) {
+      const body = JSON.stringify(payload);
+      return httpService.http<DatafeedValidationResponse>({
+        path: `${basePath()}/validate/datafeed_preview`,
         method: 'POST',
         body,
       });

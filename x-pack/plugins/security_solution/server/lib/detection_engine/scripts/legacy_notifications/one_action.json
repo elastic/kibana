@@ -3,7 +3,7 @@
   "interval": "1m",
   "actions": [
     {
-      "id": "42534430-2092-11ec-99a6-05d79563c01a",
+      "id": "1fa31c30-3046-11ec-8971-1f3f7bae65af",
       "group": "default",
       "params": {
         "message": "Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts"

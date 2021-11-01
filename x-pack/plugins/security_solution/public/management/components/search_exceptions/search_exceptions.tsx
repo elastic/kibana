@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { PolicySelectionItem, PoliciesSelector } from '../policies_selector';
 import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
-import { useEndpointPrivileges } from '../../../common/components/user_privileges/use_endpoint_privileges';
+import { useEndpointPrivileges } from '../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 
 export interface SearchExceptionsProps {
   defaultValue?: string;

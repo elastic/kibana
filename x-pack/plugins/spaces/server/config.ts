@@ -36,6 +36,7 @@ const disabledDeprecation: ConfigDeprecation = (config, fromPath, addDeprecation
         defaultMessage:
           'This setting will be removed in 8.0 and the Spaces plugin will always be enabled.',
       }),
+      level: 'critical',
       correctiveActions: {
         manualSteps: [
           i18n.translate('xpack.spaces.deprecations.enabled.manualStepOneMessage', {

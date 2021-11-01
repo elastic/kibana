@@ -9,11 +9,17 @@
 import { HomePublicPluginSetup } from '../../../home/public';
 import { DevToolsSetup } from '../../../dev_tools/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { SharePluginSetup } from '../../../share/public';
+import { SharePluginSetup, LocatorPublic } from '../../../share/public';
+
+import { ConsoleUILocatorParams } from './locator';
 
 export interface AppSetupUIPluginDependencies {
   home?: HomePublicPluginSetup;
   devTools: DevToolsSetup;
   share: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
+}
+
+export interface ConsolePluginSetup {
+  locator?: LocatorPublic<ConsoleUILocatorParams>;
 }

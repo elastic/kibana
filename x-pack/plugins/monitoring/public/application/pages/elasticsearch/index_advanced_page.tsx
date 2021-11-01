@@ -11,7 +11,7 @@ import { useParams } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useCharts } from '../../hooks/use_charts';
 import { ItemTemplate } from './item_template';
@@ -87,7 +87,13 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clust
   }, [clusterUuid, services.data?.query.timefilter.timefilter, services.http, index]);
 
   return (
-    <ItemTemplate title={title} getPageData={getPageData} id={index} pageType="indices">
+    <ItemTemplate
+      title={title}
+      getPageData={getPageData}
+      id={index}
+      pageType="indices"
+      pageTitle={index}
+    >
       <SetupModeRenderer
         productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (

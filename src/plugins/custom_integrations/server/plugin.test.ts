@@ -32,22 +32,9 @@ describe('CustomIntegrationsPlugin', () => {
       const setup = new CustomIntegrationsPlugin(initContext).setup(mockCoreSetup);
       expect(setup.getAppendCustomIntegrations()).toEqual([
         {
-          id: 'language_client.all',
-          title: 'Elasticsearch Clients',
-          description:
-            'Start building your custom application on top of Elasticsearch with the official language clients.',
-          type: 'ui_link',
-          shipper: 'language_clients',
-          uiInternalPath: 'https://www.elastic.co/guide/en/elasticsearch/client/index.html',
-          isBeta: false,
-          icons: [{ type: 'eui', src: 'logoElasticsearch' }],
-          categories: ['elastic_stack', 'custom', 'language_client'],
-        },
-        {
           id: 'language_client.javascript',
           title: 'Elasticsearch JavaScript Client',
-          description:
-            'Start building your custom application on top of Elasticsearch with the official Node.js client.',
+          description: 'Index data to Elasticsearch with the JavaScript client.',
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
@@ -59,8 +46,7 @@ describe('CustomIntegrationsPlugin', () => {
         {
           id: 'language_client.ruby',
           title: 'Elasticsearch Ruby Client',
-          description:
-            'Start building your custom application on top of Elasticsearch with the official Ruby client.',
+          description: 'Index data to Elasticsearch with the Ruby client.',
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
@@ -72,8 +58,7 @@ describe('CustomIntegrationsPlugin', () => {
         {
           id: 'language_client.go',
           title: 'Elasticsearch Go Client',
-          description:
-            'Start building your custom application on top of Elasticsearch with the official Go client.',
+          description: 'Index data to Elasticsearch with the Go client.',
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
@@ -85,8 +70,7 @@ describe('CustomIntegrationsPlugin', () => {
         {
           id: 'language_client.dotnet',
           title: 'Elasticsearch .NET Client',
-          description:
-            'Start building your custom application on top of Elasticsearch with the official .NET client.',
+          description: 'Index data to Elasticsearch with the .NET client.',
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
@@ -98,8 +82,7 @@ describe('CustomIntegrationsPlugin', () => {
         {
           id: 'language_client.php',
           title: 'Elasticsearch PHP Client',
-          description:
-            'Start building your custom application on top of Elasticsearch with the official .PHP client.',
+          description: 'Index data to Elasticsearch with the PHP client.',
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
@@ -111,8 +94,7 @@ describe('CustomIntegrationsPlugin', () => {
         {
           id: 'language_client.perl',
           title: 'Elasticsearch Perl Client',
-          description:
-            'Start building your custom application on top of Elasticsearch with the official Perl client.',
+          description: 'Index data to Elasticsearch with the Perl client.',
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
@@ -124,8 +106,7 @@ describe('CustomIntegrationsPlugin', () => {
         {
           id: 'language_client.python',
           title: 'Elasticsearch Python Client',
-          description:
-            'Start building your custom application on top of Elasticsearch with the official Python client.',
+          description: 'Index data to Elasticsearch with the Python client.',
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
@@ -137,8 +118,7 @@ describe('CustomIntegrationsPlugin', () => {
         {
           id: 'language_client.rust',
           title: 'Elasticsearch Rust Client',
-          description:
-            'Start building your custom application on top of Elasticsearch with the official Rust client.',
+          description: 'Index data to Elasticsearch with the Rust client.',
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
@@ -150,8 +130,7 @@ describe('CustomIntegrationsPlugin', () => {
         {
           id: 'language_client.java',
           title: 'Elasticsearch Java Client',
-          description:
-            'Start building your custom application on top of Elasticsearch with the official Java client.',
+          description: 'Index data to Elasticsearch with the Java client.',
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:

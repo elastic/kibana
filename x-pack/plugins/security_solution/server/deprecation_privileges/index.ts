@@ -14,7 +14,7 @@ import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../common/constants';
 
 interface Deps {
   deprecationsService: DeprecationsServiceSetup;
-  getKibanaRolesByFeatureId?: PrivilegeDeprecationsService['getKibanaRolesByFeatureId'];
+  getKibanaRoles?: PrivilegeDeprecationsService['getKibanaRoles'];
   logger: Logger;
 }
 
@@ -70,16 +70,16 @@ function outdatedSiemRolePredicate(role: Role) {
 
 export const registerPrivilegeDeprecations = ({
   deprecationsService,
-  getKibanaRolesByFeatureId,
+  getKibanaRoles,
   logger,
 }: Deps) => {
   deprecationsService.registerDeprecations({
     getDeprecations: async (context) => {
       let deprecatedRoles: DeprecationsDetails[] = [];
-      if (!getKibanaRolesByFeatureId) {
+      if (!getKibanaRoles) {
         return deprecatedRoles;
       }
-      const responseRoles = await getKibanaRolesByFeatureId({
+      const responseRoles = await getKibanaRoles({
         context,
         featureId: 'siem',
       });
@@ -119,7 +119,8 @@ export const registerPrivilegeDeprecations = ({
             title: i18n.translate(
               'xpack.securitySolution.privilegeDeprecations.casesSubFeaturePrivileges.title',
               {
-                defaultMessage: 'The "{roleName}" role needs to be updated',
+                defaultMessage:
+                  'The Security feature is changing, and the "{roleName}" role requires an update',
                 values: { roleName },
               }
             ),
@@ -127,7 +128,7 @@ export const registerPrivilegeDeprecations = ({
               'xpack.securitySolution.privilegeDeprecations.casesSubFeaturePrivileges.message',
               {
                 defaultMessage:
-                  'The "Security" feature will be split into two separate features in 8.0. The "{roleName}" role grants access to this feature, and it needs to be updated before you upgrade Kibana. This will ensure that users have access to the same features after the upgrade.',
+                  'The Security feature will be split into the Security and Cases features in 8.0. The "{roleName}" role grants access to the Security feature only. Update the role to also grant access to the Cases feature.',
                 values: { roleName },
               }
             ),

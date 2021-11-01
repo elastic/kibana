@@ -22,7 +22,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
   const mockServiceNow = {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
-      isLegacy: false,
+      usesTableApi: false,
     },
     secrets: {
       password: 'elastic',
@@ -91,6 +91,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             connector_type_id: '.servicenow',
             config: {
               apiUrl: serviceNowSimulatorURL,
+              usesTableApi: false,
             },
             secrets: mockServiceNow.secrets,
           })
@@ -104,7 +105,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: {
             apiUrl: serviceNowSimulatorURL,
-            isLegacy: false,
+            usesTableApi: false,
           },
         });
 
@@ -120,12 +121,12 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: {
             apiUrl: serviceNowSimulatorURL,
-            isLegacy: false,
+            usesTableApi: false,
           },
         });
       });
 
-      it('should set the isLegacy to false when not provided', async () => {
+      it('should set the usesTableApi to true when not provided', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
@@ -143,7 +144,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
           .get(`/api/actions/connector/${createdAction.id}`)
           .expect(200);
 
-        expect(fetchedAction.config.isLegacy).to.be(false);
+        expect(fetchedAction.config.usesTableApi).to.be(true);
       });
 
       it('should respond with a 400 Bad Request when creating a servicenow action with no apiUrl', async () => {
@@ -222,7 +223,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             connector_type_id: '.servicenow',
             config: {
               apiUrl: serviceNowSimulatorURL,
-              isLegacy: false,
+              usesTableApi: false,
             },
             secrets: mockServiceNow.secrets,
           });
@@ -241,33 +242,6 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
               expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
-              expect(resp.body.retry).to.eql(false);
-              // Node.js 12 oddity:
-              //
-              // The first time after the server is booted, the error message will be:
-              //
-              //     undefined is not iterable (cannot read property Symbol(Symbol.iterator))
-              //
-              // After this, the error will be:
-              //
-              //     Cannot destructure property 'value' of 'undefined' as it is undefined.
-              //
-              // The error seems to come from the exact same place in the code based on the
-              // exact same circumstances:
-              //
-              //     https://github.com/elastic/kibana/blob/b0a223ebcbac7e404e8ae6da23b2cc6a4b509ff1/packages/kbn-config-schema/src/types/literal_type.ts#L28
-              //
-              // What triggers the error is that the `handleError` function expects its 2nd
-              // argument to be an object containing a `valids` property of type array.
-              //
-              // In this test the object does not contain a `valids` property, so hence the
-              // error.
-              //
-              // Why the error message isn't the same in all scenarios is unknown to me and
-              // could be a bug in V8.
-              expect(resp.body.message).to.match(
-                /^error validating action params: (undefined is not iterable \(cannot read property Symbol\(Symbol.iterator\)\)|Cannot destructure property 'value' of 'undefined' as it is undefined\.)$/
-              );
             });
         });
 
@@ -409,7 +383,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
       });
 
       describe('Execution', () => {
-        // New connectors
+        // Connectors that use the Import set API
         describe('Import set API', () => {
           it('should handle creating an incident without comments', async () => {
             const { body: result } = await supertest
@@ -440,7 +414,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
           });
         });
 
-        // Legacy connectors
+        // Connectors that use the Table API
         describe('Table API', () => {
           before(async () => {
             const { body } = await supertest
@@ -451,7 +425,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 connector_type_id: '.servicenow',
                 config: {
                   apiUrl: serviceNowSimulatorURL,
-                  isLegacy: true,
+                  usesTableApi: true,
                 },
                 secrets: mockServiceNow.secrets,
               });

@@ -124,7 +124,7 @@ describe('Security Plugin', () => {
             "isLicenseAvailable": [Function],
           },
           "privilegeDeprecationsService": Object {
-            "getKibanaRolesByFeatureId": [Function],
+            "getKibanaRoles": [Function],
           },
         }
       `);

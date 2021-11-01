@@ -9,16 +9,15 @@ import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { SpacesPluginStart } from '../../../plugins/spaces/public';
 import { LensPublicStart } from '../../../plugins/lens/public';
 import { NewsfeedPublicPluginStart } from '../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { TelemetryManagementSectionPluginSetup } from '../../../../src/plugins/telemetry_management_section/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { FleetStart } from '../../fleet/public';
 import { PluginStart as ListsPluginStart } from '../../lists/public';
+import { SpacesPluginStart } from '../../spaces/public';
 import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
@@ -49,7 +48,6 @@ export interface SetupPlugins {
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
-  telemetryManagementSection?: TelemetryManagementSectionPluginSetup;
   ml?: MlPluginSetup;
 }
 

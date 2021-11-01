@@ -14,6 +14,24 @@ import { LoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { ChecklistFlyoutStep } from './checklist_step';
 
+jest.mock('../../../../../app_context', () => {
+  const { docLinksServiceMock } = jest.requireActual(
+    '../../../../../../../../../../src/core/public/doc_links/doc_links_service.mock'
+  );
+
+  return {
+    useAppContext: () => {
+      return {
+        services: {
+          core: {
+            docLinks: docLinksServiceMock.createStartContract(),
+          },
+        },
+      };
+    },
+  };
+});
+
 describe('ChecklistFlyout', () => {
   const defaultProps = {
     indexName: 'myIndex',

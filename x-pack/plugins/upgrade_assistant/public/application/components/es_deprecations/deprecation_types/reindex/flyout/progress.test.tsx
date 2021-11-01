@@ -52,37 +52,37 @@ describe('ReindexProgress', () => {
               Object {
                 "status": "inProgress",
                 "title": <FormattedMessage
-                  defaultMessage="Setting old index to read-only"
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
+                  defaultMessage="Setting original index to read-only."
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.readonlyStepTitle"
                   values={Object {}}
                 />,
               },
               Object {
                 "status": "incomplete",
                 "title": <FormattedMessage
-                  defaultMessage="Creating new index"
+                  defaultMessage="Create new index."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
                   values={Object {}}
                 />,
               },
               Object {
                 "status": "incomplete",
-                "title": <EuiFlexGroup
-                  alignItems="center"
-                >
-                  <EuiFlexItem>
-                    <FormattedMessage
-                      defaultMessage="Reindexing documents"
-                      id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
-                      values={Object {}}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>,
+                "title": <ReindexingDocumentsStepTitle
+                  cancelReindex={[MockFunction]}
+                  reindexState={
+                    Object {
+                      "errorMessage": null,
+                      "lastCompletedStep": 0,
+                      "reindexTaskPercComplete": null,
+                      "status": 0,
+                    }
+                  }
+                />,
               },
               Object {
                 "status": "incomplete",
                 "title": <FormattedMessage
-                  defaultMessage="Swapping original index with alias"
+                  defaultMessage="Swap original index with alias."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
                   values={Object {}}
                 />,
