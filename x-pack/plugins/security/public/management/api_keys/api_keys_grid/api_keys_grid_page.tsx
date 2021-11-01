@@ -164,6 +164,7 @@ export class APIKeysGridPage extends Component<Props, State> {
               {...reactRouterNavigate(this.props.history, '/create')}
               fill
               iconType="plusInCircleFilled"
+              data-test-subj="createApiKey"
             >
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.createButton"
