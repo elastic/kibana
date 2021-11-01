@@ -65,7 +65,7 @@ export const WaffleTimeControls = withTheme(({ interval }: Props) => {
             injectTimes={currentMoment ? [currentMoment] : []}
             isLoading={isAutoReloading}
             onChange={handleChangeDate}
-            popperPlacement="top-end"
+            popoverPlacement="top-end"
             selected={currentMoment}
             shouldCloseOnSelect
             showTimeSelect
