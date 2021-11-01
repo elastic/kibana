@@ -50,22 +50,13 @@ export class ApmSystem {
     this.addHttpRequestNormalization(apm);
 
     init(apmConfig);
-    this.pageLoadTransaction = apm.getCurrentTransaction();
-
-    // Keep the page load transaction open until all resources finished loading
-    if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
-      // @ts-expect-error 2339
-      this.pageLoadTransaction.block(true);
-      this.pageLoadTransaction.mark('apm-setup');
-    }
+    this.holdPageLoadTransaction(apm);
   }
 
   async start(start?: StartDeps) {
     if (!this.enabled || !start) return;
 
-    if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
-      this.pageLoadTransaction.mark('apm-start');
-    }
+    this.markPageLoadStart();
 
     /**
      * Register listeners for navigation changes and capture them as
@@ -74,17 +65,52 @@ export class ApmSystem {
     start.application.currentAppId$.subscribe((appId) => {
       const apmInstance = (window as any).elasticApm;
       if (appId && apmInstance && typeof apmInstance.startTransaction === 'function') {
-        // Close the page load transaction
-        if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
-          this.pageLoadTransaction.end();
-          this.pageLoadTransaction = undefined;
-        }
+        this.closePageLoadTransaction();
         apmInstance.startTransaction(`/app/${appId}`, 'route-change', {
           managed: true,
           canReuse: true,
         });
       }
     });
+  }
+
+  /* Hold the page load transaction open, until all resources actually finish loading */
+  private holdPageLoadTransaction(apm: ApmBase) {
+    this.pageLoadTransaction = apm.getCurrentTransaction();
+
+    // Keep the page load transaction open until all resources finished loading
+    if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
+      // @ts-expect-error 2339
+      this.pageLoadTransaction.block(true);
+      this.pageLoadTransaction.mark('apmSetup');
+    }
+  }
+
+  /* Returns the number of resources that were loaded from network (vs. from disk cache) */
+  private getLoadedResourcesCount() {
+    try {
+      return window.performance
+        .getEntriesByType('resource')
+        .filter((r: Record<string, any>) => r.initiatorType === 'script' && r.transferSize > 0)
+        .length;
+    } catch (e) {
+      return -1;
+    }
+  }
+
+  /* Close and clear the page load transaction */
+  private closePageLoadTransaction() {
+    if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
+      this.pageLoadTransaction.addLabels({ loadedResources: this.getLoadedResourcesCount() });
+      this.pageLoadTransaction.end();
+      this.pageLoadTransaction = undefined;
+    }
+  }
+
+  private markPageLoadStart() {
+    if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
+      this.pageLoadTransaction.mark('apmStart');
+    }
   }
 
   /**
