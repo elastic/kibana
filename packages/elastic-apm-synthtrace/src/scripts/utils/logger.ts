@@ -6,24 +6,59 @@
  * Side Public License, v 1.
  */
 
+import { isPromise } from 'util/types';
+
 export enum LogLevel {
-  debug = 0,
-  info = 1,
-  quiet = 2,
+  trace = 0,
+  debug = 1,
+  info = 2,
+  error = 3,
+}
+
+function getTimeString() {
+  return `[${new Date().toLocaleTimeString()}]`;
 }
 
 export function createLogger(logLevel: LogLevel) {
+  function logPerf(name: string, start: bigint) {
+    // eslint-disable-next-line no-console
+    console.debug(
+      getTimeString(),
+      `${name}: ${Number(process.hrtime.bigint() - start) / 1000000}ms`
+    );
+  }
   return {
+    perf: <T extends any>(name: string, cb: () => T): T => {
+      if (logLevel <= LogLevel.trace) {
+        const start = process.hrtime.bigint();
+        const val = cb();
+        if (isPromise(val)) {
+          val.then(() => {
+            logPerf(name, start);
+          });
+        } else {
+          logPerf(name, start);
+        }
+        return val;
+      }
+      return cb();
+    },
     debug: (...args: any[]) => {
       if (logLevel <= LogLevel.debug) {
         // eslint-disable-next-line no-console
-        console.debug(...args);
+        console.debug(getTimeString(), ...args);
       }
     },
     info: (...args: any[]) => {
       if (logLevel <= LogLevel.info) {
         // eslint-disable-next-line no-console
-        console.log(...args);
+        console.log(getTimeString(), ...args);
+      }
+    },
+    error: (...args: any[]) => {
+      if (logLevel <= LogLevel.error) {
+        // eslint-disable-next-line no-console
+        console.log(getTimeString(), ...args);
       }
     },
   };
