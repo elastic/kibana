@@ -17,8 +17,6 @@ import {
   EuiPanel,
   EuiIconTip,
   EuiToolTip,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButtonEmpty,
   EuiAccordion,
 } from '@elastic/eui';
@@ -192,6 +190,15 @@ export function SuggestionPanel({
   const existsStagedPreview = useLensSelector((state) => Boolean(state.lens.stagedPreview));
   const currentVisualization = useLensSelector(selectCurrentVisualization);
   const currentDatasourceStates = useLensSelector(selectCurrentDatasourceStates);
+  // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
+  const [hideSuggestions, setHideSuggestions] = useLocalStorage(
+    LOCAL_STORAGE_SUGGESTIONS_PANEL,
+    false
+  );
+
+  const toggleSuggestions = useCallback(() => {
+    setHideSuggestions(!hideSuggestions);
+  }, [setHideSuggestions, hideSuggestions]);
 
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
@@ -296,15 +303,6 @@ export function SuggestionPanel({
   }, [ExpressionRendererComponent]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
-  // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
-  const [hideSuggestions, setHideSuggestions] = useLocalStorage(
-    LOCAL_STORAGE_SUGGESTIONS_PANEL,
-    false
-  );
-
-  const toggleSuggestions = useCallback(() => {
-    setHideSuggestions(!hideSuggestions);
-  }, [setHideSuggestions, hideSuggestions]);
 
   useEffect(() => {
     // if the staged preview is overwritten by a suggestion,
@@ -333,78 +331,24 @@ export function SuggestionPanel({
   }
 
   return (
-    <div
-      className={classNames('lnsSuggestionPanel', {
-        'lnsSuggestionPanel--hideSuggestions': hideSuggestions,
-      })}
-    >
-      <EuiFlexGroup alignItems="flexStart" gutterSize="none">
-        <EuiFlexItem>
-          <EuiAccordion
-            className="lnsSuggestionPanel__accordion"
-            id="lensSuggestionsPanel"
-            buttonContent={
-              <EuiTitle size="xxs">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.suggestionPanelTitle"
-                    defaultMessage="Suggestions"
-                  />
-                </h3>
-              </EuiTitle>
-            }
-            forceState={hideSuggestions ? 'closed' : 'open'}
-            onToggle={toggleSuggestions}
-          >
-            <div className="lnsSuggestionPanel__suggestions" data-test-subj="lnsSuggestionsPanel">
-              {currentVisualization.activeId && !hideSuggestions && (
-                <SuggestionPreview
-                  preview={{
-                    error: currentStateError != null,
-                    expression: currentStateExpression,
-                    icon:
-                      visualizationMap[currentVisualization.activeId].getDescription(
-                        currentVisualization.state
-                      ).icon || 'empty',
-                    title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
-                      defaultMessage: 'Current visualization',
-                    }),
-                  }}
-                  ExpressionRenderer={AutoRefreshExpressionRenderer}
-                  onSelect={rollbackToCurrentVisualization}
-                  selected={lastSelectedSuggestion === -1}
-                  showTitleAsLabel
-                />
-              )}
-              {!hideSuggestions &&
-                suggestions.map((suggestion, index) => {
-                  return (
-                    <SuggestionPreview
-                      preview={{
-                        expression: suggestion.previewExpression,
-                        icon: suggestion.previewIcon,
-                        title: suggestion.title,
-                      }}
-                      ExpressionRenderer={AutoRefreshExpressionRenderer}
-                      key={index}
-                      onSelect={() => {
-                        trackUiEvent('suggestion_clicked');
-                        if (lastSelectedSuggestion === index) {
-                          rollbackToCurrentVisualization();
-                        } else {
-                          setLastSelectedSuggestion(index);
-                          switchToSuggestion(dispatchLens, suggestion);
-                        }
-                      }}
-                      selected={index === lastSelectedSuggestion}
-                    />
-                  );
-                })}
-            </div>
-          </EuiAccordion>
-        </EuiFlexItem>
-        {existsStagedPreview && !hideSuggestions && (
-          <EuiFlexItem grow={false}>
+    <div className="lnsSuggestionPanel">
+      <EuiAccordion
+        id="lensSuggestionsPanel"
+        buttonContent={
+          <EuiTitle size="xxs">
+            <h3>
+              <FormattedMessage
+                id="xpack.lens.editorFrame.suggestionPanelTitle"
+                defaultMessage="Suggestions"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        forceState={hideSuggestions ? 'closed' : 'open'}
+        onToggle={toggleSuggestions}
+        extraAction={
+          existsStagedPreview &&
+          !hideSuggestions && (
             <EuiToolTip
               content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
                 defaultMessage: 'Refresh the suggestions based on the selected visualization.',
@@ -424,9 +368,55 @@ export function SuggestionPanel({
                 })}
               </EuiButtonEmpty>
             </EuiToolTip>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+          )
+        }
+      >
+        <div className="lnsSuggestionPanel__suggestions" data-test-subj="lnsSuggestionsPanel">
+          {currentVisualization.activeId && !hideSuggestions && (
+            <SuggestionPreview
+              preview={{
+                error: currentStateError != null,
+                expression: currentStateExpression,
+                icon:
+                  visualizationMap[currentVisualization.activeId].getDescription(
+                    currentVisualization.state
+                  ).icon || 'empty',
+                title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
+                  defaultMessage: 'Current visualization',
+                }),
+              }}
+              ExpressionRenderer={AutoRefreshExpressionRenderer}
+              onSelect={rollbackToCurrentVisualization}
+              selected={lastSelectedSuggestion === -1}
+              showTitleAsLabel
+            />
+          )}
+          {!hideSuggestions &&
+            suggestions.map((suggestion, index) => {
+              return (
+                <SuggestionPreview
+                  preview={{
+                    expression: suggestion.previewExpression,
+                    icon: suggestion.previewIcon,
+                    title: suggestion.title,
+                  }}
+                  ExpressionRenderer={AutoRefreshExpressionRenderer}
+                  key={index}
+                  onSelect={() => {
+                    trackUiEvent('suggestion_clicked');
+                    if (lastSelectedSuggestion === index) {
+                      rollbackToCurrentVisualization();
+                    } else {
+                      setLastSelectedSuggestion(index);
+                      switchToSuggestion(dispatchLens, suggestion);
+                    }
+                  }}
+                  selected={index === lastSelectedSuggestion}
+                />
+              );
+            })}
+        </div>
+      </EuiAccordion>
     </div>
   );
 }

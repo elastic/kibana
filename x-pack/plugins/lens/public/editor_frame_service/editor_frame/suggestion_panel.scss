@@ -12,15 +12,9 @@
   // Padding / negative margins to make room for overflow shadow
   padding-left: $euiSizeXS;
   margin-left: -$euiSizeXS;
-  padding-bottom: $euiSizeXS;
 }
 
-.lnsSuggestionPanel__accordion {
-  // this makes the accordion content scrollable
-  display: inline-grid;
-}
-
-.lnsSuggestionPanel--hideSuggestions {
+.lnsSuggestionPanel {
   padding-bottom: $euiSizeS;
 }
 
