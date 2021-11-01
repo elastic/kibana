@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './tms_source';
+import { ISource } from '../source';
+
+export interface ITMSSource extends ISource {
+  getUrlTemplate(): Promise<string>;
+}
