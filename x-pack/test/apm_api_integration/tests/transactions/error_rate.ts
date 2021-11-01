@@ -112,12 +112,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('has the correct number of buckets', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.timeseries.length).toMatchInline(`61`);
+          expectSnapshot(errorRateResponse.currentPeriod.transactionErrorRate.length).toMatchInline(
+            `31`
+          );
         });
 
         it('has the correct calculation for average', () => {
           expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(
-            `0.092511013215859`
+            `0.0848214285714286`
           );
         });
 
@@ -167,33 +169,45 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the correct start date', () => {
           expectSnapshot(
-            new Date(first(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2021-08-03T07:05:10.000Z"`);
+            new Date(
+              first(errorRateResponse.currentPeriod.transactionErrorRate)?.x ?? NaN
+            ).toISOString()
+          ).toMatchInline(`"2021-08-03T07:05:00.000Z"`);
           expectSnapshot(
-            new Date(first(errorRateResponse.previousPeriod.timeseries)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2021-08-03T07:05:10.000Z"`);
+            new Date(
+              first(errorRateResponse.previousPeriod.transactionErrorRate)?.x ?? NaN
+            ).toISOString()
+          ).toMatchInline(`"2021-08-03T07:05:00.000Z"`);
         });
 
         it('has the correct end date', () => {
           expectSnapshot(
-            new Date(last(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2021-08-03T07:20:10.000Z"`);
+            new Date(
+              last(errorRateResponse.currentPeriod.transactionErrorRate)?.x ?? NaN
+            ).toISOString()
+          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
           expectSnapshot(
-            new Date(last(errorRateResponse.previousPeriod.timeseries)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2021-08-03T07:20:10.000Z"`);
+            new Date(
+              last(errorRateResponse.previousPeriod.transactionErrorRate)?.x ?? NaN
+            ).toISOString()
+          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
         });
 
         it('has the correct number of buckets', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.timeseries.length).toMatchInline(`91`);
-          expectSnapshot(errorRateResponse.previousPeriod.timeseries.length).toMatchInline(`91`);
+          expectSnapshot(errorRateResponse.currentPeriod.transactionErrorRate.length).toMatchInline(
+            `16`
+          );
+          expectSnapshot(
+            errorRateResponse.previousPeriod.transactionErrorRate.length
+          ).toMatchInline(`16`);
         });
 
         it('has the correct calculation for average', () => {
           expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(
-            `0.102040816326531`
+            `0.0792079207920792`
           );
           expectSnapshot(errorRateResponse.previousPeriod.average).toMatchInline(
-            `0.0852713178294574`
+            `0.0894308943089431`
           );
         });
 
