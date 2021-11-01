@@ -7,7 +7,6 @@
 
 import {
   EuiFlexGroup,
-  EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
