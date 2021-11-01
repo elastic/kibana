@@ -11,8 +11,7 @@ import { fromExpression, Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 const baseEmbeddableInput = {
-  id: 'elementId',
-  savedObjectId: 'embeddableId',
+  id: 'embeddableId',
   filters: [],
 };
 
@@ -28,7 +27,7 @@ describe('toExpression', () => {
     expect(ast.type).toBe('expression');
     expect(ast.chain[0].function).toBe('savedLens');
 
-    expect(ast.chain[0].arguments.id).toStrictEqual([input.savedObjectId]);
+    expect(ast.chain[0].arguments.id).toStrictEqual([input.id]);
 
     expect(ast.chain[0].arguments).not.toHaveProperty('title');
     expect(ast.chain[0].arguments).not.toHaveProperty('timerange');
