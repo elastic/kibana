@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, MouseEvent, KeyboardEvent } from 'react';
+import React, { useState, useEffect, MouseEvent } from 'react';
 import { EuiButton, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IProcess } from '../../hooks/use_process_tree';
