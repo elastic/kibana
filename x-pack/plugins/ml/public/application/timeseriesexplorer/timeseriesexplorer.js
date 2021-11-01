@@ -1168,9 +1168,13 @@ export class TimeSeriesExplorer extends React.Component {
                     <EuiFlexItem grow={false}>
                       <EuiCheckbox
                         id="toggleShowForecastCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                          defaultMessage: 'show forecast',
-                        })}
+                        label={
+                          <span data-test-subj={'mlForecastCheckbox'}>
+                            {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                              defaultMessage: 'show forecast',
+                            })}
+                          </span>
+                        }
                         checked={showForecast}
                         onChange={this.toggleShowForecastHandler}
                       />
