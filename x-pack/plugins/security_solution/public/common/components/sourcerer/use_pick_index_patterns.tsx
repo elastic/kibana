@@ -105,7 +105,14 @@ export const usePickIndexPatterns = ({
             label: indexSelected,
             value: indexSelected,
           })),
-    [alertsOptions, isOnlyDetectionAlerts, kibanaDataViews, scopeId, signalIndexName]
+    [
+      alertsOptions,
+      isOnlyDetectionAlerts,
+      kibanaDataViews,
+      scopeId,
+      signalIndexName,
+      defaultDataViewId,
+    ]
   );
 
   const defaultSelectedOptions = useMemo(
