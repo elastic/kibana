@@ -101,7 +101,7 @@ image:images/find-manufacturer-field.png[Fields list that displays the top five 
 
 . Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
 
-. Find the `customer_first_name` and `customer_last_name` last name fields and add
+. Find the `customer_first_name` and `customer_last_name` fields and add
 them to your document table. Your table should look similar to this:
 +
 [role="screenshot"]
@@ -110,7 +110,7 @@ image:images/document-table.png[Document table with fields for manufacturer, cus
 . To rearrange the table columns, hover the mouse over a
 column header, and then use the move control.
 
-. To view more of the document table, click *Hide chart*.
+. To view more of the document table, click *Chart options > Hide chart*.
 
 [float]
 [[add-field-in-discover]]
@@ -241,9 +241,6 @@ and current view of *Discover*&mdash;the columns selected in the document table,
 . In the toolbar, click **Save**.
 
 . Give your search a title, and then click **Save**.
-+
-[role="screenshot"]
-image:images/discover-save-saved-search.png[Save saved search in Discover, width=50%]
 
 [float]
 === Visualize your findings
