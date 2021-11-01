@@ -11,6 +11,7 @@
     "observability"
   ],
   "optionalPlugins": [
+    "discover",
     "embeddable",
     "home",
     "lens",

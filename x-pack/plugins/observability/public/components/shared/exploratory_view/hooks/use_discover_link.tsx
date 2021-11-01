@@ -32,39 +32,41 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
   useEffect(() => {
     const indexPattern = indexPatterns?.[series.dataType];
 
-    const definitions = series.reportDefinitions ?? {};
-    const filters = [...(seriesConfig?.baseFilters ?? [])];
+    if (indexPattern) {
+      const definitions = series.reportDefinitions ?? {};
+      const filters = [...(seriesConfig?.baseFilters ?? [])];
 
-    const definitionFilters = getFiltersFromDefs(definitions);
+      const definitionFilters = getFiltersFromDefs(definitions);
 
-    definitionFilters.forEach(({ field, values = [] }) => {
-      if (values.length > 1) {
-        filters.push(buildPhrasesFilter(field, values, indexPattern)[0]);
-      } else {
-        filters.push(buildPhraseFilter(field, values[0], indexPattern)[0]);
-      }
-    });
-
-    const selectedMetricField = series.selectedMetricField;
-
-    if (
-      selectedMetricField &&
-      selectedMetricField !== RECORDS_FIELD &&
-      selectedMetricField !== RECORDS_PERCENTAGE_FIELD
-    ) {
-      filters.push(buildExistsFilter(selectedMetricField, indexPattern)[0]);
-    }
-
-    const getDiscoverUrl = async () => {
-      if (!urlGenerator?.createUrl) return;
-
-      const newUrl = await urlGenerator.createUrl({
-        filters,
-        indexPatternId: indexPattern?.id,
+      definitionFilters.forEach(({ field, values = [] }) => {
+        if (values.length > 1) {
+          filters.push(buildPhrasesFilter(field, values, indexPattern)[0]);
+        } else if (values?.length > 0) {
+          filters.push(buildPhraseFilter(field, values[0], indexPattern)[0]);
+        }
       });
-      setDiscoverUrl(newUrl);
-    };
-    getDiscoverUrl();
+
+      const selectedMetricField = series.selectedMetricField;
+
+      if (
+        selectedMetricField &&
+        selectedMetricField !== RECORDS_FIELD &&
+        selectedMetricField !== RECORDS_PERCENTAGE_FIELD
+      ) {
+        filters.push(buildExistsFilter(selectedMetricField, indexPattern)[0]);
+      }
+
+      const getDiscoverUrl = async () => {
+        if (!urlGenerator?.createUrl) return;
+
+        const newUrl = await urlGenerator.createUrl({
+          filters,
+          indexPatternId: indexPattern?.id,
+        });
+        setDiscoverUrl(newUrl);
+      };
+      getDiscoverUrl();
+    }
   }, [
     indexPatterns,
     series.dataType,
