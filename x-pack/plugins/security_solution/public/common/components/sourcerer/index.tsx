@@ -96,6 +96,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   } = usePickIndexPatterns({
     alertsOptions,
     dataViewId,
+    defaultDataViewId: defaultDataView.id,
     isOnlyDetectionAlerts,
     kibanaDataViews,
     scopeId,

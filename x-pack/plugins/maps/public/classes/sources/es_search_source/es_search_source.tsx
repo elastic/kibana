@@ -9,8 +9,8 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
-import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
+import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
 import {
@@ -35,7 +35,6 @@ import {
   FIELD_ORIGIN,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
-  MVT_SOURCE_LAYER_NAME,
   MVT_TOKEN_PARAM_NAME,
   SCALING_TYPES,
   SOURCE_TYPES,
@@ -54,14 +53,17 @@ import {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { TimeRange } from '../../../../../../../src/plugins/data/common';
+import {
+  SortDirection,
+  SortDirectionNumeric,
+  TimeRange,
+} from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import { GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source';
 import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
-import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
 import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
@@ -82,6 +84,8 @@ type ESSearchSourceSyncMeta = Pick<
   | 'topHitsSplitField'
   | 'topHitsSize'
 >;
+
+const ES_MVT_HITS_LAYER_NAME = 'hits';
 
 export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
   const timeRangeBounds = getTimeFilter().calculateBounds(timerange);
@@ -150,7 +154,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       fieldName,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
-      canReadFromGeoJson: this._descriptor.scalingType !== SCALING_TYPES.MVT,
     });
   }
 
@@ -185,6 +188,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         sortOrder={this._descriptor.sortOrder}
         scalingType={this._descriptor.scalingType}
         filterByMapBounds={this.isFilterByMapBounds()}
+        hasJoins={sourceEditorArgs.hasJoins}
+        clearJoins={sourceEditorArgs.clearJoins}
       />
     );
   }
@@ -209,6 +214,10 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   getFieldNames(): string[] {
     return [this._descriptor.geoField];
+  }
+
+  isMvt() {
+    return this._descriptor.scalingType === SCALING_TYPES.MVT;
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
@@ -748,7 +757,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       });
     } else if (this._descriptor.scalingType === SCALING_TYPES.MVT) {
       reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReasonMvt', {
-        defaultMessage: 'Joins are not supported when scaling by mvt vector tiles',
+        defaultMessage: 'Joins are not supported when scaling by vector tiles',
       });
     } else {
       reason = null;
@@ -757,7 +766,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   getLayerName(): string {
-    return MVT_SOURCE_LAYER_NAME;
+    return ES_MVT_HITS_LAYER_NAME;
   }
 
   async _getEditableIndex(): Promise<string> {
@@ -828,22 +837,17 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    const geoField = await this._getGeoField();
-
     const urlTemplate = `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
-&requestBody=${risonDsl}\
-&geoFieldType=${geoField.type}`;
+&requestBody=${risonDsl}`;
 
     return {
       refreshTokenParamName: MVT_TOKEN_PARAM_NAME,
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),
-      urlTemplate: searchFilters.searchSessionId
-        ? urlTemplate + `&searchSessionId=${searchFilters.searchSessionId}`
-        : urlTemplate,
+      urlTemplate,
     };
   }
 

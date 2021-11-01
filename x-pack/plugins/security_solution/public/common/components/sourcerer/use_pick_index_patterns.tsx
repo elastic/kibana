@@ -15,6 +15,7 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 interface UsePickIndexPatternsProps {
   alertsOptions: Array<EuiComboBoxOptionOption<string>>;
   dataViewId: string;
+  defaultDataViewId: string;
   isOnlyDetectionAlerts: boolean;
   kibanaDataViews: sourcererModel.KibanaDataView[];
   scopeId: sourcererModel.SourcererScopeName;
@@ -33,6 +34,7 @@ interface UsePickIndexPatterns {
 export const usePickIndexPatterns = ({
   alertsOptions,
   dataViewId,
+  defaultDataViewId,
   isOnlyDetectionAlerts,
   kibanaDataViews,
   scopeId,
@@ -97,7 +99,8 @@ export const usePickIndexPatterns = ({
         : getScopePatternListSelection(
             kibanaDataViews.find((dataView) => dataView.id === id),
             scopeId,
-            signalIndexName
+            signalIndexName,
+            id === defaultDataViewId
           ).map((indexSelected: string) => ({
             label: indexSelected,
             value: indexSelected,

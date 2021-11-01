@@ -12,11 +12,7 @@ import { Provider } from 'react-redux';
 import { getScopeFromPath, useInitSourcerer } from '.';
 import { mockPatterns } from './mocks';
 import { RouteSpyState } from '../../utils/route/types';
-import {
-  DEFAULT_DATA_VIEW_ID,
-  DEFAULT_INDEX_PATTERN,
-  SecurityPageName,
-} from '../../../../common/constants';
+import { DEFAULT_INDEX_PATTERN, SecurityPageName } from '../../../../common/constants';
 import { createStore, State } from '../../store';
 import {
   useUserInfo,
@@ -164,7 +160,7 @@ describe('Sourcerer Hooks', () => {
           ...state.sourcerer,
           signalIndexName: null,
           defaultDataView: {
-            id: DEFAULT_DATA_VIEW_ID,
+            id: mockSourcererState.defaultDataView.id,
             title: DEFAULT_INDEX_PATTERN.join(','),
             patternList: DEFAULT_INDEX_PATTERN,
           },

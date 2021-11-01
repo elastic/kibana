@@ -30,32 +30,6 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
   unused('authorization.legacyFallback.enabled', { level: 'warning' }),
   unused('authc.saml.maxRedirectURLSize', { level: 'warning' }),
-  // Deprecation warning for the legacy audit logger.
-  (settings, fromPath, addDeprecation, { branch }) => {
-    const auditLoggingEnabled = settings?.xpack?.security?.audit?.enabled ?? false;
-    const legacyAuditLoggerEnabled = !settings?.xpack?.security?.audit?.appender;
-    if (auditLoggingEnabled && legacyAuditLoggerEnabled) {
-      addDeprecation({
-        configPath: 'xpack.security.audit.appender',
-        title: i18n.translate('xpack.security.deprecations.auditLoggerTitle', {
-          defaultMessage: 'The legacy audit logger is deprecated',
-        }),
-        message: i18n.translate('xpack.security.deprecations.auditLoggerMessage', {
-          defaultMessage:
-            'The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.',
-        }),
-        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/security-settings-kb.html#audit-logging-settings`,
-        correctiveActions: {
-          manualSteps: [
-            i18n.translate('xpack.security.deprecations.auditLogger.manualStepOneMessage', {
-              defaultMessage:
-                'Declare an audit logger "appender" via "xpack.security.audit.appender" to enable the ECS audit logger.',
-            }),
-          ],
-        },
-      });
-    }
-  },
 
   // Deprecation warning for the old array-based format of `xpack.security.authc.providers`.
   (settings, _fromPath, addDeprecation, { branch }) => {
@@ -151,30 +125,6 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
             i18n.translate('xpack.security.deprecations.maxRedirectURLSize.manualSteps1', {
               defaultMessage:
                 'Remove "xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" from kibana.yml.',
-            }),
-          ],
-        },
-      });
-    }
-  },
-  (settings, fromPath, addDeprecation) => {
-    if (settings?.xpack?.security?.enabled === false) {
-      addDeprecation({
-        configPath: 'xpack.security.enabled',
-        title: i18n.translate('xpack.security.deprecations.enabledTitle', {
-          defaultMessage: 'Disabling the security plugin "xpack.security.enabled" is deprecated',
-        }),
-        message: i18n.translate('xpack.security.deprecations.enabledMessage', {
-          defaultMessage:
-            'Disabling the security plugin "xpack.security.enabled" will only be supported by disable security in Elasticsearch.',
-        }),
-        correctiveActions: {
-          manualSteps: [
-            i18n.translate('xpack.security.deprecations.enabled.manualStepOneMessage', {
-              defaultMessage: `Remove "xpack.security.enabled" from your Kibana configuration.`,
-            }),
-            i18n.translate('xpack.security.deprecations.enabled.manualStepTwoMessage', {
-              defaultMessage: `To turn off security features, disable them in Elasticsearch instead.`,
             }),
           ],
         },

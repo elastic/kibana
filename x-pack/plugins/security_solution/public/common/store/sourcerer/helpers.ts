@@ -8,7 +8,6 @@
 import { isEmpty } from 'lodash';
 import { KibanaDataView, SourcererModel, SourcererScopeById, SourcererScopeName } from './model';
 import { TimelineEventsType } from '../../../../common';
-import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { SelectedDataViewPayload } from './actions';
 
 export interface Args {
@@ -21,12 +20,13 @@ export interface Args {
 export const getScopePatternListSelection = (
   theDataView: KibanaDataView | undefined,
   sourcererScope: SourcererScopeName,
-  signalIndexName: SourcererModel['signalIndexName']
+  signalIndexName: SourcererModel['signalIndexName'],
+  isDefaultDataView: boolean
 ): string[] => {
   const patternList: string[] =
     theDataView != null && theDataView.id !== null ? theDataView.patternList : [];
 
-  if (theDataView?.id !== DEFAULT_DATA_VIEW_ID) {
+  if (!isDefaultDataView) {
     return patternList.sort();
   }
   // when our SIEM data view is set, here are the defaults
@@ -95,10 +95,17 @@ export const validateSelectedPatterns = (
       ...rest,
       selectedDataViewId: dataView?.id ?? null,
       selectedPatterns,
-      ...(isEmpty(selectedPatterns) && dataView?.id != null
+      ...(isEmpty(selectedPatterns)
         ? id === SourcererScopeName.timeline
           ? defaultDataViewByEventType({ state, eventType })
-          : { selectedPatterns: getScopePatternListSelection(dataView, id, state.signalIndexName) }
+          : {
+              selectedPatterns: getScopePatternListSelection(
+                dataView ?? state.defaultDataView,
+                id,
+                state.signalIndexName,
+                (dataView ?? state.defaultDataView).id === state.defaultDataView.id
+              ),
+            }
         : {}),
       loading: false,
     },

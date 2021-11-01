@@ -103,11 +103,25 @@ describe('source/index.tsx', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      jest.restoreAllMocks();
-      store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-      (useKibana().services.data.search.search as jest.Mock).mockReturnValue({
+      const mock = {
         subscribe: ({ next }: { next: Function }) => next(mockSearchResponse),
         unsubscribe: jest.fn(),
+      };
+
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          data: {
+            search: {
+              search: jest.fn().mockReturnValue({
+                subscribe: ({ next }: { next: Function }) => {
+                  next(mockSearchResponse);
+                  return mock;
+                },
+                unsubscribe: jest.fn(),
+              }),
+            },
+          },
+        },
       });
     });
     it('sets source for default scope', async () => {
@@ -137,40 +151,6 @@ describe('source/index.tsx', () => {
       });
     });
 
-    // TODO: Steph/sourcerer figure out this test
-    // I'm stuck on this test, if someone wants to give it a try?
-    // i get an error relating to the rxjs subscription. i think i need to mock differently
-    // but im having quite a difficult time doing so. if no one else can get this, maybe we should just cover this
-    // case in a cypress test
-    it.skip('sets source for detections scope when signalIndexName is updated', async () => {
-      await act(async () => {
-        const { result, rerender, waitForNextUpdate } = renderHook<
-          string,
-          { indexFieldsSearch: (selectedDataViewId: string, newSignalsIndex?: string) => void }
-        >(() => useIndexFields(SourcererScopeName.detections), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
-        await waitForNextUpdate();
-        rerender();
-        act(() => {
-          result.current.indexFieldsSearch(
-            sourcererState.defaultDataView.id,
-            `${sourcererState.signalIndexName}-*`
-          );
-        });
-        // rxjs subscription error thrown here
-        //   TypeError: Cannot read property 'unsubscribe' of undefined
-        //
-        //   337 |           });
-        //   338 |       };
-        // > 339 |       searchSubscription$.current.unsubscribe();
-        //       |                                   ^
-        //   340 |       abortCtrl.current.abort();
-        //   341 |       asyncSearch();
-        //   342 |     },
-        expect(true).toEqual(true);
-      });
-    });
     it('sets source for detections scope', async () => {
       await act(async () => {
         const { rerender, waitForNextUpdate } = renderHook<string, void>(
@@ -193,6 +173,67 @@ describe('source/index.tsx', () => {
         expect(payload.id).toEqual(SourcererScopeName.detections);
         expect(payload.indicesExist).toEqual(true);
         expect(payload.indexPattern.title).toEqual(sourcererState.signalIndexName);
+      });
+    });
+    it('sets source for timelines scope', async () => {
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(
+          () => useIndexFields(SourcererScopeName.timeline),
+          {
+            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+          }
+        );
+        await waitForNextUpdate();
+        rerender();
+        expect(mockDispatch.mock.calls[0][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+          payload: { id: SourcererScopeName.timeline, loading: true },
+        });
+        const {
+          type: sourceType,
+          payload: { payload },
+        } = mockDispatch.mock.calls[1][0];
+        expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_SOURCE');
+        expect(payload.id).toEqual(SourcererScopeName.timeline);
+        expect(payload.indicesExist).toEqual(true);
+        expect(payload.indexPattern.title).toEqual(
+          `${sourcererState.signalIndexName},apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*`
+        );
+      });
+    });
+    it('sets source for detections scope when signalIndexName is updated', async () => {
+      store = createStore(
+        { ...state, sourcerer: { ...state.sourcerer, signalIndexName: null } },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      await act(async () => {
+        const { result, rerender, waitForNextUpdate } = renderHook<
+          string,
+          { indexFieldsSearch: (selectedDataViewId: string, newSignalsIndex?: string) => void }
+        >(() => useIndexFields(SourcererScopeName.detections), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        act(() => {
+          result.current.indexFieldsSearch(
+            sourcererState.defaultDataView.id,
+            `${sourcererState.signalIndexName}`
+          );
+        });
+
+        expect(mockDispatch.mock.calls[0][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+          payload: { id: SourcererScopeName.detections, loading: true },
+        });
+        expect(mockDispatch.mock.calls[1][0].payload.payload.indicesExist).toEqual(false);
+        expect(mockDispatch.mock.calls[2][0]).toEqual({
+          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+          payload: { id: SourcererScopeName.detections, loading: true },
+        });
+        expect(mockDispatch.mock.calls[3][0].payload.payload.indicesExist).toEqual(true);
       });
     });
     it('when selectedPatterns=[], defaults to the patternList of the selected dataView', async () => {

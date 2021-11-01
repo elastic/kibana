@@ -327,7 +327,8 @@ export const mockGlobalState: State = {
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
           SourcererScopeName.default,
-          mockSourcererState.signalIndexName
+          mockSourcererState.signalIndexName,
+          true
         ),
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
@@ -339,7 +340,8 @@ export const mockGlobalState: State = {
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
           SourcererScopeName.detections,
-          mockSourcererState.signalIndexName
+          mockSourcererState.signalIndexName,
+          true
         ),
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
@@ -351,7 +353,8 @@ export const mockGlobalState: State = {
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
           SourcererScopeName.timeline,
-          mockSourcererState.signalIndexName
+          mockSourcererState.signalIndexName,
+          true
         ),
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,

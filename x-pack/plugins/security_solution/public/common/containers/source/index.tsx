@@ -260,7 +260,6 @@ export const useIndexFields = (
           )
           .subscribe({
             next: (response) => {
-              // TODO: Steph/sourcerer needs better tests
               if (isCompleteResponse(response)) {
                 const signalIndexName = signalIndexNameSelector
                   ? signalIndexNameSelector
@@ -303,7 +302,6 @@ export const useIndexFields = (
                         id: sourcererScopeName,
                         indexPattern: getIndexFields(patternString, response.indexFields),
                         indicesExist:
-                          // TODO: Steph/sourcerer needs test
                           sourcererScopeName === SourcererScopeName.detections
                             ? response.indicesExist.includes(signalIndexName)
                             : sourcererScopeName === SourcererScopeName.default

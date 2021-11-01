@@ -6,7 +6,6 @@
  */
 
 import { mockGlobalState } from '../../mock';
-import { DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { SourcererScopeName } from './model';
 import {
   defaultDataViewByEventType,
@@ -17,7 +16,7 @@ import {
 const signalIndexName = mockGlobalState.sourcerer.signalIndexName;
 
 const dataView = {
-  id: DEFAULT_DATA_VIEW_ID,
+  id: mockGlobalState.sourcerer.defaultDataView.id,
   title: `auditbeat-*,packetbeat-*,${signalIndexName}`,
   patternList: ['packetbeat-*', 'auditbeat-*', `${signalIndexName}`],
 };
@@ -38,7 +37,8 @@ describe('sourcerer store helpers', () => {
           id: '1234',
         },
         SourcererScopeName.default,
-        signalIndexName
+        signalIndexName,
+        false
       );
       expect(result).toEqual([`${signalIndexName}`, 'auditbeat-*', 'packetbeat-*']);
     });
@@ -46,7 +46,8 @@ describe('sourcerer store helpers', () => {
       const result = getScopePatternListSelection(
         dataView,
         SourcererScopeName.timeline,
-        signalIndexName
+        signalIndexName,
+        true
       );
       expect(result).toEqual([signalIndexName, 'auditbeat-*', 'packetbeat-*']);
     });
@@ -54,7 +55,8 @@ describe('sourcerer store helpers', () => {
       const result = getScopePatternListSelection(
         dataView,
         SourcererScopeName.default,
-        signalIndexName
+        signalIndexName,
+        true
       );
       expect(result).toEqual(['auditbeat-*', 'packetbeat-*']);
     });
@@ -62,7 +64,8 @@ describe('sourcerer store helpers', () => {
       const result = getScopePatternListSelection(
         dataView,
         SourcererScopeName.detections,
-        signalIndexName
+        signalIndexName,
+        true
       );
       expect(result).toEqual([signalIndexName]);
     });

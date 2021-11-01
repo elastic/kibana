@@ -70,7 +70,12 @@ export const getSelectedDataViewSelector = () => {
       if (scopeId === SourcererScopeName.detections && signalIndexName != null) {
         selectedPatterns = [signalIndexName];
       } else if (scopeId !== SourcererScopeName.detections && theDataView != null) {
-        selectedPatterns = getScopePatternListSelection(theDataView, scopeId, signalIndexName);
+        selectedPatterns = getScopePatternListSelection(
+          theDataView,
+          scopeId,
+          signalIndexName,
+          theDataView.id === defaultDataView.id
+        );
       }
     }
 
