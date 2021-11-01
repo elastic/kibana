@@ -35,7 +35,7 @@ export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName })
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curation.detail.historyTableTitle',
             {
-              defaultMessage: 'Automated curation changes',
+              defaultMessage: 'Adaptive relevance changes',
             }
           )}
         </h2>
@@ -43,7 +43,8 @@ export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName })
       subtitle={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.curation.detail.historyTableDescription',
         {
-          defaultMessage: 'A detailed log of recent changes to your automated curation.',
+          defaultMessage:
+            'A detailed log of recent changes to curations powered by adaptive relevance.',
         }
       )}
       hasBorder
