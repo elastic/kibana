@@ -23,6 +23,24 @@ coming::[8.0.0-beta1]
 Review the {kib} 8.0.0-beta1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
 
 [float]
+[[known-issues-8.0.0-beta1]]
+=== Known issues
+
+.Kibana server crashes if you use model management features without ingest pipelines
+[%collapsible]
+====
+*Details* +
+If you access *{ml-app} > Model Management* and there are no ingest pipelines
+defined, the Kibana server crashes.
+
+*Impact* +
+To avoid this issue, create a simple {ref}/ingest.html[ingest pipeline] before
+accessing the *Model Management* page. The ingest pipeline does not need to be
+used; it just needs to exist to prevent the crash. This problem will be fixed in
+8.0.0-rc1.
+====
+
+[float]
 [[breaking-changes-8.0.0-beta1]]
 === Breaking changes
 
