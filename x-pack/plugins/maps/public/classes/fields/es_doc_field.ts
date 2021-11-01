@@ -16,22 +16,27 @@ import { IVectorSource } from '../sources/vector_source';
 
 export class ESDocField extends AbstractField implements IField {
   private readonly _source: IESSource;
-  private readonly _canReadFromGeoJson: boolean;
 
   constructor({
     fieldName,
     source,
     origin,
-    canReadFromGeoJson = true,
   }: {
     fieldName: string;
     source: IESSource;
     origin: FIELD_ORIGIN;
-    canReadFromGeoJson?: boolean;
   }) {
     super({ fieldName, origin });
     this._source = source;
-    this._canReadFromGeoJson = canReadFromGeoJson;
+  }
+
+  supportsFieldMetaFromEs(): boolean {
+    return true;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API does not return meta tiles for documents
+    return !this.getSource().isMvt();
   }
 
   canValueBeFormatted(): boolean {
@@ -71,14 +76,6 @@ export class ESDocField extends AbstractField implements IField {
     return indexPatternField && indexPatternField.displayName
       ? indexPatternField.displayName
       : super.getLabel();
-  }
-
-  supportsFieldMeta(): boolean {
-    return true;
-  }
-
-  canReadFromGeoJson(): boolean {
-    return this._canReadFromGeoJson;
   }
 
   async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
