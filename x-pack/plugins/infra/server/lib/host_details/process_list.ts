@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD } from '../../../common/constants';
 import { ProcessListAPIRequest, ProcessListAPIQueryAggregation } from '../../../common/http_api';
 import { ESSearchClient } from '../metrics/types';
 import { CMDLINE_FIELD } from './common';
@@ -14,7 +13,7 @@ const TOP_N = 10;
 
 export const getProcessList = async (
   search: ESSearchClient,
-  { hostTerm, indexPattern, to, sortBy, searchFilter }: ProcessListAPIRequest
+  { hostTerm, timefield, indexPattern, to, sortBy, searchFilter }: ProcessListAPIRequest
 ) => {
   const body = {
     size: 0,
@@ -23,7 +22,7 @@ export const getProcessList = async (
         filter: [
           {
             range: {
-              [TIMESTAMP_FIELD]: {
+              [timefield]: {
                 gte: to - 60 * 1000, // 1 minute
                 lte: to,
               },
@@ -48,7 +47,7 @@ export const getProcessList = async (
               size: 1,
               sort: [
                 {
-                  [TIMESTAMP_FIELD]: {
+                  [timefield]: {
                     order: 'desc',
                   },
                 },
@@ -94,7 +93,7 @@ export const getProcessList = async (
                   size: 1,
                   sort: [
                     {
-                      [TIMESTAMP_FIELD]: {
+                      [timefield]: {
                         order: 'desc',
                       },
                     },

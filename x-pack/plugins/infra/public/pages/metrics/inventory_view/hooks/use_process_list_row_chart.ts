@@ -25,13 +25,14 @@ export function useProcessListRowChart(command: string) {
       fold(throwErrors(createPlainError), identity)
     );
   };
-  const { hostTerm, indexPattern, to } = useProcessListContext();
+  const { hostTerm, timefield, indexPattern, to } = useProcessListContext();
 
   const { error, loading, response, makeRequest } = useHTTPRequest<ProcessListAPIChartResponse>(
     '/api/metrics/process_list/chart',
     'POST',
     JSON.stringify({
       hostTerm,
+      timefield,
       indexPattern,
       to,
       command,

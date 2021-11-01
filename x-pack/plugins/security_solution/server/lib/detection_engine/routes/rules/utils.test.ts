@@ -534,6 +534,7 @@ describe.each([
 
   describe('getTupleDuplicateErrorsAndUniqueRules', () => {
     test('returns tuple of empty duplicate errors array and rule array with instance of Syntax Error when imported rule contains parse error', async () => {
+      // This is a string because we have a double "::" below to make an error happen on purpose.
       const multipartPayload =
         '{"name"::"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-1","severity":"high","type":"query","query":"user.name: root or user.name: admin"}\n';
       const ndJsonStream = new Readable({
@@ -657,6 +658,7 @@ describe.each([
     });
 
     test('returns empty errors array and rule array with instance of Syntax Error when imported rule contains parse error', async () => {
+      // This is a string because we have a double "::" below to make an error happen on purpose.
       const multipartPayload =
         '{"name"::"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-1","severity":"high","type":"query","query":"user.name: root or user.name: admin"}\n';
       const ndJsonStream = new Readable({
