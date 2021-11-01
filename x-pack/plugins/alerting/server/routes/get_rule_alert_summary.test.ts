@@ -24,11 +24,11 @@ beforeEach(() => {
 
 describe('getRuleAlertSummaryRoute', () => {
   const dateString = new Date().toISOString();
-  const mockedAlertInstanceSummary: AlertSummary = {
+  const mockedAlertSummary: AlertSummary = {
     id: '',
     name: '',
     tags: [],
-    alertTypeId: '',
+    ruleTypeId: '',
     consumer: '',
     muteAll: false,
     throttle: null,
@@ -37,7 +37,7 @@ describe('getRuleAlertSummaryRoute', () => {
     statusEndDate: dateString,
     status: 'OK',
     errorMessages: [],
-    instances: {},
+    alerts: {},
     executionDuration: {
       average: 1,
       values: [3, 5, 5],
@@ -54,7 +54,7 @@ describe('getRuleAlertSummaryRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_alert_summary"`);
 
-    rulesClient.getAlertSummary.mockResolvedValueOnce(mockedAlertInstanceSummary);
+    rulesClient.getAlertSummary.mockResolvedValueOnce(mockedAlertSummary);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
