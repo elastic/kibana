@@ -45,7 +45,7 @@ export class SynthtraceEsClient {
       clientWorkers: 5,
       events: eventsToIndex,
       logger: this.logger,
-      writeTargets: await this.getWriteTargets(),
+      writeTargets,
     });
 
     return this.client.indices.refresh({
