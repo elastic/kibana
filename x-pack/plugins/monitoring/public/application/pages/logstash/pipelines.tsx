@@ -105,7 +105,6 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
-      data-test-subj="logstashPipelinesListing"
       cluster={cluster}
     >
       <div data-test-subj="logstashPipelinesListing">{renderOverview(data)}</div>
