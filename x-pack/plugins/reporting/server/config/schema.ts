@@ -9,7 +9,17 @@ import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import moment from 'moment';
 
 const KibanaServerSchema = schema.object({
-  hostname: schema.maybe(schema.string({ hostname: true })),
+  hostname: schema.maybe(
+    schema.string({
+      hostname: true,
+      validate(value) {
+        if (/^0.0.0.0$/.test(value)) {
+          // prevent setting a hostname that fails in Chromium on Windows
+          return 'must be a valid hostname, not "0.0.0.0"';
+        }
+      },
+    })
+  ),
   port: schema.maybe(schema.number()),
   protocol: schema.maybe(
     schema.string({

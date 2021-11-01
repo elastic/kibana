@@ -288,11 +288,20 @@ describe('Reporting Config Schema', () => {
     `);
   });
 
-  it(`logs the proper validation messages`, () => {
+  it(`logs the proper validation messages for invalid hostname`, () => {
     // kibanaServer
     const throwValidationErr = () => ConfigSchema.validate({ kibanaServer: { hostname: '0' } });
     expect(throwValidationErr).toThrowError(
       `[kibanaServer.hostname]: value must be a valid hostname (see RFC 1123).`
+    );
+  });
+
+  it(`logs the proper validation messages for hostname: 0.0.0.0`, () => {
+    // kibanaServer
+    const throwValidationErr = () =>
+      ConfigSchema.validate({ kibanaServer: { hostname: '0.0.0.0' } });
+    expect(throwValidationErr).toThrowError(
+      `[kibanaServer.hostname]: must be a valid hostname, not "0.0.0.0"`
     );
   });
 });
