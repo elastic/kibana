@@ -210,7 +210,7 @@ less likely to introduce bugs in the future due to insufficient types.
 
 If you’re not having `any` in your plugin or are starting a new plugin, you should enable the
 [`@typescript-eslint/no-explicit-any`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md)
-linting rule for your plugin via the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/master/.eslintrc.js) config.
+linting rule for your plugin via the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/main/.eslintrc.js) config.
 
 ### Avoid non-null assertions
 
@@ -229,7 +229,7 @@ assertion would now wrongly disable proper type checking for us.
 
 If you’re not using non-null assertions in your plugin or are starting a new plugin, consider enabling the
 [`@typescript-eslint/no-non-null-assertion`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-assertion.md)
-linting rule for you plugin in the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/master/.eslintrc.js) config.
+linting rule for you plugin in the [`.eslintrc.js`](https://github.com/elastic/kibana/blob/main/.eslintrc.js) config.
 
 ### Return/throw early from functions
 
@@ -623,7 +623,7 @@ by your code until the circular dependencies on these have been solved.
 
 When writing a new component, create a sibling SASS file of the same name and import directly into the **top** of the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).
 
-All SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & Kibana invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/core/public/core_app/styles/_globals_v7light.scss).
+All SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & Kibana invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/core/public/core_app/styles/_globals_v8light.scss).
 
 While the styles for this component will only be loaded if the component exists on the page,
 the styles **will** be global and so it is recommended to use a three letter prefix on your
