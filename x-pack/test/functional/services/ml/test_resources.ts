@@ -128,11 +128,15 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       return createResponse.id;
     },
 
-    async createDashboardSavedObject(title: string, body: object): Promise<string> {
+    async createDashboardSavedObject(
+      title: string,
+      body: object,
+      override = false
+    ): Promise<string> {
       log.debug(`Creating dashboard with title '${title}'`);
 
       const createResponse = await supertest
-        .post(`/api/saved_objects/${SavedObjectType.DASHBOARD}`)
+        .post(`/api/saved_objects/${SavedObjectType.DASHBOARD}?overwrite=${override}`)
         .set(COMMON_REQUEST_HEADERS)
         .send(body)
         .then((res: any) => res.body);
