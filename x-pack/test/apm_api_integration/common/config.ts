@@ -15,7 +15,7 @@ import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
 import { RegistryProvider } from './registry';
-import { synthtraceEsClient } from './synthtrace_es_client';
+import { synthtraceEsClientService } from './synthtrace_es_client_service';
 
 export interface ApmFtrConfig {
   name: APMFtrConfigName;
@@ -78,7 +78,7 @@ export function createTestConfig(config: ApmFtrConfig) {
         ...services,
         apmFtrConfig: () => config,
         registry: RegistryProvider,
-        synthtraceEsClient,
+        synthtraceEsClient: synthtraceEsClientService,
         apmApiClient: async (context: InheritedFtrProviderContext) => {
           const security = context.getService('security');
           await security.init();
