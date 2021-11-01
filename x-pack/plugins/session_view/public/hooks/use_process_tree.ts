@@ -151,9 +151,9 @@ class Process implements IProcess {
   }
 }
 
-interface ProcessMap {
+type ProcessMap = {
   [key: string]: Process;
-}
+};
 
 export const useProcessTree = ({
   sessionId,
