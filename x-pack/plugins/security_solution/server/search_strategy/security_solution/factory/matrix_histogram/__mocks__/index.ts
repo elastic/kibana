@@ -2098,8 +2098,8 @@ export const formattedPreviewStrategyResponse = {
       JSON.stringify(
         {
           index: ['.siem-preview-signals-default'],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
           track_total_hits: true,
           body: {
             aggregations: {

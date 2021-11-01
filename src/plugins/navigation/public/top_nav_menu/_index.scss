@@ -1,12 +1,6 @@
 .kbnTopNavMenu {
-  @include kbnThemeStyle('v7') {
-    margin-right: $euiSizeXS;
-  }
-
-  @include kbnThemeStyle('v8') {
-    button:last-child {
-      margin-right: 0;
-    }
+  button:last-child {
+    margin-right: 0;
   }
 }
 
