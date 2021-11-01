@@ -352,7 +352,7 @@ Enable link:https://www.elastic.co/guide/en/elasticsearch/reference/master/modul
 The `kibana.index`, `xpack.reporting.index`, and `xpack.task_manager.index` settings have been removed. For more information, refer to {kibana-pull}112773[#112773].
 
 *Impact* +
-Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<xpack-spaces,spaces>>, export your <<managing-saved-objects, saved objects>> from a tenant into the default tenant in a space. For more details, refer to link:https://github.com/elastic/kibana/issues/82020[#82020].
+Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<xpack-spaces,spaces>>, export your <<managing-saved-objects, saved objects>> from a tenant into the default space. For more details, refer to link:https://github.com/elastic/kibana/issues/82020[#82020].
 ====
   
 [discrete]
