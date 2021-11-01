@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { EncryptedSavedObjectsAuditLogger } from './audit_logger';
+export * from './connectors_api';

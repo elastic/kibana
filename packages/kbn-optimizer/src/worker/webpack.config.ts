@@ -73,6 +73,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       new BundleRefsPlugin(bundle, bundleRefs),
       new PopulateBundleCachePlugin(worker, bundle),
       new BundleMetricsPlugin(bundle),
+      new webpack.DllReferencePlugin({
+        context: worker.repoRoot,
+        manifest: require(UiSharedDepsNpm.dllManifestPath),
+      }),
       ...(worker.profileWebpack ? [new EmitStatsPlugin(bundle)] : []),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
@@ -260,10 +264,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         filename: '[path].gz',
         test: /\.(js|css)$/,
         cache: false,
-      }),
-      new webpack.DllReferencePlugin({
-        context: worker.repoRoot,
-        manifest: require(UiSharedDepsNpm.dllManifestPath),
       }),
     ],
 
