@@ -1513,10 +1513,10 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IField.supportsAutoDomain",
+            "id": "def-public.IField.supportsFieldMetaFromLocalData",
             "type": "Function",
             "tags": [],
-            "label": "supportsAutoDomain",
+            "label": "supportsFieldMetaFromLocalData",
             "description": [],
             "signature": [
               "() => boolean"
@@ -1528,25 +1528,10 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IField.supportsFieldMeta",
+            "id": "def-public.IField.supportsFieldMetaFromEs",
             "type": "Function",
             "tags": [],
-            "label": "supportsFieldMeta",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.IField.canReadFromGeoJson",
-            "type": "Function",
-            "tags": [],
-            "label": "canReadFromGeoJson",
+            "label": "supportsFieldMetaFromEs",
             "description": [],
             "signature": [
               "() => boolean"

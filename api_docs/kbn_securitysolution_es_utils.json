@@ -310,6 +310,61 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
+        "id": "def-server.getBootstrapIndexExists",
+        "type": "Function",
+        "tags": [],
+        "label": "getBootstrapIndexExists",
+        "description": [
+          "\nThis function is similar to getIndexExists, but is limited to searching indices that match\nthe index pattern used as concrete backing indices (e.g. .siem-signals-default-000001).\nThis allows us to separate the indices that are actually .siem-signals indices from\nalerts as data indices that only share the .siem-signals alias.\n"
+        ],
+        "signature": [
+          "(esClient: Pick<",
+          "KibanaClient",
+          ", \"monitoring\" | \"security\" | \"create\" | \"name\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\">, index: string) => Promise<boolean>"
+        ],
+        "path": "packages/kbn-securitysolution-es-utils/src/get_bootstrap_index_exists/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-server.getBootstrapIndexExists.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [
+              "Elasticsearch client to use to make the request"
+            ],
+            "signature": [
+              "Pick<",
+              "KibanaClient",
+              ", \"monitoring\" | \"security\" | \"create\" | \"name\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\">"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/get_bootstrap_index_exists/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-server.getBootstrapIndexExists.$2",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [
+              "Index alias name to check for existence"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/get_bootstrap_index_exists/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-es-utils",
         "id": "def-server.getIndexAliases",
         "type": "Function",
         "tags": [],

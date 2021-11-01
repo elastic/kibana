@@ -7974,10 +7974,6 @@
             "references": [
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
-              },
-              {
-                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/functions/filters.ts"
               },
               {
@@ -17948,10 +17944,6 @@
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
             "deprecated": true,
             "references": [
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
-              },
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/functions/filters.ts"
@@ -29845,10 +29837,6 @@
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
             "deprecated": true,
             "references": [
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
-              },
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/functions/filters.ts"

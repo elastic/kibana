@@ -2957,7 +2957,7 @@
             "label": "isProjectEnabled",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\") => boolean"
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\") => boolean"
             ],
             "path": "src/plugins/presentation_util/public/services/labs.ts",
             "deprecated": false,
@@ -2970,7 +2970,7 @@
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\""
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
@@ -2987,7 +2987,7 @@
             "label": "getProjectIDs",
             "description": [],
             "signature": [
-              "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\"]"
+              "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\"]"
             ],
             "path": "src/plugins/presentation_util/public/services/labs.ts",
             "deprecated": false,
@@ -3002,7 +3002,7 @@
             "label": "getProject",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\") => ",
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\") => ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -3022,7 +3022,7 @@
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\""
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
@@ -3039,7 +3039,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
+              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -3077,7 +3077,7 @@
             "label": "setProjectStatus",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
             ],
             "path": "src/plugins/presentation_util/public/services/labs.ts",
             "deprecated": false,
@@ -3090,7 +3090,7 @@
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\""
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
@@ -3710,7 +3710,7 @@
         "label": "ProjectID",
         "description": [],
         "signature": [
-          "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+          "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\""
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -3851,7 +3851,7 @@
         "label": "projectIDs",
         "description": [],
         "signature": [
-          "readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\"]"
+          "readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\"]"
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -3994,7 +3994,7 @@
         "label": "getProjectIDs",
         "description": [],
         "signature": [
-          "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\"]"
+          "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\"]"
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -4081,7 +4081,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+              "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\""
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false
@@ -4158,20 +4158,6 @@
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "presentationUtil",
-        "id": "def-common.BY_VALUE_EMBEDDABLE",
-        "type": "string",
-        "tags": [],
-        "label": "BY_VALUE_EMBEDDABLE",
-        "description": [],
-        "signature": [
-          "\"labs:canvas:byValueEmbeddable\""
-        ],
-        "path": "src/plugins/presentation_util/common/labs.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "presentationUtil",
         "id": "def-common.DASHBOARD_CONTROLS",
@@ -4307,7 +4293,7 @@
         "label": "ProjectID",
         "description": [],
         "signature": [
-          "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+          "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\""
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -4372,7 +4358,7 @@
         "label": "projectIDs",
         "description": [],
         "signature": [
-          "readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\"]"
+          "readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\"]"
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -4578,103 +4564,6 @@
                 "description": [],
                 "signature": [
                   "\"dashboard\"[]"
-                ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-common.projects.BY_VALUE_EMBEDDABLE",
-            "type": "Object",
-            "tags": [],
-            "label": "[BY_VALUE_EMBEDDABLE]",
-            "description": [],
-            "path": "src/plugins/presentation_util/common/labs.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "\"labs:canvas:byValueEmbeddable\""
-                ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.isActive",
-                "type": "boolean",
-                "tags": [],
-                "label": "isActive",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.isDisplayed",
-                "type": "boolean",
-                "tags": [],
-                "label": "isDisplayed",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.environments",
-                "type": "Array",
-                "tags": [],
-                "label": "environments",
-                "description": [],
-                "signature": [
-                  "(\"kibana\" | \"browser\" | \"session\")[]"
-                ],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "src/plugins/presentation_util/common/labs.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.solutions",
-                "type": "Array",
-                "tags": [],
-                "label": "solutions",
-                "description": [],
-                "signature": [
-                  "\"canvas\"[]"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false

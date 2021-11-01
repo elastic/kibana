@@ -332,7 +332,7 @@
                 "id": "def-server.AlertingAuthorization.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    ruleTypeRegistry,\n    request,\n    authorization,\n    features,\n    auditLogger,\n    getSpace,\n    getSpaceId,\n  }",
+                "label": "{\n    ruleTypeRegistry,\n    request,\n    authorization,\n    features,\n    getSpace,\n    getSpaceId,\n  }",
                 "description": [],
                 "signature": [
                   "ConstructorOptions"
@@ -531,7 +531,7 @@
                 "section": "def-server.JsonObject",
                 "text": "JsonObject"
               },
-              " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; logSuccessfulAuthorization: () => void; }>"
+              " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; }>"
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
@@ -623,7 +623,7 @@
                 "section": "def-server.JsonObject",
                 "text": "JsonObject"
               },
-              " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; logSuccessfulAuthorization: () => void; }>"
+              " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; }>"
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,

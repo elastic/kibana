@@ -9575,6 +9575,19 @@
             ],
             "path": "x-pack/plugins/fleet/common/types/index.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetConfigType.developer",
+            "type": "Object",
+            "tags": [],
+            "label": "developer",
+            "description": [],
+            "signature": [
+              "{ disableRegistryVersionCheck?: boolean | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/index.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

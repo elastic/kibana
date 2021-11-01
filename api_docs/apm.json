@@ -1056,7 +1056,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: { key: number; count: number; }[]; previousPeriod: { key: number; count: number; }[]; bucketSize: number; }, ",
+          ", { currentPeriod: { x: number; y: number; }[]; previousPeriod: { x: number; y: number | null | undefined; }[]; bucketSize: number; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"POST /internal/apm/latency/overall_distribution\": ",
           {
