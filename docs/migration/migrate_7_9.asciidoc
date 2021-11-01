@@ -422,8 +422,8 @@ setup(core: CoreSetup) {
 
 The API reference docs for `state_sync` and `state_containers` are now available:
 
-* https://github.com/elastic/kibana/blob/master/docs/development/plugins/kibana_utils/public/state_sync/kibana-plugin-plugins-kibana_utils-public-state_sync.md[state_sync]
-* https://github.com/elastic/kibana/blob/master/docs/development/plugins/kibana_utils/common/state_containers/kibana-plugin-plugins-kibana_utils-common-state_containers.md[state_containers]
+* https://github.com/elastic/kibana/blob/main/docs/development/plugins/kibana_utils/public/state_sync/kibana-plugin-plugins-kibana_utils-public-state_sync.md[state_sync]
+* https://github.com/elastic/kibana/blob/main/docs/development/plugins/kibana_utils/common/state_containers/kibana-plugin-plugins-kibana_utils-common-state_containers.md[state_containers]
 
 *via https://github.com/elastic/kibana/pull/67354[#67354]*
 
