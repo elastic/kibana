@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
           strategy: 'securitySolutionSearchStrategy',
         });
         // This can have a odd unknown flake if we do anything more strict than this.
-        expect(networkDns.rawResponse.aggregations?.dns_count).to.be.above(0);
+        expect(networkDns.rawResponse.aggregations?.dns_count?.value).to.be.above(0);
       });
     });
   });

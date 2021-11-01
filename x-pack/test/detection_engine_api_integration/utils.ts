@@ -1257,7 +1257,7 @@ export const waitForAlertToComplete = async (
         )}, status: ${JSON.stringify(response.status)}`
       );
     }
-    return response.body.alertBody.previousStartedAt != null;
+    return response.body.previousStartedAt != null;
   }, 'waitForAlertToComplete');
 };
 
