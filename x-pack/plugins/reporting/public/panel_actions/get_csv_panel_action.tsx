@@ -122,7 +122,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
       searchSource: getSearchSource(true),
       columns,
-      title: savedSearch.title,
+      title: savedSearch.title || '',
       objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType
     });
 

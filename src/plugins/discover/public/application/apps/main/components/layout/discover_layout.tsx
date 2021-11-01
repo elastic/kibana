@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiSpacer,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +16,7 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -26,7 +26,7 @@ import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { esFilters, IndexPatternField } from '../../../../../../../data/public';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../../common';
 import { popularizeField } from '../../../../helpers/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
@@ -39,6 +39,12 @@ import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../../types';
 import { useDataState } from '../../utils/use_data_state';
+import {
+  SavedSearchURLConflictCallout,
+  useSavedSearchAliasMatchRedirect,
+} from '../../../../../saved_searches';
+import { DiscoverDataVisualizerGrid } from '../../../../components/data_visualizer_grid';
+import { VIEW_MODE } from '../view_mode_toggle';
 
 /**
  * Local storage key for sidebar persistence state
@@ -48,6 +54,7 @@ export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
+const DataVisualizerGridMemoized = React.memo(DiscoverDataVisualizerGrid);
 
 export function DiscoverLayout({
   indexPattern,
@@ -65,12 +72,33 @@ export function DiscoverLayout({
   state,
   stateContainer,
 }: DiscoverLayoutProps) {
-  const { trackUiMetric, capabilities, indexPatterns, data, uiSettings, filterManager, storage } =
-    services;
+  const {
+    trackUiMetric,
+    capabilities,
+    indexPatterns,
+    data,
+    uiSettings,
+    filterManager,
+    storage,
+    history,
+    spaces,
+  } = services;
   const { main$, charts$, totalHits$ } = savedSearchData$;
-
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
+
+  const viewMode = useMemo(() => {
+    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
+    return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
+  }, [uiSettings, state.viewMode]);
+
+  const setDiscoverViewMode = useCallback(
+    (mode: VIEW_MODE) => {
+      stateContainer.setAppState({ viewMode: mode });
+    },
+    [stateContainer]
+  );
+
   const fetchCounter = useRef<number>(0);
   const dataState: DataMainMsg = useDataState(main$);
 
@@ -79,6 +107,8 @@ export function DiscoverLayout({
       fetchCounter.current++;
     }
   }, [dataState.fetchStatus]);
+
+  useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   const timeField = useMemo(() => {
     return indexPattern.type !== 'rollup' ? indexPattern.timeFieldName : undefined;
@@ -174,6 +204,11 @@ export function DiscoverLayout({
         resetSavedSearch={resetSavedSearch}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
+        <SavedSearchURLConflictCallout
+          savedSearch={savedSearch}
+          spaces={spaces}
+          history={history}
+        />
         <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
           {savedSearch.title}
         </h1>
@@ -194,6 +229,7 @@ export function DiscoverLayout({
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onEditRuntimeField={onEditRuntimeField}
+              viewMode={viewMode}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
@@ -260,22 +296,36 @@ export function DiscoverLayout({
                       services={services}
                       stateContainer={stateContainer}
                       timefield={timeField}
+                      viewMode={viewMode}
+                      setDiscoverViewMode={setDiscoverViewMode}
                     />
                   </EuiFlexItem>
                   <EuiHorizontalRule margin="none" />
-
-                  <DiscoverDocuments
-                    documents$={savedSearchData$.documents$}
-                    expandedDoc={expandedDoc}
-                    indexPattern={indexPattern}
-                    navigateTo={navigateTo}
-                    onAddFilter={onAddFilter as DocViewFilterFn}
-                    savedSearch={savedSearch}
-                    services={services}
-                    setExpandedDoc={setExpandedDoc}
-                    state={state}
-                    stateContainer={stateContainer}
-                  />
+                  {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+                    <DiscoverDocuments
+                      documents$={savedSearchData$.documents$}
+                      expandedDoc={expandedDoc}
+                      indexPattern={indexPattern}
+                      navigateTo={navigateTo}
+                      onAddFilter={onAddFilter as DocViewFilterFn}
+                      savedSearch={savedSearch}
+                      services={services}
+                      setExpandedDoc={setExpandedDoc}
+                      state={state}
+                      stateContainer={stateContainer}
+                    />
+                  ) : (
+                    <DataVisualizerGridMemoized
+                      savedSearch={savedSearch}
+                      services={services}
+                      indexPattern={indexPattern}
+                      query={state.query}
+                      filters={state.filters}
+                      columns={columns}
+                      stateContainer={stateContainer}
+                      onAddFilter={onAddFilter}
+                    />
+                  )}
                 </EuiFlexGroup>
               )}
             </EuiPageContent>

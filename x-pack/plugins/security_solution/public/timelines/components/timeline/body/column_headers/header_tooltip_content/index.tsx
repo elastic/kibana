@@ -61,7 +61,7 @@ export const HeaderToolTipContent = React.memo<{ header: ColumnHeaderOptions }>(
         {':'}
       </ToolTipTableMetadata>
       <ToolTipTableValue>
-        <IconType data-test-subj="type-icon" type={getIconFromType(header.type!)} />
+        <IconType data-test-subj="type-icon" type={getIconFromType(header.type)} />
         <span data-test-subj="type-value">{header.type}</span>
       </ToolTipTableValue>
     </P>

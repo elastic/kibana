@@ -33,14 +33,6 @@ export const AnalyticsNavigationBar: FC<{
         path: '/data_frame_analytics',
         testSubj: 'mlAnalyticsJobsTab',
       },
-      {
-        id: 'models',
-        name: i18n.translate('xpack.ml.dataframe.modelsTabLabel', {
-          defaultMessage: 'Models',
-        }),
-        path: '/data_frame_analytics/models',
-        testSubj: 'mlTrainedModelsTab',
-      },
     ];
     if (jobId !== undefined || modelId !== undefined) {
       navTabs.push({

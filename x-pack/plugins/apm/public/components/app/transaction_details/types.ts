@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { XYBrushArea } from '@elastic/charts';
+import { XYBrushEvent } from '@elastic/charts';
 
 import type { TraceSample } from '../../../hooks/use_transaction_trace_samples_fetcher';
 
@@ -14,6 +14,6 @@ export interface TabContentProps {
   onFilter: () => void;
   sampleRangeFrom?: number;
   sampleRangeTo?: number;
-  selectSampleFromChartSelection: (selection: XYBrushArea) => void;
+  selectSampleFromChartSelection: (selection: XYBrushEvent) => void;
   traceSamples: TraceSample[];
 }

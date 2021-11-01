@@ -6,18 +6,17 @@
  */
 
 import { CaptureConfig } from '../../../../server/types';
+import { DEFAULT_VIEWPORT } from '../../../../common/constants';
 
-type ViewportConfig = CaptureConfig['viewport'];
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 
 interface LaunchArgs {
   userDataDir: string;
-  viewport: ViewportConfig;
   disableSandbox: BrowserConfig['disableSandbox'];
   proxy: BrowserConfig['proxy'];
 }
 
-export const args = ({ userDataDir, viewport, disableSandbox, proxy: proxyConfig }: LaunchArgs) => {
+export const args = ({ userDataDir, disableSandbox, proxy: proxyConfig }: LaunchArgs) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
@@ -45,7 +44,7 @@ export const args = ({ userDataDir, viewport, disableSandbox, proxy: proxyConfig
     // NOTE: setting the window size does NOT set the viewport size: viewport and window size are different.
     // The viewport may later need to be resized depending on the position of the clip area.
     // These numbers come from the job parameters, so this is a close guess.
-    `--window-size=${Math.floor(viewport.width)},${Math.floor(viewport.height)}`,
+    `--window-size=${Math.floor(DEFAULT_VIEWPORT.width)},${Math.floor(DEFAULT_VIEWPORT.height)}`,
     // allow screenshot clip region to go outside of the viewport
     `--mainFrameClipsContent=false`,
   ];

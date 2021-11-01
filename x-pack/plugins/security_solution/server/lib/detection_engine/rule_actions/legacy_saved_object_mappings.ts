@@ -59,9 +59,10 @@ const legacyRuleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
  * @deprecated Remove this once we no longer need legacy migrations for rule actions (8.0.0)
  */
 export const legacyType: SavedObjectsType = {
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   name: legacyRuleActionsSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   mappings: legacyRuleActionsSavedObjectMappings,
   migrations: legacyRuleActionsSavedObjectMigration,
 };

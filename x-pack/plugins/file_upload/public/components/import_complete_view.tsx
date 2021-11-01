@@ -183,7 +183,7 @@ export class ImportCompleteView extends Component<Props, {}> {
           <a
             data-test-subj="indexManagementNewIndexLink"
             target="_blank"
-            href={getHttp().basePath.prepend('/app/management/kibana/indexPatterns')}
+            href={getHttp().basePath.prepend('/app/management/kibana/dataViews')}
           >
             <FormattedMessage
               id="xpack.fileUpload.importComplete.indexMgmtLink"
@@ -210,7 +210,7 @@ export class ImportCompleteView extends Component<Props, {}> {
         {this._renderCodeEditor(
           this.props.indexPatternResp,
           i18n.translate('xpack.fileUpload.importComplete.indexPatternResponse', {
-            defaultMessage: 'Index pattern response',
+            defaultMessage: 'Data view response',
           }),
           'indexPatternRespCopyButton'
         )}

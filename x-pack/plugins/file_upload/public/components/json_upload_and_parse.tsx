@@ -180,7 +180,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     this.setState({
       importResults,
       importStatus: i18n.translate('xpack.fileUpload.jsonUploadAndParse.creatingIndexPattern', {
-        defaultMessage: 'Creating index pattern: {indexName}',
+        defaultMessage: 'Creating data view: {indexName}',
         values: { indexName: this.state.indexName },
       }),
     });
@@ -194,7 +194,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
         true
       );
       if (!indexPattern.id) {
-        throw new Error('Index pattern id not provided');
+        throw new Error('id not provided');
       }
       const geoField = indexPattern.fields.find((field) =>
         [ES_FIELD_TYPES.GEO_POINT as string, ES_FIELD_TYPES.GEO_SHAPE as string].includes(
@@ -202,7 +202,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
         )
       );
       if (!geoField) {
-        throw new Error('geo field not created in index pattern');
+        throw new Error('geo field not created');
       }
       results = {
         indexPatternId: indexPattern.id,
@@ -214,7 +214,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
       if (this._isMounted) {
         this.setState({
           importStatus: i18n.translate('xpack.fileUpload.jsonUploadAndParse.indexPatternError', {
-            defaultMessage: 'Index pattern error',
+            defaultMessage: 'Unable to create data view',
           }),
           phase: PHASE.COMPLETE,
         });

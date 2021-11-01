@@ -79,7 +79,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   tabType,
   timelineId,
 }) => {
-  const [loading, detailsData] = useTimelineEventsDetails({
+  const [loading, detailsData, rawEventData] = useTimelineEventsDetails({
     docValueFields,
     entityType,
     indexName: expandedEvent.indexName ?? '',
@@ -108,10 +108,10 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     }
   }, []);
 
-  const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
+  const isAlert = some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, detailsData);
 
   const ruleName = useMemo(
-    () => getFieldValue({ category: 'signal', field: 'signal.rule.name' }, detailsData),
+    () => getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.name' }, detailsData),
     [detailsData]
   );
 
@@ -195,6 +195,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             isAlert={isAlert}
             isDraggable={isDraggable}
             loading={loading}
+            rawEventData={rawEventData}
             timelineId={timelineId}
             timelineTabType="flyout"
             hostRisk={hostRisk}
@@ -228,6 +229,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         isAlert={isAlert}
         isDraggable={isDraggable}
         loading={loading}
+        rawEventData={rawEventData}
         timelineId={timelineId}
         timelineTabType={tabType}
         hostRisk={hostRisk}

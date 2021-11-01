@@ -26,3 +26,10 @@ export interface StartDependencies {
   discover: DiscoverStart;
   data: DataPublicPluginStart;
 }
+
+export interface ClientConfigType {
+  readonly: boolean;
+  ui: {
+    enabled: boolean;
+  };
+}

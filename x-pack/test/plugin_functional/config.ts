@@ -48,7 +48,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           KIBANA_ROOT,
           'test/plugin_functional/plugins/core_provider_plugin'
         )}`,
-        '--xpack.timelines.enabled=true',
         ...plugins.map((pluginDir) => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
       ],
     },

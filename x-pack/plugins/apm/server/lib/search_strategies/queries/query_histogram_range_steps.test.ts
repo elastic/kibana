@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from 'src/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
@@ -17,8 +17,8 @@ import {
 
 const params = {
   index: 'apm-*',
-  start: '2020',
-  end: '2021',
+  start: 1577836800000,
+  end: 1609459200000,
   includeFrozen: false,
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
@@ -106,8 +106,8 @@ describe('query_histogram_range_steps', () => {
       );
 
       expect(resp.length).toEqual(100);
-      expect(resp[0]).toEqual(9.260965422132594);
-      expect(resp[99]).toEqual(18521.930844265193);
+      expect(resp[0]).toEqual(9);
+      expect(resp[99]).toEqual(18522);
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });

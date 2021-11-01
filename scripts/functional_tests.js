@@ -12,6 +12,19 @@ const alwaysImportedTests = [
   require.resolve('../test/plugin_functional/config.ts'),
   require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
   require.resolve('../test/new_visualize_flow/config.ts'),
+  require.resolve('../test/interactive_setup_api_integration/enrollment_flow.config.ts'),
+  require.resolve('../test/interactive_setup_api_integration/manual_configuration_flow.config.ts'),
+  require.resolve(
+    '../test/interactive_setup_api_integration/manual_configuration_flow_without_tls.config.ts'
+  ),
+  require.resolve('../test/interactive_setup_functional/enrollment_token.config.ts'),
+  require.resolve('../test/interactive_setup_functional/manual_configuration.config.ts'),
+  require.resolve(
+    '../test/interactive_setup_functional/manual_configuration_without_security.config.ts'
+  ),
+  require.resolve(
+    '../test/interactive_setup_functional/manual_configuration_without_tls.config.ts'
+  ),
 ];
 // eslint-disable-next-line no-restricted-syntax
 const onlyNotInCoverageTests = [

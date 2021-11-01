@@ -31,6 +31,8 @@ import { PROMOTED_DOCUMENTS_TITLE } from '../constants';
 import { CurationLogic } from '../curation_logic';
 import { AddResultButton, CurationResult, convertToResultFormat } from '../results';
 
+import './promoted_documents.scss';
+
 export const PromotedDocuments: React.FC = () => {
   const { curation, isAutomated, promotedIds, promotedDocumentsLoading } = useValues(CurationLogic);
   const documents = curation.promoted;
@@ -89,36 +91,42 @@ export const PromotedDocuments: React.FC = () => {
     >
       {hasDocuments ? (
         <EuiDragDropContext onDragEnd={reorderPromotedIds}>
-          <EuiDroppable droppableId="PromotedDocuments" spacing="m">
-            {documents.map((document, index) => (
-              <EuiDraggable
-                index={index}
-                key={document.id}
-                draggableId={document.id}
-                customDragHandle
-                spacing="none"
-                isDragDisabled={isAutomated}
-              >
-                {(provided) => (
-                  <CurationResult
-                    key={document.id}
+          <EuiDroppable
+            droppableId="PromotedDocuments"
+            spacing="m"
+            className="promotedDocuments--results"
+          >
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {documents.map((document, index) => (
+                <EuiFlexItem key={index}>
+                  <EuiDraggable
                     index={index}
-                    result={convertToResultFormat(document)}
-                    actions={
-                      isAutomated
-                        ? []
-                        : [
-                            {
-                              ...DEMOTE_DOCUMENT_ACTION,
-                              onClick: () => removePromotedId(document.id),
-                            },
-                          ]
-                    }
-                    dragHandleProps={provided.dragHandleProps}
-                  />
-                )}
-              </EuiDraggable>
-            ))}
+                    draggableId={document.id}
+                    customDragHandle
+                    spacing="none"
+                    isDragDisabled={isAutomated}
+                  >
+                    {(provided) => (
+                      <CurationResult
+                        index={index}
+                        result={convertToResultFormat(document)}
+                        actions={
+                          isAutomated
+                            ? []
+                            : [
+                                {
+                                  ...DEMOTE_DOCUMENT_ACTION,
+                                  onClick: () => removePromotedId(document.id),
+                                },
+                              ]
+                        }
+                        dragHandleProps={provided.dragHandleProps}
+                      />
+                    )}
+                  </EuiDraggable>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
           </EuiDroppable>
         </EuiDragDropContext>
       ) : (

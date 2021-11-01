@@ -32,13 +32,9 @@ export const ADD_NESTED_BTN = '[data-test-subj="exceptionsNestedButton"]';
 
 export const ENTRY_DELETE_BTN = '[data-test-subj="builderItemEntryDeleteButton"]';
 
-export const FIELD_INPUT_LIST_BTN = '[data-test-subj="comboBoxToggleListButton"]';
-
 export const CANCEL_BTN = '[data-test-subj="cancelExceptionAddButton"]';
 
 export const BUILDER_MODAL_BODY = '[data-test-subj="exceptionsBuilderWrapper"]';
-
-export const EXCEPTIONS_TABLE_TAB = '[data-test-subj="allRulesTableTab-exceptions"]';
 
 export const EXCEPTIONS_TABLE = '[data-test-subj="exceptions-table"]';
 

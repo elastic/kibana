@@ -117,7 +117,9 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
     arrowDisplay="left"
     buttonContent="Custom extents"
     buttonContentClassName="euiText euiText--small"
+    buttonElement="button"
     className="visEditorSidebar__section visEditorSidebar__collapsible"
+    element="div"
     id="yAxisOptionsAccordionValueAxis-1"
     initialIsOpen={false}
     isLoading={false}

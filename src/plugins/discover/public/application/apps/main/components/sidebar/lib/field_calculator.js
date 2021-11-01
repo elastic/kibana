@@ -8,12 +8,12 @@
 
 import { map, sortBy, without, each, defaults, isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { flattenHit } from '../../../../../../../../data/common';
 
 function getFieldValues(hits, field, indexPattern) {
   const name = field.name;
-  const flattenHit = indexPattern.flattenHit;
   return map(hits, function (hit) {
-    return flattenHit(hit)[name];
+    return flattenHit(hit, indexPattern, { includeIgnoredValues: true })[name];
   });
 }
 

@@ -53,7 +53,7 @@ export function registerLegacy(reporting: ReportingCore, logger: LevelLogger) {
             savedObjectId,
             browserTimezone,
             queryString,
-            version: reporting.getKibanaVersion(),
+            version: reporting.getKibanaPackageInfo().version,
           });
         } catch (err) {
           throw requestHandler.handleError(err);

@@ -98,7 +98,7 @@ export const useHostsRiskScore = ({
 
   useEffect(() => {
     if (riskyHostsFeatureEnabled && (hostName || timerange)) {
-      spaces.getActiveSpace().then((space) => {
+      spaces?.getActiveSpace().then((space) => {
         start({
           data,
           timerange: timerange
