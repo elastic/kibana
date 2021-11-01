@@ -765,7 +765,7 @@ export const ECSMappingEditorField = ({ field, query, fieldRef }: ECSMappingEdit
               LIMIT 5;
             */
 
-            if (selectItem.type === 'FunctionCall' && selectItem.hasAs) {
+            if (selectItem.hasAs && selectItem.alias) {
               return [
                 {
                   label: selectItem.alias,
