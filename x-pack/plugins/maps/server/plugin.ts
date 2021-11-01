@@ -83,6 +83,18 @@ export class MapsPlugin implements Plugin {
       },
     ]);
 
+    home.sampleData.replacePanelInSampleDatasetDashboard({
+      sampleDataId: 'ecommerce',
+      dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
+      oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
+      embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+      // @ts-ignore
+      embeddableType: MAP_SAVED_OBJECT_TYPE,
+      embeddableConfig: {
+        isLayerTOCOpen: false,
+      },
+    });
+
     home.sampleData.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
 
     home.sampleData.addAppLinksToSampleDataset('flights', [
@@ -138,15 +150,6 @@ export class MapsPlugin implements Plugin {
     const { usageCollection, home, licensing, features, mapsEms } = plugins;
     const mapsEmsConfig = mapsEms.config;
     const config$ = this._initializerContext.config.create();
-    const currentConfig = this._initializerContext.config.get();
-
-    // @ts-ignore
-    const mapsEnabled = currentConfig.enabled;
-    // TODO: Consider dynamic way to disable maps app on config change
-    if (!mapsEnabled) {
-      this._logger.warn('Maps app disabled by configuration');
-      return;
-    }
 
     let isEnterprisePlus = false;
     let lastLicenseId: string | undefined;

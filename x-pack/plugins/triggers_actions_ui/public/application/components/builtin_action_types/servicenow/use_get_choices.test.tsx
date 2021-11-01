@@ -162,4 +162,26 @@ describe('useGetChoices', () => {
       title: 'Unable to get choices',
     });
   });
+
+  it('returns an empty array if the response is not an array', async () => {
+    getChoicesMock.mockResolvedValue({
+      status: 'ok',
+      data: {},
+    });
+
+    const { result } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+      useGetChoices({
+        http: services.http,
+        actionConnector: undefined,
+        toastNotifications: services.notifications.toasts,
+        fields,
+        onSuccess,
+      })
+    );
+
+    expect(result.current).toEqual({
+      isLoading: false,
+      choices: [],
+    });
+  });
 });

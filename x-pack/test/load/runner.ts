@@ -28,7 +28,11 @@ if (!Fs.existsSync(gatlingProjectRootPath)) {
   );
 }
 
-const dropEmptyLines = (s: string) => s.split(',').filter((i) => i.length > 0);
+const dropEmptyLines = (s: string) =>
+  s
+    .split(',')
+    .filter((i) => i.length > 0)
+    .map((i) => (i.includes('.') ? i : `branch.${i}`));
 const simulationClasses = dropEmptyLines(simulationEntry);
 const simulationsRootPath = resolve(gatlingProjectRootPath, baseSimulationPath);
 

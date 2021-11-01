@@ -16,6 +16,8 @@ describe('correlations', () => {
         includeFrozen: true,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
+        start: 1577836800000,
+        end: 1609459200000,
       });
       expect(requestBase).toEqual({
         index: 'apm-*',
@@ -29,6 +31,8 @@ describe('correlations', () => {
         index: 'apm-*',
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
+        start: 1577836800000,
+        end: 1609459200000,
       });
       expect(requestBase).toEqual({
         index: 'apm-*',
