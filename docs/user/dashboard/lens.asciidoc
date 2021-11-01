@@ -182,7 +182,7 @@ For a time shift example, refer to <<compare-time-ranges>>.
 [[add-reference-lines]]
 ==== Add reference lines
 
-To identify specified values, add static, dynamic, and formula reference line layers to your visualization axes. You can add reference lines to any visualization type that displays axes.
+With reference lines, you can identify specific values in your visualizations with icons, colors, and other display options. You can add reference lines to any visualization type that displays axes.
 
 For example, to track the number of bytes in the 75th percentile, add a shaded *Percentile* reference line to your time series visualization.  
 
@@ -453,7 +453,7 @@ To configure the bounds, use the menus in the editor toolbar. Bar and area chart
 .*Is it possible to display icons in data tables?*
 [%collapsible]
 ====
-You can display icons with <<managing-index-patterns, field formatter>> in data tables.
+You can display icons with <<managing-index-patterns, field formatters>> in data tables.
 ====
 
 [discrete]
