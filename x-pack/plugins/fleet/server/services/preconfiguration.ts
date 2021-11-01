@@ -22,7 +22,6 @@ import type {
 } from '../../common';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  DEFAULT_PACKAGES,
   normalizeHostsForAgents,
   SO_SEARCH_LIMIT,
 } from '../../common';
@@ -33,7 +32,7 @@ import {
 
 import { escapeSearchQueryPhrase } from './saved_object';
 import { pkgToPkgKey } from './epm/registry';
-import { getInstallation, getInstallations, getPackageInfo } from './epm/packages';
+import { getInstallation, getPackageInfo } from './epm/packages';
 import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
@@ -43,7 +42,6 @@ import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { outputService } from './output';
-import { updatePackage } from './epm/packages/update';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
@@ -366,22 +364,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     esClient,
     allPackagePolicyIds.items
   );
-
-  // Ensure `keep_policies_up_to_date` is set to true for any package that appears in `DEFAULT_PACKAGES`
-  const defaultPackages = await getInstallations(soClient, {
-    searchFields: ['name'],
-    search: DEFAULT_PACKAGES.map(({ name }) => name).join('|'),
-  });
-  const defaultPackagesToUpdate = defaultPackages.saved_objects.filter(
-    ({ attributes }) => !attributes.keep_policies_up_to_date
-  );
-  for (const packageToUpdate of defaultPackagesToUpdate) {
-    await updatePackage({
-      savedObjectsClient: soClient,
-      pkgName: packageToUpdate.attributes.name,
-      keepPoliciesUpToDate: true,
-    });
-  }
 
   return {
     policies: fulfilledPolicies.map((p) =>
