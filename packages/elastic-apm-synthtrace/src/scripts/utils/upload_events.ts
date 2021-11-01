@@ -14,7 +14,7 @@ import {
   ElasticsearchOutputWriteTargets,
   toElasticsearchOutput,
 } from '../../lib/output/to_elasticsearch_output';
-import { Logger } from './logger';
+import { Logger } from '../../lib/utils/create_logger';
 
 export function uploadEvents({
   events,
@@ -56,23 +56,17 @@ export function uploadEvents({
         );
       })
     )
-  )
-    .then((results) => {
-      const errors = results
-        .flatMap((result) => result.items)
-        .filter((item) => !!item.index?.error)
-        .map((item) => item.index?.error);
+  ).then((results) => {
+    const errors = results
+      .flatMap((result) => result.items)
+      .filter((item) => !!item.index?.error)
+      .map((item) => item.index?.error);
 
-      if (errors.length) {
-        logger.error(inspect(errors.slice(0, 10), { depth: null }));
-        throw new Error('Failed to upload some items');
-      }
+    if (errors.length) {
+      logger.error(inspect(errors.slice(0, 10), { depth: null }));
+      throw new Error('Failed to upload some items');
+    }
 
-      logger.debug(`Uploaded ${events.length} in ${new Date().getTime() - time}ms`);
-    })
-    .catch((err) => {
-      // eslint-disable-next-line no-console
-      console.error(err);
-      process.exit(1);
-    });
+    logger.debug(`Uploaded ${events.length} in ${new Date().getTime() - time}ms`);
+  });
 }
