@@ -273,28 +273,13 @@ export function Process({
     onProcessSelected(process);
   }
 
-  /**
-   * calls up to terminal to show details for this command
-   */
-  function onProcessKeyPress(e: KeyboardEvent<HTMLDivElement>): void {
-    e.stopPropagation();
-
-    const selection = window.getSelection();
-
-    // do not select the command if the user was just selecting text for copy.
-    if (selection && selection.type === 'Range') {
-      return;
-    }
-
-    onProcessSelected(process);
-  }
-
   const id = process.getEntityID();
 
   return (
     <>
       <div data-id={id} key={id} css={processCSS}>
-        <div css={wrapperCSS} onClick={onProcessClicked} onKeyPress={onProcessKeyPress}>
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+        <div css={wrapperCSS} onClick={onProcessClicked}>
           {isSessionLeader ? renderSessionLeader() : renderProcess()}
           {renderButtons()}
         </div>
