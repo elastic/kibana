@@ -54,6 +54,7 @@ export interface EngineDetails extends Engine {
   engine_count?: number;
   includedEngines?: EngineDetails[];
   search_relevance_suggestions?: SearchRelevanceSuggestionDetails;
+  search_relevance_suggestions_active: boolean;
 }
 
 interface ResultField {

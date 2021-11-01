@@ -22,10 +22,7 @@ export const initSavedObjects = (
   const config = osqueryContext.config();
 
   savedObjects.registerType(usageMetricType);
-
-  if (config.savedQueries) {
-    savedObjects.registerType(savedQueryType);
-  }
+  savedObjects.registerType(savedQueryType);
 
   if (config.packs) {
     savedObjects.registerType(packType);

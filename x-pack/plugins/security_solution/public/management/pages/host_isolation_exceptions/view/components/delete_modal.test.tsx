@@ -104,7 +104,7 @@ describe('When on the host isolation exceptions delete modal', () => {
     });
 
     expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-      '"some name" has been removed from the Host Isolation Exceptions list.'
+      '"some name" has been removed from the Host isolation exceptions list.'
     );
   });
 
@@ -129,7 +129,7 @@ describe('When on the host isolation exceptions delete modal', () => {
     });
 
     expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Unable to remove "some name" from the Host Isolation Exceptions list. Reason: That\'s not true. That\'s impossible'
+      'Unable to remove "some name" from the Host isolation exceptions list. Reason: That\'s not true. That\'s impossible'
     );
   });
 });

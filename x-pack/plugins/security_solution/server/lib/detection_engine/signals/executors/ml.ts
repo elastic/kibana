@@ -6,7 +6,6 @@
  */
 
 import { KibanaRequest, Logger } from 'src/core/server';
-import { SavedObject } from 'src/core/types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
@@ -15,17 +14,17 @@ import {
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { SetupPlugins } from '../../../../plugin';
-import { MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
 import { BuildRuleMessage } from '../rule_messages';
-import { AlertAttributes, BulkCreate, RuleRangeTuple, WrapHits } from '../types';
+import { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
+import { SetupPlugins } from '../../../../plugin';
 
 export const mlExecutor = async ({
-  rule,
+  completeRule,
   tuple,
   ml,
   listClient,
@@ -36,7 +35,7 @@ export const mlExecutor = async ({
   bulkCreate,
   wrapHits,
 }: {
-  rule: SavedObject<AlertAttributes<MachineLearningRuleParams>>;
+  completeRule: CompleteRule<MachineLearningRuleParams>;
   tuple: RuleRangeTuple;
   ml: SetupPlugins['ml'];
   listClient: ListClient;
@@ -48,7 +47,7 @@ export const mlExecutor = async ({
   wrapHits: WrapHits;
 }) => {
   const result = createSearchAfterReturnType();
-  const ruleParams = rule.attributes.params;
+  const ruleParams = completeRule.ruleParams;
   if (ml == null) {
     throw new Error('ML plugin unavailable during rule execution');
   }
@@ -105,15 +104,15 @@ export const mlExecutor = async ({
 
   const anomalyCount = filteredAnomalyResults.hits.hits.length;
   if (anomalyCount) {
-    logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
+    logger.debug(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
   }
   const { success, errors, bulkCreateDuration, createdItemsCount, createdItems } =
     await bulkCreateMlSignals({
       someResult: filteredAnomalyResults,
-      ruleSO: rule,
+      completeRule,
       services,
       logger,
-      id: rule.id,
+      id: completeRule.alertId,
       signalsIndex: ruleParams.outputIndex,
       buildRuleMessage,
       bulkCreate,

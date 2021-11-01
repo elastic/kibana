@@ -250,7 +250,7 @@ export function Detail() {
 
       let redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
         CreatePackagePolicyRouteState['onCancelNavigateTo'];
-
+      let onSaveQueryParams: CreatePackagePolicyRouteState['onSaveQueryParams'];
       if (agentPolicyIdFromContext) {
         redirectToPath = [
           PLUGIN_ID,
@@ -260,24 +260,37 @@ export function Detail() {
             })[1],
           },
         ];
+
+        onSaveQueryParams = {
+          showAddAgentHelp: true,
+          openEnrollmentFlyout: true,
+        };
       } else {
         redirectToPath = [
           INTEGRATIONS_PLUGIN_ID,
           {
             path: pagePathGetters.integration_details_policies({
               pkgkey,
+              ...(integration ? { integration } : {}),
             })[1],
           },
         ];
+
+        onSaveQueryParams = {
+          showAddAgentHelp: { renameKey: 'showAddAgentHelpForPolicyId', policyIdAsValue: true },
+          openEnrollmentFlyout: { renameKey: 'addAgentToPolicyId', policyIdAsValue: true },
+        };
       }
 
       const redirectBackRouteState: CreatePackagePolicyRouteState = {
         onSaveNavigateTo: redirectToPath,
+        onSaveQueryParams,
         onCancelNavigateTo: [
           INTEGRATIONS_PLUGIN_ID,
           {
             path: pagePathGetters.integration_details_overview({
               pkgkey,
+              ...(integration ? { integration } : {}),
             })[1],
           },
         ],
@@ -441,7 +454,7 @@ export function Detail() {
         name: (
           <FormattedMessage
             id="xpack.fleet.epm.packageDetailsNav.packagePoliciesLinkText"
-            defaultMessage="Policies"
+            defaultMessage="Integration Policies"
           />
         ),
         isSelected: panel === 'policies',

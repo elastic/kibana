@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     const fetchIndexContent = async () => {
-      const { body } = await es.search<{ type: string }>({
+      const body = await es.search<{ type: string }>({
         index: '.kibana',
         body: {
           size: 100,

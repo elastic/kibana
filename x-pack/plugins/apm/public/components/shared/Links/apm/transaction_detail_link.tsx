@@ -9,7 +9,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { EuiLink } from '@elastic/eui';
 import { pickBy, identity } from 'lodash';
-import { getAPMHref, APMLinkExtendProps } from './APMLink';
+import { getLegacyApmHref, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { APMQueryParams } from '../url_helpers';
@@ -43,7 +43,7 @@ export function TransactionDetailLink({
   const { urlParams } = useUrlParams();
   const { core } = useApmPluginContext();
   const location = useLocation();
-  const href = getAPMHref({
+  const href = getLegacyApmHref({
     basePath: core.http.basePath,
     path: `/services/${serviceName}/transactions/view`,
     query: {

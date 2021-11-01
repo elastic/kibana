@@ -245,7 +245,7 @@ export const legacyMigrateRuleAlertId = (
     return {
       ...doc,
       attributes: {
-        ...attributesWithoutRuleAlertId.attributes,
+        ...attributesWithoutRuleAlertId,
         actions: actionsWithRef,
       },
       references: [...existingReferences, ...alertReferences, ...actionsReferences],

@@ -6,7 +6,7 @@
  */
 
 import { merge } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -14,7 +14,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
-import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getTransactionDurationFieldForTransactions } from '../helpers/transactions';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 
 interface MetricParams {
@@ -51,7 +51,7 @@ export async function getAverages({
   const params = mergeRequestWithAggs(request, {
     avg: {
       avg: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
+        field: getTransactionDurationFieldForTransactions(
           searchAggregatedTransactions
         ),
       },
@@ -115,7 +115,7 @@ export async function getSums({
   const params = mergeRequestWithAggs(request, {
     sum: {
       sum: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
+        field: getTransactionDurationFieldForTransactions(
           searchAggregatedTransactions
         ),
       },

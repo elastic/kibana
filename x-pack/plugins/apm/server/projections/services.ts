@@ -9,7 +9,7 @@ import { Setup } from '../../server/lib/helpers/setup_request';
 import { SERVICE_NAME } from '../../common/elasticsearch_fieldnames';
 import { rangeQuery, kqlQuery } from '../../../observability/server';
 import { ProcessorEvent } from '../../common/processor_event';
-import { getProcessorEventForAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getProcessorEventForTransactions } from '../lib/helpers/transactions';
 
 export function getServicesProjection({
   kuery,
@@ -27,9 +27,7 @@ export function getServicesProjection({
   return {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForTransactions(searchAggregatedTransactions),
         ProcessorEvent.metric as const,
         ProcessorEvent.error as const,
       ],

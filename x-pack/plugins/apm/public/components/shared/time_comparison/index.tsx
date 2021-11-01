@@ -12,16 +12,14 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useUiTracker } from '../../../../../observability/public';
+import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../../shared/Links/url_helpers';
 import { getComparisonTypes } from './get_comparison_types';
-import {
-  getTimeRangeComparison,
-  TimeRangeComparisonType,
-} from './get_time_range_comparison';
+import { getTimeRangeComparison } from './get_time_range_comparison';
 
 const PrependContainer = euiStyled.div`
   display: flex;
@@ -66,13 +64,13 @@ export function getSelectOptions({
   start,
   end,
 }: {
-  comparisonTypes: TimeRangeComparisonType[];
+  comparisonTypes: TimeRangeComparisonEnum[];
   start?: string;
   end?: string;
 }) {
   return comparisonTypes.map((value) => {
     switch (value) {
-      case TimeRangeComparisonType.DayBefore: {
+      case TimeRangeComparisonEnum.DayBefore: {
         return {
           value,
           text: i18n.translate('xpack.apm.timeComparison.select.dayBefore', {
@@ -80,7 +78,7 @@ export function getSelectOptions({
           }),
         };
       }
-      case TimeRangeComparisonType.WeekBefore: {
+      case TimeRangeComparisonEnum.WeekBefore: {
         return {
           value,
           text: i18n.translate('xpack.apm.timeComparison.select.weekBefore', {
@@ -88,9 +86,9 @@ export function getSelectOptions({
           }),
         };
       }
-      case TimeRangeComparisonType.PeriodBefore: {
+      case TimeRangeComparisonEnum.PeriodBefore: {
         const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-          comparisonType: TimeRangeComparisonType.PeriodBefore,
+          comparisonType: TimeRangeComparisonEnum.PeriodBefore,
           start,
           end,
           comparisonEnabled: true,

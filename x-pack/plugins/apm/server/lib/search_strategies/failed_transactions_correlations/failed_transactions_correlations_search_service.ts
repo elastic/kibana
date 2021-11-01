@@ -9,17 +9,15 @@ import { chunk } from 'lodash';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../../../src/plugins/data/common';
-
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
-import type { SearchStrategyServerParams } from '../../../../common/search_strategies/types';
 import type {
-  FailedTransactionsCorrelationsRequestParams,
+  SearchStrategyClientParams,
+  SearchStrategyServerParams,
+  RawResponseBase,
+} from '../../../../common/search_strategies/types';
+import type {
+  FailedTransactionsCorrelationsParams,
   FailedTransactionsCorrelationsRawResponse,
 } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
@@ -36,23 +34,20 @@ import type { SearchServiceProvider } from '../search_strategy_provider';
 import { failedTransactionsCorrelationsSearchServiceStateProvider } from './failed_transactions_correlations_search_service_state';
 
 import { ERROR_CORRELATION_THRESHOLD } from '../constants';
+import { fetchFieldsStats } from '../queries/field_stats/get_fields_stats';
 
-export type FailedTransactionsCorrelationsSearchServiceProvider =
+type FailedTransactionsCorrelationsSearchServiceProvider =
   SearchServiceProvider<
-    FailedTransactionsCorrelationsRequestParams,
-    FailedTransactionsCorrelationsRawResponse
+    FailedTransactionsCorrelationsParams & SearchStrategyClientParams,
+    FailedTransactionsCorrelationsRawResponse & RawResponseBase
   >;
-
-export type FailedTransactionsCorrelationsSearchStrategy = ISearchStrategy<
-  IKibanaSearchRequest<FailedTransactionsCorrelationsRequestParams>,
-  IKibanaSearchResponse<FailedTransactionsCorrelationsRawResponse>
->;
 
 export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransactionsCorrelationsSearchServiceProvider =
   (
     esClient: ElasticsearchClient,
     getApmIndices: () => Promise<ApmIndicesConfig>,
-    searchServiceParams: FailedTransactionsCorrelationsRequestParams,
+    searchServiceParams: FailedTransactionsCorrelationsParams &
+      SearchStrategyClientParams,
     includeFrozen: boolean
   ) => {
     const { addLogMessage, getLogMessages } = searchServiceLogProvider();
@@ -62,7 +57,8 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
     async function fetchErrorCorrelations() {
       try {
         const indices = await getApmIndices();
-        const params: FailedTransactionsCorrelationsRequestParams &
+        const params: FailedTransactionsCorrelationsParams &
+          SearchStrategyClientParams &
           SearchStrategyServerParams = {
           ...searchServiceParams,
           index: indices.transaction,
@@ -133,6 +129,7 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
         state.setProgress({ loadedFieldCandidates: 1 });
 
         let fieldCandidatesFetchedCount = 0;
+        const fieldsToSample = new Set<string>();
         if (params !== undefined && fieldCandidates.length > 0) {
           const batches = chunk(fieldCandidates, 10);
           for (let i = 0; i < batches.length; i++) {
@@ -150,13 +147,19 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
 
               results.forEach((result, idx) => {
                 if (result.status === 'fulfilled') {
+                  const significantCorrelations = result.value.filter(
+                    (record) =>
+                      record &&
+                      record.pValue !== undefined &&
+                      record.pValue < ERROR_CORRELATION_THRESHOLD
+                  );
+
+                  significantCorrelations.forEach((r) => {
+                    fieldsToSample.add(r.fieldName);
+                  });
+
                   state.addFailedTransactionsCorrelations(
-                    result.value.filter(
-                      (record) =>
-                        record &&
-                        typeof record.pValue === 'number' &&
-                        record.pValue < ERROR_CORRELATION_THRESHOLD
-                    )
+                    significantCorrelations
                   );
                 } else {
                   // If one of the fields in the batch had an error
@@ -184,6 +187,23 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
             `Identified correlations for ${fieldCandidatesFetchedCount} fields out of ${fieldCandidates.length} candidates.`
           );
         }
+
+        addLogMessage(
+          `Identified ${fieldsToSample.size} fields to sample for field statistics.`
+        );
+
+        const { stats: fieldStats } = await fetchFieldsStats(
+          esClient,
+          params,
+          [...fieldsToSample],
+          [{ fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure }]
+        );
+
+        addLogMessage(
+          `Retrieved field statistics for ${fieldStats.length} fields out of ${fieldsToSample.size} fields.`
+        );
+
+        state.addFieldStats(fieldStats);
       } catch (e) {
         state.setError(e);
       }
@@ -208,6 +228,7 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
         errorHistogram,
         percentileThresholdValue,
         progress,
+        fieldStats,
       } = state.getState();
 
       return {
@@ -231,6 +252,7 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
           overallHistogram,
           errorHistogram,
           percentileThresholdValue,
+          fieldStats,
         },
       };
     };

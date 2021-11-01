@@ -18,6 +18,7 @@ import { parseExperimentalConfigValue } from '../../../../common/experimental_fe
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createMockPackageService,
   createRouteHandlerContext,
@@ -157,9 +158,12 @@ describe('Host Isolation', () => {
           keep_policies_up_to_date: false,
         })
       );
+
       licenseEmitter = new Subject();
       licenseService = new LicenseService();
       licenseService.start(licenseEmitter);
+
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
         licenseService,

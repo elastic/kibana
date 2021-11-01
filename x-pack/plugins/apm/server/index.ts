@@ -14,10 +14,9 @@ import { maxSuggestions } from '../../observability/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 import { APMPlugin } from './plugin';
 
-// All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/master/docs/settings/apm-settings.asciidoc
+// All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/main/docs/settings/apm-settings.asciidoc
 // and be included on cloud allow list unless there are specific reasons not to
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   serviceMapEnabled: schema.boolean({ defaultValue: true }),
   serviceMapFingerprintBucketSize: schema.number({ defaultValue: 100 }),
   serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
@@ -60,32 +59,41 @@ const configSchema = schema.object({
 
 // plugin config
 export const config: PluginConfigDescriptor<APMConfig> = {
-  deprecations: ({
-    deprecate,
-    renameFromRoot,
-    deprecateFromRoot,
-    unusedFromRoot,
-  }) => [
-    deprecate('enabled', '8.0.0'),
+  deprecations: ({ renameFromRoot, deprecateFromRoot, unusedFromRoot }) => [
     renameFromRoot(
       'apm_oss.transactionIndices',
-      'xpack.apm.indices.transaction'
+      'xpack.apm.indices.transaction',
+      { level: 'warning' }
     ),
-    renameFromRoot('apm_oss.spanIndices', 'xpack.apm.indices.span'),
-    renameFromRoot('apm_oss.errorIndices', 'xpack.apm.indices.error'),
-    renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.indices.metric'),
-    renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.indices.sourcemap'),
-    renameFromRoot('apm_oss.onboardingIndices', 'xpack.apm.indices.onboarding'),
-    deprecateFromRoot('apm_oss.enabled', '8.0.0'),
-    unusedFromRoot('apm_oss.fleetMode'),
-    unusedFromRoot('apm_oss.indexPattern'),
+    renameFromRoot('apm_oss.spanIndices', 'xpack.apm.indices.span', {
+      level: 'warning',
+    }),
+    renameFromRoot('apm_oss.errorIndices', 'xpack.apm.indices.error', {
+      level: 'warning',
+    }),
+    renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.indices.metric', {
+      level: 'warning',
+    }),
+    renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.indices.sourcemap', {
+      level: 'warning',
+    }),
+    renameFromRoot(
+      'apm_oss.onboardingIndices',
+      'xpack.apm.indices.onboarding',
+      { level: 'warning' }
+    ),
+    deprecateFromRoot('apm_oss.enabled', '8.0.0', { level: 'warning' }),
+    unusedFromRoot('apm_oss.fleetMode', { level: 'warning' }),
+    unusedFromRoot('apm_oss.indexPattern', { level: 'warning' }),
     renameFromRoot(
       'xpack.apm.maxServiceEnvironments',
-      `uiSettings.overrides[${maxSuggestions}]`
+      `uiSettings.overrides[${maxSuggestions}]`,
+      { level: 'warning' }
     ),
     renameFromRoot(
       'xpack.apm.maxServiceSelections',
-      `uiSettings.overrides[${maxSuggestions}]`
+      `uiSettings.overrides[${maxSuggestions}]`,
+      { level: 'warning' }
     ),
   ],
   exposeToBrowser: {

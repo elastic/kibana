@@ -15,7 +15,7 @@ describe('DeprecatedCallout', () => {
     render(<InstallationCallout />);
     expect(
       screen.getByText(
-        'To use this connector, you must first install the Elastic App from the ServiceNow App Store'
+        'To use this connector, first install the Elastic app from the ServiceNow app store.'
       )
     ).toBeInTheDocument();
   });

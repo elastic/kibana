@@ -16,7 +16,7 @@ import { KibanaTemplate } from './kibana_template';
 // @ts-ignore
 import { KibanaInstances } from '../../../components/kibana/instances';
 // @ts-ignore
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { AlertsByName } from '../../../alerts/types';

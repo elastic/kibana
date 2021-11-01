@@ -1,2 +1,0 @@
-{"_version":"WzQyNjA0LDFd","created_at":"2021-10-14T01:30:22.034Z","created_by":"elastic","description":"Test exception list description","id":"4c65a230-2c8e-11ec-be1c-2bbdec602f88","immutable":false,"list_id":"test_exception_list","name":"Test exception list","namespace_type":"single","os_types":[],"tags":[],"tie_breaker_id":"b04983b4-1617-441c-bb6c-c729281fa2e9","type":"detection","updated_at":"2021-10-14T01:30:22.036Z","updated_by":"elastic","version":1}
-{"exported_list_items_count":0}

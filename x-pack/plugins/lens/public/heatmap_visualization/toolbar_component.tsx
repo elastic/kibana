@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import type { VisualizationToolbarProps } from '../types';
-import { LegendSettingsPopover } from '../shared_components';
+import { LegendSettingsPopover, ToolbarPopover, ValueLabelsSettings } from '../shared_components';
 import type { HeatmapVisualizationState } from './types';
 
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
@@ -37,11 +37,29 @@ export const HeatmapToolbar = memo(
     const legendMode = state.legend.isVisible ? 'show' : 'hide';
 
     return (
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" responsive={false}>
+            <ToolbarPopover
+              title={i18n.translate('xpack.lens.shared.curveLabel', {
+                defaultMessage: 'Visual options',
+              })}
+              type="visualOptions"
+              groupPosition="left"
+              buttonDataTestSubj="lnsVisualOptionsButton"
+            >
+              <ValueLabelsSettings
+                valueLabels={state?.gridConfig.isCellLabelVisible ? 'inside' : 'hide'}
+                onValueLabelChange={(newMode) => {
+                  setState({
+                    ...state,
+                    gridConfig: { ...state.gridConfig, isCellLabelVisible: newMode === 'inside' },
+                  });
+                }}
+              />
+            </ToolbarPopover>
             <LegendSettingsPopover
-              groupPosition={'none'}
+              groupPosition={'right'}
               legendOptions={legendOptions}
               mode={legendMode}
               onDisplayChange={(optionId) => {

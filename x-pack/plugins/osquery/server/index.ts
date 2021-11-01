@@ -10,10 +10,8 @@ import { OsqueryPlugin } from './plugin';
 import { ConfigSchema, ConfigType } from './config';
 
 export const config: PluginConfigDescriptor<ConfigType> = {
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: ConfigSchema,
   exposeToBrowser: {
-    enabled: true,
     actionEnabled: true,
     savedQueries: true,
     packs: true,

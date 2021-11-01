@@ -54,6 +54,7 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
             body: { has_all_requested: hasAllPrivileges },
           } = await ctx.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
             body: {
+              // @ts-expect-error SecurityClusterPrivilege doesn’t contain all the priviledges
               cluster: NODES_INFO_PRIVILEGES,
             },
           });
