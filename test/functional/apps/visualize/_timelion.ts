@@ -23,6 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const elasticChart = getService('elasticChart');
   const find = getService('find');
+  const retry = getService('retry');
   const timelionChartSelector = 'timelionChart';
 
   describe('Timelion visualization', () => {
@@ -265,7 +266,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             // wait for index patterns will be loaded
             await common.sleep(500);
             const suggestions = await timelion.getSuggestionItemsText();
-            expect(suggestions.length).not.to.eql(0);
             expect(suggestions[0].includes('log')).to.eql(true);
           });
 
@@ -290,7 +290,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await common.sleep(300);
             const suggestions = await timelion.getSuggestionItemsText();
 
-            expect(suggestions.length).not.to.eql(0);
             expect(suggestions[0].includes('@message.raw')).to.eql(true);
           });
 
@@ -299,9 +298,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               '.es(index=logstash-*, timefield=@timestamp, metric=avg:',
               'timelionCodeEditor'
             );
-            const suggestions = await timelion.getSuggestionItemsText();
-            expect(suggestions.length).not.to.eql(0);
-            expect(suggestions[0].includes('avg:bytes')).to.eql(true);
+            // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
+            await retry.try(async () => {
+              const suggestions = await timelion.getSuggestionItemsText();
+              expect(suggestions[0].includes('avg:bytes')).to.eql(true);
+            });
           });
         });
       });
