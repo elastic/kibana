@@ -809,7 +809,7 @@ export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<
 export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
-  maxTimeout: number = 20000,
+  maxTimeout: number = 40000,
   timeoutWait: number = 10
 ): Promise<void> => {
   let found = false;

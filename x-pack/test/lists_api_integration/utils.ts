@@ -116,7 +116,7 @@ export const removeExceptionListServerGeneratedProperties = (
 export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
-  maxTimeout: number = 5000,
+  maxTimeout: number = 40000,
   timeoutWait: number = 10
 ) => {
   await new Promise<void>(async (resolve, reject) => {
