@@ -7,7 +7,8 @@
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-export { registerTestBed, TestBed } from '@kbn/test/jest';
+export type { TestBed } from '@kbn/test/jest';
+export { registerTestBed } from '@kbn/test/jest';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 export { getRandomString } from '@kbn/test/jest';
