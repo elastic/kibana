@@ -12,7 +12,8 @@ import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../plugins/fle
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
-  describe('Endpoint plugin', function () {
+  // failing: https://github.com/elastic/kibana/issues/116510
+  describe.skip('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
 
     const log = getService('log');

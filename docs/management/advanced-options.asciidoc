@@ -189,7 +189,7 @@ Set to `true` to enable a dark mode for the {kib} UI. You must refresh the page
 to apply the setting.
 
 [[theme-version]]`theme:version`::
-Specifies the {kib} theme. If you change the setting, refresh the page to apply the setting.
+Kibana only ships with the v8 theme now, so this setting can no longer be edited.
 
 [[timepicker-quickranges]]`timepicker:quickRanges`::
 The list of ranges to show in the Quick section of the time filter. This should

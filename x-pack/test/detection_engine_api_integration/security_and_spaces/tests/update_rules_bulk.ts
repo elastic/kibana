@@ -20,6 +20,7 @@ import {
   getSimpleRuleUpdate,
   createRule,
   getSimpleRule,
+  createLegacyRuleAction,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -92,6 +93,64 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
         expect(bodyToCompare1).to.eql(outputRule1);
         expect(bodyToCompare2).to.eql(outputRule2);
+      });
+
+      it('should update two rule properties of name using the two rules rule_id and migrate actions', async () => {
+        const [connector, rule1, rule2] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          createRule(supertest, getSimpleRule('rule-1')),
+          createRule(supertest, getSimpleRule('rule-2')),
+        ]);
+        await Promise.all([
+          createLegacyRuleAction(supertest, rule1.id, connector.body.id),
+          createLegacyRuleAction(supertest, rule2.id, connector.body.id),
+        ]);
+
+        expect(rule1.actions).to.eql([]);
+        expect(rule2.actions).to.eql([]);
+
+        const updatedRule1 = getSimpleRuleUpdate('rule-1');
+        updatedRule1.name = 'some other name';
+
+        const updatedRule2 = getSimpleRuleUpdate('rule-2');
+        updatedRule2.name = 'some other name';
+
+        // update both rule names
+        const { body } = await supertest
+          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .set('kbn-xsrf', 'true')
+          .send([updatedRule1, updatedRule2])
+          .expect(200);
+
+        // @ts-expect-error
+        body.forEach((response) => {
+          const outputRule = getSimpleRuleOutput(response.rule_id);
+          outputRule.name = 'some other name';
+          outputRule.version = 2;
+          outputRule.actions = [
+            {
+              action_type_id: '.slack',
+              group: 'default',
+              id: connector.body.id,
+              params: {
+                message:
+                  'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+            },
+          ];
+          outputRule.throttle = '1m';
+          const bodyToCompare = removeServerGeneratedProperties(response);
+          expect(bodyToCompare).to.eql(outputRule);
+        });
       });
 
       it('should update a single rule property of name using an id', async () => {
