@@ -7,11 +7,11 @@
 
 import { VisualizeInput } from 'src/plugins/visualizations/public';
 
-export function toExpression(input: VisualizeInput & { savedObjectId: string }): string {
+export function toExpression(input: VisualizeInput): string {
   const expressionParts = [] as string[];
 
   expressionParts.push('savedVisualization');
-  expressionParts.push(`id="${input.savedObjectId}"`);
+  expressionParts.push(`id="${input.id}"`);
 
   if (input.title !== undefined) {
     expressionParts.push(`title="${input.title}"`);
