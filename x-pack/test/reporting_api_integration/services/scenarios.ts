@@ -36,6 +36,20 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const REPORTING_USER_USERNAME = 'reporting_user';
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
 
+  const checkTaskManagerHealth = async () => {
+    // Check task manager health for analyzing test failures. See https://github.com/elastic/kibana/issues/114946
+    const tmHealth = await supertest.get(`/api/task_manager/_health`);
+    const driftValues = tmHealth.body?.stats?.runtime?.value;
+
+    log.info(`Task Manager status: "${tmHealth.body?.status}"`);
+    log.info(`Task Manager overall drift rankings: "${JSON.stringify(driftValues?.drift)}"`);
+    log.info(
+      `Task Manager drift rankings for "report:execute": "${JSON.stringify(
+        driftValues?.drift_by_type?.['report:execute']
+      )}"`
+    );
+  };
+
   const initEcommerce = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
     await kibanaServer.importExport.load(ecommerceSOPath);
@@ -201,6 +215,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   return {
+    checkTaskManagerHealth,
     initEcommerce,
     teardownEcommerce,
     DATA_ANALYST_USERNAME,
