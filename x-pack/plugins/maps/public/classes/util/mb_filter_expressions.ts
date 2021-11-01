@@ -54,7 +54,7 @@ export function getFillFilterExpression(
 ): unknown[] {
   return getFilterExpression(
     [
-      EXCLUDE_CENTROID_FEATURES,
+      // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
       [
         'any',
         ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
@@ -72,7 +72,7 @@ export function getLineFilterExpression(
 ): unknown[] {
   return getFilterExpression(
     [
-      EXCLUDE_CENTROID_FEATURES,
+      // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
       [
         'any',
         ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
@@ -86,19 +86,18 @@ export function getLineFilterExpression(
   );
 }
 
+const IS_POINT_FEATURE = [
+  'any',
+  ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT],
+];
+
 export function getPointFilterExpression(
   hasJoins: boolean,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
   return getFilterExpression(
-    [
-      EXCLUDE_CENTROID_FEATURES,
-      [
-        'any',
-        ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
-        ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT],
-      ],
-    ],
+    [EXCLUDE_CENTROID_FEATURES, IS_POINT_FEATURE],
     hasJoins,
     timesliceMaskConfig
   );
@@ -111,9 +110,11 @@ export function getLabelFilterExpression(
 ): unknown[] {
   const filters: unknown[] = [];
 
-  // centroids added for geojson sources only
   if (isSourceGeoJson) {
-    filters.push(['==', ['get', KBN_IS_CENTROID_FEATURE], true]);
+    // Centroid feature added to GeoJSON feature collection for LINE_STRING, MULTI_LINE_STRING, POLYGON, MULTI_POLYGON, and GEOMETRY_COLLECTION geometries
+    // For GeoJSON sources, show label for centroid features or point/multi-point features only.
+    // no explicit isCentroidFeature filter is needed, centroids are points and are included in the geometry filter.
+    filters.push(IS_POINT_FEATURE);
   }
 
   return getFilterExpression(filters, hasJoins, timesliceMaskConfig);
