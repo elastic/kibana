@@ -18,15 +18,15 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
       <ToolbarPopover
-        title={i18n.translate('xpack.lens.table.valuesSettings', {
-          defaultMessage: 'Settings',
+        title={i18n.translate('xpack.lens.table.valuesVisualOptions', {
+          defaultMessage: 'Visual options',
         })}
-        type="legend"
+        type="visualOptions"
         groupPosition="none"
-        buttonDataTestSubj="lnsSettingsButton"
+        buttonDataTestSubj="lnsVisualOptionsButton"
       >
         <EuiFormRow
-          label={i18n.translate('xpack.lens.table.settingFitRowToContentLabel', {
+          label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
             defaultMessage: 'Fit row to content',
           })}
           display="columnCompressedSwitch"
