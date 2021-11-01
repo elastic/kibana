@@ -8,10 +8,6 @@
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import expect from '@kbn/expect';
-import {
-  KBN_IS_CENTROID_FEATURE,
-  MVT_SOURCE_LAYER_NAME,
-} from '../../../../plugins/maps/common/constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -23,45 +19,57 @@ export default function ({ getService }) {
           `/api/maps/mvt/getGridTile/3/2/3.pbf\
 ?geometryFieldName=geo.coordinates\
 &index=logstash-*\
-&requestBody=(_source:(excludes:!()),aggs:(gridSplit:(aggs:(avg_of_bytes:(avg:(field:bytes)),gridCentroid:(geo_centroid:(field:geo.coordinates))),geotile_grid:(bounds:!n,field:geo.coordinates,precision:!n,shard_size:65535,size:65535))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
-&requestType=point\
-&geoFieldType=geo_point`
+&requestBody=(_source:(excludes:!()),aggs:(avg_of_bytes:(avg:(field:bytes))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
+&requestType=point`
         )
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
-      const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
-      expect(layer.length).to.be(2);
 
       // Cluster feature
+      const layer = jsonTile.layers.aggs;
+      expect(layer.length).to.be(1);
       const clusterFeature = layer.feature(0);
       expect(clusterFeature.type).to.be(1);
       expect(clusterFeature.extent).to.be(4096);
       expect(clusterFeature.id).to.be(undefined);
-      expect(clusterFeature.properties).to.eql({ doc_count: 1, avg_of_bytes: 9252 });
+      expect(clusterFeature.properties).to.eql({
+        _count: 1,
+        _key: '10/258/404',
+        'avg_of_bytes.value': 9252,
+      });
       expect(clusterFeature.loadGeometry()).to.eql([[{ x: 87, y: 667 }]]);
 
       // Metadata feature
-      const metadataFeature = layer.feature(1);
+      const metaDataLayer = jsonTile.layers.meta;
+      expect(metaDataLayer.length).to.be(1);
+      const metadataFeature = metaDataLayer.feature(0);
       expect(metadataFeature.type).to.be(3);
       expect(metadataFeature.extent).to.be(4096);
-      expect(metadataFeature.properties).to.eql({
-        __kbn_metadata_feature__: true,
-        __kbn_feature_count__: 1,
-        __kbn_is_tile_complete__: true,
-        __kbn_vector_shape_type_counts__: '{"POINT":1,"LINE":0,"POLYGON":0}',
-        fieldMeta:
-          '{"doc_count":{"range":{"min":1,"max":1,"delta":0},"categories":{"categories":[{"key":1,"count":1}]}},"avg_of_bytes":{"range":{"min":9252,"max":9252,"delta":0},"categories":{"categories":[{"key":9252,"count":1}]}}}',
-      });
+
+      expect(metadataFeature.properties['aggregations._count.avg']).to.eql(1);
+      expect(metadataFeature.properties['aggregations._count.count']).to.eql(1);
+      expect(metadataFeature.properties['aggregations._count.min']).to.eql(1);
+      expect(metadataFeature.properties['aggregations._count.sum']).to.eql(1);
+
+      expect(metadataFeature.properties['aggregations.avg_of_bytes.avg']).to.eql(9252);
+      expect(metadataFeature.properties['aggregations.avg_of_bytes.count']).to.eql(1);
+      expect(metadataFeature.properties['aggregations.avg_of_bytes.max']).to.eql(9252);
+      expect(metadataFeature.properties['aggregations.avg_of_bytes.min']).to.eql(9252);
+      expect(metadataFeature.properties['aggregations.avg_of_bytes.sum']).to.eql(9252);
+
+      expect(metadataFeature.properties['hits.total.relation']).to.eql('eq');
+      expect(metadataFeature.properties['hits.total.value']).to.eql(1);
+
       expect(metadataFeature.loadGeometry()).to.eql([
         [
-          { x: 0, y: 0 },
-          { x: 4096, y: 0 },
-          { x: 4096, y: 4096 },
           { x: 0, y: 4096 },
+          { x: 4096, y: 4096 },
+          { x: 4096, y: 0 },
           { x: 0, y: 0 },
+          { x: 0, y: 4096 },
         ],
       ]);
     });
@@ -72,65 +80,66 @@ export default function ({ getService }) {
           `/api/maps/mvt/getGridTile/3/2/3.pbf\
 ?geometryFieldName=geo.coordinates\
 &index=logstash-*\
-&requestBody=(_source:(excludes:!()),aggs:(gridSplit:(aggs:(avg_of_bytes:(avg:(field:bytes)),gridCentroid:(geo_centroid:(field:geo.coordinates))),geotile_grid:(bounds:!n,field:geo.coordinates,precision:!n,shard_size:65535,size:65535))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
-&requestType=grid\
-&geoFieldType=geo_point`
+&requestBody=(_source:(excludes:!()),aggs:(avg_of_bytes:(avg:(field:bytes))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
+&requestType=grid`
         )
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
         .expect(200);
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
-      const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
-      expect(layer.length).to.be(3);
+      const layer = jsonTile.layers.aggs;
+      expect(layer.length).to.be(1);
 
       const gridFeature = layer.feature(0);
       expect(gridFeature.type).to.be(3);
       expect(gridFeature.extent).to.be(4096);
       expect(gridFeature.id).to.be(undefined);
-      expect(gridFeature.properties).to.eql({ doc_count: 1, avg_of_bytes: 9252 });
+      expect(gridFeature.properties).to.eql({
+        _count: 1,
+        _key: '10/258/404',
+        'avg_of_bytes.value': 9252,
+      });
       expect(gridFeature.loadGeometry()).to.eql([
         [
-          { x: 96, y: 640 },
-          { x: 96, y: 672 },
           { x: 64, y: 672 },
-          { x: 64, y: 640 },
+          { x: 96, y: 672 },
           { x: 96, y: 640 },
+          { x: 64, y: 640 },
+          { x: 64, y: 672 },
         ],
       ]);
 
       // Metadata feature
-      const metadataFeature = layer.feature(1);
+      const metaDataLayer = jsonTile.layers.meta;
+      expect(metaDataLayer.length).to.be(1);
+      const metadataFeature = metaDataLayer.feature(0);
       expect(metadataFeature.type).to.be(3);
       expect(metadataFeature.extent).to.be(4096);
-      expect(metadataFeature.properties).to.eql({
-        __kbn_metadata_feature__: true,
-        __kbn_feature_count__: 1,
-        __kbn_is_tile_complete__: true,
-        __kbn_vector_shape_type_counts__: '{"POINT":0,"LINE":0,"POLYGON":1}',
-        fieldMeta:
-          '{"doc_count":{"range":{"min":1,"max":1,"delta":0},"categories":{"categories":[{"key":1,"count":1}]}},"avg_of_bytes":{"range":{"min":9252,"max":9252,"delta":0},"categories":{"categories":[{"key":9252,"count":1}]}}}',
-      });
+
+      expect(metadataFeature.properties['aggregations._count.avg']).to.eql(1);
+      expect(metadataFeature.properties['aggregations._count.count']).to.eql(1);
+      expect(metadataFeature.properties['aggregations._count.min']).to.eql(1);
+      expect(metadataFeature.properties['aggregations._count.sum']).to.eql(1);
+
+      expect(metadataFeature.properties['aggregations.avg_of_bytes.avg']).to.eql(9252);
+      expect(metadataFeature.properties['aggregations.avg_of_bytes.count']).to.eql(1);
+      expect(metadataFeature.properties['aggregations.avg_of_bytes.max']).to.eql(9252);
+      expect(metadataFeature.properties['aggregations.avg_of_bytes.min']).to.eql(9252);
+      expect(metadataFeature.properties['aggregations.avg_of_bytes.sum']).to.eql(9252);
+
+      expect(metadataFeature.properties['hits.total.relation']).to.eql('eq');
+      expect(metadataFeature.properties['hits.total.value']).to.eql(1);
+
       expect(metadataFeature.loadGeometry()).to.eql([
         [
-          { x: 0, y: 0 },
-          { x: 4096, y: 0 },
-          { x: 4096, y: 4096 },
           { x: 0, y: 4096 },
+          { x: 4096, y: 4096 },
+          { x: 4096, y: 0 },
           { x: 0, y: 0 },
+          { x: 0, y: 4096 },
         ],
       ]);
-
-      const clusterFeature = layer.feature(2);
-      expect(clusterFeature.type).to.be(1);
-      expect(clusterFeature.extent).to.be(4096);
-      expect(clusterFeature.id).to.be(undefined);
-      expect(clusterFeature.properties).to.eql({
-        doc_count: 1,
-        avg_of_bytes: 9252,
-        [KBN_IS_CENTROID_FEATURE]: true,
-      });
-      expect(clusterFeature.loadGeometry()).to.eql([[{ x: 80, y: 656 }]]);
     });
   });
 }

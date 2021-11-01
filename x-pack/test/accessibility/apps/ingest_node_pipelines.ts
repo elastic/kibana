@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Client } from '@elastic/elasticsearch';
 import { deleteAllPipelines, putSamplePipeline } from './helpers';
 export default function ({ getService, getPageObjects }: any) {
   const { common } = getPageObjects(['common']);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const esClient = getService('es');
+  const esClient: Client = getService('es');
   const log = getService('log');
   const a11y = getService('a11y'); /* this is the wrapping service around axe */
 
