@@ -73,7 +73,8 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
         const name = await nodeName.getVisibleText();
         const nodeValue = await node.findByTestSubject('nodeValue');
         const value = await nodeValue.getVisibleText();
-        return { name, value: parseFloat(value) };
+        const color = await nodeValue.getAttribute('color');
+        return { name, value: parseFloat(value), color };
       });
       return await Promise.all(promises);
     },
@@ -103,17 +104,35 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async enterSearchTerm(query: string) {
-      const input = await testSubjects.find('infraSearchField');
-      await input.clearValueWithKeyboard({ charByChar: true });
+      const input = await this.clearSearchTerm();
       await input.type([query, browser.keys.RETURN]);
       await this.waitForLoading();
+    },
+
+    async clearSearchTerm() {
+      const input = await testSubjects.find('infraSearchField');
+      await input.clearValueWithKeyboard({ charByChar: true });
+      return input;
+    },
+
+    async openLegendControls() {
+      await testSubjects.click('openLegendControlsButton');
+      await testSubjects.find('legendControls');
+    },
+
+    async changePalette(paletteId: string) {
+      await testSubjects.find('legendControlsPalette');
+      await testSubjects.selectValue('legendControlsPalette', paletteId);
+    },
+
+    async applyLegendControls() {
+      await testSubjects.click('applyLegendControlsButton');
     },
 
     async toggleReverseSort() {
       await testSubjects.click('waffleSortByDropdown');
       await testSubjects.find('waffleSortByDirection');
       await testSubjects.click('waffleSortByDirection');
-      await browser.pressKeys(browser.keys.ESCAPE);
     },
 
     async openInvenotrySwitcher() {

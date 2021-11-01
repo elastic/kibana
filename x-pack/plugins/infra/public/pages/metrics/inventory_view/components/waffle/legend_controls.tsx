@@ -84,6 +84,7 @@ export const LegendControls = ({
         defaultMessage: 'configure legend',
       })}
       onClick={() => setPopoverState(true)}
+      data-test-subj="openLegendControlsButton"
     />
   );
 
@@ -179,7 +180,7 @@ export const LegendControls = ({
     : [];
 
   return (
-    <ControlContainer>
+    <ControlContainer data-test-subj="legendControls">
       <EuiPopover
         isOpen={isPopoverOpen}
         closePopover={handleCancelClick}
@@ -201,6 +202,7 @@ export const LegendControls = ({
                 id="palette"
                 onChange={handlePaletteChange}
                 compressed
+                data-test-subj="legendControlsPalette"
               />
               <EuiSpacer size="m" />
               <PalettePreview
@@ -338,6 +340,7 @@ export const LegendControls = ({
                 fill
                 disabled={commited || !boundsValidRange}
                 onClick={handleApplyClick}
+                data-test-subj="applyLegendControlsButton"
               >
                 <FormattedMessage
                   id="xpack.infra.legendControls.applyButton"
