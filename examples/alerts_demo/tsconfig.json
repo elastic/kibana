@@ -1,0 +1,27 @@
+{
+    "extends": "../../tsconfig.json", // Extend kibana/tsconfig.json
+    "compilerOptions": {
+      "outDir": "./target/types",
+      "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+    },
+    "include": [
+      "index.ts",
+      "../../typings/**/*",
+      // The following paths are optional, based on whether you have common code,
+      // or are building a client-side-only or server-side-only plugin.
+      "common/**/*.ts",
+      "public/**/*.ts",
+      "public/**/*.tsx",
+      "server/**/*.ts",
+      "types/**/*"
+    ],
+    "exclude": [],
+    // If you import another plugin's types, point to their `tsconfig.json` file.
+    "references": [
+      { "path": "../../src/core/tsconfig.json" },
+      { "path": "../../x-pack/plugins/observability/tsconfig.json" },
+
+    ]
+  }

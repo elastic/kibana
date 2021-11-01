@@ -1,0 +1,7 @@
+{
+  "prefix": "alertsDemo",
+  "paths": {
+    "alertsDemo": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}

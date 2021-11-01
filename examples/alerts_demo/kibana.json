@@ -1,0 +1,14 @@
+{
+  "id": "alertsDemo",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Infra Monitoring UI",
+    "githubTeam": "Infra Monitoring UI"
+  },
+  "description": "Alerts Demo",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation", "observability","kibanaReact", "triggersActionsUi", "alerting", "features"],
+  "optionalPlugins": []
+}
