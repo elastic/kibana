@@ -59,8 +59,11 @@
 {
   "attributes": {
     "buildNum": 9007199254740991,
-    "defaultIndex": "907bc200-a294-11e9-a900-ef10e0ac769e",
-    "dateFormat:tz": "UTC"
+    "dateFormat:tz": "UTC",
+    "defaultIndex": "89655130-5013-11e9-bce7-4dabcb8bef24",
+    "csv:quoteValues": true,
+    "csv:separator": ",",
+    "search:queryLanguage": "lucene"
   },
   "coreMigrationVersion": "8.0.0",
   "id": "8.0.0",
@@ -406,22 +409,4 @@
   "type": "dashboard",
   "updated_at": "2021-02-06T02:16:29.540Z",
   "version": "WzksMl0="
-}
-
-{
-  "attributes": {
-    "buildNum": 9007199254740991,
-    "dateFormat:tz": "UTC",
-    "defaultIndex": "89655130-5013-11e9-bce7-4dabcb8bef24",
-    "search:queryLanguage": "lucene"
-  },
-  "coreMigrationVersion": "8.0.0",
-  "id": "7.11.0",
-  "migrationVersion": {
-    "config": "8.0.0"
-  },
-  "references": [],
-  "type": "config",
-  "updated_at": "2019-03-26T22:15:16.992Z",
-  "version": "WzUsMl0="
 }

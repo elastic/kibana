@@ -38,16 +38,18 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('CSV Generation from SearchSource', () => {
     before(async () => {
+      await reportingAPI.initEcommerce();
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': false,
         'dateFormat:tz': 'UTC',
-        defaultIndex: 'logstash-*',
       });
-      await reportingAPI.initEcommerce();
     });
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
+      await kibanaServer.uiSettings.update({
+        'csv:quoteValues': true,
+      });
     });
 
     it('Exports CSV with almost all fields when using fieldsFromSource', async () => {
@@ -195,9 +197,15 @@ export default function ({ getService }: FtrProviderContext) {
     describe('date formatting', () => {
       before(async () => {
         await reportingAPI.initLogs();
+        await kibanaServer.uiSettings.update({
+          'csv:quoteValues': true,
+        });
       });
       after(async () => {
         await reportingAPI.teardownLogs();
+        await kibanaServer.uiSettings.update({
+          'csv:quoteValues': false,
+        });
       });
 
       it('With filters and timebased data, default to UTC', async () => {
