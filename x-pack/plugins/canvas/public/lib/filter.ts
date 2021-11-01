@@ -13,24 +13,25 @@ import {
 } from '../../types/filters';
 import { filterViewsRegistry } from '../filter_view_types';
 
-const defaultFormatter = (value: unknown) => (value ? `${value}` : '-');
+export const defaultFormatter = (value: unknown) => (value || null ? `${value}` : '-');
 
-const formatFilterView = (filterValue: FilterType) => (filterView: FlattenFilterViewInstance) => {
-  const filterViewKeys = Object.keys(filterView) as Array<keyof FilterViewInstance>;
-  return filterViewKeys.reduce(
-    (acc, key) => ({
-      ...acc,
-      [key]: {
-        label: filterView[key].label,
-        formattedValue: (filterView[key].formatter ?? defaultFormatter)(filterValue[key]),
-        component: filterView[key].component,
-      },
-    }),
-    {}
-  );
-};
+export const formatFilterView =
+  (filterValue: FilterType) => (filterView: FlattenFilterViewInstance) => {
+    const filterViewKeys = Object.keys(filterView) as Array<keyof FilterViewInstance>;
+    return filterViewKeys.reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: {
+          label: filterView[key].label,
+          formattedValue: (filterView[key].formatter ?? defaultFormatter)(filterValue[key]),
+          component: filterView[key].component,
+        },
+      }),
+      {}
+    );
+  };
 
-const flattenFilterView = (filterValue: FilterType) => (filterView: FilterViewInstance) => {
+export const flattenFilterView = (filterValue: FilterType) => (filterView: FilterViewInstance) => {
   const filterViewKeys = Object.keys(filterView) as Array<keyof FilterViewInstance>;
   return filterViewKeys.reduce<FlattenFilterViewInstance>((acc, key) => {
     const filterField = filterView[key];
