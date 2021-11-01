@@ -20,7 +20,7 @@ const { argv } = yargs(process.argv.slice(2))
   .option('server', {
     default: false,
     type: 'boolean',
-    description: 'Start Elasticsearch and kibana',
+    description: 'Start Elasticsearch and Kibana',
   })
   .option('runner', {
     default: false,
@@ -28,14 +28,25 @@ const { argv } = yargs(process.argv.slice(2))
     description:
       'Run all tests (an instance of Elasticsearch and kibana are needs to be available)',
   })
+  .option('spec', {
+    default: false,
+    type: 'string',
+    description:
+      'Specify the spec files to run (use doublequotes for glob matching)',
+  })
   .option('open', {
     default: false,
     type: 'boolean',
     description: 'Opens the Cypress Test Runner',
   })
+  .option('bail', {
+    default: false,
+    type: 'boolean',
+    description: 'stop tests after the first failure',
+  })
   .help();
 
-const { server, runner, open, kibanaInstallDir } = argv;
+const { server, runner, open, spec, bail, kibanaInstallDir } = argv;
 
 const e2eDir = path.join(__dirname, '../../ftr_e2e');
 
@@ -46,9 +57,11 @@ if (server) {
   ftrScript = 'functional_test_runner';
 }
 
-const config = open ? './cypress_open.ts' : './cypress_run.ts';
+const config = open ? './ftr_config_open.ts' : './ftr_config_run.ts';
+const grepArg = spec ? `--grep ${spec}` : '';
+const bailArg = bail ? `--bail` : '';
 
 childProcess.execSync(
-  `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'`,
+  `node ../../../../scripts/${ftrScript} --config ${config} ${grepArg} ${bailArg} --kibana-install-dir '${kibanaInstallDir}'`,
   { cwd: e2eDir, stdio: 'inherit' }
 );
