@@ -547,7 +547,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const { actionGroups } = alwaysFiringAlertType;
 
         // Verify content
-        await testSubjects.existOrFail('alertInstancesList');
+        await testSubjects.existOrFail('alertsList');
 
         const actionGroupNameFromId = (actionGroupId: string) =>
           actionGroups.find(
@@ -657,7 +657,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('allows the user to mute a specific alert', async () => {
         // Verify content
-        await testSubjects.existOrFail('alertInstancesList');
+        await testSubjects.existOrFail('alertsList');
 
         log.debug(`Ensuring us-central is not muted`);
         await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-central', false);
@@ -671,7 +671,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('allows the user to unmute a specific alert', async () => {
         // Verify content
-        await testSubjects.existOrFail('alertInstancesList');
+        await testSubjects.existOrFail('alertsList');
 
         log.debug(`Ensuring us-east is not muted`);
         await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-east', false);
@@ -744,7 +744,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const PAGE_SIZE = 10;
       it('renders the first page', async () => {
         // Verify content
-        await testSubjects.existOrFail('alertInstancesList');
+        await testSubjects.existOrFail('alertsList');
 
         const { alerts: alertInstances } = await getAlertSummary(rule.id);
 
@@ -757,7 +757,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('navigates to the next page', async () => {
         // Verify content
-        await testSubjects.existOrFail('alertInstancesList');
+        await testSubjects.existOrFail('alertsList');
 
         const { alerts: alertInstances } = await getAlertSummary(rule.id);
 

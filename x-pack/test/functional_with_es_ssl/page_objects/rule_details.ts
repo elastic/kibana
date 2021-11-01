@@ -28,27 +28,27 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
     },
     async getAlertsList() {
       const table = await find.byCssSelector(
-        '.euiBasicTable[data-test-subj="alertInstancesList"]:not(.euiBasicTable-loading)'
+        '.euiBasicTable[data-test-subj="alertsList"]:not(.euiBasicTable-loading)'
       );
       const $ = await table.parseDomContent();
-      return $.findTestSubjects('alert-instance-row')
+      return $.findTestSubjects('alert-row')
         .toArray()
         .map((row) => {
           return {
             alert: $(row)
-              .findTestSubject('alertInstancesTableCell-instance')
+              .findTestSubject('alertsTableCell-alert')
               .find('.euiTableCellContent')
               .text(),
             status: $(row)
-              .findTestSubject('alertInstancesTableCell-status')
+              .findTestSubject('alertsTableCell-status')
               .find('.euiTableCellContent')
               .text(),
             start: $(row)
-              .findTestSubject('alertInstancesTableCell-start')
+              .findTestSubject('alertsTableCell-start')
               .find('.euiTableCellContent')
               .text(),
             duration: $(row)
-              .findTestSubject('alertInstancesTableCell-duration')
+              .findTestSubject('alertsTableCell-duration')
               .find('.euiTableCellContent')
               .text(),
           };
@@ -56,7 +56,7 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
     },
     async getAlertDurationEpoch(): Promise<number> {
       const alertDurationEpoch = await find.byCssSelector(
-        'input[data-test-subj="alertInstancesDurationEpoch"]'
+        'input[data-test-subj="alertsDurationEpoch"]'
       );
       return parseInt(await alertDurationEpoch.getAttribute('value'), 10);
     },
@@ -76,16 +76,16 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
     async ensureAlertExistence(alert: string, shouldExist: boolean) {
       await retry.try(async () => {
         const table = await find.byCssSelector(
-          '.euiBasicTable[data-test-subj="alertInstancesList"]:not(.euiBasicTable-loading)'
+          '.euiBasicTable[data-test-subj="alertsList"]:not(.euiBasicTable-loading)'
         );
         const $ = await table.parseDomContent();
         expect(
-          $.findTestSubjects('alert-instance-row')
+          $.findTestSubjects('alert-row')
             .toArray()
             .filter(
               (row) =>
                 $(row)
-                  .findTestSubject('alertInstancesTableCell-instance')
+                  .findTestSubject('alertsTableCell-alert')
                   .find('.euiTableCellContent')
                   .text() === alert
             )

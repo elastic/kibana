@@ -34,7 +34,7 @@ import {
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
-import './alert_instances.scss';
+import './alerts.scss';
 import { RuleMutedSwitch } from './rule_muted_switch';
 import { getHealthColor } from '../../alerts_list/components/alert_status_filter';
 import {
@@ -62,14 +62,13 @@ export const alertsTableColumns = (
 ) => [
   {
     field: 'alert',
-    name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.alert',
-      { defaultMessage: 'Alert' }
-    ),
+    name: i18n.translate('xpack.triggersActionsUI.sections.alertDetails.alertsList.columns.alert', {
+      defaultMessage: 'Alert',
+    }),
     sortable: false,
     truncateText: true,
     width: '45%',
-    'data-test-subj': 'alertInstancesTableCell-instance',
+    'data-test-subj': 'alertsTableCell-alert',
     render: (value: string) => {
       return (
         <EuiToolTip anchorClassName={'eui-textTruncate'} content={value}>
@@ -81,20 +80,20 @@ export const alertsTableColumns = (
   {
     field: 'status',
     name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status',
+      'xpack.triggersActionsUI.sections.alertDetails.alertsList.columns.status',
       { defaultMessage: 'Status' }
     ),
     width: '15%',
     render: (value: AlertListItemStatus) => {
       return (
-        <EuiHealth color={value.healthColor} className="actionsInstanceList__health">
+        <EuiHealth color={value.healthColor} className="alertsList__health">
           {value.label}
           {value.actionGroup ? ` (${value.actionGroup})` : ``}
         </EuiHealth>
       );
     },
     sortable: false,
-    'data-test-subj': 'alertInstancesTableCell-status',
+    'data-test-subj': 'alertsTableCell-status',
   },
   {
     field: 'start',
@@ -102,12 +101,11 @@ export const alertsTableColumns = (
     render: (value: Date | undefined) => {
       return value ? moment(value).format('D MMM YYYY @ HH:mm:ss') : '';
     },
-    name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.start',
-      { defaultMessage: 'Start' }
-    ),
+    name: i18n.translate('xpack.triggersActionsUI.sections.alertDetails.alertsList.columns.start', {
+      defaultMessage: 'Start',
+    }),
     sortable: false,
-    'data-test-subj': 'alertInstancesTableCell-start',
+    'data-test-subj': 'alertsTableCell-start',
   },
   {
     field: 'duration',
@@ -115,21 +113,20 @@ export const alertsTableColumns = (
       return value ? durationAsString(moment.duration(value)) : '';
     },
     name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.duration',
+      'xpack.triggersActionsUI.sections.alertDetails.alertsList.columns.duration',
       { defaultMessage: 'Duration' }
     ),
     sortable: false,
     width: '80px',
-    'data-test-subj': 'alertInstancesTableCell-duration',
+    'data-test-subj': 'alertsTableCell-duration',
   },
   {
     field: '',
     align: RIGHT_ALIGNMENT,
     width: '60px',
-    name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.mute',
-      { defaultMessage: 'Mute' }
-    ),
+    name: i18n.translate('xpack.triggersActionsUI.sections.alertDetails.alertsList.columns.mute', {
+      defaultMessage: 'Mute',
+    }),
     render: (alert: AlertListItem) => {
       return (
         <RuleMutedSwitch
@@ -140,7 +137,7 @@ export const alertsTableColumns = (
       );
     },
     sortable: false,
-    'data-test-subj': 'alertInstancesTableCell-actions',
+    'data-test-subj': 'alertsTableCell-actions',
   },
 ];
 
@@ -209,7 +206,7 @@ export function Alerts({
                 </EuiHealth>
               }
               description={i18n.translate(
-                'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.ruleLastExecutionDescription',
+                'xpack.triggersActionsUI.sections.alertDetails.alertsList.ruleLastExecutionDescription',
                 {
                   defaultMessage: `Last response`,
                 }
@@ -236,7 +233,7 @@ export function Alerts({
                         type="alert"
                         color="warning"
                         content={i18n.translate(
-                          'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.ruleTypeExcessDurationMessage',
+                          'xpack.triggersActionsUI.sections.alertDetails.alertsList.ruleTypeExcessDurationMessage',
                           {
                             defaultMessage: `Duration exceeds the rule's expected run time.`,
                           }
@@ -251,7 +248,7 @@ export function Alerts({
                 </EuiFlexGroup>
               }
               description={i18n.translate(
-                'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.avgDurationDescription',
+                'xpack.triggersActionsUI.sections.alertDetails.alertsList.avgDurationDescription',
                 {
                   defaultMessage: `Average duration`,
                 }
@@ -266,8 +263,8 @@ export function Alerts({
       <EuiSpacer size="xl" />
       <input
         type="hidden"
-        data-test-subj="alertInstancesDurationEpoch"
-        name="alertInstancesDurationEpoch"
+        data-test-subj="alertsDurationEpoch"
+        name="alertsDurationEpoch"
         value={durationEpoch}
       />
       <EuiBasicTable
@@ -281,15 +278,15 @@ export function Alerts({
           setPagination(changedPage);
         }}
         rowProps={() => ({
-          'data-test-subj': 'alert-instance-row',
+          'data-test-subj': 'alert-row',
         })}
         cellProps={() => ({
           'data-test-subj': 'cell',
         })}
         columns={alertsTableColumns(onMuteAction, readOnly)}
-        data-test-subj="alertInstancesList"
+        data-test-subj="alertsList"
         tableLayout="fixed"
-        className="alertInstancesList"
+        className="alertsList"
       />
     </>
   );
@@ -315,12 +312,12 @@ export interface AlertListItem {
 }
 
 const ACTIVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.active',
+  'xpack.triggersActionsUI.sections.alertDetails.alertsList.status.active',
   { defaultMessage: 'Active' }
 );
 
 const INACTIVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.inactive',
+  'xpack.triggersActionsUI.sections.alertDetails.alertsList.status.inactive',
   { defaultMessage: 'Recovered' }
 );
 

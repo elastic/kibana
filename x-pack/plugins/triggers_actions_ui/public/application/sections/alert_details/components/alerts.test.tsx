@@ -93,7 +93,7 @@ describe('alerts', () => {
           alertSummary={alertSummary}
         />
       )
-        .find('[name="alertInstancesDurationEpoch"]')
+        .find('[name="alertsDurationEpoch"]')
         .prop('value')
     ).toEqual(fake2MinutesAgo.getTime());
   });
