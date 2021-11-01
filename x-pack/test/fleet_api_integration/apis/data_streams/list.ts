@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { keyBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -114,29 +115,17 @@ export default function (providerContext: FtrProviderContext) {
       expect(body).to.eql({ data_streams: [] });
     });
 
-    it('should return correct data stream information', async function () {
-      const seedResponse = await seedDataStreams();
-      const docs = await getSeedDocsFromResponse(seedResponse);
-      const ingestedTimestamps = docs.map((doc: any) =>
-        new Date(doc?._source?.event?.ingested).getTime()
-      ); // sort ascending
-
-      await retry.tryForTime(10000, async () => {
-        const { body } = await getDataStreams();
-        return expect(
-          body.data_streams.map((dataStream: any) => {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            const { index, size_in_bytes, ...rest } = dataStream;
-            return rest;
-          })
-        ).to.eql([
+    it('should return correct basic data stream information', async function () {
+      await seedDataStreams();
+      // we can't compare the array directly as the order is unpredictable
+      const expectedStreamsByDataset = keyBy(
+        [
           {
             dataset: 'datastreams.test_metrics',
             namespace: 'default',
             type: 'metrics',
             package: 'datastreams',
             package_version: '0.1.0',
-            last_activity_ms: ingestedTimestamps[1],
             dashboards: [],
           },
           {
@@ -145,10 +134,39 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logs',
             package: 'datastreams',
             package_version: '0.1.0',
-            last_activity_ms: ingestedTimestamps[0],
             dashboards: [],
           },
-        ]);
+        ],
+        'dataset'
+      );
+
+      await retry.tryForTime(10000, async () => {
+        const { body } = await getDataStreams();
+        expect(body.data_streams.length).to.eql(2);
+
+        body.data_streams.forEach((dataStream: any) => {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          const { index, size_in_bytes, last_activity_ms, ...coreFields } = dataStream;
+          expect(expectedStreamsByDataset[coreFields.dataset]).not.to.eql(undefined);
+          expect(coreFields).to.eql(expectedStreamsByDataset[coreFields.dataset]);
+        });
+      });
+    });
+
+    it('should use event.ingested instead of @timestamp for last_activity_ms', async function () {
+      const seedResponse = await seedDataStreams();
+      const docs = await getSeedDocsFromResponse(seedResponse);
+      const docsByDataset: Record<string, any> = keyBy(docs, '_source.data_stream.dataset');
+      await retry.tryForTime(10000, async () => {
+        const { body } = await getDataStreams();
+        expect(body.data_streams.length).to.eql(2);
+        body.data_streams.forEach((dataStream: any) => {
+          expect(docsByDataset[dataStream.dataset]).not.to.eql(undefined);
+          const expectedTimestamp = new Date(
+            docsByDataset[dataStream.dataset]?._source?.event?.ingested
+          ).getTime();
+          expect(dataStream.last_activity_ms).to.eql(expectedTimestamp);
+        });
       });
     });
 
