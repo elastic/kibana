@@ -11,7 +11,7 @@ import { useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { ENGINE_CURATION_SUGGESTION_PATH } from '../../../routes';
-import { generateEnginePath } from '../../engine';
+import { EngineLogic, generateEnginePath } from '../../engine';
 
 import { SuggestionsCallout } from '../components/suggestions_callout';
 
@@ -21,8 +21,15 @@ export const SuggestedDocumentsCallout: React.FC = () => {
   const {
     curation: { suggestion, queries },
   } = useValues(CurationLogic);
+  const {
+    engine: { search_relevance_suggestions_active: searchRelevanceSuggestionsActive },
+  } = useValues(EngineLogic);
 
-  if (typeof suggestion === 'undefined' || suggestion.status !== 'pending') {
+  if (
+    typeof suggestion === 'undefined' ||
+    suggestion.status !== 'pending' ||
+    searchRelevanceSuggestionsActive === false
+  ) {
     return null;
   }
 

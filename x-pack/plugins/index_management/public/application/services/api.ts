@@ -19,8 +19,6 @@ import {
   UIM_INDEX_FLUSH_MANY,
   UIM_INDEX_FORCE_MERGE,
   UIM_INDEX_FORCE_MERGE_MANY,
-  UIM_INDEX_FREEZE,
-  UIM_INDEX_FREEZE_MANY,
   UIM_INDEX_OPEN,
   UIM_INDEX_OPEN_MANY,
   UIM_INDEX_REFRESH,
@@ -174,16 +172,6 @@ export async function clearCacheIndices(indices: string[]) {
   });
   // Only track successful requests.
   const eventName = indices.length > 1 ? UIM_INDEX_CLEAR_CACHE_MANY : UIM_INDEX_CLEAR_CACHE;
-  uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
-  return response;
-}
-export async function freezeIndices(indices: string[]) {
-  const body = JSON.stringify({
-    indices,
-  });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/freeze`, { body });
-  // Only track successful requests.
-  const eventName = indices.length > 1 ? UIM_INDEX_FREEZE_MANY : UIM_INDEX_FREEZE;
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
   return response;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
 import { ActionResult, PreConfiguredAction } from '../types';
@@ -43,6 +43,7 @@ export async function getTotalCount(
 
   const { body: searchResult } = await esClient.search({
     index: kibanaIndex,
+    size: 0,
     body: {
       query: {
         bool: {
@@ -224,6 +225,7 @@ export async function getInUseTotalCount(
 
   const { body: actionResults } = await esClient.search({
     index: kibanaIndex,
+    size: 0,
     body: {
       query: {
         bool: {

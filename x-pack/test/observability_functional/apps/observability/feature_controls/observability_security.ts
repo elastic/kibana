@@ -31,8 +31,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/cases/default');
     });
 
+    it('Shows the no data page on load', async () => {
+      await PageObjects.common.navigateToActualUrl('observabilityCases');
+      await PageObjects.observability.expectNoDataPage();
+    });
+
     describe('observability cases all privileges', () => {
       before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
             observabilityCases: ['all'],
@@ -42,6 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.restoreDefaultTestUserRole();
       });
 
@@ -83,6 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('observability cases read-only privileges', () => {
       before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
             observabilityCases: ['read'],
@@ -92,6 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.restoreDefaultTestUserRole();
       });
 

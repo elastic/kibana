@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
         'waiting for 3 records to be loaded into elasticsearch.',
         10000,
         async () => {
-          const { body: response } = await es.indices.get({
+          const response = await es.indices.get({
             index: `${rollupSourceIndexPrefix}*`,
             allow_no_indices: false,
           });

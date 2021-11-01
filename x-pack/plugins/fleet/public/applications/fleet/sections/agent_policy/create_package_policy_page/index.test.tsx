@@ -71,20 +71,6 @@ describe('when on the package policy create page', () => {
         expect(cancelLink.href).toBe(expectedRouteState.onCancelUrl);
         expect(cancelButton.href).toBe(expectedRouteState.onCancelUrl);
       });
-
-      it('should redirect via history when cancel link is clicked', () => {
-        act(() => {
-          cancelLink.click();
-        });
-        expect(testRenderer.mountHistory.location.pathname).toBe('/cancel/url/here');
-      });
-
-      it('should redirect via history when cancel Button (button bar) is clicked', () => {
-        act(() => {
-          cancelButton.click();
-        });
-        expect(testRenderer.mountHistory.location.pathname).toBe('/cancel/url/here');
-      });
     });
   });
 });

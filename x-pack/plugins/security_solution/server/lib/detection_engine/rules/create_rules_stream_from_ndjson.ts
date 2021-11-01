@@ -24,6 +24,7 @@ import {
   filterExportedRulesCounts,
   filterExceptions,
   createLimitStream,
+  filterExportedCounts,
 } from '../../../utils/read_stream/create_stream_from_ndjson';
 
 export const validateRules = (): Transform => {
@@ -60,6 +61,7 @@ export const createRulesStreamFromNdJson = (ruleLimit: number) => {
   return [
     createSplitStream('\n'),
     parseNdjsonStrings(),
+    filterExportedCounts(),
     filterExportedRulesCounts(),
     filterExceptions(),
     validateRules(),

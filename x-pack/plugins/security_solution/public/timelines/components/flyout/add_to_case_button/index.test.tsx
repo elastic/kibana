@@ -62,7 +62,7 @@ describe('AddToCaseButton', () => {
     wrapper.find(`[data-test-subj="attach-timeline-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="attach-timeline-existing-case"]`).first().simulate('click');
 
-    expect(navigateToApp).toHaveBeenCalledWith('securitySolution', {
+    expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '/create',
       deepLinkId: SecurityPageName.case,
     });
@@ -84,7 +84,7 @@ describe('AddToCaseButton', () => {
     wrapper.find(`[data-test-subj="attach-timeline-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="attach-timeline-existing-case"]`).first().simulate('click');
 
-    expect(navigateToApp).toHaveBeenCalledWith('securitySolution', {
+    expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '/case-id',
       deepLinkId: SecurityPageName.case,
     });
