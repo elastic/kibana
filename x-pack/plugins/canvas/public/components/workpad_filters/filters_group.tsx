@@ -18,7 +18,6 @@ interface Props {
 }
 
 const panelStyle = {
-  paddingRight: '12px',
   paddingTop: '15px',
 };
 
@@ -46,7 +45,7 @@ export const FiltersGroup: FC<Props> = ({ filtersGroup }) => {
         id="canvas-element-stats"
         buttonContent={name ?? strings.getWithoutGroupLabel()}
         initialIsOpen={true}
-        className="canvasSidebar__accordion"
+        className="canvasSidebar__accordion filtersSidebar__accordion"
         style={{ marginLeft: '0px' }}
       >
         <div style={panelStyle}>{filtersComponents}</div>
