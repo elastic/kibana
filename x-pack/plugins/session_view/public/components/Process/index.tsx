@@ -205,9 +205,9 @@ export function Process({
   }
 
   // TODO: not customizable for now (cmd previously offered a template string to render)
-  const template = (templateProcess: IProcess) => {
-    const { args, working_directory: workingDirectory } = templateProcess.getLatest().process;
-    const { searchMatched } = templateProcess;
+  const template = () => {
+    const { args, working_directory: workingDirectory } = process.getLatest().process;
+    const { searchMatched } = process;
 
     if (searchMatched !== null) {
       const regex = new RegExp(searchMatched);
@@ -252,7 +252,7 @@ export function Process({
     return (
       <>
         {process.isUserEntered() && <EuiIcon css={userEnteredIconCSS} type="user" />}
-        <EuiIcon type="console" /> {template(process)}
+        <EuiIcon type="console" /> {template()}
       </>
     );
   }
