@@ -1285,6 +1285,15 @@ export const waitForRuleSuccessOrStatus = async (
           )}, status: ${JSON.stringify(response.status)}`
         );
       }
+      if (response.body[id]?.current_status?.status !== status) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `Did not get an expected status of ${status} while waiting for a rule success or status for rule id ${id} (waitForRuleSuccessOrStatus). Will continue retrying until status is found. body: ${JSON.stringify(
+            response.body
+          )}, status: ${JSON.stringify(response.status)}`
+        );
+      }
+
       return response.body[id]?.current_status?.status === status;
     } catch (e) {
       if ((e as Error).message.includes('got 503 "Service Unavailable"')) {
