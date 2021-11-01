@@ -88,7 +88,6 @@ function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: Run
     if (isRuntimeField(field) && shouldAddAsDepVarOption(id, field.type, jobType)) {
       runtimeOptions.push({
         label: id,
-        key: `runtime_mapping_${id}`,
       });
     }
   });
