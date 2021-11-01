@@ -142,12 +142,13 @@ export const signalRulesAlertType = ({
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
       let result = createSearchAfterReturnType();
+
       const ruleStatusClient = ruleExecutionLogClientOverride
         ? ruleExecutionLogClientOverride
         : new RuleExecutionLogClient({
-            eventLogService,
-            savedObjectsClient: services.savedObjectsClient,
             underlyingClient: config.ruleExecutionLog.underlyingClient,
+            savedObjectsClient: services.savedObjectsClient,
+            eventLogService,
           });
 
       const completeRule: CompleteRule<RuleParams> = {

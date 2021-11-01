@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-export { AuditService, AuditServiceSetup, AuditLogger, LegacyAuditLogger } from './audit_service';
+export { AuditService, AuditServiceSetup, AuditLogger } from './audit_service';
 export {
   AuditEvent,
   userLoginEvent,
+  accessAgreementAcknowledgedEvent,
   httpRequestEvent,
   savedObjectEvent,
   spaceAuditEvent,
   SavedObjectAction,
   SpaceAuditAction,
 } from './audit_events';
-export { SecurityAuditLogger } from './security_audit_logger';
