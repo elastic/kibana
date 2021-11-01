@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { Client } from '@elastic/elasticsearch';
 import { FtrService } from '../../functional/ftr_provider_context';
 import {
@@ -168,7 +168,7 @@ export class EndpointTestResources extends FtrService {
     // else we just want to make sure the index has data, thus just having one in the index will do
     const size = ids.length || 1;
 
-    await this.retry.waitFor('wait for endpoints hosts', async () => {
+    await this.retry.waitFor('endpoint hosts', async () => {
       try {
         const searchResponse = await this.esClient.search({
           index: metadataCurrentIndexPattern,
@@ -177,10 +177,10 @@ export class EndpointTestResources extends FtrService {
           rest_total_hits_as_int: true,
         });
 
-        return searchResponse.body.hits.total === size;
+        return searchResponse.hits.total === size;
       } catch (error) {
         // We ignore 404's (index might not exist)
-        if (error instanceof ResponseError && error.statusCode === 404) {
+        if (error instanceof errors.ResponseError && error.statusCode === 404) {
           return false;
         }
 

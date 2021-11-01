@@ -6,9 +6,8 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { find, get } from 'lodash';
-import { estypes } from '@elastic/elasticsearch/index';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   NumericFieldStats,
   FieldStatsCommonRequestParams,
@@ -80,7 +79,7 @@ export const fetchNumericFieldStats = async (
   field: FieldValuePair,
   termFilters?: FieldValuePair[]
 ): Promise<NumericFieldStats> => {
-  const request: SearchRequest = getNumericFieldStatsRequest(
+  const request: estypes.SearchRequest = getNumericFieldStatsRequest(
     params,
     field.fieldName,
     termFilters

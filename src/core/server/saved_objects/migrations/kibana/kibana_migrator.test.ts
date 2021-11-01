@@ -7,7 +7,7 @@
  */
 
 import { take } from 'rxjs/operators';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
@@ -45,15 +45,6 @@ const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
 describe('KibanaMigrator', () => {
   beforeEach(() => {
     (DocumentMigrator as jest.Mock).mockClear();
-  });
-  describe('constructor', () => {
-    it('coerces the current Kibana version if it has a hyphen', () => {
-      const options = mockOptions();
-      options.kibanaVersion = '3.2.1-SNAPSHOT';
-      const migrator = new KibanaMigrator(options);
-      expect(migrator.kibanaVersion).toEqual('3.2.1');
-      expect((DocumentMigrator as jest.Mock).mock.calls[0][0].kibanaVersion).toEqual('3.2.1');
-    });
   });
   describe('getActiveMappings', () => {
     it('returns full index mappings w/ core properties', () => {
@@ -252,7 +243,7 @@ const mockV2MigrationOptions = () => {
       error: undefined,
       failures: [],
       task: { description: 'task description' } as any,
-    } as estypes.TaskGetResponse)
+    } as estypes.TasksGetResponse)
   );
 
   options.client.search = jest

@@ -10,7 +10,7 @@ import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 import { Feature } from 'geojson';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -83,11 +83,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   constructor(descriptor: Partial<ESGeoGridSourceDescriptor>, inspectorAdapters?: Adapters) {
     const sourceDescriptor = ESGeoGridSource.createDescriptor(descriptor);
-    super(
-      sourceDescriptor,
-      inspectorAdapters,
-      descriptor.resolution !== GRID_RESOLUTION.SUPER_FINE
-    );
+    super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
   }
 

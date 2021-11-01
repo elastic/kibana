@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -423,7 +422,7 @@ export default ({ getService }: FtrProviderContext): void => {
        * around 30 seconds which seemed too slow
        */
       const getAllCasesSortedByCreatedAtAsc = async () => {
-        const cases: ApiResponse<estypes.SearchResponse<CaseAttributes>> = await es.search({
+        const cases = await es.search<CaseAttributes>({
           index: '.kibana',
           body: {
             size: 10000,
@@ -433,7 +432,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           },
         });
-        return cases.body.hits.hits.map((hit) => hit._source);
+        return cases.hits.hits.map((hit) => hit._source);
       };
 
       it('returns the correct total when perPage is less than the total', async () => {
