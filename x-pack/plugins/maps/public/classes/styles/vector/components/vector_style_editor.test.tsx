@@ -28,7 +28,11 @@ jest.mock('../../../../kibana_services', () => {
   };
 });
 
-class MockField extends AbstractField {}
+class MockField extends AbstractField {
+  supportsFieldMetaFromLocalData(): boolean {
+    return true;
+  }
+}
 
 function createLayerMock(numFields: number, supportedShapeTypes: VECTOR_SHAPE_TYPE[]) {
   const fields: IField[] = [];
