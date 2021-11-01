@@ -36,6 +36,7 @@ import { performBulkActionRoute } from '../lib/detection_engine/routes/rules/per
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
+import { findRuleStatusInternalRoute } from '../lib/detection_engine/routes/rules/find_rule_status_internal_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import {
   createTimelinesRoute,
@@ -122,6 +123,7 @@ export const initRoutes = (
   persistPinnedEventRoute(router, config, security);
 
   findRulesStatusesRoute(router);
+  findRuleStatusInternalRoute(router);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
