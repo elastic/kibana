@@ -210,29 +210,25 @@ export const useProcessTree = ({
     const results = [];
 
     if (searchQuery) {
-      for (const processId in processMap) {
-        if (Object.prototype.hasOwnProperty.call(processMap, processId)) {
-          const process = processMap[processId];
-          const event = process.getLatest();
-          const { working_directory: workingDirectory, args } = event.process;
+      for (const processId of Object.keys(processMap)) {
+        const process = processMap[processId];
+        const event = process.getLatest();
+        const { working_directory: workingDirectory, args } = event.process;
 
-          // TODO: the text we search is the same as what we render.
-          // should this be customizable??
-          const text = `${workingDirectory} ${args.join(' ')}`;
+        // TODO: the text we search is the same as what we render.
+        // should this be customizable??
+        const text = `${workingDirectory} ${args.join(' ')}`;
 
-          process.searchMatched = text.includes(searchQuery) ? searchQuery : null;
+        process.searchMatched = text.includes(searchQuery) ? searchQuery : null;
 
-          if (process.searchMatched) {
-            results.push(process);
-          }
+        if (process.searchMatched) {
+          results.push(process);
         }
       }
     } else {
-      for (const processId in processMap) {
-        if (Object.prototype.hasOwnProperty.call(processMap, processId)) {
-          processMap[processId].searchMatched = null;
-          processMap[processId].autoExpand = false;
-        }
+      for (const processId of Object.keys(processMap)) {
+        processMap[processId].searchMatched = null;
+        processMap[processId].autoExpand = false;
       }
     }
 
@@ -240,19 +236,17 @@ export const useProcessTree = ({
   };
 
   const autoExpandProcessTree = () => {
-    for (const processId in processMap) {
-      if (Object.prototype.hasOwnProperty.call(processMap, processId)) {
-        const process = processMap[processId];
+    for (const processId of Object.keys(processMap)) {
+      const process = processMap[processId];
 
-        if (process.searchMatched || process.isUserEntered()) {
-          let { parent } = process;
+      if (process.searchMatched || process.isUserEntered()) {
+        let { parent } = process;
 
-          while (parent) {
-            // eslint-disable-next-line no-console
-            console.log('auto expanding', parent.getLatest().process.name);
-            parent.autoExpand = true;
-            parent = parent.parent;
-          }
+        while (parent) {
+          // eslint-disable-next-line no-console
+          console.log('auto expanding', parent.getLatest().process.name);
+          parent.autoExpand = true;
+          parent = parent.parent;
         }
       }
     }
