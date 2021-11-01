@@ -6,7 +6,7 @@
  */
 
 import { validateSingleAction, validateRuleActionsField } from './schema';
-import { isUuid, getActionTypeName, validateMustache, validateActionParams } from './utils';
+import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 import { actionTypeRegistryMock } from '../../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { FormHook } from '../../../../shared_imports';
 jest.mock('./utils');
@@ -16,7 +16,6 @@ describe('stepRuleActions schema', () => {
 
   describe('validateSingleAction', () => {
     it('should validate single action', async () => {
-      (isUuid as jest.Mock).mockReturnValue(true);
       (validateActionParams as jest.Mock).mockReturnValue([]);
       (validateMustache as jest.Mock).mockReturnValue([]);
 
@@ -34,7 +33,6 @@ describe('stepRuleActions schema', () => {
     });
 
     it('should validate single action with invalid mustache template', async () => {
-      (isUuid as jest.Mock).mockReturnValue(true);
       (validateActionParams as jest.Mock).mockReturnValue([]);
       (validateMustache as jest.Mock).mockReturnValue(['Message is not valid mustache template']);
 
@@ -54,8 +52,7 @@ describe('stepRuleActions schema', () => {
       expect(errors[0]).toEqual('Message is not valid mustache template');
     });
 
-    it('should validate single action with incorrect id', async () => {
-      (isUuid as jest.Mock).mockReturnValue(false);
+    it('should validate single action with non-uuid formatted id', async () => {
       (validateMustache as jest.Mock).mockReturnValue([]);
       (validateActionParams as jest.Mock).mockReturnValue([]);
 
@@ -68,8 +65,7 @@ describe('stepRuleActions schema', () => {
         },
         actionTypeRegistry
       );
-      expect(errors).toHaveLength(1);
-      expect(errors[0]).toEqual('No connector selected');
+      expect(errors).toHaveLength(0);
     });
   });
 
@@ -89,40 +85,8 @@ describe('stepRuleActions schema', () => {
       expect(result).toEqual(undefined);
     });
 
-    it('should validate incorrect rule actions field', async () => {
-      (getActionTypeName as jest.Mock).mockReturnValue('Slack');
-      const validator = validateRuleActionsField(actionTypeRegistry);
-
-      const result = await validator({
-        path: '',
-        value: [
-          {
-            id: '3',
-            group: 'default',
-            actionTypeId: '.slack',
-            params: {},
-          },
-        ],
-        form: {} as FormHook,
-        formData: jest.fn(),
-        errors: [],
-        customData: { value: null, provider: () => Promise.resolve(null) },
-      });
-
-      expect(result).toEqual({
-        code: 'ERR_FIELD_FORMAT',
-        message: `
-**Slack:**
-*   No connector selected
-`,
-        path: '',
-      });
-    });
-
     it('should validate multiple incorrect rule actions field', async () => {
-      (isUuid as jest.Mock).mockReturnValueOnce(false);
       (getActionTypeName as jest.Mock).mockReturnValueOnce('Slack');
-      (isUuid as jest.Mock).mockReturnValueOnce(true);
       (getActionTypeName as jest.Mock).mockReturnValueOnce('Pagerduty');
       (validateActionParams as jest.Mock).mockReturnValue(['Summary is required']);
       (validateMustache as jest.Mock).mockReturnValue(['Component is not valid mustache template']);
@@ -156,7 +120,8 @@ describe('stepRuleActions schema', () => {
         code: 'ERR_FIELD_FORMAT',
         message: `
 **Slack:**
-*   No connector selected
+*   Summary is required
+*   Component is not valid mustache template
 
 
 **Pagerduty:**
