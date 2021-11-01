@@ -49,20 +49,6 @@ OQMtOW0BH63Xcmy432HJ,ecommerce,-,-,Men's Clothing, Men's Accessories,EUR,Recip,R
 "
 `;
 
-exports[`Reporting APIs CSV Generation from SearchSource date formatting Formatted date_nanos data, UTC timezone 1`] = `
-"date,message
-\\"Jan 1, 2015 @ 12:10:30.123456789\\",\\"Hello 2\\"
-\\"Jan 1, 2015 @ 12:10:30.000000000\\",\\"Hello 1\\"
-"
-`;
-
-exports[`Reporting APIs CSV Generation from SearchSource date formatting Formatted date_nanos data, custom timezone (New York) 1`] = `
-"date,message
-\\"Jan 1, 2015 @ 07:10:30.123456789\\",\\"Hello 2\\"
-\\"Jan 1, 2015 @ 07:10:30.000000000\\",\\"Hello 1\\"
-"
-`;
-
 exports[`Reporting APIs CSV Generation from SearchSource date formatting With filters and timebased data, default to UTC 1`] = `
 "\\"@timestamp\\",clientip,extension
 \\"Sep 20, 2015 @ 10:26:48.725\\",\\"74.214.76.90\\",jpg
