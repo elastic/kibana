@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { flowRight } from 'lodash';
+import { flowRight, groupBy } from 'lodash';
 import {
   Filter as FilterType,
+  FilterField,
   FilterViewInstance,
   FlattenFilterViewInstance,
 } from '../../types/filters';
@@ -49,4 +50,12 @@ export const transformFilterView = (filterView: FilterViewInstance) => (filterVa
 export const getFilterFormatter = (type: string = '') => {
   const filterView = filterViewsRegistry.get(type) ?? filterViewsRegistry.get('default');
   return transformFilterView(filterView.view());
+};
+
+export const groupFiltersBy = (filters: FilterType[], groupByField: FilterField) => {
+  const groupedFilters = groupBy(filters, (filter) => filter[groupByField]);
+  return Object.keys(groupedFilters).map((key) => ({
+    name: groupedFilters[key]?.[0]?.[groupByField] ? key : null,
+    filters: groupedFilters[key],
+  }));
 };

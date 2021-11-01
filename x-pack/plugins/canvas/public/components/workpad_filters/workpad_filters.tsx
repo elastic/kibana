@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import { groupBy } from 'lodash';
 import React, { FC, useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Filter, State, FilterField } from '../../../types';
+import { State, FilterField } from '../../../types';
+import { groupFiltersBy } from '../../lib/filter';
 import { setGroupFiltersByOption } from '../../state/actions/sidebar';
 import { getGroupFiltersByOption } from '../../state/selectors/sidebar';
 import { useCanvasFilters } from '../hooks/sidebar/use_canvas_filters';
 import { WorkpadFilters as Component } from './workpad_filters.component';
-
-const groupFiltersBy = (filters: Filter[], groupByField: FilterField) => {
-  const groupedFilters = groupBy(filters, (filter) => filter[groupByField]);
-  return Object.keys(groupedFilters).map((key) => ({
-    name: groupedFilters[key]?.[0]?.[groupByField] ? key : null,
-    filters: groupedFilters[key],
-  }));
-};
 
 const DEFAULT_GROUP_BY: FilterField = 'filterGroup';
 

@@ -26,6 +26,7 @@ import {
   flattenFilterView,
   transformFilterView,
   getFilterFormatter,
+  groupFiltersBy,
 } from './filter';
 
 const formatterFactory = (value: unknown) => () => JSON.stringify(value);
@@ -276,5 +277,66 @@ describe('getFilterFormatter returns fn which', () => {
   it('returns default filter view if filter view name was not found', () => {
     const formatterFn = getFilterFormatter('some_absent_filter_vew');
     expect(formatterFn(simpleFilterValue)).toEqual(simpleResult);
+  });
+});
+
+describe('groupFiltersBy', () => {
+  const filters: FilterType[] = [
+    { type: 'exactly', column: 'project', value: 'kibana', filterGroup: 'someGroup' },
+    {
+      type: 'time',
+      column: '@timestamp',
+      value: { from: 'some time', to: 'some time' },
+      filterGroup: 'someGroup2',
+    },
+    { type: 'exactly', column: 'country', value: 'US', filterGroup: 'someGroup2' },
+    {
+      type: 'time',
+      column: 'time',
+      value: { from: 'some time', to: 'some time' },
+      filterGroup: null,
+    },
+  ];
+
+  it('groups by type', () => {
+    const grouped = groupFiltersBy(filters, 'type');
+    expect(grouped).toEqual([
+      { name: 'exactly', filters: [filters[0], filters[2]] },
+      { name: 'time', filters: [filters[1], filters[3]] },
+    ]);
+  });
+
+  it('groups by column', () => {
+    const grouped = groupFiltersBy(filters, 'column');
+    expect(grouped).toEqual([
+      { name: 'project', filters: [filters[0]] },
+      { name: '@timestamp', filters: [filters[1]] },
+      { name: 'country', filters: [filters[2]] },
+      { name: 'time', filters: [filters[3]] },
+    ]);
+  });
+
+  it('groups by filterGroup', () => {
+    const grouped = groupFiltersBy(filters, 'filterGroup');
+    expect(grouped).toEqual([
+      { name: 'someGroup', filters: [filters[0]] },
+      { name: 'someGroup2', filters: [filters[1], filters[2]] },
+      { name: null, filters: [filters[3]] },
+    ]);
+  });
+
+  it('groups by field on empty array', () => {
+    const grouped = groupFiltersBy([], 'filterGroup');
+    expect(grouped).toEqual([]);
+  });
+
+  it('groups by empty field', () => {
+    const filtersWithoutGroups = filters.map(({ filterGroup, ...rest }) => ({
+      ...rest,
+      filterGroup: null,
+    }));
+
+    const grouped = groupFiltersBy(filtersWithoutGroups, 'filterGroup');
+    expect(grouped).toEqual([{ name: null, filters: filtersWithoutGroups }]);
   });
 });
