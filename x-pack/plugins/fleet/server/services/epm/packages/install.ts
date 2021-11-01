@@ -18,6 +18,7 @@ import type {
   InstallablePackage,
   InstallSource,
 } from '../../../../common';
+import { DEFAULT_PACKAGES } from '../../../../common';
 import {
   IngestManagerError,
   PackageOperationNotSupportedError,
@@ -464,6 +465,12 @@ export async function createInstallation(options: {
   const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
+  // For default packages, default the `keep_policies_up_to_date` setting to true. For all other
+  // package, default it to false.
+  const defaultKeepPoliciesUpToDate = DEFAULT_PACKAGES.some(
+    ({ name }) => name === packageInfo.name
+  );
+
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
@@ -479,7 +486,7 @@ export async function createInstallation(options: {
       install_status: 'installing',
       install_started_at: new Date().toISOString(),
       install_source: installSource,
-      keep_policies_up_to_date: false,
+      keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     },
     { id: pkgName, overwrite: true }
   );
