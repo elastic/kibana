@@ -98,9 +98,8 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await comboBox.setElement(groupByCustomField, field);
       await testSubjects.click('groupByCustomFieldAddButton');
       await this.waitForLoading();
-      const groupNameLink = await testSubjects.find('groupNameLink');
-      const groupName = await groupNameLink.getVisibleText();
-      expect(groupName).to.be('ubuntu');
+      const groupNameLinks = await testSubjects.findAll('groupNameLink');
+      return Promise.all(groupNameLinks.map(async (link) => link.getVisibleText()));
     },
 
     async toggleReverseSort() {

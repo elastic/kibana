@@ -85,7 +85,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('group nodes by custom field', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        await pageObjects.infraHome.groupByCustomField('host.os.platform');
+        const groups = await pageObjects.infraHome.groupByCustomField('host.os.platform');
+        expect(groups).to.eql(['ubuntu']);
       });
 
       it('renders an empty data prompt for dates with no data', async () => {
