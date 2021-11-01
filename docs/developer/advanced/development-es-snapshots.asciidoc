@@ -81,7 +81,7 @@ Each day, a https://kibana-ci.elastic.co/job/elasticsearch+snapshots+trigger/[Je
 
 https://kibana-ci.elastic.co/job/elasticsearch+snapshots+build/[This Jenkins job] builds the {es} snapshots and uploads them to GCS.
 
-The Jenkins job pipeline definition is https://github.com/elastic/kibana/blob/master/.ci/es-snapshots/Jenkinsfile_build_es[in the {kib} repo].
+The Jenkins job pipeline definition is https://github.com/elastic/kibana/blob/main/.ci/es-snapshots/Jenkinsfile_build_es[in the {kib} repo].
 
 1. Checkout {es} repo for the given branch/version.
 2. Run `./gradlew -p distribution/archives assemble --parallel` to create all of the {es} distributions.
@@ -97,7 +97,7 @@ The Jenkins job pipeline definition is https://github.com/elastic/kibana/blob/ma
 
 https://kibana-ci.elastic.co/job/elasticsearch+snapshots+verify/[This Jenkins job] tests the latest {es} snapshot with the full {kib} CI pipeline, and promotes if it there are no test failures.
 
-The Jenkins job pipeline definition is https://github.com/elastic/kibana/blob/master/.ci/es-snapshots/Jenkinsfile_verify_es[in the {kib} repo].
+The Jenkins job pipeline definition is https://github.com/elastic/kibana/blob/main/.ci/es-snapshots/Jenkinsfile_verify_es[in the {kib} repo].
 
 1. Checkout {kib} and set up CI environment as normal.
 2. Set the `ES_SNAPSHOT_MANIFEST` env var to point to the latest snapshot manifest.
