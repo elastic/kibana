@@ -67,7 +67,7 @@ describe('useResolver', () => {
         },
         currentDataView: null,
         currentSavedSearch: null,
-        dataViewsContract: null,
+        dataViewsContract: {},
         kibanaConfig: {},
       },
       results: {},
