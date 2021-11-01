@@ -53,7 +53,7 @@ To create dashboards, you must meet the minimum requirements.
 
 * If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
-* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<data-views, data view>>.
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and a <<data-views, data view>>.
 
 * When the read-only indicator appears, you have insufficient privileges
 to create or save dashboards, and the options to create and save dashboards are not visible. For more information,
