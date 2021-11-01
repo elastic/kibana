@@ -9,6 +9,7 @@ if [[ -z "$CODE_COVERAGE" ]]; then
     node scripts/functional_tests \
       --verbose \
       --bail \
+      --kibana-install-dir "$KIBANA_INSTALL_DIR" \
       --include-tag "ciGroup6"
 
   echo ""
