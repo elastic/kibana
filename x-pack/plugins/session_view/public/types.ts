@@ -6,5 +6,5 @@
  */
 
 export interface SessionViewConfigType {
-    enabled: boolean;
-};
+  enabled: boolean;
+}

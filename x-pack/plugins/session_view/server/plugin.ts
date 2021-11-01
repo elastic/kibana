@@ -12,17 +12,14 @@ import {
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
-import { 
-  SessionViewSetupPlugins,
-  SessionViewStartPlugins,
-} from './types';
+import { SessionViewSetupPlugins, SessionViewStartPlugins } from './types';
 import { registerRoutes } from './routes';
 import { getTestSavedObject } from './saved_objects';
 
 export class SessionViewPlugin implements Plugin {
   private logger: Logger;
 
-  /** 
+  /**
    * Initialize SessionViewPlugin class properties (logger, etc) that is accessible
    * through the initializerContext.
    */
@@ -47,6 +44,6 @@ export class SessionViewPlugin implements Plugin {
   }
 
   public stop() {
-    this.logger.debug('session view: Stop')
+    this.logger.debug('session view: Stop');
   }
 }

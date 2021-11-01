@@ -5,10 +5,10 @@
  * 2.0.
  */
 import React, { useRef, useLayoutEffect, useCallback } from 'react';
-import Process from '../Process';
-import useProcessTree, { IProcessEvent, IProcess } from '../../hooks/use_process_tree';
-import useScroll from '../../hooks/use_scroll';
 import { useEuiTheme } from '@elastic/eui';
+import { Process } from '../Process';
+import { useProcessTree, IProcessEvent, IProcess } from '../../hooks/use_process_tree';
+import { useScroll } from '../../hooks/use_scroll';
 
 interface IProcessTreeDeps {
   // process.entity_id to act as root node
@@ -28,7 +28,7 @@ interface IProcessTreeDeps {
   onProcessSelected(process: IProcess): void;
 }
 
-const ProcessTree = ({
+export const ProcessTree = ({
   sessionId,
   forward,
   backward,
@@ -51,10 +51,12 @@ const ProcessTree = ({
     div: scrollerRef.current,
     handler: (pos: number, endReached: boolean) => {
       if (endReached) {
+        // eslint-disable-next-line no-console
         console.log('end reached');
-        //TODO: call load more
+        // TODO: call load more
       }
 
+      // eslint-disable-next-line no-console
       console.log(pos);
     },
   });
@@ -75,7 +77,7 @@ const ProcessTree = ({
     const selectionAreaEl = selectionAreaRef.current;
     selectionAreaEl.style.display = 'block';
 
-    //TODO: concept of alert level unknown wrt to elastic security
+    // TODO: concept of alert level unknown wrt to elastic security
     const alertLevel = process.getMaxAlertLevel();
 
     if (alertLevel && alertLevel >= 0) {
@@ -86,7 +88,7 @@ const ProcessTree = ({
     }
 
     // find the DOM element for the command which is selected by id
-    let processEl = scrollerRef.current.querySelector(`[data-id="${process.getEntityID()}"]`);
+    const processEl = scrollerRef.current.querySelector(`[data-id="${process.getEntityID()}"]`);
 
     if (processEl) {
       processEl.prepend(selectionAreaEl);
@@ -124,12 +126,14 @@ const ProcessTree = ({
     opacity: .1;
   `;
 
-  //TODO: processes without parents.
+  // TODO: processes without parents.
   // haven't decided whether to just add to session leader
   // or some other UX treatment (reparenting to init?)
+  // eslint-disable-next-line no-console
   console.log(orphans);
 
-  //TODO: search input and results navigation
+  // TODO: search input and results navigation
+  // eslint-disable-next-line no-console
   console.log(searchResults);
 
   return (
@@ -141,5 +145,3 @@ const ProcessTree = ({
     </div>
   );
 };
-
-export default ProcessTree;

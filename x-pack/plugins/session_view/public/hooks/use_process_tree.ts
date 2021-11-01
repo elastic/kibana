@@ -75,7 +75,7 @@ export interface IProcessEvent {
   };
   process: IProcessSelf;
 
-  //TODO: alerts? output? file_descriptors?
+  // TODO: alerts? output? file_descriptors?
 }
 
 export interface IProcess {
@@ -148,7 +148,7 @@ class Process implements IProcess {
   }
 
   getMaxAlertLevel() {
-    //TODO:
+    // TODO:
     return null;
   }
 }
@@ -157,7 +157,12 @@ type ProcessMap = {
   [key: string]: Process;
 };
 
-const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProcessTreeDeps) => {
+export const useProcessTree = ({
+  sessionId,
+  forward,
+  backward,
+  searchQuery,
+}: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   const initializedProcessMap: ProcessMap = {
     [sessionId]: new Process(),
@@ -182,7 +187,7 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
     });
   };
 
-  const buildProcessTree = (events: IProcessEvent[], backward: boolean = false) => {
+  const buildProcessTree = (events: IProcessEvent[], backwardDirection: boolean = false) => {
     events.forEach((event) => {
       const process = processMap[event.process.entity_id];
       const parentProcess = processMap[event.process.parent.entity_id];
@@ -191,7 +196,7 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
         process.parent = parentProcess; // handy for recursive operations (like auto expand)
 
         if (!parentProcess.children.includes(process)) {
-          if (backward) {
+          if (backwardDirection) {
             parentProcess.children.unshift(process);
           } else {
             parentProcess.children.push(process);
@@ -208,14 +213,14 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
     const results = [];
 
     if (searchQuery) {
-      for (let processId in processMap) {
+      for (const processId of Object.keys(processMap)) {
         const process = processMap[processId];
         const event = process.getLatest();
-        const { working_directory, args } = event.process;
+        const { working_directory: workingDirectory, args } = event.process;
 
-        //TODO: the text we search is the same as what we render.
+        // TODO: the text we search is the same as what we render.
         // should this be customizable??
-        const text = `${working_directory} ${args.join(' ')}`;
+        const text = `${workingDirectory} ${args.join(' ')}`;
 
         process.searchMatched = text.includes(searchQuery) ? searchQuery : null;
 
@@ -224,7 +229,7 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
         }
       }
     } else {
-      for (let processId in processMap) {
+      for (const processId of Object.keys(processMap)) {
         processMap[processId].searchMatched = null;
         processMap[processId].autoExpand = false;
       }
@@ -234,13 +239,14 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
   };
 
   const autoExpandProcessTree = () => {
-    for (let processId in processMap) {
+    for (const processId of Object.keys(processMap)) {
       const process = processMap[processId];
 
       if (process.searchMatched || process.isUserEntered()) {
         let { parent } = process;
 
         while (parent) {
+          // eslint-disable-next-line no-console
           console.log('auto expanding', parent.getLatest().process.name);
           parent.autoExpand = true;
           parent = parent.parent;
@@ -249,15 +255,19 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
     }
   };
 
-  const processNewEvents = (events: IProcessEvent[] | undefined, backward: boolean = false) => {
+  const processNewEvents = (
+    events: IProcessEvent[] | undefined,
+    backwardDirection: boolean = false
+  ) => {
     if (!events || events.length === 0) {
       return;
     }
 
+    // eslint-disable-next-line no-console
     console.log(`processing ${events.length} commands`);
 
     updateProcessMap(events);
-    buildProcessTree(events, backward);
+    buildProcessTree(events, backwardDirection);
     autoExpandProcessTree();
   };
 
@@ -272,15 +282,15 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
 
     setProcessMap({ ...processMap });
     setOrphans([...orphans]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forward, backward]);
 
   useEffect(() => {
     searchProcessTree();
     autoExpandProcessTree();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
   // return the root session leader process, and a list of orphans
   return { sessionLeader: processMap[sessionId], orphans, searchResults };
 };
-
-export default useProcessTree;

@@ -8,14 +8,15 @@
 import { SavedObjectsType } from 'src/core/server';
 import { TEST_SAVED_OBJECT } from '../../common/constants';
 
-export const getTestSavedObject = () => ({
-  name: TEST_SAVED_OBJECT,
-  hidden: false,
-  namespaceType: 'agnostic',
-  mappings: {
-    properties: {
-      name: { type: 'text' },
-      value: { type: 'keyword' },
+export const getTestSavedObject = () =>
+  ({
+    name: TEST_SAVED_OBJECT,
+    hidden: false,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        name: { type: 'text' },
+        value: { type: 'keyword' },
+      },
     },
-  },
-} as SavedObjectsType);
+  } as SavedObjectsType);

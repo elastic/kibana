@@ -8,6 +8,6 @@
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { SessionViewPlugin } from './plugin';
 
-export function plugin (initializerContext: PluginInitializerContext) {
+export function plugin(initializerContext: PluginInitializerContext) {
   return new SessionViewPlugin(initializerContext);
 }
