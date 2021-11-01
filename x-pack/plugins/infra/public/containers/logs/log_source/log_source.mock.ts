@@ -73,6 +73,11 @@ export const createBasicSourceConfiguration = (sourceId: string): LogSourceConfi
     },
     logColumns: [],
     fields: {
+      container: 'CONTAINER_FIELD',
+      host: 'HOST_FIELD',
+      pod: 'POD_FIELD',
+      tiebreaker: 'TIEBREAKER_FIELD',
+      timestamp: 'TIMESTAMP_FIELD',
       message: ['MESSAGE_FIELD'],
     },
     name: sourceId,

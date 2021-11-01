@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { POD_FIELD, HOST_FIELD, CONTAINER_FIELD } from '../constants';
 import { host } from './host';
 import { pod } from './pod';
 import { awsEC2 } from './aws_ec2';
@@ -31,23 +30,31 @@ export const findInventoryModel = (type: InventoryItemType) => {
   return model;
 };
 
+interface InventoryFields {
+  host: string;
+  pod: string;
+  container: string;
+  timestamp: string;
+  tiebreaker: string;
+}
+
 const LEGACY_TYPES = ['host', 'pod', 'container'];
 
-export const getFieldByType = (type: InventoryItemType) => {
+const getFieldByType = (type: InventoryItemType, fields: InventoryFields) => {
   switch (type) {
     case 'pod':
-      return POD_FIELD;
+      return fields.pod;
     case 'host':
-      return HOST_FIELD;
+      return fields.host;
     case 'container':
-      return CONTAINER_FIELD;
+      return fields.container;
   }
 };
 
-export const findInventoryFields = (type: InventoryItemType) => {
+export const findInventoryFields = (type: InventoryItemType, fields?: InventoryFields) => {
   const inventoryModel = findInventoryModel(type);
-  if (LEGACY_TYPES.includes(type)) {
-    const id = getFieldByType(type) || inventoryModel.fields.id;
+  if (fields && LEGACY_TYPES.includes(type)) {
+    const id = getFieldByType(type, fields) || inventoryModel.fields.id;
     return {
       ...inventoryModel.fields,
       id,

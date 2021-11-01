@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { findInventoryFields, findInventoryModel } from '../../../../common/inventory_models';
 import { MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
@@ -38,6 +37,7 @@ export const transformRequestToMetricsAPIRequest = async ({
   const metricsApiRequest: MetricsAPIRequest = {
     indexPattern: sourceOverrides?.indexPattern ?? source.configuration.metricAlias,
     timerange: {
+      field: sourceOverrides?.timestamp ?? source.configuration.fields.timestamp,
       from: timeRangeWithIntervalApplied.from,
       to: timeRangeWithIntervalApplied.to,
       interval: timeRangeWithIntervalApplied.interval,
@@ -69,7 +69,10 @@ export const transformRequestToMetricsAPIRequest = async ({
     inventoryModel.nodeFilter?.forEach((f) => filters.push(f));
   }
 
-  const inventoryFields = findInventoryFields(snapshotRequest.nodeType);
+  const inventoryFields = findInventoryFields(
+    snapshotRequest.nodeType,
+    source.configuration.fields
+  );
   if (snapshotRequest.groupBy) {
     const groupBy = snapshotRequest.groupBy.map((g) => g.field).filter(Boolean) as string[];
     metricsApiRequest.groupBy = [...groupBy, inventoryFields.id];
@@ -83,7 +86,7 @@ export const transformRequestToMetricsAPIRequest = async ({
           size: 1,
           metrics: [{ field: inventoryFields.name }],
           sort: {
-            [TIMESTAMP_FIELD]: 'desc',
+            [source.configuration.fields.timestamp]: 'desc',
           },
         },
       },
