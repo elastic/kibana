@@ -31,7 +31,7 @@ export const setupFleetForEndpoint = async (
   kbnClient: KbnClient
 ): Promise<SetupFleetForEndpointResponse> => {
   // We try to use the kbnClient **private** logger, bug if unable to access it, then just use console
-  // @ts-ignore
+  // @ts-expect-error TS2341
   const log = kbnClient.log ? kbnClient.log : console;
 
   // Setup Fleet
