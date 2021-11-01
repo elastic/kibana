@@ -318,7 +318,7 @@ To run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to 
 [%collapsible]
 ====
 *Details* +
-The `so/server/es` settings have been removed. If your configuration uses the following settings, {kib} fails to start:
+Some of the `so/server/es` settings have been removed. If your configuration uses the following settings, {kib} fails to start:
 
 * `savedObjects.indexCheckTimeout`
 * `server.xsrf.token`
