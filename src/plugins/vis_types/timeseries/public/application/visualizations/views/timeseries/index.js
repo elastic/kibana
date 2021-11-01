@@ -144,7 +144,10 @@ export const TimeSeries = ({
     ...GRID_LINE_CONFIG,
     visible: showGrid,
   };
-  const xAxisStyle = !useLegacyTimeAxis
+
+  const shouldUseNewTimeAxis =
+    series.some(({ stack }) => stack !== STACKED_OPTIONS.NONE) && !useLegacyTimeAxis;
+  const xAxisStyle = shouldUseNewTimeAxis
     ? {
         tickLabel: {
           visible: true,
@@ -339,10 +342,8 @@ export const TimeSeries = ({
           position={position}
           domain={domain}
           hide={hide}
-          gridLine={{
-            ...GRID_LINE_CONFIG,
-            visible: showGrid,
-          }}
+          gridLine={gridLineStyle}
+          ticks={5}
           tickFormat={tickFormatter}
         />
       ))}
@@ -354,7 +355,7 @@ export const TimeSeries = ({
         tickFormat={xAxisFormatter}
         gridLine={gridLineStyle}
         style={xAxisStyle}
-        timeAxisLayerCount={useLegacyTimeAxis ? 0 : 3}
+        timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
       />
     </Chart>
   );
