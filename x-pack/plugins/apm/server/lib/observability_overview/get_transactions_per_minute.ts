@@ -16,10 +16,7 @@ import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../helpers/transactions';
-import {
-  calculateThroughputWithInterval,
-  calculateThroughputWithRange,
-} from '../helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../helpers/calculate_throughput';
 
 export async function getTransactionsPerMinute({
   setup,

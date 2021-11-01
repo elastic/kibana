@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsDateInterval } from '@elastic/elasticsearch/api/types';
+import { AggregationsDateInterval } from '@elastic/elasticsearch/lib/api/types';
 import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import {
   SERVICE_NAME,

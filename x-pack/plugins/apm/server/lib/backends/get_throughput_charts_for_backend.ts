@@ -41,7 +41,7 @@ export async function getThroughputChartsForBackend({
     offset,
   });
 
-  const { intervalString, bucketSize } = getBucketSize({
+  const { intervalString } = getBucketSize({
     start: startWithOffset,
     end: endWithOffset,
     minBucketSize: 60,
