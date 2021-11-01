@@ -37,4 +37,6 @@ Example.args = {
     rangeFrom: 'now-15m',
     rangeTo: 'now',
   },
+  type: 'db',
+  subtype: 'postgresql',
 };
