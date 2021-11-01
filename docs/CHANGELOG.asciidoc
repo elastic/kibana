@@ -475,7 +475,7 @@ Dashboard::
 Elastic Security::
 For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Machine Learning::
-* Enhancements for the Model Management page {kibana-pull}115772[#115772]
+* Addition of new Model Management tab {kibana-pull}115772[#115772]
 Platform::
 * Changes edit view to json read-only view {kibana-pull}112034[#112034]
 
@@ -496,7 +496,7 @@ Lens & Visualizations::
 Logs::
 * Make Alerts page use shared Kibana time range {kibana-pull}115192[#115192]
 Machine Learning::
-* Adds support for installing ML models {kibana-pull}107710[#107710]
+* Adds support to {fleet} {integrations} for installing ML models {kibana-pull}107710[#107710]
 * Adds Index data visualizer grid embeddable as extra view within Discover {kibana-pull}107184[#107184]
 Maps::
 * Use Elastic Maps Service v8.0 {kibana-pull}116217[#116217]
