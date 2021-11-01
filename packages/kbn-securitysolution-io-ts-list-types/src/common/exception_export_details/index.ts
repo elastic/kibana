@@ -9,7 +9,7 @@
 import * as t from 'io-ts';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
-export const exportExceptionDetails = t.type({
+export const exportExceptionDetails = {
   exported_exception_list_count: t.number,
   exported_exception_list_item_count: t.number,
   missing_exception_list_item_count: t.number,
@@ -28,7 +28,8 @@ export const exportExceptionDetails = t.type({
     )
   ),
   missing_exception_lists_count: t.number,
-});
+};
 
-export const exportExceptionDetailsSchema = t.exact(exportExceptionDetails);
+export const exportExceptionDetailsSchema = t.type(exportExceptionDetails);
+
 export type ExportExceptionDetails = t.TypeOf<typeof exportExceptionDetailsSchema>;

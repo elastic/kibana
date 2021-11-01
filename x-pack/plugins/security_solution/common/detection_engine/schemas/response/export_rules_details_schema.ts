@@ -6,25 +6,32 @@
  */
 
 import * as t from 'io-ts';
-import { exportExceptionDetailsSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { exportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
-export const exportRulesDetailsSchema = t.intersection([
-  t.exact(
-    t.type({
-      exported_count: t.number,
-      exported_rules_count: t.number,
-      missing_rules: t.array(
-        t.exact(
-          t.type({
-            rule_id: NonEmptyString,
-          })
-        )
-      ),
-      missing_rules_count: t.number,
-    })
+const createSchema = <Required extends t.Props, Optional extends t.Props>(
+  requiredFields: Required,
+  optionalFields: Optional
+) => {
+  return t.intersection([t.exact(t.type(requiredFields)), t.exact(t.partial(optionalFields))]);
+};
+
+export const exportRulesDetails = {
+  exported_count: t.number,
+  exported_rules_count: t.number,
+  missing_rules: t.array(
+    t.exact(
+      t.type({
+        rule_id: NonEmptyString,
+      })
+    )
   ),
-  t.exact(t.partial(exportExceptionDetailsSchema)),
-]);
+  missing_rules_count: t.number,
+};
+
+export const exportRulesDetailsSchema = createSchema(
+  exportRulesDetails,
+  exportExceptionDetails as Optional
+);
 
 export type ExportRulesDetails = t.TypeOf<typeof exportRulesDetailsSchema>;

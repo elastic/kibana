@@ -43,18 +43,6 @@ describe('exportRulesDetailsSchema', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should NOT validate a count that is a negative number', () => {
-    const payload: ExportRulesDetails = getOutputDetailsSample({ totalCount: -1 });
-    const decoded = exportRulesDetailsSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "-1" supplied to "total_count"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
   test('it should strip out extra keys', () => {
     const payload: ExportRulesDetails & {
       extraKey?: string;
