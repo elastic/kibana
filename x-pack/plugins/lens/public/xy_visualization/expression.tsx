@@ -207,21 +207,8 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 const MemoizedChart = React.memo(XYChart);
 
 export function XYChartReportable(props: XYChartRenderProps) {
-  const [isReady, setIsReady] = useState(false);
-
-  // It takes a cycle for the XY chart to render. This prevents
-  // reporting from printing a blank chart placeholder.
-  useEffect(() => {
-    setIsReady(true);
-  }, [setIsReady]);
-
   return (
-    <VisualizationContainer
-      className="lnsXyExpression__container"
-      isReady={isReady}
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-    >
+    <VisualizationContainer className="lnsXyExpression__container">
       <MemoizedChart {...props} />
     </VisualizationContainer>
   );

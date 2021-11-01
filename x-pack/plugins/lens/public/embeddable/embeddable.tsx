@@ -333,6 +333,8 @@ export class Embeddable
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);
     }
+
+    this.renderComplete.dispatchComplete();
   };
 
   /**
@@ -342,12 +344,17 @@ export class Embeddable
    */
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
+    super.render(domNode as HTMLElement);
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
+
+    this.domNode.setAttribute('data-shared-item', '');
+
+    this.renderComplete.dispatchInProgress();
 
     const executionContext = {
       type: 'lens',

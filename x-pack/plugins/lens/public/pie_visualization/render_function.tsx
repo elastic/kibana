@@ -214,13 +214,6 @@ export function PieComponent(
     },
   });
 
-  const [isReady, setIsReady] = useState(false);
-  // It takes a cycle for the chart to render. This prevents
-  // reporting from printing a blank chart placeholder.
-  useEffect(() => {
-    setIsReady(true);
-  }, []);
-
   const hasNegative = firstTable.rows.some((row) => {
     const value = row[metricColumn.id];
     return typeof value === 'number' && value < 0;
@@ -237,11 +230,7 @@ export function PieComponent(
 
   if (isEmpty) {
     return (
-      <VisualizationContainer
-        reportTitle={props.args.title}
-        reportDescription={props.args.description}
-        className="lnsPieExpression__container"
-      >
+      <VisualizationContainer className="lnsPieExpression__container">
         <EmptyPlaceholder icon={LensIconChartDonut} />
       </VisualizationContainer>
     );
@@ -268,12 +257,7 @@ export function PieComponent(
   };
 
   return (
-    <VisualizationContainer
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-      className="lnsPieExpression__container"
-      isReady={isReady}
-    >
+    <VisualizationContainer className="lnsPieExpression__container">
       <Chart>
         <Settings
           tooltip={{ boundary: document.getElementById('app-fixed-viewport') ?? undefined }}

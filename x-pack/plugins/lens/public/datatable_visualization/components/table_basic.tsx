@@ -317,11 +317,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   if (isEmpty) {
     return (
-      <VisualizationContainer
-        className="lnsDataTableContainer"
-        reportTitle={props.args.title}
-        reportDescription={props.args.description}
-      >
+      <VisualizationContainer className="lnsDataTableContainer">
         <EmptyPlaceholder icon={LensIconChartDatatable} />
       </VisualizationContainer>
     );
@@ -334,11 +330,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     });
 
   return (
-    <VisualizationContainer
-      className="lnsDataTableContainer"
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-    >
+    <VisualizationContainer className="lnsDataTableContainer">
       <DataContext.Provider
         value={{
           table: firstLocalTable,
