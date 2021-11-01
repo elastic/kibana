@@ -19,20 +19,24 @@ import { Logger } from './logger';
 export function uploadEvents({
   events,
   client,
-  workers,
+  clientWorkers,
+  batchSize,
   writeTargets,
   logger,
 }: {
   events: Fields[];
   client: Client;
-  workers: number;
+  clientWorkers: number;
+  batchSize: number;
   writeTargets: ElasticsearchOutputWriteTargets;
   logger: Logger;
 }) {
-  const esDocuments = toElasticsearchOutput({ events, writeTargets });
-  const fn = pLimit(workers);
+  const esDocuments = logger.perf('to_elasticsearch_output', () => {
+    return toElasticsearchOutput({ events, writeTargets });
+  });
+  const fn = pLimit(clientWorkers);
 
-  const batches = chunk(esDocuments, 5000);
+  const batches = chunk(esDocuments, batchSize);
 
   logger.debug(`Uploading ${esDocuments.length} in ${batches.length} batches`);
 
@@ -41,12 +45,15 @@ export function uploadEvents({
   return Promise.all(
     batches.map((batch) =>
       fn(() => {
-        return client.bulk({
-          require_alias: true,
-          body: batch.flatMap((doc) => {
-            return [{ index: { _index: doc._index } }, doc._source];
-          }),
-        });
+        return logger.perf('bulk_upload', () =>
+          client.bulk({
+            require_alias: true,
+            refresh: false,
+            body: batch.flatMap((doc) => {
+              return [{ index: { _index: doc._index } }, doc._source];
+            }),
+          })
+        );
       })
     )
   )
@@ -57,8 +64,7 @@ export function uploadEvents({
         .map((item) => item.index?.error);
 
       if (errors.length) {
-        // eslint-disable-next-line no-console
-        console.error(inspect(errors.slice(0, 10), { depth: null }));
+        logger.error(inspect(errors.slice(0, 10), { depth: null }));
         throw new Error('Failed to upload some items');
       }
 
