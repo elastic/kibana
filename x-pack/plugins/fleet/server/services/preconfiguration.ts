@@ -22,8 +22,8 @@ import type {
 } from '../../common';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  normalizeHostsForAgents,
   SO_SEARCH_LIMIT,
+  normalizeHostsForAgents,
 } from '../../common';
 import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
