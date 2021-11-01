@@ -21,7 +21,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import { BASE_PATH, INTERNAL_TEST_ROUTE } from '../../../common/constants';
-import SessionView from '../SessionView';
+import { SessionView } from '../SessionView';
 
 const testSessionId = '4321';
 

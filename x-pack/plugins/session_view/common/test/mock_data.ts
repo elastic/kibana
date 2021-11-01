@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IProcessEvent } from '../../public/hooks/use_process_tree';
 
-const mockData: IProcessEvent[] = [
+export const mockData: IProcessEvent[] = [
   {
     '@timestamp': 'Thu Oct 14 2021 12: 06: 48 GMT-0700 (Pacific Daylight Time)',
     event: {
@@ -300,5 +301,3 @@ const mockData: IProcessEvent[] = [
     },
   },
 ];
-
-export default mockData;

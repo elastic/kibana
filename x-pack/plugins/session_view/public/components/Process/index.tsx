@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, MouseEvent } from 'react';
-import { IProcess } from '../../hooks/use_process_tree';
+import React, { useState, useEffect, MouseEvent, KeyboardEvent } from 'react';
 import { EuiButton, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { IProcess } from '../../hooks/use_process_tree';
 
 const TREE_INDENT = 32;
 
@@ -22,12 +22,18 @@ interface IProcessDeps {
  * Renders a node on the process tree
  * TODO: as well as sections for tty output, alerts and file redirection.
  */
-function Process({ process, isSessionLeader = false, depth = 0, onProcessSelected }: IProcessDeps) {
+export function Process({
+  process,
+  isSessionLeader = false,
+  depth = 0,
+  onProcessSelected,
+}: IProcessDeps) {
   const { euiTheme } = useEuiTheme();
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
 
   useEffect(() => {
     setChildrenExpanded(isSessionLeader || process.autoExpand);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [process.autoExpand]);
 
   const darkTextCSS = `
@@ -119,9 +125,9 @@ function Process({ process, isSessionLeader = false, depth = 0, onProcessSelecte
    * gets border, bg and hover colors for a process
    */
   function getProcessColors() {
-    let bgColor = 'none';
-    let hoverColor = '#6B5FC6';
-    let borderColor = 'transparent';
+    const bgColor = 'none';
+    const hoverColor = '#6B5FC6';
+    const borderColor = 'transparent';
 
     // if (props.isSummaryMatch) {
     //   borderColor = '#8070F1'
@@ -184,8 +190,7 @@ function Process({ process, isSessionLeader = false, depth = 0, onProcessSelecte
   `;
 
   function renderSessionLeader() {
-    const event = process.getLatest();
-    const { name, user } = event.process;
+    const { name, user } = process.getLatest().process;
     const sessionIcon = interactive ? 'consoleApp' : 'compute';
 
     return (
@@ -200,16 +205,15 @@ function Process({ process, isSessionLeader = false, depth = 0, onProcessSelecte
   }
 
   // TODO: not customizable for now (cmd previously offered a template string to render)
-  const template = (process: IProcess) => {
-    const event = process.getLatest();
-    const { args, working_directory } = event.process;
-    const { searchMatched } = process;
+  const template = (templateProcess: IProcess) => {
+    const { args, working_directory: workingDirectory } = templateProcess.getLatest().process;
+    const { searchMatched } = templateProcess;
 
     if (searchMatched !== null) {
       const regex = new RegExp(searchMatched);
 
-      //TODO: should we allow some form of customization via settings?
-      let text = `${working_directory} ${args.join(' ')}`;
+      // TODO: should we allow some form of customization via settings?
+      let text = `${workingDirectory} ${args.join(' ')}`;
 
       text = text.replace(regex, (match) => {
         return `<span style="${searchHighlightCSS}">${match}</span>`;
@@ -217,6 +221,7 @@ function Process({ process, isSessionLeader = false, depth = 0, onProcessSelecte
 
       return (
         <>
+          {/* eslint-disable-next-line react/no-danger */}
           <span dangerouslySetInnerHTML={{ __html: text }} />
         </>
       );
@@ -228,7 +233,7 @@ function Process({ process, isSessionLeader = false, depth = 0, onProcessSelecte
 
     return (
       <>
-        <span css={workingDirCSS}>{working_directory}</span>&nbsp;
+        <span css={workingDirCSS}>{workingDirectory}</span>&nbsp;
         <span css={darkTextCSS}>{args[0]}</span>&nbsp;
         {args.slice(1).join(' ')}
       </>
@@ -268,12 +273,28 @@ function Process({ process, isSessionLeader = false, depth = 0, onProcessSelecte
     onProcessSelected(process);
   }
 
+  /**
+   * calls up to terminal to show details for this command
+   */
+  function onProcessKeyPress(e: KeyboardEvent<HTMLDivElement>): void {
+    e.stopPropagation();
+
+    const selection = window.getSelection();
+
+    // do not select the command if the user was just selecting text for copy.
+    if (selection && selection.type === 'Range') {
+      return;
+    }
+
+    onProcessSelected(process);
+  }
+
   const id = process.getEntityID();
 
   return (
     <>
       <div data-id={id} key={id} css={processCSS}>
-        <div css={wrapperCSS} onClick={onProcessClicked}>
+        <div css={wrapperCSS} onClick={onProcessClicked} onKeyPress={onProcessKeyPress}>
           {isSessionLeader ? renderSessionLeader() : renderProcess()}
           {renderButtons()}
         </div>
@@ -282,5 +303,3 @@ function Process({ process, isSessionLeader = false, depth = 0, onProcessSelecte
     </>
   );
 }
-
-export default Process;

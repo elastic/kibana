@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export * from './constants';
+export {
+  PLUGIN_ID,
+  PLUGIN_NAME,
+  BASE_PATH,
+  INTERNAL_TEST_ROUTE,
+  TEST_SAVED_OBJECT,
+} from './constants';

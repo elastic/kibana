@@ -5,10 +5,10 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import ProcessTree from '../ProcessTree';
-import mockData from '../../../common/test/mock_data';
-import { IProcess } from '../../hooks/use_process_tree';
 import { EuiSearchBar, EuiSearchBarOnChangeArgs } from '@elastic/eui';
+import { ProcessTree } from '../ProcessTree';
+import { mockData } from '../../../common/test/mock_data';
+import { IProcess } from '../../hooks/use_process_tree';
 
 interface ISessionViewDeps {
   sessionId: string;
@@ -24,8 +24,8 @@ interface ISessionViewDeps {
  * - Search results navigation
  * - Settings menu (needs design)
  */
-const SessionView = ({ sessionId }: ISessionViewDeps) => {
-  const [query, setQuery] = useState('');
+export const SessionView = ({ sessionId }: ISessionViewDeps) => {
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedProcess, setSelectedProcess] = useState<IProcess | null>(null);
 
   const processTreeCSS = `
@@ -40,20 +40,20 @@ const SessionView = ({ sessionId }: ISessionViewDeps) => {
 
   const onSearch = ({ query }: EuiSearchBarOnChangeArgs) => {
     if (query) {
-      setQuery(query.text);
+      setSearchQuery(query.text);
     } else {
-      setQuery('');
+      setSearchQuery('');
     }
   };
 
   return (
     <>
-      <EuiSearchBar query={query} onChange={onSearch} />
+      <EuiSearchBar query={searchQuery} onChange={onSearch} />
       <div css={processTreeCSS}>
         <ProcessTree
           sessionId={sessionId}
           forward={mockData}
-          searchQuery={query}
+          searchQuery={searchQuery}
           selectedProcess={selectedProcess}
           onProcessSelected={onProcessSelected}
         />
@@ -61,5 +61,3 @@ const SessionView = ({ sessionId }: ISessionViewDeps) => {
     </>
   );
 };
-
-export default SessionView;
