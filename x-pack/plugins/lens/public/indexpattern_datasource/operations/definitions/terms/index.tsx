@@ -242,11 +242,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     };
   },
   toEsAggsFn: (column, columnId, _indexPattern, layer, uiSettings, orderedColumnIds) => {
-    return buildExpressionFunction<AggFunctionsMapping['aggTerms']>('aggTerms', {
+    return buildExpressionFunction<AggFunctionsMapping['aggMultiTerms']>('aggMultiTerms', {
       id: columnId,
       enabled: true,
       schema: 'segment',
-      field: column.sourceField,
+      fields: [column.sourceField, 'geo.dest'],
       orderBy:
         column.params.orderBy.type === 'alphabetical'
           ? '_key'
@@ -256,10 +256,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       otherBucket: Boolean(column.params.otherBucket),
       otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
         defaultMessage: 'Other',
-      }),
-      missingBucket: column.params.otherBucket && column.params.missingBucket,
-      missingBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.missingLabel', {
-        defaultMessage: '(missing value)',
       }),
     }).toAst();
   },

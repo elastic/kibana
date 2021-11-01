@@ -14,6 +14,7 @@ export enum BUCKET_TYPES {
   DATE_RANGE = 'date_range',
   RANGE = 'range',
   TERMS = 'terms',
+  MULTI_TERMS = 'multi_terms',
   SIGNIFICANT_TERMS = 'significant_terms',
   GEOHASH_GRID = 'geohash_grid',
   GEOTILE_GRID = 'geotile_grid',
