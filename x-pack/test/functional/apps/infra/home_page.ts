@@ -119,6 +119,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { name: 'demo-stack-apache-01', value: 1.4, color: '#e7664c' },
         ]);
       });
+
+      it('toggle the timeline', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.openTimeline();
+        await pageObjects.infraHome.closeTimeline();
+      });
     });
 
     describe('alerts flyouts', () => {

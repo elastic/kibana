@@ -135,6 +135,16 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('waffleSortByDirection');
     },
 
+    async openTimeline() {
+      await testSubjects.click('toggleTimelineButton');
+      await testSubjects.existOrFail('timelineContainerOpen');
+    },
+
+    async closeTimeline() {
+      await testSubjects.click('toggleTimelineButton');
+      await testSubjects.existOrFail('timelineContainerClosed');
+    },
+
     async openInvenotrySwitcher() {
       await testSubjects.click('openInventorySwitcher');
       return await testSubjects.find('goToHost');
