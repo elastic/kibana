@@ -1086,7 +1086,7 @@ export function overridePackageInputs(
   for (const override of inputsOverride) {
     // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
     // policy template, so we only match on `type` in that case.
-    const originalInput = override.policy_template
+    let originalInput = override.policy_template
       ? inputs.find(
           (i) => i.type === override.type && i.policy_template === override.policy_template
         )
@@ -1112,13 +1112,14 @@ export function overridePackageInputs(
     }
 
     if (override.vars) {
-      // deepMerge mutate the input
-      deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      const indexOfInput = inputs.indexOf(originalInput);
+      inputs[indexOfInput] = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      originalInput = inputs[indexOfInput];
     }
 
     if (override.streams) {
       for (const stream of override.streams) {
-        const originalStream = originalInput?.streams.find(
+        let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
 
@@ -1132,8 +1133,12 @@ export function overridePackageInputs(
         }
 
         if (stream.vars) {
-          // deepMerge mutate the stream
-          deepMergeVars(originalStream, stream as InputsOverride);
+          const indexOfStream = originalInput.streams.indexOf(originalStream);
+          originalInput.streams[indexOfStream] = deepMergeVars(
+            originalStream,
+            stream as InputsOverride
+          );
+          originalStream = originalInput.streams[indexOfStream];
         }
       }
     }
