@@ -8,6 +8,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 export type { TestBed } from '@kbn/test/jest';
+// eslint-disable-next-line import/no-extraneous-dependencies
 export { registerTestBed } from '@kbn/test/jest';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
