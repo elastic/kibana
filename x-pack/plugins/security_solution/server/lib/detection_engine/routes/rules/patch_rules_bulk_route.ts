@@ -194,12 +194,11 @@ export const patchRulesBulkRoute = (
               exceptionsList,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
-              const ruleStatuses = await ruleStatusClient.find({
-                logsCount: 1,
+              const ruleStatus = await ruleStatusClient.getCurrentStatus({
                 ruleId: rule.id,
                 spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, ruleStatuses, isRuleRegistryEnabled);
+              return transformValidateBulkError(rule.id, rule, ruleStatus, isRuleRegistryEnabled);
             } else {
               return getIdBulkError({ id, ruleId });
             }
