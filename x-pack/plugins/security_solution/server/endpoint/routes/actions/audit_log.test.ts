@@ -25,6 +25,7 @@ import { parseExperimentalConfigValue } from '../../../../common/experimental_fe
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
@@ -130,6 +131,7 @@ describe('Action Log API', () => {
       const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
       const routerMock = httpServiceMock.createRouter();
       endpointAppContextService = new EndpointAppContextService();
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
       registerActionAuditLogRoutes(routerMock, {

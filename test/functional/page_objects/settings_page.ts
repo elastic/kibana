@@ -43,10 +43,10 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickKibanaIndexPatterns() {
-    this.log.debug('clickKibanaIndexPatterns link');
+    this.log.debug('clickKibanaDataViews link');
     const currentUrl = await this.browser.getCurrentUrl();
-    if (!currentUrl.endsWith('indexPatterns')) {
-      await this.testSubjects.click('indexPatterns');
+    if (!currentUrl.endsWith('dataViews')) {
+      await this.testSubjects.click('dataViews');
     }
 
     await this.header.waitUntilLoadingHasFinished();
@@ -384,10 +384,10 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();
       this.log.info('currentUrl', currentUrl);
-      if (!currentUrl.match(/indexPatterns\/.+\?/)) {
-        throw new Error('Index pattern not created');
+      if (!currentUrl.match(/dataViews\/.+\?/)) {
+        throw new Error('Data view not created');
       } else {
-        this.log.debug('Index pattern created: ' + currentUrl);
+        this.log.debug('Data view created: ' + currentUrl);
       }
     });
 
@@ -556,6 +556,20 @@ export class SettingsPageObject extends FtrService {
     if (doSaveField) {
       await this.clickSaveField();
     }
+  }
+
+  async addFieldFilter(name: string) {
+    await this.testSubjects.click('tab-sourceFilters');
+    await this.find.setValue('.euiFieldText', name);
+    await this.find.clickByButtonText('Add');
+    const table = await this.find.byClassName('euiTable');
+    await this.retry.waitFor('field filter to be added', async () => {
+      const tableCells = await table.findAllByCssSelector('td');
+      const fieldNames = await mapAsync(tableCells, async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      });
+      return fieldNames.includes(name);
+    });
   }
 
   public async confirmSave() {

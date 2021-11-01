@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable } from 'rxjs';
 import type { HttpStart } from 'kibana/public';
 import { HttpService } from '../http_service';
@@ -484,13 +484,13 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     getVisualizerFieldHistograms({
-      indexPatternTitle,
+      indexPattern,
       query,
       fields,
       samplerShardSize,
       runtimeMappings,
     }: {
-      indexPatternTitle: string;
+      indexPattern: string;
       query: any;
       fields: FieldHistogramRequestConfig[];
       samplerShardSize?: number;
@@ -504,7 +504,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
 
       return httpService.http<any>({
-        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPatternTitle}`,
+        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPattern}`,
         method: 'POST',
         body,
       });

@@ -31,6 +31,9 @@ import {
   LabelOverflowConstraint,
   DisplayValueStyle,
   RecursivePartial,
+  AxisStyle,
+  GridLineStyle,
+  ScaleType,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import type {
@@ -89,6 +92,7 @@ export type XYChartRenderProps = XYChartProps & {
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
   timeZone: string;
+  useLegacyTimeAxis: boolean;
   minInterval: number | undefined;
   interactive?: boolean;
   onClickValue: (data: LensFilterEvent['data']) => void;
@@ -129,6 +133,7 @@ export const getXyChartRenderer = (dependencies: {
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
+  useLegacyTimeAxis: boolean;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
@@ -159,6 +164,7 @@ export const getXyChartRenderer = (dependencies: {
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
+          useLegacyTimeAxis={dependencies.useLegacyTimeAxis}
           minInterval={calculateMinInterval(config)}
           interactive={handlers.isInteractive()}
           onClickValue={onClickValue}
@@ -234,6 +240,7 @@ export function XYChart({
   onSelectRange,
   interactive = true,
   syncColors,
+  useLegacyTimeAxis,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -319,15 +326,15 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => layer.splitAccessor);
 
-  const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
+  const isTimeViz = Boolean(data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time'));
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
     filteredLayers,
     data,
     minInterval,
-    Boolean(isTimeViz),
-    Boolean(isHistogramViz)
+    isTimeViz,
+    isHistogramViz
   );
 
   const yAxesMap = {
@@ -554,6 +561,72 @@ export function XYChart({
     floatingColumns: legend?.floatingColumns ?? 1,
   } as LegendPositionConfig;
 
+  // todo be moved in the chart plugin
+  const shouldUseNewTimeAxis = isTimeViz && !useLegacyTimeAxis && !shouldRotate;
+
+  const gridLineStyle: RecursivePartial<GridLineStyle> = shouldUseNewTimeAxis
+    ? {
+        visible: gridlinesVisibilitySettings?.x,
+        strokeWidth: 0.1,
+        stroke: darkMode ? 'white' : 'black',
+      }
+    : {
+        visible: gridlinesVisibilitySettings?.x,
+        strokeWidth: 2,
+      };
+  const xAxisStyle: RecursivePartial<AxisStyle> = shouldUseNewTimeAxis
+    ? {
+        tickLabel: {
+          visible: Boolean(tickLabelsVisibilitySettings?.x),
+          rotation: 0, // rotation is disabled on new time axis
+          fontSize: 11,
+          padding:
+            referenceLinePaddings.bottom != null ? { inner: referenceLinePaddings.bottom } : 0,
+          alignment: {
+            vertical: Position.Bottom,
+            horizontal: Position.Left,
+          },
+          offset: {
+            x: 1.5,
+            y: 0,
+          },
+        },
+        axisLine: {
+          stroke: darkMode ? 'lightgray' : 'darkgray',
+          strokeWidth: 1,
+        },
+        tickLine: {
+          size: 12,
+          strokeWidth: 0.15,
+          stroke: darkMode ? 'white' : 'black',
+          padding: -10,
+          visible: Boolean(tickLabelsVisibilitySettings?.x),
+        },
+        axisTitle: {
+          visible: axisTitlesVisibilitySettings.x,
+          padding:
+            !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
+              ? { inner: referenceLinePaddings.bottom }
+              : undefined,
+        },
+      }
+    : {
+        tickLabel: {
+          visible: tickLabelsVisibilitySettings?.x,
+          rotation: labelsOrientation?.x,
+          padding:
+            referenceLinePaddings.bottom != null
+              ? { inner: referenceLinePaddings.bottom }
+              : undefined,
+        },
+        axisTitle: {
+          visible: axisTitlesVisibilitySettings.x,
+          padding:
+            !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
+              ? { inner: referenceLinePaddings.bottom }
+              : undefined,
+        },
+      };
   return (
     <Chart ref={chartRef}>
       <Settings
@@ -594,18 +667,22 @@ export function XYChart({
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
         }}
-        allowBrushingLastHistogramBucket={Boolean(isTimeViz)}
+        allowBrushingLastHistogramBin={isTimeViz}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
         onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
         onElementClick={interactive ? clickHandler : undefined}
-        legendAction={getLegendAction(
-          filteredLayers,
-          data.tables,
-          onClickValue,
-          formatFactory,
-          layersAlreadyFormatted
-        )}
+        legendAction={
+          interactive
+            ? getLegendAction(
+                filteredLayers,
+                data.tables,
+                onClickValue,
+                formatFactory,
+                layersAlreadyFormatted
+              )
+            : undefined
+        }
         showLegendExtra={isHistogramViz && valuesInLegend}
       />
 
@@ -613,29 +690,11 @@ export function XYChart({
         id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
-        gridLine={{
-          visible: gridlinesVisibilitySettings?.x,
-          strokeWidth: 2,
-        }}
+        gridLine={gridLineStyle}
         hide={filteredLayers[0].hide || !filteredLayers[0].xAccessor}
         tickFormat={(d) => safeXAccessorLabelRenderer(d)}
-        style={{
-          tickLabel: {
-            visible: tickLabelsVisibilitySettings?.x,
-            rotation: labelsOrientation?.x,
-            padding:
-              referenceLinePaddings.bottom != null
-                ? { inner: referenceLinePaddings.bottom }
-                : undefined,
-          },
-          axisTitle: {
-            visible: axisTitlesVisibilitySettings.x,
-            padding:
-              !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
-                ? { inner: referenceLinePaddings.bottom }
-                : undefined,
-          },
-        }}
+        style={xAxisStyle}
+        timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
       />
 
       {yAxesConfiguration.map((axis) => {
@@ -763,6 +822,8 @@ export function XYChart({
             axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
           );
 
+          const formatter = table?.columns.find((column) => column.id === accessor)?.meta?.params;
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: isStacked ? [xAccessor as string] : [],
@@ -771,7 +832,10 @@ export function XYChart({
             yAccessors: [accessor],
             data: rows,
             xScaleType: xAccessor ? xScaleType : 'ordinal',
-            yScaleType,
+            yScaleType:
+              formatter?.id === 'bytes' && yScaleType === ScaleType.Linear
+                ? ScaleType.LinearBinary
+                : yScaleType,
             color: ({ yAccessor, seriesKeys }) => {
               const overwriteColor = getSeriesColor(layer, accessor);
               if (overwriteColor !== null) {

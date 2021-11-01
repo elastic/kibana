@@ -8,6 +8,7 @@
 
 import type { ISearchSource } from '../../../data/public';
 import { DiscoverGridSettingsColumn } from '../application/components/discover_grid/types';
+import { VIEW_MODE } from '../application/apps/main/components/view_mode_toggle';
 
 /** @internal **/
 export interface SavedSearchAttributes {
@@ -22,6 +23,8 @@ export interface SavedSearchAttributes {
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;
   };
+  viewMode?: VIEW_MODE;
+  hideAggregatedPreview?: boolean;
 }
 
 /** @internal **/
@@ -44,4 +47,6 @@ export interface SavedSearch {
     aliasTargetId?: string;
     errorJSON?: string;
   };
+  viewMode?: VIEW_MODE;
+  hideAggregatedPreview?: boolean;
 }

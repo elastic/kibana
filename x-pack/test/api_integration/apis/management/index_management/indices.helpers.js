@@ -29,8 +29,6 @@ export const registerHelpers = ({ supertest }) => {
 
   const forceMerge = (index, args) => executeActionOnIndices(index, 'forcemerge', args);
 
-  const freeze = (index) => executeActionOnIndices(index, 'freeze');
-
   const unfreeze = (index) => executeActionOnIndices(index, 'unfreeze');
 
   const clearCache = (index) => executeActionOnIndices(index, 'clear_cache');
@@ -47,7 +45,6 @@ export const registerHelpers = ({ supertest }) => {
     flushIndex,
     refreshIndex,
     forceMerge,
-    freeze,
     unfreeze,
     list,
     reload,

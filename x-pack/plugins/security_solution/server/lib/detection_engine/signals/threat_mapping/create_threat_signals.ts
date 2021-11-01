@@ -15,39 +15,39 @@ import { buildExecutionIntervalValidator, combineConcurrentResults } from './uti
 import { buildThreatEnrichment } from './build_threat_enrichment';
 
 export const createThreatSignals = async ({
-  tuple,
-  threatMapping,
-  query,
-  inputIndex,
-  type,
-  filters,
-  language,
-  savedId,
-  services,
+  alertId,
+  buildRuleMessage,
+  bulkCreate,
+  completeRule,
+  concurrentSearches,
+  eventsTelemetry,
   exceptionItems,
+  filters,
+  inputIndex,
+  itemsPerSearch,
+  language,
   listClient,
   logger,
-  eventsTelemetry,
-  alertId,
   outputIndex,
-  ruleSO,
+  query,
+  savedId,
   searchAfterSize,
+  services,
   threatFilters,
-  threatQuery,
-  threatLanguage,
-  buildRuleMessage,
   threatIndex,
   threatIndicatorPath,
-  concurrentSearches,
-  itemsPerSearch,
-  bulkCreate,
+  threatLanguage,
+  threatMapping,
+  threatQuery,
+  tuple,
+  type,
   wrapHits,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
-  const params = ruleSO.attributes.params;
+  const params = completeRule.ruleParams;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
   const perPage = concurrentSearches * itemsPerSearch;
   const verifyExecutionCanProceed = buildExecutionIntervalValidator(
-    ruleSO.attributes.schedule.interval
+    completeRule.ruleConfig.schedule.interval
   );
 
   let results: SearchAfterAndBulkCreateReturnType = {
@@ -108,28 +108,28 @@ export const createThreatSignals = async ({
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
       (slicedChunk) =>
         createThreatSignal({
-          tuple,
-          threatEnrichment,
-          threatMapping,
-          query,
-          inputIndex,
-          type,
-          filters,
-          language,
-          savedId,
-          services,
+          alertId,
+          buildRuleMessage,
+          bulkCreate,
+          completeRule,
+          currentResult: results,
+          currentThreatList: slicedChunk,
+          eventsTelemetry,
           exceptionItems,
+          filters,
+          inputIndex,
+          language,
           listClient,
           logger,
-          eventsTelemetry,
-          alertId,
           outputIndex,
-          ruleSO,
+          query,
+          savedId,
           searchAfterSize,
-          buildRuleMessage,
-          currentThreatList: slicedChunk,
-          currentResult: results,
-          bulkCreate,
+          services,
+          threatEnrichment,
+          threatMapping,
+          tuple,
+          type,
           wrapHits,
         })
     );

@@ -963,18 +963,18 @@ export default ({ getService }: FtrProviderContext) => {
 
   const testDataListNegative = [
     {
-      testTitleSuffix: 'for non existent index pattern',
+      testTitleSuffix: 'for non existent data view',
       module: 'sample_data_weblogs',
       user: USER.ML_POWERUSER,
       requestBody: {
-        indexPatternName: 'non-existent-index-pattern',
+        indexPatternName: 'non-existent-data-view',
         startDatafeed: false,
       },
       expected: {
         responseCode: 400,
         error: 'Bad Request',
         message:
-          "Module's jobs contain custom URLs which require a kibana index pattern (non-existent-index-pattern) which cannot be found.",
+          "Module's jobs contain custom URLs which require a Kibana data view (non-existent-data-view) which cannot be found.",
       },
     },
     {

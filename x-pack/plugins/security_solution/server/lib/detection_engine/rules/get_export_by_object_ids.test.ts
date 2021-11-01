@@ -16,6 +16,9 @@ import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
+
+const exceptionsClient = getExceptionListClientMock();
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { requestContextMock } from '../routes/__mocks__/request_context';
 
@@ -42,6 +45,7 @@ describe.each([
       const objects = [{ rule_id: 'rule-1' }];
       const exports = await getExportByObjectIds(
         rulesClient,
+        exceptionsClient,
         clients.savedObjectsClient,
         objects,
         logger,
@@ -94,7 +98,13 @@ describe.each([
           exceptions_list: getListArrayMock(),
         },
         exportDetails: {
-          exported_count: 1,
+          exported_exception_list_count: 0,
+          exported_exception_list_item_count: 0,
+          exported_rules_count: 1,
+          missing_exception_list_item_count: 0,
+          missing_exception_list_items: [],
+          missing_exception_lists: [],
+          missing_exception_lists_count: 0,
           missing_rules: [],
           missing_rules_count: 0,
         },
@@ -119,6 +129,7 @@ describe.each([
       const objects = [{ rule_id: 'rule-1' }];
       const exports = await getExportByObjectIds(
         rulesClient,
+        exceptionsClient,
         clients.savedObjectsClient,
         objects,
         logger,
@@ -127,7 +138,8 @@ describe.each([
       expect(exports).toEqual({
         rulesNdjson: '',
         exportDetails:
-          '{"exported_count":0,"missing_rules":[{"rule_id":"rule-1"}],"missing_rules_count":1}\n',
+          '{"exported_rules_count":0,"missing_rules":[{"rule_id":"rule-1"}],"missing_rules_count":1,"exported_exception_list_count":0,"exported_exception_list_item_count":0,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}\n',
+        exceptionLists: '',
       });
     });
   });

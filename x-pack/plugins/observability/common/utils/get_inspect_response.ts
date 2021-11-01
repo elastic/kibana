@@ -60,12 +60,12 @@ function getStats({
       value: `${kibanaRequest.route.method.toUpperCase()} ${kibanaRequest.route.path}`,
     },
     indexPattern: {
-      label: i18n.translate('xpack.observability.inspector.stats.indexPatternLabel', {
-        defaultMessage: 'Index pattern',
+      label: i18n.translate('xpack.observability.inspector.stats.dataViewLabel', {
+        defaultMessage: 'Data view',
       }),
       value: esRequestParams.index,
-      description: i18n.translate('xpack.observability.inspector.stats.indexPatternDescription', {
-        defaultMessage: 'The index pattern that connected to the Elasticsearch indices.',
+      description: i18n.translate('xpack.observability.inspector.stats.dataViewDescription', {
+        defaultMessage: 'The data view that connected to the Elasticsearch indices.',
       }),
     },
   };

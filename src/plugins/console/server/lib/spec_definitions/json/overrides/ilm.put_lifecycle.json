@@ -31,7 +31,7 @@
                 "forcemerge": {
                   "max_num_segments": 1
                 }
-              }  
+              }
             },
             "min_age": "1d",
             "actions": {
@@ -69,7 +69,6 @@
                 "set_priority": {
                   "priority": 0
                 },
-                "freeze": {},
                 "allocate": {
                   "number_of_replicas": 1,
                   "include": {
@@ -85,14 +84,13 @@
                     "_ip": ""
                   }
                 }
-              }  
+              }
             },
             "min_age": "1d",
             "actions": {
               "set_priority": {
                 "priority": 0
               },
-              "freeze": {},
               "unfollow": {},
               "allocate": {
                 "number_of_replicas": 1,
@@ -123,7 +121,7 @@
                   "max_docs": 1000,
                   "max_size": "5gb"
                 }
-              }  
+              }
             },
             "min_age": "1d",
             "actions": {

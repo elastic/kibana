@@ -17,7 +17,7 @@ The service allows plugins to:
 - to implement custom authentication and authorization strategy.
 
 <DocCallOut>
-  See [the server-side HTTP service API docs](https://github.com/elastic/kibana/blob/master/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md)
+  See [the server-side HTTP service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md)
 </DocCallOut>
 
 **Registering a basic GET endpoint**
@@ -55,7 +55,7 @@ export class MyPlugin implements Plugin {
 ```
 
 <DocCallOut>
-  See [the routing example plugin](https://github.com/elastic/kibana/blob/master/examples/routing_example) for more route registration examples.
+  See [the routing example plugin](https://github.com/elastic/kibana/blob/main/examples/routing_example) for more route registration examples.
 </DocCallOut>
 
 ## Consuming the endpoint from the client-side
@@ -79,9 +79,9 @@ async function fetchData(http: HttpStart, id: string) {
 ```
 
 <DocCallOut>
-  See [the client-side HTTP service API docs](https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.httpsetup.md)
+  See [the client-side HTTP service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.httpsetup.md)
 </DocCallOut>
 
 <DocCallOut>
-  See [the routing example plugin](https://github.com/elastic/kibana/blob/master/examples/routing_example) for more endpoint consumption examples.
+  See [the routing example plugin](https://github.com/elastic/kibana/blob/main/examples/routing_example) for more endpoint consumption examples.
 </DocCallOut>

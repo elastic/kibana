@@ -410,7 +410,8 @@ describe('indicator match', () => {
         loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       });
 
-      it('Creates and activates a new Indicator Match rule', () => {
+      // Skipping until we fix dupe mitigation
+      it.skip('Creates and activates a new Indicator Match rule', () => {
         waitForAlertsPanelToBeLoaded();
         waitForAlertsIndexToBeCreated();
         goToManageAlertsDetectionRules();
@@ -508,7 +509,7 @@ describe('indicator match', () => {
           .should('have.text', getNewThreatIndicatorRule().riskScore);
       });
 
-      it('Investigate alert in timeline', () => {
+      it.skip('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();

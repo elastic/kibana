@@ -248,6 +248,7 @@ export const EventFiltersListPage = memo(() => {
           </EuiButton>
         )
       }
+      hideHeader={!doesDataExist}
     >
       {showFlyout && (
         <EventFiltersFlyout

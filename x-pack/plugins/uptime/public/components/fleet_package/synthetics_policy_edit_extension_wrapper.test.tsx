@@ -1075,6 +1075,59 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
   });
 
+  it.each([
+    [true, 'Testing script'],
+    [false, 'Inline script'],
+  ])(
+    'browser monitors - auto selects the right tab depending on source metadata',
+    async (isGeneratedScript, text) => {
+      const currentPolicy = {
+        ...defaultCurrentPolicy,
+        inputs: [
+          {
+            ...defaultNewPolicy.inputs[0],
+            enabled: false,
+          },
+          {
+            ...defaultNewPolicy.inputs[1],
+            enabled: false,
+          },
+          {
+            ...defaultNewPolicy.inputs[2],
+            enabled: false,
+          },
+          {
+            ...defaultNewPolicy.inputs[3],
+            enabled: true,
+            streams: [
+              {
+                ...defaultNewPolicy.inputs[3].streams[0],
+                vars: {
+                  ...defaultNewPolicy.inputs[3].streams[0].vars,
+                  'source.inline.script': {
+                    type: 'yaml',
+                    value: JSON.stringify('step(() => {})'),
+                  },
+                  __ui: {
+                    type: 'yaml',
+                    value: JSON.stringify({
+                      script_source: {
+                        is_generated_script: isGeneratedScript,
+                      },
+                    }),
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { getByText } = render(<WrappedComponent policy={currentPolicy} />);
+
+      expect(getByText(text)).toBeInTheDocument();
+    }
+  );
   it('hides tls fields when metadata.is_tls_enabled is false', async () => {
     const { getByLabelText, queryByLabelText } = render(
       <WrappedComponent

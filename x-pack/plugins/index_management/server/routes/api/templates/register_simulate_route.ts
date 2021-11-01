@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
@@ -31,7 +31,7 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
             // Issue: https://github.com/elastic/elasticsearch/issues/59152
             index_patterns: ['a_fake_index_pattern_that_wont_match_any_indices'],
           },
-        });
+        } as estypes.IndicesSimulateTemplateRequest);
 
         return response.ok({ body: templatePreview });
       } catch (error) {

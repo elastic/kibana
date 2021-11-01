@@ -19,7 +19,7 @@ export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = asy
         count,
       },
     },
-  } = await uptimeEsClient.count({ terminateAfter: 1 });
+  } = await uptimeEsClient.count({ terminate_after: 1 });
   return {
     indices,
     indexExists: total > 0,

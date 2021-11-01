@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATAFEED_STATE } from '../../../../plugins/ml/common/constants/states';
 
