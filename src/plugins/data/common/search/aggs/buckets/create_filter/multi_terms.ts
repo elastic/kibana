@@ -8,10 +8,11 @@
 
 import { buildPhrasesFilter, buildExistsFilter, buildPhraseFilter, Filter } from '@kbn/es-query';
 import { IBucketAggConfig } from '../bucket_agg_type';
+import { MultiFieldKey } from '../multi_field_key';
 
 export const createFilterMultiTerms = (
   aggConfig: IBucketAggConfig,
-  key: string[],
+  key: MultiFieldKey,
   params: any
 ): Filter => {
   const fields = aggConfig.params.fields;
@@ -32,7 +33,7 @@ export const createFilterMultiTerms = (
 
     return filters;
   }
-  const partials = key.map((partialKey, i) =>
+  const partials = key.keys.map((partialKey, i) =>
     buildPhraseFilter(indexPattern.getFieldByName(fields[i])!, partialKey, indexPattern)
   );
   return {
