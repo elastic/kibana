@@ -201,11 +201,9 @@ export default function ({ getService }: FtrProviderContext) {
           'csv:quoteValues': true,
         });
       });
+
       after(async () => {
         await reportingAPI.teardownLogs();
-        await kibanaServer.uiSettings.update({
-          'csv:quoteValues': false,
-        });
       });
 
       it('With filters and timebased data, default to UTC', async () => {
@@ -282,10 +280,26 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
       });
+    });
+
+    describe('nanosecond formatting', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
+        await reportingAPI.initLogs();
+        await kibanaServer.uiSettings.update({
+          'csv:quoteValues': true,
+        });
+      });
+
+      after(async () => {
+        await reportingAPI.teardownLogs();
+        await kibanaServer.uiSettings.update({
+          'csv:quoteValues': false,
+        });
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/nanos');
+      });
 
       it('Formatted date_nanos data, UTC timezone', async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
-
         const res = await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
             searchSource: {
@@ -303,13 +317,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
-
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/nanos');
       });
 
       it('Formatted date_nanos data, custom timezone (New York)', async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
-
         const res = await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
             browserTimezone: 'America/New_York',
@@ -328,12 +338,24 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
-
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/nanos');
       });
     });
 
     describe('non-timebased', () => {
+      before(async () => {
+        await reportingAPI.initLogs();
+        await kibanaServer.uiSettings.update({
+          'csv:quoteValues': true,
+        });
+      });
+
+      after(async () => {
+        await reportingAPI.teardownLogs();
+        await kibanaServer.uiSettings.update({
+          'csv:quoteValues': false,
+        });
+      });
+
       it('Handle _id and _index columns', async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
 
@@ -359,8 +381,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('With filters and non-timebased data', async () => {
-        // load test data that contains a saved search and documents
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/sales');
+        await kibanaServer.uiSettings.update({
+          defaultIndex: 'timeless-sales',
+        });
 
         const {
           status: resStatus,
@@ -392,6 +416,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('validation', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          'csv:quoteValues': true,
+        });
+      });
+
       it('Return a 404', async () => {
         const { body } = (await generateAPI.getCSVFromSearchSource(
           getMockJobParams({

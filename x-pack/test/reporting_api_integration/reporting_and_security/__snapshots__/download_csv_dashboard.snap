@@ -191,6 +191,20 @@ exports[`Reporting APIs CSV Generation from SearchSource date formatting With fi
 "
 `;
 
+exports[`Reporting APIs CSV Generation from SearchSource nanosecond formatting Formatted date_nanos data, UTC timezone 1`] = `
+"date,message
+\\"Jan 1, 2015 @ 12:10:30.123456789\\",\\"Hello 2\\"
+\\"Jan 1, 2015 @ 12:10:30.000000000\\",\\"Hello 1\\"
+"
+`;
+
+exports[`Reporting APIs CSV Generation from SearchSource nanosecond formatting Formatted date_nanos data, custom timezone (New York) 1`] = `
+"date,message
+\\"Jan 1, 2015 @ 07:10:30.123456789\\",\\"Hello 2\\"
+\\"Jan 1, 2015 @ 07:10:30.000000000\\",\\"Hello 1\\"
+"
+`;
+
 exports[`Reporting APIs CSV Generation from SearchSource non-timebased Handle _id and _index columns 1`] = `
 "date,message,\\"_id\\",\\"_index\\"
 \\"Jan 1, 2015 @ 12:10:30.123456789\\",\\"Hello 2\\",2,nanos
