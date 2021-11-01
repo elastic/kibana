@@ -144,7 +144,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'trial', archives: ['8.0.0'] },
     () => {
       // putting this into a single `it` because the responses depend on each other
-      it('queries the search strategy and returns results', async () => {
+      it.skip('queries the search strategy and returns results', async () => {
         const intialResponse = await supertest
           .post(`/internal/bsearch`)
           .set('kbn-xsrf', 'foo')

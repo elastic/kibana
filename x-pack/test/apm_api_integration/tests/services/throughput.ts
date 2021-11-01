@@ -64,7 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when(
-    'data is loaded',
+    'Throughput when data is loaded',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       describe('Throughput chart api', () => {
