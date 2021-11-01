@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
-import { DataView } from '../../../../data_views/common';
+import { DataViewListItem } from '../../../../data_views/common';
 
 import { ToolbarButton, ToolbarButtonProps } from '../../../../kibana_react/public';
 
@@ -21,14 +21,14 @@ export type DataViewTriggerProps = ToolbarButtonProps & {
 export function DataViewPicker({
   dataViews,
   selectedDataViewId,
-  onChangeIndexPattern,
+  onChangeDataViewId,
   trigger,
   selectableProps,
 }: {
-  dataViews: DataView[];
+  dataViews: DataViewListItem[];
   selectedDataViewId?: string;
   trigger: DataViewTriggerProps;
-  onChangeIndexPattern: (newId: string) => void;
+  onChangeDataViewId: (newId: string) => void;
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -67,7 +67,7 @@ export function DataViewPicker({
         panelPaddingSize="s"
         ownFocus
       >
-        <div>
+        <div style={{ width: 368 }}>
           <EuiPopoverTitle>
             {i18n.translate('presentationUtil.dataViewPicker.changeDataViewTitle', {
               defaultMessage: 'Data view',
@@ -92,7 +92,7 @@ export function DataViewPicker({
               const choice = choices.find(({ checked }) => checked) as unknown as {
                 value: string;
               };
-              onChangeIndexPattern(choice.value);
+              onChangeDataViewId(choice.value);
               setPopoverIsOpen(false);
             }}
             searchProps={{
