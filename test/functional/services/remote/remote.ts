@@ -114,10 +114,14 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   });
 
   lifecycle.afterTestSuite.add(async () => {
-    const { width, height } = windowSizeStack.shift()!;
-    await driver.manage().window().setRect({ width, height });
+    const size = windowSizeStack.shift()!;
+    log.debug('restoring window size to', size);
+    await driver.manage().window().setRect(size);
+    log.debug('clearing sessionStorage');
     await clearBrowserStorage('sessionStorage');
+    log.debug('clearing localStorage');
     await clearBrowserStorage('localStorage');
+    log.debug('global afterTestSuite complete');
   });
 
   lifecycle.cleanup.add(async () => {

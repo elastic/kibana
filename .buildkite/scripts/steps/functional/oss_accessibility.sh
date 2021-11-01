@@ -8,6 +8,6 @@ echo --- OSS Accessibility Tests
 
 checks-reporter-with-killswitch "Kibana accessibility tests" \
   node scripts/functional_tests \
-    --debug --bail \
+    --verbose --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config test/accessibility/config.ts
