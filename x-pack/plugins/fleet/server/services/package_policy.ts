@@ -404,6 +404,7 @@ class PackagePolicyService {
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
+
       const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
       inputs = await this._compilePackagePolicyInputs(
         registryPkgInfo,
@@ -1085,7 +1086,7 @@ export function overridePackageInputs(
   for (const override of inputsOverride) {
     // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
     // policy template, so we only match on `type` in that case.
-    let originalInput = override.policy_template
+    const originalInput = override.policy_template
       ? inputs.find(
           (i) => i.type === override.type && i.policy_template === override.policy_template
         )
@@ -1111,12 +1112,13 @@ export function overridePackageInputs(
     }
 
     if (override.vars) {
-      originalInput = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      // deepMerge mutate the input
+      deepMergeVars(originalInput, override) as NewPackagePolicyInput;
     }
 
     if (override.streams) {
       for (const stream of override.streams) {
-        let originalStream = originalInput?.streams.find(
+        const originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
 
@@ -1130,10 +1132,20 @@ export function overridePackageInputs(
         }
 
         if (stream.vars) {
-          originalStream = deepMergeVars(originalStream, stream as InputsOverride);
+          // deepMerge mutate the stream
+          deepMergeVars(originalStream, stream as InputsOverride);
         }
       }
     }
+
+    // Filter all stream that have been removed from the input
+    originalInput.streams = originalInput.streams.filter((originalStream) => {
+      return (
+        override.streams?.some(
+          (s) => s.data_stream.dataset === originalStream.data_stream.dataset
+        ) ?? false
+      );
+    });
   }
 
   const resultingPackagePolicy: NewPackagePolicy = {
