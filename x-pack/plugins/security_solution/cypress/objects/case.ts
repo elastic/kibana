@@ -44,6 +44,14 @@ export interface IbmResilientConnectorOptions {
   incidentTypes: string[];
 }
 
+interface ServiceNowHealthResponse {
+  result: {
+    name: string;
+    scope: string;
+    version: string;
+  };
+}
+
 export const getCase1 = (): TestCase => ({
   name: 'This is the title of the case',
   tags: ['Tag1', 'Tag2'],
@@ -58,6 +66,14 @@ export const getServiceNowConnector = (): Connector => ({
   URL: 'https://www.test.service-now.com',
   username: 'Username Name',
   password: 'password',
+});
+
+export const getServiceNowITSMHealthResponse = (): ServiceNowHealthResponse => ({
+  result: {
+    name: 'Elastic',
+    scope: 'x_elas2_inc_int',
+    version: '1.0.0',
+  },
 });
 
 export const getJiraConnectorOptions = (): JiraConnectorOptions => ({

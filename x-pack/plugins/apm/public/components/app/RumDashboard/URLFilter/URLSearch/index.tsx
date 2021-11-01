@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import useDebounce from 'react-use/lib/useDebounce';
-import React, { useEffect, useState, FormEvent } from 'react';
-import { map } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { isEqual, map } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
-import { useFetcher } from '../../../../../hooks/use_fetcher';
 import { I18LABELS } from '../../translations';
 import { formatToSec } from '../../UXMetrics/KeyUXMetrics';
-import { SelectableUrlList } from './SelectableUrlList';
-import { UrlOption } from './RenderOption';
-import { useUxQuery } from '../../hooks/useUxQuery';
 import { getPercentileLabel } from '../../UXMetrics/translations';
+import { SelectableUrlList } from '../../../../../../../observability/public';
+import { selectableRenderOptions, UrlOption } from './render_option';
+import { useUrlSearch } from './use_url_search';
 
 interface Props {
   onChange: (value?: string[], excludedValue?: string[]) => void;
@@ -38,6 +37,7 @@ const formatOptions = (
 
   return urlItems.map((item) => ({
     label: item.url,
+    title: item.url,
     key: item.url,
     meta: [
       I18LABELS.pageViews + ': ' + item.count,
@@ -55,124 +55,146 @@ const formatOptions = (
   }));
 };
 
+const processItems = (items: UrlOption[]) => {
+  const includedItems = map(
+    items.filter(({ checked, isWildcard }) => checked === 'on' && !isWildcard),
+    'label'
+  );
+
+  const excludedItems = map(
+    items.filter(({ checked, isWildcard }) => checked === 'off' && !isWildcard),
+    'label'
+  );
+
+  const includedWildcards = map(
+    items.filter(({ checked, isWildcard }) => checked === 'on' && isWildcard),
+    'title'
+  );
+
+  const excludedWildcards = map(
+    items.filter(({ checked, isWildcard }) => checked === 'off' && isWildcard),
+    'title'
+  );
+
+  return { includedItems, excludedItems, includedWildcards, excludedWildcards };
+};
+
+const getWildcardLabel = (wildcard: string) => {
+  return i18n.translate('xpack.apm.urlFilter.wildcard', {
+    defaultMessage: 'Use wildcard *{wildcard}*',
+    values: { wildcard },
+  });
+};
+
 export function URLSearch({
   onChange: onFilterChange,
   updateSearchTerm,
 }: Props) {
-  const { uxUiFilters, urlParams } = useUrlParams();
-
-  const { transactionUrl, transactionUrlExcluded, ...restFilters } =
-    uxUiFilters;
+  const {
+    uxUiFilters: { transactionUrl, transactionUrlExcluded },
+    urlParams,
+  } = useUrlParams();
 
   const { searchTerm, percentile } = urlParams;
 
   const [popoverIsOpen, setPopoverIsOpen] = useState<boolean>(false);
 
-  const [searchValue, setSearchValue] = useState(searchTerm ?? '');
-
-  const [debouncedValue, setDebouncedValue] = useState(searchTerm ?? '');
+  const [searchValue, setSearchValue] = useState('');
 
   const [items, setItems] = useState<UrlOption[]>([]);
 
-  useDebounce(
-    () => {
-      setSearchValue(debouncedValue);
-    },
-    250,
-    [debouncedValue]
-  );
-
-  const uxQuery = useUxQuery();
-
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (uxQuery && popoverIsOpen) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/url-search',
-          params: {
-            query: {
-              ...uxQuery,
-              uiFilters: JSON.stringify(restFilters),
-              urlQuery: searchValue,
-            },
-          },
-        });
-      }
-      return Promise.resolve(null);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [uxQuery, searchValue, popoverIsOpen]
-  );
+  const { data, status } = useUrlSearch({ query: searchValue, popoverIsOpen });
 
   useEffect(() => {
-    setItems(
-      formatOptions(
-        data?.items ?? [],
-        transactionUrl,
-        transactionUrlExcluded,
-        percentile
-      )
+    const newItems = formatOptions(
+      data?.items ?? [],
+      transactionUrl,
+      transactionUrlExcluded,
+      percentile
     );
-  }, [data, percentile, transactionUrl, transactionUrlExcluded]);
+    const wildCardLabel = searchValue || searchTerm;
 
-  useEffect(() => {
-    if (searchTerm && searchValue === '') {
-      updateSearchTerm('');
+    if (wildCardLabel) {
+      newItems.unshift({
+        label: getWildcardLabel(wildCardLabel),
+        title: wildCardLabel,
+        isWildcard: true,
+        checked: searchTerm ? 'on' : undefined,
+      });
     }
-  }, [searchValue, updateSearchTerm, searchTerm]);
+    setItems(newItems);
+  }, [
+    data,
+    percentile,
+    searchTerm,
+    searchValue,
+    transactionUrl,
+    transactionUrlExcluded,
+  ]);
 
   const onChange = (updatedOptions: UrlOption[]) => {
-    const includedItems = map(
-      updatedOptions.filter((option) => option.checked === 'on'),
-      'label'
-    );
-
-    const excludedItems = map(
-      updatedOptions.filter((option) => option.checked === 'off'),
-      'label'
-    );
-
     setItems(
-      formatOptions(data?.items ?? [], includedItems, excludedItems, percentile)
+      updatedOptions.map((item) => {
+        const { isWildcard, checked } = item;
+        if (isWildcard && checked === 'off') {
+          return {
+            ...item,
+            checked: undefined,
+          };
+        }
+        return item;
+      })
     );
   };
 
-  const onInputChange = (e: FormEvent<HTMLInputElement>) => {
-    setDebouncedValue(e.currentTarget.value);
+  const onInputChange = (val: string) => {
+    setSearchValue(val);
   };
 
   const isLoading = status !== 'success';
 
-  const onTermChange = () => {
-    updateSearchTerm(searchValue);
-  };
-
   const onApply = () => {
-    const includedItems = map(
-      items.filter((option) => option.checked === 'on'),
-      'label'
-    );
-
-    const excludedItems = map(
-      items.filter((option) => option.checked === 'off'),
-      'label'
-    );
+    const { includedItems, excludedItems } = processItems(items);
 
     onFilterChange(includedItems, excludedItems);
+
+    updateSearchTerm(searchValue);
+
+    setSearchValue('');
+  };
+
+  const hasChanged = () => {
+    const { includedItems, excludedItems, includedWildcards } =
+      processItems(items);
+
+    let isWildcardChanged =
+      (includedWildcards.length > 0 && !searchTerm) ||
+      (includedWildcards.length === 0 && searchTerm);
+
+    if (includedWildcards.length > 0) {
+      isWildcardChanged = includedWildcards[0] !== searchTerm;
+    }
+
+    return (
+      isWildcardChanged ||
+      !isEqual(includedItems.sort(), (transactionUrl ?? []).sort()) ||
+      !isEqual(excludedItems.sort(), (transactionUrlExcluded ?? []).sort())
+    );
   };
 
   return (
     <SelectableUrlList
-      initialValue={searchTerm}
       loading={isLoading}
       onInputChange={onInputChange}
-      onTermChange={onTermChange}
       data={{ items, total: data?.total ?? 0 }}
-      onChange={onChange}
+      onSelectionChange={onChange}
       searchValue={searchValue}
       popoverIsOpen={Boolean(popoverIsOpen)}
       setPopoverIsOpen={setPopoverIsOpen}
-      onApply={onApply}
+      onSelectionApply={onApply}
+      renderOption={selectableRenderOptions}
+      rowHeight={64}
+      hasChanged={() => Boolean(hasChanged())}
     />
   );
 }

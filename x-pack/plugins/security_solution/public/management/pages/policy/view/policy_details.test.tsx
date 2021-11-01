@@ -23,6 +23,7 @@ describe('Policy Details', () => {
   const generator = new EndpointDocGenerator();
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
+  let middlewareSpy: AppContextTestRender['middlewareSpy'];
   let http: typeof coreStart.http;
   let render: (ui: Parameters<typeof mount>[0]) => ReturnType<typeof mount>;
   let policyPackagePolicy: ReturnType<typeof generator.generatePolicyPackagePolicy>;
@@ -32,13 +33,20 @@ describe('Policy Details', () => {
     const appContextMockRenderer = createAppRootMockRenderer();
     const AppWrapper = appContextMockRenderer.AppWrapper;
 
-    ({ history, coreStart } = appContextMockRenderer);
+    ({ history, coreStart, middlewareSpy } = appContextMockRenderer);
     render = (ui) => mount(ui, { wrappingComponent: AppWrapper });
     http = coreStart.http;
   });
 
   describe('when displayed with invalid id', () => {
+    let releaseApiFailure: () => void;
+
     beforeEach(() => {
+      http.get.mockImplementation(async () => {
+        await new Promise((_, reject) => {
+          releaseApiFailure = reject.bind(null, new Error('policy not found'));
+        });
+      });
       history.push(policyDetailsPathUrl);
       policyView = render(<PolicyDetails />);
     });
@@ -46,7 +54,19 @@ describe('Policy Details', () => {
     it('should NOT display timeline', async () => {
       expect(policyView.find('flyoutOverlay')).toHaveLength(0);
     });
+
+    it('should show loader followed by error message', async () => {
+      expect(policyView.find('EuiLoadingSpinner').length).toBe(1);
+      releaseApiFailure();
+      await middlewareSpy.waitForAction('serverFailedToReturnPolicyDetailsData');
+      policyView.update();
+      const callout = policyView.find('EuiCallOut');
+      expect(callout).toHaveLength(1);
+      expect(callout.prop('color')).toEqual('danger');
+      expect(callout.text()).toEqual('policy not found');
+    });
   });
+
   describe('when displayed with valid id', () => {
     let asyncActions: Promise<unknown> = Promise.resolve();
 

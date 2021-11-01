@@ -37,7 +37,7 @@ import { loadSavedDashboards, loadIndexPatterns } from '../edit_utils';
 import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
 import { Job } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { UrlConfig } from '../../../../../../../common/types/custom_urls';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../../../src/plugins/data_views/common';
 import { MlKibanaReactContextValue } from '../../../../../contexts/kibana';
 
 const MAX_NUMBER_DASHBOARDS = 1000;
@@ -54,7 +54,7 @@ interface CustomUrlsProps {
 interface CustomUrlsState {
   customUrls: UrlConfig[];
   dashboards: any[];
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
   queryEntityFieldNames: string[];
   editorOpen: boolean;
   editorSettings?: CustomUrlSettings;
@@ -109,9 +109,9 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         console.error('Error loading list of dashboards:', resp);
         toasts.addDanger(
           i18n.translate(
-            'xpack.ml.jobsList.editJobFlyout.customUrls.loadIndexPatternsErrorNotificationMessage',
+            'xpack.ml.jobsList.editJobFlyout.customUrls.loadDataViewsErrorNotificationMessage',
             {
-              defaultMessage: 'An error occurred loading the list of saved index patterns',
+              defaultMessage: 'An error occurred loading the list of saved data views',
             }
           )
         );

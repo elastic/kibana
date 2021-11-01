@@ -10,6 +10,7 @@ import type {
   LatencyCorrelationSearchServiceProgress,
   LatencyCorrelation,
 } from '../../../../common/search_strategies/latency_correlations/types';
+import { FieldStats } from '../../../../common/search_strategies/field_stats_types';
 
 export const latencyCorrelationsSearchServiceStateProvider = () => {
   let ccsWarning = false;
@@ -79,6 +80,10 @@ export const latencyCorrelationsSearchServiceStateProvider = () => {
   function getLatencyCorrelationsSortedByCorrelation() {
     return latencyCorrelations.sort((a, b) => b.correlation - a.correlation);
   }
+  const fieldStats: FieldStats[] = [];
+  function addFieldStats(stats: FieldStats[]) {
+    fieldStats.push(...stats);
+  }
 
   function getState() {
     return {
@@ -90,6 +95,7 @@ export const latencyCorrelationsSearchServiceStateProvider = () => {
       percentileThresholdValue,
       progress,
       latencyCorrelations,
+      fieldStats,
     };
   }
 
@@ -106,6 +112,7 @@ export const latencyCorrelationsSearchServiceStateProvider = () => {
     setOverallHistogram,
     setPercentileThresholdValue,
     setProgress,
+    addFieldStats,
   };
 };
 

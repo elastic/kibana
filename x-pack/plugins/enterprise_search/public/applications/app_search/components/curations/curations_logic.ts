@@ -23,7 +23,7 @@ import { EngineLogic, generateEnginePath } from '../engine';
 import { DELETE_CONFIRMATION_MESSAGE, DELETE_SUCCESS_MESSAGE } from './constants';
 import { Curation, CurationsAPIResponse } from './types';
 
-type CurationsPageTabs = 'overview' | 'settings';
+type CurationsPageTabs = 'overview' | 'settings' | 'history';
 
 interface CurationsValues {
   dataLoading: boolean;
@@ -61,7 +61,6 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
     dataLoading: [
       true,
       {
-        loadCurations: () => true,
         onCurationsLoad: () => false,
       },
     ],
@@ -126,6 +125,9 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
       } catch (e) {
         flashAPIErrors(e);
       }
+    },
+    onSelectPageTab: () => {
+      clearFlashMessages();
     },
   }),
 });

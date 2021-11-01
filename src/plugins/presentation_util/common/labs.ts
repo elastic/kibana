@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 export const LABS_PROJECT_PREFIX = 'labs:';
 export const DEFER_BELOW_FOLD = `${LABS_PROJECT_PREFIX}dashboard:deferBelowFold` as const;
-
-export const projectIDs = [DEFER_BELOW_FOLD] as const;
+export const DASHBOARD_CONTROLS = `${LABS_PROJECT_PREFIX}dashboard:dashboardControls` as const;
+export const projectIDs = [DEFER_BELOW_FOLD, DASHBOARD_CONTROLS] as const;
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
 export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
 
@@ -31,6 +31,20 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
     description: i18n.translate('presentationUtil.labs.enableDeferBelowFoldProjectDescription', {
       defaultMessage:
         'Any panels below "the fold"-- the area hidden beyond the bottom of the window, accessed by scrolling-- will not be loaded immediately, but only when they enter the viewport',
+    }),
+    solutions: ['dashboard'],
+  },
+  [DASHBOARD_CONTROLS]: {
+    id: DASHBOARD_CONTROLS,
+    isActive: false,
+    isDisplayed: true,
+    environments: ['kibana', 'browser', 'session'],
+    name: i18n.translate('presentationUtil.labs.enableDashboardControlsProjectName', {
+      defaultMessage: 'Enable dashboard controls',
+    }),
+    description: i18n.translate('presentationUtil.labs.enableDashboardControlsProjectDescription', {
+      defaultMessage:
+        'Enables the controls system for dashboard, which allows dashboard authors to more easily build interactive elements for their users.',
     }),
     solutions: ['dashboard'],
   },

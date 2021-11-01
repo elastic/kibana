@@ -23,7 +23,6 @@ export type {
   FeatureCatalogueSolution,
   Environment,
   TutorialVariables,
-  TutorialDirectoryNoticeComponent,
   TutorialDirectoryHeaderLinkComponent,
   TutorialModuleNoticeComponent,
 } from './services';

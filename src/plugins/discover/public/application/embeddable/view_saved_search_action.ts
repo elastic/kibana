@@ -12,6 +12,7 @@ import { IEmbeddable, ViewMode } from '../../../../embeddable/public';
 import { Action } from '../../../../ui_actions/public';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../common';
+import { getSavedSearchUrl } from '../../saved_searches';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
@@ -28,7 +29,7 @@ export class ViewSavedSearchAction implements Action<ViewSearchContext> {
   async execute(context: ActionExecutionContext<ViewSearchContext>): Promise<void> {
     const { embeddable } = context;
     const savedSearchId = (embeddable as SavedSearchEmbeddable).getSavedSearch().id;
-    const path = `#/view/${encodeURIComponent(savedSearchId)}`;
+    const path = getSavedSearchUrl(savedSearchId);
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
     await this.application.navigateToApp(app ? app : 'discover', { path });
   }

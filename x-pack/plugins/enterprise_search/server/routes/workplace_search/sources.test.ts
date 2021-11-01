@@ -42,6 +42,7 @@ import {
   registerOrgSourceDownloadDiagnosticsRoute,
   registerOrgSourceOauthConfigurationsRoute,
   registerOrgSourceOauthConfigurationRoute,
+  registerOrgSourceSynchronizeRoute,
   registerOauthConnectorParamsRoute,
 } from './sources';
 
@@ -1248,6 +1249,29 @@ describe('sources routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/settings/connectors/:serviceType',
+      });
+    });
+  });
+
+  describe('POST /internal/workplace_search/org/sources/{id}/sync', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/workplace_search/org/sources/{id}/sync',
+      });
+
+      registerOrgSourceSynchronizeRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/sources/:id/sync',
       });
     });
   });

@@ -19,6 +19,7 @@ import { discoverServiceMock } from '../../../../../__mocks__/services';
 import { FetchStatus } from '../../../../types';
 import { Chart } from './point_series';
 import { DiscoverChart } from './discover_chart';
+import { VIEW_MODE } from '../view_mode_toggle';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -94,6 +95,8 @@ function getProps(timefield?: string) {
     state: { columns: [] },
     stateContainer: {} as GetStateReturn,
     timefield,
+    viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    setDiscoverViewMode: jest.fn(),
   };
 }
 

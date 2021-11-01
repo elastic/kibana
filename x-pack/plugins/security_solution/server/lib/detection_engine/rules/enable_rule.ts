@@ -33,24 +33,11 @@ export const enableRule = async ({
 }: EnableRuleArgs) => {
   await rulesClient.enable({ id: rule.id });
 
-  const ruleCurrentStatus = await ruleStatusClient.find({
-    logsCount: 1,
+  await ruleStatusClient.logStatusChange({
     ruleId: rule.id,
+    ruleName: rule.name,
+    ruleType: rule.alertTypeId,
     spaceId,
+    newStatus: RuleExecutionStatus['going to run'],
   });
-
-  // set current status for this rule to be 'going to run'
-  if (ruleCurrentStatus && ruleCurrentStatus.length > 0) {
-    const currentStatusToDisable = ruleCurrentStatus[0];
-    await ruleStatusClient.update({
-      id: currentStatusToDisable.id,
-      ruleName: rule.name,
-      ruleType: rule.alertTypeId,
-      attributes: {
-        ...currentStatusToDisable.attributes,
-        status: RuleExecutionStatus['going to run'],
-      },
-      spaceId,
-    });
-  }
 };

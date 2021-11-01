@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useEffect, useMemo } from 'react';
 
 import {
@@ -19,12 +19,9 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from 'src/core/public';
 
-import {
-  IndexPattern,
-  IFieldType,
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-} from '../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+
+import type { DataView, DataViewField } from '../../../../../../../src/plugins/data_views/common';
 
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { extractErrorMessage } from '../../../../common/util/errors';
@@ -72,7 +69,7 @@ export const euiDataGridToolbarSettings = {
   showFullScreenSelector: false,
 };
 
-export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): string[] => {
+export const getFieldsFromKibanaIndexPattern = (indexPattern: DataView): string[] => {
   const allFields = indexPattern.fields.map((f) => f.name);
   const indexPatternFields: string[] = allFields.filter((f) => {
     if (indexPattern.metaFields.includes(f)) {
@@ -98,7 +95,7 @@ export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): str
  * @param RuntimeMappings
  */
 export function getCombinedRuntimeMappings(
-  indexPattern: IndexPattern | undefined,
+  indexPattern: DataView | undefined,
   runtimeMappings?: RuntimeMappings
 ): RuntimeMappings | undefined {
   let combinedRuntimeMappings = {};
@@ -219,7 +216,7 @@ export const getDataGridSchemaFromESFieldType = (
 };
 
 export const getDataGridSchemaFromKibanaFieldType = (
-  field: IFieldType | undefined
+  field: DataViewField | undefined
 ): string | undefined => {
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.
@@ -312,7 +309,7 @@ export const getTopClasses = (row: Record<string, any>, mlResultsField: string):
 };
 
 export const useRenderCellValue = (
-  indexPattern: IndexPattern | undefined,
+  indexPattern: DataView | undefined,
   pagination: IndexPagination,
   tableItems: DataGridItem[],
   resultsField?: string,

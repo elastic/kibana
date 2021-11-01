@@ -1139,6 +1139,122 @@ describe('state_helpers', () => {
           }).columns.col1
         ).toEqual(expect.objectContaining({ label: 'Average of bytes' }));
       });
+
+      it('should carry over a custom label when transitioning to a managed reference', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'MY CUSTOM LABEL',
+                  customLabel: true,
+                  dataType: 'string',
+                  isBucketed: true,
+                  operationType: 'terms',
+                  sourceField: 'source',
+                  params: {
+                    orderBy: { type: 'alphabetical' },
+                    orderDirection: 'asc',
+                    size: 5,
+                  },
+                },
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'formula',
+            field: indexPattern.fields[2], // bytes field
+            visualizationGroups: [],
+            shouldResetLabel: undefined,
+          }).columns.col1
+        ).toEqual(expect.objectContaining({ label: 'MY CUSTOM LABEL' }));
+      });
+
+      it('should overwrite the current label when transitioning to a managed reference operation when not custom', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'Average of bytes',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'average',
+                  sourceField: 'bytes',
+                },
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'formula',
+            field: indexPattern.fields[2], // bytes field
+            visualizationGroups: [],
+            shouldResetLabel: undefined,
+          }).columns.col1
+        ).toEqual(expect.objectContaining({ label: 'average(bytes)' }));
+      });
+
+      it('should carry over a custom label when transitioning from a managed reference', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'MY CUSTOM LABEL',
+                  customLabel: true,
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: { isFormulaBroken: false, formula: 'average(bytes)' },
+                  references: [],
+                },
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'average',
+            field: indexPattern.fields[2], // bytes field
+            visualizationGroups: [],
+            shouldResetLabel: undefined,
+          }).columns.col1
+        ).toEqual(expect.objectContaining({ label: 'MY CUSTOM LABEL' }));
+      });
+
+      it('should not carry over the managed reference default label to the new operation', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'average(bytes)',
+                  customLabel: true,
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: { isFormulaBroken: false, formula: 'average(bytes)' },
+                  references: [],
+                },
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'average',
+            field: indexPattern.fields[2], // bytes field
+            visualizationGroups: [],
+            shouldResetLabel: undefined,
+          }).columns.col1
+        ).toEqual(expect.objectContaining({ label: 'Average of bytes' }));
+      });
     });
 
     it('should execute adjustments for other columns', () => {

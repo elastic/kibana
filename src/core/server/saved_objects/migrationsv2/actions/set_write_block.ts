@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -61,7 +60,7 @@ export const setWriteBlock =
                 message: 'set_write_block_failed',
               });
         })
-        .catch((e: ElasticsearchClientError) => {
+        .catch((e: EsErrors.ElasticsearchClientError) => {
           if (e instanceof EsErrors.ResponseError) {
             if (e.body?.error?.type === 'index_not_found_exception') {
               return Either.left({ type: 'index_not_found_exception' as const, index });

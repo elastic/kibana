@@ -29,7 +29,7 @@ import { isValidLabel } from '../../../util/custom_url_utils';
 
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../src/plugins/data_views/common';
 
 function getLinkToOptions() {
   return [
@@ -59,7 +59,7 @@ interface CustomUrlEditorProps {
   setEditCustomUrl: (url: any) => void;
   savedCustomUrls: UrlConfig[];
   dashboards: any[];
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
   queryEntityFieldNames: string[];
 }
 
@@ -267,8 +267,8 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ml.customUrlsEditor.indexPatternLabel"
-                defaultMessage="Index pattern"
+                id="xpack.ml.customUrlsEditor.dataViewLabel"
+                defaultMessage="Data view"
               />
             }
             display="rowCompressed"

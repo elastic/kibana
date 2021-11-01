@@ -37,18 +37,18 @@ export function RumHome() {
             defaultMessage: 'Observability',
           }),
           actions: {
-            beats: {
+            elasticAgent: {
               title: i18n.translate('xpack.apm.ux.overview.beatsCard.title', {
-                defaultMessage: 'Add RUM data',
+                defaultMessage: 'Add the APM integration',
               }),
               description: i18n.translate(
                 'xpack.apm.ux.overview.beatsCard.description',
                 {
                   defaultMessage:
-                    'Use the RUM (JS) agent to collect user experience data.',
+                    'Enable RUM with the APM agent to collect user experience data.',
                 }
               ),
-              href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
+              href: core.http.basePath.prepend(`integrations/detail/apm`),
             },
           },
           docsLink: core.docLinks.links.observability.guide,

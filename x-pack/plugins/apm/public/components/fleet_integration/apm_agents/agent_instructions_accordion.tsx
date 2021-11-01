@@ -24,7 +24,6 @@ import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { AgentIcon } from '../../shared/agent_icon';
 import { NewPackagePolicy } from '../apm_policy_form/typings';
 import { getCommands } from '../../../tutorial/config_agent/commands/get_commands';
-import { CopyCommands } from '../../../tutorial/config_agent/copy_commands';
 import { replaceTemplateStrings } from './replace_template_strings';
 
 function AccordionButtonContent({
@@ -91,14 +90,9 @@ function TutorialConfigAgent({
     policyDetails: { apmServerUrl, secretToken },
   });
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem style={{ marginLeft: 'auto' }}>
-        <CopyCommands commands={commandBlock} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiCodeBlock language="bash">{commandBlock}</EuiCodeBlock>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiCodeBlock isCopyable language="bash">
+      {commandBlock}
+    </EuiCodeBlock>
   );
 }
 
@@ -153,23 +147,16 @@ export function AgentInstructionsAccordion({
               <EuiSpacer size="s" />
               <EuiText color="subdued" size="s">
                 {textPre && (
-                  <EuiFlexGroup justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>
-                      <InstructionsContent
-                        markdown={replaceTemplateStrings(textPre, docLinks)}
-                      />
-                    </EuiFlexItem>
-                    {commandBlock && (
-                      <EuiFlexItem grow={false}>
-                        <CopyCommands commands={commandBlock} />
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
+                  <InstructionsContent
+                    markdown={replaceTemplateStrings(textPre, docLinks)}
+                  />
                 )}
                 {commandBlock && (
                   <>
                     <EuiSpacer size="s" />
-                    <EuiCodeBlock language="bash">{commandBlock}</EuiCodeBlock>
+                    <EuiCodeBlock isCopyable language="bash">
+                      {commandBlock}
+                    </EuiCodeBlock>
                   </>
                 )}
                 {customComponentName === 'TutorialConfigAgent' && (

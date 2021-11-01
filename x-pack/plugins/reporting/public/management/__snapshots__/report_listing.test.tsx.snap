@@ -33,7 +33,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                     checked={false}
                     compressed={false}
                     disabled={false}
-                    id="_selection_column-checkbox_generated-id"
+                    id="_selection_column-checkbox_generated-id_mobile"
                     indeterminate={false}
                     label="Select all rows"
                     onChange={[Function]}
@@ -46,7 +46,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                         checked={false}
                         className="euiCheckbox__input"
                         disabled={false}
-                        id="_selection_column-checkbox_generated-id"
+                        id="_selection_column-checkbox_generated-id_mobile"
                         onChange={[Function]}
                         type="checkbox"
                       />
@@ -55,7 +55,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                       />
                       <label
                         className="euiCheckbox__label"
-                        htmlFor="_selection_column-checkbox_generated-id"
+                        htmlFor="_selection_column-checkbox_generated-id_mobile"
                       >
                         Select all rows
                       </label>
@@ -76,13 +76,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
       </div>
     </EuiTableHeaderMobile>
     <EuiTable
-      id="generated-id"
+      id="__table_generated-id"
       responsive={true}
       tableLayout="fixed"
     >
       <table
         className="euiTable euiTable--responsive"
-        id="generated-id"
+        id="__table_generated-id"
         tabIndex={-1}
       >
         <EuiScreenReaderOnly>
@@ -122,7 +122,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                         compressed={false}
                         data-test-subj="checkboxSelectAll"
                         disabled={false}
-                        id="_selection_column-checkbox_generated-id"
+                        id="_selection_column-checkbox_generated-id_desktop"
                         indeterminate={false}
                         label={null}
                         onChange={[Function]}
@@ -137,7 +137,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             className="euiCheckbox__input"
                             data-test-subj="checkboxSelectAll"
                             disabled={false}
-                            id="_selection_column-checkbox_generated-id"
+                            id="_selection_column-checkbox_generated-id_desktop"
                             onChange={[Function]}
                             type="checkbox"
                           />
@@ -368,7 +368,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           compressed={false}
                           data-test-subj="checkboxSelectRow-k90e51pk1ieucbae0c3t8wo2"
                           disabled={false}
-                          id="_selection_column_k90e51pk1ieucbae0c3t8wo2-checkbox"
+                          id="__table_generated-id_selection_column_k90e51pk1ieucbae0c3t8wo2-checkbox"
                           indeterminate={false}
                           onChange={[Function]}
                           title="Select this row"
@@ -383,7 +383,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               className="euiCheckbox__input"
                               data-test-subj="checkboxSelectRow-k90e51pk1ieucbae0c3t8wo2"
                               disabled={false}
-                              id="_selection_column_k90e51pk1ieucbae0c3t8wo2-checkbox"
+                              id="__table_generated-id_selection_column_k90e51pk1ieucbae0c3t8wo2-checkbox"
                               onChange={[Function]}
                               title="Select this row"
                               type="checkbox"
@@ -1448,7 +1448,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           compressed={false}
                           data-test-subj="checkboxSelectRow-k90e51pk1ieucbae0c3t8wo1"
                           disabled={false}
-                          id="_selection_column_k90e51pk1ieucbae0c3t8wo1-checkbox"
+                          id="__table_generated-id_selection_column_k90e51pk1ieucbae0c3t8wo1-checkbox"
                           indeterminate={false}
                           onChange={[Function]}
                           title="Select this row"
@@ -1463,7 +1463,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               className="euiCheckbox__input"
                               data-test-subj="checkboxSelectRow-k90e51pk1ieucbae0c3t8wo1"
                               disabled={false}
-                              id="_selection_column_k90e51pk1ieucbae0c3t8wo1-checkbox"
+                              id="__table_generated-id_selection_column_k90e51pk1ieucbae0c3t8wo1-checkbox"
                               onChange={[Function]}
                               title="Select this row"
                               type="checkbox"
@@ -2528,7 +2528,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           compressed={false}
                           data-test-subj="checkboxSelectRow-k90cmthd1gv8cbae0c2le8bo"
                           disabled={false}
-                          id="_selection_column_k90cmthd1gv8cbae0c2le8bo-checkbox"
+                          id="__table_generated-id_selection_column_k90cmthd1gv8cbae0c2le8bo-checkbox"
                           indeterminate={false}
                           onChange={[Function]}
                           title="Select this row"
@@ -2543,7 +2543,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               className="euiCheckbox__input"
                               data-test-subj="checkboxSelectRow-k90cmthd1gv8cbae0c2le8bo"
                               disabled={false}
-                              id="_selection_column_k90cmthd1gv8cbae0c2le8bo-checkbox"
+                              id="__table_generated-id_selection_column_k90cmthd1gv8cbae0c2le8bo-checkbox"
                               onChange={[Function]}
                               title="Select this row"
                               type="checkbox"
@@ -3637,7 +3637,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           compressed={false}
                           data-test-subj="checkboxSelectRow-k906958e1d4wcbae0c9hip1a"
                           disabled={false}
-                          id="_selection_column_k906958e1d4wcbae0c9hip1a-checkbox"
+                          id="__table_generated-id_selection_column_k906958e1d4wcbae0c9hip1a-checkbox"
                           indeterminate={false}
                           onChange={[Function]}
                           title="Select this row"
@@ -3652,7 +3652,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               className="euiCheckbox__input"
                               data-test-subj="checkboxSelectRow-k906958e1d4wcbae0c9hip1a"
                               disabled={false}
-                              id="_selection_column_k906958e1d4wcbae0c9hip1a-checkbox"
+                              id="__table_generated-id_selection_column_k906958e1d4wcbae0c9hip1a-checkbox"
                               onChange={[Function]}
                               title="Select this row"
                               type="checkbox"
@@ -4774,7 +4774,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           compressed={false}
                           data-test-subj="checkboxSelectRow-k9067y2a1d4wcbae0cad38n0"
                           disabled={false}
-                          id="_selection_column_k9067y2a1d4wcbae0cad38n0-checkbox"
+                          id="__table_generated-id_selection_column_k9067y2a1d4wcbae0cad38n0-checkbox"
                           indeterminate={false}
                           onChange={[Function]}
                           title="Select this row"
@@ -4789,7 +4789,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               className="euiCheckbox__input"
                               data-test-subj="checkboxSelectRow-k9067y2a1d4wcbae0cad38n0"
                               disabled={false}
-                              id="_selection_column_k9067y2a1d4wcbae0cad38n0-checkbox"
+                              id="__table_generated-id_selection_column_k9067y2a1d4wcbae0cad38n0-checkbox"
                               onChange={[Function]}
                               title="Select this row"
                               type="checkbox"
@@ -5883,7 +5883,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           compressed={false}
                           data-test-subj="checkboxSelectRow-k9067s1m1d4wcbae0cdnvcms"
                           disabled={false}
-                          id="_selection_column_k9067s1m1d4wcbae0cdnvcms-checkbox"
+                          id="__table_generated-id_selection_column_k9067s1m1d4wcbae0cdnvcms-checkbox"
                           indeterminate={false}
                           onChange={[Function]}
                           title="Select this row"
@@ -5898,7 +5898,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               className="euiCheckbox__input"
                               data-test-subj="checkboxSelectRow-k9067s1m1d4wcbae0cdnvcms"
                               disabled={false}
-                              id="_selection_column_k9067s1m1d4wcbae0cdnvcms-checkbox"
+                              id="__table_generated-id_selection_column_k9067s1m1d4wcbae0cdnvcms-checkbox"
                               onChange={[Function]}
                               title="Select this row"
                               type="checkbox"
@@ -6992,7 +6992,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           compressed={false}
                           data-test-subj="checkboxSelectRow-k9065q3s1d4wcbae0c00fxlh"
                           disabled={false}
-                          id="_selection_column_k9065q3s1d4wcbae0c00fxlh-checkbox"
+                          id="__table_generated-id_selection_column_k9065q3s1d4wcbae0c00fxlh-checkbox"
                           indeterminate={false}
                           onChange={[Function]}
                           title="Select this row"
@@ -7007,7 +7007,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               className="euiCheckbox__input"
                               data-test-subj="checkboxSelectRow-k9065q3s1d4wcbae0c00fxlh"
                               disabled={false}
-                              id="_selection_column_k9065q3s1d4wcbae0c00fxlh-checkbox"
+                              id="__table_generated-id_selection_column_k9065q3s1d4wcbae0c00fxlh-checkbox"
                               onChange={[Function]}
                               title="Select this row"
                               type="checkbox"
@@ -8101,7 +8101,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           compressed={false}
                           data-test-subj="checkboxSelectRow-k905zdw11d34cbae0c3y6tzh"
                           disabled={false}
-                          id="_selection_column_k905zdw11d34cbae0c3y6tzh-checkbox"
+                          id="__table_generated-id_selection_column_k905zdw11d34cbae0c3y6tzh-checkbox"
                           indeterminate={false}
                           onChange={[Function]}
                           title="Select this row"
@@ -8116,7 +8116,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               className="euiCheckbox__input"
                               data-test-subj="checkboxSelectRow-k905zdw11d34cbae0c3y6tzh"
                               disabled={false}
-                              id="_selection_column_k905zdw11d34cbae0c3y6tzh-checkbox"
+                              id="__table_generated-id_selection_column_k905zdw11d34cbae0c3y6tzh-checkbox"
                               onChange={[Function]}
                               title="Select this row"
                               type="checkbox"
@@ -9247,7 +9247,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                           compressed={false}
                           data-test-subj="checkboxSelectRow-k8t4ylcb07mi9d006214ifyg"
                           disabled={false}
-                          id="_selection_column_k8t4ylcb07mi9d006214ifyg-checkbox"
+                          id="__table_generated-id_selection_column_k8t4ylcb07mi9d006214ifyg-checkbox"
                           indeterminate={false}
                           onChange={[Function]}
                           title="Select this row"
@@ -9262,7 +9262,7 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               className="euiCheckbox__input"
                               data-test-subj="checkboxSelectRow-k8t4ylcb07mi9d006214ifyg"
                               disabled={false}
-                              id="_selection_column_k8t4ylcb07mi9d006214ifyg-checkbox"
+                              id="__table_generated-id_selection_column_k8t4ylcb07mi9d006214ifyg-checkbox"
                               onChange={[Function]}
                               title="Select this row"
                               type="checkbox"
@@ -10369,366 +10369,370 @@ exports[`ReportListing Report job listing with some items 1`] = `
       </table>
     </EuiTable>
   </div>
-  <PaginationBar
-    aria-controls="generated-id"
-    aria-label={
-      <EuiI18n
-        default="Pagination for preceding table: {tableCaption}"
-        token="euiBasicTable.tablePagination"
-        values={
-          Object {
-            "tableCaption": "Reports generated in Kibana applications",
-          }
-        }
-      />
-    }
-    onPageChange={[Function]}
-    onPageSizeChange={[Function]}
-    pagination={
+  <EuiI18n
+    default="Pagination for table: {tableCaption}"
+    token="euiBasicTable.tablePagination"
+    values={
       Object {
-        "hidePerPageOptions": true,
-        "pageIndex": 0,
-        "pageSize": 10,
-        "totalItemCount": 18,
+        "tableCaption": "Reports generated in Kibana applications",
       }
     }
   >
-    <div>
-      <EuiSpacer
-        size="m"
-      >
-        <div
-          className="euiSpacer euiSpacer--m"
-        />
-      </EuiSpacer>
-      <EuiTablePagination
-        activePage={0}
-        aria-controls="generated-id"
-        hidePerPageOptions={true}
-        itemsPerPage={10}
-        itemsPerPageOptions={
-          Array [
-            10,
-            25,
-            50,
-          ]
+    <PaginationBar
+      aria-controls="__table_generated-id"
+      aria-label="Pagination for table: Reports generated in Kibana applications"
+      onPageChange={[Function]}
+      onPageSizeChange={[Function]}
+      pagination={
+        Object {
+          "hidePerPageOptions": true,
+          "pageIndex": 0,
+          "pageSize": 10,
+          "totalItemCount": 18,
         }
-        onChangeItemsPerPage={[Function]}
-        onChangePage={[Function]}
-        pageCount={2}
-      >
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-          responsive={false}
+      }
+    >
+      <div>
+        <EuiSpacer
+          size="m"
         >
           <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+            className="euiSpacer euiSpacer--m"
+          />
+        </EuiSpacer>
+        <EuiTablePagination
+          activePage={0}
+          aria-controls="__table_generated-id"
+          aria-label="Pagination for table: Reports generated in Kibana applications"
+          hidePerPageOptions={true}
+          itemsPerPage={10}
+          itemsPerPageOptions={
+            Array [
+              10,
+              25,
+              50,
+            ]
+          }
+          onChangeItemsPerPage={[Function]}
+          onChangePage={[Function]}
+          pageCount={2}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            responsive={false}
           >
-            <EuiFlexItem
-              grow={false}
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
             >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
+              <EuiFlexItem
+                grow={false}
               >
-                <EuiPagination
-                  activePage={0}
-                  aria-controls="generated-id"
-                  onPageClick={[Function]}
-                  pageCount={2}
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  <nav
-                    className="euiPagination"
+                  <EuiPagination
+                    activePage={0}
+                    aria-controls="__table_generated-id"
+                    aria-label="Pagination for table: Reports generated in Kibana applications"
+                    onPageClick={[Function]}
+                    pageCount={2}
                   >
-                    <EuiI18n
-                      default="Previous page, {page}"
-                      token="euiPagination.previousPage"
-                      values={
-                        Object {
-                          "page": 0,
-                        }
-                      }
+                    <nav
+                      aria-label="Pagination for table: Reports generated in Kibana applications"
+                      className="euiPagination"
                     >
                       <EuiI18n
-                        default="Previous page"
-                        token="euiPagination.disabledPreviousPage"
+                        default="Previous page, {page}"
+                        token="euiPagination.previousPage"
+                        values={
+                          Object {
+                            "page": 0,
+                          }
+                        }
                       >
-                        <EuiButtonIcon
-                          aria-label="Previous page"
-                          color="text"
-                          data-test-subj="pagination-button-previous"
-                          disabled={true}
-                          iconType="arrowLeft"
-                          onClick={[Function]}
+                        <EuiI18n
+                          default="Previous page"
+                          token="euiPagination.disabledPreviousPage"
                         >
-                          <button
+                          <EuiButtonIcon
                             aria-label="Previous page"
-                            className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                            color="text"
                             data-test-subj="pagination-button-previous"
                             disabled={true}
+                            iconType="arrowLeft"
                             onClick={[Function]}
-                            type="button"
                           >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiButtonIcon__icon"
-                              color="inherit"
-                              size="m"
-                              type="arrowLeft"
+                            <button
+                              aria-label="Previous page"
+                              className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                              data-test-subj="pagination-button-previous"
+                              disabled={true}
+                              onClick={[Function]}
+                              type="button"
                             >
-                              <span
+                              <EuiIcon
                                 aria-hidden="true"
                                 className="euiButtonIcon__icon"
                                 color="inherit"
-                                data-euiicon-type="arrowLeft"
                                 size="m"
-                              />
-                            </EuiIcon>
-                          </button>
-                        </EuiButtonIcon>
+                                type="arrowLeft"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  className="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="arrowLeft"
+                                  size="m"
+                                />
+                              </EuiIcon>
+                            </button>
+                          </EuiButtonIcon>
+                        </EuiI18n>
                       </EuiI18n>
-                    </EuiI18n>
-                    <ul
-                      className="euiPagination__list"
-                    >
-                      <PaginationButtonWrapper
-                        activePage={0}
-                        ariaControls="generated-id"
-                        key="0"
-                        pageCount={2}
-                        pageIndex={0}
-                        safeClick={[Function]}
+                      <ul
+                        aria-label="Pagination for table: Reports generated in Kibana applications"
+                        className="euiPagination__list"
                       >
-                        <li
-                          className="euiPagination__item"
+                        <PaginationButtonWrapper
+                          activePage={0}
+                          ariaControls="__table_generated-id"
+                          key="0"
+                          pageCount={2}
+                          pageIndex={0}
+                          safeClick={[Function]}
                         >
-                          <EuiPaginationButton
-                            aria-controls="generated-id"
-                            hideOnMobile={true}
-                            isActive={true}
-                            onClick={[Function]}
-                            pageIndex={0}
-                            totalPages={2}
+                          <li
+                            className="euiPagination__item"
                           >
-                            <EuiI18n
-                              default="Page {page} of {totalPages}"
-                              token="euiPaginationButton.longPageString"
-                              values={
-                                Object {
-                                  "page": 1,
-                                  "totalPages": 2,
-                                }
-                              }
+                            <EuiPaginationButton
+                              aria-controls="__table_generated-id"
+                              hideOnMobile={true}
+                              isActive={true}
+                              onClick={[Function]}
+                              pageIndex={0}
+                              totalPages={2}
                             >
                               <EuiI18n
-                                default="Page {page}"
-                                token="euiPaginationButton.shortPageString"
+                                default="Page {page} of {totalPages}"
+                                token="euiPaginationButton.longPageString"
                                 values={
                                   Object {
                                     "page": 1,
+                                    "totalPages": 2,
                                   }
                                 }
                               >
-                                <EuiButtonEmpty
-                                  aria-controls="generated-id"
-                                  aria-current={true}
-                                  aria-label="Page 1 of 2"
-                                  className="euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
-                                  color="text"
-                                  data-test-subj="pagination-button-0"
-                                  href="#generated-id"
-                                  isDisabled={true}
-                                  onClick={[Function]}
-                                  size="s"
+                                <EuiI18n
+                                  default="Page {page}"
+                                  token="euiPaginationButton.shortPageString"
+                                  values={
+                                    Object {
+                                      "page": 1,
+                                    }
+                                  }
                                 >
-                                  <button
-                                    aria-controls="generated-id"
+                                  <EuiButtonEmpty
+                                    aria-controls="__table_generated-id"
                                     aria-current={true}
                                     aria-label="Page 1 of 2"
-                                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                                    className="euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                                    color="text"
                                     data-test-subj="pagination-button-0"
-                                    disabled={true}
+                                    href="#__table_generated-id"
+                                    isDisabled={true}
                                     onClick={[Function]}
-                                    type="button"
+                                    size="s"
                                   >
-                                    <EuiButtonContent
-                                      className="euiButtonEmpty__content"
-                                      iconSide="left"
-                                      iconSize="m"
-                                      textProps={
-                                        Object {
-                                          "className": "euiButtonEmpty__text",
-                                        }
-                                      }
+                                    <button
+                                      aria-controls="__table_generated-id"
+                                      aria-current={true}
+                                      aria-label="Page 1 of 2"
+                                      className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                                      data-test-subj="pagination-button-0"
+                                      disabled={true}
+                                      onClick={[Function]}
+                                      type="button"
                                     >
-                                      <span
-                                        className="euiButtonContent euiButtonEmpty__content"
+                                      <EuiButtonContent
+                                        className="euiButtonEmpty__content"
+                                        iconSide="left"
+                                        iconSize="m"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButtonEmpty__text",
+                                          }
+                                        }
                                       >
                                         <span
-                                          className="euiButtonEmpty__text"
+                                          className="euiButtonContent euiButtonEmpty__content"
                                         >
-                                          1
+                                          <span
+                                            className="euiButtonEmpty__text"
+                                          >
+                                            1
+                                          </span>
                                         </span>
-                                      </span>
-                                    </EuiButtonContent>
-                                  </button>
-                                </EuiButtonEmpty>
+                                      </EuiButtonContent>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </EuiI18n>
                               </EuiI18n>
-                            </EuiI18n>
-                          </EuiPaginationButton>
-                        </li>
-                      </PaginationButtonWrapper>
-                      <PaginationButtonWrapper
-                        activePage={0}
-                        ariaControls="generated-id"
-                        key="1"
-                        pageCount={2}
-                        pageIndex={1}
-                        safeClick={[Function]}
-                      >
-                        <li
-                          className="euiPagination__item"
+                            </EuiPaginationButton>
+                          </li>
+                        </PaginationButtonWrapper>
+                        <PaginationButtonWrapper
+                          activePage={0}
+                          ariaControls="__table_generated-id"
+                          key="1"
+                          pageCount={2}
+                          pageIndex={1}
+                          safeClick={[Function]}
                         >
-                          <EuiPaginationButton
-                            aria-controls="generated-id"
-                            hideOnMobile={true}
-                            isActive={false}
-                            onClick={[Function]}
-                            pageIndex={1}
-                            totalPages={2}
+                          <li
+                            className="euiPagination__item"
                           >
-                            <EuiI18n
-                              default="Page {page} of {totalPages}"
-                              token="euiPaginationButton.longPageString"
-                              values={
-                                Object {
-                                  "page": 2,
-                                  "totalPages": 2,
-                                }
-                              }
+                            <EuiPaginationButton
+                              aria-controls="__table_generated-id"
+                              hideOnMobile={true}
+                              isActive={false}
+                              onClick={[Function]}
+                              pageIndex={1}
+                              totalPages={2}
                             >
                               <EuiI18n
-                                default="Page {page}"
-                                token="euiPaginationButton.shortPageString"
+                                default="Page {page} of {totalPages}"
+                                token="euiPaginationButton.longPageString"
                                 values={
                                   Object {
                                     "page": 2,
+                                    "totalPages": 2,
                                   }
                                 }
                               >
-                                <EuiButtonEmpty
-                                  aria-controls="generated-id"
-                                  aria-label="Page 2 of 2"
-                                  className="euiPaginationButton euiPaginationButton--hideOnMobile"
-                                  color="text"
-                                  data-test-subj="pagination-button-1"
-                                  href="#generated-id"
-                                  isDisabled={false}
-                                  onClick={[Function]}
-                                  size="s"
+                                <EuiI18n
+                                  default="Page {page}"
+                                  token="euiPaginationButton.shortPageString"
+                                  values={
+                                    Object {
+                                      "page": 2,
+                                    }
+                                  }
                                 >
-                                  <a
-                                    aria-controls="generated-id"
+                                  <EuiButtonEmpty
+                                    aria-controls="__table_generated-id"
                                     aria-label="Page 2 of 2"
-                                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                                    className="euiPaginationButton euiPaginationButton--hideOnMobile"
+                                    color="text"
                                     data-test-subj="pagination-button-1"
-                                    href="#generated-id"
+                                    href="#__table_generated-id"
+                                    isDisabled={false}
                                     onClick={[Function]}
-                                    rel="noreferrer"
+                                    size="s"
                                   >
-                                    <EuiButtonContent
-                                      className="euiButtonEmpty__content"
-                                      iconSide="left"
-                                      iconSize="m"
-                                      textProps={
-                                        Object {
-                                          "className": "euiButtonEmpty__text",
-                                        }
-                                      }
+                                    <a
+                                      aria-controls="__table_generated-id"
+                                      aria-label="Page 2 of 2"
+                                      className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                                      data-test-subj="pagination-button-1"
+                                      href="#__table_generated-id"
+                                      onClick={[Function]}
+                                      rel="noreferrer"
                                     >
-                                      <span
-                                        className="euiButtonContent euiButtonEmpty__content"
+                                      <EuiButtonContent
+                                        className="euiButtonEmpty__content"
+                                        iconSide="left"
+                                        iconSize="m"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButtonEmpty__text",
+                                          }
+                                        }
                                       >
                                         <span
-                                          className="euiButtonEmpty__text"
+                                          className="euiButtonContent euiButtonEmpty__content"
                                         >
-                                          2
+                                          <span
+                                            className="euiButtonEmpty__text"
+                                          >
+                                            2
+                                          </span>
                                         </span>
-                                      </span>
-                                    </EuiButtonContent>
-                                  </a>
-                                </EuiButtonEmpty>
+                                      </EuiButtonContent>
+                                    </a>
+                                  </EuiButtonEmpty>
+                                </EuiI18n>
                               </EuiI18n>
-                            </EuiI18n>
-                          </EuiPaginationButton>
-                        </li>
-                      </PaginationButtonWrapper>
-                    </ul>
-                    <EuiI18n
-                      default="Next page, {page}"
-                      token="euiPagination.nextPage"
-                      values={
-                        Object {
-                          "page": 2,
-                        }
-                      }
-                    >
+                            </EuiPaginationButton>
+                          </li>
+                        </PaginationButtonWrapper>
+                      </ul>
                       <EuiI18n
-                        default="Next page"
-                        token="euiPagination.disabledNextPage"
+                        default="Next page, {page}"
+                        token="euiPagination.nextPage"
+                        values={
+                          Object {
+                            "page": 2,
+                          }
+                        }
                       >
-                        <EuiButtonIcon
-                          aria-controls="generated-id"
-                          aria-label="Next page, 2"
-                          color="text"
-                          data-test-subj="pagination-button-next"
-                          href="#generated-id"
-                          iconType="arrowRight"
-                          onClick={[Function]}
+                        <EuiI18n
+                          default="Next page"
+                          token="euiPagination.disabledNextPage"
                         >
-                          <a
-                            aria-controls="generated-id"
+                          <EuiButtonIcon
+                            aria-controls="__table_generated-id"
                             aria-label="Next page, 2"
-                            className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                            color="text"
                             data-test-subj="pagination-button-next"
-                            href="#generated-id"
+                            href="#__table_generated-id"
+                            iconType="arrowRight"
                             onClick={[Function]}
-                            rel="noreferrer"
                           >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiButtonIcon__icon"
-                              color="inherit"
-                              size="m"
-                              type="arrowRight"
+                            <a
+                              aria-controls="__table_generated-id"
+                              aria-label="Next page, 2"
+                              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                              data-test-subj="pagination-button-next"
+                              href="#__table_generated-id"
+                              onClick={[Function]}
+                              rel="noreferrer"
                             >
-                              <span
+                              <EuiIcon
                                 aria-hidden="true"
                                 className="euiButtonIcon__icon"
                                 color="inherit"
-                                data-euiicon-type="arrowRight"
                                 size="m"
-                              />
-                            </EuiIcon>
-                          </a>
-                        </EuiButtonIcon>
+                                type="arrowRight"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  className="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="arrowRight"
+                                  size="m"
+                                />
+                              </EuiIcon>
+                            </a>
+                          </EuiButtonIcon>
+                        </EuiI18n>
                       </EuiI18n>
-                    </EuiI18n>
-                  </nav>
-                </EuiPagination>
-              </div>
-            </EuiFlexItem>
-          </div>
-        </EuiFlexGroup>
-      </EuiTablePagination>
-    </div>
-  </PaginationBar>
+                    </nav>
+                  </EuiPagination>
+                </div>
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+        </EuiTablePagination>
+      </div>
+    </PaginationBar>
+  </EuiI18n>
 </div>
 `;

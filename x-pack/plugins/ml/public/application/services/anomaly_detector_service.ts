@@ -50,7 +50,7 @@ export class AnomalyDetectorService {
     }
     const influencers = new Set<string>();
     for (const job of jobs) {
-      for (const influencer of job.analysis_config.influencers) {
+      for (const influencer of job.analysis_config.influencers || []) {
         influencers.add(influencer);
       }
     }

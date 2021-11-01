@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
 import { SeriesConfig, SeriesUrl } from '../types';
+import { PERCENTILE } from '../configurations/constants';
 import { ReportDefinitionCol } from './columns/report_definition_col';
 import { OperationTypeSelect } from './columns/operation_type_select';
 import { parseCustomFieldName } from '../configurations/lens_attributes';
@@ -42,15 +43,18 @@ export function ExpandedSeriesRow(seriesProps: Props) {
 
   const columnType = getColumnType(seriesConfig, selectedMetricField);
 
+  // if the breakdown field is percentiles, we can't apply further operations
+  const hasPercentileBreakdown = series.breakdown === PERCENTILE;
+
   return (
     <div style={{ width: '100%' }}>
-      <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem>
+      <EuiFlexGroup gutterSize="xs" wrap>
+        <EuiFlexItem grow={1}>
           <EuiFormRow label={DATE_LABEL} fullWidth>
             <DatePickerCol {...seriesProps} />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={2}>
           <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -58,8 +62,8 @@ export function ExpandedSeriesRow(seriesProps: Props) {
       <EuiFormRow label={FILTERS_LABEL} fullWidth>
         <SeriesFilter seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
       </EuiFormRow>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={2}>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
           <EuiFormRow label={BREAKDOWN_BY_LABEL}>
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem style={{ minWidth: 200 }}>
@@ -69,8 +73,8 @@ export function ExpandedSeriesRow(seriesProps: Props) {
             </EuiFlexGroup>
           </EuiFormRow>
         </EuiFlexItem>
-        {(hasOperationType || columnType === 'operation') && (
-          <EuiFlexItem grow={1}>
+        {(hasOperationType || (columnType === 'operation' && !hasPercentileBreakdown)) && (
+          <EuiFlexItem>
             <EuiFormRow label={OPERATION_LABEL}>
               <OperationTypeSelect
                 {...seriesProps}

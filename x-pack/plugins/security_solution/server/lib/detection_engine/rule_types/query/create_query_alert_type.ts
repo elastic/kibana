@@ -6,24 +6,18 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { QUERY_RULE_TYPE_ID } from '../../../../../common/constants';
-import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
-import { queryExecutor } from '../../signals/executors/query';
-import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { CreateRuleOptions } from '../types';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 
-export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
-  const { experimentalFeatures, lists, logger, config, ruleDataClient, version, eventLogService } =
-    createOptions;
-  const createSecurityRuleType = createSecurityRuleTypeFactory({
-    lists,
-    logger,
-    config,
-    ruleDataClient,
-    eventLogService,
-  });
-  return createSecurityRuleType<QueryRuleParams, {}, PersistenceServices, {}>({
+import { CompleteRule, queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
+import { queryExecutor } from '../../signals/executors/query';
+import { CreateRuleOptions, SecurityAlertType } from '../types';
+
+export const createQueryAlertType = (
+  createOptions: CreateRuleOptions
+): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
+  const { experimentalFeatures, logger, version } = createOptions;
+  return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
     validate: {
@@ -52,7 +46,7 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {
@@ -60,7 +54,7 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
           bulkCreate,
           exceptionItems,
           listClient,
-          rule,
+          completeRule,
           searchAfterSize,
           tuple,
           wrapHits,
@@ -77,7 +71,7 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
         eventsTelemetry: undefined,
         listClient,
         logger,
-        rule,
+        completeRule: completeRule as CompleteRule<QueryRuleParams>,
         searchAfterSize,
         services,
         tuple,
@@ -86,5 +80,5 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
       });
       return { ...result, state };
     },
-  });
+  };
 };

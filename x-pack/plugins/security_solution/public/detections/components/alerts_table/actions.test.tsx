@@ -290,7 +290,7 @@ describe('alert actions', () => {
           ...mockEcsDataWithAlert,
           signal: {
             rule: {
-              ...mockEcsDataWithAlert.signal?.rule!,
+              ...mockEcsDataWithAlert.signal?.rule,
               // @ts-expect-error
               timeline_id: null,
             },
@@ -317,7 +317,7 @@ describe('alert actions', () => {
           ...mockEcsDataWithAlert,
           signal: {
             rule: {
-              ...mockEcsDataWithAlert.signal?.rule!,
+              ...mockEcsDataWithAlert.signal?.rule,
               timeline_id: [''],
             },
           },
@@ -343,7 +343,7 @@ describe('alert actions', () => {
           ...mockEcsDataWithAlert,
           signal: {
             rule: {
-              ...mockEcsDataWithAlert.signal?.rule!,
+              ...mockEcsDataWithAlert.signal?.rule,
               type: ['eql'],
               timeline_id: [''],
             },
@@ -387,7 +387,7 @@ describe('alert actions', () => {
           ...mockEcsDataWithAlert,
           signal: {
             rule: {
-              ...mockEcsDataWithAlert.signal?.rule!,
+              ...mockEcsDataWithAlert.signal?.rule,
               type: ['eql'],
               timeline_id: [''],
             },

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
-
 import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
 import {
   GetCategoriesRequestSchema,
@@ -20,6 +18,7 @@ import {
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
 } from '../../types';
+import type { FleetRouter } from '../../types/request_context';
 
 import {
   getCategoriesHandler,
@@ -37,8 +36,8 @@ import {
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
-export const registerRoutes = (router: IRouter) => {
-  router.get(
+export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRouter }) => {
+  routers.rbac.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       validate: GetCategoriesRequestSchema,
@@ -47,7 +46,7 @@ export const registerRoutes = (router: IRouter) => {
     getCategoriesHandler
   );
 
-  router.get(
+  routers.rbac.get(
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
       validate: GetPackagesRequestSchema,
@@ -56,25 +55,25 @@ export const registerRoutes = (router: IRouter) => {
     getListHandler
   );
 
-  router.get(
+  routers.rbac.get(
     {
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       validate: false,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getLimitedListHandler
   );
 
-  router.get(
+  routers.rbac.get(
     {
       path: EPM_API_ROUTES.STATS_PATTERN,
       validate: GetStatsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getStatsHandler
   );
 
-  router.get(
+  routers.rbac.get(
     {
       path: EPM_API_ROUTES.FILEPATH_PATTERN,
       validate: GetFileRequestSchema,
@@ -83,7 +82,7 @@ export const registerRoutes = (router: IRouter) => {
     getFileHandler
   );
 
-  router.get(
+  routers.rbac.get(
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: GetInfoRequestSchema,
@@ -92,7 +91,7 @@ export const registerRoutes = (router: IRouter) => {
     getInfoHandler
   );
 
-  router.put(
+  routers.superuser.put(
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: UpdatePackageRequestSchema,
@@ -101,7 +100,7 @@ export const registerRoutes = (router: IRouter) => {
     updatePackageHandler
   );
 
-  router.post(
+  routers.superuser.post(
     {
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
       validate: InstallPackageFromRegistryRequestSchema,
@@ -110,7 +109,7 @@ export const registerRoutes = (router: IRouter) => {
     installPackageFromRegistryHandler
   );
 
-  router.post(
+  routers.superuser.post(
     {
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
       validate: BulkUpgradePackagesFromRegistryRequestSchema,
@@ -119,7 +118,7 @@ export const registerRoutes = (router: IRouter) => {
     bulkInstallPackagesFromRegistryHandler
   );
 
-  router.post(
+  routers.superuser.post(
     {
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
       validate: InstallPackageByUploadRequestSchema,
@@ -135,7 +134,7 @@ export const registerRoutes = (router: IRouter) => {
     installPackageByUploadHandler
   );
 
-  router.delete(
+  routers.superuser.delete(
     {
       path: EPM_API_ROUTES.DELETE_PATTERN,
       validate: DeletePackageRequestSchema,

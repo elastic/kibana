@@ -9,6 +9,7 @@ import { UserConfiguredActionConnector } from '../../../../types';
 import {
   ExecutorSubActionPushParamsITSM,
   ExecutorSubActionPushParamsSIR,
+  ExecutorSubActionAddEventParams,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../actions/server/builtin_action_types/servicenow/types';
 
@@ -27,8 +28,14 @@ export interface ServiceNowSIRActionParams {
   subActionParams: ExecutorSubActionPushParamsSIR;
 }
 
+export interface ServiceNowITOMActionParams {
+  subAction: string;
+  subActionParams: ExecutorSubActionAddEventParams;
+}
+
 export interface ServiceNowConfig {
   apiUrl: string;
+  usesTableApi: boolean;
 }
 
 export interface ServiceNowSecrets {
@@ -44,3 +51,17 @@ export interface Choice {
 }
 
 export type Fields = Record<string, Choice[]>;
+export interface AppInfo {
+  id: string;
+  name: string;
+  scope: string;
+  version: string;
+}
+
+export interface RESTApiError {
+  error: {
+    message: string;
+    detail: string;
+  };
+  status: string;
+}

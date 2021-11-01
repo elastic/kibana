@@ -10,7 +10,7 @@ import {
   asSavedObjectExecutionSource,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../../actions/server';
-import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
 import {
@@ -21,8 +21,9 @@ import {
   AlertInstanceContext,
   RawAlert,
 } from '../types';
-import { NormalizedAlertType } from '../rule_type_registry';
+import { NormalizedAlertType, UntypedNormalizedAlertType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
+import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 
 export interface CreateExecutionHandlerOptions<
   Params extends AlertTypeParams,
@@ -201,43 +202,35 @@ export function createExecutionHandler<
         await actionsClient.enqueueExecution(enqueueOptions);
       }
 
-      const event: IEvent = {
-        event: {
-          action: EVENT_LOG_ACTIONS.executeAction,
-          kind: 'alert',
-          category: [alertType.producer],
-        },
-        kibana: {
-          alerting: {
-            instance_id: alertInstanceId,
-            action_group_id: actionGroup,
-            action_subgroup: actionSubgroup,
+      const event = createAlertEventLogRecordObject({
+        ruleId: alertId,
+        ruleType: alertType as UntypedNormalizedAlertType,
+        action: EVENT_LOG_ACTIONS.executeAction,
+        instanceId: alertInstanceId,
+        group: actionGroup,
+        subgroup: actionSubgroup,
+        ruleName: alertName,
+        savedObjects: [
+          {
+            type: 'alert',
+            id: alertId,
+            typeId: alertType.id,
+            relation: SAVED_OBJECT_REL_PRIMARY,
           },
-          saved_objects: [
-            {
-              rel: SAVED_OBJECT_REL_PRIMARY,
-              type: 'alert',
-              id: alertId,
-              type_id: alertType.id,
-              ...namespace,
-            },
-            { type: 'action', id: action.id, type_id: action.actionTypeId, ...namespace },
-          ],
-        },
-        rule: {
-          id: alertId,
-          license: alertType.minimumLicenseRequired,
-          category: alertType.id,
-          ruleset: alertType.producer,
-          name: alertName,
-        },
-      };
+          {
+            type: 'action',
+            id: action.id,
+            typeId: action.actionTypeId,
+          },
+        ],
+        ...namespace,
+        message: `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
+          actionSubgroup
+            ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+            : `actionGroup: '${actionGroup}'`
+        } action: ${actionLabel}`,
+      });
 
-      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
-        actionSubgroup
-          ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
-          : `actionGroup: '${actionGroup}'`
-      } action: ${actionLabel}`;
       eventLogger.logEvent(event);
     }
   };

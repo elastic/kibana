@@ -20,6 +20,7 @@ import type {
 import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
+import { deleteMlModel } from '../elasticsearch/ml_model';
 import { packagePolicyService, appContextService } from '../..';
 import { splitPkgKey } from '../registry';
 import { deletePackageCache } from '../archive';
@@ -105,6 +106,8 @@ function deleteESAssets(
       return deleteTransforms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
       return deleteIlms(esClient, [id]);
+    } else if (assetType === ElasticsearchAssetType.mlModel) {
+      return deleteMlModel(esClient, [id]);
     }
   });
 }
@@ -117,11 +120,15 @@ async function deleteAssets(
   const logger = appContextService.getLogger();
 
   // must delete index templates first, or component templates which reference them cannot be deleted
-  // separate the assets into Index Templates and other assets
+  // must delete ingestPipelines first, or ml models referenced in them cannot be deleted.
+  // separate the assets into Index Templates and other assets.
   type Tuple = [EsAssetReference[], EsAssetReference[]];
-  const [indexTemplates, otherAssets] = installedEs.reduce<Tuple>(
+  const [indexTemplatesAndPipelines, otherAssets] = installedEs.reduce<Tuple>(
     ([indexAssetTypes, otherAssetTypes], asset) => {
-      if (asset.type === ElasticsearchAssetType.indexTemplate) {
+      if (
+        asset.type === ElasticsearchAssetType.indexTemplate ||
+        asset.type === ElasticsearchAssetType.ingestPipeline
+      ) {
         indexAssetTypes.push(asset);
       } else {
         otherAssetTypes.push(asset);
@@ -133,8 +140,8 @@ async function deleteAssets(
   );
 
   try {
-    // must delete index templates first
-    await Promise.all(deleteESAssets(indexTemplates, esClient));
+    // must delete index templates and pipelines first
+    await Promise.all(deleteESAssets(indexTemplatesAndPipelines, esClient));
     // then the other asset types
     await Promise.all([
       ...deleteESAssets(otherAssets, esClient),

@@ -11,7 +11,7 @@ import { fieldValidators } from '../../shared_imports';
 
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 
-const { emptyField, numberGreaterThanField } = fieldValidators;
+const { containsCharsField, emptyField, numberGreaterThanField } = fieldValidators;
 
 export const schema = {
   name: {
@@ -28,6 +28,17 @@ export const schema = {
             }
           )
         ),
+      },
+      {
+        validator: containsCharsField({
+          message: i18n.translate(
+            'indexPatternFieldEditor.editor.form.validations.starCharacterNotAllowedValidationErrorMessage',
+            {
+              defaultMessage: 'The field cannot have * in the name.',
+            }
+          ),
+          chars: '*',
+        }),
       },
     ],
   },
