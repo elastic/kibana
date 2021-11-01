@@ -14,7 +14,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlyoutHeader,
   EuiButtonGroup,
@@ -32,39 +32,48 @@ import {
 } from '@elastic/eui';
 
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlEditorComponent, ControlWidth } from '../../types';
-import { CONTROL_WIDTH_OPTIONS } from '../control_group_constants';
+import {
+  ControlEmbeddable,
+  ControlInput,
+  ControlWidth,
+  IEditableControlFactory,
+} from '../../types';
+import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 
-interface ManageControlProps {
-  title?: string;
-  isCreate: boolean;
-  onSave: () => void;
+interface EditControlProps {
+  factory: IEditableControlFactory;
+  embeddable?: ControlEmbeddable;
   width: ControlWidth;
+  isCreate: boolean;
+  title?: string;
+  onSave: () => void;
   onCancel: () => void;
   removeControl?: () => void;
-  controlEditorComponent?: ControlEditorComponent;
-  updateTitle: (title: string) => void;
+  updateTitle: (title?: string) => void;
   updateWidth: (newWidth: ControlWidth) => void;
+  onTypeEditorChange: (partial: Partial<ControlInput>) => void;
 }
 
 export const ControlEditor = ({
-  controlEditorComponent,
+  onTypeEditorChange,
   removeControl,
   updateTitle,
   updateWidth,
+  embeddable,
   isCreate,
   onCancel,
+  factory,
   onSave,
   title,
   width,
-}: ManageControlProps) => {
+}: EditControlProps) => {
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentWidth, setCurrentWidth] = useState(width);
 
   const [controlEditorValid, setControlEditorValid] = useState(false);
-  const [editorValid, setEditorValid] = useState(false);
+  const [defaultTitle, setDefaultTitle] = useState<string>();
 
-  useEffect(() => setEditorValid(Boolean(currentTitle)), [currentTitle]);
+  const ControlTypeEditor = factory.controlEditorComponent;
 
   return (
     <>
@@ -79,15 +88,29 @@ export const ControlEditor = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm>
+          <EuiSpacer size="l" />
+          {ControlTypeEditor && (
+            <ControlTypeEditor
+              onChange={onTypeEditorChange}
+              setValidState={setControlEditorValid}
+              initialInput={embeddable?.getInput()}
+              setDefaultTitle={(newDefaultTitle) => {
+                if (!currentTitle || currentTitle === defaultTitle) {
+                  setCurrentTitle(newDefaultTitle);
+                  updateTitle(newDefaultTitle);
+                }
+                setDefaultTitle(newDefaultTitle);
+              }}
+            />
+          )}
           <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
             <EuiFieldText
-              placeholder="Placeholder text"
+              placeholder={defaultTitle}
               value={currentTitle}
               onChange={(e) => {
-                updateTitle(e.target.value);
+                updateTitle(e.target.value || defaultTitle);
                 setCurrentTitle(e.target.value);
               }}
-              aria-label="Use aria labels when no actual label is in use"
             />
           </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
@@ -102,10 +125,6 @@ export const ControlEditor = ({
               }}
             />
           </EuiFormRow>
-
-          <EuiSpacer size="l" />
-          {controlEditorComponent &&
-            controlEditorComponent({ setValidState: setControlEditorValid })}
           <EuiSpacer size="l" />
           {removeControl && (
             <EuiButtonEmpty
@@ -141,10 +160,8 @@ export const ControlEditor = ({
               aria-label={`save-${title}`}
               iconType="check"
               color="primary"
-              disabled={!editorValid || !controlEditorValid}
-              onClick={() => {
-                onSave();
-              }}
+              disabled={!controlEditorValid}
+              onClick={() => onSave()}
             >
               {ControlGroupStrings.manageControl.getSaveChangesTitle()}
             </EuiButton>

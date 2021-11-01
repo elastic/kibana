@@ -182,7 +182,7 @@ describe('migration v2', () => {
 
     await startWithDelay([rootA, rootB, rootC], 0);
 
-    const esClient = esServer.es.getClient();
+    const esClient = esServer.es.getKibanaEsClient();
     const migratedDocs = await fetchDocs(esClient, migratedIndex);
 
     expect(migratedDocs.length).toBe(5000);
@@ -201,7 +201,7 @@ describe('migration v2', () => {
 
     await startWithDelay([rootA, rootB, rootC], 1);
 
-    const esClient = esServer.es.getClient();
+    const esClient = esServer.es.getKibanaEsClient();
     const migratedDocs = await fetchDocs(esClient, migratedIndex);
 
     expect(migratedDocs.length).toBe(5000);
@@ -220,7 +220,7 @@ describe('migration v2', () => {
 
     await startWithDelay([rootA, rootB, rootC], 5);
 
-    const esClient = esServer.es.getClient();
+    const esClient = esServer.es.getKibanaEsClient();
     const migratedDocs = await fetchDocs(esClient, migratedIndex);
 
     expect(migratedDocs.length).toBe(5000);
@@ -239,7 +239,7 @@ describe('migration v2', () => {
 
     await startWithDelay([rootA, rootB, rootC], 20);
 
-    const esClient = esServer.es.getClient();
+    const esClient = esServer.es.getKibanaEsClient();
     const migratedDocs = await fetchDocs(esClient, migratedIndex);
 
     expect(migratedDocs.length).toBe(5000);

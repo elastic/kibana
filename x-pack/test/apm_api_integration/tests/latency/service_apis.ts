@@ -15,7 +15,7 @@ import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
-  const traceData = getService('traceData');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -116,7 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let latencyMetricValues: PromiseReturnType<typeof getLatencyValues>;
   let latencyTransactionValues: PromiseReturnType<typeof getLatencyValues>;
 
-  registry.when('Services APIs', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
+  registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
@@ -129,7 +129,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const serviceGoDevInstance = service(serviceName, 'development', 'go').instance(
           'instance-b'
         );
-        await traceData.index([
+        await synthtraceEsClient.index([
           ...timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
@@ -153,7 +153,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => traceData.clean());
+      after(() => synthtraceEsClient.clean());
 
       describe('compare latency value between service inventory, latency chart, service inventory and transactions apis', () => {
         before(async () => {

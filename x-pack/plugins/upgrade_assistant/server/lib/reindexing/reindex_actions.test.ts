@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
+import { TransportResult } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -257,10 +257,10 @@ describe('ReindexActions', () => {
   });
 
   describe('getFlatSettings', () => {
-    const asApiResponse = <T>(body: T): RequestEvent<T> =>
+    const asApiResponse = <T>(body: T): TransportResult<T> =>
       ({
         body,
-      } as RequestEvent<T>);
+      } as TransportResult<T>);
 
     it('returns flat settings', async () => {
       clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(

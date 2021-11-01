@@ -7,11 +7,8 @@
 
 import _ from 'lodash';
 import { FeatureCollection, Feature } from 'geojson';
-import { SOURCE_TYPES } from '../../../../common/constants';
-import { IVectorSource } from '../../sources/vector_source';
 
 export const GEOJSON_FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
-export const ES_MVT_FEATURE_ID_PROPERTY_NAME = '_id';
 
 let idCounter = 0;
 
@@ -59,14 +56,4 @@ export function assignFeatureIds(featureCollection: FeatureCollection): FeatureC
     type: 'FeatureCollection',
     features,
   };
-}
-
-export function getFeatureId(feature: Feature, source: IVectorSource): string | number | undefined {
-  if (!source.isMvt()) {
-    return feature.properties?.[GEOJSON_FEATURE_ID_PROPERTY_NAME];
-  }
-
-  return source.getType() === SOURCE_TYPES.ES_SEARCH
-    ? feature.properties?.[ES_MVT_FEATURE_ID_PROPERTY_NAME]
-    : feature.id;
 }

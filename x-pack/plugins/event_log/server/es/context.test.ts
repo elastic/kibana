@@ -9,7 +9,7 @@ import { createEsContext } from './context';
 import { ElasticsearchClient, Logger } from '../../../../../src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { RequestEvent } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 jest.mock('../lib/../../../../package.json', () => ({ version: '1.2.3' }));
 jest.mock('./init');
 
@@ -63,6 +63,7 @@ describe('createEsContext', () => {
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
+
     elasticsearchClient.indices.existsTemplate.mockResolvedValue(asApiResponse(false));
     elasticsearchClient.indices.existsIndexTemplate.mockResolvedValue(asApiResponse(false));
     elasticsearchClient.indices.existsAlias.mockResolvedValue(asApiResponse(false));
@@ -113,8 +114,8 @@ describe('createEsContext', () => {
   });
 });
 
-function asApiResponse<T>(body: T): RequestEvent<T> {
+function asApiResponse<T>(body: T): TransportResult<T> {
   return {
     body,
-  } as RequestEvent<T>;
+  } as TransportResult<T>;
 }

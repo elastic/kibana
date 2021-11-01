@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
   async function getNumberOfSessionDocuments() {
     return (
       // @ts-expect-error doesn't handle total as number
-      (await es.search({ index: '.kibana_security_session*' })).body.hits.total.value as number
+      (await es.search({ index: '.kibana_security_session*' })).hits.total.value as number
     );
   }
 

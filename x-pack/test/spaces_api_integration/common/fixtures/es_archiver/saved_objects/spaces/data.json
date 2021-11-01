@@ -56,15 +56,11 @@
 {
   "type": "_doc",
   "value": {
-    "id": "space_2:dashboard:my_dashboard",
+    "id": "isolatedtype:my_isolated_object",
     "index": ".kibana",
     "source": {
-      "dashboard": {
-        "description": "Space 2",
-        "title": "This is the second test space"
-      },
       "namespace": "space_2",
-      "type": "dashboard",
+      "type": "isolatedtype",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
     "type": "_doc"
@@ -74,15 +70,11 @@
 {
   "type": "_doc",
   "value": {
-    "id": "space_1:dashboard:my_dashboard",
+    "id": "isolatedtype:my_isolated_object",
     "index": ".kibana",
     "source": {
-      "dashboard": {
-        "description": "Space 1",
-        "title": "This is the second test space"
-      },
       "namespace": "space_1",
-      "type": "dashboard",
+      "type": "isolatedtype",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
     "type": "_doc"
@@ -92,14 +84,10 @@
 {
   "type": "_doc",
   "value": {
-    "id": "dashboard:my_dashboard",
+    "id": "isolatedtype:my_isolated_object",
     "index": ".kibana",
     "source": {
-      "dashboard": {
-        "description": "Default Space",
-        "title": "This is the default test space"
-      },
-      "type": "dashboard",
+      "type": "isolatedtype",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
     "type": "_doc"
@@ -109,9 +97,10 @@
 {
   "type": "_doc",
   "value": {
-    "id": "dashboard:cts_dashboard",
+    "id": "dashboard:cts_dashboard_default",
     "index": ".kibana",
     "source": {
+      "originId": "cts_dashboard",
       "dashboard": {
         "description": "Copy to Space Dashboard from the default space",
         "title": "This is the default test space CTS dashboard"
@@ -130,7 +119,8 @@
         "name": "CTS Vis 3"
       }],
       "type": "dashboard",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["default"]
     },
     "type": "_doc"
   }
@@ -227,9 +217,10 @@
 {
   "type": "_doc",
   "value": {
-    "id": "space_1:dashboard:cts_dashboard",
+    "id": "dashboard:cts_dashboard_space_1",
     "index": ".kibana",
     "source": {
+      "originId": "cts_dashboard",
       "dashboard": {
         "description": "Copy to Space Dashboard from space_1 space",
         "title": "This is the space_1 test space CTS dashboard"
@@ -253,7 +244,7 @@
       ],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespace": "space_1"
+      "namespaces": ["space_1"]
     },
     "type": "_doc"
   }

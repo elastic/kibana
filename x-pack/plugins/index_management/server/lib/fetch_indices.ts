@@ -54,7 +54,6 @@ async function fetchIndicesCall(
         aliases: aliases.length ? aliases : 'none',
         // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/532
         hidden: index.settings.index.hidden === 'true',
-        // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/532
         data_stream: index.data_stream!,
       });
     }
