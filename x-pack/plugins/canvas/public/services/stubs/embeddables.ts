@@ -14,5 +14,4 @@ const noop = (..._args: any[]): any => {};
 
 export const embeddablesServiceFactory: EmbeddablesServiceFactory = () => ({
   getEmbeddableFactories: noop,
-  getStateTransfer: noop,
 });

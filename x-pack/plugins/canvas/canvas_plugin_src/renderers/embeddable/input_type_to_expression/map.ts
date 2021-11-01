@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { MapEmbeddableInput } from '../../../../../../plugins/maps/public';
+import { MapEmbeddableInput } from '../../../../../../plugins/maps/public/embeddable';
 
-export function toExpression(input: MapEmbeddableInput & { savedObjectId: string }): string {
+export function toExpression(input: MapEmbeddableInput): string {
   const expressionParts = [] as string[];
 
   expressionParts.push('savedMap');
-
-  expressionParts.push(`id="${input.savedObjectId}"`);
+  expressionParts.push(`id="${input.id}"`);
 
   if (input.title !== undefined) {
     expressionParts.push(`title="${input.title}"`);

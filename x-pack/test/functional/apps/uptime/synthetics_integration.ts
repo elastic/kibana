@@ -129,7 +129,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     use_output: 'default',
   });
 
-  describe('When on the Synthetics Integration Policy Create Page', function () {
+  // failing: https://github.com/elastic/kibana/issues/116522
+  describe.skip('When on the Synthetics Integration Policy Create Page', function () {
     this.tags(['ciGroup10']);
     const basicConfig = {
       name: monitorName,

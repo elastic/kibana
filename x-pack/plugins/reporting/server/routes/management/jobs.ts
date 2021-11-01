@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '../../';
 import { ROUTE_TAG_CAN_REDIRECT } from '../../../../security/server';
 import { API_BASE_URL } from '../../../common/constants';
@@ -115,7 +115,12 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       const { jobtype: jobType } = result;
 
       if (!jobTypes.includes(jobType)) {
-        throw Boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
+        return res.forbidden({
+          body: i18n.translate('xpack.reporting.jobsQuery.infoError.unauthorizedErrorMessage', {
+            defaultMessage: 'Sorry, you are not authorized to view {jobType} info',
+            values: { jobType },
+          }),
+        });
       }
 
       return res.ok({
