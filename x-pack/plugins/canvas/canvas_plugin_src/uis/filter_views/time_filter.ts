@@ -42,7 +42,7 @@ const formatTime = (str: string, roundUp: boolean) => {
     return strings.getInvalidDateLabel(str);
   }
 
-  return moment.format('YYYY-mm-DD HH:mm:ss');
+  return moment.format('YYYY-MM-DD HH:mm:ss');
 };
 
 export const timeFilter: FilterViewSpec<TimeFilterValue> = {
