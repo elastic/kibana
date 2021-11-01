@@ -426,7 +426,7 @@ export const signalRulesAlertType = ({
                 ?.kibana_siem_app_url,
             });
 
-            logger.info(
+            logger.debug(
               buildRuleMessage(`Found ${result.createdSignalsCount} signals for notification.`)
             );
 
@@ -478,8 +478,7 @@ export const signalRulesAlertType = ({
             });
           }
 
-          // adding this log line so we can get some information from cloud
-          logger.info(
+          logger.debug(
             buildRuleMessage(
               `[+] Finished indexing ${result.createdSignalsCount}  ${
                 !isEmpty(tuples)

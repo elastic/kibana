@@ -579,19 +579,21 @@ export const SUCCESSFULLY_IMPORTED_RULES = (totalRules: number) =>
     }
   );
 
-export const IMPORT_FAILED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedTitle',
-  {
-    defaultMessage: 'Failed to import rules',
-  }
-);
+export const IMPORT_FAILED = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedTitle',
+    {
+      values: { totalRules },
+      defaultMessage: 'Failed to import {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+    }
+  );
 
-export const IMPORT_FAILED_DETAILED = (ruleId: string, statusCode: number, message: string) =>
+export const IMPORT_FAILED_DETAILED = (message: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedDetailedTitle',
     {
-      values: { ruleId, statusCode, message },
-      defaultMessage: 'Rule ID: {ruleId}\n Status Code: {statusCode}\n Message: {message}',
+      values: { message },
+      defaultMessage: '{message}',
     }
   );
 
