@@ -45,7 +45,20 @@ export class AlertsDemoPlugin implements AlertsDemoPluginClass {
       )
     );
     pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(getAlwaysFiringAlertType());
-
+    pluginsSetup.developerExamples.register({
+      appId: 'alertsDemo',
+      title: 'Alerts Demo example',
+      description: 'This alerting example walks you through how to set up a new rule.',
+      links: [
+        {
+          label: 'README',
+          href: 'https://github.com/elastic/kibana/tree/main/x-pack/plugins/rule_registry',
+          iconType: 'logoGithub',
+          size: 's',
+          target: '_blank',
+        },
+      ],
+    });
     // Register an application into the side navigation menu
     core.application.register({
       id: 'alertsDemo',

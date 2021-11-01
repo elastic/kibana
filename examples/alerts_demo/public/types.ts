@@ -16,6 +16,7 @@ import {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '../../../x-pack/plugins/observability/public';
+import { DeveloperExamplesSetup } from '../../developer_examples/public';
 
 export interface AlertsDemoPluginSetup {
   getGreeting: () => string;
@@ -31,6 +32,7 @@ export interface AppPluginStartDependencies {
 export interface AlertsDemoClientSetupDeps {
   observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  developerExamples: DeveloperExamplesSetup;
   // navigation: NavigationPublicPluginStart;
 }
 
@@ -38,6 +40,7 @@ export interface AlertsDemoClientStartDeps {
   observability: ObservabilityPublicStart;
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  developerExamplers: DeveloperExamplesSetup;
 }
 
 export type AlertsDemoSetupExports = void;
