@@ -73,7 +73,12 @@ export const registerRulePreviewPrivilegeDeprecations = ({
           message: i18n.translate(
             'xpack.securitySolution.deprecations.rulePreviewPrivileges.message',
             {
-              defaultMessage: `In order to enable a more robust preview, users will need read privileges to new signals preview indices (.siem-preview-signals-<KIBANA_SPACE>), analogous to existing signals indices (${DEFAULT_SIGNALS_INDEX}-<KIBANA_SPACE>).`,
+              values: {
+                previewIndexPrefix: '.siem-preview-signals',
+                signalsIndexPrefix: DEFAULT_SIGNALS_INDEX,
+              },
+              defaultMessage:
+                'In order to enable a more robust preview, users will need read privileges to new signals preview indices ({previewIndexPrefix}-<KIBANA_SPACE>), analogous to existing signals indices ({signalsIndexPrefix}-<KIBANA_SPACE>).',
             }
           ),
           level: 'warning',
