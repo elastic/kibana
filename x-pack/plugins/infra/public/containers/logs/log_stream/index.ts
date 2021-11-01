@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { buildEsQuery } from '@kbn/es-query';
 import createContainer from 'constate';
+import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
 import { useSubscription } from '../../../utils/use_observable';
 import { LogSourceConfigurationProperties } from '../log_source';
@@ -18,7 +18,7 @@ import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
 import { useFetchLogEntriesAround } from './use_fetch_log_entries_around';
 import { useFetchLogEntriesBefore } from './use_fetch_log_entries_before';
 
-export type BuiltEsQuery = ReturnType<typeof esQuery.buildEsQuery>;
+export type BuiltEsQuery = ReturnType<typeof buildEsQuery>;
 
 interface LogStreamProps {
   sourceId: string;
