@@ -18,7 +18,8 @@ export function startLiveDataUpload({
   start,
   bucketSizeInMs,
   intervalInMs,
-  workers,
+  clientWorkers,
+  batchSize,
   writeTargets,
   scenario,
   client,
@@ -27,7 +28,8 @@ export function startLiveDataUpload({
   start: number;
   bucketSizeInMs: number;
   intervalInMs: number;
-  workers: number;
+  clientWorkers: number;
+  batchSize: number;
   writeTargets: ElasticsearchOutputWriteTargets;
   scenario: Scenario;
   client: Client;
@@ -63,7 +65,8 @@ export function startLiveDataUpload({
     uploadEvents({
       events: eventsToUpload,
       client,
-      workers,
+      clientWorkers,
+      batchSize,
       writeTargets,
       logger,
     });
