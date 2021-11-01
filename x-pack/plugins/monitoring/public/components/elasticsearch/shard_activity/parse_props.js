@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Legacy } from '../../../legacy_shims';
 import { capitalize } from 'lodash';
 import { formatMetric } from '../../../lib/format_number';
 import { formatDateTimeLocal } from '../../../../common/formatting';
@@ -37,11 +36,10 @@ export const parseProps = (props) => {
     target,
     translog,
     type,
+    timezone,
   } = props;
 
   const { files, size } = index;
-  const injector = Legacy.shims.getAngularInjector();
-  const timezone = injector.get('config').get('dateFormat:tz');
 
   return {
     name: indexName || index.name,

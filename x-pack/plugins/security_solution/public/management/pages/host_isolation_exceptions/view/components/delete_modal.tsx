@@ -54,7 +54,7 @@ export const HostIsolationExceptionDeleteModal = memo<{}>(() => {
         i18n.translate(
           'xpack.securitySolution.hostIsolationExceptions.deletionDialog.deleteSuccess',
           {
-            defaultMessage: '"{name}" has been removed from the Host Isolation Exceptions list.',
+            defaultMessage: '"{name}" has been removed from the Host isolation exceptions list.',
             values: { name: exception?.name },
           }
         )
@@ -72,7 +72,7 @@ export const HostIsolationExceptionDeleteModal = memo<{}>(() => {
           'xpack.securitySolution.hostIsolationExceptions.deletionDialog.deleteFailure',
           {
             defaultMessage:
-              'Unable to remove "{name}" from the Host Isolation Exceptions list. Reason: {message}',
+              'Unable to remove "{name}" from the Host isolation exceptions list. Reason: {message}',
             values: { name: exception?.name, message: deleteError.message },
           }
         )
@@ -86,7 +86,7 @@ export const HostIsolationExceptionDeleteModal = memo<{}>(() => {
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.title"
-            defaultMessage="Delete Host Isolation Exception"
+            defaultMessage="Delete Host isolation exception"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>

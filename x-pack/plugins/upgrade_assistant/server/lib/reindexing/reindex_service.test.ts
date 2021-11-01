@@ -7,7 +7,7 @@
 
 jest.mock('../es_indices_state_check', () => ({ esIndicesStateCheck: jest.fn() }));
 import { BehaviorSubject } from 'rxjs';
-import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
+import { TransportResult } from '@elastic/elasticsearch';
 import { Logger } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -20,7 +20,7 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { mockKibanaVersion } from '../../../common/constants';
+import { MAJOR_VERSION } from '../../../common/constants';
 import { licensingMock } from '../../../../licensing/server/mocks';
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
@@ -35,10 +35,10 @@ import {
   reindexServiceFactory,
 } from './reindex_service';
 
-const asApiResponse = <T>(body: T): RequestEvent<T> =>
+const asApiResponse = <T>(body: T): TransportResult<T> =>
   ({
     body,
-  } as RequestEvent<T>);
+  } as TransportResult<T>);
 
 const { currentMajor, prevMajor } = getMockVersionInfo();
 
@@ -89,7 +89,7 @@ describe('reindexService', () => {
       licensingPluginSetup
     );
 
-    versionService.setup(mockKibanaVersion);
+    versionService.setup(MAJOR_VERSION);
   });
 
   describe('hasRequiredPrivileges', () => {
@@ -793,7 +793,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.readonly);
         expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
           index: 'myIndex',
-          body: { settings: { blocks: { write: true } } },
+          body: { blocks: { write: true } },
         });
       });
 
@@ -885,7 +885,7 @@ describe('reindexService', () => {
         // Original index should have been set back to allow reads.
         expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
           index: 'myIndex',
-          body: { settings: { blocks: { write: false } } },
+          body: { blocks: { write: false } },
         });
       });
     });

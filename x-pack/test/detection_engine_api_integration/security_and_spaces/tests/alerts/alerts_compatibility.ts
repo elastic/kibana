@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
 
 import {
@@ -109,7 +109,6 @@ export default ({ getService }: FtrProviderContext) => {
             migrationIds: [migration.migration_id],
             supertest,
           });
-
           return completed === true;
         }, `polling finalize_migration until complete`);
 

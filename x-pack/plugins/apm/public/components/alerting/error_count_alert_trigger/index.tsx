@@ -120,6 +120,7 @@ export function ErrorCountAlertTrigger(props: Props) {
       data={data?.errorCountChartPreview}
       threshold={params.threshold}
       yTickFormat={asInteger}
+      uiSettings={services.uiSettings}
     />
   );
 

@@ -32,7 +32,6 @@ import {
   CUSTOM_QUERY_REQUIRED,
   DEFAULT_RISK_SCORE_INPUT,
   DEFINE_CONTINUE_BUTTON,
-  DEFINE_EDIT_TAB,
   EQL_QUERY_INPUT,
   EQL_QUERY_PREVIEW_HISTOGRAM,
   EQL_QUERY_VALIDATION_SPINNER,
@@ -255,7 +254,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   rule: CustomRule | OverrideRule
 ) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
@@ -274,7 +273,7 @@ export const fillDefineThresholdRule = (rule: ThresholdRule) => {
   const threshold = 1;
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(COMBO_BOX_CLEAR_BTN).first().click();
 
   rule.index.forEach((index) => {
@@ -299,7 +298,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
     cy.wrap($el).type(rule.thresholdField, { delay: 35 });
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
@@ -315,9 +314,12 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 };
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
+  if (rule.customQuery == null) {
+    throw new TypeError('The rule custom query should never be undefined or null ');
+  }
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
-  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery!);
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   cy.get(RULES_CREATION_PREVIEW)
     .find(QUERY_PREVIEW_BUTTON)
@@ -493,10 +495,6 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
   getDefineContinueButton().should('exist').click({ force: true });
 
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).should('not.exist');
-};
-
-export const goToDefineStepTab = () => {
-  cy.get(DEFINE_EDIT_TAB).click({ force: true });
 };
 
 export const goToAboutStepTab = () => {

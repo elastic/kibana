@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type ModelSnapshot = estypes.MlModelSnapshot;

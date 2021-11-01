@@ -123,9 +123,9 @@ export const Controls: FC<Props> = React.memo(
         await navigateToPath(path);
       } else {
         toasts.addDanger(
-          i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.indexPatternMissingMessage', {
+          i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.dataViewMissingMessage', {
             defaultMessage:
-              'To create a job from this index please create an index pattern for {indexTitle}.',
+              'To create a job from this index please create a data view for {indexTitle}.',
             values: { indexTitle: nodeLabel },
           })
         );

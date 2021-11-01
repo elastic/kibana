@@ -8,8 +8,9 @@
 
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
+import { copyFile } from 'fs/promises';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import Mustache from 'mustache';
 
 import { compressTar, copyAll, mkdirp, write, Config } from '../../../lib';
@@ -39,9 +40,10 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
   await copyAll(resolve(scope.dockerBuildDir, 'bin'), resolve(dockerFilesBuildDir, 'bin'));
   await copyAll(resolve(scope.dockerBuildDir, 'config'), resolve(dockerFilesBuildDir, 'config'));
   if (scope.ironbank) {
-    await copyAll(resolve(scope.dockerBuildDir), resolve(dockerFilesBuildDir), {
-      select: ['LICENSE'],
-    });
+    await copyFile(
+      resolve(REPO_ROOT, 'licenses/ELASTIC-LICENSE-2.0.txt'),
+      resolve(dockerFilesBuildDir, 'LICENSE')
+    );
     const templates = ['hardening_manifest.yaml', 'README.md'];
     for (const template of templates) {
       const file = readFileSync(resolve(__dirname, 'templates/ironbank', template));

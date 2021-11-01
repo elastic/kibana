@@ -8,15 +8,13 @@
 import { range } from 'lodash';
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../../../src/plugins/data/common';
-
-import type { SearchStrategyServerParams } from '../../../../common/search_strategies/types';
 import type {
-  LatencyCorrelationsRequestParams,
+  RawResponseBase,
+  SearchStrategyClientParams,
+  SearchStrategyServerParams,
+} from '../../../../common/search_strategies/types';
+import type {
+  LatencyCorrelationsParams,
   LatencyCorrelationsRawResponse,
 } from '../../../../common/search_strategies/latency_correlations/types';
 
@@ -36,22 +34,18 @@ import { searchServiceLogProvider } from '../search_service_log';
 import type { SearchServiceProvider } from '../search_strategy_provider';
 
 import { latencyCorrelationsSearchServiceStateProvider } from './latency_correlations_search_service_state';
+import { fetchFieldsStats } from '../queries/field_stats/get_fields_stats';
 
-export type LatencyCorrelationsSearchServiceProvider = SearchServiceProvider<
-  LatencyCorrelationsRequestParams,
-  LatencyCorrelationsRawResponse
->;
-
-export type LatencyCorrelationsSearchStrategy = ISearchStrategy<
-  IKibanaSearchRequest<LatencyCorrelationsRequestParams>,
-  IKibanaSearchResponse<LatencyCorrelationsRawResponse>
+type LatencyCorrelationsSearchServiceProvider = SearchServiceProvider<
+  LatencyCorrelationsParams & SearchStrategyClientParams,
+  LatencyCorrelationsRawResponse & RawResponseBase
 >;
 
 export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearchServiceProvider =
   (
     esClient: ElasticsearchClient,
     getApmIndices: () => Promise<ApmIndicesConfig>,
-    searchServiceParams: LatencyCorrelationsRequestParams,
+    searchServiceParams: LatencyCorrelationsParams & SearchStrategyClientParams,
     includeFrozen: boolean
   ) => {
     const { addLogMessage, getLogMessages } = searchServiceLogProvider();
@@ -60,14 +54,16 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
 
     async function fetchCorrelations() {
       let params:
-        | (LatencyCorrelationsRequestParams & SearchStrategyServerParams)
+        | (LatencyCorrelationsParams &
+            SearchStrategyClientParams &
+            SearchStrategyServerParams)
         | undefined;
 
       try {
         const indices = await getApmIndices();
         params = {
           ...searchServiceParams,
-          index: indices['apm_oss.transactionIndices'],
+          index: indices.transaction,
           includeFrozen,
         };
 
@@ -196,6 +192,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
           `Loaded fractions and totalDocCount of ${totalDocCount}.`
         );
 
+        const fieldsToSample = new Set<string>();
         let loadedHistograms = 0;
         for await (const item of fetchTransactionDurationHistograms(
           esClient,
@@ -211,6 +208,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
         )) {
           if (item !== undefined) {
             state.addLatencyCorrelation(item);
+            fieldsToSample.add(item.fieldName);
           }
           loadedHistograms++;
           state.setProgress({
@@ -225,6 +223,19 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
             fieldValuePairs.length
           } field/value pairs.`
         );
+
+        addLogMessage(
+          `Identified ${fieldsToSample.size} fields to sample for field statistics.`
+        );
+
+        const { stats: fieldStats } = await fetchFieldsStats(esClient, params, [
+          ...fieldsToSample,
+        ]);
+
+        addLogMessage(
+          `Retrieved field statistics for ${fieldStats.length} fields out of ${fieldsToSample.size} fields.`
+        );
+        state.addFieldStats(fieldStats);
       } catch (e) {
         state.setError(e);
       }
@@ -251,6 +262,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
         overallHistogram,
         percentileThresholdValue,
         progress,
+        fieldStats,
       } = state.getState();
 
       return {
@@ -270,6 +282,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
             state.getLatencyCorrelationsSortedByCorrelation(),
           percentileThresholdValue,
           overallHistogram,
+          fieldStats,
         },
       };
     };

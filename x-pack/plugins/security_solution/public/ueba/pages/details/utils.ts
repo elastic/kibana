@@ -15,7 +15,7 @@ import { getUebaDetailsUrl } from '../../../common/components/link_to/redirect_t
 import * as i18n from '../translations';
 import { UebaRouteSpyState } from '../../../common/utils/route/types';
 import { GetUrlForApp } from '../../../common/components/navigation/types';
-import { APP_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 
 export const type = uebaModel.UebaType.details;
@@ -35,7 +35,7 @@ export const getBreadcrumbs = (
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getUrlForApp(APP_ID, {
+      href: getUrlForApp(APP_UI_ID, {
         path: !isEmpty(search[0]) ? search[0] : '',
         deepLinkId: SecurityPageName.ueba,
       }),
@@ -47,7 +47,7 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: params.detailName,
-        href: getUrlForApp(APP_ID, {
+        href: getUrlForApp(APP_UI_ID, {
           path: getUebaDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
           deepLinkId: SecurityPageName.ueba,
         }),

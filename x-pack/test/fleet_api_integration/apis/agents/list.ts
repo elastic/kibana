@@ -8,66 +8,15 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { testUsers } from '../test_users';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
-  const security = getService('security');
-  const users: { [rollName: string]: { username: string; password: string; permissions?: any } } = {
-    kibana_basic_user: {
-      permissions: {
-        feature: {
-          dashboards: ['read'],
-        },
-        spaces: ['*'],
-      },
-      username: 'kibana_basic_user',
-      password: 'changeme',
-    },
-    fleet_user: {
-      permissions: {
-        feature: {
-          fleet: ['read'],
-        },
-        spaces: ['*'],
-      },
-      username: 'fleet_user',
-      password: 'changeme',
-    },
-    fleet_admin: {
-      permissions: {
-        feature: {
-          fleet: ['all'],
-        },
-        spaces: ['*'],
-      },
-      username: 'fleet_admin',
-      password: 'changeme',
-    },
-  };
 
   describe('fleet_list_agent', () => {
     before(async () => {
-      for (const roleName in users) {
-        if (users.hasOwnProperty(roleName)) {
-          const user = users[roleName];
-
-          if (user.permissions) {
-            await security.role.create(roleName, {
-              kibana: [user.permissions],
-            });
-          }
-
-          // Import a repository first
-          await security.user.create(user.username, {
-            password: user.password,
-            roles: [roleName],
-            full_name: user.username,
-          });
-        }
-      }
-
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
     });
     after(async () => {
@@ -77,13 +26,13 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return a 403 if a user without the superuser role try to access the APU', async () => {
       await supertestWithoutAuth
         .get(`/api/fleet/agents`)
-        .auth(users.fleet_admin.username, users.fleet_admin.password)
+        .auth(testUsers.fleet_all.username, testUsers.fleet_all.password)
         .expect(403);
     });
     it('should not return the list of agents when requesting as a user without fleet permissions', async () => {
       await supertestWithoutAuth
         .get(`/api/fleet/agents`)
-        .auth(users.kibana_basic_user.username, users.kibana_basic_user.password)
+        .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
         .expect(403);
     });
 

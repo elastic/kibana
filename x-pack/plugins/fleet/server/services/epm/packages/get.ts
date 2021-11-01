@@ -53,7 +53,6 @@ export async function getPackages(
   });
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
-
   // filter out any internal packages
   const savedObjectsVisible = packageSavedObjects.saved_objects.filter(
     (o) => !o.attributes.internal
@@ -70,7 +69,6 @@ export async function getPackages(
 }
 
 // Get package names for packages which cannot have more than one package policy on an agent policy
-// Assume packages only export one policy template for now
 export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string[]> {

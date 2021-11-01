@@ -76,11 +76,11 @@ export function ServiceOverviewDependenciesTable({
       const itemLink =
         location.type === NodeType.backend ? (
           <BackendLink
-            backendName={location.backendName}
             type={location.spanType}
             subtype={location.spanSubtype}
             query={{
-              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+              backendName: location.backendName,
+              comparisonEnabled,
               comparisonType,
               environment,
               kuery,
@@ -100,7 +100,7 @@ export function ServiceOverviewDependenciesTable({
             serviceName={location.serviceName}
             agentName={location.agentName}
             query={{
-              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+              comparisonEnabled,
               comparisonType,
               environment,
               kuery,

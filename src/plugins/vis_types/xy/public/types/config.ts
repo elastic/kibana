@@ -85,6 +85,7 @@ export interface AxisConfig<S extends XScaleType | YScaleType> {
   title?: string;
   grid?: AxisGrid;
   integersOnly: boolean;
+  timeAxisLayerCount?: number;
 }
 
 export interface LegendOptions {

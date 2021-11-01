@@ -6,117 +6,45 @@
  */
 
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { taskManagerMock } from '../../../../../task_manager/server/mocks';
-import { TaskStatus } from '../../../../../task_manager/server';
-import { TelemetryDiagTask, TelemetryDiagTaskConstants } from './diagnostic';
-import {
-  createMockTelemetryEventsSender,
-  MockTelemetryDiagnosticTask,
-  createMockTelemetryReceiver,
-} from '../mocks';
+import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
+import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
 
-describe('test', () => {
+describe('diagnostics telemetry task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
   });
 
-  describe('basic diagnostic alert telemetry sanity checks', () => {
-    test('diagnostic task can register', () => {
-      const telemetryDiagTask = new TelemetryDiagTask(
-        logger,
-        taskManagerMock.createSetup(),
-        createMockTelemetryEventsSender(true),
-        createMockTelemetryReceiver()
-      );
-
-      expect(telemetryDiagTask).toBeInstanceOf(TelemetryDiagTask);
-    });
-  });
-
-  test('diagnostic task should be registered', () => {
-    const mockTaskManager = taskManagerMock.createSetup();
-    new TelemetryDiagTask(
-      logger,
-      mockTaskManager,
-      createMockTelemetryEventsSender(true),
-      createMockTelemetryReceiver()
-    );
-
-    expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalled();
-  });
-
-  test('diagnostic task should be scheduled', async () => {
-    const mockTaskManagerSetup = taskManagerMock.createSetup();
-    const telemetryDiagTask = new TelemetryDiagTask(
-      logger,
-      mockTaskManagerSetup,
-      createMockTelemetryEventsSender(true),
-      createMockTelemetryReceiver()
-    );
-
-    const mockTaskManagerStart = taskManagerMock.createStart();
-    await telemetryDiagTask.start(mockTaskManagerStart);
-    expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalled();
-  });
-
-  test('diagnostic task should run', async () => {
-    const mockContext = createMockTelemetryEventsSender(true);
-    const mockTaskManager = taskManagerMock.createSetup();
-    const mockReceiver = createMockTelemetryReceiver();
-    const telemetryDiagTask = new MockTelemetryDiagnosticTask(
-      logger,
-      mockTaskManager,
-      mockContext,
-      mockReceiver
-    );
-
-    const mockTaskInstance = {
-      id: TelemetryDiagTaskConstants.TYPE,
-      runAt: new Date(),
-      attempts: 0,
-      ownerId: '',
-      status: TaskStatus.Running,
-      startedAt: new Date(),
-      scheduledAt: new Date(),
-      retryAt: new Date(),
-      params: {},
-      state: {},
-      taskType: TelemetryDiagTaskConstants.TYPE,
+  test('diagnostics telemetry task should query and enqueue events', async () => {
+    const testAlertDoc1 = { id: 'test1' };
+    const testAlertDoc2 = { id: 'test2' };
+    const testDiagnosticsAlerts = {
+      hits: { hits: [{ _source: [testAlertDoc1] }, { _source: [testAlertDoc2] }] },
     };
-    const createTaskRunner =
-      mockTaskManager.registerTaskDefinitions.mock.calls[0][0][TelemetryDiagTaskConstants.TYPE]
-        .createTaskRunner;
-    const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
-    await taskRunner.run();
-    expect(telemetryDiagTask.runTask).toHaveBeenCalled();
-  });
-
-  test('diagnostic task should not query elastic if telemetry is not opted in', async () => {
-    const mockSender = createMockTelemetryEventsSender(false);
-    const mockTaskManager = taskManagerMock.createSetup();
-    const mockReceiver = createMockTelemetryReceiver();
-    new MockTelemetryDiagnosticTask(logger, mockTaskManager, mockSender, mockReceiver);
-
-    const mockTaskInstance = {
-      id: TelemetryDiagTaskConstants.TYPE,
-      runAt: new Date(),
-      attempts: 0,
-      ownerId: '',
-      status: TaskStatus.Running,
-      startedAt: new Date(),
-      scheduledAt: new Date(),
-      retryAt: new Date(),
-      params: {},
-      state: {},
-      taskType: TelemetryDiagTaskConstants.TYPE,
+    const testTaskExecutionPeriod = {
+      last: new Date().toISOString(),
+      current: new Date().toISOString(),
     };
-    const createTaskRunner =
-      mockTaskManager.registerTaskDefinitions.mock.calls[0][0][TelemetryDiagTaskConstants.TYPE]
-        .createTaskRunner;
-    const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
-    await taskRunner.run();
-    expect(mockReceiver.fetchDiagnosticAlerts).not.toHaveBeenCalled();
+    const mockTelemetryEventsSender = createMockTelemetryEventsSender();
+    const mockTelemetryReceiver = createMockTelemetryReceiver(testDiagnosticsAlerts);
+    const telemetryDiagnoticsTaskConfig = createTelemetryDiagnosticsTaskConfig();
+
+    await telemetryDiagnoticsTaskConfig.runTask(
+      'test-id',
+      logger,
+      mockTelemetryReceiver,
+      mockTelemetryEventsSender,
+      testTaskExecutionPeriod
+    );
+
+    expect(mockTelemetryReceiver.fetchDiagnosticAlerts).toHaveBeenCalledWith(
+      testTaskExecutionPeriod.last,
+      testTaskExecutionPeriod.current
+    );
+
+    expect(mockTelemetryEventsSender.queueTelemetryEvents).toHaveBeenCalledWith(
+      testDiagnosticsAlerts.hits.hits.flatMap((doc) => [doc._source])
+    );
   });
 });

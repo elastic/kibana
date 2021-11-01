@@ -25,6 +25,8 @@ export type TestSubjects =
   | 'ilmPolicyLink'
   | 'includeStatsSwitch'
   | 'includeManagedSwitch'
+  | 'indexActionsContextMenuButton'
+  | 'indexContextMenu'
   | 'indexManagementHeaderContent'
   | 'indexTable'
   | 'indexTableIncludeHiddenIndicesToggle'
@@ -57,4 +59,5 @@ export type TestSubjects =
   | 'templatesTab'
   | 'templateTable'
   | 'title'
+  | 'unfreezeIndexMenuButton'
   | 'viewButton';

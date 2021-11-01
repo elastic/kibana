@@ -160,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     describe(`Index Lifecycle`, () => {
-      it('should query across indicies matching the Event Log index pattern', async () => {
+      it('should query across indices matching the Event Log data view', async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/event_log_multiple_indicies');
 
         const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;

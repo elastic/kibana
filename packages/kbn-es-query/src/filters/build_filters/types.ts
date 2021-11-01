@@ -56,6 +56,8 @@ export type FilterMeta = {
   negate?: boolean;
   // controlledBy is there to identify who owns the filter
   controlledBy?: string;
+  // allows grouping of filters
+  group?: string;
   // index and type are optional only because when you create a new filter, there are no defaults
   index?: string;
   isMultiIndex?: boolean;
