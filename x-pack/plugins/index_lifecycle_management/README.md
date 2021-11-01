@@ -34,7 +34,6 @@ PUT /_ilm/policy/full
       "cold" : {
         "min_age" : "30s",
         "actions" : {
-          "freeze": {}
         }
       },
       "delete" : {

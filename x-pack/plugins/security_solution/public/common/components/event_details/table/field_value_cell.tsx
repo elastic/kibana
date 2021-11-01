@@ -37,6 +37,7 @@ export const FieldValueCell = React.memo(
   }: FieldValueCellProps) => {
     return (
       <EuiFlexGroup
+        alignItems="flexStart"
         data-test-subj={`event-field-${data.field}`}
         direction="column"
         gutterSize="none"

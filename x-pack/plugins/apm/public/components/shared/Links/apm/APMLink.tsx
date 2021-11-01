@@ -54,13 +54,13 @@ export function useAPMHref({
     ...query,
   };
 
-  return getAPMHref({ basePath, path, query: nextQuery, search });
+  return getLegacyApmHref({ basePath, path, query: nextQuery, search });
 }
 
 /**
  * Get an APM link for a path.
  */
-export function getAPMHref({
+export function getLegacyApmHref({
   basePath,
   path = '',
   search,
@@ -91,7 +91,7 @@ export function APMLink({ path = '', query, mergeQuery, ...rest }: Props) {
 
   const mergedQuery = mergeQuery ? mergeQuery(query ?? {}) : query;
 
-  const href = getAPMHref({ basePath, path, search, query: mergedQuery });
+  const href = getLegacyApmHref({ basePath, path, search, query: mergedQuery });
 
   return <EuiLink {...rest} href={href} />;
 }

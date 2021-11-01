@@ -64,10 +64,10 @@ export function BackendInventoryDependenciesTable() {
       }
       const link = (
         <BackendLink
-          backendName={location.backendName}
           type={location.spanType}
           subtype={location.spanSubtype}
           query={{
+            backendName: location.backendName,
             comparisonEnabled,
             comparisonType,
             environment,

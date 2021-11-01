@@ -7610,10 +7610,10 @@
       },
       {
         "parentPluginId": "cases",
-        "id": "def-common.ConnectorResillientTypeFields",
+        "id": "def-common.ConnectorResilientTypeFields",
         "type": "Type",
         "tags": [],
-        "label": "ConnectorResillientTypeFields",
+        "label": "ConnectorResilientTypeFields",
         "description": [],
         "signature": [
           "{ type: ",

@@ -67,6 +67,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         .pipe()
         .toPromise()
         .then((screenshot) => {
+          // NOTE: the screenshot could be returned as a string using `data:image/png;base64,` + results.buffer.toString('base64')
           if (screenshot.warnings.length) {
             return res.ok({
               body: {

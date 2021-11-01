@@ -70,6 +70,16 @@ export class TiledVectorLayer extends VectorLayer {
     this._source = source as ITiledSingleLayerVectorSource;
   }
 
+  getFeatureId(feature: Feature): string | number | undefined {
+    if (!this.getSource().isESSource()) {
+      return feature.id;
+    }
+
+    return this.getSource().getType() === SOURCE_TYPES.ES_SEARCH
+      ? feature.properties?._id
+      : feature.properties?._key;
+  }
+
   _getMetaFromTiles(): TileMetaFeature[] {
     return this._descriptor.__metaFromTiles || [];
   }

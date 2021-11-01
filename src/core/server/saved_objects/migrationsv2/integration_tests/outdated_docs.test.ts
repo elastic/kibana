@@ -41,7 +41,7 @@ describe('migration v2', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
-  it('migrates the documents to the highest version', async () => {
+  it.skip('migrates the documents to the highest version', async () => {
     const migratedIndex = `.kibana_${pkg.version}_001`;
     const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),

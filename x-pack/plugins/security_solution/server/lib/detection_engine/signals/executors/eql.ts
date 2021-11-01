@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Logger } from 'src/core/server';
@@ -70,26 +70,25 @@ export const eqlExecutor = async ({
     );
     result.warning = true;
   }
-  try {
-    const signalIndexVersion = await getIndexVersion(
-      services.scopedClusterClient.asCurrentUser,
-      ruleParams.outputIndex
-    );
-    if (
-      !experimentalFeatures.ruleRegistryEnabled &&
-      isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })
-    ) {
-      throw new Error(
-        `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
+  if (!experimentalFeatures.ruleRegistryEnabled) {
+    try {
+      const signalIndexVersion = await getIndexVersion(
+        services.scopedClusterClient.asCurrentUser,
+        ruleParams.outputIndex
       );
-    }
-  } catch (err) {
-    if (err.statusCode === 403) {
-      throw new Error(
-        `EQL based rules require the user that created it to have the view_index_metadata, read, and write permissions for index: ${ruleParams.outputIndex}`
-      );
-    } else {
-      throw err;
+      if (isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })) {
+        throw new Error(
+          `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
+        );
+      }
+    } catch (err) {
+      if (err.statusCode === 403) {
+        throw new Error(
+          `EQL based rules require the user that created it to have the view_index_metadata, read, and write permissions for index: ${ruleParams.outputIndex}`
+        );
+      } else {
+        throw err;
+      }
     }
   }
   const inputIndex = await getInputIndex({
@@ -120,7 +119,7 @@ export const eqlExecutor = async ({
   // TODO: fix this later
   const { body: response } = (await services.scopedClusterClient.asCurrentUser.transport.request(
     request
-  )) as ApiResponse<EqlSignalSearchResponse>;
+  )) as TransportResult<EqlSignalSearchResponse>;
 
   const eqlSignalSearchEnd = performance.now();
   const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
