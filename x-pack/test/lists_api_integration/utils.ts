@@ -123,13 +123,18 @@ export const waitFor = async (
     try {
       let found = false;
       let numberOfTries = 0;
+      const maxTries = Math.floor(maxTimeout / timeoutWait);
 
-      while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
+      while (!found && numberOfTries < maxTries) {
         const itPasses = await functionToTest();
 
         if (itPasses) {
           found = true;
         } else {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Try number ${numberOfTries} out of ${maxTries} for function ${functionName}`
+          );
           numberOfTries++;
         }
 
@@ -285,7 +290,7 @@ export const waitForListItem = async (
     if (status !== 200) {
       // eslint-disable-next-line no-console
       console.log(
-        `Did not get an expected 200 "ok" when waiting for a list item (waitForListItem). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        `Did not get an expected 200 "ok" when waiting for a list item (waitForListItem) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
           body
         )}, status: ${JSON.stringify(status)}`
       );
@@ -331,7 +336,7 @@ export const waitForTextListItem = async (
         if (status !== 200) {
           // eslint-disable-next-line no-console
           console.log(
-            `Did not get an expected 200 "ok" when waiting for a text list item (waitForTextListItem). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+            `Did not get an expected 200 "ok" when waiting for a text list item (waitForTextListItem) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
               body
             )}, status: ${JSON.stringify(status)}`
           );

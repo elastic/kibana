@@ -820,7 +820,7 @@ export const waitFor = async (
       found = true;
     } else {
       // eslint-disable-next-line no-console
-      console.log(`Try number ${numberOfTries} out of ${maxTries}`);
+      console.log(`Try number ${numberOfTries} out of ${maxTries} for function ${functionName}`);
       numberOfTries++;
     }
 
@@ -1408,7 +1408,7 @@ export const installPrePackagedRules = async (
     if (status !== 200) {
       // eslint-disable-next-line no-console
       console.log(
-        `Did not get an expected 200 "ok" when installing pre-packaged rules (installPrePackagedRules). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        `Did not get an expected 200 "ok" when installing pre-packaged rules (installPrePackagedRules) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
           body
         )}, status: ${JSON.stringify(status)}`
       );
