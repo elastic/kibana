@@ -8,6 +8,7 @@
 import { ChildProcess, spawn } from 'child_process';
 import { ToolingLog } from '@kbn/dev-utils';
 import axios from 'axios';
+import process from 'process';
 import { Manager } from './resource_manager';
 import { getLatestVersion } from './artifact_manager';
 
@@ -38,6 +39,10 @@ export class FleetManager extends Manager {
         const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
         this.log.info(artifact);
 
+        // https://stackoverflow.com/a/48547074
+        const isLinux = process.platform === 'linux';
+        const host = isLinux ? '172.17.0.1' : 'host.docker.internal';
+
         const args = [
           'run',
           '--add-host',
@@ -45,7 +50,7 @@ export class FleetManager extends Manager {
           '--env',
           'FLEET_SERVER_ENABLE=true',
           '--env',
-          `FLEET_SERVER_ELASTICSEARCH_HOST=http://gateway.docker.internal:${this.esConfig.port}`,
+          `FLEET_SERVER_ELASTICSEARCH_HOST=http://${host}:${this.esConfig.port}`,
           '--env',
           `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
           '--rm',
