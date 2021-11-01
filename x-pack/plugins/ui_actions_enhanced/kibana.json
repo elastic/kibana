@@ -1,7 +1,7 @@
 {
   "id": "uiActionsEnhanced",
   "owner": {
-    "name": "Kibana App Services",
+    "name": "App Services",
     "githubTeam": "kibana-app-services"
   },
   "description": "Extends UI Actions plugin with more functionality",
