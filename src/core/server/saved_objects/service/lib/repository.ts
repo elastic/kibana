@@ -1646,7 +1646,7 @@ export class SavedObjectsRepository {
    *
    * When using incrementCounter for collecting usage data, you need to ensure
    * that usage collection happens on a best-effort basis and doesn't
-   * negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.mdx#tracking-interactions-with-incrementcounter)
+   * negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#tracking-interactions-with-incrementcounter)
    *
    * @example
    * ```ts

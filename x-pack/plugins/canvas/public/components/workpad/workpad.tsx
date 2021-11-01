@@ -27,7 +27,6 @@ import { WorkpadRoutingContext } from '../../routes/workpad';
 import { usePlatformService } from '../../services';
 import { Workpad as WorkpadComponent, Props } from './workpad.component';
 import { State } from '../../../types';
-import { useIncomingEmbeddable } from '../hooks';
 
 type ContainerProps = Pick<Props, 'registerLayout' | 'unregisterLayout'>;
 
@@ -58,9 +57,6 @@ export const Workpad: FC<ContainerProps> = (props) => {
       zoomScale: getZoomScale(state),
     };
   });
-
-  const selectedPage = propsFromState.pages[propsFromState.selectedPageNumber - 1];
-  useIncomingEmbeddable(selectedPage);
 
   const fetchAllRenderables = useCallback(() => {
     dispatch(fetchAllRenderablesAction());

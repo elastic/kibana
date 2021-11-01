@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -43,11 +43,33 @@ export const CurationsSettings: React.FC = () => {
     curationsSettings: { enabled, mode },
     dataLoading,
   } = useValues(CurationsSettingsLogic);
-  const { toggleCurationsEnabled, toggleCurationsMode } = useActions(CurationsSettingsLogic);
+  const {
+    loadCurationsSettings,
+    onSkipLoadingCurationsSettings,
+    toggleCurationsEnabled,
+    toggleCurationsMode,
+  } = useActions(CurationsSettingsLogic);
 
   const { isLogRetentionUpdating, logRetention } = useValues(LogRetentionLogic);
+  const { fetchLogRetention } = useActions(LogRetentionLogic);
 
   const analyticsDisabled = !logRetention?.[LogRetentionOptions.Analytics].enabled;
+
+  useEffect(() => {
+    if (hasPlatinumLicense) {
+      fetchLogRetention();
+    }
+  }, [hasPlatinumLicense]);
+
+  useEffect(() => {
+    if (logRetention) {
+      if (!analyticsDisabled) {
+        loadCurationsSettings();
+      } else {
+        onSkipLoadingCurationsSettings();
+      }
+    }
+  }, [logRetention]);
 
   if (!hasPlatinumLicense)
     return (
