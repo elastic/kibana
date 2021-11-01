@@ -809,8 +809,8 @@ export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<
 export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
-  maxTimeout: number = 40000,
-  timeoutWait: number = 10
+  maxTimeout: number = 800000,
+  timeoutWait: number = 100
 ): Promise<void> => {
   let found = false;
   let numberOfTries = 0;
