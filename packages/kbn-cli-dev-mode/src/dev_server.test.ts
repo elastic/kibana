@@ -79,6 +79,7 @@ expect.addSnapshotSerializer(extendedEnvSerializer);
 beforeEach(() => {
   jest.clearAllMocks();
   log.messages.length = 0;
+  process.execArgv = ['--inheritted', '--exec', '--argv'];
   currentProc = undefined;
 });
 
@@ -123,10 +124,30 @@ describe('#run$', () => {
     // ensure that FORCE_COLOR is in the env for consistency in snapshot
     process.env.FORCE_COLOR = process.env.FORCE_COLOR || 'true';
 
-    const [script, args, options] = execa.node.mock.calls[0];
-    expect(script).toBe('some/script');
-    expect(args).toEqual(['foo', 'bar']);
-    expect(options.stdio).toEqual('pipe');
+    expect(execa.node.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "some/script",
+          Array [
+            "foo",
+            "bar",
+          ],
+          Object {
+            "env": Object {
+              "<inheritted process.env>": true,
+              "ELASTIC_APM_SERVICE_NAME": "kibana",
+              "isDevCliChild": "true",
+            },
+            "nodeOptions": Array [
+              "--inheritted",
+              "--exec",
+              "--argv",
+            ],
+            "stdio": "pipe",
+          },
+        ],
+      ]
+    `);
   });
 
   it('writes stdout and stderr lines to logger', () => {
