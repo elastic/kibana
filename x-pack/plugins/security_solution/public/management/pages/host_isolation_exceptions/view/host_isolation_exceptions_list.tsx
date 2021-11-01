@@ -13,7 +13,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
-import { useLicense } from '../../../../common/hooks/use_license';
 import {
   getCurrentLocation,
   getItemToDelete,
@@ -41,6 +40,7 @@ import {
   EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
 } from './components/translations';
 import { getEndpointListPath } from '../../../common/routing';
+import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -58,15 +58,15 @@ export const HostIsolationExceptionsList = () => {
   const itemToDelete = useHostIsolationExceptionsSelector(getItemToDelete);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
   const history = useHistory();
-  const license = useLicense();
-  const showFlyout = license.isPlatinumPlus() && !!location.show;
+  const privileges = useEndpointPrivileges();
+  const showFlyout = privileges.canIsolateHost && !!location.show;
   const hasDataToShow = !isLoading && (!!location.filter || listItems.length > 0);
 
   useEffect(() => {
-    if (!isLoading && listItems.length === 0 && !license.isPlatinumPlus()) {
+    if (!isLoading && listItems.length === 0 && !privileges.canIsolateHost) {
       history.replace(getEndpointListPath({ name: 'endpointList' }));
     }
-  }, [history, isLoading, license, listItems.length]);
+  }, [history, isLoading, listItems.length, privileges.canIsolateHost]);
 
   const handleOnSearch = useCallback(
     (query: string) => {
@@ -101,7 +101,7 @@ export const HostIsolationExceptionsList = () => {
     return {
       item: element,
       'data-test-subj': `hostIsolationExceptionsCard`,
-      actions: license.isPlatinumPlus() ? [editAction, deleteAction] : [deleteAction],
+      actions: privileges.canIsolateHost ? [editAction, deleteAction] : [deleteAction],
     };
   }
 
@@ -140,7 +140,7 @@ export const HostIsolationExceptionsList = () => {
         />
       }
       actions={
-        license.isPlatinumPlus() && hasDataToShow ? (
+        privileges.canIsolateHost && hasDataToShow ? (
           <EuiButton
             fill
             iconType="plusInCircle"

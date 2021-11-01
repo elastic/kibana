@@ -31,7 +31,7 @@ import { SecurityLicenseService } from '../common/licensing';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuditServiceSetup } from './audit';
-import { AuditService, SecurityAuditLogger } from './audit';
+import { AuditService } from './audit';
 import type {
   AuthenticationServiceStart,
   InternalAuthenticationServiceStart,
@@ -278,7 +278,6 @@ export class SecurityPlugin
     });
 
     setupSavedObjects({
-      legacyAuditLogger: new SecurityAuditLogger(this.auditSetup.getLogger()),
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
@@ -307,7 +306,6 @@ export class SecurityPlugin
     return Object.freeze<SecurityPluginSetup>({
       audit: {
         asScoped: this.auditSetup.asScoped,
-        getLogger: this.auditSetup.getLogger,
       },
       authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
       authz: {
@@ -355,7 +353,6 @@ export class SecurityPlugin
       config,
       featureUsageService: this.featureUsageServiceStart,
       http: core.http,
-      legacyAuditLogger: new SecurityAuditLogger(this.auditSetup!.getLogger()),
       loggers: this.initializerContext.logger,
       session,
     });
