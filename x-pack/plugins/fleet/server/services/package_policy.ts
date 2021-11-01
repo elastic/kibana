@@ -1023,7 +1023,14 @@ function deepMergeVars(original: any, override: any): any {
 
   for (const { name, ...overrideVal } of overrideVars) {
     const originalVar = original.vars[name];
+
     result.vars[name] = { ...originalVar, ...overrideVal };
+
+    // Ensure that any value from the original object is persisted on the newly merged resulting object,
+    // even if we merge other data about the given variable
+    if (originalVar?.value) {
+      result.vars[name].value = originalVar.value;
+    }
   }
 
   return result;
