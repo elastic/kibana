@@ -32,15 +32,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
-      await reporting.initTestSavedObjects();
-
+      await reporting.initLogs();
       await createReportingUser();
       await reporting.loginReportingUser();
     });
 
     after(async () => {
-      await reporting.teardownTestSavedObjects();
-
+      await reporting.teardownLogs();
       await deleteReportingUser();
     });
 

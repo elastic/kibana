@@ -194,11 +194,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('date formatting', () => {
       before(async () => {
-        // load test data that contains a saved search and documents
-        await reportingAPI.initTestSavedObjects();
+        await reportingAPI.initLogs();
       });
       after(async () => {
-        await reportingAPI.teardownTestSavedObjects();
+        await reportingAPI.teardownLogs();
       });
 
       it('With filters and timebased data, default to UTC', async () => {

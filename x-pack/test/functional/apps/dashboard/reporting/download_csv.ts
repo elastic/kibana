@@ -125,11 +125,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Field Formatters and Scripted Fields', () => {
       before(async () => {
-        await reportingAPI.initTestSavedObjects();
+        await reportingAPI.initLogs();
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
       });
       after(async () => {
-        await reportingAPI.teardownTestSavedObjects();
+        await reportingAPI.teardownLogs();
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
       });
 

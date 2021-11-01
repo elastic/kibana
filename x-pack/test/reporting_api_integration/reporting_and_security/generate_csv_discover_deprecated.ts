@@ -31,11 +31,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Generation from Legacy Job Params', () => {
     before(async () => {
-      await reportingAPI.initTestSavedObjects();
+      await reportingAPI.initLogs();
     });
 
     after(async () => {
-      await reportingAPI.teardownTestSavedObjects();
+      await reportingAPI.teardownLogs();
       await reportingAPI.deleteAllReports();
     });
 

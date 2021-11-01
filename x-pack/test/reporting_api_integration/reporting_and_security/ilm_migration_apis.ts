@@ -21,11 +21,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('ILM policy migration APIs', () => {
     before(async () => {
-      await reportingAPI.initTestSavedObjects();
+      await reportingAPI.initLogs();
     });
 
     after(async () => {
-      await reportingAPI.teardownTestSavedObjects();
+      await reportingAPI.teardownLogs();
     });
 
     afterEach(async () => {

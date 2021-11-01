@@ -33,12 +33,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Job Listing APIs: Deprecated CSV Export', () => {
     before(async () => {
-      await reportingAPI.initTestSavedObjects();
+      await reportingAPI.initLogs();
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     after(async () => {
-      await reportingAPI.teardownTestSavedObjects();
+      await reportingAPI.teardownLogs();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
