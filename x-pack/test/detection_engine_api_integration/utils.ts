@@ -6,6 +6,8 @@
  */
 
 import { KbnClient } from '@kbn/test';
+import { ALERT_RULE_RULE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+
 import type { TransportResult } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Client } from '@elastic/elasticsearch';
@@ -31,7 +33,6 @@ import {
   EqlCreateSchema,
   ThresholdCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
-import { Signal } from '../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
 import {
   Status,
@@ -47,7 +48,9 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
   INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
+  UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '../../plugins/security_solution/common/constants';
+import { RACAlert } from '../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -238,7 +241,7 @@ export const getSimpleMlRuleUpdate = (ruleId = 'rule-1', enabled = false): Updat
 });
 
 export const getSignalStatus = () => ({
-  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
+  aggs: { statuses: { terms: { field: 'kibana.alert.workflow_status', size: 10 } } },
 });
 
 export const getQueryAllSignals = () => ({
@@ -261,7 +264,7 @@ export const getQuerySignalIds = (signalIds: SignalIds) => ({
 export const getQuerySignalsRuleId = (ruleIds: string[]) => ({
   query: {
     terms: {
-      'signal.rule.rule_id': ruleIds,
+      [ALERT_RULE_RULE_ID]: ruleIds,
     },
   },
 });
@@ -275,7 +278,7 @@ export const getQuerySignalsId = (ids: string[], size = 10) => ({
   size,
   query: {
     terms: {
-      'signal.rule.id': ids,
+      [ALERT_RULE_UUID]: ids,
     },
   },
 });
@@ -514,6 +517,29 @@ export const createSignalsIndex = async (
   }, 'createSignalsIndex');
 };
 
+export const createLegacyRuleAction = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  alertId: string,
+  connectorId: string
+): Promise<unknown> =>
+  supertest
+    .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}`)
+    .set('kbn-xsrf', 'true')
+    .query({ alert_id: alertId })
+    .send({
+      name: 'Legacy notification with one action',
+      interval: '1m',
+      actions: [
+        {
+          id: connectorId,
+          group: 'default',
+          params: {
+            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          actionTypeId: '.slack',
+        },
+      ],
+    });
 /**
  * Deletes the signals index for use inside of afterEach blocks of tests
  * @param supertest The supertest client library
@@ -960,7 +986,9 @@ export const deleteRule = async (
   if (response.status !== 200) {
     // eslint-disable-next-line no-console
     console.log(
-      'Did not get an expected 200 "ok" when deleting the rule. CI issues could happen. Suspect this line if you are seeing CI issues.'
+      `Did not get an expected 200 "ok" when deleting the rule. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
     );
   }
 
@@ -1109,7 +1137,7 @@ export const createExceptionList = async (
 };
 
 /**
- * Helper to cut down on the noise in some of the tests. Does a delete of a rule.
+ * Helper to cut down on the noise in some of the tests. Does a delete of an exception list.
  * It does not check for a 200 "ok" on this.
  * @param supertest The supertest deps
  * @param id The rule id to delete
@@ -1124,7 +1152,9 @@ export const deleteExceptionList = async (
   if (response.status !== 200) {
     // eslint-disable-next-line no-console
     console.log(
-      'Did not get an expected 200 "ok" when deleting an exception list. CI issues could happen. Suspect this line if you are seeing CI issues.'
+      `Did not get an expected 200 "ok" when deleting an exception list. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
     );
   }
 
@@ -1141,12 +1171,20 @@ export const createExceptionListItem = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   exceptionListItem: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {
-  const { body } = await supertest
+  const response = await supertest
     .post(EXCEPTION_LIST_ITEM_URL)
     .set('kbn-xsrf', 'true')
-    .send(exceptionListItem)
-    .expect(200);
-  return body;
+    .send(exceptionListItem);
+
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when creating an exception list item. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  return response.body;
 };
 
 /**
@@ -1190,12 +1228,19 @@ export const waitForRuleSuccessOrStatus = async (
   status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded'
 ): Promise<void> => {
   await waitFor(async () => {
-    const { body } = await supertest
-      .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-      .set('kbn-xsrf', 'true')
-      .send({ ids: [id] })
-      .expect(200);
-    return body[id]?.current_status?.status === status;
+    try {
+      const { body } = await supertest
+        .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+        .set('kbn-xsrf', 'true')
+        .send({ ids: [id] })
+        .expect(200);
+      return body[id]?.current_status?.status === status;
+    } catch (e) {
+      if ((e as Error).message.includes('got 503 "Service Unavailable"')) {
+        return false;
+      }
+      throw e;
+    }
   }, 'waitForRuleSuccessOrStatus');
 };
 
@@ -1210,10 +1255,15 @@ export const waitForSignalsToBePresent = async (
   numberOfSignals = 1,
   signalIds: string[]
 ): Promise<void> => {
-  await waitFor(async () => {
-    const signalsOpen = await getSignalsByIds(supertest, signalIds, numberOfSignals);
-    return signalsOpen.hits.hits.length >= numberOfSignals;
-  }, 'waitForSignalsToBePresent');
+  await waitFor(
+    async () => {
+      const signalsOpen = await getSignalsByIds(supertest, signalIds, numberOfSignals);
+      return signalsOpen.hits.hits.length >= numberOfSignals;
+    },
+    'waitForSignalsToBePresent',
+    20000,
+    250 // Wait 250ms between tries
+  );
 };
 
 /**
@@ -1223,18 +1273,12 @@ export const waitForSignalsToBePresent = async (
 export const getSignalsByRuleIds = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   ruleIds: string[]
-): Promise<
-  estypes.SearchResponse<{
-    signal: Signal;
-    [x: string]: unknown;
-  }>
-> => {
-  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-    await supertest
-      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .set('kbn-xsrf', 'true')
-      .send(getQuerySignalsRuleId(ruleIds))
-      .expect(200);
+): Promise<estypes.SearchResponse<RACAlert>> => {
+  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsRuleId(ruleIds))
+    .expect(200);
   return signalsOpen;
 };
 
@@ -1248,18 +1292,12 @@ export const getSignalsByIds = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   ids: string[],
   size?: number
-): Promise<
-  estypes.SearchResponse<{
-    signal: Signal;
-    [x: string]: unknown;
-  }>
-> => {
-  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-    await supertest
-      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .set('kbn-xsrf', 'true')
-      .send(getQuerySignalsId(ids, size))
-      .expect(200);
+): Promise<estypes.SearchResponse<RACAlert>> => {
+  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsId(ids, size))
+    .expect(200);
   return signalsOpen;
 };
 
@@ -1271,18 +1309,12 @@ export const getSignalsByIds = async (
 export const getSignalsById = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   id: string
-): Promise<
-  estypes.SearchResponse<{
-    signal: Signal;
-    [x: string]: unknown;
-  }>
-> => {
-  const { body: signalsOpen }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-    await supertest
-      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .set('kbn-xsrf', 'true')
-      .send(getQuerySignalsId([id]))
-      .expect(200);
+): Promise<estypes.SearchResponse<RACAlert>> => {
+  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsId([id]))
+    .expect(200);
   return signalsOpen;
 };
 
@@ -1554,6 +1586,6 @@ export const getOpenSignals = async (
   // Critically important that we wait for rule success AND refresh the write index in that order before we
   // assert that no signals were created. Otherwise, signals could be written but not available to query yet
   // when we search, causing tests that check that signals are NOT created to pass when they should fail.
-  await refreshIndex(es, rule.output_index);
+  await refreshIndex(es, '.alerts-security.alerts-default*');
   return getSignalsByIds(supertest, [rule.id]);
 };

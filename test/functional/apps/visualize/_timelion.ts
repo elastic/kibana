@@ -23,6 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const elasticChart = getService('elasticChart');
   const find = getService('find');
+  const retry = getService('retry');
   const timelionChartSelector = 'timelionChart';
 
   describe('Timelion visualization', () => {
@@ -167,7 +168,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
       expect(secondAreaChartData).to.eql(secondAreaExpectedChartData);
       expect(thirdAreaChartData).to.eql(thirdAreaExpectedChartData);
-      expect(firstAxesLabels).to.eql(['12.19GB', '12.2GB', '12.21GB']);
+      expect(firstAxesLabels).to.eql(['12.2GB', '12.21GB']);
       expect(secondAxesLabels).to.eql(['5.59KB', '5.6KB']);
       expect(thirdAxesLabels.toString()).to.be(
         'BYTES_5721,BYTES_5722,BYTES_5723,BYTES_5724,BYTES_5725,BYTES_5726,BYTES_5727,BYTES_5728,BYTES_5729,BYTES_5730,BYTES_5731,BYTES_5732,BYTES_5733'
@@ -257,8 +258,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(value).to.eql('.es()');
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/116033
-      describe.skip('dynamic suggestions for argument values', () => {
+      describe('dynamic suggestions for argument values', () => {
         describe('.es()', () => {
           it('should show index pattern suggestions for index argument', async () => {
             await monacoEditor.setCodeEditorValue('');
@@ -266,7 +266,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             // wait for index patterns will be loaded
             await common.sleep(500);
             const suggestions = await timelion.getSuggestionItemsText();
-            expect(suggestions.length).not.to.eql(0);
             expect(suggestions[0].includes('log')).to.eql(true);
           });
 
@@ -291,7 +290,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await common.sleep(300);
             const suggestions = await timelion.getSuggestionItemsText();
 
-            expect(suggestions.length).not.to.eql(0);
             expect(suggestions[0].includes('@message.raw')).to.eql(true);
           });
 
@@ -300,9 +298,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               '.es(index=logstash-*, timefield=@timestamp, metric=avg:',
               'timelionCodeEditor'
             );
-            const suggestions = await timelion.getSuggestionItemsText();
-            expect(suggestions.length).not.to.eql(0);
-            expect(suggestions[0].includes('avg:bytes')).to.eql(true);
+            // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
+            await retry.try(async () => {
+              const suggestions = await timelion.getSuggestionItemsText();
+              expect(suggestions[0].includes('avg:bytes')).to.eql(true);
+            });
           });
         });
       });
