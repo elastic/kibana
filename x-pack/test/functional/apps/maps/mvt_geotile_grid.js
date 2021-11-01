@@ -14,13 +14,12 @@ export default function ({ getPageObjects, getService }) {
   const inspector = getService('inspector');
   const security = getService('security');
 
-  describe('mvt grid layer', () => {
+  describe('mvt geotile grid layer', () => {
     before(async () => {
       await security.testUser.setRoles(
         ['global_maps_all', 'test_logstash_reader', 'geoshape_data_reader'],
         false
       );
-      await PageObjects.maps.loadSavedMap('geo grid vector grid example SUPER_FINE resolution');
     });
 
     after(async () => {
@@ -28,7 +27,8 @@ export default function ({ getPageObjects, getService }) {
       await security.testUser.restoreDefaults();
     });
 
-    it('should render with mvt-source', async () => {
+    it('should render with mvt-source (style meta from ES)', async () => {
+      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from ES)');
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
 
       //Source should be correct
@@ -74,6 +74,96 @@ export default function ({ getPageObjects, getService }) {
           7748.25,
           '#769fc8',
           8769.125,
+          '#6092c0',
+        ],
+        'fill-opacity': 0.75,
+      });
+    });
+
+    it('should render with mvt-source (style meta from local - count)', async () => {
+      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from local - count)');
+      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+
+      const fillLayer = mapboxStyle.layers.find(
+        (layer) => layer.id === MB_VECTOR_SOURCE_ID + '_fill'
+      );
+
+      expect(fillLayer.paint).to.eql({
+        'fill-color': [
+          'interpolate',
+          ['linear'],
+          [
+            'coalesce',
+            [
+              'case',
+              ['==', ['get', '_count'], null],
+              0,
+              ['max', ['min', ['to-number', ['get', '_count']], 10], 1],
+            ],
+            0,
+          ],
+          0,
+          'rgba(0,0,0,0)',
+          1,
+          '#ecf1f7',
+          2.125,
+          '#d9e3ef',
+          3.25,
+          '#c5d5e7',
+          4.375,
+          '#b2c7df',
+          5.5,
+          '#9eb9d8',
+          6.625,
+          '#8bacd0',
+          7.75,
+          '#769fc8',
+          8.875,
+          '#6092c0',
+        ],
+        'fill-opacity': 0.75,
+      });
+    });
+
+    it('should render with mvt-source (style meta from local - field value)', async () => {
+      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from local - field value)');
+      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+
+      const fillLayer = mapboxStyle.layers.find(
+        (layer) => layer.id === MB_VECTOR_SOURCE_ID + '_fill'
+      );
+
+      expect(fillLayer.paint).to.eql({
+        'fill-color': [
+          'interpolate',
+          ['linear'],
+          [
+            'coalesce',
+            [
+              'case',
+              ['==', ['get', 'sum_of_bytes.value'], null],
+              -1,
+              ['max', ['min', ['to-number', ['get', 'sum_of_bytes.value']], 14941], 0],
+            ],
+            -1,
+          ],
+          -1,
+          'rgba(0,0,0,0)',
+          0,
+          '#ecf1f7',
+          1867.625,
+          '#d9e3ef',
+          3735.25,
+          '#c5d5e7',
+          5602.875,
+          '#b2c7df',
+          7470.5,
+          '#9eb9d8',
+          9338.125,
+          '#8bacd0',
+          11205.75,
+          '#769fc8',
+          13073.375,
           '#6092c0',
         ],
         'fill-opacity': 0.75,
