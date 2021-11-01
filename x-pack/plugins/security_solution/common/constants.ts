@@ -237,6 +237,11 @@ export const INTERNAL_RULE_ALERT_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_alert_id`
 export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable`;
 
 /**
+ * Internal actions route
+ */
+export const UPDATE_OR_CREATE_LEGACY_ACTIONS = '/internal/api/detection/legacy/notifications';
+
+/**
  * Detection engine routes
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine';
