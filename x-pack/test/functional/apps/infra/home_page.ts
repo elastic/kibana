@@ -89,6 +89,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(groups).to.eql(['ubuntu']);
       });
 
+      it('filter nodes by search term', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.enterSearchTerm('host.name: "demo-stack-apache-01"');
+        const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
+        expect(nodesWithValue).to.eql([{ name: 'demo-stack-apache-01', value: 1.4 }]);
+      });
+
       it('renders an empty data prompt for dates with no data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
         await pageObjects.infraHome.getNoMetricsDataPrompt();

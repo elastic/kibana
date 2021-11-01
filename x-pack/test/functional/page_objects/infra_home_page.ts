@@ -102,6 +102,13 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       return Promise.all(groupNameLinks.map(async (link) => link.getVisibleText()));
     },
 
+    async enterSearchTerm(query: string) {
+      const input = await testSubjects.find('infraSearchField');
+      await input.clearValueWithKeyboard({ charByChar: true });
+      await input.type([query, browser.keys.RETURN]);
+      await this.waitForLoading();
+    },
+
     async toggleReverseSort() {
       await testSubjects.click('waffleSortByDropdown');
       await testSubjects.find('waffleSortByDirection');
