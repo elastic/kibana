@@ -6,7 +6,6 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
 import { ActionTypeExecutorResult } from '../../../../../../actions/common';
