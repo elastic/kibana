@@ -50,6 +50,7 @@ export class ApmSystem {
     this.addHttpRequestNormalization(apm);
 
     init(apmConfig);
+    // hold page load transaction blocks a transaction implicitly created by init.
     this.holdPageLoadTransaction(apm);
   }
 
@@ -76,11 +77,12 @@ export class ApmSystem {
 
   /* Hold the page load transaction open, until all resources actually finish loading */
   private holdPageLoadTransaction(apm: ApmBase) {
-    this.pageLoadTransaction = apm.getCurrentTransaction();
+    const transaction = apm.getCurrentTransaction();
 
     // Keep the page load transaction open until all resources finished loading
-    if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
-      // @ts-expect-error 2339
+    if (transaction && transaction.type === 'page-load') {
+      this.pageLoadTransaction = transaction;
+      // @ts-expect-error 2339  block is a private property of Transaction interface
       this.pageLoadTransaction.block(true);
       this.pageLoadTransaction.mark('apmSetup');
     }
@@ -100,7 +102,7 @@ export class ApmSystem {
 
   /* Close and clear the page load transaction */
   private closePageLoadTransaction() {
-    if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
+    if (this.pageLoadTransaction) {
       this.pageLoadTransaction.addLabels({ loadedResources: this.getLoadedResourcesCount() });
       this.pageLoadTransaction.end();
       this.pageLoadTransaction = undefined;
@@ -108,7 +110,7 @@ export class ApmSystem {
   }
 
   private markPageLoadStart() {
-    if (this.pageLoadTransaction && this.pageLoadTransaction.type === 'page-load') {
+    if (this.pageLoadTransaction) {
       this.pageLoadTransaction.mark('apmStart');
     }
   }
