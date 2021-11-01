@@ -14,7 +14,6 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const retry = getService('retry');
   const supertest = getService('supertest');
-  const archive = 'x-pack/test/functional/es_archives/reporting/canvas_disallowed_url';
 
   /*
    * The Reporting API Functional Test config implements a network policy that
@@ -22,11 +21,11 @@ export default function ({ getService }: FtrProviderContext) {
    */
   describe('Network Policy', () => {
     before(async () => {
-      await esArchiver.load(archive); // includes a canvas worksheet with an offending image URL
+      await reportingAPI.initLogs();
     });
 
     after(async () => {
-      await esArchiver.unload(archive);
+      await reportingAPI.teardownLogs();
     });
 
     it('should fail job when page voilates the network policy', async () => {
