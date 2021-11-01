@@ -11,9 +11,7 @@ import { VisualizationContainer } from './visualization_container';
 
 describe('VisualizationContainer', () => {
   test('renders child content', () => {
-    const component = mount(
-      <VisualizationContainer>Hello!</VisualizationContainer>
-    );
+    const component = mount(<VisualizationContainer>Hello!</VisualizationContainer>);
 
     expect(component.text()).toEqual('Hello!');
   });
