@@ -125,8 +125,8 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-    it('should render with mvt-source (style meta from local - field value)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from local - field value)');
+    it('should render with mvt-source (style meta from local - metric)', async () => {
+      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from local - metric)');
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
 
       const fillLayer = mapboxStyle.layers.find(
