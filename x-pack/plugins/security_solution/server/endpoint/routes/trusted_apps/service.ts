@@ -259,6 +259,7 @@ export const updateTrustedApp = async (
       // @ts-ignore 4.3.5 upgrade
       updatedTrustedAppToUpdateExceptionListItemOptions(
         currentTrustedAppExceptionItem,
+        // @ts-ignore 4.3.5 upgrade
         updatedTrustedApp
       )
     );

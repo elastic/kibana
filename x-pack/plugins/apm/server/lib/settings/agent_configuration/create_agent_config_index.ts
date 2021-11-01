@@ -39,7 +39,6 @@ const mappings: Mappings = {
       strings: {
         match_mapping_type: 'string',
         mapping: {
-          // @ts-expect-error client type does not define 'type' property
           type: 'keyword' as const,
           ignore_above: 1024,
         },

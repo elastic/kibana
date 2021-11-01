@@ -27,7 +27,7 @@ describe('query for signal', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // @ts-ignore 4.3.5 upgrade
     ruleDataClient.getReader().search.mockResolvedValue(getEmptySignalsResponse() as any);
 
     querySignalsRoute(server.router, ruleDataClient);
