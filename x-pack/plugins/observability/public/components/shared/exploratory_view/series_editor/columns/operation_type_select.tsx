@@ -33,7 +33,6 @@ export function OperationTypeSelect({
   return (
     <OperationTypeComponent
       onChange={onChange}
-      showLabel={true}
       operationType={operationType || defaultOperationType}
     />
   );
@@ -42,11 +41,9 @@ export function OperationTypeSelect({
 export function OperationTypeComponent({
   operationType,
   onChange,
-  showLabel = false,
 }: {
   operationType?: OperationType;
   onChange: (value: OperationType) => void;
-  showLabel?: boolean;
 }) {
   const options = [
     {
@@ -101,15 +98,7 @@ export function OperationTypeComponent({
 
   return (
     <EuiSuperSelect
-      compressed
       fullWidth
-      prepend={
-        showLabel
-          ? i18n.translate('xpack.observability.expView.operationType.label', {
-              defaultMessage: 'Calculation',
-            })
-          : undefined
-      }
       data-test-subj="operationTypeSelect"
       valueOfSelected={operationType}
       options={options}
