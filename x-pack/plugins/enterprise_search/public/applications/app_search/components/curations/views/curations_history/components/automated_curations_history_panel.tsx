@@ -34,7 +34,7 @@ export const AutomatedCurationsHistoryPanel: React.FC = () => {
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curations.automatedCurationsHistoryPanel.tableTitle',
             {
-              defaultMessage: 'Automated curation changes',
+              defaultMessage: 'Adaptive relevance changes',
             }
           )}
         </h2>
@@ -42,7 +42,8 @@ export const AutomatedCurationsHistoryPanel: React.FC = () => {
       subtitle={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.curations.automatedCurationsHistoryPanel.tableDecription',
         {
-          defaultMessage: 'A detailed log of recent changes to your automated curations.',
+          defaultMessage:
+            'A detailed log of recent changes to curations powered by adaptive relevance.',
         }
       )}
       hasBorder
