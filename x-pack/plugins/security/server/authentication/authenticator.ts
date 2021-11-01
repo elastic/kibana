@@ -19,8 +19,8 @@ import {
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
-import { userLoginEvent } from '../audit';
+import type { AuditServiceSetup } from '../audit';
+import { accessAgreementAcknowledgedEvent, userLoginEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -77,7 +77,6 @@ export interface ProviderLoginAttempt {
 }
 
 export interface AuthenticatorOptions {
-  legacyAuditLogger: SecurityAuditLogger;
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
@@ -465,9 +464,12 @@ export class Authenticator {
       accessAgreementAcknowledged: true,
     });
 
-    this.options.legacyAuditLogger.accessAgreementAcknowledged(
-      currentUser.username,
-      existingSessionValue.provider
+    const auditLogger = this.options.audit.asScoped(request);
+    auditLogger.log(
+      accessAgreementAcknowledgedEvent({
+        username: currentUser.username,
+        provider: existingSessionValue.provider,
+      })
     );
 
     this.options.featureUsageService.recordPreAccessAgreementUsage();
