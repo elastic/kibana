@@ -7,7 +7,6 @@
 
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   SIGNALS_ID,
   QUERY_RULE_TYPE_ID,
@@ -22,6 +21,8 @@ import { Logger, SavedObjectsClient } from '../../../../src/core/server';
 import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
 
 import { ECS_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
+import { FieldMap } from '../../rule_registry/common/field_map';
+import { technicalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { IRuleDataClient, Dataset } from '../../rule_registry/server';
 import { ListPluginSetup } from '../../lists/server';
@@ -188,13 +189,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
 
     if (isRuleRegistryEnabled) {
-      // NOTE: this is not used yet
-      // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
-      // Split aliases by component template since we need to alias some fields in technical field mappings,
-      // some fields in security solution specific component template.
-      const aliases: Record<string, estypes.MappingProperty> = {};
+      const aliasesFieldMap: FieldMap = {};
       Object.entries(aadFieldConversion).forEach(([key, value]) => {
-        aliases[key] = {
+        aliasesFieldMap[key] = {
           type: 'alias',
           path: value,
         };
@@ -208,7 +205,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         componentTemplates: [
           {
             name: 'mappings',
-            mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
+            mappings: mappingFromFieldMap(
+              { ...technicalRuleFieldMap, ...alertsFieldMap, ...rulesFieldMap, ...aliasesFieldMap },
+              false
+            ),
           },
         ],
         secondaryAlias: config.signalsIndex,
