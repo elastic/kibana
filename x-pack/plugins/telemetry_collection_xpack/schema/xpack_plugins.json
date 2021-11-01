@@ -144,26 +144,26 @@
         "throttle_time": {
           "properties": {
             "min": {
-              "type": "keyword"
+              "type": "long"
             },
             "avg": {
-              "type": "keyword"
+              "type": "float"
             },
             "max": {
-              "type": "keyword"
+              "type": "long"
             }
           }
         },
         "schedule_time": {
           "properties": {
             "min": {
-              "type": "keyword"
+              "type": "long"
             },
             "avg": {
-              "type": "keyword"
+              "type": "float"
             },
             "max": {
-              "type": "keyword"
+              "type": "long"
             }
           }
         },
@@ -6928,12 +6928,6 @@
           "type": "boolean",
           "_meta": {
             "description": "Indicates if audit logging is both enabled and supported by the current license."
-          }
-        },
-        "auditLoggingType": {
-          "type": "keyword",
-          "_meta": {
-            "description": "If auditLoggingEnabled is true, indicates what type is enabled (ECS or legacy)."
           }
         },
         "loginSelectorEnabled": {

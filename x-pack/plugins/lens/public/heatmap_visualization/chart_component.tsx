@@ -288,6 +288,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       maxHeight: 'fill',
       label: {
         visible: args.gridConfig.isCellLabelVisible ?? false,
+        minFontSize: 8,
+        maxFontSize: 18,
+        useGlobalMinFontSize: true, // override the min if there's a different directive upstream
       },
       border: {
         strokeWidth: 0,

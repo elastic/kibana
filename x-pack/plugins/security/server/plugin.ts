@@ -6,7 +6,6 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { TypeOf } from '@kbn/config-schema';
@@ -32,7 +31,7 @@ import { SecurityLicenseService } from '../common/licensing';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuditServiceSetup } from './audit';
-import { AuditService, SecurityAuditLogger } from './audit';
+import { AuditService } from './audit';
 import type {
   AuthenticationServiceStart,
   InternalAuthenticationServiceStart,
@@ -203,6 +202,7 @@ export class SecurityPlugin
     core: CoreSetup<PluginStartDependencies>,
     { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
   ) {
+    this.kibanaIndexName = core.savedObjects.getKibanaIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
       map((rawConfig) =>
         createConfig(rawConfig, this.initializerContext.logger.get('config'), {
@@ -210,12 +210,8 @@ export class SecurityPlugin
         })
       )
     );
-    this.configSubscription = combineLatest([
-      config$,
-      this.initializerContext.config.legacy.globalConfig$,
-    ]).subscribe(([config, { kibana }]) => {
+    this.configSubscription = config$.subscribe((config) => {
       this.config = config;
-      this.kibanaIndexName = kibana.index;
     });
 
     const config = this.getConfig();
@@ -282,7 +278,6 @@ export class SecurityPlugin
     });
 
     setupSavedObjects({
-      legacyAuditLogger: new SecurityAuditLogger(this.auditSetup.getLogger()),
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
@@ -311,7 +306,6 @@ export class SecurityPlugin
     return Object.freeze<SecurityPluginSetup>({
       audit: {
         asScoped: this.auditSetup.asScoped,
-        getLogger: this.auditSetup.getLogger,
       },
       authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
       authz: {
@@ -359,7 +353,6 @@ export class SecurityPlugin
       config,
       featureUsageService: this.featureUsageServiceStart,
       http: core.http,
-      legacyAuditLogger: new SecurityAuditLogger(this.auditSetup!.getLogger()),
       loggers: this.initializerContext.logger,
       session,
     });

@@ -17,7 +17,7 @@ import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
 import { Create } from '../components/create';
 import * as i18n from './translations';
-import { APP_ID } from '../../../common/constants';
+import { APP_UI_ID } from '../../../common/constants';
 
 export const CreateCasePage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
@@ -37,7 +37,7 @@ export const CreateCasePage = React.memo(() => {
 
   useEffect(() => {
     if (userPermissions != null && !userPermissions.crud) {
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: getCaseUrl(search),
       });
@@ -47,7 +47,7 @@ export const CreateCasePage = React.memo(() => {
   return (
     <>
       <SecuritySolutionPageWrapper>
-        <CaseHeaderPage backOptions={backOptions} title={i18n.CREATE_TITLE} />
+        <CaseHeaderPage backOptions={backOptions} title={i18n.CREATE_TITLE} border />
         <Create />
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.case} />
