@@ -62,7 +62,7 @@ export function ExpandedSeriesRow(seriesProps: Props) {
       <EuiFormRow label={FILTERS_LABEL} fullWidth>
         <SeriesFilter seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
       </EuiFormRow>
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormRow label={BREAKDOWN_BY_LABEL}>
             <EuiFlexGroup gutterSize="xs">
