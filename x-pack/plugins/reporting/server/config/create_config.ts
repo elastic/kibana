@@ -43,10 +43,22 @@ export function createConfig$(
       }
       const { kibanaServer: reportingServer } = config;
       const serverInfo = core.http.getServerInfo();
-      // kibanaServer.hostname, default to server.host
-      const kibanaServerHostname = reportingServer.hostname
+      // set kibanaServer.hostname, default to server.host, don't allow "0.0.0.0" as it breaks in Windows
+      let kibanaServerHostname = reportingServer.hostname
         ? reportingServer.hostname
         : serverInfo.hostname;
+      if (kibanaServerHostname === '0.0.0.0') {
+        logger.warn(
+          i18n.translate('xpack.reporting.serverConfig.invalidServerHostname', {
+            defaultMessage:
+              `Found 'server.host: "0.0.0.0"' in Kibana configuration. Reporting is not able to use this as the Kibana server hostname.` +
+              ` To enable PNG/PDF Reporting to work, '{configKey}: localhost' is automatically set in the configuration.` +
+              ` You can prevent this message by adding '{configKey}: localhost' in kibana.yml.`,
+            values: { configKey: 'xpack.reporting.kibanaServer.hostname' },
+          })
+        );
+        kibanaServerHostname = 'localhost';
+      }
       // kibanaServer.port, default to server.port
       const kibanaServerPort = reportingServer.port ? reportingServer.port : serverInfo.port;
       // kibanaServer.protocol, default to server.protocol
@@ -66,7 +78,7 @@ export function createConfig$(
     mergeMap(async (config) => {
       if (config.capture.browser.chromium.disableSandbox != null) {
         // disableSandbox was set by user
-        return config;
+        return { ...config };
       }
 
       // disableSandbox was not set by user, apply default for OS
