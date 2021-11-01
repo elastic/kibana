@@ -3271,7 +3271,7 @@ To rename the Ingest Manger plugin to Fleet:
 ====
 
 Kibana plugins can no longer rely on their server code being automatically transpiled with Babel.
-The https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-helpers[`@kbn/plugin-helpers`]
+The https://github.com/elastic/kibana/tree/main/packages/kbn-plugin-helpers[`@kbn/plugin-helpers`]
 provide a build task that will transform a plugin's server code to plain JS via Babel,
 but plugin authors can use a tool of their choosing to accomplish the same result.
 
@@ -3683,7 +3683,7 @@ Resolves https://github.com/elastic/kibana/issues/73557[#73557].
 {kib} provides the new {es} client
 as a part of the {es} service on the server-side.
 The legacy client is deprecated on and subject for removal in `7.x`. Reference
-the https://github.com/elastic/kibana/blob/master/src/core/MIGRATION_EXAMPLES.md#elasticsearch-client[migration guide] to refactor your code
+the https://github.com/elastic/kibana/blob/main/src/core/MIGRATION_EXAMPLES.md#elasticsearch-client[migration guide] to refactor your code
 
 *via https://github.com/elastic/kibana/pull/73651[#73651]*
 
@@ -4980,8 +4980,8 @@ setup(core: CoreSetup) {
 
 The API reference docs for `state_sync` and `state_containers` are now available:
 
-* https://github.com/elastic/kibana/blob/master/docs/development/plugins/kibana_utils/public/state_sync/kibana-plugin-plugins-kibana_utils-public-state_sync.md[state_sync]
-* https://github.com/elastic/kibana/blob/master/docs/development/plugins/kibana_utils/common/state_containers/kibana-plugin-plugins-kibana_utils-common-state_containers.md[state_containers]
+* https://github.com/elastic/kibana/blob/main/docs/development/plugins/kibana_utils/public/state_sync/kibana-plugin-plugins-kibana_utils-public-state_sync.md[state_sync]
+* https://github.com/elastic/kibana/blob/main/docs/development/plugins/kibana_utils/common/state_containers/kibana-plugin-plugins-kibana_utils-common-state_containers.md[state_containers]
 
 *via https://github.com/elastic/kibana/pull/67354[#67354]*
 
@@ -6039,7 +6039,7 @@ The corresponding code was previously moved to the new platform.
 
 For more information on where to locate new platform `data` services,
 refer to the
-https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
+https://github.com/elastic/kibana/blob/main/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
 in `src/core/MIGRATION.md`.
 
 *via https://github.com/elastic/kibana/pull/61618[#61618]*
@@ -6585,7 +6585,7 @@ const myPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginAp
 
 For more information on where to locate new platform `data` services,
 please refer to the table of
-https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
+https://github.com/elastic/kibana/blob/main/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
 in `src/core/MIGRATION.md`.
 
 *via {kib-pull}60449[#60449]*
@@ -6748,7 +6748,7 @@ const trigger = {
 ===== Use log4j pattern syntax
 
 Logging output of the New platform plugins can use adjusted
-via https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md[new config].
+via https://github.com/elastic/kibana/blob/main/src/core/server/logging/README.md[new config].
 
 *via {kib-pull}57433[#57433]*
 
@@ -6906,14 +6906,14 @@ const reactToUiComponent: (comp: React.ComponentType) => UiComponent;
 ===== Start consuming np logging config
 
 Provides experimental support of new logging format for **new platform plugins**.
-More about https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md[the logging format].
+More about https://github.com/elastic/kibana/blob/main/src/core/server/logging/README.md[the logging format].
 
 *via {kib-pull}56480[#56480]*
 
 [discrete]
 ===== [State Management] State syncing utils docs
 
-Refer to https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync[these docs]
+Refer to https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync[these docs]
 on state syncing utils.
 
 *via {kib-pull}56479[#56479]*
@@ -7029,8 +7029,8 @@ import { BUCKET_TYPES, METRIC_TYPES } from 'src/plugins/data/public';
 
 The above examples are not comprehensive, but represent some of the more
 common uses of `agg_types`. For more details, please refer to the interfaces
-in https://github.com/elastic/kibana/blob/master/src/plugins/data/public/types.ts#L50[the source code],
-as well as the data plugin's https://github.com/elastic/kibana/blob/master/src/plugins/data/public/index.ts#L282[`public/index` file].
+in https://github.com/elastic/kibana/blob/main/src/plugins/data/public/types.ts#L50[the source code],
+as well as the data plugin's https://github.com/elastic/kibana/blob/main/src/plugins/data/public/index.ts#L282[`public/index` file].
 
 
 *`ui/time_buckets`* https://github.com/elastic/kibana/pull/58805[#58805]

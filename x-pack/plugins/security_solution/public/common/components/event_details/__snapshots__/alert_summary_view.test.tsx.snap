@@ -136,7 +136,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.status"
               >
                 <div
@@ -207,7 +207,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-@timestamp"
               >
                 <div
@@ -278,7 +278,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.rule.name"
               >
                 <div
@@ -349,7 +349,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.rule.severity"
               >
                 <div
@@ -420,7 +420,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.rule.risk_score"
               >
                 <div
@@ -491,7 +491,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-host.name"
               >
                 <div
@@ -562,7 +562,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-user.name"
               >
                 <div
@@ -633,7 +633,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-source.ip"
               >
                 <div
@@ -828,7 +828,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.status"
               >
                 <div
@@ -899,7 +899,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-@timestamp"
               >
                 <div
@@ -970,7 +970,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.rule.name"
               >
                 <div
@@ -1041,7 +1041,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.rule.severity"
               >
                 <div
@@ -1112,7 +1112,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-signal.rule.risk_score"
               >
                 <div
@@ -1183,7 +1183,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-host.name"
               >
                 <div
@@ -1254,7 +1254,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-user.name"
               >
                 <div
@@ -1325,7 +1325,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
                 data-test-subj="event-field-source.ip"
               >
                 <div

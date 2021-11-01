@@ -42,7 +42,7 @@ describe('Indicator Match Alerts', () => {
           {
             field: 'file.hash.md5',
             type: 'mapping',
-            value: 'threat.indicator.file.hash.md5',
+            value: 'threatintel.indicator.file.hash.md5',
           },
         ],
       },
@@ -156,11 +156,11 @@ describe('Indicator Match Alerts', () => {
               ...sampleDocNoSortId(v4()),
               _source: {
                 ...sampleDocNoSortId(v4())._source,
-                'threat.indicator.file.hash.md5': 'a1b2c3',
+                'threatintel.indicator.file.hash.md5': 'a1b2c3',
               },
               fields: {
                 ...sampleDocNoSortId(v4()).fields,
-                'threat.indicator.file.hash.md5': ['a1b2c3'],
+                'threatintel.indicator.file.hash.md5': ['a1b2c3'],
               },
             },
           ],

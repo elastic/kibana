@@ -38,7 +38,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
+    describe('With no data', () => {
+      it('Shows the no data screen', async () => {
+        await observability.alerts.common.getNoDataPageOrFail();
+      });
+    });
+
     describe('Alerts table', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await observability.alerts.common.navigateToTimeWithData();
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
       it('Renders the table', async () => {
         await observability.alerts.common.getTableOrFail();
       });
