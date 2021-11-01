@@ -60,6 +60,7 @@ export const HostIsolationExceptionsList = () => {
   const history = useHistory();
   const privileges = useEndpointPrivileges();
   const showFlyout = privileges.canIsolateHost && !!location.show;
+  const hasDataToShow = !isLoading && (!!location.filter || listItems.length > 0);
 
   useEffect(() => {
     if (!isLoading && listItems.length === 0 && !privileges.canIsolateHost) {
@@ -139,7 +140,7 @@ export const HostIsolationExceptionsList = () => {
         />
       }
       actions={
-        privileges.canIsolateHost && listItems.length > 0 ? (
+        privileges.canIsolateHost && hasDataToShow ? (
           <EuiButton
             fill
             iconType="plusInCircle"
@@ -156,13 +157,13 @@ export const HostIsolationExceptionsList = () => {
           []
         )
       }
-      hideHeader={isLoading || listItems.length === 0}
+      hideHeader={!hasDataToShow}
     >
       {showFlyout && <HostIsolationExceptionsFormFlyout />}
 
       {itemToDelete ? <HostIsolationExceptionDeleteModal /> : null}
 
-      {!isLoading && listItems.length ? (
+      {hasDataToShow ? (
         <>
           <SearchExceptions
             defaultValue={location.filter}
@@ -196,7 +197,9 @@ export const HostIsolationExceptionsList = () => {
         pagination={pagination}
         contentClassName="host-isolation-exceptions-container"
         data-test-subj="hostIsolationExceptionsContent"
-        noItemsMessage={<HostIsolationExceptionsEmptyState onAdd={handleAddButtonClick} />}
+        noItemsMessage={
+          !hasDataToShow && <HostIsolationExceptionsEmptyState onAdd={handleAddButtonClick} />
+        }
       />
     </AdministrationListPage>
   );
