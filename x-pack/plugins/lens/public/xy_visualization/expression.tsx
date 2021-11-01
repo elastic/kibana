@@ -54,11 +54,11 @@ import { search } from '../../../../../src/plugins/data/public';
 import {
   ChartsPluginSetup,
   ChartsPluginStart,
-  MULTILAYER_TIME_AXIS_STYLE,
   PaletteRegistry,
   SeriesLayer,
   useActiveCursor,
 } from '../../../../../src/plugins/charts/public';
+import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../src/plugins/charts/common';
 import { EmptyPlaceholder } from '../shared_components';
 import { getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
@@ -561,8 +561,17 @@ export function XYChart({
     floatingColumns: legend?.floatingColumns ?? 1,
   } as LegendPositionConfig;
 
-  // todo be moved in the chart plugin
-  const shouldUseNewTimeAxis = isTimeViz && !useLegacyTimeAxis && !shouldRotate;
+  const isHistogramModeEnabled = filteredLayers.some(
+    ({ isHistogram, seriesType, splitAccessor }) =>
+      isHistogram &&
+      (seriesType.includes('stacked') || !splitAccessor) &&
+      (seriesType.includes('stacked') ||
+        !seriesType.includes('bar') ||
+        !chartHasMoreThanOneBarSeries)
+  );
+
+  const shouldUseNewTimeAxis =
+    isTimeViz && isHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate;
 
   const gridLineStyle = {
     visible: gridlinesVisibilitySettings?.x,
