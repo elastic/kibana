@@ -19,6 +19,7 @@ import {
   EuiFieldSearch,
   EuiAccordion,
   EuiPanel,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -58,7 +59,7 @@ export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, metadata } = props;
-  const { http, notifications } = useKibanaContextForPlugin().services;
+  const { http, notifications, docLinks } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     fetch: http.fetch,
@@ -270,7 +271,7 @@ export const Expressions: React.FC<Props> = (props) => {
       : alertParams.groupBy;
     return groups.map((group: string) => ({
       groupName: group,
-      pattern: new RegExp(`{"match(_phrase)?":{"${group}":"(.*?)"}}`, 'g'),
+      pattern: new RegExp(`{"match(_phrase)?":{"${group}":"(.*?)"}}`),
     }));
   }, [alertParams.groupBy]);
 
@@ -278,11 +279,7 @@ export const Expressions: React.FC<Props> = (props) => {
     if (!alertParams.filterQuery || !groupByFilterTestPatterns) return [];
     return groupByFilterTestPatterns
       .map(({ groupName, pattern }) => {
-        // Test to see if there is ONLY ONE match for this group in the query
-        // If there are 0 matches, then this query isn't filtering out any groups at all
-        // If there are 2+ matches, the query is using OR logic (e.g. group:a OR group:b) and will
-        // still allow for more than one groupBy alert instance.
-        if (alertParams.filterQuery!.match(pattern)?.length === 1) {
+        if (pattern.test(alertParams.filterQuery!)) {
           return groupName;
         }
       })
@@ -463,10 +460,20 @@ export const Expressions: React.FC<Props> = (props) => {
           <EuiText size="xs" color="danger">
             <FormattedMessage
               id="xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError"
-              defaultMessage="This rule will only alert per one {matchedGroups} because the filter query contains an exact match for {groupCount, plural, one {this field} other {these fields}}."
+              defaultMessage="This rule may alert on less {matchedGroups} than expected, because the filter query contains a match for {groupCount, plural, one {this field} other {these fields}}. For more information, refer to {filteringAndGroupingLink}."
               values={{
                 matchedGroups: <strong>{redundantFilterGroupBy.join(', ')}</strong>,
                 groupCount: redundantFilterGroupBy.length,
+                filteringAndGroupingLink: (
+                  <EuiLink
+                    href={`${docLinks.links.observability.metricsThreshold}#filtering-and-grouping`}
+                  >
+                    {i18n.translate(
+                      'xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError.docsLink',
+                      { defaultMessage: 'the docs' }
+                    )}
+                  </EuiLink>
+                ),
               }}
             />
           </EuiText>
