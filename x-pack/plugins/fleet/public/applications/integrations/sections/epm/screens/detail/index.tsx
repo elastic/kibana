@@ -271,6 +271,7 @@ export function Detail() {
           {
             path: pagePathGetters.integration_details_policies({
               pkgkey,
+              ...(integration ? { integration } : {}),
             })[1],
           },
         ];
@@ -289,6 +290,7 @@ export function Detail() {
           {
             path: pagePathGetters.integration_details_overview({
               pkgkey,
+              ...(integration ? { integration } : {}),
             })[1],
           },
         ],
