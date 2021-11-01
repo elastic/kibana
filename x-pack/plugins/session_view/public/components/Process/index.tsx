@@ -202,7 +202,7 @@ function Process({ process, isSessionLeader = false, depth = 0, onProcessSelecte
   // TODO: not customizable for now (cmd previously offered a template string to render)
   const template = (process: IProcess) => {
     const event = process.getLatest();
-    const { args, working_directory } = event.process;
+    const { args, working_directory, exit_code } = event.process;
     const { searchMatched } = process;
 
     if (searchMatched !== null) {
@@ -231,6 +231,7 @@ function Process({ process, isSessionLeader = false, depth = 0, onProcessSelecte
         <span css={workingDirCSS}>{working_directory}</span>&nbsp;
         <span css={darkTextCSS}>{args[0]}</span>&nbsp;
         {args.slice(1).join(' ')}
+        {exit_code && <small> [exit_code: {exit_code}]</small>}
       </>
     );
   };

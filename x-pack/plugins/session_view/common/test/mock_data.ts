@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IProcessEvent } from '../../public/hooks/use_process_tree';
+import { Action, IProcessEvent } from '../../public/hooks/use_process_tree';
 
 const mockData: IProcessEvent[] = [
   {
@@ -12,7 +12,7 @@ const mockData: IProcessEvent[] = [
     event: {
       kind: 'event',
       category: 'process',
-      action: 'exec',
+      action: Action.exec,
     },
     process: {
       args: ['bash'],
@@ -86,7 +86,7 @@ const mockData: IProcessEvent[] = [
     event: {
       kind: 'event',
       category: 'process',
-      action: 'exec',
+      action: Action.exec,
     },
     process: {
       args: ['ls', '-l'],
@@ -158,7 +158,7 @@ const mockData: IProcessEvent[] = [
     event: {
       kind: 'event',
       category: 'process',
-      action: 'exec',
+      action: Action.exec,
     },
     process: {
       args: ['df'],
@@ -230,7 +230,7 @@ const mockData: IProcessEvent[] = [
     event: {
       kind: 'event',
       category: 'process',
-      action: 'exec',
+      action: Action.fork,
     },
     process: {
       args: ['df', 'nested'],
@@ -243,6 +243,156 @@ const mockData: IProcessEvent[] = [
       working_directory: '/home/kg',
       pid: 6,
       pgid: 4,
+
+      user: {
+        id: '2',
+        name: 'kg',
+      },
+
+      parent: {
+        args: ['df'],
+        args_count: 1,
+        command_line: 'df',
+        entity_id: '12345',
+        executable: '/bin/df',
+        name: 'df',
+        interactive: true,
+        working_directory: '/home/kg',
+        pid: 5,
+        pgid: 4,
+        user: {
+          id: '2',
+          name: 'kg',
+        },
+      },
+      session: {
+        args: ['bash'],
+        args_count: 1,
+        command_line: 'bash',
+        entity_id: '4321',
+        executable: '/bin/bash',
+        name: 'bash',
+        interactive: true,
+        working_directory: '/home/kg',
+        pid: 3,
+        pgid: 2,
+        user: {
+          id: '2',
+          name: 'kg',
+        },
+      },
+      entry: {
+        args: ['bash'],
+        args_count: 1,
+        command_line: 'bash',
+        entity_id: '4321',
+        executable: '/bin/bash',
+        name: 'bash',
+        interactive: true,
+        working_directory: '/home/kg',
+        pid: 3,
+        pgid: 2,
+        user: {
+          id: '2',
+          name: 'kg',
+        },
+      },
+    },
+  },
+  {
+    '@timestamp': 'Thu Oct 14 2021 12: 07: 56 GMT-0700 (Pacific Daylight Time)',
+    event: {
+      kind: 'event',
+      category: 'process',
+      action: Action.exec,
+    },
+    process: {
+      args: ['df', 'nested'],
+      args_count: 2,
+      command_line: 'df nested',
+      entity_id: '123456',
+      executable: '/bin/df',
+      name: 'df',
+      interactive: true,
+      working_directory: '/home/kg',
+      pid: 6,
+      pgid: 4,
+
+      user: {
+        id: '2',
+        name: 'kg',
+      },
+
+      parent: {
+        args: ['df'],
+        args_count: 1,
+        command_line: 'df',
+        entity_id: '12345',
+        executable: '/bin/df',
+        name: 'df',
+        interactive: true,
+        working_directory: '/home/kg',
+        pid: 5,
+        pgid: 4,
+        user: {
+          id: '2',
+          name: 'kg',
+        },
+      },
+      session: {
+        args: ['bash'],
+        args_count: 1,
+        command_line: 'bash',
+        entity_id: '4321',
+        executable: '/bin/bash',
+        name: 'bash',
+        interactive: true,
+        working_directory: '/home/kg',
+        pid: 3,
+        pgid: 2,
+        user: {
+          id: '2',
+          name: 'kg',
+        },
+      },
+      entry: {
+        args: ['bash'],
+        args_count: 1,
+        command_line: 'bash',
+        entity_id: '4321',
+        executable: '/bin/bash',
+        name: 'bash',
+        interactive: true,
+        working_directory: '/home/kg',
+        pid: 3,
+        pgid: 2,
+        user: {
+          id: '2',
+          name: 'kg',
+        },
+      },
+    },
+  },
+  {
+    '@timestamp': 'Thu Oct 14 2021 12: 08: 56 GMT-0700 (Pacific Daylight Time)',
+    event: {
+      kind: 'event',
+      category: 'process',
+      action: Action.end,
+    },
+    process: {
+      args: ['df', 'nested'],
+      args_count: 2,
+      command_line: 'df nested',
+      entity_id: '123456',
+      executable: '/bin/df',
+      name: 'df',
+      interactive: true,
+      working_directory: '/home/kg',
+      pid: 6,
+      pgid: 4,
+      end: 'Thu Oct 14 2021 12: 08: 56 GMT-0700 (Pacific Daylight Time)',
+      exit_code: 137,
 
       user: {
         id: '2',

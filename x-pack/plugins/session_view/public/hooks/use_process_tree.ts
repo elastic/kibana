@@ -37,6 +37,8 @@ interface IProcessFields {
   pid: number;
   pgid: number;
   user: IUser;
+  end?: string;
+  exit_code?: number;
 }
 
 interface IProcessSelf extends IProcessFields {
@@ -51,7 +53,7 @@ export interface IProcessEvent {
   event: {
     kind: string;
     category: string;
-    action: string;
+    action: Action;
   };
   host?: {
     // optional for now (raw agent output doesn't have server identity)
@@ -167,8 +169,8 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
   const [searchResults, setSearchResults] = useState<IProcess[]>([]);
   const [orphans, setOrphans] = useState<IProcess[]>([]);
 
-  const updateProcessMap = (eventsToProcess: IProcessEvent[]) => {
-    eventsToProcess.forEach((event) => {
+  const updateProcessMap = (events: IProcessEvent[]) => {
+    events.forEach((event) => {
       let process = processMap[event.process.entity_id];
 
       if (!process) {
@@ -180,17 +182,21 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
     });
   };
 
-  const buildProcessTree = (eventsToProcess: IProcessEvent[], backward: boolean = false) => {
-    eventsToProcess.forEach((event) => {
+  const buildProcessTree = (events: IProcessEvent[], backward: boolean = false) => {
+    events.forEach((event) => {
       const process = processMap[event.process.entity_id];
       const parentProcess = processMap[event.process.parent.entity_id];
 
       if (parentProcess) {
         process.parent = parentProcess; // handy for recursive operations (like auto expand)
 
-        return backward
-          ? parentProcess.children.unshift(process)
-          : parentProcess.children.push(process);
+        if (!parentProcess.children.includes(process)) {
+          if (backward) {
+            parentProcess.children.unshift(process);
+          } else {
+            parentProcess.children.push(process);
+          }
+        }
       } else if (!orphans.includes(process)) {
         // if no parent process, process is probably orphaned
         orphans.push(process);
@@ -243,28 +249,25 @@ const useProcessTree = ({ sessionId, forward, backward, searchQuery }: UseProces
     }
   };
 
-  const processEvents = (
-    eventsToProcess: IProcessEvent[] | undefined,
-    backward: boolean = false
-  ) => {
-    if (!eventsToProcess || eventsToProcess.length === 0) {
+  const processNewEvents = (events: IProcessEvent[] | undefined, backward: boolean = false) => {
+    if (!events || events.length === 0) {
       return;
     }
 
-    console.log(`processing ${eventsToProcess.length} commands`);
+    console.log(`processing ${events.length} commands`);
 
-    updateProcessMap(eventsToProcess);
-    buildProcessTree(eventsToProcess, backward);
+    updateProcessMap(events);
+    buildProcessTree(events, backward);
     autoExpandProcessTree();
   };
 
   useEffect(() => {
     if (backward) {
-      processEvents(backward.slice(0, backward.length - backwardIndex), true);
+      processNewEvents(backward.slice(0, backward.length - backwardIndex), true);
       setBackwardIndex(backward.length);
     }
 
-    processEvents(forward.slice(forwardIndex));
+    processNewEvents(forward.slice(forwardIndex));
     setForwardIndex(forward.length);
 
     setProcessMap({ ...processMap });
