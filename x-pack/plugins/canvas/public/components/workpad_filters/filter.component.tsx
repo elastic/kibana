@@ -7,12 +7,11 @@
 
 import React, { FC } from 'react';
 import { EuiDescriptionList, EuiPanel } from '@elastic/eui';
-import { Filter as FilterType, FormattedFilterViewInstance } from '../../../types';
+import { FormattedFilterViewInstance } from '../../../types';
 
 interface Props {
   filter: FormattedFilterViewInstance;
-  filters: FilterType[];
-  updateFilter: (value: any) => void;
+  updateFilter?: (value: any) => void;
 }
 
 const titleStyle = {
@@ -27,7 +26,7 @@ type CustomComponentProps = Omit<Props, 'filter'> & { value: string };
 
 const renderElement = (
   Component: FC<
-    Omit<CustomComponentProps, 'updateFilter'> & { onChange: CustomComponentProps['updateFilter'] }
+    Omit<CustomComponentProps, 'updateFilter'> & { onChange?: CustomComponentProps['updateFilter'] }
   >,
   { updateFilter, ...props }: CustomComponentProps
 ) => {

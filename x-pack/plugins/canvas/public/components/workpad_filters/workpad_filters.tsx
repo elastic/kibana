@@ -17,7 +17,7 @@ import { WorkpadFilters as Component } from './workpad_filters.component';
 const groupFiltersBy = (filters: Filter[], groupByField: FilterField) => {
   const groupedFilters = groupBy(filters, (filter) => filter[groupByField]);
   return Object.keys(groupedFilters).map((key) => ({
-    name: groupedFilters[key][0]?.[groupByField] ? key : null,
+    name: groupedFilters[key]?.[0]?.[groupByField] ? key : null,
     filters: groupedFilters[key],
   }));
 };
@@ -43,7 +43,7 @@ export const WorkpadFilters: FC = () => {
     }
   }, [groupFiltersByField, onGroupByChange]);
 
-  const { filters: canvasFilters } = useCanvasFilters();
+  const canvasFilters = useCanvasFilters();
 
   const filtersGroups = groupFiltersByField
     ? groupFiltersBy(canvasFilters, groupFiltersByField)
@@ -52,7 +52,6 @@ export const WorkpadFilters: FC = () => {
   return (
     <Component
       filtersGroups={filtersGroups}
-      filters={canvasFilters}
       onGroupByChange={onGroupByChange}
       groupFiltersByField={groupFiltersByField}
     />

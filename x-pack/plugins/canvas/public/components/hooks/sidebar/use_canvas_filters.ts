@@ -6,15 +6,22 @@
  */
 
 import { ExpressionFunctionAST, fromExpression } from '@kbn/interpreter/common';
-import { useCallback } from 'react';
+import { identity } from 'lodash';
 import { shallowEqual, useSelector } from 'react-redux';
-import { Filter, FilterType, State } from '../../../../types';
+import { ExpressionAstArgument, Filter, FilterType, State } from '../../../../types';
 import { getGlobalFilters } from '../../../state/selectors/workpad';
 
 const functionToFilter: Record<string, FilterType> = {
   timefilter: FilterType.time,
   exactly: FilterType.exactly,
 };
+
+const defaultFormatter = (arg: ExpressionAstArgument) => arg.toString();
+
+const argToValue = (
+  arg: ExpressionAstArgument[],
+  formatter: (arg: ExpressionAstArgument) => string | null = defaultFormatter
+) => (arg?.[0] ? formatter(arg[0]) : null);
 
 const convertFunctionToFilterType = (func: string) => functionToFilter[func] ?? FilterType.exactly;
 
@@ -23,14 +30,17 @@ export function adaptCanvasFilter(filter: ExpressionFunctionAST): Filter {
   const { column, filterGroup, value, ...rest } = args ?? {};
   return {
     type: convertFunctionToFilterType(type),
-    column: column[0]?.toString() ?? null,
-    filterGroup: filterGroup?.[0].toString() ?? null,
+    column: argToValue(column),
+    filterGroup: argToValue(filterGroup),
     value:
-      value?.[0] ??
-      Object.keys(rest).reduce<Record<string, unknown>>((acc, key) => {
-        acc[key] = rest[key]?.[0];
-        return acc;
-      }, {}),
+      argToValue(value) ??
+      Object.keys(rest).reduce<Record<string, unknown>>(
+        (acc, key) => ({
+          ...acc,
+          [key]: argToValue(rest[key], identity),
+        }),
+        {}
+      ),
   };
 }
 
@@ -42,13 +52,5 @@ export function useCanvasFilters() {
   const expression = extractExpressionAST(filterExpressions);
   const filters = expression.chain.map(adaptCanvasFilter);
 
-  return { filters };
-}
-
-export function useCanvasFiltersActions() {
-  return {
-    updateFilter: useCallback((value: any) => {
-      console.log(value);
-    }, []),
-  };
+  return filters;
 }

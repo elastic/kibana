@@ -8,14 +8,13 @@
 import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { FormattedFilterViewInstance, Filter as FilterType } from '../../../types';
+import { FormattedFilterViewInstance } from '../../../types';
 import { getFilterFormatter } from '../../lib/filter';
 import { Filter } from './filter';
 import { FiltersGroup as FiltersGroupType } from './types';
 
 interface Props {
   filtersGroup: FiltersGroupType;
-  filters: FilterType[];
 }
 
 const panelStyle = {
@@ -30,7 +29,7 @@ const strings = {
     }),
 };
 
-export const FiltersGroup: FC<Props> = ({ filtersGroup, filters }) => {
+export const FiltersGroup: FC<Props> = ({ filtersGroup }) => {
   const { name, filters: groupFilters } = filtersGroup;
 
   const filterViews: FormattedFilterViewInstance[] = groupFilters.map((filter) =>
@@ -38,11 +37,11 @@ export const FiltersGroup: FC<Props> = ({ filtersGroup, filters }) => {
   );
 
   const filtersComponents = filterViews.map((filter, index) => (
-    <Filter key={`filter-${name}-${index}`} filter={filter} filters={filters} />
+    <Filter key={`filter-${name}-${index}`} filter={filter} />
   ));
 
   return (
-    <div>
+    <div className="canvasSidebar__expandable">
       <EuiAccordion
         id="canvas-element-stats"
         buttonContent={name ?? strings.getWithoutGroupLabel()}

@@ -35,9 +35,9 @@ export type CanvasFilter = CanvasTimeFilter | CanvasExactlyFilter | CanvasLucene
 
 export interface Filter {
   type: keyof typeof FilterType;
-  column: string;
+  column: string | null;
   value: unknown;
-  filterGroup: string;
+  filterGroup: string | null;
 }
 
 export type ComplexFilterViewField<FilterValue> = (

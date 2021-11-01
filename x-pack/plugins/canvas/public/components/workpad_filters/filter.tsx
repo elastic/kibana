@@ -6,16 +6,13 @@
  */
 
 import React, { FC } from 'react';
-import { Filter as FilterType, FormattedFilterViewInstance } from '../../../types';
+import { FormattedFilterViewInstance } from '../../../types';
 import { Filter as Component } from './filter.component';
 
 interface Props {
   filter: FormattedFilterViewInstance;
-  filters: FilterType[];
 }
 
 export const Filter: FC<Props> = (props) => {
-  const { updateFilter } = useCanvasFiltersActions();
-
-  return <Component {...props} updateFilter={updateFilter} />;
+  return <Component {...props} />;
 };
