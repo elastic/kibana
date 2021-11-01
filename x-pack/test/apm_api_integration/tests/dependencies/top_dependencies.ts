@@ -20,7 +20,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
-  const backendName = 'elasticsearch';
 
   async function callApi() {
     return await apmApiClient.readUser({
@@ -58,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let topDependencies: TopDependencies;
 
         before(async () => {
-          await generateData({ synthtraceEsClient, backendName, start, end });
+          await generateData({ synthtraceEsClient, start, end });
           const response = await callApi();
           topDependencies = response.body;
         });
@@ -72,10 +71,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns correct dependency information', () => {
           const location = topDependencies.backends[0].location as BackendNode;
+          const { span } = dataConfig;
+
           expect(location.type).to.be(NodeType.backend);
-          expect(location.backendName).to.be(backendName);
-          expect(location.spanType).to.be(dataConfig.spanType);
-          expect(location.spanSubtype).to.be(backendName);
+          expect(location.backendName).to.be(span.destination);
+          expect(location.spanType).to.be(span.type);
+          expect(location.spanSubtype).to.be(span.subType);
           expect(location).to.have.property('id');
         });
 
@@ -98,8 +99,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const {
               currentStats: { latency },
             } = backends;
-            expect(latency.value).to.be(dataConfig.duration * 1000);
-            expect(latency.timeseries.every(({ y }) => y === dataConfig.duration * 1000)).to.be(
+
+            const { transaction } = dataConfig;
+
+            expect(latency.value).to.be(transaction.duration * 1000);
+            expect(latency.timeseries.every(({ y }) => y === transaction.duration * 1000)).to.be(
               true
             );
           });
@@ -108,17 +112,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const {
               currentStats: { throughput },
             } = backends;
-            expect(roundNumber(throughput.value)).to.be(roundNumber(dataConfig.rate));
+            const { rate } = dataConfig;
+
+            expect(roundNumber(throughput.value)).to.be(roundNumber(rate));
           });
 
           it('returns the correct total time', () => {
             const {
               currentStats: { totalTime },
             } = backends;
+            const { rate, transaction } = dataConfig;
+
             expect(
-              totalTime.timeseries.every(
-                ({ y }) => y === dataConfig.rate * dataConfig.duration * 1000
-              )
+              totalTime.timeseries.every(({ y }) => y === rate * transaction.duration * 1000)
             ).to.be(true);
           });
 

@@ -8,42 +8,47 @@ import { service, timerange } from '@elastic/apm-synthtrace';
 import type { SynthtraceEsClient } from '../../common/synthtrace_es_client';
 
 export const dataConfig = {
-  spanType: 'db',
-  duration: 1000,
   rate: 20,
+  transaction: {
+    name: 'GET /api/product/list',
+    duration: 1000,
+  },
+  span: {
+    name: 'GET apm-*/_search',
+    type: 'db',
+    subType: 'elasticsearch',
+    destination: 'elasticsearch',
+  },
 };
 
 export async function generateData({
   synthtraceEsClient,
-  backendName,
   start,
   end,
 }: {
   synthtraceEsClient: SynthtraceEsClient;
-  backendName: string;
   start: number;
   end: number;
 }) {
   const instance = service('synth-go', 'production', 'go').instance('instance-a');
-  const transactionName = 'GET /api/product/list';
-  const spanName = 'GET apm-*/_search';
+  const { rate, transaction, span } = dataConfig;
 
   await synthtraceEsClient.index(
     timerange(start, end)
       .interval('1m')
-      .rate(dataConfig.rate)
+      .rate(rate)
       .flatMap((timestamp) =>
         instance
-          .transaction(transactionName)
+          .transaction(transaction.name)
           .timestamp(timestamp)
-          .duration(dataConfig.duration)
+          .duration(transaction.duration)
           .success()
           .children(
             instance
-              .span(spanName, dataConfig.spanType, backendName)
-              .duration(dataConfig.duration)
+              .span(span.name, span.type, span.subType)
+              .duration(transaction.duration)
               .success()
-              .destination(backendName)
+              .destination(span.destination)
               .timestamp(timestamp)
           )
           .serialize()
