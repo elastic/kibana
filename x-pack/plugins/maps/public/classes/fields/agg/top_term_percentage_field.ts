@@ -12,11 +12,18 @@ import { TOP_TERM_PERCENTAGE_SUFFIX, FIELD_ORIGIN } from '../../../../common/con
 
 export class TopTermPercentageField implements IESAggField {
   private readonly _topTermAggField: IESAggField;
-  private readonly _canReadFromGeoJson: boolean;
 
-  constructor(topTermAggField: IESAggField, canReadFromGeoJson: boolean = true) {
+  constructor(topTermAggField: IESAggField) {
     this._topTermAggField = topTermAggField;
-    this._canReadFromGeoJson = canReadFromGeoJson;
+  }
+
+  supportsFieldMetaFromEs(): boolean {
+    return false;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API does not support top term metric
+    return false;
   }
 
   getSource(): IVectorSource {
@@ -64,15 +71,6 @@ export class TopTermPercentageField implements IESAggField {
   getBucketCount(): number {
     return 0;
   }
-
-  supportsAutoDomain(): boolean {
-    return this._canReadFromGeoJson;
-  }
-
-  supportsFieldMeta(): boolean {
-    return false;
-  }
-
   async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
     return null;
   }
@@ -87,10 +85,6 @@ export class TopTermPercentageField implements IESAggField {
 
   canValueBeFormatted(): boolean {
     return false;
-  }
-
-  canReadFromGeoJson(): boolean {
-    return this._canReadFromGeoJson;
   }
 
   isEqual(field: IESAggField) {
