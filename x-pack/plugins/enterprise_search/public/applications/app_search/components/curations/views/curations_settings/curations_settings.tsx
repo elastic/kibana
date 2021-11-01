@@ -178,7 +178,7 @@ export const CurationsSettings: React.FC = () => {
           'xpack.enterpriseSearch.appSearch.curations.settings.automaticCurationsDescription',
           {
             defaultMessage:
-              "App search will monitor your engine's analytics and suggest changes to your curations to help you deliver the most relevant results. Each suggestion can be accepted, rejected, or modified.",
+              "App Search will monitor your engine's analytics and suggest changes to your curations to help you deliver the most relevant results. Each suggestion can be accepted, rejected, or modified.",
           }
         )}
       </EuiText>
