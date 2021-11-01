@@ -105,7 +105,7 @@ export const LogStreamContent: React.FC<LogStreamContentProps> = ({
       `<LogStream /> cannot access kibana core services.
 
 Ensure the component is mounted within kibana-react's <KibanaContextProvider> hierarchy.
-Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_react/README.md"
+Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_react/README.md"
 `
     );
   }
