@@ -259,16 +259,20 @@ Configuring the default `csp.script_src`, `csp.workers_src`, and `csp.style_src`
 
 [discrete]
 [[breaking-113653]]
-.Removes unused and renamed deprecated core settings and deprecated settings from core plugins
+.Changes and removes deprecated core settings and deprecated settings from core plugins
 [%collapsible]
 ====
 *Details* +
-The deprecation notice for `server.cors` has changed from `level:critical` to `level:warning`. 
+The deprecation notice for `server.cors` has changed from `level:critical` to `level:warning`.
+
+The following settings have changed:
+
+* The `xpack.banners.placement` value has been renamed
+* The `newsfeed.defaultLanguage` newsfeed item retrieval method and default language has changed
 
 Support for the following configuration settings has been removed:
 
 * `newsfeed.defaultLanguage`
-* `xpack.banners.placement`
 * `cpu.cgroup.path.override`
 * `cpuacct.cgroup.path.override`
 * `server.xsrf.whitelist`
@@ -278,8 +282,8 @@ Support for the following configuration settings has been removed:
 For more information, refer to {kibana-pull}113653[#113653].
 
 *Impact* +
-* `newsfeed.defaultLanguage` -- Newsfeed items are retrieved based on the browser locale and default to English
-* `xpack.banners.placement` has changed value from 'header' to 'top'
+* The `header` value provided to the `xpack.banners.placement` configuration has been renamed to 'top'
+* The `newsfeed.defaultLanguage` newsfeed items are retrieved based on the browser locale and default to English
 * Replace `cpu.cgroup.path.override` with `ops.cGroupOverrides.cpuPath`
 * Replace `cpuacct.cgroup.path.override` with `ops.cGroupOverrides.cpuAcctPath`
 * Replace `server.xsrf.whitelist` with `server.xsrf.allowlist`
@@ -295,8 +299,13 @@ For more information, refer to {kibana-pull}113653[#113653].
 *Details* +
 Using `{plugin_name}.enabled` to disable plugins has been removed. Some plugins, such as `telemetry`, `newsfeed`, `reporting`, and the various `vis_type` plugins will continue to support this setting. All other {kib} plugins will not support this setting. Any new plugin will support this setting only when specified in the `configSchema`. For more information, refer to {kibana-pull}113495[#113495].
 
+The `xpack.security.enabled` setting has been removed. For more information, refer to {kibana-pull}111681[#111681].
+
 *Impact* +
-Before you upgrade to 8.0.0, remove `{plugin_name}.enabled` from kibana.yml. If you use the setting to control user access to {kib} applications, use <<tutorial-secure-access-to-kibana,*Features* controls>> instead.
+Before you upgrade to 8.0.0:
+
+* Remove `{plugin_name}.enabled` from kibana.yml. If you use the setting to control user access to {kib} applications, use <<tutorial-secure-access-to-kibana,*Features* controls>> instead.
+* Replace `xpack.security.enabled` with {ref}/security-settings.html#general-security-settings[`xpack.security.enabled`] in elasticsearch.yml.
 ====
 
 [discrete]
@@ -456,18 +465,6 @@ The legacy audit logger has been removed. For more information, refer to {kibana
 
 *Impact* +
 Audit logs will be written to the default location in the new ECS format. To change the output file, filter events, and more, use the <<audit-logging-settings, audit logging settings>>.
-====
-
-[discrete]
-[[breaking-111681]]
-.Removes `xpack.security.enabled` setting
-[%collapsible]
-====
-*Details* +
-The `xpack.security.enabled` setting has been removed. For more information, refer to {kibana-pull}111681[#111681].
-
-*Impact* +
-Use {ref}/security-settings.html#general-security-settings[`xpack.security.enabled`] in elasticsearch.yml.
 ====
 
 // end::notable-breaking-changes[]
