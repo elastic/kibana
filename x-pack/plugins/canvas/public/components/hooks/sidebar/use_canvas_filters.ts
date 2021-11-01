@@ -5,44 +5,11 @@
  * 2.0.
  */
 
-import { ExpressionFunctionAST, fromExpression } from '@kbn/interpreter/common';
-import { identity } from 'lodash';
+import { fromExpression } from '@kbn/interpreter/common';
 import { shallowEqual, useSelector } from 'react-redux';
-import { ExpressionAstArgument, Filter, FilterType, State } from '../../../../types';
+import { State } from '../../../../types';
+import { adaptCanvasFilter } from '../../../lib/filter_adapters';
 import { getGlobalFilters } from '../../../state/selectors/workpad';
-
-const functionToFilter: Record<string, FilterType> = {
-  timefilter: FilterType.time,
-  exactly: FilterType.exactly,
-};
-
-const defaultFormatter = (arg: ExpressionAstArgument) => arg.toString();
-
-const argToValue = (
-  arg: ExpressionAstArgument[],
-  formatter: (arg: ExpressionAstArgument) => string | null = defaultFormatter
-) => (arg?.[0] ? formatter(arg[0]) : null);
-
-const convertFunctionToFilterType = (func: string) => functionToFilter[func] ?? FilterType.exactly;
-
-export function adaptCanvasFilter(filter: ExpressionFunctionAST): Filter {
-  const { function: type, arguments: args } = filter;
-  const { column, filterGroup, value, ...rest } = args ?? {};
-  return {
-    type: convertFunctionToFilterType(type),
-    column: argToValue(column),
-    filterGroup: argToValue(filterGroup),
-    value:
-      argToValue(value) ??
-      Object.keys(rest).reduce<Record<string, unknown>>(
-        (acc, key) => ({
-          ...acc,
-          [key]: argToValue(rest[key], identity),
-        }),
-        {}
-      ),
-  };
-}
 
 const extractExpressionAST = (filtersExpressions: string[]) =>
   fromExpression(filtersExpressions.join(' | '));
