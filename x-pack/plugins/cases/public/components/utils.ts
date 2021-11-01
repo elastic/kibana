@@ -80,7 +80,7 @@ export const getConnectorIcon = (
 // TODO: Remove when the applications are certified
 export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean => {
   if (connector == null) {
-    return true;
+    return false;
   }
 
   if (!ENABLE_NEW_SN_ITSM_CONNECTOR && connector.actionTypeId === '.servicenow') {

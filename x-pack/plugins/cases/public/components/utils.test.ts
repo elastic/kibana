@@ -7,7 +7,7 @@
 
 import { actionTypeRegistryMock } from '../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { triggersActionsUiMock } from '../../../triggers_actions_ui/public/mocks';
-import { getConnectorIcon } from './utils';
+import { getConnectorIcon, isDeprecatedConnector } from './utils';
 
 describe('Utils', () => {
   describe('getConnectorIcon', () => {
@@ -35,6 +35,12 @@ describe('Utils', () => {
       };
 
       expect(getConnectorIcon(mockTriggersActionsUiService, '.not-registered')).toBe('');
+    });
+  });
+
+  describe('isDeprecatedConnector', () => {
+    it('returns false if the connector is not defined', () => {
+      expect(isDeprecatedConnector()).toBe(false);
     });
   });
 });
