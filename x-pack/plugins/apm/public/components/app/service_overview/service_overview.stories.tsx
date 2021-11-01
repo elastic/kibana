@@ -8,11 +8,15 @@
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { APMServiceContext } from '../../../context/apm_service/apm_service_context';
-
-import { ServiceOverview } from './';
+import type { CoreStart } from '../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import {
+  APMServiceContext,
+  APMServiceContextValue,
+} from '../../../context/apm_service/apm_service_context';
+import { ServiceOverview } from './';
 
 const stories: Meta<{}> = {
   title: 'app/ServiceOverview',
@@ -39,7 +43,10 @@ const stories: Meta<{}> = {
         notifications: { toasts: { add: () => {} } },
         uiSettings: { get: () => 'Browser' },
       } as unknown as CoreStart;
-      const serviceContextValue = { alerts: [], serviceName };
+      const serviceContextValue = {
+        alerts: [],
+        serviceName,
+      } as unknown as APMServiceContextValue;
       const KibanaReactContext = createKibanaReactContext(mockCore);
 
       return (
@@ -49,7 +56,9 @@ const stories: Meta<{}> = {
           ]}
         >
           <KibanaReactContext.Provider>
-            <MockApmPluginContextWrapper value={{ core: mockCore }}>
+            <MockApmPluginContextWrapper
+              value={{ core: mockCore } as ApmPluginContextValue}
+            >
               <APMServiceContext.Provider value={serviceContextValue}>
                 <StoryComponent />
               </APMServiceContext.Provider>
