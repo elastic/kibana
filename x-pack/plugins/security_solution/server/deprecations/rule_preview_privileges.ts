@@ -15,7 +15,7 @@ const buildManualSteps = (roleNames: string[]): string[] => {
   const baseSteps = [
     i18n.translate('xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep1', {
       defaultMessage:
-        'Update your roles to include read privileges for the signals preview indices appropriate for that role and space(s).',
+        'Update your roles to include read privileges for the detection alerts preview indices appropriate for that role and space(s).',
     }),
     i18n.translate('xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep2', {
       defaultMessage:
@@ -25,7 +25,8 @@ const buildManualSteps = (roleNames: string[]): string[] => {
   const informationalStep = i18n.translate(
     'xpack.securitySolution.deprecations.rulePreviewPrivileges.manualStep3',
     {
-      defaultMessage: 'The roles that currently have read access to signals indices are: {roles}',
+      defaultMessage:
+        'The roles that currently have read access to detection alerts indices are: {roles}',
       values: {
         roles: roleNames.join(', '),
       },
@@ -78,7 +79,7 @@ export const registerRulePreviewPrivilegeDeprecations = ({
                 signalsIndexPrefix: DEFAULT_SIGNALS_INDEX,
               },
               defaultMessage:
-                'In order to enable a more robust preview, users will need read privileges to new signals preview indices ({previewIndexPrefix}-<KIBANA_SPACE>), analogous to existing signals indices ({signalsIndexPrefix}-<KIBANA_SPACE>).',
+                'In order to enable a more robust preview, users will need read privileges to new detection alerts preview indices ({previewIndexPrefix}-<KIBANA_SPACE>), analogous to existing detection alerts indices ({signalsIndexPrefix}-<KIBANA_SPACE>).',
             }
           ),
           level: 'warning',
