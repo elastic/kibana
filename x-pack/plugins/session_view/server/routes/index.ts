@@ -7,7 +7,9 @@
 
 import { IRouter } from '../../../../../src/core/server';
 import { registerTestRoute } from './test_route';
+import { registerTestSavedObjectsRoute } from './test_saved_objects_route';
 
 export const registerRoutes = (router: IRouter) => {
   registerTestRoute(router);
+  registerTestSavedObjectsRoute(router);
 };
