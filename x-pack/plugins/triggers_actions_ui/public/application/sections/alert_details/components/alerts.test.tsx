@@ -10,8 +10,8 @@ import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
-import { AlertInstances, AlertInstanceListItem, alertInstanceToListItem } from './alert_instances';
-import { Alert, AlertInstanceSummary, AlertInstanceStatus, AlertType } from '../../../../types';
+import { Alerts, AlertListItem, alertToListItem } from './alerts';
+import { Alert, AlertSummary, AlertStatus, AlertType } from '../../../../types';
 import { EuiBasicTable } from '@elastic/eui';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 
@@ -31,18 +31,18 @@ beforeAll(() => {
   global.Date.now = jest.fn(() => fakeNow.getTime());
 });
 
-describe('alert_instances', () => {
-  it('render a list of alert instances', () => {
-    const alert = mockAlert();
-    const alertType = mockAlertType();
-    const alertInstanceSummary = mockAlertInstanceSummary({
-      instances: {
-        first_instance: {
+describe('alerts', () => {
+  it('render a list of alerts', () => {
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const alertSummary = mockAlertSummary({
+      alerts: {
+        first_alert: {
           status: 'OK',
           muted: false,
           actionGroupId: 'default',
         },
-        second_instance: {
+        second_alert: {
           status: 'Active',
           muted: false,
           actionGroupId: 'action group id unknown',
@@ -50,52 +50,47 @@ describe('alert_instances', () => {
       },
     });
 
-    const instances: AlertInstanceListItem[] = [
+    const alerts: AlertListItem[] = [
       // active first
-      alertInstanceToListItem(
+      alertToListItem(
         fakeNow.getTime(),
-        alertType,
-        'second_instance',
-        alertInstanceSummary.instances.second_instance
+        ruleType,
+        'second_alert',
+        alertSummary.alerts.second_alert
       ),
       // ok second
-      alertInstanceToListItem(
-        fakeNow.getTime(),
-        alertType,
-        'first_instance',
-        alertInstanceSummary.instances.first_instance
-      ),
+      alertToListItem(fakeNow.getTime(), ruleType, 'first_alert', alertSummary.alerts.first_alert),
     ];
 
     expect(
       shallow(
-        <AlertInstances
+        <Alerts
           {...mockAPIs}
-          alert={alert}
-          alertType={alertType}
-          alertInstanceSummary={alertInstanceSummary}
+          rule={rule}
+          ruleType={ruleType}
+          alertSummary={alertSummary}
           readOnly={false}
         />
       )
         .find(EuiBasicTable)
         .prop('items')
-    ).toEqual(instances);
+    ).toEqual(alerts);
   });
 
   it('render a hidden field with duration epoch', () => {
-    const alert = mockAlert();
-    const alertType = mockAlertType();
-    const alertInstanceSummary = mockAlertInstanceSummary();
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const alertSummary = mockAlertSummary();
 
     expect(
       shallow(
-        <AlertInstances
+        <Alerts
           durationEpoch={fake2MinutesAgo.getTime()}
           {...mockAPIs}
-          alert={alert}
-          alertType={alertType}
+          rule={rule}
+          ruleType={ruleType}
           readOnly={false}
-          alertInstanceSummary={alertInstanceSummary}
+          alertSummary={alertSummary}
         />
       )
         .find('[name="alertInstancesDurationEpoch"]')
@@ -103,10 +98,10 @@ describe('alert_instances', () => {
     ).toEqual(fake2MinutesAgo.getTime());
   });
 
-  it('render all active alert instances', () => {
-    const alert = mockAlert();
-    const alertType = mockAlertType();
-    const instances: Record<string, AlertInstanceStatus> = {
+  it('render all active alerts', () => {
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const alerts: Record<string, AlertStatus> = {
       ['us-central']: {
         status: 'OK',
         muted: false,
@@ -118,41 +113,41 @@ describe('alert_instances', () => {
     };
     expect(
       shallow(
-        <AlertInstances
+        <Alerts
           {...mockAPIs}
-          alert={alert}
-          alertType={alertType}
+          rule={rule}
+          ruleType={ruleType}
           readOnly={false}
-          alertInstanceSummary={mockAlertInstanceSummary({
-            instances,
+          alertSummary={mockAlertSummary({
+            alerts,
           })}
         />
       )
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual([
-      alertInstanceToListItem(fakeNow.getTime(), alertType, 'us-central', instances['us-central']),
-      alertInstanceToListItem(fakeNow.getTime(), alertType, 'us-east', instances['us-east']),
+      alertToListItem(fakeNow.getTime(), ruleType, 'us-central', alerts['us-central']),
+      alertToListItem(fakeNow.getTime(), ruleType, 'us-east', alerts['us-east']),
     ]);
   });
 
-  it('render all inactive alert instances', () => {
-    const alert = mockAlert({
+  it('render all inactive alerts', () => {
+    const rule = mockRule({
       mutedInstanceIds: ['us-west', 'us-east'],
     });
-    const alertType = mockAlertType();
-    const instanceUsWest: AlertInstanceStatus = { status: 'OK', muted: false };
-    const instanceUsEast: AlertInstanceStatus = { status: 'OK', muted: false };
+    const ruleType = mockRuleType();
+    const alertUsWest: AlertStatus = { status: 'OK', muted: false };
+    const alertUsEast: AlertStatus = { status: 'OK', muted: false };
 
     expect(
       shallow(
-        <AlertInstances
+        <Alerts
           {...mockAPIs}
-          alert={alert}
-          alertType={alertType}
+          rule={rule}
+          ruleType={ruleType}
           readOnly={false}
-          alertInstanceSummary={mockAlertInstanceSummary({
-            instances: {
+          alertSummary={mockAlertSummary({
+            alerts: {
               'us-west': {
                 status: 'OK',
                 muted: false,
@@ -168,30 +163,30 @@ describe('alert_instances', () => {
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual([
-      alertInstanceToListItem(fakeNow.getTime(), alertType, 'us-west', instanceUsWest),
-      alertInstanceToListItem(fakeNow.getTime(), alertType, 'us-east', instanceUsEast),
+      alertToListItem(fakeNow.getTime(), ruleType, 'us-west', alertUsWest),
+      alertToListItem(fakeNow.getTime(), ruleType, 'us-east', alertUsEast),
     ]);
   });
 });
 
-describe('alertInstanceToListItem', () => {
-  it('handles active instances', () => {
-    const alertType = mockAlertType({
+describe('alertToListItem', () => {
+  it('handles active alerts', () => {
+    const ruleType = mockRuleType({
       actionGroups: [
         { id: 'default', name: 'Default Action Group' },
         { id: 'testing', name: 'Test Action Group' },
       ],
     });
     const start = fake2MinutesAgo;
-    const instance: AlertInstanceStatus = {
+    const alert: AlertStatus = {
       status: 'Active',
       muted: false,
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'testing',
     };
 
-    expect(alertInstanceToListItem(fakeNow.getTime(), alertType, 'id', instance)).toEqual({
-      instance: 'id',
+    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+      alert: 'id',
       status: { label: 'Active', actionGroup: 'Test Action Group', healthColor: 'primary' },
       start,
       sortPriority: 0,
@@ -200,17 +195,17 @@ describe('alertInstanceToListItem', () => {
     });
   });
 
-  it('handles active instances with no action group id', () => {
-    const alertType = mockAlertType();
+  it('handles active alerts with no action group id', () => {
+    const ruleType = mockRuleType();
     const start = fake2MinutesAgo;
-    const instance: AlertInstanceStatus = {
+    const alert: AlertStatus = {
       status: 'Active',
       muted: false,
       activeStartDate: fake2MinutesAgo.toISOString(),
     };
 
-    expect(alertInstanceToListItem(fakeNow.getTime(), alertType, 'id', instance)).toEqual({
-      instance: 'id',
+    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+      alert: 'id',
       status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
       start,
       sortPriority: 0,
@@ -219,18 +214,18 @@ describe('alertInstanceToListItem', () => {
     });
   });
 
-  it('handles active muted instances', () => {
-    const alertType = mockAlertType();
+  it('handles active muted alerts', () => {
+    const ruleType = mockRuleType();
     const start = fake2MinutesAgo;
-    const instance: AlertInstanceStatus = {
+    const alert: AlertStatus = {
       status: 'Active',
       muted: true,
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'default',
     };
 
-    expect(alertInstanceToListItem(fakeNow.getTime(), alertType, 'id', instance)).toEqual({
-      instance: 'id',
+    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+      alert: 'id',
       status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
       start,
       sortPriority: 0,
@@ -239,16 +234,16 @@ describe('alertInstanceToListItem', () => {
     });
   });
 
-  it('handles active instances with start date', () => {
-    const alertType = mockAlertType();
-    const instance: AlertInstanceStatus = {
+  it('handles active alerts with start date', () => {
+    const ruleType = mockRuleType();
+    const alert: AlertStatus = {
       status: 'Active',
       muted: false,
       actionGroupId: 'default',
     };
 
-    expect(alertInstanceToListItem(fakeNow.getTime(), alertType, 'id', instance)).toEqual({
-      instance: 'id',
+    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+      alert: 'id',
       status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
       start: undefined,
       duration: 0,
@@ -257,15 +252,15 @@ describe('alertInstanceToListItem', () => {
     });
   });
 
-  it('handles muted inactive instances', () => {
-    const alertType = mockAlertType();
-    const instance: AlertInstanceStatus = {
+  it('handles muted inactive alerts', () => {
+    const ruleType = mockRuleType();
+    const alert: AlertStatus = {
       status: 'OK',
       muted: true,
       actionGroupId: 'default',
     };
-    expect(alertInstanceToListItem(fakeNow.getTime(), alertType, 'id', instance)).toEqual({
-      instance: 'id',
+    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+      alert: 'id',
       status: { label: 'Recovered', healthColor: 'subdued' },
       start: undefined,
       duration: 0,
@@ -277,19 +272,19 @@ describe('alertInstanceToListItem', () => {
 
 describe('execution duration overview', () => {
   it('render last execution status', async () => {
-    const rule = mockAlert({
+    const rule = mockRule({
       executionStatus: { status: 'ok', lastExecutionDate: new Date('2020-08-20T19:23:38Z') },
     });
-    const ruleType = mockAlertType();
-    const alertSummary = mockAlertInstanceSummary();
+    const ruleType = mockRuleType();
+    const alertSummary = mockAlertSummary();
 
     const wrapper = mountWithIntl(
-      <AlertInstances
+      <Alerts
         {...mockAPIs}
-        alert={rule}
-        alertType={ruleType}
+        rule={rule}
+        ruleType={ruleType}
         readOnly={false}
-        alertInstanceSummary={alertSummary}
+        alertSummary={alertSummary}
       />
     );
 
@@ -305,19 +300,19 @@ describe('execution duration overview', () => {
   });
 
   it('renders average execution duration', async () => {
-    const rule = mockAlert();
-    const ruleType = mockAlertType({ ruleTaskTimeout: '10m' });
-    const alertSummary = mockAlertInstanceSummary({
+    const rule = mockRule();
+    const ruleType = mockRuleType({ ruleTaskTimeout: '10m' });
+    const alertSummary = mockAlertSummary({
       executionDuration: { average: 60284, values: [] },
     });
 
     const wrapper = mountWithIntl(
-      <AlertInstances
+      <Alerts
         {...mockAPIs}
-        alert={rule}
-        alertType={ruleType}
+        rule={rule}
+        ruleType={ruleType}
         readOnly={false}
-        alertInstanceSummary={alertSummary}
+        alertSummary={alertSummary}
       />
     );
 
@@ -336,19 +331,19 @@ describe('execution duration overview', () => {
   });
 
   it('renders warning when average execution duration exceeds rule timeout', async () => {
-    const rule = mockAlert();
-    const ruleType = mockAlertType({ ruleTaskTimeout: '10m' });
-    const alertSummary = mockAlertInstanceSummary({
+    const rule = mockRule();
+    const ruleType = mockRuleType({ ruleTaskTimeout: '10m' });
+    const alertSummary = mockAlertSummary({
       executionDuration: { average: 60284345, values: [] },
     });
 
     const wrapper = mountWithIntl(
-      <AlertInstances
+      <Alerts
         {...mockAPIs}
-        alert={rule}
-        alertType={ruleType}
+        rule={rule}
+        ruleType={ruleType}
         readOnly={false}
-        alertInstanceSummary={alertSummary}
+        alertSummary={alertSummary}
       />
     );
 
@@ -367,17 +362,17 @@ describe('execution duration overview', () => {
   });
 
   it('renders execution duration chart', () => {
-    const rule = mockAlert();
-    const ruleType = mockAlertType();
-    const alertSummary = mockAlertInstanceSummary();
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const alertSummary = mockAlertSummary();
 
     expect(
       shallow(
-        <AlertInstances
+        <Alerts
           {...mockAPIs}
-          alert={rule}
-          alertType={ruleType}
-          alertInstanceSummary={alertSummary}
+          rule={rule}
+          ruleType={ruleType}
+          alertSummary={alertSummary}
           readOnly={false}
         />
       )
@@ -387,11 +382,11 @@ describe('execution duration overview', () => {
   });
 });
 
-function mockAlert(overloads: Partial<Alert> = {}): Alert {
+function mockRule(overloads: Partial<Alert> = {}): Alert {
   return {
     id: uuid.v4(),
     enabled: true,
-    name: `alert-${uuid.v4()}`,
+    name: `rule-${uuid.v4()}`,
     tags: [],
     alertTypeId: '.noop',
     consumer: 'consumer',
@@ -415,10 +410,10 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
   };
 }
 
-function mockAlertType(overloads: Partial<AlertType> = {}): AlertType {
+function mockRuleType(overloads: Partial<AlertType> = {}): AlertType {
   return {
-    id: 'test.testAlertType',
-    name: 'My Test Alert Type',
+    id: 'test.testRuleType',
+    name: 'My Test Rule Type',
     actionGroups: [{ id: 'default', name: 'Default Action Group' }],
     actionVariables: {
       context: [],
@@ -435,15 +430,13 @@ function mockAlertType(overloads: Partial<AlertType> = {}): AlertType {
   };
 }
 
-function mockAlertInstanceSummary(
-  overloads: Partial<AlertInstanceSummary> = {}
-): AlertInstanceSummary {
-  const summary: AlertInstanceSummary = {
-    id: 'alert-id',
-    name: 'alert-name',
+function mockAlertSummary(overloads: Partial<AlertSummary> = {}): AlertSummary {
+  const summary: AlertSummary = {
+    id: 'rule-id',
+    name: 'rule-name',
     tags: ['tag-1', 'tag-2'],
-    alertTypeId: 'alert-type-id',
-    consumer: 'alert-consumer',
+    ruleTypeId: 'rule-type-id',
+    consumer: 'rule-consumer',
     status: 'OK',
     muteAll: false,
     throttle: '',
@@ -451,7 +444,7 @@ function mockAlertInstanceSummary(
     errorMessages: [],
     statusStartDate: fake2MinutesAgo.toISOString(),
     statusEndDate: fakeNow.toISOString(),
-    instances: {
+    alerts: {
       foo: {
         status: 'OK',
         muted: false,

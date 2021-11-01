@@ -43,7 +43,9 @@ export const getAlertInstanceSummaryRoute = (
       const rulesClient = context.alerting.getRulesClient();
       const { id } = req.params;
       const { dateStart } = req.query;
-      const summary = await rulesClient.getAlertInstanceSummary({ id, dateStart });
+      const summary = await rulesClient.getAlertSummary({ id, dateStart });
+
+      // TODO - rewrite so format is unchanged - ruleTypeId -> alertTypeId & alerts -> instances
       return res.ok({ body: summary });
     })
   );

@@ -9,22 +9,22 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { ToastsApi } from 'kibana/public';
-import { AlertInstancesRoute, getAlertInstanceSummary } from './alert_instances_route';
-import { Alert, AlertInstanceSummary, AlertType } from '../../../../types';
+import { AlertsRoute, getAlertSummary } from './alerts_route';
+import { Alert, AlertSummary, AlertType } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 jest.mock('../../../../common/lib/kibana');
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
 
-describe('alert_instance_summary_route', () => {
+describe('alerts_summary_route', () => {
   it('render a loader while fetching data', () => {
-    const alert = mockAlert();
-    const alertType = mockAlertType();
+    const rule = mockRule();
+    const ruleType = mockRuleType();
 
     expect(
       shallow(
-        <AlertInstancesRoute readOnly={false} alert={alert} alertType={alertType} {...mockApis()} />
+        <AlertsRoute readOnly={false} rule={rule} ruleType={ruleType} {...mockApis()} />
       ).containsMatchingElement(<CenterJustifiedSpinner />)
     ).toBeTruthy();
   });
@@ -35,62 +35,52 @@ describe('getAlertState useEffect handler', () => {
     jest.clearAllMocks();
   });
 
-  it('fetches alert instance summary', async () => {
-    const alert = mockAlert();
-    const alertInstanceSummary = mockAlertInstanceSummary();
-    const { loadAlertInstanceSummary } = mockApis();
-    const { setAlertInstanceSummary } = mockStateSetter();
+  it('fetches alert summary', async () => {
+    const rule = mockRule();
+    const alertSummary = mockAlertSummary();
+    const { loadAlertSummary } = mockApis();
+    const { setAlertSummary } = mockStateSetter();
 
-    loadAlertInstanceSummary.mockImplementationOnce(async () => alertInstanceSummary);
+    loadAlertSummary.mockImplementationOnce(async () => alertSummary);
 
     const toastNotifications = {
       addDanger: jest.fn(),
     } as unknown as ToastsApi;
 
-    await getAlertInstanceSummary(
-      alert.id,
-      loadAlertInstanceSummary,
-      setAlertInstanceSummary,
-      toastNotifications
-    );
+    await getAlertSummary(rule.id, loadAlertSummary, setAlertSummary, toastNotifications);
 
-    expect(loadAlertInstanceSummary).toHaveBeenCalledWith(alert.id);
-    expect(setAlertInstanceSummary).toHaveBeenCalledWith(alertInstanceSummary);
+    expect(loadAlertSummary).toHaveBeenCalledWith(rule.id);
+    expect(setAlertSummary).toHaveBeenCalledWith(alertSummary);
   });
 
-  it('displays an error if the alert instance summary isnt found', async () => {
-    const actionType = {
+  it('displays an error if the alert summary isnt found', async () => {
+    const connectorType = {
       id: '.server-log',
       name: 'Server log',
       enabled: true,
     };
-    const alert = mockAlert({
+    const rule = mockRule({
       actions: [
         {
           group: '',
           id: uuid.v4(),
-          actionTypeId: actionType.id,
+          actionTypeId: connectorType.id,
           params: {},
         },
       ],
     });
 
-    const { loadAlertInstanceSummary } = mockApis();
-    const { setAlertInstanceSummary } = mockStateSetter();
+    const { loadAlertSummary } = mockApis();
+    const { setAlertSummary } = mockStateSetter();
 
-    loadAlertInstanceSummary.mockImplementation(async () => {
+    loadAlertSummary.mockImplementation(async () => {
       throw new Error('OMG');
     });
 
     const toastNotifications = {
       addDanger: jest.fn(),
     } as unknown as ToastsApi;
-    await getAlertInstanceSummary(
-      alert.id,
-      loadAlertInstanceSummary,
-      setAlertInstanceSummary,
-      toastNotifications
-    );
+    await getAlertSummary(rule.id, loadAlertSummary, setAlertSummary, toastNotifications);
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
       title: 'Unable to load alerts: OMG',
@@ -100,22 +90,22 @@ describe('getAlertState useEffect handler', () => {
 
 function mockApis() {
   return {
-    loadAlertInstanceSummary: jest.fn(),
+    loadAlertSummary: jest.fn(),
     requestRefresh: jest.fn(),
   };
 }
 
 function mockStateSetter() {
   return {
-    setAlertInstanceSummary: jest.fn(),
+    setAlertSummary: jest.fn(),
   };
 }
 
-function mockAlert(overloads: Partial<Alert> = {}): Alert {
+function mockRule(overloads: Partial<Alert> = {}): Alert {
   return {
     id: uuid.v4(),
     enabled: true,
-    name: `alert-${uuid.v4()}`,
+    name: `rule-${uuid.v4()}`,
     tags: [],
     alertTypeId: '.noop',
     consumer: 'consumer',
@@ -139,10 +129,10 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
   };
 }
 
-function mockAlertType(overloads: Partial<AlertType> = {}): AlertType {
+function mockRuleType(overloads: Partial<AlertType> = {}): AlertType {
   return {
-    id: 'test.testAlertType',
-    name: 'My Test Alert Type',
+    id: 'test.testRuleType',
+    name: 'My Test Rule Type',
     actionGroups: [{ id: 'default', name: 'Default Action Group' }],
     actionVariables: {
       context: [],
@@ -159,13 +149,13 @@ function mockAlertType(overloads: Partial<AlertType> = {}): AlertType {
   };
 }
 
-function mockAlertInstanceSummary(overloads: Partial<any> = {}): any {
-  const summary: AlertInstanceSummary = {
-    id: 'alert-id',
-    name: 'alert-name',
+function mockAlertSummary(overloads: Partial<any> = {}): any {
+  const summary: AlertSummary = {
+    id: 'rule-id',
+    name: 'rule-name',
     tags: ['tag-1', 'tag-2'],
-    alertTypeId: 'alert-type-id',
-    consumer: 'alert-consumer',
+    ruleTypeId: 'rule-type-id',
+    consumer: 'rule-consumer',
     status: 'OK',
     muteAll: false,
     throttle: null,
@@ -173,7 +163,7 @@ function mockAlertInstanceSummary(overloads: Partial<any> = {}): any {
     errorMessages: [],
     statusStartDate: fake2MinutesAgo.toISOString(),
     statusEndDate: fakeNow.toISOString(),
-    instances: {
+    alerts: {
       foo: {
         status: 'OK',
         muted: false,
