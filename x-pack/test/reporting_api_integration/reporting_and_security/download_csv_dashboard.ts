@@ -382,9 +382,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('With filters and non-timebased data', async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/sales');
-        await kibanaServer.uiSettings.update({
-          defaultIndex: 'timeless-sales',
-        });
 
         const {
           status: resStatus,
