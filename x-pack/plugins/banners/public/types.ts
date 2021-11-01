@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { EncryptedSavedObjectsAuditLogger } from './audit_logger';
+import type { ScreenshotModePluginStart } from '../../../../src/plugins/screenshot_mode/public';
+
+export interface BannerPluginStartDependencies {
+  screenshotMode: ScreenshotModePluginStart;
+}
