@@ -36,7 +36,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('Event metadata', { config: 'basic', archives: ['apm_8.0.0'] }, () => {
-    it('fetches transaction metadata', async () => {
+    it('fetches transaction event metadata', async () => {
       const id = await getLastDocId(ProcessorEvent.transaction);
 
       const { body } = await apmApiClient.readUser({
@@ -66,7 +66,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('fetches error metadata', async () => {
+    it('fetches error event metadata', async () => {
       const id = await getLastDocId(ProcessorEvent.error);
 
       const { body } = await apmApiClient.readUser({
@@ -96,7 +96,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('fetches span metadata', async () => {
+    it('fetches span event metadata', async () => {
       const id = await getLastDocId(ProcessorEvent.span);
 
       const { body } = await apmApiClient.readUser({
