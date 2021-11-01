@@ -55,7 +55,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<Output | ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -79,7 +79,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }>>>, ",
+              " | undefined; }> | Output>>, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -95,7 +95,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<Output | ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -119,7 +119,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }>>>, {}>"
+              " | undefined; }> | Output>>, {}>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false
@@ -188,7 +188,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<Output | ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -212,7 +212,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }>>>"
+              " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false
@@ -335,7 +335,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<Output | ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -359,7 +359,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }>>>"
+              " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -829,7 +829,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<",
+              "<Output | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -853,7 +853,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }> | Output>>"
+              " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution_contract.ts",
             "deprecated": false,
@@ -911,7 +911,14 @@
               "\nGet Inspector adapters provided to all functions of expression through\nexecution context."
             ],
             "signature": [
-              "() => InspectorAdapters"
+              "() => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              }
             ],
             "path": "src/plugins/expressions/common/execution/execution_contract.ts",
             "deprecated": false,
@@ -1901,8 +1908,8 @@
                 "pluginId": "@kbn/utility-types",
                 "scope": "server",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
+                "section": "def-server.Serializable",
+                "text": "Serializable"
               },
               ">) => ",
               {
@@ -1936,8 +1943,8 @@
                     "pluginId": "@kbn/utility-types",
                     "scope": "server",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
-                    "text": "SerializableRecord"
+                    "section": "def-server.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],
@@ -2652,6 +2659,359 @@
       },
       {
         "parentPluginId": "expressions",
+        "id": "def-public.ExpressionLoader",
+        "type": "Class",
+        "tags": [],
+        "label": "ExpressionLoader",
+        "description": [],
+        "path": "src/plugins/expressions/public/loader.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.data$",
+            "type": "Object",
+            "tags": [],
+            "label": "data$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionResult",
+                "text": "ExecutionResult"
+              },
+              "<unknown>>"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.update$",
+            "type": "Object",
+            "tags": [],
+            "label": "update$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<UpdateValue | null>"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.render$",
+            "type": "Object",
+            "tags": [],
+            "label": "render$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<number>"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.events$",
+            "type": "Object",
+            "tags": [],
+            "label": "events$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "public",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-public.ExpressionRendererEvent",
+                "text": "ExpressionRendererEvent"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.loading$",
+            "type": "Object",
+            "tags": [],
+            "label": "loading$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<void>"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionLoader.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "element",
+                "description": [],
+                "signature": [
+                  "HTMLElement"
+                ],
+                "path": "src/plugins/expressions/public/loader.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionLoader.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "expression",
+                "description": [],
+                "signature": [
+                  "string | ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionAstExpression",
+                    "text": "ExpressionAstExpression"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/public/loader.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionLoader.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "public",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-public.IExpressionLoaderParams",
+                    "text": "IExpressionLoaderParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/public/loader.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.destroy",
+            "type": "Function",
+            "tags": [],
+            "label": "destroy",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.cancel",
+            "type": "Function",
+            "tags": [],
+            "label": "cancel",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.getExpression",
+            "type": "Function",
+            "tags": [],
+            "label": "getExpression",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.getAst",
+            "type": "Function",
+            "tags": [],
+            "label": "getAst",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.getElement",
+            "type": "Function",
+            "tags": [],
+            "label": "getElement",
+            "description": [],
+            "signature": [
+              "() => HTMLElement"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.inspect",
+            "type": "Function",
+            "tags": [],
+            "label": "inspect",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionLoader.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "(expression?: string | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              " | undefined, params?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "public",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-public.IExpressionLoaderParams",
+                "text": "IExpressionLoaderParams"
+              },
+              " | undefined) => void"
+            ],
+            "path": "src/plugins/expressions/public/loader.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionLoader.update.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "expression",
+                "description": [],
+                "signature": [
+                  "string | ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionAstExpression",
+                    "text": "ExpressionAstExpression"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/public/loader.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionLoader.update.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "public",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-public.IExpressionLoaderParams",
+                    "text": "IExpressionLoaderParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/public/loader.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
         "id": "def-public.ExpressionRenderer",
         "type": "Class",
         "tags": [],
@@ -3253,101 +3613,6 @@
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressions",
-        "id": "def-public.ExpressionsInspectorAdapter",
-        "type": "Class",
-        "tags": [],
-        "label": "ExpressionsInspectorAdapter",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionsInspectorAdapter",
-            "text": "ExpressionsInspectorAdapter"
-          },
-          " extends EventEmitter"
-        ],
-        "path": "src/plugins/expressions/common/util/expressions_inspector_adapter.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ExpressionsInspectorAdapter.logAST",
-            "type": "Function",
-            "tags": [],
-            "label": "logAST",
-            "description": [],
-            "signature": [
-              "(ast: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstNode",
-                "text": "ExpressionAstNode"
-              },
-              ") => void"
-            ],
-            "path": "src/plugins/expressions/common/util/expressions_inspector_adapter.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.ExpressionsInspectorAdapter.logAST.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "ast",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.ExpressionAstNode",
-                    "text": "ExpressionAstNode"
-                  }
-                ],
-                "path": "src/plugins/expressions/common/util/expressions_inspector_adapter.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ExpressionsInspectorAdapter.ast",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ast",
-            "description": [],
-            "signature": [
-              "string | number | boolean | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstExpression",
-                "text": "ExpressionAstExpression"
-              },
-              " | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstFunction",
-                "text": "ExpressionAstFunction"
-              }
-            ],
-            "path": "src/plugins/expressions/common/util/expressions_inspector_adapter.ts",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -4747,8 +5012,8 @@
                 "pluginId": "@kbn/utility-types",
                 "scope": "server",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
+                "section": "def-server.Serializable",
+                "text": "Serializable"
               },
               ">) => ",
               {
@@ -4782,8 +5047,8 @@
                     "pluginId": "@kbn/utility-types",
                     "scope": "server",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
-                    "text": "SerializableRecord"
+                    "section": "def-server.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],
@@ -6126,67 +6391,6 @@
       },
       {
         "parentPluginId": "expressions",
-        "id": "def-public.format",
-        "type": "Function",
-        "tags": [],
-        "label": "format",
-        "description": [],
-        "signature": [
-          "(ast: T, type: T extends ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpression",
-            "text": "ExpressionAstExpression"
-          },
-          " ? \"expression\" : \"argument\") => string"
-        ],
-        "path": "src/plugins/expressions/common/ast/format.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.format.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "ast",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "path": "src/plugins/expressions/common/ast/format.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.format.$2",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "T extends ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstExpression",
-                "text": "ExpressionAstExpression"
-              },
-              " ? \"expression\" : \"argument\""
-            ],
-            "path": "src/plugins/expressions/common/ast/format.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressions",
         "id": "def-public.formatExpression",
         "type": "Function",
         "tags": [],
@@ -6275,66 +6479,6 @@
       },
       {
         "parentPluginId": "expressions",
-        "id": "def-public.parse",
-        "type": "Function",
-        "tags": [],
-        "label": "parse",
-        "description": [],
-        "signature": [
-          "(expression: E, startRule: S) => S extends \"expression\" ? ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpression",
-            "text": "ExpressionAstExpression"
-          },
-          " : ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstArgument",
-            "text": "ExpressionAstArgument"
-          }
-        ],
-        "path": "src/plugins/expressions/common/ast/parse.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.parse.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "expression",
-            "description": [],
-            "signature": [
-              "E"
-            ],
-            "path": "src/plugins/expressions/common/ast/parse.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.parse.$2",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "startRule",
-            "description": [],
-            "signature": [
-              "S"
-            ],
-            "path": "src/plugins/expressions/common/ast/parse.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressions",
         "id": "def-public.parseExpression",
         "type": "Function",
         "tags": [],
@@ -6368,51 +6512,6 @@
               "string"
             ],
             "path": "src/plugins/expressions/common/ast/parse_expression.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressions",
-        "id": "def-public.ReactExpressionRenderer",
-        "type": "Function",
-        "tags": [],
-        "label": "ReactExpressionRenderer",
-        "description": [],
-        "signature": [
-          "({ className, dataAttrs, padding, renderError, expression, onEvent, onData$, reload$, debounce, ...expressionLoaderOptions }: ",
-          {
-            "pluginId": "expressions",
-            "scope": "public",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-public.ReactExpressionRendererProps",
-            "text": "ReactExpressionRendererProps"
-          },
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ReactExpressionRenderer.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  className,\n  dataAttrs,\n  padding,\n  renderError,\n  expression,\n  onEvent,\n  onData$,\n  reload$,\n  debounce,\n  ...expressionLoaderOptions\n}",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "public",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-public.ReactExpressionRendererProps",
-                "text": "ReactExpressionRendererProps"
-              }
-            ],
-            "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -8189,7 +8288,7 @@
                 "section": "def-common.CumulativeSumArgs",
                 "text": "CumulativeSumArgs"
               },
-              ", ",
+              ", Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -8197,7 +8296,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", ",
+              ">, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -8257,7 +8356,7 @@
                 "section": "def-common.OverallMetricArgs",
                 "text": "OverallMetricArgs"
               },
-              ", ",
+              ", Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -8265,7 +8364,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", ",
+              ">, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -8325,7 +8424,7 @@
                 "section": "def-common.DerivativeArgs",
                 "text": "DerivativeArgs"
               },
-              ", ",
+              ", Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -8333,7 +8432,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", ",
+              ">, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -8393,7 +8492,7 @@
                 "section": "def-common.MovingAverageArgs",
                 "text": "MovingAverageArgs"
               },
-              ", ",
+              ", Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -8401,7 +8500,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", ",
+              ">, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -10915,7 +11014,7 @@
           },
           "<any>"
         ],
-        "path": "src/plugins/expressions/public/render.ts",
+        "path": "src/plugins/expressions/public/types/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11593,47 +11692,13 @@
       "children": [
         {
           "parentPluginId": "expressions",
-          "id": "def-public.ExpressionsStart.ExpressionLoader",
-          "type": "Object",
-          "tags": [],
-          "label": "ExpressionLoader",
-          "description": [],
-          "signature": [
-            "typeof ",
-            "ExpressionLoader"
-          ],
-          "path": "src/plugins/expressions/public/plugin.ts",
-          "deprecated": false
-        },
-        {
-          "parentPluginId": "expressions",
-          "id": "def-public.ExpressionsStart.ExpressionRenderHandler",
-          "type": "Object",
-          "tags": [],
-          "label": "ExpressionRenderHandler",
-          "description": [],
-          "signature": [
-            "typeof ",
-            {
-              "pluginId": "expressions",
-              "scope": "public",
-              "docId": "kibExpressionsPluginApi",
-              "section": "def-public.ExpressionRenderHandler",
-              "text": "ExpressionRenderHandler"
-            }
-          ],
-          "path": "src/plugins/expressions/public/plugin.ts",
-          "deprecated": false
-        },
-        {
-          "parentPluginId": "expressions",
           "id": "def-public.ExpressionsStart.loader",
           "type": "Function",
           "tags": [],
           "label": "loader",
           "description": [],
           "signature": [
-            "(element: HTMLElement, expression: string | ",
+            "(element: HTMLElement, expression?: string | ",
             {
               "pluginId": "expressions",
               "scope": "common",
@@ -11641,7 +11706,7 @@
               "section": "def-common.ExpressionAstExpression",
               "text": "ExpressionAstExpression"
             },
-            ", params: ",
+            " | undefined, params?: ",
             {
               "pluginId": "expressions",
               "scope": "public",
@@ -11649,8 +11714,15 @@
               "section": "def-public.IExpressionLoaderParams",
               "text": "IExpressionLoaderParams"
             },
-            ") => ",
-            "ExpressionLoader"
+            " | undefined) => Promise<",
+            {
+              "pluginId": "expressions",
+              "scope": "public",
+              "docId": "kibExpressionsPluginApi",
+              "section": "def-public.ExpressionLoader",
+              "text": "ExpressionLoader"
+            },
+            ">"
           ],
           "path": "src/plugins/expressions/public/plugin.ts",
           "deprecated": false,
@@ -11684,7 +11756,8 @@
                   "docId": "kibExpressionsPluginApi",
                   "section": "def-common.ExpressionAstExpression",
                   "text": "ExpressionAstExpression"
-                }
+                },
+                " | undefined"
               ],
               "path": "src/plugins/expressions/public/loader.ts",
               "deprecated": false
@@ -11703,52 +11776,10 @@
                   "docId": "kibExpressionsPluginApi",
                   "section": "def-public.IExpressionLoaderParams",
                   "text": "IExpressionLoaderParams"
-                }
+                },
+                " | undefined"
               ],
               "path": "src/plugins/expressions/public/loader.ts",
-              "deprecated": false
-            }
-          ]
-        },
-        {
-          "parentPluginId": "expressions",
-          "id": "def-public.ExpressionsStart.ReactExpressionRenderer",
-          "type": "Function",
-          "tags": [],
-          "label": "ReactExpressionRenderer",
-          "description": [],
-          "signature": [
-            "({ className, dataAttrs, padding, renderError, expression, onEvent, onData$, reload$, debounce, ...expressionLoaderOptions }: ",
-            {
-              "pluginId": "expressions",
-              "scope": "public",
-              "docId": "kibExpressionsPluginApi",
-              "section": "def-public.ReactExpressionRendererProps",
-              "text": "ReactExpressionRendererProps"
-            },
-            ") => JSX.Element"
-          ],
-          "path": "src/plugins/expressions/public/plugin.ts",
-          "deprecated": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "expressions",
-              "id": "def-public.ExpressionsStart.ReactExpressionRenderer.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "__0",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "expressions",
-                  "scope": "public",
-                  "docId": "kibExpressionsPluginApi",
-                  "section": "def-public.ReactExpressionRendererProps",
-                  "text": "ReactExpressionRendererProps"
-                }
-              ],
-              "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
               "deprecated": false
             }
           ]
@@ -11763,14 +11794,15 @@
           "signature": [
             "(element: HTMLElement, data: unknown, options?: ",
             "ExpressionRenderHandlerParams",
-            " | undefined) => ",
+            " | undefined) => Promise<",
             {
               "pluginId": "expressions",
               "scope": "public",
               "docId": "kibExpressionsPluginApi",
               "section": "def-public.ExpressionRenderHandler",
               "text": "ExpressionRenderHandler"
-            }
+            },
+            ">"
           ],
           "path": "src/plugins/expressions/public/plugin.ts",
           "deprecated": false,
@@ -11814,6 +11846,49 @@
                 " | undefined"
               ],
               "path": "src/plugins/expressions/public/render.ts",
+              "deprecated": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "expressions",
+          "id": "def-public.ExpressionsStart.ReactExpressionRenderer",
+          "type": "Function",
+          "tags": [],
+          "label": "ReactExpressionRenderer",
+          "description": [],
+          "signature": [
+            "(props: ",
+            {
+              "pluginId": "expressions",
+              "scope": "public",
+              "docId": "kibExpressionsPluginApi",
+              "section": "def-public.ReactExpressionRendererProps",
+              "text": "ReactExpressionRendererProps"
+            },
+            ") => JSX.Element"
+          ],
+          "path": "src/plugins/expressions/public/plugin.ts",
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "expressions",
+              "id": "def-public.ExpressionsStart.ReactExpressionRenderer.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "expressions",
+                  "scope": "public",
+                  "docId": "kibExpressionsPluginApi",
+                  "section": "def-public.ReactExpressionRendererProps",
+                  "text": "ReactExpressionRendererProps"
+                }
+              ],
+              "path": "src/plugins/expressions/public/react_expression_renderer_wrapper.tsx",
               "deprecated": false
             }
           ]
@@ -11878,7 +11953,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<Output | ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -11902,7 +11977,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }>>>, ",
+              " | undefined; }> | Output>>, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -11918,7 +11993,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<Output | ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -11942,7 +12017,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }>>>, {}>"
+              " | undefined; }> | Output>>, {}>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false
@@ -12011,7 +12086,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<Output | ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -12035,7 +12110,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }>>>"
+              " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false
@@ -12158,7 +12233,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<Output | ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -12182,7 +12257,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }>>>"
+              " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -13526,8 +13601,8 @@
                 "pluginId": "@kbn/utility-types",
                 "scope": "server",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
+                "section": "def-server.Serializable",
+                "text": "Serializable"
               },
               ">) => ",
               {
@@ -13561,8 +13636,8 @@
                     "pluginId": "@kbn/utility-types",
                     "scope": "server",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
-                    "text": "SerializableRecord"
+                    "section": "def-server.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],
@@ -18185,7 +18260,7 @@
                 "section": "def-common.CumulativeSumArgs",
                 "text": "CumulativeSumArgs"
               },
-              ", ",
+              ", Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -18193,7 +18268,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", ",
+              ">, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -18253,7 +18328,7 @@
                 "section": "def-common.OverallMetricArgs",
                 "text": "OverallMetricArgs"
               },
-              ", ",
+              ", Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -18261,7 +18336,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", ",
+              ">, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -18321,7 +18396,7 @@
                 "section": "def-common.DerivativeArgs",
                 "text": "DerivativeArgs"
               },
-              ", ",
+              ", Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -18329,7 +18404,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", ",
+              ">, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -18389,7 +18464,7 @@
                 "section": "def-common.MovingAverageArgs",
                 "text": "MovingAverageArgs"
               },
-              ", ",
+              ", Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -18397,7 +18472,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", ",
+              ">, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -20496,7 +20571,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<Output | ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -20520,7 +20595,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }>>>, ",
+              " | undefined; }> | Output>>, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -20536,7 +20611,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<Output | ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -20560,7 +20635,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }>>>, {}>"
+              " | undefined; }> | Output>>, {}>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false
@@ -20629,7 +20704,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<Output | ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -20653,7 +20728,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }>>>"
+              " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false
@@ -20776,7 +20851,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<Output | ",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -20800,7 +20875,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }>>>"
+              " | undefined; }> | Output>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -21270,7 +21345,7 @@
                 "section": "def-common.ExecutionResult",
                 "text": "ExecutionResult"
               },
-              "<",
+              "<Output | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -21294,7 +21369,7 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              " | undefined; }> | Output>>"
+              " | undefined; }>>>"
             ],
             "path": "src/plugins/expressions/common/execution/execution_contract.ts",
             "deprecated": false,
@@ -21352,7 +21427,14 @@
               "\nGet Inspector adapters provided to all functions of expression through\nexecution context."
             ],
             "signature": [
-              "() => InspectorAdapters"
+              "() => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              }
             ],
             "path": "src/plugins/expressions/common/execution/execution_contract.ts",
             "deprecated": false,
@@ -22342,8 +22424,8 @@
                 "pluginId": "@kbn/utility-types",
                 "scope": "server",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
+                "section": "def-server.Serializable",
+                "text": "Serializable"
               },
               ">) => ",
               {
@@ -22377,8 +22459,8 @@
                     "pluginId": "@kbn/utility-types",
                     "scope": "server",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
-                    "text": "SerializableRecord"
+                    "section": "def-server.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],
@@ -24545,8 +24627,8 @@
                 "pluginId": "@kbn/utility-types",
                 "scope": "server",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
+                "section": "def-server.Serializable",
+                "text": "Serializable"
               },
               ">) => ",
               {
@@ -24580,8 +24662,8 @@
                     "pluginId": "@kbn/utility-types",
                     "scope": "server",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
-                    "text": "SerializableRecord"
+                    "section": "def-server.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],
@@ -27556,23 +27638,6 @@
         "description": [
           "\nDefault inspector adapters created if inspector adapters are not set explicitly."
         ],
-        "signature": [
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DefaultInspectorAdapters",
-            "text": "DefaultInspectorAdapters"
-          },
-          " extends ",
-          {
-            "pluginId": "inspector",
-            "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          }
-        ],
         "path": "src/plugins/expressions/common/execution/types.ts",
         "deprecated": false,
         "children": [
@@ -27609,6 +27674,25 @@
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-common.TablesAdapter",
                 "text": "TablesAdapter"
+              }
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.DefaultInspectorAdapters.expression",
+            "type": "Object",
+            "tags": [],
+            "label": "expression",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionsInspectorAdapter",
+                "text": "ExpressionsInspectorAdapter"
               }
             ],
             "path": "src/plugins/expressions/common/execution/types.ts",
@@ -30069,7 +30153,7 @@
                 "section": "def-common.CumulativeSumArgs",
                 "text": "CumulativeSumArgs"
               },
-              ", ",
+              ", Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -30077,7 +30161,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", ",
+              ">, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -30137,7 +30221,7 @@
                 "section": "def-common.OverallMetricArgs",
                 "text": "OverallMetricArgs"
               },
-              ", ",
+              ", Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -30145,7 +30229,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", ",
+              ">, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -30205,7 +30289,7 @@
                 "section": "def-common.DerivativeArgs",
                 "text": "DerivativeArgs"
               },
-              ", ",
+              ", Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -30213,7 +30297,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", ",
+              ">, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -30273,7 +30357,7 @@
                 "section": "def-common.MovingAverageArgs",
                 "text": "MovingAverageArgs"
               },
-              ", ",
+              ", Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -30281,7 +30365,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", ",
+              ">, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -33252,7 +33336,7 @@
             "section": "def-common.CumulativeSumArgs",
             "text": "CumulativeSumArgs"
           },
-          ", ",
+          ", Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -33260,7 +33344,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", ",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -33321,7 +33405,7 @@
             "section": "def-common.DerivativeArgs",
             "text": "DerivativeArgs"
           },
-          ", ",
+          ", Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -33329,7 +33413,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", ",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -33451,7 +33535,7 @@
             "section": "def-common.MovingAverageArgs",
             "text": "MovingAverageArgs"
           },
-          ", ",
+          ", Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -33459,7 +33543,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", ",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -33520,7 +33604,7 @@
             "section": "def-common.OverallMetricArgs",
             "text": "OverallMetricArgs"
           },
-          ", ",
+          ", Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -33528,7 +33612,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", ",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -35560,7 +35644,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", { by, inputColumnId, outputColumnId, outputColumnName }: ",
+              ", args: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -35568,14 +35652,15 @@
                 "section": "def-common.CumulativeSumArgs",
                 "text": "CumulativeSumArgs"
               },
-              ") => ",
+              ") => Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-common.Datatable",
                 "text": "Datatable"
-              }
+              },
+              ">"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/cumulative_sum.ts",
             "deprecated": false,
@@ -35605,7 +35690,7 @@
                 "id": "def-common.cumulativeSum.fn.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ by, inputColumnId, outputColumnId, outputColumnName }",
+                "label": "args",
                 "description": [],
                 "signature": [
                   {
@@ -36338,7 +36423,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", { by, inputColumnId, outputColumnId, outputColumnName }: ",
+              ", args: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -36346,14 +36431,15 @@
                 "section": "def-common.DerivativeArgs",
                 "text": "DerivativeArgs"
               },
-              ") => ",
+              ") => Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-common.Datatable",
                 "text": "Datatable"
-              }
+              },
+              ">"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/derivative.ts",
             "deprecated": false,
@@ -36383,7 +36469,7 @@
                 "id": "def-common.derivative.fn.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ by, inputColumnId, outputColumnId, outputColumnName }",
+                "label": "args",
                 "description": [],
                 "signature": [
                   {
@@ -36515,7 +36601,7 @@
                     "section": "def-server.SerializableRecord",
                     "text": "SerializableRecord"
                   },
-                  " | undefined; }>, \"error\" | \"info\">; }>"
+                  " | undefined; }>, \"info\" | \"error\">; }>"
                 ],
                 "path": "src/plugins/expressions/common/expression_types/specs/error.ts",
                 "deprecated": false,
@@ -38215,7 +38301,7 @@
                 "section": "def-common.MathArguments",
                 "text": "MathArguments"
               },
-              ") => number | false | null"
+              ") => Promise<number | boolean | null>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/math.ts",
             "deprecated": false,
@@ -38568,14 +38654,15 @@
                 "section": "def-server.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">) => ",
+              ">) => Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-common.Datatable",
                 "text": "Datatable"
-              }
+              },
+              ">"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
             "deprecated": false,
@@ -39002,7 +39089,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", { by, inputColumnId, outputColumnId, outputColumnName, window }: ",
+              ", args: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -39010,14 +39097,15 @@
                 "section": "def-common.MovingAverageArgs",
                 "text": "MovingAverageArgs"
               },
-              ") => ",
+              ") => Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-common.Datatable",
                 "text": "Datatable"
-              }
+              },
+              ">"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/moving_average.ts",
             "deprecated": false,
@@ -39047,7 +39135,7 @@
                 "id": "def-common.movingAverage.fn.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ by, inputColumnId, outputColumnId, outputColumnName, window }",
+                "label": "args",
                 "description": [],
                 "signature": [
                   {
@@ -39965,7 +40053,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", { by, inputColumnId, outputColumnId, outputColumnName, metric }: ",
+              ", args: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -39973,14 +40061,15 @@
                 "section": "def-common.OverallMetricArgs",
                 "text": "OverallMetricArgs"
               },
-              ") => ",
+              ") => Promise<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-common.Datatable",
                 "text": "Datatable"
-              }
+              },
+              ">"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
             "deprecated": false,
@@ -40010,7 +40099,7 @@
                 "id": "def-common.overallMetric.fn.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ by, inputColumnId, outputColumnId, outputColumnName, metric }",
+                "label": "args",
                 "description": [],
                 "signature": [
                   {

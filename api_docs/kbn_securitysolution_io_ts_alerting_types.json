@@ -426,7 +426,7 @@
         "label": "Severity",
         "description": [],
         "signature": [
-          "\"high\" | \"low\" | \"critical\" | \"medium\""
+          "\"high\" | \"low\" | \"medium\" | \"critical\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity/index.ts",
         "deprecated": false,
@@ -440,7 +440,7 @@
         "label": "SeverityMapping",
         "description": [],
         "signature": [
-          "{ field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"critical\" | \"medium\"; }[]"
+          "{ field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"medium\" | \"critical\"; }[]"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "deprecated": false,
@@ -454,7 +454,7 @@
         "label": "SeverityMappingItem",
         "description": [],
         "signature": [
-          "{ field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"critical\" | \"medium\"; }"
+          "{ field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"medium\" | \"critical\"; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "deprecated": false,
@@ -468,7 +468,7 @@
         "label": "SeverityMappingOrUndefined",
         "description": [],
         "signature": [
-          "{ field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"critical\" | \"medium\"; }[] | undefined"
+          "{ field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"medium\" | \"critical\"; }[] | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "deprecated": false,
@@ -482,7 +482,7 @@
         "label": "SeverityOrUndefined",
         "description": [],
         "signature": [
-          "\"high\" | \"low\" | \"critical\" | \"medium\" | undefined"
+          "\"high\" | \"low\" | \"medium\" | \"critical\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity/index.ts",
         "deprecated": false,
@@ -818,7 +818,7 @@
         "label": "Type",
         "description": [],
         "signature": [
-          "\"query\" | \"eql\" | \"threshold\" | \"threat_match\" | \"machine_learning\" | \"saved_query\""
+          "\"query\" | \"eql\" | \"threat_match\" | \"threshold\" | \"machine_learning\" | \"saved_query\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,
@@ -832,7 +832,7 @@
         "label": "TypeOrUndefined",
         "description": [],
         "signature": [
-          "\"query\" | \"eql\" | \"threshold\" | \"threat_match\" | \"machine_learning\" | \"saved_query\" | undefined"
+          "\"query\" | \"eql\" | \"threat_match\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,
@@ -1256,7 +1256,7 @@
         ],
         "signature": [
           "Type",
-          "<{ field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"critical\" | \"medium\"; }[], { field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"critical\" | \"medium\"; }[] | undefined, unknown>"
+          "<{ field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"medium\" | \"critical\"; }[], { field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"medium\" | \"critical\"; }[] | undefined, unknown>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_severity_mapping_array/index.ts",
         "deprecated": false,

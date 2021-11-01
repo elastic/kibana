@@ -463,49 +463,6 @@
       },
       {
         "parentPluginId": "home",
-        "id": "def-public.TutorialDirectoryNoticeComponent",
-        "type": "Type",
-        "tags": [],
-        "label": "TutorialDirectoryNoticeComponent",
-        "description": [],
-        "signature": [
-          "React.FunctionComponent<{}>"
-        ],
-        "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "home",
-            "id": "def-public.TutorialDirectoryNoticeComponent.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P & { children?: React.ReactNode; }"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "home",
-            "id": "def-public.TutorialDirectoryNoticeComponent.$2",
-            "type": "Any",
-            "tags": [],
-            "label": "context",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "home",
         "id": "def-public.TutorialModuleNoticeComponent",
         "type": "Type",
         "tags": [],
@@ -555,7 +512,7 @@
         "label": "TutorialSetup",
         "description": [],
         "signature": [
-          "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
+          "{ setVariable: (key: string, value: unknown) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
         ],
         "path": "src/plugins/home/public/plugin.ts",
         "deprecated": false,
@@ -789,7 +746,7 @@
           "label": "tutorials",
           "description": [],
           "signature": [
-            "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
+            "{ setVariable: (key: string, value: unknown) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
           ],
           "path": "src/plugins/home/public/plugin.ts",
           "deprecated": false

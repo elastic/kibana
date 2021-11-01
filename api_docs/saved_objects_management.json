@@ -837,7 +837,9 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">) => React.ReactNode) | undefined; colSpan?: number | undefined; headers?: string | undefined; rowSpan?: number | undefined; scope?: string | undefined; valign?: \"top\" | \"bottom\" | \"baseline\" | \"middle\" | undefined; dataType?: \"string\" | \"number\" | \"boolean\" | \"date\" | \"auto\" | undefined; isExpander?: boolean | undefined; textOnly?: boolean | undefined; truncateText?: boolean | undefined; isMobileHeader?: boolean | undefined; mobileOptions?: { show?: boolean | undefined; only?: boolean | undefined; render?: ((item: ",
+              ">) => React.ReactNode) | undefined; colSpan?: number | undefined; headers?: string | undefined; rowSpan?: number | undefined; scope?: string | undefined; valign?: \"top\" | \"bottom\" | \"baseline\" | \"middle\" | undefined; dataType?: \"string\" | \"number\" | \"boolean\" | \"date\" | \"auto\" | undefined; isExpander?: boolean | undefined; textOnly?: boolean | undefined; truncateText?: boolean | undefined; isMobileHeader?: boolean | undefined; mobileOptions?: (Pick<",
+              "EuiTableRowCellMobileOptionsShape",
+              ", \"fullWidth\" | \"width\" | \"header\" | \"show\" | \"only\" | \"enlarge\"> & { render?: ((item: ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
@@ -845,7 +847,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ") => React.ReactNode) | undefined; header?: boolean | undefined; } | undefined; hideForMobile?: boolean | undefined; }"
+              ") => React.ReactNode) | undefined; }) | undefined; hideForMobile?: boolean | undefined; }"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
             "deprecated": false

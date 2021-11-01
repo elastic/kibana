@@ -114,6 +114,19 @@
           },
           {
             "parentPluginId": "visTypeTable",
+            "id": "def-common.TableVisParams.autoFitRowToContent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoFitRowToContent",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/vis_types/table/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visTypeTable",
             "id": "def-common.TableVisParams.row",
             "type": "CompoundType",
             "tags": [],

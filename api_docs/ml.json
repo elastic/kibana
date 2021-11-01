@@ -1055,7 +1055,7 @@
               },
               "<",
               "MlAnomalyDetectionAlertParams",
-              ">, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              ">, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -1327,7 +1327,7 @@
         "label": "ML_PAGES",
         "description": [],
         "signature": [
-          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly DATA_FRAME_ANALYTICS_MODELS_MANAGE: \"data_frame_analytics/models\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly ACCESS_DENIED: \"access-denied\"; readonly OVERVIEW: \"overview\"; }"
+          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly TRAINED_MODELS_NODES: \"trained_models/nodes\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly ACCESS_DENIED: \"access-denied\"; readonly OVERVIEW: \"overview\"; }"
         ],
         "path": "x-pack/plugins/ml/common/constants/locator.ts",
         "deprecated": false,
@@ -1531,7 +1531,7 @@
             "section": "def-server.IScopedClusterClient",
             "text": "IScopedClusterClient"
           },
-          ", indexPatternTitle: string, query: any, fields: ",
+          ", indexPattern: string, query: any, fields: ",
           "HistogramField",
           "[], samplerShardSize: number, runtimeMappings?: Record<string, ",
           "MappingRuntimeField",
@@ -1565,7 +1565,7 @@
             "id": "def-server.getHistogramsForFields.$2",
             "type": "string",
             "tags": [],
-            "label": "indexPatternTitle",
+            "label": "indexPattern",
             "description": [],
             "signature": [
               "string"
@@ -2890,7 +2890,7 @@
               },
               "<",
               "MlAnomalyDetectionAlertParams",
-              ">, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              ">, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false

@@ -162,97 +162,28 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-public.DataView.formatHit",
-            "type": "Function",
-            "tags": [],
-            "label": "formatHit",
-            "description": [],
-            "signature": [
-              "{ (hit: Record<string, any>, type?: string | undefined): any; formatField: FormatFieldFn; }"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.DataView.formatHit.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "hit",
-                "description": [],
-                "signature": [
-                  "{ [x: string]: any; }"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.DataView.formatHit.$2",
-                "type": "string",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataView.formatField",
-            "type": "Function",
-            "tags": [],
-            "label": "formatField",
-            "description": [],
-            "signature": [
-              "(hit: Record<string, any>, fieldName: string) => any"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.DataView.formatField.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "hit",
-                "description": [],
-                "signature": [
-                  "{ [x: string]: any; }"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.DataView.formatField.$2",
-                "type": "string",
-                "tags": [],
-                "label": "fieldName",
-                "description": [],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-public.DataView.flattenHit",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "flattenHit",
             "description": [],
             "signature": [
               "(hit: Record<string, any>, deep?: boolean | undefined) => Record<string, any>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              }
+            ],
             "returnComment": [],
             "children": [
               {
@@ -3311,7 +3242,11 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx"
+            "path": "src/plugins/discover/public/application/components/data_visualizer_grid/data_visualizer_grid.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/components/data_visualizer_grid/data_visualizer_grid.tsx"
           },
           {
             "plugin": "discover",
@@ -3319,11 +3254,7 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/services/use_es_doc_search.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/services/use_es_doc_search.ts"
+            "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx"
           },
           {
             "plugin": "discover",
@@ -3675,11 +3606,11 @@
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
           },
           {
             "plugin": "apm",
@@ -3688,14 +3619,6 @@
           {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/SelectedFilters.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/use_index_pattern.ts"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/use_index_pattern.ts"
           },
           {
             "plugin": "lens",
@@ -3715,27 +3638,27 @@
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_errors.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_errors.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_errors.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_errors.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_last_results.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_last_results.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_last_results.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_last_results.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
+            "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
+            "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4135,14 +4058,6 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/components/discover_grid/discover_grid.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/components/discover_grid/discover_grid.d.ts"
-          },
-          {
-            "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/components/doc_table/doc_table_wrapper.d.ts"
           },
           {
@@ -4275,14 +4190,6 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/apps/main/utils/calc_field_counts.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/apps/main/utils/calc_field_counts.d.ts"
-          },
-          {
-            "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/utils/get_switch_index_pattern_app_state.d.ts"
           },
           {
@@ -4356,6 +4263,22 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/components/doc_table/components/table_header/table_header.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/components/source_viewer/source_viewer.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/components/source_viewer/source_viewer.tsx"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/selected_wildcards.tsx"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/selected_wildcards.tsx"
           },
           {
             "plugin": "discover",
@@ -4575,6 +4498,14 @@
           },
           {
             "plugin": "discover",
+            "path": "src/plugins/discover/public/application/apps/doc/components/doc.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/apps/doc/components/doc.tsx"
+          },
+          {
+            "plugin": "discover",
             "path": "src/plugins/discover/public/application/apps/context/services/anchor.ts"
           },
           {
@@ -4695,15 +4626,15 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts"
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts"
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts"
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "dashboard",
@@ -4819,6 +4750,22 @@
           },
           {
             "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
           },
           {
@@ -4880,22 +4827,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
           },
           {
             "plugin": "maps",
@@ -5016,18 +4947,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/shared/kuery_bar/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/shared/kuery_bar/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/shared/kuery_bar/index.tsx"
           },
           {
             "plugin": "graph",
@@ -5934,6 +5853,14 @@
             "path": "src/plugins/discover/public/application/apps/main/utils/get_sharing_data.test.ts"
           },
           {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/apps/doc/components/doc.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/apps/doc/components/doc.d.ts"
+          },
+          {
             "plugin": "inputControlVis",
             "path": "src/plugins/input_control_vis/target/types/public/components/editor/controls_tab.d.ts"
           },
@@ -6100,6 +6027,18 @@
           },
           {
             "plugin": "discover",
+            "path": "src/plugins/discover/public/application/components/data_visualizer_grid/data_visualizer_grid.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/components/data_visualizer_grid/data_visualizer_grid.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/components/data_visualizer_grid/data_visualizer_grid.tsx"
+          },
+          {
+            "plugin": "discover",
             "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx"
           },
           {
@@ -6181,6 +6120,14 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
           },
           {
             "plugin": "lens",
@@ -6640,6 +6587,130 @@
           },
           {
             "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
+          },
+          {
+            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
           },
           {
@@ -6656,7 +6727,19 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metrics_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metrics_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/update_source_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/update_source_editor.tsx"
           },
           {
             "plugin": "maps",
@@ -6664,115 +6747,7 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
           },
           {
             "plugin": "maps",
@@ -6841,26 +6816,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metrics_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metrics_editor.tsx"
           },
           {
             "plugin": "maps",
@@ -8276,65 +8231,6 @@
       }
     ],
     "functions": [
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-public.formatHitProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "formatHitProvider",
-        "description": [],
-        "signature": [
-          "(dataView: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          ", defaultFormat: any) => { (hit: Record<string, any>, type?: string): any; formatField(hit: Record<string, any>, fieldName: string): any; }"
-        ],
-        "path": "src/plugins/data_views/common/data_views/format_hit.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.formatHitProvider.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "dataView",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              }
-            ],
-            "path": "src/plugins/data_views/common/data_views/format_hit.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.formatHitProvider.$2",
-            "type": "Any",
-            "tags": [],
-            "label": "defaultFormat",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/data_views/common/data_views/format_hit.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "dataViews",
         "id": "def-public.onRedirectNoIndexPattern",
@@ -10768,15 +10664,13 @@
               "signature": [
                 "Pick<",
                 "KibanaClient",
-                ", \"monitoring\" | \"security\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                ", \"monitoring\" | \"security\" | \"create\" | \"name\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
                 "TransportRequestParams",
                 ", options?: ",
                 "TransportRequestOptions",
-                " | undefined): ",
-                "TransportRequestPromise",
-                "<",
-                "ApiResponse",
-                "<Record<string, any>, unknown>>; }; }"
+                " | undefined): Promise<",
+                "TransportResult",
+                "<TResponse, unknown>>; }; }"
               ],
               "path": "src/plugins/data_views/server/types.ts",
               "deprecated": false
@@ -11224,15 +11118,13 @@
               "signature": [
                 "Pick<",
                 "KibanaClient",
-                ", \"monitoring\" | \"security\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                ", \"monitoring\" | \"security\" | \"create\" | \"name\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
                 "TransportRequestParams",
                 ", options?: ",
                 "TransportRequestOptions",
-                " | undefined): ",
-                "TransportRequestPromise",
-                "<",
-                "ApiResponse",
-                "<Record<string, any>, unknown>>; }; }"
+                " | undefined): Promise<",
+                "TransportResult",
+                "<TResponse, unknown>>; }; }"
               ],
               "path": "src/plugins/data_views/server/types.ts",
               "deprecated": false
@@ -11419,97 +11311,28 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DataView.formatHit",
-            "type": "Function",
-            "tags": [],
-            "label": "formatHit",
-            "description": [],
-            "signature": [
-              "{ (hit: Record<string, any>, type?: string | undefined): any; formatField: FormatFieldFn; }"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.DataView.formatHit.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "hit",
-                "description": [],
-                "signature": [
-                  "{ [x: string]: any; }"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.DataView.formatHit.$2",
-                "type": "string",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataView.formatField",
-            "type": "Function",
-            "tags": [],
-            "label": "formatField",
-            "description": [],
-            "signature": [
-              "(hit: Record<string, any>, fieldName: string) => any"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.DataView.formatField.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "hit",
-                "description": [],
-                "signature": [
-                  "{ [x: string]: any; }"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.DataView.formatField.$2",
-                "type": "string",
-                "tags": [],
-                "label": "fieldName",
-                "description": [],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DataView.flattenHit",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "flattenHit",
             "description": [],
             "signature": [
               "(hit: Record<string, any>, deep?: boolean | undefined) => Record<string, any>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              }
+            ],
             "returnComment": [],
             "children": [
               {
@@ -14906,7 +14729,11 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx"
+            "path": "src/plugins/discover/public/application/components/data_visualizer_grid/data_visualizer_grid.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/components/data_visualizer_grid/data_visualizer_grid.tsx"
           },
           {
             "plugin": "discover",
@@ -14914,11 +14741,7 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/services/use_es_doc_search.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/services/use_es_doc_search.ts"
+            "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx"
           },
           {
             "plugin": "discover",
@@ -15270,11 +15093,11 @@
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
           },
           {
             "plugin": "apm",
@@ -15283,14 +15106,6 @@
           {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/SelectedFilters.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/use_index_pattern.ts"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/use_index_pattern.ts"
           },
           {
             "plugin": "lens",
@@ -15310,27 +15125,27 @@
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_errors.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_errors.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_errors.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_errors.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_last_results.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_last_results.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/use_scheduled_query_group_query_last_results.ts"
+            "path": "x-pack/plugins/osquery/public/packs/use_pack_query_last_results.ts"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
+            "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
           },
           {
             "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_status_table.tsx"
+            "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -15730,14 +15545,6 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/components/discover_grid/discover_grid.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/components/discover_grid/discover_grid.d.ts"
-          },
-          {
-            "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/components/doc_table/doc_table_wrapper.d.ts"
           },
           {
@@ -15870,14 +15677,6 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/apps/main/utils/calc_field_counts.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/apps/main/utils/calc_field_counts.d.ts"
-          },
-          {
-            "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/utils/get_switch_index_pattern_app_state.d.ts"
           },
           {
@@ -15951,6 +15750,22 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/apps/main/components/doc_table/components/table_header/table_header.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/components/source_viewer/source_viewer.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/components/source_viewer/source_viewer.tsx"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/selected_wildcards.tsx"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/selected_wildcards.tsx"
           },
           {
             "plugin": "discover",
@@ -16170,6 +15985,14 @@
           },
           {
             "plugin": "discover",
+            "path": "src/plugins/discover/public/application/apps/doc/components/doc.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/apps/doc/components/doc.tsx"
+          },
+          {
+            "plugin": "discover",
             "path": "src/plugins/discover/public/application/apps/context/services/anchor.ts"
           },
           {
@@ -16290,15 +16113,15 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts"
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts"
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts"
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
           },
           {
             "plugin": "dashboard",
@@ -16414,6 +16237,22 @@
           },
           {
             "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
           },
           {
@@ -16475,22 +16314,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
           },
           {
             "plugin": "maps",
@@ -16611,18 +16434,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/shared/kuery_bar/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/shared/kuery_bar/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/shared/kuery_bar/index.tsx"
           },
           {
             "plugin": "graph",
@@ -17529,6 +17340,14 @@
             "path": "src/plugins/discover/public/application/apps/main/utils/get_sharing_data.test.ts"
           },
           {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/apps/doc/components/doc.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/apps/doc/components/doc.d.ts"
+          },
+          {
             "plugin": "inputControlVis",
             "path": "src/plugins/input_control_vis/target/types/public/components/editor/controls_tab.d.ts"
           },
@@ -17695,6 +17514,18 @@
           },
           {
             "plugin": "discover",
+            "path": "src/plugins/discover/public/application/components/data_visualizer_grid/data_visualizer_grid.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/components/data_visualizer_grid/data_visualizer_grid.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/components/data_visualizer_grid/data_visualizer_grid.tsx"
+          },
+          {
+            "plugin": "discover",
             "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx"
           },
           {
@@ -17776,6 +17607,14 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
           },
           {
             "plugin": "lens",
@@ -18235,6 +18074,130 @@
           },
           {
             "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
+          },
+          {
+            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
           },
           {
@@ -18251,7 +18214,19 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metrics_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metrics_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/update_source_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/update_source_editor.tsx"
           },
           {
             "plugin": "maps",
@@ -18259,115 +18234,7 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
           },
           {
             "plugin": "maps",
@@ -18436,26 +18303,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metrics_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metrics_editor.tsx"
           },
           {
             "plugin": "maps",
@@ -19527,7 +19374,7 @@
             "section": "def-common.IndexPatternLoadExpressionFunctionDefinition",
             "text": "IndexPatternLoadExpressionFunctionDefinition"
           },
-          ", \"telemetry\" | \"inject\" | \"extract\" | \"migrations\" | \"type\" | \"name\" | \"disabled\" | \"help\" | \"inputTypes\" | \"args\" | \"aliases\" | \"context\">"
+          ", \"type\" | \"telemetry\" | \"extract\" | \"inject\" | \"migrations\" | \"name\" | \"disabled\" | \"help\" | \"inputTypes\" | \"args\" | \"aliases\" | \"context\">"
         ],
         "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
         "deprecated": false,
@@ -22050,14 +21897,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/action.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/action.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
           },
           {
@@ -22163,6 +22002,14 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/action.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/action.ts"
           },
           {
             "plugin": "securitySolution",
@@ -25119,22 +24966,6 @@
             "path": "src/plugins/discover/public/application/apps/main/components/doc_table/actions/columns.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/apps/doc/components/doc.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/apps/doc/components/doc.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/saved_visualizations/_saved_vis.ts"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
           },
@@ -25225,6 +25056,10 @@
           {
             "plugin": "transform",
             "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/indexpattern_datasource/loader.test.ts"
           },
           {
             "plugin": "lens",
@@ -25429,14 +25264,6 @@
           {
             "plugin": "indexPatternManagement",
             "path": "src/plugins/index_pattern_management/target/types/public/components/utils.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/apps/doc/components/doc.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/apps/doc/components/doc.d.ts"
           }
         ],
         "initialIsOpen": false
@@ -25501,14 +25328,6 @@
           {
             "plugin": "indexPatternEditor",
             "path": "src/plugins/index_pattern_editor/public/components/index_pattern_flyout_content_container.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/use_index_pattern.ts"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/use_index_pattern.ts"
           }
         ],
         "initialIsOpen": false

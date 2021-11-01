@@ -944,13 +944,20 @@
           },
           {
             "parentPluginId": "reporting",
-            "id": "def-server.ReportingCore.getKibanaVersion",
+            "id": "def-server.ReportingCore.getKibanaPackageInfo",
             "type": "Function",
             "tags": [],
-            "label": "getKibanaVersion",
+            "label": "getKibanaPackageInfo",
             "description": [],
             "signature": [
-              "() => string"
+              "() => ",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.PackageInfo",
+                "text": "PackageInfo"
+              }
             ],
             "path": "x-pack/plugins/reporting/server/core.ts",
             "deprecated": false,
@@ -1551,6 +1558,59 @@
                 "description": [],
                 "signature": [
                   "LevelLogger"
+                ],
+                "path": "x-pack/plugins/reporting/server/core.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
+            "id": "def-server.ReportingCore.getDataViewsService",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewsService",
+            "description": [],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewsService",
+                "text": "DataViewsService"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/reporting/server/core.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-server.ReportingCore.getDataViewsService.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/reporting/server/core.ts",
                 "deprecated": false,

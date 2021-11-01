@@ -3860,65 +3860,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.SourceFormat.htmlConvert",
-            "type": "Function",
-            "tags": [],
-            "label": "htmlConvert",
-            "description": [],
-            "signature": [
-              "(value: string, options?: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
-              " | undefined) => string"
-            ],
-            "path": "src/plugins/field_formats/common/converters/source.tsx",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.SourceFormat.htmlConvert.$1",
-                "type": "string",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/field_formats/common/converters/source.tsx",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.SourceFormat.htmlConvert.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/plugins/field_formats/common/converters/source.tsx",
-                "deprecated": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4870,19 +4811,6 @@
             "description": [],
             "signature": [
               "{ name: string; } | undefined"
-            ],
-            "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.HtmlContextTypeOptions.indexPattern",
-            "type": "Object",
-            "tags": [],
-            "label": "indexPattern",
-            "description": [],
-            "signature": [
-              "{ formatHit: (hit: { highlight: Record<string, string[]>; }) => Record<string, string>; } | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false

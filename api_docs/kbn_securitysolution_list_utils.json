@@ -1722,7 +1722,7 @@
         "label": "getFilters",
         "description": [],
         "signature": [
-          "({ filters, namespaceTypes, showTrustedApps, showEventFilters, }: ",
+          "({ filters, namespaceTypes, showTrustedApps, showEventFilters, showHostIsolationExceptions, }: ",
           {
             "pluginId": "@kbn/securitysolution-list-utils",
             "scope": "common",
@@ -1740,7 +1740,7 @@
             "id": "def-common.getFilters.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filters,\n  namespaceTypes,\n  showTrustedApps,\n  showEventFilters,\n}",
+            "label": "{\n  filters,\n  namespaceTypes,\n  showTrustedApps,\n  showEventFilters,\n  showHostIsolationExceptions,\n}",
             "description": [],
             "signature": [
               {
@@ -3240,6 +3240,16 @@
             "type": "boolean",
             "tags": [],
             "label": "showEventFilters",
+            "description": [],
+            "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-utils",
+            "id": "def-common.GetFiltersParams.showHostIsolationExceptions",
+            "type": "boolean",
+            "tags": [],
+            "label": "showHostIsolationExceptions",
             "description": [],
             "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
             "deprecated": false

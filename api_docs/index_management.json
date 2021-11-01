@@ -641,7 +641,7 @@
         "label": "IndexManagementConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; }"
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/index_management/server/config.ts",
         "deprecated": false,
@@ -2324,7 +2324,7 @@
         "label": "MAJOR_VERSION",
         "description": [],
         "signature": [
-          "\"8.0.0\""
+          "\"8.1.0\""
         ],
         "path": "x-pack/plugins/index_management/common/constants/plugin.ts",
         "deprecated": false,
