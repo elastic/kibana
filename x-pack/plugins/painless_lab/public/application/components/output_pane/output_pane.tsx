@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiTabbedContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -48,7 +47,7 @@ export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) =>
   );
 
   return (
-    <EuiPanel className="painlessLabRightPane">
+    <div className="painlessLabRightPane">
       <EuiTabbedContent
         className="painlessLabRightPane__tabs"
         data-test-subj="painlessTabs"
@@ -76,6 +75,6 @@ export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) =>
           },
         ]}
       />
-    </EuiPanel>
+    </div>
   );
 };
