@@ -15,7 +15,7 @@ const KibanaServerSchema = schema.object({
       validate(value) {
         if (/^0.0.0.0$/.test(value)) {
           // prevent setting a hostname that fails in Chromium on Windows
-          return 'must be a valid hostname, not "0.0.0.0"';
+          return `cannot use '0.0.0.0' as Kibana host name, consider using the default (localhost) instead`;
         }
       },
     })
