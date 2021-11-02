@@ -34,6 +34,11 @@ const defaultFields: Fields = {
   priority: [],
 };
 
+/**
+ * Default params are being set in
+ * x-pack/plugins/triggers_actions_ui/public/application/lib/get_defaults_for_action_params.ts
+ */
+
 const ServiceNowSIRParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowSIRActionParams>
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
@@ -127,23 +132,6 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
-
-  useEffect(() => {
-    if (!actionParams.subAction) {
-      editAction('subAction', 'pushToService', index);
-    }
-    if (!actionParams.subActionParams) {
-      editAction(
-        'subActionParams',
-        {
-          incident: { correlation_id: DEFAULT_CORRELATION_ID },
-          comments: [],
-        },
-        index
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionParams]);
 
   return (
     <>

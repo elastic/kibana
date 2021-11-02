@@ -19,15 +19,28 @@ export const getDefaultsForActionParams = (
   actionGroupId: string,
   isRecoveryActionGroup: boolean
 ): DefaultActionParams => {
+  const defaultGroupAlert = `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`;
+
   switch (actionTypeId) {
     case '.pagerduty':
       const pagerDutyDefaults = {
-        dedupKey: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+        dedupKey: defaultGroupAlert,
         eventAction: EventActionOptions.TRIGGER,
       };
       if (isRecoveryActionGroup) {
         pagerDutyDefaults.eventAction = EventActionOptions.RESOLVE;
       }
       return pagerDutyDefaults;
+    case '.servicenow':
+    case '.servicenow-sir':
+      return {
+        subAction: 'pushToService',
+        subActionParams: {
+          incident: {
+            correlation_id: defaultGroupAlert,
+          },
+          comments: [],
+        },
+      };
   }
 };
