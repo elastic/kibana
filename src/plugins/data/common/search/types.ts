@@ -71,7 +71,7 @@ export interface IKibanaSearchResponse<RawResponse = any> {
   isRestored?: boolean;
 
   /**
-   * Optional warnings that should be surfaced to the end user
+   * Optional warnings returned from Elasticsearch for deprecations
    */
   warning?: string;
 
