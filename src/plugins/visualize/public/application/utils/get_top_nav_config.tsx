@@ -243,7 +243,7 @@ export const getTopNavConfig = (
 
   const allowByValue = dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
   const saveButtonLabel =
-    !savedVis.id && allowByValue && originatingApp === 'dashboards'
+    !savedVis.id && allowByValue && originatingApp
       ? i18n.translate('visualize.topNavMenu.saveVisualizationToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         })
@@ -336,7 +336,7 @@ export const getTopNavConfig = (
         }
       },
       // disable the Share button if no action specified and fot byValue visualizations
-      disableButton: !share || (!savedVis.id && allowByValue && originatingApp === 'dashboards'),
+      disableButton: !share || Boolean(!savedVis.id && allowByValue && originatingApp),
     },
     ...(originatingApp
       ? [
