@@ -20,17 +20,17 @@ describe('VisualizationContainer', () => {
     const component = mount(
       <VisualizationContainer style={{ color: 'blue' }}>Hello!</VisualizationContainer>
     );
-    const reportingEl = component.find('[data-shared-item]').first();
+    const el = component.find('.lnsVisualizationContainer').first();
 
-    expect(reportingEl.prop('style')).toEqual({ color: 'blue' });
+    expect(el.prop('style')).toEqual({ color: 'blue' });
   });
 
   test('combines class names with container class', () => {
     const component = mount(
       <VisualizationContainer className="myClass">Hello!</VisualizationContainer>
     );
-    const reportingEl = component.find('[data-shared-item]').first();
+    const el = component.find('.lnsVisualizationContainer').first();
 
-    expect(reportingEl.prop('className')).toEqual('myClass lnsVisualizationContainer');
+    expect(el.prop('className')).toEqual('myClass lnsVisualizationContainer');
   });
 });

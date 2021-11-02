@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 import {
   Chart,
   ElementClickListener,

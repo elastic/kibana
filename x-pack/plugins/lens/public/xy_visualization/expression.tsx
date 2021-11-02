@@ -7,7 +7,7 @@
 
 import './expression.scss';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Chart,
