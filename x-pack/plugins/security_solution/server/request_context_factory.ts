@@ -36,7 +36,13 @@ export class RequestContextFactory implements IRequestContextFactory {
   private readonly appClientFactory: AppClientFactory;
 
   constructor(private readonly options: ConstructorOptions) {
+    const { config, plugins } = options;
+
     this.appClientFactory = new AppClientFactory();
+    this.appClientFactory.setup({
+      getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
+      config,
+    });
   }
 
   public async create(
@@ -44,14 +50,10 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, plugins } = options;
+    const { config, core, plugins } = options;
     const { lists, ruleRegistry, security, spaces } = plugins;
 
-    appClientFactory.setup({
-      getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
-      config,
-    });
-
+    const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
     return {
@@ -69,9 +71,10 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getExecutionLogClient: () =>
         new RuleExecutionLogClient({
+          underlyingClient: config.ruleExecutionLog.underlyingClient,
           savedObjectsClient: context.core.savedObjects.client,
           eventLogService: plugins.eventLog,
-          underlyingClient: config.ruleExecutionLog.underlyingClient,
+          eventLogClient: startPlugins.eventLog.getClient(request),
         }),
 
       getExceptionListClient: () => {

@@ -71,12 +71,14 @@ const TabComponent = (props: TabProps) => {
   ]);
   const { sourceId, createDerivedIndexPattern } = useSourceContext();
   const { nodeType, accountId, region, customMetrics } = useWaffleOptionsContext();
-  const { currentTime, node } = props;
+  const { currentTime, options, node } = props;
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern('metrics'),
     [createDerivedIndexPattern]
   );
-  let filter = `${findInventoryFields(nodeType).id}: "${node.id}"`;
+  let filter = options.fields
+    ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
+    : '';
 
   if (filter) {
     filter = convertKueryToElasticSearchQuery(filter, derivedIndexPattern);

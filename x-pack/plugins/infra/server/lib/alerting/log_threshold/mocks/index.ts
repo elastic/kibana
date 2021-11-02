@@ -17,6 +17,7 @@ export const libsMock = {
             type: 'index_pattern',
             indexPatternId: 'some-id',
           },
+          fields: { timestamp: '@timestamp' },
         },
       });
     },

@@ -67,11 +67,13 @@ export const AnomalyDetectionFlyout = () => {
           indexPattern={source?.configuration.metricAlias ?? ''}
           sourceId={'default'}
           spaceId={space.id}
+          timestampField={source?.configuration.fields.timestamp ?? ''}
         >
           <MetricK8sModuleProvider
             indexPattern={source?.configuration.metricAlias ?? ''}
             sourceId={'default'}
             spaceId={space.id}
+            timestampField={source?.configuration.fields.timestamp ?? ''}
           >
             <EuiFlyout onClose={closeFlyout} data-test-subj="loadMLFlyout">
               {screenName === 'home' && (

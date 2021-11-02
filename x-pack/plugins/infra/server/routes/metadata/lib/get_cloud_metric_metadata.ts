@@ -13,7 +13,6 @@ import {
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export interface InfraCloudMetricsAdapterResponse {
   buckets: InfraMetadataAggregationBucket[];
@@ -37,7 +36,7 @@ export const getCloudMetricsMetadata = async (
             { match: { 'cloud.instance.id': instanceId } },
             {
               range: {
-                [TIMESTAMP_FIELD]: {
+                [sourceConfiguration.fields.timestamp]: {
                   gte: timeRange.from,
                   lte: timeRange.to,
                   format: 'epoch_millis',

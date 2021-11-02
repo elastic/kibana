@@ -579,11 +579,7 @@ export class RulesClient {
       );
       throw error;
     }
-    const {
-      filter: authorizationFilter,
-      ensureRuleTypeIsAuthorized,
-      logSuccessfulAuthorization,
-    } = authorizationTuple;
+    const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
 
     const {
       page,
@@ -638,8 +634,6 @@ export class RulesClient {
       )
     );
 
-    logSuccessfulAuthorization();
-
     return {
       page,
       perPage,
@@ -654,11 +648,10 @@ export class RulesClient {
     // Replace this when saved objects supports aggregations https://github.com/elastic/kibana/pull/64002
     const alertExecutionStatus = await Promise.all(
       AlertExecutionStatusValues.map(async (status: string) => {
-        const { filter: authorizationFilter, logSuccessfulAuthorization } =
-          await this.authorization.getFindAuthorizationFilter(
-            AlertingAuthorizationEntity.Rule,
-            alertingAuthorizationFilterOpts
-          );
+        const { filter: authorizationFilter } = await this.authorization.getFindAuthorizationFilter(
+          AlertingAuthorizationEntity.Rule,
+          alertingAuthorizationFilterOpts
+        );
         const filter = options.filter
           ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
           : `alert.attributes.executionStatus.status:(${status})`;
@@ -675,8 +668,6 @@ export class RulesClient {
           perPage: 0,
           type: 'alert',
         });
-
-        logSuccessfulAuthorization();
 
         return { [status]: total };
       })
