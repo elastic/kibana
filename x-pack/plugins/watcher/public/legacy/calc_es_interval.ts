@@ -7,7 +7,7 @@
 
 import dateMath from '@elastic/datemath';
 
-import { parseEsInterval } from './index';
+import { parseEsInterval } from './parse_es_interval';
 
 const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('M');
@@ -17,10 +17,9 @@ const largeMax = unitsDesc.indexOf('M');
  * compatible expression, and provide
  * associated metadata
  *
- * @param  {moment.duration} duration
- * @return {object}
+ * @param duration
  */
-export function convertDurationToNormalizedEsInterval(duration) {
+export function convertDurationToNormalizedEsInterval(duration: moment.Duration) {
   for (let i = 0; i < unitsDesc.length; i++) {
     const unit = unitsDesc[i];
     const val = duration.as(unit);
@@ -35,7 +34,7 @@ export function convertDurationToNormalizedEsInterval(duration) {
 
       return {
         value: val,
-        unit: unit,
+        unit,
         expression: val + unit,
       };
     }
@@ -49,7 +48,7 @@ export function convertDurationToNormalizedEsInterval(duration) {
   };
 }
 
-export function convertIntervalToEsInterval(interval) {
+export function convertIntervalToEsInterval(interval: string) {
   const { value, unit } = parseEsInterval(interval);
   return {
     value,
