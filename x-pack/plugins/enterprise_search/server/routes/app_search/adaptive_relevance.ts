@@ -17,7 +17,7 @@ export function registerSearchRelevanceSuggestionsRoutes({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions',
+      path: '/internal/app_search/engines/{engineName}/adaptive_relevance/suggestions',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -35,13 +35,13 @@ export function registerSearchRelevanceSuggestionsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions',
+      path: '/api/as/v0/engines/:engineName/adaptive_relevance/suggestions',
     })
   );
 
   router.put(
     skipBodyValidation({
-      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions',
+      path: '/internal/app_search/engines/{engineName}/adaptive_relevance/suggestions',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -49,13 +49,13 @@ export function registerSearchRelevanceSuggestionsRoutes({
       },
     }),
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions',
+      path: '/api/as/v0/engines/:engineName/adaptive_relevance/suggestions',
     })
   );
 
   router.get(
     {
-      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/settings',
+      path: '/internal/app_search/engines/{engineName}/adaptive_relevance/settings',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -63,13 +63,13 @@ export function registerSearchRelevanceSuggestionsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
+      path: '/api/as/v0/engines/:engineName/adaptive_relevance/settings',
     })
   );
 
   router.put(
     skipBodyValidation({
-      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/settings',
+      path: '/internal/app_search/engines/{engineName}/adaptive_relevance/settings',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -77,13 +77,13 @@ export function registerSearchRelevanceSuggestionsRoutes({
       },
     }),
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/search_relevance_suggestions/settings',
+      path: '/api/as/v0/engines/:engineName/adaptive_relevance/settings',
     })
   );
 
   router.get(
     {
-      path: '/internal/app_search/engines/{engineName}/search_relevance_suggestions/{query}',
+      path: '/internal/app_search/engines/{engineName}/adaptive_relevance/suggestions/{query}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -95,7 +95,7 @@ export function registerSearchRelevanceSuggestionsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/as/engines/:engineName/search_relevance_suggestions/:query',
+      path: '/as/engines/:engineName/adaptive_relevance/suggestions/:query',
     })
   );
 }
