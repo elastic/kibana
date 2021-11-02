@@ -251,6 +251,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
         const response = await http.put(
           `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           {
+            query: { skip_record_analytics: 'true' },
             body: JSON.stringify({
               queries: values.queries,
               query: values.activeQuery,
