@@ -357,17 +357,21 @@ const schema = {
 }
 
 // myform.tsx
+import { firstValueFrom } from '@kbn/std';
+
 const MyForm = () => {
   ...
   const [indices, setIndices] = useState([]);
   const [indices$, nextIndices] = useBehaviorSubject(null); // Use the provided util hook to create an observable
 
   const indicesProvider = useCallback(() => {
-    // We wait until we get
-    return await indices$.pipe(first((data) => data !== null)).toPromise();
+    // We wait until we have fetched the indices.
+    // The result will then be sent to the validator (await provider() call);
+    return await firstValueFrom(indices$.pipe(first((data) => data !== null)));
   }, [indices$, nextIndices]);
 
   const fetchIndices = useCallback(async () => {
+    // Reset the subject to not send stale data to the validator
     nextIndices(null);
 
     const result = await httpClient.get(`/api/search/${indexName}`);

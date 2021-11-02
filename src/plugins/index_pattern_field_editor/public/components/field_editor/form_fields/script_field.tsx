@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
 import { PainlessLang, PainlessContext, monaco } from '@kbn/monaco';
+import { firstValueFrom } from '@kbn/std';
 
 import {
   UseField,
@@ -109,15 +110,15 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
   });
 
   const validationDataProvider = useCallback(async () => {
-    const validationData = await validationData$
-      .pipe(
+    const validationData = await firstValueFrom(
+      validationData$.pipe(
         first((data) => {
           return data === undefined
             ? false
             : data.isFetchingDoc === false && data.isLoadingPreview === false;
         })
       )
-      .toPromise();
+    );
 
     return validationData!.error;
   }, [validationData$]);
@@ -125,6 +126,10 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
   const onEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       monacoEditor.current = editor;
+
+      if (editorValidationSubscription.current) {
+        editorValidationSubscription.current.unsubscribe();
+      }
 
       editorValidationSubscription.current = PainlessLang.validation$().subscribe(
         ({ isValid, isValidating, errors }) => {
