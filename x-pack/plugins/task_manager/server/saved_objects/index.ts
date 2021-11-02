@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 import { TaskManagerConfig } from '../config.js';

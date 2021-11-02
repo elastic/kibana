@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger, ElasticsearchClient } from 'kibana/server';
 import { getEsErrorMessage } from '../../../../alerting/server';
 import { DEFAULT_GROUPS } from '../index';

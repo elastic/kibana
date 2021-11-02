@@ -108,6 +108,8 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   public stop() {
     this.metric$.complete();
+
+    this.pluginStop$.next();
     this.pluginStop$.complete();
   }
 

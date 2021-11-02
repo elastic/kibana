@@ -105,6 +105,7 @@ const allowlistBaseEventFields: AllowlistFields = {
 // blindly. Object contents means that we only copy the fields that appear explicitly in
 // the sub-object.
 export const allowlistEventFields: AllowlistFields = {
+  _id: true,
   '@timestamp': true,
   agent: true,
   Endpoint: true,
@@ -140,6 +141,7 @@ export const exceptionListEventFields: AllowlistFields = {
   name: true,
   os_types: true,
   rule_version: true,
+  scope: true,
 };
 
 /**

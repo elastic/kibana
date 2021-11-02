@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { Logger } from 'kibana/server';
 
 import type { ConfigType } from '../../../../../config';
 import { buildRuleWithoutOverrides } from '../../../signals/build_rule';
-import { Ancestor, SignalSource } from '../../../signals/types';
+import { Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { RACAlert, WrappedRACAlert } from '../../types';
 import { buildAlert, buildAncestors, generateAlertId } from './build_alert';
 import { buildBulkBody } from './build_bulk_body';
@@ -63,7 +63,7 @@ export const buildAlertGroupFromSequence = (
     _index: '',
     _source: {
       ...block,
-      [ALERT_INSTANCE_ID]: buildingBlockIds[i],
+      [ALERT_UUID]: buildingBlockIds[i],
     },
   }));
 
@@ -92,9 +92,9 @@ export const buildAlertRoot = (
   buildReasonMessage: BuildReasonMessage
 ): RACAlert => {
   const rule = buildRuleWithoutOverrides(completeRule);
-  const reason = buildReasonMessage({ rule });
-  const doc = buildAlert(wrappedBuildingBlocks, rule, spaceId, reason);
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
+  const reason = buildReasonMessage({ rule, mergedDoc: mergedAlerts as SignalSourceHit });
+  const doc = buildAlert(wrappedBuildingBlocks, rule, spaceId, reason);
   return {
     ...mergedAlerts,
     event: {
