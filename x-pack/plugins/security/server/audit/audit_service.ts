@@ -25,20 +25,12 @@ import { httpRequestEvent } from './audit_events';
 export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
 
-/**
- * @deprecated
- */
-export interface LegacyAuditLogger {
-  log: (eventType: string, message: string, data?: Record<string, any>) => void;
-}
-
 export interface AuditLogger {
   log: (event: AuditEvent | undefined) => void;
 }
 
 export interface AuditServiceSetup {
   asScoped: (request: KibanaRequest) => AuditLogger;
-  getLogger: (id?: string) => LegacyAuditLogger;
 }
 
 interface AuditServiceSetupParams {
@@ -57,11 +49,11 @@ interface AuditServiceSetupParams {
 }
 
 export class AuditService {
-  private ecsLogger: Logger;
+  private logger: Logger;
   private usageIntervalId?: NodeJS.Timeout;
 
-  constructor(logger: Logger) {
-    this.ecsLogger = logger.get('ecs');
+  constructor(_logger: Logger) {
+    this.logger = _logger.get('ecs');
   }
 
   setup({
@@ -152,20 +144,10 @@ export class AuditService {
         };
         if (filterEvent(meta, config.ignore_filters)) {
           const { message, ...eventMeta } = meta;
-          this.ecsLogger.info(message, eventMeta);
+          this.logger.info(message, eventMeta);
         }
       };
       return { log };
-    };
-
-    /**
-     * @deprecated
-     * Use `audit.asScoped(request)` method instead to create an audit logger
-     */
-    const getLogger = (id?: string): LegacyAuditLogger => {
-      return {
-        log: (eventType: string, message: string, data?: Record<string, any>) => {},
-      };
     };
 
     http.registerOnPostAuth((request, response, t) => {
@@ -175,7 +157,7 @@ export class AuditService {
       return t.next();
     });
 
-    return { asScoped, getLogger };
+    return { asScoped };
   }
 
   stop() {
