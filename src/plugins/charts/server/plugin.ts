@@ -37,7 +37,8 @@ export class ChartsServerPlugin implements Plugin<object, object> {
           message: i18n.translate(
             'charts.advancedSettings.visualization.colorMappingTextDeprecation',
             {
-              defaultMessage: 'This setting is deprecated and will not be supported as of 8.0.',
+              defaultMessage:
+                'This setting is deprecated and will not be supported in a future version.',
             }
           ),
           docLinksKey: 'visualizationSettings',
