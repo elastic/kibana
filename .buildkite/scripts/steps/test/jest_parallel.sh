@@ -14,8 +14,6 @@ exitCode=0
 find src x-pack packages -name jest.config.js -not -path "*/__fixtures__/*" | sort | while read config; do
   if [ "$(($i % $JOB_COUNT))" -eq $JOB ]; then
     echo "--- $ node scripts/jest --config $config"
-    # TODO: sort by list of test files identified by --listFiles
-    # Also allows us to ignore configs with no tests so they can still exist.
     node --max-old-space-size=5632 ./node_modules/.bin/jest --config=$config --runInBand --coverage=false
 
     if [ $? -ne 0 ]; then
