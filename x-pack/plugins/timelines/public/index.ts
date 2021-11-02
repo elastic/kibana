@@ -10,8 +10,6 @@
 
 import { createContext } from 'react';
 
-import { PluginInitializerContext } from '../../../../src/core/public';
-
 import { TimelinesPlugin } from './plugin';
 import type { StatefulEventContextType } from './types';
 export * as tGridActions from './store/t_grid/actions';
@@ -63,8 +61,8 @@ export { StatefulFieldsBrowser } from './components/t_grid/toolbar/fields_browse
 export { useStatusBulkActionItems } from './hooks/use_status_bulk_action_items';
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new TimelinesPlugin(initializerContext);
+export function plugin() {
+  return new TimelinesPlugin();
 }
 
 export const StatefulEventContext = createContext<StatefulEventContextType | null>(null);

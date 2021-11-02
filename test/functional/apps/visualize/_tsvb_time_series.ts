@@ -193,7 +193,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      describe('Elastic charts', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/115529
+      describe.skip('Elastic charts', () => {
         beforeEach(async () => {
           await visualBuilder.toggleNewChartsLibraryWithDebug(true);
           await visualBuilder.clickPanelOptions('timeSeries');

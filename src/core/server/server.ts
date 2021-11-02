@@ -36,7 +36,6 @@ import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
-import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
@@ -373,7 +372,6 @@ export class Server {
       loggingConfig,
       httpConfig,
       pluginsConfig,
-      kibanaConfig,
       savedObjectsConfig,
       savedObjectsMigrationConfig,
       uiSettingsConfig,

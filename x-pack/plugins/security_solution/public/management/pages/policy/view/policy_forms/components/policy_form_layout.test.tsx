@@ -118,7 +118,7 @@ describe('Policy Form Layout', () => {
       cancelbutton.simulate('click', { button: 0 });
       const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
       expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
-        'securitySolution',
+        'securitySolutionUI',
         { path: endpointListPath },
       ]);
     });

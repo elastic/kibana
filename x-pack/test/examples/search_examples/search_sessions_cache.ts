@@ -27,7 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return text;
   }
 
-  describe('Search session client side cache', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/116537
+  describe.skip('Search session client side cache', () => {
     const appId = 'searchExamples';
 
     before(async function () {

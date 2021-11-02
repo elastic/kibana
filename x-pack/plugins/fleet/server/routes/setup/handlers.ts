@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
-
 import { appContextService } from '../../services';
 import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common';
 import { setupFleet } from '../../services/setup';
@@ -14,12 +12,14 @@ import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
 
-export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
+export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
   try {
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
-    const isFleetServerSetup = await hasFleetServers(appContextService.getInternalUserESClient());
+    const isFleetServerSetup = await hasFleetServers(
+      context.core.elasticsearch.client.asInternalUser
+    );
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
     if (!isApiKeysEnabled) {

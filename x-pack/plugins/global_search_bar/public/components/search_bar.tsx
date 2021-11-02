@@ -180,6 +180,7 @@ export function SearchBar({
   darkMode,
 }: Props) {
   const isMounted = useMountedState();
+  const [initialLoad, setInitialLoad] = useState(false);
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
@@ -190,12 +191,14 @@ export function SearchBar({
   const UNKNOWN_TAG_ID = '__unknown__';
 
   useEffect(() => {
-    const fetch = async () => {
-      const types = await globalSearch.getSearchableTypes();
-      setSearchableTypes(types);
-    };
-    fetch();
-  }, [globalSearch]);
+    if (initialLoad) {
+      const fetch = async () => {
+        const types = await globalSearch.getSearchableTypes();
+        setSearchableTypes(types);
+      };
+      fetch();
+    }
+  }, [globalSearch, initialLoad]);
 
   const loadSuggestions = useCallback(
     (term: string) => {
@@ -234,75 +237,80 @@ export function SearchBar({
 
   useDebounce(
     () => {
-      // cancel pending search if not completed yet
-      if (searchSubscription.current) {
-        searchSubscription.current.unsubscribe();
-        searchSubscription.current = null;
-      }
+      if (initialLoad) {
+        // cancel pending search if not completed yet
+        if (searchSubscription.current) {
+          searchSubscription.current.unsubscribe();
+          searchSubscription.current = null;
+        }
 
-      const suggestions = loadSuggestions(searchValue);
+        const suggestions = loadSuggestions(searchValue);
 
-      let aggregatedResults: GlobalSearchResult[] = [];
-      if (searchValue.length !== 0) {
-        trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
-      }
+        let aggregatedResults: GlobalSearchResult[] = [];
+        if (searchValue.length !== 0) {
+          trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
+        }
 
-      const rawParams = parseSearchParams(searchValue);
-      const tagIds =
-        taggingApi && rawParams.filters.tags
-          ? rawParams.filters.tags.map(
-              (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
-            )
-          : undefined;
-      const searchParams: GlobalSearchFindParams = {
-        term: rawParams.term,
-        types: rawParams.filters.types,
-        tags: tagIds,
-      };
-      // TODO technically a subtle bug here
-      // this term won't be set until the next time the debounce is fired
-      // so the SearchOption won't highlight anything if only one call is fired
-      // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
-      setSearchTerm(rawParams.term ?? '');
+        const rawParams = parseSearchParams(searchValue);
+        const tagIds =
+          taggingApi && rawParams.filters.tags
+            ? rawParams.filters.tags.map(
+                (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
+              )
+            : undefined;
+        const searchParams: GlobalSearchFindParams = {
+          term: rawParams.term,
+          types: rawParams.filters.types,
+          tags: tagIds,
+        };
+        // TODO technically a subtle bug here
+        // this term won't be set until the next time the debounce is fired
+        // so the SearchOption won't highlight anything if only one call is fired
+        // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
+        setSearchTerm(rawParams.term ?? '');
 
-      searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
-        next: ({ results }) => {
-          if (searchValue.length > 0) {
-            aggregatedResults = [...results, ...aggregatedResults].sort(sortByScore);
+        searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
+          next: ({ results }) => {
+            if (searchValue.length > 0) {
+              aggregatedResults = [...results, ...aggregatedResults].sort(sortByScore);
+              setOptions(aggregatedResults, suggestions, searchParams.tags);
+              return;
+            }
+
+            // if searchbar is empty, filter to only applications and sort alphabetically
+            results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
+
+            aggregatedResults = [...results, ...aggregatedResults].sort(sortByTitle);
+
             setOptions(aggregatedResults, suggestions, searchParams.tags);
-            return;
-          }
-
-          // if searchbar is empty, filter to only applications and sort alphabetically
-          results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
-
-          aggregatedResults = [...results, ...aggregatedResults].sort(sortByTitle);
-
-          setOptions(aggregatedResults, suggestions, searchParams.tags);
-        },
-        error: () => {
-          // Not doing anything on error right now because it'll either just show the previous
-          // results or empty results which is basically what we want anyways
-          trackUiMetric(METRIC_TYPE.COUNT, 'unhandled_error');
-        },
-        complete: () => {},
-      });
+          },
+          error: () => {
+            // Not doing anything on error right now because it'll either just show the previous
+            // results or empty results which is basically what we want anyways
+            trackUiMetric(METRIC_TYPE.COUNT, 'unhandled_error');
+          },
+          complete: () => {},
+        });
+      }
     },
     350,
-    [searchValue, loadSuggestions]
+    [searchValue, loadSuggestions, searchableTypes, initialLoad]
   );
 
-  const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
-      event.preventDefault();
-      trackUiMetric(METRIC_TYPE.COUNT, 'shortcut_used');
-      if (searchRef) {
-        searchRef.focus();
-      } else if (buttonRef) {
-        (buttonRef.children[0] as HTMLButtonElement).click();
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
+        event.preventDefault();
+        trackUiMetric(METRIC_TYPE.COUNT, 'shortcut_used');
+        if (searchRef) {
+          searchRef.focus();
+        } else if (buttonRef) {
+          (buttonRef.children[0] as HTMLButtonElement).click();
+        }
       }
-    }
-  };
+    },
+    [buttonRef, searchRef, trackUiMetric]
+  );
 
   const onChange = (selection: EuiSelectableTemplateSitewideOption[]) => {
     const selected = selection.find(({ checked }) => checked === 'on');
@@ -411,6 +419,7 @@ export function SearchBar({
         }),
         onFocus: () => {
           trackUiMetric(METRIC_TYPE.COUNT, 'search_focus');
+          setInitialLoad(true);
         },
       }}
       popoverProps={{

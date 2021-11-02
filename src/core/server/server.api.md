@@ -5,11 +5,10 @@
 ```ts
 
 import { AddConfigDeprecation } from '@kbn/config';
-import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
-import { ClientOptions } from '@elastic/elasticsearch';
+import { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { ConfigDeprecation } from '@kbn/config';
 import { ConfigDeprecationContext } from '@kbn/config';
 import { ConfigDeprecationFactory } from '@kbn/config';
@@ -25,9 +24,9 @@ import { EcsEventKind } from '@kbn/logging';
 import { EcsEventOutcome } from '@kbn/logging';
 import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IncomingHttpHeaders } from 'http';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Logger } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
@@ -49,9 +48,9 @@ import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ShallowPromise } from '@kbn/utility-types';
 import { Stream } from 'stream';
-import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestOptions } from '@elastic/elasticsearch';
+import { TransportRequestParams } from '@elastic/elasticsearch';
+import { TransportResult } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -870,9 +869,9 @@ export { EcsEventOutcome }
 export { EcsEventType }
 
 // @public
-export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'> & {
+export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'> & {
     transport: {
-        request(params: TransportRequestParams, options?: TransportRequestOptions): TransportRequestPromise<ApiResponse>;
+        request<TResponse = unknown>(params: TransportRequestParams, options?: TransportRequestOptions): Promise<TransportResult<TResponse>>;
     };
 };
 
@@ -916,6 +915,15 @@ export class ElasticsearchConfig {
 export interface ElasticsearchConfigPreboot {
     readonly credentialsSpecified: boolean;
     readonly hosts: string[];
+}
+
+// @public (undocumented)
+export interface ElasticsearchErrorDetails {
+    // (undocumented)
+    error?: {
+        type: string;
+        reason?: string;
+    };
 }
 
 // @public (undocumented)
@@ -2171,8 +2179,6 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
-    static createGenericNotFoundEsUnavailableError(type?: string | null, id?: string | null): DecoratedError;
-    // (undocumented)
     static createIndexAliasNotFoundError(alias: string): DecoratedError;
     // (undocumented)
     static createInvalidVersionError(versionInput?: string): DecoratedError;
@@ -2704,6 +2710,7 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
+    getKibanaIndex: () => string;
     registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
@@ -2977,7 +2984,6 @@ export interface ShardsResponse {
 
 // @public (undocumented)
 export type SharedGlobalConfig = RecursiveReadonly<{
-    kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
     elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
     savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
@@ -3050,11 +3056,10 @@ export const validBodyOutput: readonly ["data", "stream"];
 
 // Warnings were encountered during analysis:
 //
-// src/core/server/elasticsearch/client/types.ts:94:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
+// src/core/server/elasticsearch/client/types.ts:93:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:380:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:486:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:375:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:483:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

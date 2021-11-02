@@ -28,6 +28,8 @@ export const JSON_LINES = '.euiCodeBlock__line';
 
 export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
 
+export const JSON_TEXT = '[data-test-subj="jsonView"]';
+
 export const TABLE_CELL = '.euiTableRowCell';
 
 export const TABLE_TAB = '[data-test-subj="tableTab"]';

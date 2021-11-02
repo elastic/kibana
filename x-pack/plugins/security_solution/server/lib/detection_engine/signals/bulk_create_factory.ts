@@ -27,7 +27,8 @@ export const bulkCreateFactory =
     logger: Logger,
     esClient: ElasticsearchClient,
     buildRuleMessage: BuildRuleMessage,
-    refreshForBulkCreate: RefreshTypes
+    refreshForBulkCreate: RefreshTypes,
+    indexNameOverride?: string
   ) =>
   async <T>(wrappedDocs: Array<BaseHit<T>>): Promise<GenericBulkCreateResponse<T>> => {
     if (wrappedDocs.length === 0) {
@@ -43,7 +44,7 @@ export const bulkCreateFactory =
     const bulkBody = wrappedDocs.flatMap((wrappedDoc) => [
       {
         create: {
-          _index: wrappedDoc._index,
+          _index: indexNameOverride ?? wrappedDoc._index,
           _id: wrappedDoc._id,
         },
       },

@@ -8,6 +8,7 @@
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
+  ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -41,8 +42,8 @@ export async function getHostIsolationExceptionItems({
   http,
   perPage,
   page,
-  sortField,
-  sortOrder,
+  sortField = 'created_at',
+  sortOrder = 'desc',
   filter,
 }: {
   http: HttpStart;
@@ -110,5 +111,15 @@ export async function updateOneHostIsolationExceptionItem(
   await ensureHostIsolationExceptionsListExists(http);
   return http.put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
     body: JSON.stringify(exception),
+  });
+}
+export async function getHostIsolationExceptionSummary(
+  http: HttpStart
+): Promise<ExceptionListSummarySchema> {
+  return http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
+    query: {
+      list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+      namespace_type: 'agnostic',
+    },
   });
 }

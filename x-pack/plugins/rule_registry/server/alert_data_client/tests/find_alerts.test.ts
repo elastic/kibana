@@ -18,8 +18,7 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 import { alertingAuthorizationMock } from '../../../../alerting/server/authorization/alerting_authorization.mock';
 import { AuditLogger } from '../../../../security/server';
 import { AlertingAuthorizationEntity } from '../../../../alerting/server';
-import { ruleDataPluginServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
-import { RuleDataPluginService } from '../../rule_data_plugin_service';
+import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
@@ -32,7 +31,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   authorization: alertingAuthMock,
   esClient: esClientMock,
   auditLogger,
-  ruleDataService: ruleDataPluginServiceMock.create() as unknown as RuleDataPluginService,
+  ruleDataService: ruleDataServiceMock.create(),
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';

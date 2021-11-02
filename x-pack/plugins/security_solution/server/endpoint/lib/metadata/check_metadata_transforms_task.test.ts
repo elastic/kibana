@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ApiResponse } from '@elastic/elasticsearch';
-import { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/api/types';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CheckMetadataTransformsTask,
   TYPE,
@@ -102,7 +102,7 @@ describe('check metadata transforms task', () => {
             },
           ],
         },
-      } as unknown as ApiResponse<TransformGetTransformStatsResponse>);
+      } as unknown as TransportResult<TransformGetTransformStatsResponse>);
 
     it('should stop task if transform stats response fails', async () => {
       esClient.transform.getTransformStats.mockRejectedValue({});
@@ -237,7 +237,7 @@ describe('check metadata transforms task', () => {
             },
           ],
         },
-      } as unknown as ApiResponse<TransformGetTransformStatsResponse>;
+      } as unknown as TransportResult<TransformGetTransformStatsResponse>;
       esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
       taskResponse = (await runTask({
         ...MOCK_TASK_INSTANCE,
