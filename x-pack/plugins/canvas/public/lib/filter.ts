@@ -44,12 +44,16 @@ export const flattenFilterView = (filterValue: FilterType) => (filterView: Filte
   }, {});
 };
 
-export const transformFilterView = (filterView: FilterViewInstance) => (filterValue: FilterType) =>
+export const transformFilterView = (filterView: FilterViewInstance, filterValue: FilterType) =>
   flowRight(formatFilterView(filterValue), flattenFilterView(filterValue))(filterView);
 
-export const getFilterFormatter = (type: string = '') => {
-  const filterView = filterViewsRegistry.get(type) ?? filterViewsRegistry.get('default');
-  return transformFilterView(filterView.view());
+export const formatFilter = (filter: FilterType) => {
+  const filterView = filterViewsRegistry.get(filter.type) ?? filterViewsRegistry.get('default');
+  if (!filterView) {
+    throw new Error('At least default filter view should be defined');
+  }
+
+  return transformFilterView(filterView.view(), filter);
 };
 
 export const groupFiltersBy = (filters: FilterType[], groupByField: FilterField) => {

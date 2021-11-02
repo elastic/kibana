@@ -25,7 +25,7 @@ import {
   formatFilterView,
   flattenFilterView,
   transformFilterView,
-  getFilterFormatter,
+  formatFilter,
   groupFiltersBy,
 } from './filter';
 
@@ -40,7 +40,7 @@ const simpleFilterValue: FilterType = {
 };
 
 const filterWithNestedValue: FilterType = {
-  type: 'exactly',
+  type: 'exactlyNested' as any,
   column: 'project',
   value: { nestedField1: 'nestedField1', nestedField2: 'nestedField2' },
   filterGroup: 'someGroup',
@@ -70,8 +70,8 @@ jest.mock('../filter_view_types', () => ({
     get: (type: string) => {
       const views: Record<string, FilterViewSpec> = {
         default: { name: 'default', view: () => simpleFilterView },
-        simple: { name: 'simple', view: () => simpleFilterView },
-        nested: { name: 'nested', view: () => nestedFilterView },
+        exactly: { name: 'exactly', view: () => simpleFilterView },
+        exactlyNested: { name: 'exactlyNested', view: () => nestedFilterView },
       };
       return views[type] ? views[type] : views.default;
     },
@@ -199,7 +199,7 @@ describe('formatFilterView returns fn which', () => {
   });
 });
 
-describe('transformFilterView returns fn which', () => {
+describe('transformFilterView', () => {
   it('returns simple filter view with formattedValue and components', () => {
     const simpleFilterValueWithComponent = {
       ...simpleFilterView,
@@ -208,9 +208,8 @@ describe('transformFilterView returns fn which', () => {
         component: fc,
       },
     };
-    const transformFn = transformFilterView(simpleFilterValueWithComponent);
 
-    expect(transformFn(simpleFilterValue)).toEqual({
+    expect(transformFilterView(simpleFilterValueWithComponent, simpleFilterValue)).toEqual({
       type: { label: 'label', formattedValue: simpleFilterValue.type },
       value: { label: 'value', formattedValue: simpleFilterValue.value, component: fc },
       column: { label: 'column', formattedValue: simpleFilterValue.column },
@@ -229,8 +228,8 @@ describe('transformFilterView returns fn which', () => {
         },
       }),
     };
-    const transformFn = transformFilterView(nestedFilterViewWithComponent);
-    expect(transformFn(filterWithNestedValue)).toEqual({
+
+    expect(transformFilterView(nestedFilterViewWithComponent, filterWithNestedValue)).toEqual({
       type: { label: 'label', formattedValue: filterWithNestedValue.type },
       column: { label: 'column', formattedValue: filterWithNestedValue.column },
       filterGroup: { label: 'filterGroup', formattedValue: filterWithNestedValue.filterGroup },
@@ -243,7 +242,7 @@ describe('transformFilterView returns fn which', () => {
   });
 });
 
-describe('getFilterFormatter returns fn which', () => {
+describe('formatFilter', () => {
   const simpleResult = {
     type: { label: 'label', formattedValue: simpleFilterValue.type },
     value: { label: 'value', formattedValue: simpleFilterValue.value },
@@ -252,31 +251,32 @@ describe('getFilterFormatter returns fn which', () => {
   };
 
   const nestedResult = {
-    type: { label: 'label', formattedValue: simpleFilterValue.type },
-    column: { label: 'column', formattedValue: simpleFilterValue.column },
-    filterGroup: { label: 'filterGroup', formattedValue: simpleFilterValue.filterGroup },
+    type: { label: 'label', formattedValue: filterWithNestedValue.type },
+    column: { label: 'column', formattedValue: filterWithNestedValue.column },
+    filterGroup: { label: 'filterGroup', formattedValue: filterWithNestedValue.filterGroup },
     nested: {
       label: 'nested',
       formattedValue: formatterFactory(filterWithNestedValue.value)(),
     },
   };
 
-  it('returns filter view by filter view name', () => {
-    const formatterFn = getFilterFormatter('simple');
-    expect(formatterFn(simpleFilterValue)).toEqual(simpleResult);
-
-    const formatterFn2 = getFilterFormatter('nested');
-    expect(formatterFn2(filterWithNestedValue)).toEqual(nestedResult);
+  it('returns formatted filter view by filter view name', () => {
+    expect(formatFilter(simpleFilterValue)).toEqual(simpleResult);
+    expect(formatFilter(filterWithNestedValue)).toEqual(nestedResult);
   });
 
-  it('returns default filter view if filter view name is not specified', () => {
-    const formatterFn = getFilterFormatter();
-    expect(formatterFn(simpleFilterValue)).toEqual(simpleResult);
+  it('formatting by default filter view if filter view name is not specified', () => {
+    expect(formatFilter({ ...simpleFilterValue, type: null } as any)).toEqual({
+      ...simpleResult,
+      type: { ...simpleResult.type, formattedValue: '-' },
+    });
   });
 
-  it('returns default filter view if filter view name was not found', () => {
-    const formatterFn = getFilterFormatter('some_absent_filter_vew');
-    expect(formatterFn(simpleFilterValue)).toEqual(simpleResult);
+  it('foramtting by default filter view if filter view name was not found', () => {
+    expect(formatFilter({ ...simpleFilterValue, type: 'some_absent_filter_vew' } as any)).toEqual({
+      ...simpleResult,
+      type: { ...simpleResult.type, formattedValue: 'some_absent_filter_vew' },
+    });
   });
 });
 
