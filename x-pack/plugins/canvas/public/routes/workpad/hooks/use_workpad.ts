@@ -53,24 +53,14 @@ export const useWorkpad = (
           workpad.aliasId = aliasId;
         }
 
-        if (storedWorkpad.id !== workpadId || storedWorkpad.aliasId !== aliasId) {
-          dispatch(setAssets(assets));
-          dispatch(setWorkpad(workpad, { loadPages }));
-          dispatch(setZoomScale(1));
-        }
+        dispatch(setAssets(assets));
+        dispatch(setWorkpad(workpad, { loadPages }));
+        dispatch(setZoomScale(1));
       } catch (e) {
         setError(e as Error | string);
       }
     })();
-  }, [
-    workpadId,
-    dispatch,
-    setError,
-    loadPages,
-    workpadResolve,
-    storedWorkpad.id,
-    storedWorkpad.aliasId,
-  ]);
+  }, [workpadId, dispatch, setError, loadPages, workpadResolve]);
 
   useEffect(() => {
     (() => {
