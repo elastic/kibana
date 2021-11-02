@@ -206,7 +206,14 @@ export type ValidationFunc<
   V = unknown
 > = (
   data: ValidationFuncArg<I, V>
-) => ValidationError<E> | void | undefined | Promise<ValidationError<E> | void | undefined>;
+) => ValidationError<E> | void | undefined | ValidationCancelablePromise;
+
+export type ValidationResponsePromise<E extends string = string> = Promise<
+  ValidationError<E> | void | undefined
+>;
+
+export type ValidationCancelablePromise<E extends string = string> =
+  ValidationResponsePromise<E> & { cancel?(): void };
 
 export interface FieldValidateResponse {
   isValid: boolean;

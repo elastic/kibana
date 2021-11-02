@@ -28,6 +28,7 @@ export {
   ValidationFunc,
   FieldConfig,
   useBehaviorSubject,
+  ValidationCancelablePromise,
 } from '../../es_ui_shared/static/forms/hook_form_lib';
 
 export { fieldValidators } from '../../es_ui_shared/static/forms/helpers';

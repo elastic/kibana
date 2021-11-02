@@ -12,49 +12,57 @@ import type { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { PainlessLang } from '@kbn/monaco';
 
-import { fieldValidators, FieldConfig, RuntimeType, ValidationFunc } from '../../shared_imports';
+import {
+  fieldValidators,
+  FieldConfig,
+  RuntimeType,
+  ValidationFunc,
+  ValidationCancelablePromise,
+} from '../../shared_imports';
 import type { Context } from '../preview';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
-
-type CancelablePromise = Promise<any> & { cancel?(): void };
 
 const { emptyField, numberGreaterThanField } = fieldValidators;
 
 // Validate the painless **syntax** (no need to make an HTTP request)
-const painlessSyntaxValidator: ValidationFunc = () => {
+const painlessSyntaxValidator = () => {
   let isValidatingSub: Subscription;
-  const promise: CancelablePromise = new Promise((resolve) => {
-    isValidatingSub = PainlessLang.validation$()
-      .pipe(
-        first(({ isValidating }) => {
-          return isValidating === false;
-        })
-      )
-      .subscribe(({ errors }) => {
-        const editorHasSyntaxErrors = errors.length > 0;
 
-        if (editorHasSyntaxErrors) {
-          return resolve({
-            message: i18n.translate(
-              'indexPatternFieldEditor.editor.form.scriptEditorValidationMessage',
-              {
-                defaultMessage: 'Invalid Painless syntax.',
-              }
-            ),
-          });
-        }
+  return (() => {
+    const promise: ValidationCancelablePromise<'ERR_PAINLESS_SYNTAX'> = new Promise((resolve) => {
+      isValidatingSub = PainlessLang.validation$()
+        .pipe(
+          first(({ isValidating }) => {
+            return isValidating === false;
+          })
+        )
+        .subscribe(({ errors }) => {
+          const editorHasSyntaxErrors = errors.length > 0;
 
-        resolve(undefined);
-      });
-  });
+          if (editorHasSyntaxErrors) {
+            return resolve({
+              message: i18n.translate(
+                'indexPatternFieldEditor.editor.form.scriptEditorValidationMessage',
+                {
+                  defaultMessage: 'Invalid Painless syntax.',
+                }
+              ),
+              code: 'ERR_PAINLESS_SYNTAX',
+            });
+          }
 
-  promise.cancel = () => {
-    if (isValidatingSub) {
-      isValidatingSub.unsubscribe();
-    }
-  };
+          resolve(undefined);
+        });
+    });
 
-  return promise;
+    promise.cancel = () => {
+      if (isValidatingSub) {
+        isValidatingSub.unsubscribe();
+      }
+    };
+
+    return promise;
+  }) as ValidationFunc;
 };
 
 // Validate the painless **script**
@@ -115,7 +123,7 @@ export const schema = {
           ),
         },
         {
-          validator: painlessSyntaxValidator,
+          validator: painlessSyntaxValidator(),
           isAsync: true,
         },
         {

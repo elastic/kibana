@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import { ScriptError } from '../components/preview/types';
 import { RuntimeFieldPainlessError, PainlessErrorCode } from '../types';
-
-type Error = Record<string, any>;
 
 export const getErrorCodeFromErrorReason = (reason: string = ''): PainlessErrorCode => {
   if (reason.startsWith('Cannot cast from')) {
@@ -17,8 +16,8 @@ export const getErrorCodeFromErrorReason = (reason: string = ''): PainlessErrorC
   return 'UNKNOWN';
 };
 
-export const parseEsError = (scriptError: Error): RuntimeFieldPainlessError => {
-  let reason: string = scriptError.caused_by?.reason;
+export const parseEsError = (scriptError: ScriptError): RuntimeFieldPainlessError => {
+  let reason = scriptError.caused_by?.reason;
   const errorCode = getErrorCodeFromErrorReason(reason);
 
   if (errorCode === 'CAST_ERROR') {

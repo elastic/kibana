@@ -347,21 +347,23 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       return;
     }
 
-    const { values, error } = response.data ?? { values: [], error: {} };
+    if (response.data) {
+      const { values, error } = response.data;
 
-    if (error) {
-      setPreviewResponse({
-        fields: [{ key: name ?? '', value: '', formattedValue: defaultValueFormatter('') }],
-        error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error) },
-      });
-    } else {
-      const [value] = values;
-      const formattedValue = valueFormatter(value);
+      if (error) {
+        setPreviewResponse({
+          fields: [{ key: name ?? '', value: '', formattedValue: defaultValueFormatter('') }],
+          error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error) },
+        });
+      } else {
+        const [value] = values;
+        const formattedValue = valueFormatter(value);
 
-      setPreviewResponse({
-        fields: [{ key: name!, value, formattedValue }],
-        error: null,
-      });
+        setPreviewResponse({
+          fields: [{ key: name!, value, formattedValue }],
+          error: null,
+        });
+      }
     }
 
     setIsLoadingPreview(false);

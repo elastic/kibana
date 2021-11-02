@@ -21,7 +21,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-import type { Field } from '../types';
+import type { Field, RuntimeFieldPainlessError } from '../types';
 import { euiFlyoutClassname } from '../constants';
 import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
@@ -249,7 +249,7 @@ const FieldEditorFlyoutContentComponent = ({
                     style={{ fontWeight: 500 }}
                   >
                     <EuiTextColor color="danger">
-                      <p>{painlessScriptError!.error.reason}</p>
+                      <p>{(painlessScriptError!.error as RuntimeFieldPainlessError).reason}</p>
                     </EuiTextColor>
                   </EuiText>
                   <EuiSpacer size="s" />

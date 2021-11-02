@@ -8,13 +8,17 @@
 import React from 'react';
 
 import type { RuntimeType, RuntimeField } from '../../shared_imports';
-import type { FieldFormatConfig } from '../../types';
+import type { FieldFormatConfig, RuntimeFieldPainlessError } from '../../types';
 
 export type From = 'cluster' | 'custom';
 
 export interface EsDocument {
   _id: string;
-  [key: string]: any;
+  _index: string;
+  _source: {
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
 }
 
 export type ScriptErrorCodes = 'PAINLESS_SCRIPT_ERROR' | 'PAINLESS_SYNTAX_ERROR';
@@ -22,12 +26,20 @@ export type FetchDocErrorCodes = 'DOC_NOT_FOUND' | 'ERR_FETCHING_DOC';
 
 interface PreviewError {
   code: ScriptErrorCodes;
-  error: Record<string, any>;
+  error:
+    | RuntimeFieldPainlessError
+    | {
+        [key: string]: unknown;
+      };
 }
 
 export interface FetchDocError {
   code: FetchDocErrorCodes;
-  error: Record<string, any>;
+  error: {
+    message?: string;
+    reason?: string;
+    [key: string]: unknown;
+  };
 }
 
 export interface ClusterData {
@@ -42,7 +54,7 @@ export interface Params {
   type: RuntimeType | null;
   script: Required<RuntimeField>['script'] | null;
   format: FieldFormatConfig | null;
-  document: EsDocument | null;
+  document: { [key: string]: unknown } | null;
 }
 
 export interface FieldPreview {
@@ -108,5 +120,19 @@ export type PainlessExecuteContext =
 
 export interface FieldPreviewResponse {
   values: unknown[];
-  error?: Record<string, any>;
+  error?: ScriptError;
+}
+
+export interface ScriptError {
+  caused_by: {
+    reason: string;
+    [key: string]: unknown;
+  };
+  position?: {
+    offset: number;
+    start: number;
+    end: number;
+  };
+  script_stack?: string[];
+  [key: string]: unknown;
 }
