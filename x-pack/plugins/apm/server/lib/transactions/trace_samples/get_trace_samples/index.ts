@@ -93,19 +93,14 @@ export async function getTraceSamples({
         },
       });
 
-      return response.hits.hits;
+      return response.hits.hits.map((hit) => ({
+        transactionId: hit._source.transaction.id,
+        traceId: hit._source.trace.id,
+      }));
     }
 
-    const samplesForDistributionHits = await getTraceSamplesHits();
-
-    const traceSamples = samplesForDistributionHits.map((hit) => ({
-      transactionId: hit._source.transaction.id,
-      traceId: hit._source.trace.id,
-    }));
-
     return {
-      noHits: samplesForDistributionHits.length === 0,
-      traceSamples,
+      traceSamples: await getTraceSamplesHits(),
     };
   });
 }

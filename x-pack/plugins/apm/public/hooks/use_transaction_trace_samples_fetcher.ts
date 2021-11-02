@@ -17,7 +17,6 @@ export interface TraceSample {
 }
 
 const INITIAL_DATA = {
-  noHits: true,
   traceSamples: [] as TraceSample[],
 };
 
@@ -71,16 +70,7 @@ export function useTransactionTraceSamplesFetcher({
           },
         });
 
-        if (response.noHits) {
-          return response;
-        }
-
-        const { traceSamples } = response;
-
-        return {
-          noHits: false,
-          traceSamples,
-        };
+        return response;
       }
     },
     // the samples should not be refetched if the transactionId or traceId changes

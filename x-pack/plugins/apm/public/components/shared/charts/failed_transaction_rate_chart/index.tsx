@@ -40,13 +40,11 @@ type ErrorRate =
 
 const INITIAL_STATE: ErrorRate = {
   currentPeriod: {
-    noHits: true,
-    transactionErrorRate: [],
+    timeseries: [],
     average: null,
   },
   previousPeriod: {
-    noHits: true,
-    transactionErrorRate: [],
+    timeseries: [],
     average: null,
   },
 };
@@ -116,7 +114,7 @@ export function FailedTransactionRateChart({
 
   const timeseries = [
     {
-      data: data.currentPeriod.transactionErrorRate,
+      data: data.currentPeriod.timeseries,
       type: 'linemark',
       color: theme.eui.euiColorVis7,
       title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
@@ -126,7 +124,7 @@ export function FailedTransactionRateChart({
     ...(comparisonEnabled
       ? [
           {
-            data: data.previousPeriod.transactionErrorRate,
+            data: data.previousPeriod.timeseries,
             type: 'area',
             color: theme.eui.euiColorMediumShade,
             title: i18n.translate(

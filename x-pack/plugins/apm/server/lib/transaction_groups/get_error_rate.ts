@@ -49,8 +49,7 @@ export async function getErrorRate({
   start: number;
   end: number;
 }): Promise<{
-  noHits: boolean;
-  transactionErrorRate: Coordinate[];
+  timeseries: Coordinate[];
   average: number | null;
 }> {
   const { apmEventClient } = setup;
@@ -111,20 +110,16 @@ export async function getErrorRate({
     'get_transaction_group_error_rate',
     params
   );
-
-  const noHits = resp.hits.total.value === 0;
-
   if (!resp.aggregations) {
-    return { noHits, transactionErrorRate: [], average: null };
+    return { timeseries: [], average: null };
   }
 
-  const transactionErrorRate = getFailedTransactionRateTimeSeries(
+  const timeseries = getFailedTransactionRateTimeSeries(
     resp.aggregations.timeseries.buckets
   );
-
   const average = calculateFailedTransactionRate(resp.aggregations.outcomes);
 
-  return { noHits, transactionErrorRate, average };
+  return { timeseries, average };
 }
 
 export async function getErrorRatePeriods({
@@ -171,22 +166,22 @@ export async function getErrorRatePeriods({
           start: comparisonStart,
           end: comparisonEnd,
         })
-      : { noHits: true, transactionErrorRate: [], average: null };
+      : { timeseries: [], average: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,
     previousPeriodPromise,
   ]);
 
-  const firstCurrentPeriod = currentPeriod.transactionErrorRate;
+  const currentPeriodTimeseries = currentPeriod.timeseries;
 
   return {
     currentPeriod,
     previousPeriod: {
       ...previousPeriod,
-      transactionErrorRate: offsetPreviousPeriodCoordinates({
-        currentPeriodTimeseries: firstCurrentPeriod,
-        previousPeriodTimeseries: previousPeriod.transactionErrorRate,
+      timeseries: offsetPreviousPeriodCoordinates({
+        currentPeriodTimeseries,
+        previousPeriodTimeseries: previousPeriod.timeseries,
       }),
     },
   };
