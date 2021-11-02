@@ -64,7 +64,7 @@ export async function storedPackagePoliciesToAgentPermissions(
           // - Endpoint doesn't store the `data_stream` metadata in
           // `packagePolicy.inputs`, so we will use _all_ data_streams from the
           // package.
-          dataStreamsForPermissions = removeArray;
+          dataStreamsForPermissions = pkg.data_streams;
           break;
 
         case 'apm':
