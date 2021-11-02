@@ -111,7 +111,7 @@ export const uebaReducer = reducerWithInitialState(initialUebaState)
         ...state[uebaType].queries,
         [tableType]: {
           // TODO: Steph/ueba fix active page/limit on ueba tables. is broken because multiple UebaTableType.userRules tables
-          // @ts-ignore
+          // @ts-expect-error TS7053
           ...state[uebaType].queries[tableType],
           activePage,
         },
@@ -126,7 +126,7 @@ export const uebaReducer = reducerWithInitialState(initialUebaState)
         ...state[uebaType].queries,
         [tableType]: {
           // TODO: Steph/ueba fix active page/limit on ueba tables. is broken because multiple UebaTableType.userRules tables
-          // @ts-ignore
+          // @ts-expect-error TS7053
           ...state[uebaType].queries[tableType],
           limit,
         },
