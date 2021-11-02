@@ -12,7 +12,7 @@ import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/utils';
 
-import { IRouter, IBasePath, IKibanaResponse, KibanaResponseFactory } from '../http';
+import { IRouter, IBasePath, IKibanaResponse, KibanaResponseFactory, KibanaRequest } from '../http';
 import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';
 import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
 import { CoreContext } from '../core_context';
@@ -27,6 +27,7 @@ interface CommonRoutesParams {
   basePath: IBasePath;
   uiPlugins: UiPlugins;
   onResourceNotFound: (
+    req: KibanaRequest,
     res: HttpResourcesServiceToolkit & KibanaResponseFactory
   ) => Promise<IKibanaResponse>;
 }
@@ -64,7 +65,20 @@ export class CoreApp {
         httpResources: corePreboot.httpResources.createRegistrar(router),
         router,
         uiPlugins,
-        onResourceNotFound: (res) => res.renderCoreApp(),
+        onResourceNotFound: async (req, res) =>
+          // THe API consumers might call various Kibana APIs (e.g. `/api/status`) when Kibana is still at the preboot
+          // stage, and the main HTTP server that registers API handlers isn't up yet. At this stage we don't know if
+          // the API endpoint exists or not, and hence cannot reply with `404`. We also should not reply with completely
+          // unexpected response (`200 text/html` for the Core app). The only suitable option is to reply with `503`
+          // like we do for all other unknown non-GET requests at the preboot stage.
+          req.route.path.startsWith('/api/') || req.route.path.startsWith('/internal/')
+            ? res.customError({
+                statusCode: 503,
+                headers: { 'Retry-After': '30' },
+                body: 'Kibana server is not ready yet',
+                bypassErrorFormat: true,
+              })
+            : res.renderCoreApp(),
       });
     });
   }
@@ -91,7 +105,7 @@ export class CoreApp {
       httpResources: resources,
       router,
       uiPlugins,
-      onResourceNotFound: async (res) => res.notFound(),
+      onResourceNotFound: async (req, res) => res.notFound(),
     });
 
     resources.register(
@@ -148,7 +162,7 @@ export class CoreApp {
         const { query, params } = req;
         const { path } = params;
         if (!path || !path.endsWith('/') || path.startsWith('/')) {
-          return onResourceNotFound(res);
+          return onResourceNotFound(req, res);
         }
 
         // remove trailing slash
