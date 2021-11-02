@@ -41,7 +41,6 @@ const enabledActionTypes = [
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [], ssl = false, testFiles = [] } = options;
-  const auditLogPlugin = resolve(__dirname, './fixtures/audit/audit_log');
   const auditLogPath = resolve(__dirname, './fixtures/audit/audit.log');
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -88,7 +87,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           // TO DO: Remove feature flags once we're good to go
           '--xpack.securitySolution.enableExperimental=["ruleRegistryEnabled"]',
           '--xpack.ruleRegistry.write.enabled=true',
-          `--plugin-path=${auditLogPlugin}`,
           '--xpack.security.audit.enabled=true',
           '--xpack.security.audit.appender.type=file',
           `--xpack.security.audit.appender.fileName=${auditLogPath}`,
