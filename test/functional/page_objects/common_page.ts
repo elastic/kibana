@@ -505,7 +505,7 @@ export class CommonPageObject extends FtrService {
 
   /**
    * Due to a warning thrown, documented at:
-   * https://momentjs.com/guides/#/warnings/js-date/
+   * https://github.com/elastic/kibana/pull/114997#issuecomment-950823874
    * this fn formats time in a format specified, or defaulted
    * to the same format in
    * [getTimeDurationInHours()](https://github.com/elastic/kibana/blob/main/test/functional/page_objects/time_picker.ts#L256)
@@ -526,13 +526,12 @@ export class CommonPageObject extends FtrService {
   }
 
   /**
-   * Due to a warning thrown, documented at:
-   * https://github.com/elastic/kibana/pull/114997#issuecomment-950823874
-   * this fn formats time in a format specified, or defaulted
-   * to the same format in
-   * [getTimeDurationInHours()](https://github.com/elastic/kibana/blob/main/test/functional/page_objects/time_picker.ts#L256)
+   * Previously, many tests were using the time picker.
+   * To speed things up, we are now setting time here.
+   * The formatting fn is called here, such that the tests
+   * that were using the time picker can use the same time
+   * parameters as before, but they are auto-formatted.
    * @param time
-   * @param fmt
    */
   async setTime(time: TimeStrings) {
     await this.kibanaServer.uiSettings.replace({
