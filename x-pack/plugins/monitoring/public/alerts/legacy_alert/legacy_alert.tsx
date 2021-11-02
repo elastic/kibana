@@ -12,7 +12,7 @@ import {
   LEGACY_RULE_DETAILS,
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
-import { MonitoringConfig } from '../../types';
+import type { MonitoringConfig } from '../../types';
 import { LazyExpression, LazyExpressionProps } from './lazy_expression';
 
 export function createLegacyAlertTypes(config: MonitoringConfig): AlertTypeModel[] {

@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AlertTypeParams } from '../../../../alerting/common';
-import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
+import type { AlertTypeParams } from '../../../../alerting/common';
+import type { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
 import {
   RULE_DETAILS,
   RULE_LARGE_SHARD_SIZE,
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
-import { MonitoringConfig } from '../../types';
+import type { MonitoringConfig } from '../../types';
 import {
   LazyExpression,
   LazyExpressionProps,
