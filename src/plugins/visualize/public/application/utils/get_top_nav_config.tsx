@@ -49,7 +49,7 @@ interface VisualizeCapabilities {
   show: boolean;
 }
 
-interface TopNavConfigParams {
+export interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
   openInspector: () => void;
@@ -254,7 +254,6 @@ export const getTopNavConfig = (
       : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
           defaultMessage: 'Save',
         });
-
   const showSaveAndReturn = originatingApp && (savedVis?.id || allowByValue);
 
   const showSaveButton =
