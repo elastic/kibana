@@ -9,7 +9,7 @@ Containers are a special type of embeddable that can contain nested embeddables.
 
 === Examples
 
-Multiple embeddable examples are implemented and registered https://github.com/elastic/kibana/tree/master/examples/embeddable_examples[here]. They can be played around with and explored https://github.com/elastic/kibana/tree/master/examples/embeddable_explorer[in the Embeddable Explorer example plugin]. Just run kibana with
+Multiple embeddable examples are implemented and registered https://github.com/elastic/kibana/tree/main/examples/embeddable_examples[here]. They can be played around with and explored https://github.com/elastic/kibana/tree/main/examples/embeddable_explorer[in the Embeddable Explorer example plugin]. Just run kibana with
 
 [source,sh]
 --
@@ -18,20 +18,20 @@ yarn start --run-examples
 
 and navigate to the Embeddable explorer app.
 
-There is also an example of rendering dashboard container outside of dashboard app https://github.com/elastic/kibana/tree/master/examples/dashboard_embeddable_examples[here].
+There is also an example of rendering dashboard container outside of dashboard app https://github.com/elastic/kibana/tree/main/examples/dashboard_embeddable_examples[here].
 
 === Docs
 
-link:https://github.com/elastic/kibana/blob/master/src/plugins/embeddable/docs/README.md[Embeddable docs, guides & caveats]
+link:https://github.com/elastic/kibana/blob/main/src/plugins/embeddable/docs/README.md[Embeddable docs, guides & caveats]
 
 === API docs
 
 ==== Browser API
-https://github.com/elastic/kibana/blob/master/docs/development/plugins/embeddable/public/kibana-plugin-plugins-embeddable-public.embeddablesetup.md[Browser Setup contract]
-https://github.com/elastic/kibana/blob/master/docs/development/plugins/embeddable/public/kibana-plugin-plugins-embeddable-public.embeddablestart.md[Browser Start contract]
+https://github.com/elastic/kibana/blob/main/docs/development/plugins/embeddable/public/kibana-plugin-plugins-embeddable-public.embeddablesetup.md[Browser Setup contract]
+https://github.com/elastic/kibana/blob/main/docs/development/plugins/embeddable/public/kibana-plugin-plugins-embeddable-public.embeddablestart.md[Browser Start contract]
 
 ==== Server API
-https://github.com/elastic/kibana/blob/master/docs/development/plugins/embeddable/server/kibana-plugin-plugins-embeddable-server.embeddablesetup.md[Server Setup contract]
+https://github.com/elastic/kibana/blob/main/docs/development/plugins/embeddable/server/kibana-plugin-plugins-embeddable-server.embeddablesetup.md[Server Setup contract]
 
 === Testing
 
