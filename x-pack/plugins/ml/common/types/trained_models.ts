@@ -150,24 +150,35 @@ export interface TrainedModelDeploymentStatsResponse {
   }>;
 }
 
+export interface AllocatedModel {
+  inference_threads: number;
+  allocation_status: {
+    target_allocation_count: number;
+    state: string;
+    allocation_count: number;
+  };
+  model_id: string;
+  state: string;
+  model_threads: number;
+  model_size_bytes: number;
+  node: {
+    average_inference_time_ms: number;
+    inference_count: number;
+    routing_state: {
+      routing_state: string;
+      reason: string;
+    };
+    last_access?: number;
+  };
+}
+
 export interface NodeDeploymentStatsResponse {
   id: string;
   name: string;
   transport_address: string;
   attributes: Record<string, string>;
   roles: string[];
-  allocated_models: Array<{
-    inference_threads: number;
-    allocation_status: {
-      target_allocation_count: number;
-      state: string;
-      allocation_count: number;
-    };
-    model_id: string;
-    state: string;
-    model_threads: number;
-    model_size_bytes: number;
-  }>;
+  allocated_models: AllocatedModel[];
   memory_overview: {
     machine_memory: {
       /** Total machine memory in bytes */
