@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
 import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
 import { telemetryBaseEmbeddableInput } from './migrate_base_input';
 
 export const getTelemetryFunction = (embeddables: CommonEmbeddableStartContract) => {
-  return (state: EmbeddableStateWithType, telemetryData: Record<string, any> = {}) => {
-    const enhancements: Record<string, any> = state.enhancements || {};
+  return (
+    state: EmbeddableStateWithType,
+    telemetryData: Record<string, string | number | boolean> = {}
+  ) => {
+    const enhancements = state.enhancements || {};
     const factory = embeddables.getEmbeddableFactory(state.type);
 
     let outputTelemetryData = telemetryBaseEmbeddableInput(state, telemetryData);
@@ -22,7 +26,7 @@ export const getTelemetryFunction = (embeddables: CommonEmbeddableStartContract)
       if (!enhancements[key]) return;
       outputTelemetryData = embeddables
         .getEnhancement(key)
-        .telemetry(enhancements[key], outputTelemetryData);
+        .telemetry(enhancements[key] as Record<string, SerializableRecord>, outputTelemetryData);
     });
 
     return outputTelemetryData;
