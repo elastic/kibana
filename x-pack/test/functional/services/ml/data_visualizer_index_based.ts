@@ -217,15 +217,19 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       pinned?: boolean;
       negated?: boolean;
     }) {
-      await retry.tryForTime(2000, async () => {
-        await filterBar.hasFilter(
-          filter.key,
-          filter.value,
-          filter.enabled,
-          filter.pinned,
-          filter.negated
-        );
-      });
+      await retry.waitForWithTimeout(
+        `filter ${JSON.stringify(filter)} to exist`,
+        2000,
+        async () => {
+          return await filterBar.hasFilter(
+            filter.key,
+            filter.value,
+            filter.enabled,
+            filter.pinned,
+            filter.negated
+          );
+        }
+      );
     },
   };
 }
