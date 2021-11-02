@@ -8,6 +8,41 @@
 The ServiceNow ITSM connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create ServiceNow incidents.
 
 [float]
+[[connector-prerequisites]]
+=== Prerequisites
+After upgrading to 7.16, you must complete the following within your ServiceNow instance before creating a new ServiceNow ITSM connector:
+
+* Install Elastic for ITSM.
+* Create a ServiceNow integration user and assign it the appropriate roles.
+* Create a CORs rule.
+
+*Create a ServiceNow integration user*
+
+To ensure authenticated communication between Elastic and ServiceNow, create a ServiceNow integration user and assign it the appropriate roles. 
+
+. Go to *System Security -> Users*.
+. Click *New*.
+. Complete the form.
+. Assign the integration user the following roles: 
+* `import_set_loader`
+* `Import_transformer`
+* `personalize_choices`
+* `sn_si.basic`
+* `x_elas2_sir_int.integration_user`
+
+*Create a CORS rule*
+
+A CORS rule is required for communication between the Elastic and Servicenow.
+To create a ServiceNow CORS rule:
+
+. Go to *System Web Services -> CORS Rules*.
+. Click *New*.
+. Configure the rule settings to use the Elastic SIR API and the Kibana URL:
+* *REST API*: Choose x_elas2_sir_int/elastic_api.
+* *Domain*: Enter the Kibana URL.
+. Go to the *HTTP methods* tab and choose the GET HTTP method by selecting *GET*.
+
+[float]
 [[servicenow-connector-configuration]]
 ==== Connector configuration
 

@@ -8,6 +8,11 @@
 The ServiceNow ITOM connector uses the https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html[Event API] to create ServiceNow events.
 
 [float]
+[[connector-prerequisites]]
+=== Prerequisites
+After upgrading to 7.16, you must create an integration user in ServiceNow and assign it the `personalize_choices` and `evt_mgmt_integration` roles before creating a new ServiceNow ITOM connector.
+
+[float]
 [[servicenow-itom-connector-configuration]]
 ==== Connector configuration
 
