@@ -20,6 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   function runTests(testData: TestData) {
     const savedSearchTitle = `Field stats for ${testData.suiteTitle} ${Date.now()}`;
     const dashboardTitle = `Dashboard for ${testData.suiteTitle} ${Date.now()}`;
+    const startTime = 'Jan 1, 2016 @ 00:00:00.000';
+    const endTime = 'Nov 1, 2020 @ 00:00:00.000';
 
     describe(`with ${testData.suiteTitle}`, function () {
       after(async function () {
@@ -40,10 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             testData.sourceIndexOrSavedSearch
           );
         }
-        await PageObjects.timePicker.setAbsoluteRange(
-          'Jan 1, 2016 @ 00:00:00.000',
-          'Nov 1, 2020 @ 00:00:00.000'
-        );
+        await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
 
         await PageObjects.discover.assertViewModeToggleExists();
         await PageObjects.discover.clickViewModeFieldStatsButton();
@@ -58,10 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.addSavedSearch(savedSearchTitle);
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await PageObjects.timePicker.setAbsoluteRange(
-          'Jan 1, 2016 @ 00:00:00.000',
-          'Nov 1, 2020 @ 00:00:00.000'
-        );
+        await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
         await PageObjects.dashboard.waitForRenderComplete();
 
         for (const fieldRow of testData.expected.metricFields as Array<
@@ -100,10 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.addSavedSearch(savedSearchTitle);
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await PageObjects.timePicker.setAbsoluteRange(
-          'Jan 1, 2016 @ 00:00:00.000',
-          'Nov 1, 2020 @ 00:00:00.000'
-        );
+        await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
         await PageObjects.dashboard.waitForRenderComplete();
 
         await PageObjects.discover.assertFieldStatsTableNotExists();
