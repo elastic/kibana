@@ -81,6 +81,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await kibanaServer.savedObjects.clean({
+        types: ['search', 'index-pattern', 'visualization', 'dashboard', 'tag'],
+      });
     });
 
     it('adds a new tag to a new Dashboard', async () => {
