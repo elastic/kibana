@@ -8,7 +8,7 @@
 The ServiceNow ITSM connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create ServiceNow incidents.
 
 [float]
-[[connector-prerequisites]]
+[[servicenow-itsm-connector-prerequisites]]
 === Prerequisites
 After upgrading to 7.16, you must complete the following within your ServiceNow instance before creating a new ServiceNow ITSM connector:
 
