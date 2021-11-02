@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-KIBANA_BUILD_ID="524c2502-ebb2-4763-9188-2d49b8f7211d"
+KIBANA_BUILD_ID="10ba7d9b-290e-44e1-959d-6cf21242fc2d"
 
 if [[ ! -d "$KIBANA_BUILD_LOCATION/bin" ]]; then
   echo '--- Downloading Distribution and Plugin artifacts'
