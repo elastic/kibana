@@ -249,6 +249,10 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     describe('errors/distribution', function () {
       loadTestFile(require.resolve('./errors/distribution'));
     });
+    
+    describe('errors/error_group_list', function () {
+      loadTestFile(require.resolve('./errors/error_group_list'));
+    });
 
     // Dependencies
     describe('dependencies/metadata', function () {
