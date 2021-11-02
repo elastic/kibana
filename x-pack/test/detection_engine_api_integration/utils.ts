@@ -810,7 +810,7 @@ export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
   maxTimeout: number = 800000,
-  timeoutWait: number = 100
+  timeoutWait: number = 250
 ): Promise<void> => {
   let found = false;
   let numberOfTries = 0;

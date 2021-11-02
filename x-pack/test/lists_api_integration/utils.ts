@@ -117,7 +117,7 @@ export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
   maxTimeout: number = 800000,
-  timeoutWait: number = 100
+  timeoutWait: number = 250
 ) => {
   await new Promise<void>(async (resolve, reject) => {
     try {
