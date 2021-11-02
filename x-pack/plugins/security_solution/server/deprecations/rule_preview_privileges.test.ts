@@ -110,7 +110,7 @@ describe('rule preview privileges deprecation', () => {
         {
           correctiveActions: {
             manualSteps: [
-              'Update your roles to include read privileges for the signals preview indices appropriate for that role and space(s).',
+              'Update your roles to include read privileges for the detection alerts preview indices appropriate for that role and space(s).',
               'In 8.0, users will be unable to view preview results until those permissions are added.',
             ],
           },
@@ -119,7 +119,7 @@ describe('rule preview privileges deprecation', () => {
             'https://www.elastic.co/guide/en/security/some-branch/rules-ui-create.html#preview-rules',
           level: 'warning',
           message:
-            'In order to enable a more robust preview, users will need read privileges to new signals preview indices (.siem-preview-signals-<KIBANA_SPACE>), analogous to existing signals indices (.siem-signals-<KIBANA_SPACE>).',
+            'In order to enable a more robust preview, users will need read privileges to new detection alerts preview indices (.alerts-security.preview.alert-<KIBANA_SPACE>), analogous to existing detection alerts indices (.siem-signals-<KIBANA_SPACE>).',
           title: 'The Detections Rule Preview feature is changing',
         },
       ]);
@@ -153,9 +153,9 @@ describe('rule preview privileges deprecation', () => {
         {
           correctiveActions: {
             manualSteps: [
-              'Update your roles to include read privileges for the signals preview indices appropriate for that role and space(s).',
+              'Update your roles to include read privileges for the detection alerts preview indices appropriate for that role and space(s).',
               'In 8.0, users will be unable to view preview results until those permissions are added.',
-              'The roles that currently have read access to signals indices are: relevantRole',
+              'The roles that currently have read access to detection alerts indices are: relevantRole',
             ],
           },
           deprecationType: 'feature',
@@ -163,7 +163,7 @@ describe('rule preview privileges deprecation', () => {
             'https://www.elastic.co/guide/en/security/some-branch/rules-ui-create.html#preview-rules',
           level: 'warning',
           message:
-            'In order to enable a more robust preview, users will need read privileges to new signals preview indices (.siem-preview-signals-<KIBANA_SPACE>), analogous to existing signals indices (.siem-signals-<KIBANA_SPACE>).',
+            'In order to enable a more robust preview, users will need read privileges to new detection alerts preview indices (.alerts-security.preview.alert-<KIBANA_SPACE>), analogous to existing detection alerts indices (.siem-signals-<KIBANA_SPACE>).',
           title: 'The Detections Rule Preview feature is changing',
         },
       ]);
