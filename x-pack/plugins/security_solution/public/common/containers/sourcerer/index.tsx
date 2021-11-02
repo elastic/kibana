@@ -55,7 +55,7 @@ export const useInitSourcerer = (
     () => sourcererSelectors.signalIndexNameSelector(),
     []
   );
-  const signalIndexNameSelector = useDeepEqualSelector(getSignalIndexNameSelector);
+  const signalIndexNameSourcerer = useDeepEqualSelector(getSignalIndexNameSelector);
 
   const getTimelineSelector = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const activeTimeline = useDeepEqualSelector((state) =>
@@ -84,7 +84,7 @@ export const useInitSourcerer = (
     if (
       !loadingSignalIndex &&
       signalIndexName != null &&
-      signalIndexNameSelector == null &&
+      signalIndexNameSourcerer == null &&
       (activeTimeline == null || activeTimeline.savedObjectId == null) &&
       initialTimelineSourcerer.current &&
       defaultDataView.id.length > 0
@@ -103,7 +103,7 @@ export const useInitSourcerer = (
         })
       );
     } else if (
-      signalIndexNameSelector != null &&
+      signalIndexNameSourcerer != null &&
       (activeTimeline == null || activeTimeline.savedObjectId == null) &&
       initialTimelineSourcerer.current &&
       defaultDataView.id.length > 0
@@ -116,7 +116,7 @@ export const useInitSourcerer = (
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
             SourcererScopeName.timeline,
-            signalIndexNameSelector,
+            signalIndexNameSourcerer,
             true
           ),
         })
@@ -128,7 +128,7 @@ export const useInitSourcerer = (
     dispatch,
     loadingSignalIndex,
     signalIndexName,
-    signalIndexNameSelector,
+    signalIndexNameSourcerer,
   ]);
 
   const pollForSignalIndex = useCallback(
@@ -220,7 +220,7 @@ export const useInitSourcerer = (
     if (
       !loadingSignalIndex &&
       signalIndexName != null &&
-      signalIndexNameSelector == null &&
+      signalIndexNameSourcerer == null &&
       defaultDataView.id.length > 0
     ) {
       // update signal name also updates sourcerer
@@ -235,7 +235,7 @@ export const useInitSourcerer = (
     isSignalIndexExists,
     loadingSignalIndex,
     signalIndexName,
-    signalIndexNameSelector,
+    signalIndexNameSourcerer,
     updateSourcererDataView,
   ]);
   // Related to the detection page
@@ -262,7 +262,7 @@ export const useInitSourcerer = (
       );
     } else if (
       scopeId === SourcererScopeName.detections &&
-      signalIndexNameSelector != null &&
+      signalIndexNameSourcerer != null &&
       initialTimelineSourcerer.current &&
       defaultDataView.id.length > 0
     ) {
@@ -273,7 +273,7 @@ export const useInitSourcerer = (
         selectedPatterns: getScopePatternListSelection(
           defaultDataView,
           SourcererScopeName.detections,
-          signalIndexNameSelector,
+          signalIndexNameSourcerer,
           true
         ),
       });
@@ -284,9 +284,11 @@ export const useInitSourcerer = (
     isSignalIndexExists,
     scopeId,
     signalIndexName,
-    signalIndexNameSelector,
+    signalIndexNameSourcerer,
   ]);
 };
+
+const LOGS_WILDCARD_INDEX = 'logs-*';
 export const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
 
 export const useSourcererDataView = (
@@ -303,7 +305,7 @@ export const useSourcererDataView = (
 
   const selectedPatterns = useMemo(
     () =>
-      scopeSelectedPatterns.some((index) => index === 'logs-*')
+      scopeSelectedPatterns.some((index) => index === LOGS_WILDCARD_INDEX)
         ? [...scopeSelectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
         : scopeSelectedPatterns,
     [scopeSelectedPatterns]

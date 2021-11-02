@@ -337,15 +337,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (!this._store) {
       let signal: { name: string | null } = { name: null };
       try {
-        // const { index_name: indexName } = await coreStart.http.fetch(
-        //   `${BASE_RAC_ALERTS_API_PATH}/index`,
-        //   {
-        //     method: 'GET',
-        //     query: { features: SERVER_APP_ID },
-        //   }
-        // );
-        // signal = { name: indexName[0] };
-        if (coreStart.application.capabilities[SERVER_APP_ID].read === true) {
+        if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
           signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
             method: 'GET',
           });
@@ -358,7 +350,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       let defaultDataView: SourcererModel['defaultDataView'];
       let kibanaDataViews: SourcererModel['kibanaDataViews'];
       try {
-        // check for/generate default Security Solution Kibana index pattern
+        // check for/generate default Security Solution Kibana data view
         const sourcererDataViews = await coreStart.http.fetch(SOURCERER_API_URL, {
           method: 'POST',
           body: JSON.stringify({
