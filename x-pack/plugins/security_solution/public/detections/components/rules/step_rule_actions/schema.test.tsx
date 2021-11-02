@@ -6,7 +6,7 @@
  */
 
 import { validateSingleAction, validateRuleActionsField } from './schema';
-import { isUuid, getActionTypeName, validateMustache, validateActionParams } from './utils';
+import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 import { actionTypeRegistryMock } from '../../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { FormHook } from '../../../../shared_imports';
 jest.mock('./utils');
@@ -86,9 +86,7 @@ describe('stepRuleActions schema', () => {
     });
 
     it('should validate multiple incorrect rule actions field', async () => {
-      (isUuid as jest.Mock).mockReturnValueOnce(false);
       (getActionTypeName as jest.Mock).mockReturnValueOnce('Slack');
-      (isUuid as jest.Mock).mockReturnValueOnce(true);
       (getActionTypeName as jest.Mock).mockReturnValueOnce('Pagerduty');
       (validateActionParams as jest.Mock).mockReturnValue(['Summary is required']);
       (validateMustache as jest.Mock).mockReturnValue(['Component is not valid mustache template']);
