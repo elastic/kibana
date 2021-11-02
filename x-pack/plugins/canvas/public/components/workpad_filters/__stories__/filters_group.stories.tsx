@@ -10,12 +10,9 @@ import React from 'react';
 import moment from 'moment';
 import { FiltersGroup } from '../filters_group';
 import { FiltersGroup as FiltersGroupType } from '../types';
-import { FilterViewSpec, filterViewsRegistry } from '../../../filter_view_types';
-import { filterViewsSpecs } from '../../../../canvas_plugin_src/canvas_addons';
+import { prepareFilterViews } from './utils';
 
-filterViewsSpecs.forEach((filterView) =>
-  filterViewsRegistry.register(() => filterView as FilterViewSpec<any>)
-);
+prepareFilterViews();
 
 const filtersGroup: FiltersGroupType = {
   name: 'Group 1',
