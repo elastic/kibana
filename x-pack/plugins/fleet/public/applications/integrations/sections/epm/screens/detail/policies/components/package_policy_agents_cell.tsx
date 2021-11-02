@@ -22,8 +22,12 @@ const AddAgentButton = ({ onAddAgent }: { onAddAgent: () => void }) => (
 );
 
 const AddAgentButtonWithPopover = ({ onAddAgent }: { onAddAgent: () => void }) => {
-  const button = <AddAgentButton onAddAgent={onAddAgent} />;
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(true);
+  const onAddAgentCloseHelp = () => {
+    setIsHelpOpen(false);
+    onAddAgent();
+  };
+  const button = <AddAgentButton onAddAgent={onAddAgentCloseHelp} />;
   return (
     <AddAgentHelpPopover
       button={button}

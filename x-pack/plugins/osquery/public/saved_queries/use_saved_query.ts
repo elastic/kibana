@@ -26,9 +26,11 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
 
   return useQuery(
     [SAVED_QUERY_ID, { savedQueryId }],
-    () => http.get(`/internal/osquery/saved_query/${savedQueryId}`),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    () => http.get<any>(`/internal/osquery/saved_query/${savedQueryId}`),
     {
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
       onSuccess: (data) => {
         if (data.error) {
           setErrorToast(data.error, {

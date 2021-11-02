@@ -19,14 +19,13 @@ export function transformDataToMetricsChart(
   result: ESSearchResponse<unknown, GenericMetricsRequest>,
   chartBase: ChartBase
 ) {
-  const { aggregations, hits } = result;
+  const { aggregations } = result;
   const timeseriesData = aggregations?.timeseriesData;
 
   return {
     title: chartBase.title,
     key: chartBase.key,
     yUnit: chartBase.yUnit,
-    noHits: hits.total.value === 0,
     series: Object.keys(chartBase.series).map((seriesKey, i) => {
       const overallValue = aggregations?.[seriesKey]?.value;
 
