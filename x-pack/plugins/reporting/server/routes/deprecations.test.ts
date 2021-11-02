@@ -24,8 +24,7 @@ import { registerDeprecationsRoutes } from './deprecations';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
-// https://github.com/elastic/kibana/issues/115881
-describe.skip(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
+describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];

@@ -79,7 +79,6 @@ expect.addSnapshotSerializer(extendedEnvSerializer);
 beforeEach(() => {
   jest.clearAllMocks();
   log.messages.length = 0;
-  process.execArgv = ['--inheritted', '--exec', '--argv'];
   currentProc = undefined;
 });
 
@@ -139,9 +138,8 @@ describe('#run$', () => {
               "isDevCliChild": "true",
             },
             "nodeOptions": Array [
-              "--inheritted",
-              "--exec",
-              "--argv",
+              "--preserve-symlinks-main",
+              "--preserve-symlinks",
             ],
             "stdio": "pipe",
           },
