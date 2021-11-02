@@ -44,6 +44,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization_small');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_apache');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_auditbeat');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_apm');

@@ -35,6 +35,7 @@ import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../../../url_generator';
 import { SavedSearch } from '../../../../saved_searches';
 import { handleSourceColumnState } from '../../../helpers/state_helpers';
+import { VIEW_MODE } from '../components/view_mode_toggle';
 
 export interface AppState {
   /**
@@ -73,6 +74,14 @@ export interface AppState {
    * id of the used saved query
    */
   savedQuery?: string;
+  /**
+   * Table view: Documents vs Field Statistics
+   */
+  viewMode?: VIEW_MODE;
+  /**
+   * Hide mini distribution/preview charts when in Field Statistics mode
+   */
+  hideAggregatedPreview?: boolean;
 }
 
 interface GetStateParams {

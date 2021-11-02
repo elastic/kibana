@@ -9,12 +9,12 @@
 import { service, timerange, getTransactionMetrics, getSpanDestinationMetrics } from '../..';
 import { getBreakdownMetrics } from '../../lib/utils/get_breakdown_metrics';
 
-export function simpleTrace(from: number, to: number) {
+export default function ({ from, to }: { from: number; to: number }) {
   const instance = service('opbeans-go', 'production', 'go').instance('instance');
 
   const range = timerange(from, to);
 
-  const transactionName = '240rpm/60% 1000ms';
+  const transactionName = '240rpm/75% 1000ms';
 
   const successfulTraceEvents = range
     .interval('1s')

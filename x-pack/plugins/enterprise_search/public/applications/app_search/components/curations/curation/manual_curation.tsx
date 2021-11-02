@@ -28,7 +28,7 @@ export const ManualCuration: React.FC = () => {
   const { curationId } = useParams() as { curationId: string };
   const logic = CurationLogic({ curationId });
   const { onSelectPageTab } = useActions(logic);
-  const { dataLoading, queries, selectedPageTab, curation } = useValues(logic);
+  const { queries, selectedPageTab, curation } = useValues(logic);
 
   const { isFlyoutOpen } = useValues(AddResultLogic);
 
@@ -64,7 +64,6 @@ export const ManualCuration: React.FC = () => {
         ],
         tabs: pageTabs,
       }}
-      isLoading={dataLoading}
     >
       <ActiveQuerySelect />
       {selectedPageTab === 'promoted' && <SuggestedDocumentsCallout />}
