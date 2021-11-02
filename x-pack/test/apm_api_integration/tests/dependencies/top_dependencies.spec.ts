@@ -108,26 +108,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             );
           });
 
-          it('returns the correct throughput', () => {
-            const {
-              currentStats: { throughput },
-            } = backends;
-            const { rate } = dataConfig;
-
-            expect(roundNumber(throughput.value)).to.be(roundNumber(rate));
-          });
-
-          it('returns the correct total time', () => {
-            const {
-              currentStats: { totalTime },
-            } = backends;
-            const { rate, transaction } = dataConfig;
-
-            expect(
-              totalTime.timeseries.every(({ y }) => y === rate * transaction.duration * 1000)
-            ).to.be(true);
-          });
-
           it('returns the correct error rate', () => {
             const {
               currentStats: { errorRate },
