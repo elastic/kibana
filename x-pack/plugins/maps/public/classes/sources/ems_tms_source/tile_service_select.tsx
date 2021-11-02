@@ -9,15 +9,13 @@ import React, { ChangeEvent, Component } from 'react';
 import { EuiSelect, EuiSelectOption, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { EMSTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { getEmsTmsServices } from '../../../util';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 
-export const AUTO_SELECT = 'auto_select';
+const AUTO_SELECT = 'auto_select';
 
-export interface EmsTmsSourceConfig {
-  id: string | null;
-  isAutoSelect: boolean;
-}
+export type EmsTmsSourceConfig = Pick<EMSTMSSourceDescriptor, 'id' | 'isAutoSelect'>;
 
 interface Props {
   config?: EmsTmsSourceConfig;
@@ -72,7 +70,7 @@ export class TileServiceSelect extends Component<Props, State> {
     const value = e.target.value;
     const isAutoSelect = value === AUTO_SELECT;
     this.props.onTileSelect({
-      id: isAutoSelect ? null : value,
+      id: isAutoSelect ? undefined : value,
       isAutoSelect,
     });
   };

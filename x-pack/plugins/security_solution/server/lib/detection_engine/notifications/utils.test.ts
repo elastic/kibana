@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/api/types';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { SignalSource } from '../signals/types';
 import { deconflictSignalsAndResults, getNotificationResultsLink } from './utils';
@@ -41,7 +41,7 @@ describe('utils', () => {
     });
 
     test('given an empty signal and a single query result it returns the query result in the array', () => {
-      const querySignals: Array<SearchHit<SignalSource>> = [
+      const querySignals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123',
           _index: 'index-123',
@@ -56,7 +56,7 @@ describe('utils', () => {
     });
 
     test('given a single signal and an empty query result it returns the query result in the array', () => {
-      const signals: Array<SearchHit<SignalSource>> = [
+      const signals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123',
           _index: 'index-123',
@@ -71,7 +71,7 @@ describe('utils', () => {
     });
 
     test('given a signal and a different query result it returns both combined together', () => {
-      const querySignals: Array<SearchHit<SignalSource>> = [
+      const querySignals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123',
           _index: 'index-123',
@@ -80,7 +80,7 @@ describe('utils', () => {
           },
         },
       ];
-      const signals: Array<SearchHit<SignalSource>> = [
+      const signals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-789',
           _index: 'index-456',
@@ -96,7 +96,7 @@ describe('utils', () => {
     });
 
     test('given a duplicate in querySignals it returns both combined together without the duplicate', () => {
-      const querySignals: Array<SearchHit<SignalSource>> = [
+      const querySignals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123',
           _index: 'index-123', // This should only show up once and not be duplicated twice
@@ -112,7 +112,7 @@ describe('utils', () => {
           },
         },
       ];
-      const signals: Array<SearchHit<SignalSource>> = [
+      const signals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123', // This should only show up once and not be duplicated twice
           _index: 'index-123',
@@ -154,7 +154,7 @@ describe('utils', () => {
     });
 
     test('given a duplicate in signals it returns both combined together without the duplicate', () => {
-      const signals: Array<SearchHit<SignalSource>> = [
+      const signals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123',
           _index: 'index-123', // This should only show up once and not be duplicated twice
@@ -170,7 +170,7 @@ describe('utils', () => {
           },
         },
       ];
-      const querySignals: Array<SearchHit<SignalSource>> = [
+      const querySignals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123', // This should only show up once and not be duplicated twice
           _index: 'index-123',
@@ -206,7 +206,7 @@ describe('utils', () => {
     });
 
     test('does not give a duplicate in signals if they are only different by their index', () => {
-      const signals: Array<SearchHit<SignalSource>> = [
+      const signals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123',
           _index: 'index-123-a', // This is only different by index
@@ -222,7 +222,7 @@ describe('utils', () => {
           },
         },
       ];
-      const querySignals: Array<SearchHit<SignalSource>> = [
+      const querySignals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123', // This is only different by index
           _index: 'index-123-b',
@@ -245,7 +245,7 @@ describe('utils', () => {
     });
 
     test('it logs a debug statement when it sees a duplicate and returns nothing if both are identical', () => {
-      const querySignals: Array<SearchHit<SignalSource>> = [
+      const querySignals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123',
           _index: 'index-123',
@@ -254,7 +254,7 @@ describe('utils', () => {
           },
         },
       ];
-      const signals: Array<SearchHit<SignalSource>> = [
+      const signals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123',
           _index: 'index-123',
@@ -278,7 +278,7 @@ describe('utils', () => {
     });
 
     test('it logs an error statement if it sees a signal missing an "_id" for an uncommon reason and returns both documents', () => {
-      const querySignals: Array<SearchHit<SignalSource>> = [
+      const querySignals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123',
           _index: 'index-123',
@@ -305,7 +305,7 @@ describe('utils', () => {
     });
 
     test('it logs an error statement if it sees a signal missing a "_index" for an uncommon reason and returns both documents', () => {
-      const querySignals: Array<SearchHit<SignalSource>> = [
+      const querySignals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123',
           _index: 'index-123',
@@ -332,14 +332,14 @@ describe('utils', () => {
     });
 
     test('it logs an error statement if it sees a querySignals missing an "_id" for an uncommon reason and returns both documents', () => {
-      const querySignals: Array<SearchHit<SignalSource>> = [
+      const querySignals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _index: 'index-123',
           _source: {
             test: '123',
           },
         },
-      ] as unknown[] as Array<SearchHit<SignalSource>>;
+      ] as unknown[] as Array<estypes.SearchHit<SignalSource>>;
       const signals: unknown[] = [
         {
           _id: 'id-123',
@@ -359,14 +359,14 @@ describe('utils', () => {
     });
 
     test('it logs an error statement if it sees a querySignals missing a "_index" for an uncommon reason and returns both documents', () => {
-      const querySignals: Array<SearchHit<SignalSource>> = [
+      const querySignals: Array<estypes.SearchHit<SignalSource>> = [
         {
           _id: 'id-123',
           _source: {
             test: '123',
           },
         },
-      ] as unknown[] as Array<SearchHit<SignalSource>>;
+      ] as unknown[] as Array<estypes.SearchHit<SignalSource>>;
       const signals: unknown[] = [
         {
           _id: 'id-123',

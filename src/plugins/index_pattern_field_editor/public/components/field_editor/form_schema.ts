@@ -22,7 +22,7 @@ import {
 import type { Context } from '../preview';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 
-const { emptyField, numberGreaterThanField } = fieldValidators;
+const { containsCharsField, emptyField, numberGreaterThanField } = fieldValidators;
 
 // Validate the painless **syntax** (no need to make an HTTP request)
 const painlessSyntaxValidator = () => {
@@ -96,6 +96,17 @@ export const schema = {
             }
           )
         ),
+      },
+      {
+        validator: containsCharsField({
+          message: i18n.translate(
+            'indexPatternFieldEditor.editor.form.validations.starCharacterNotAllowedValidationErrorMessage',
+            {
+              defaultMessage: 'The field cannot have * in the name.',
+            }
+          ),
+          chars: '*',
+        }),
       },
     ],
   },

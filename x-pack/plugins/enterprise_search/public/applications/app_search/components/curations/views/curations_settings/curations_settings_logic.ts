@@ -10,6 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { EngineLogic } from '../../../engine';
+import { CurationsLogic } from '../../curations_logic';
 
 export interface CurationsSettings {
   enabled: boolean;
@@ -70,7 +71,7 @@ export const CurationsSettingsLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(
+        const response = await http.get<{ curation: CurationsSettings }>(
           `/internal/app_search/engines/${engineName}/search_relevance_suggestions/settings`
         );
         actions.onCurationsSettingsLoad(response.curation);
@@ -94,13 +95,17 @@ export const CurationsSettingsLogic = kea<
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
       try {
-        const response = await http.put(
+        const response = await http.put<{ curation: CurationsSettings }>(
           `/internal/app_search/engines/${engineName}/search_relevance_suggestions/settings`,
           {
             body: JSON.stringify({ curation: currationsSetting }),
           }
         );
         actions.onCurationsSettingsLoad(response.curation);
+
+        //  Re-fetch data so that UI updates to new settings
+        CurationsLogic.actions.loadCurations();
+        EngineLogic.actions.initializeEngine();
       } catch (e) {
         flashAPIErrors(e);
       }

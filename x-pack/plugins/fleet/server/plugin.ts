@@ -74,7 +74,6 @@ import {
 import {
   getAgentStatusById,
   getAgentStatusForAgentPolicy,
-  authenticateAgentWithAccessToken,
   getAgentsByKuery,
   getAgentById,
 } from './services/agents';
@@ -342,7 +341,6 @@ export class FleetPlugin
         listAgents: getAgentsByKuery,
         getAgentStatusById,
         getAgentStatusForAgentPolicy,
-        authenticateAgentWithAccessToken,
       },
       agentPolicyService: {
         get: agentPolicyService.get,

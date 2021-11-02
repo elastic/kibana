@@ -100,7 +100,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const PageObjects = getPageObjects(['common', 'visChart']);
   const monacoEditor = getService('monacoEditor');
 
-  describe('dashboard container', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/116414
+  describe.skip('dashboard container', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
       await esArchiver.loadIfNeeded(

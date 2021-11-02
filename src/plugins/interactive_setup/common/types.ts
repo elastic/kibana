@@ -11,16 +11,6 @@ import type { PeerCertificate } from 'tls';
 import type { ElasticsearchConnectionStatus } from './elasticsearch_connection_status';
 
 /**
- * A set of state details that interactive setup view retrieves from the Kibana server.
- */
-export interface InteractiveSetupViewState {
-  /**
-   * Current status of the Elasticsearch connection.
-   */
-  elasticsearchConnectionStatus: ElasticsearchConnectionStatus;
-}
-
-/**
  * The token that allows one to configure Kibana instance to communicate with an existing Elasticsearch cluster that
  * has security features enabled.
  */
@@ -65,4 +55,16 @@ export interface PingResult {
    * Full certificate chain of cluster at requested address. Only present if cluster uses HTTPS.
    */
   certificateChain?: Certificate[];
+}
+
+export interface StatusResult {
+  /**
+   * Full certificate chain of cluster at requested address. Only present if cluster uses HTTPS.
+   */
+  connectionStatus: ElasticsearchConnectionStatus;
+
+  /**
+   * Indicates whether Kibana is currently on hold and cannot proceed to `setup` yet.
+   */
+  isSetupOnHold: boolean;
 }
