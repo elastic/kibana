@@ -81,20 +81,34 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
               }}
             />
             <BarSeries
-              id="executionDuration"
+              id={i18n.translate(
+                'xpack.triggersActionsUI.sections.executionDurationChart.durationLabel',
+                {
+                  defaultMessage: `Duration`,
+                }
+              )}
               xScaleType="linear"
               yScaleType="linear"
               xAccessor={0}
               yAccessors={[1]}
               data={paddedExecutionDurations.map((val, ndx) => [ndx, val])}
+              minBarHeight={2}
             />
             <LineSeries
-              id="rule_duration_avg"
+              id={i18n.translate(
+                'xpack.triggersActionsUI.sections.executionDurationChart.avgDurationLabel',
+                {
+                  defaultMessage: `Avg Duration`,
+                }
+              )}
               xScaleType="linear"
               yScaleType="linear"
               xAccessor={0}
               yAccessors={[1]}
-              data={paddedExecutionDurations.map((val, ndx) => [ndx, executionDuration.average])}
+              data={paddedExecutionDurations.map((val, ndx) => [
+                ndx,
+                paddedExecutionDurations[ndx] ? executionDuration.average : null,
+              ])}
               curve={CurveType.CURVE_NATURAL}
             />
             <Axis id="left-axis" position="left" tickFormat={(d) => formatMillisForDisplay(d)} />
@@ -125,7 +139,7 @@ export function padOrTruncateDurations(values: number[], desiredSize: number) {
   if (values.length === desiredSize) {
     return values;
   } else if (values.length < desiredSize) {
-    return assign(fill(new Array(desiredSize), 0), values);
+    return assign(fill(new Array(desiredSize), null), values);
   } else {
     // oldest durations are at the start of the array, so take the last {desiredSize} values
     return values.slice(-desiredSize);
