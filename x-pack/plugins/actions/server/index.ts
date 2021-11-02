@@ -103,13 +103,13 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
           level: 'warning',
           configPath: `${fromPath}.rejectUnauthorized`,
           message:
-            `"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.verificationMode" instead, ` +
+            `"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.ssl.verificationMode" instead, ` +
             `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
             `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
           correctiveActions: {
             manualSteps: [
               `Remove "xpack.actions.rejectUnauthorized" from your kibana configs.`,
-              `Use "xpack.actions.verificationMode" ` +
+              `Use "xpack.actions.ssl.verificationMode" ` +
                 `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
                 `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
             ],
@@ -131,13 +131,13 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
           level: 'warning',
           configPath: `${fromPath}.proxyRejectUnauthorizedCertificates`,
           message:
-            `"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.proxyVerificationMode" instead, ` +
+            `"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.ssl.proxyVerificationMode" instead, ` +
             `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
             `and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".`,
           correctiveActions: {
             manualSteps: [
               `Remove "xpack.actions.proxyRejectUnauthorizedCertificates" from your kibana configs.`,
-              `Use "xpack.actions.proxyVerificationMode" ` +
+              `Use "xpack.actions.ssl.proxyVerificationMode" ` +
                 `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
                 `and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".`,
             ],
