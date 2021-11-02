@@ -84,7 +84,9 @@ export const EngineOverviewLogic = kea<MakeLogicType<EngineOverviewValues, Engin
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/internal/app_search/engines/${engineName}/overview`);
+        const response = await http.get<EngineOverviewApiData>(
+          `/internal/app_search/engines/${engineName}/overview`
+        );
         actions.onOverviewMetricsLoad(response);
       } catch (e) {
         flashAPIErrors(e);
