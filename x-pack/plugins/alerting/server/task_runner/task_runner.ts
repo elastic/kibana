@@ -642,6 +642,11 @@ export class TaskRunner<
     eventLogger.logEvent(event);
 
     if (!this.cancelled$.getValue()) {
+      this.logger.debug(
+        `Updating rule task for ${this.alertType.id} rule with id ${alertId} - ${JSON.stringify(
+          executionStatus
+        )}`
+      );
       await this.updateRuleExecutionStatus(alertId, namespace, executionStatus);
     }
 
@@ -688,6 +693,8 @@ export class TaskRunner<
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
+    this.logger.debug(`Cancelling rule type ${this.alertType.id} with id ${alertId}`);
+
     const eventLogger = this.context.eventLogger;
     const event: IEvent = {
       '@timestamp': new Date().toISOString(),
@@ -726,6 +733,9 @@ export class TaskRunner<
         message: `rule execution cancelled due to timeout: "${this.alertType.id}${alertId}"`,
       },
     };
+    this.logger.debug(
+      `Updating rule task for ${this.alertType.id} rule with id ${alertId} - execution error due to timeout`
+    );
     await this.updateRuleExecutionStatus(alertId, namespace, executionStatus);
   }
 }
