@@ -186,7 +186,8 @@ export const getPendingActionCounts = async (
   esClient: ElasticsearchClient,
   metadataService: EndpointMetadataService,
   /** The Fleet Agent IDs to be checked */
-  agentIDs: string[]
+  agentIDs: string[],
+  isPendingActionResponsesWithAckEnabled: boolean
 ): Promise<EndpointPendingActions[]> => {
   // retrieve the unexpired actions for the given hosts
   const recentActions = await esClient
@@ -239,7 +240,8 @@ export const getPendingActionCounts = async (
     });
 
     const pendingActions: EndpointAction[] = recentActions.filter((action) => {
-      return ackResponseActionIdList.includes(action.action_id) // if has ack
+      return isPendingActionResponsesWithAckEnabled &&
+        ackResponseActionIdList.includes(action.action_id) // if has ack
         ? hasNoEndpointResponse({ action, agentId, indexedActionIds }) // then find responses in new index
         : hasNoFleetResponse({
             // else use the legacy way
