@@ -228,6 +228,9 @@ const browserConsoleStep = {
   _id: 'IvT1oXwB5ds00bB_FVXP',
   observer: {
     hostname: '16Elastic',
+    geo: {
+      name: 'au-heartbeat',
+    },
   },
   agent: {
     name: '16Elastic',
