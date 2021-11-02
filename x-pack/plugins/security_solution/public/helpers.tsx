@@ -216,7 +216,7 @@ const racFieldMappings: Record<string, string> = {
 };
 
 /*
- * @deprecated This functionality should be removed when support for signal.* is no longer
+ * Deprecation notice: This functionality should be removed when support for signal.* is no longer
  * supported.
  *
  * Selectively returns the AAD field value (kibana.alert.*) or the legacy field value

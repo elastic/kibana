@@ -49,6 +49,7 @@ import {
   formatTimelineResultToModel,
 } from '../../../timelines/components/open_timeline/helpers';
 import { convertKueryToElasticSearchQuery } from '../../../common/lib/keury';
+import { getField } from '../../../helpers';
 import {
   replaceTemplateFieldFromQuery,
   replaceTemplateFieldFromMatchFilters,
@@ -59,7 +60,6 @@ import {
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
-import { getField } from '../../../helpers';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {

@@ -255,13 +255,19 @@ export interface SignalEcs {
   threshold_result?: unknown;
 }
 
-type SearchTypes = string | number | boolean | object | SearchTypes[] | undefined;
+export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
+  rule?: Exclude<RuleEcs, 'id'> & { uuid: string[] };
+  building_block_type?: string[];
+  workflow_status?: string[];
+};
 
 export interface Ecs {
   _id: string;
   _index?: string;
   signal?: SignalEcs;
-  kibana?: SearchTypes;
+  kibana?: {
+    alert: SignalEcsAAD;
+  };
 }
 
 export type CaseActionConnector = ActionConnector;
