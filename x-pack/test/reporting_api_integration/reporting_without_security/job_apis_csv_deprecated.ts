@@ -27,7 +27,6 @@ const parseApiJSON = (apiResponseText: string): { job: ReportApiJSON; path: stri
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const supertestNoAuth = getService('supertestWithoutAuth');
   const reportingAPI = getService('reportingAPI');
 
