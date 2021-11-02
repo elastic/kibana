@@ -23,4 +23,28 @@ describe('getDefaultsForActionParams', () => {
       eventAction: 'resolve',
     });
   });
+
+  test('servicenow defaults', async () => {
+    expect(getDefaultsForActionParams('.servicenow', 'test', false)).toEqual({
+      subAction: 'pushToService',
+      subActionParams: {
+        comments: [],
+        incident: {
+          correlation_id: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+        },
+      },
+    });
+  });
+
+  test('servicenow sir defaults', async () => {
+    expect(getDefaultsForActionParams('.servicenow-sir', 'test', false)).toEqual({
+      subAction: 'pushToService',
+      subActionParams: {
+        comments: [],
+        incident: {
+          correlation_id: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+        },
+      },
+    });
+  });
 });
