@@ -9,7 +9,6 @@ import { APIReturnType } from '../../../../plugins/apm/public/services/rest/crea
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
 import { NodeType, BackendNode } from '../../../../plugins/apm/common/connections';
-import { roundNumber } from '../../utils';
 
 type TopDependencies = APIReturnType<'GET /internal/apm/backends/top_backends'>;
 
