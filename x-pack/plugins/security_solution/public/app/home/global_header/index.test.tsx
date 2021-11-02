@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import { GlobalHeader, pagesWithSourcerer } from '.';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../../../common/constants';
@@ -30,6 +30,13 @@ jest.mock('../../../common/lib/kibana', () => ({
     .fn()
     .mockReturnValue({ services: { http: { basePath: { prepend: jest.fn() } } } }),
 }));
+
+jest.mock('react-reverse-portal', () => ({
+  InPortal: ({children}) => (<>{children}</>),
+  OutPortal: ({children}) => (<>{children}</>),
+  createPortalNode: () => ({unmount: jest.fn()})
+}));
+
 describe('global header', () => {
   const mockSetHeaderActionMenu = jest.fn();
   const state = {
@@ -51,23 +58,23 @@ describe('global header', () => {
     (useRouteSpy as jest.Mock).mockReturnValue([
       { pageName: SecurityPageName.overview, detailName: undefined },
     ]);
-    const wrapper = mount(
+    const { getByTestId, getByText } = render(
       <TestProviders store={store}>
         <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="add-data"]').exists()).toBeTruthy();
+    expect(getByText('Add integrations')).toBeInTheDocument();
   });
 
   it.each(pagesWithSourcerer)('shows sourcerer on %s page', (page) => {
     (useRouteSpy as jest.Mock).mockReturnValue([{ pageName: page, detailName: undefined }]);
 
-    const wrapper = mount(
+    const { getByTestId } = render(
       <TestProviders store={store}>
         <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="sourcerer"]').exists()).toBeTruthy();
+    expect(getByTestId('sourcerer-trigger')).toBeInTheDocument();
   });
 
   it('shows sourcerer on rule details page', () => {
@@ -75,12 +82,12 @@ describe('global header', () => {
       { pageName: SecurityPageName.rules, detailName: 'mockruleId' },
     ]);
 
-    const wrapper = mount(
+    const { getByTestId } = render(
       <TestProviders store={store}>
         <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="sourcerer"]').exists()).toBeTruthy();
+    expect(getByTestId('sourcerer-trigger')).toBeInTheDocument();
   });
 
   it('shows no sourcerer if timeline is open', () => {
@@ -102,12 +109,13 @@ describe('global header', () => {
       { pageName: SecurityPageName.rules, detailName: 'mockruleId' },
     ]);
 
-    const wrapper = mount(
+    const { queryByTestId } = render(
       <TestProviders store={mockStore}>
         <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="sourcerer"]').exists()).toBeFalsy();
+    expect(queryByTestId('sourcerer-trigger')).not.toBeInTheDocument();
+
   });
 });
