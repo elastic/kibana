@@ -81,19 +81,19 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
         .join(', ');
     }, [os]);
 
-    const getEntryValue = useCallback((type: string, value: string | string[]) => {
+    const getEntryValue = (type: string, value: string | string[]) => {
       if (type === 'match_any' && Array.isArray(value)) {
         return value.map((currentValue) => <EuiBadge color="hollow">{currentValue}</EuiBadge>);
       }
       return value;
-    }, []);
+    };
 
-    const getEntryOperator = useCallback((type: string, operator: string) => {
+    const getEntryOperator = (type: string, operator: string) => {
       if (type === 'nested') return;
       return operator === 'included'
         ? OPERATOR_TYPE_LABELS_INCLUDED[type as keyof typeof OPERATOR_TYPE_LABELS_INCLUDED] ?? type
         : OPERATOR_TYPE_LABELS_EXCLUDED[type as keyof typeof OPERATOR_TYPE_LABELS_EXCLUDED] ?? type;
-    }, []);
+    };
 
     const getNestedEntriesContent = useCallback(
       (type: string, nestedEntries: ArtifactInfoEntry[]) => {
@@ -132,7 +132,7 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
           );
         }
       },
-      [getTestId, getEntryValue, getEntryOperator]
+      [getTestId]
     );
 
     return (
