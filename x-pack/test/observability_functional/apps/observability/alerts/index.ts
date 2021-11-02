@@ -189,19 +189,15 @@ export default ({ getService }: FtrProviderContext) => {
             await alertStatusCell.moveMouseTo();
             await retry.waitFor(
               'cell actions visible',
-              async () => await observability.alerts.common.copyToClipboardButtonExists()
+              async () => await observability.alerts.common.filterForValueButtonExists()
             );
           });
         });
 
         afterEach(async () => {
           await observability.alerts.common.clearQueryBar();
-        });
-
-        it('Copy button works', async () => {
-          // NOTE: We don't have access to the clipboard in a headless environment,
-          // so we'll just check the button is clickable in the functional tests.
-          await (await observability.alerts.common.getCopyToClipboardButton()).click();
+          // Reset the query bar by hiding the dropdown
+          await observability.alerts.common.submitQuery('');
         });
 
         it('Filter for value works', async () => {
