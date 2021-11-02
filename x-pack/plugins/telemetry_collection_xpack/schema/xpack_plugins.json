@@ -100,10 +100,10 @@
             }
           }
         },
-        "count_actions_executions": {
+        "count_actions_executions_per_day": {
           "type": "long"
         },
-        "count_actions_executions_by_type": {
+        "count_actions_executions_by_type_per_day": {
           "properties": {
             "DYNAMIC_KEY": {
               "type": "long"
@@ -171,10 +171,10 @@
         "count_actions_namespaces": {
           "type": "long"
         },
-        "count_actions_executions_failed": {
+        "count_actions_executions_failed_per_day": {
           "type": "long"
         },
-        "count_actions_executions_failed_by_type": {
+        "count_actions_executions_failed_by_type_per_day": {
           "properties": {
             "DYNAMIC_KEY": {
               "type": "long"
@@ -214,10 +214,10 @@
             }
           }
         },
-        "avg_execution_time": {
+        "avg_execution_time_per_day": {
           "type": "long"
         },
-        "avg_execution_time_by_type": {
+        "avg_execution_time_by_type_per_day": {
           "properties": {
             "DYNAMIC_KEY": {
               "type": "long"
@@ -482,10 +482,10 @@
         "count_rules_namespaces": {
           "type": "long"
         },
-        "count_rules_executions": {
+        "count_rules_executions_per_day": {
           "type": "long"
         },
-        "count_rules_executions_by_type": {
+        "count_rules_executions_by_type_per_day": {
           "properties": {
             "DYNAMIC_KEY": {
               "type": "long"
@@ -570,10 +570,10 @@
             }
           }
         },
-        "count_rules_executions_failured": {
+        "count_rules_executions_failured_per_day": {
           "type": "long"
         },
-        "count_rules_executions_failured_by_reason": {
+        "count_rules_executions_failured_by_reason_per_day": {
           "properties": {
             "DYNAMIC_KEY": {
               "type": "long"
@@ -592,7 +592,7 @@
             }
           }
         },
-        "count_rules_executions_failured_by_reason_by_type": {
+        "count_rules_executions_failured_by_reason_by_type_per_day": {
           "properties": {
             "DYNAMIC_KEY": {
               "properties": {
@@ -1021,10 +1021,10 @@
             }
           }
         },
-        "avg_execution_time": {
+        "avg_execution_time_per_day": {
           "type": "long"
         },
-        "avg_execution_time_by_type": {
+        "avg_execution_time_by_type_per_day": {
           "properties": {
             "DYNAMIC_KEY": {
               "type": "long"
