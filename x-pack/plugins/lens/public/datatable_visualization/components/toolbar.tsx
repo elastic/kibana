@@ -38,7 +38,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
             showLabel={false}
             checked={!!state.fitRowToContent}
             onChange={() => {
-              const current = state.fitRowToContent ?? true;
+              const current = state.fitRowToContent ?? false;
               setState({
                 ...state,
                 fitRowToContent: !current,
