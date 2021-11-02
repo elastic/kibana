@@ -9,10 +9,10 @@ import { service, timerange } from '@elastic/apm-synthtrace';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { RecursivePartial } from '../../../../../plugins/apm/typings/common';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { registry } from '../../../common/registry';
+} from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { RecursivePartial } from '../../../../plugins/apm/typings/common';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { registry } from '../../common/registry';
 
 type ErrorGroups = APIReturnType<'GET /internal/apm/services/{serviceName}/errors'>['errorGroups'];
 
@@ -70,16 +70,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
 
         before(async () => {
-          const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
-            'instance-a'
-          );
+          const serviceInstance = service(serviceName, 'production', 'go').instance('instance-a');
 
           await synthtraceEsClient.index([
             ...timerange(start, end)
               .interval('1m')
               .rate(appleTransaction.successRate)
               .flatMap((timestamp) =>
-                serviceGoProdInstance
+                serviceInstance
                   .transaction(appleTransaction.name)
                   .timestamp(timestamp)
                   .duration(1000)
@@ -90,9 +88,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .interval('1m')
               .rate(appleTransaction.failureRate)
               .flatMap((timestamp) =>
-                serviceGoProdInstance
+                serviceInstance
                   .transaction(appleTransaction.name)
-                  .errors(serviceGoProdInstance.error('error 1', 'foo').timestamp(timestamp))
+                  .errors(serviceInstance.error('error 1', 'foo').timestamp(timestamp))
                   .duration(1000)
                   .timestamp(timestamp)
                   .failure()
@@ -102,7 +100,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .interval('1m')
               .rate(bananaTransaction.successRate)
               .flatMap((timestamp) =>
-                serviceGoProdInstance
+                serviceInstance
                   .transaction(bananaTransaction.name)
                   .timestamp(timestamp)
                   .duration(1000)
@@ -113,9 +111,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .interval('1m')
               .rate(bananaTransaction.failureRate)
               .flatMap((timestamp) =>
-                serviceGoProdInstance
+                serviceInstance
                   .transaction(bananaTransaction.name)
-                  .errors(serviceGoProdInstance.error('error 2', 'bar').timestamp(timestamp))
+                  .errors(serviceInstance.error('error 2', 'bar').timestamp(timestamp))
                   .duration(1000)
                   .timestamp(timestamp)
                   .failure()
