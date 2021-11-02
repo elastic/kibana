@@ -381,8 +381,10 @@ export const DisplaySettingsLogic = kea<
         : `/internal/workplace_search/account/sources/${sourceId}/display_settings/config`;
 
       try {
-        const response = await HttpLogic.values.http.get(route);
+        const response = await HttpLogic.values.http.get<DisplaySettingsResponseProps>(route);
         actions.onInitializeDisplaySettings({
+          // isOrganization is not typed
+          // @ts-expect-error TS2345
           isOrganization,
           sourceId,
           serverRoute: route,
@@ -396,9 +398,10 @@ export const DisplaySettingsLogic = kea<
       const { searchResultConfig, serverRoute } = values;
 
       try {
-        const response = await HttpLogic.values.http.post(serverRoute, {
-          body: JSON.stringify({ ...searchResultConfig }),
-        });
+        const response = await HttpLogic.values.http.post<DisplaySettingsResponseProps>(
+          serverRoute,
+          { body: JSON.stringify({ ...searchResultConfig }) }
+        );
         actions.setServerResponseData(response);
       } catch (e) {
         flashAPIErrors(e);
