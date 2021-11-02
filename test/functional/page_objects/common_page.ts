@@ -503,6 +503,15 @@ export class CommonPageObject extends FtrService {
     }
   }
 
+  /**
+   * Due to a warning thrown, documented at:
+   * https://momentjs.com/guides/#/warnings/js-date/
+   * this fn formats time in a format specified, or defaulted
+   * to the same format in
+   * [getTimeDurationInHours()](https://github.com/elastic/kibana/blob/main/test/functional/page_objects/time_picker.ts#L256)
+   * @param time
+   * @param fmt
+   */
   formatTime(time: TimeStrings, fmt: string = 'MMM D, YYYY @ HH:mm:ss.SSS') {
     return Object.keys(time)
       .map((x) => moment(time[x], [fmt]).format())
@@ -516,7 +525,16 @@ export class CommonPageObject extends FtrService {
       );
   }
 
-  async setTime(time: { from: string; to: string }) {
+  /**
+   * Due to a warning thrown, documented at:
+   * https://github.com/elastic/kibana/pull/114997#issuecomment-950823874
+   * this fn formats time in a format specified, or defaulted
+   * to the same format in
+   * [getTimeDurationInHours()](https://github.com/elastic/kibana/blob/main/test/functional/page_objects/time_picker.ts#L256)
+   * @param time
+   * @param fmt
+   */
+  async setTime(time: TimeStrings) {
     await this.kibanaServer.uiSettings.replace({
       'timepicker:timeDefaults': JSON.stringify(this.formatTime(time)),
     });
