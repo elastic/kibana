@@ -52,7 +52,7 @@ const element3: CanvasElement = {
   position: generatePosition(3),
   type: 'element',
   expression: '',
-  filter: `timefilter column="@timestamp" from="${time2.from}" to="${time2.to}" filterGroup="${group2}"`,
+  filter: `timefilter column="@timestamp" from="${time2.from}" to="${time2.to}"`,
 };
 
 const element4: CanvasElement = {
