@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe(`with ${testData.suiteTitle}`, function () {
       after(async function () {
-        await ml.testResources.deleteSavedSearchByTitle(dashboardTitle);
+        await ml.testResources.deleteSavedSearchByTitle(savedSearchTitle);
         await ml.testResources.deleteDashboardByTitle(dashboardTitle);
       });
 
