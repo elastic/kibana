@@ -51,6 +51,10 @@
   min-width: 0;
 }
 
+.canvasSidebar__expandable {
+  width: 100%;
+}
+
 .canvasSidebar__expandable + .canvasSidebar__expandable {
   margin-top: 1px;
 

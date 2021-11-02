@@ -35,6 +35,10 @@ const strings = {
     i18n.translate('xpack.canvas.workpad_filters.groupByColumn', {
       defaultMessage: 'Column',
     }),
+  getWithoutGroupLabel: () =>
+    i18n.translate('xpack.canvas.workpad_filters.filters_group.withoutGroup', {
+      defaultMessage: 'Without group',
+    }),
 };
 
 const groupByOptions: Array<{ value: FilterField; text: string }> = [
@@ -48,7 +52,17 @@ export const WorkpadFilters: FC<Props> = ({
   onGroupByChange,
   groupFiltersByField,
 }) => {
-  const filtersGroupsComponents = filtersGroups.map((filtersGroup, index) => (
+  const groupedByFilterGroupField = groupFiltersByField === 'filterGroup';
+  const preparedFilterGroups = filtersGroups.map((filterGroup) =>
+    groupedByFilterGroupField
+      ? {
+          ...filterGroup,
+          name: filterGroup.name ?? strings.getWithoutGroupLabel(),
+        }
+      : filterGroup
+  );
+
+  const filtersGroupsComponents = preparedFilterGroups.map((filtersGroup, index) => (
     <FiltersGroup key={`filter-group-${index}`} filtersGroup={filtersGroup} />
   ));
 

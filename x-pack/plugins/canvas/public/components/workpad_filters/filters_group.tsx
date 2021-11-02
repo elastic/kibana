@@ -22,9 +22,9 @@ const panelStyle = {
 };
 
 const strings = {
-  getWithoutGroupLabel: () =>
-    i18n.translate('xpack.canvas.workpad_filters.filters_group.withoutGroup', {
-      defaultMessage: 'Without group',
+  getBlankValueLabel: () =>
+    i18n.translate('xpack.canvas.workpad_filters.filters_group.blankValue', {
+      defaultMessage: '(Blank)',
     }),
 };
 
@@ -43,7 +43,7 @@ export const FiltersGroup: FC<Props> = ({ filtersGroup }) => {
     <div className="canvasSidebar__expandable">
       <EuiAccordion
         id="canvas-element-stats"
-        buttonContent={name ?? strings.getWithoutGroupLabel()}
+        buttonContent={name ?? strings.getBlankValueLabel()}
         initialIsOpen={true}
         className="canvasSidebar__accordion filtersSidebar__accordion"
         style={{ marginLeft: '0px' }}
