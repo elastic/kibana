@@ -9,6 +9,7 @@ import { APIReturnType } from '../../../../plugins/apm/public/services/rest/crea
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
 import { NodeType, BackendNode } from '../../../../plugins/apm/common/connections';
+import { roundNumber } from '../../utils';
 
 type TopDependencies = APIReturnType<'GET /internal/apm/backends/top_backends'>;
 
@@ -105,6 +106,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(latency.timeseries.every(({ y }) => y === transaction.duration * 1000)).to.be(
               true
             );
+          });
+
+          it('returns the correct throughput', () => {
+            const {
+              currentStats: { throughput },
+            } = backends;
+            const { rate } = dataConfig;
+
+            expect(roundNumber(throughput.value)).to.be(roundNumber(rate));
+          });
+
+          it('returns the correct total time', () => {
+            const {
+              currentStats: { totalTime },
+            } = backends;
+            const { rate, transaction } = dataConfig;
+
+            expect(
+              totalTime.timeseries.every(({ y }) => y === rate * transaction.duration * 1000)
+            ).to.be(true);
           });
 
           it('returns the correct error rate', () => {
