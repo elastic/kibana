@@ -34,24 +34,13 @@ const plugin: Cypress.PluginConfig = (on, config) => {
   const requestTimeout = config.env.ES_REQUEST_TIMEOUT;
   const isCloud = config.env.TEST_CLOUD;
 
-  let client: Client;
+const client = new Client({
+  node,
+  requestTimeout,
+  Connection: HttpConnection,
+  ...(isCloud ? { tls: { ca: Fs.readFileSync(CA_CERT_PATH, "utf-8") } } : {}),
+});
 
-  if (!isCloud) {
-    client = new Client({
-      node,
-      requestTimeout,
-      Connection: HttpConnection,
-    });
-  } else {
-    client = new Client({
-      tls: {
-        ca: Fs.readFileSync(CA_CERT_PATH, 'utf-8'),
-      },
-      node,
-      requestTimeout,
-      Connection: HttpConnection,
-    });
-  }
 
   const synthtraceEsClient = new SynthtraceEsClient(
     client,
