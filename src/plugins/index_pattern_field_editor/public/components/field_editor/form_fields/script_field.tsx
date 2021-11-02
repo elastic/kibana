@@ -113,9 +113,18 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
     const validationData = await firstValueFrom(
       validationData$.pipe(
         first((data) => {
-          return data === undefined
-            ? false
-            : data.isFetchingDoc === false && data.isLoadingPreview === false;
+          // We first wait to get field preview data
+          if (data === undefined) {
+            return false;
+          }
+
+          // We are not interested in preview data meanwhile it
+          // is still making HTTP request
+          if (data.isFetchingDoc || data.isLoadingPreview) {
+            return false;
+          }
+
+          return true;
         })
       )
     );
