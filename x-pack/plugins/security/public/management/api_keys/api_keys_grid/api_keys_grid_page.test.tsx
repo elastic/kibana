@@ -18,9 +18,11 @@ import { APIKeysGridPage } from './api_keys_grid_page';
 
 /*
  * Note to engineers
- * we moved these two tests below to "x-pack/test/functional/apps/api_keys/home_page.ts":
+ * we moved these 4 tests below to "x-pack/test/functional/apps/api_keys/home_page.ts":
  * 1-"creates API key when submitting form, redirects back and displays base64"
  * 2-"creates API key with optional expiration, redirects back and displays base64"
+ * 3-"deletes multiple api keys using bulk select"
+ * 4-"deletes api key using cta button"
  * to functional tests to avoid flakyness
  */
 
@@ -168,63 +170,5 @@ describe('APIKeysGridPage', () => {
 
     expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
     await findByText(/Could not load API keys/);
-  });
-
-  it('deletes api key using cta button', async () => {
-    const history = createMemoryHistory({ initialEntries: ['/'] });
-
-    const { findByRole, findAllByLabelText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <APIKeysGridPage
-          apiKeysAPIClient={apiClientMock}
-          notifications={coreStart.notifications}
-          history={history}
-        />
-      </Providers>
-    );
-
-    const [deleteButton] = await findAllByLabelText(/Delete/i);
-    fireEvent.click(deleteButton);
-
-    const dialog = await findByRole('dialog');
-    fireEvent.click(await within(dialog).findByRole('button', { name: 'Delete API key' }));
-
-    await waitFor(() => {
-      expect(apiClientMock.invalidateApiKeys).toHaveBeenLastCalledWith(
-        [{ id: '0QQZ2m0BO2XZwgJFuWTT', name: 'first-api-key' }],
-        true
-      );
-    });
-  });
-
-  it('deletes multiple api keys using bulk select', async () => {
-    const history = createMemoryHistory({ initialEntries: ['/'] });
-
-    const { findByRole, findAllByRole } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <APIKeysGridPage
-          apiKeysAPIClient={apiClientMock}
-          notifications={coreStart.notifications}
-          history={history}
-        />
-      </Providers>
-    );
-
-    const deleteCheckboxes = await findAllByRole('checkbox', { name: 'Select this row' });
-    deleteCheckboxes.forEach((checkbox) => fireEvent.click(checkbox));
-    fireEvent.click(await findByRole('button', { name: 'Delete API keys' }));
-
-    const dialog = await findByRole('dialog');
-    fireEvent.click(await within(dialog).findByRole('button', { name: 'Delete API keys' }));
-
-    await waitFor(() => {
-      expect(apiClientMock.invalidateApiKeys).toHaveBeenLastCalledWith(
-        [
-          { id: '0QQZ2m0BO2XZwgJFuWTT', name: 'first-api-key' },
-          { id: 'BO2XZwgJFuWTT0QQZ2m0', name: 'second-api-key' },
-        ],
-        true
-      );
-    });
   });
 });

@@ -28,26 +28,24 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.getVisibleText('apiKeysPermissionDeniedMessage');
     },
 
-    async clickOnCreateApiKey() {
-      return await (await find.byCssSelector('a[data-test-subj="createApiKey"]')).click();
+    async clickOnPromptCreateApiKey() {
+      return await testSubjects.click('apiKeysCreatePromptButton');
+    },
+
+    async clickOnTableCreateApiKey() {
+      return await testSubjects.click('apiKeysCreateTableButton');
     },
 
     async setApiKeyName(apiKeyName: string) {
-      return await (
-        await find.byCssSelector('input[data-test-subj="apiKeyName"]')
-      ).type(apiKeyName);
+      return await testSubjects.setValue('apiKeyNameInput', apiKeyName);
     },
 
-    async setApiKeyExpireAfter(expirationTime: string) {
-      return await (
-        await find.byCssSelector('input[data-test-subj="apiKeyExpireAfter"]')
-      ).type(expirationTime);
+    async setApiKeyCustomExpiration(expirationTime: string) {
+      return await testSubjects.setValue('apiKeyCustomExpirationInput', expirationTime);
     },
 
     async submitOnCreateApiKey() {
-      return await (
-        await find.byCssSelector('button[data-test-subj="formFlyoutSubmitButton"]')
-      ).click();
+      return await testSubjects.click('formFlyoutSubmitButton');
     },
 
     async isApiKeyModalExists() {
@@ -59,11 +57,8 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return euiCallOutHeader.getVisibleText();
     },
 
-    async toggleExpireAfter() {
-      const toggleExpirationTimeInput = await find.byCssSelector(
-        'button[data-test-subj="toggleApiKeyExpireAfter"]'
-      );
-      return await toggleExpirationTimeInput.click();
+    async toggleCustomExpiration() {
+      return await testSubjects.click('apiKeyCustomExpirationSwitch');
     },
 
     async getErrorCallOutText() {
@@ -71,21 +66,30 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await alertElem.getVisibleText();
     },
 
-    async deleteAllApiKey() {
-      const hasApiKeysToDelete = await find.existsByCssSelector(
-        '.euiBasicTable tbody tr td button.euiButtonIcon'
-      );
+    async getApiKeysFirstPromptTitle() {
+      const titlePromptElem = await find.byCssSelector('.euiEmptyPrompt .euiTitle');
+      return await titlePromptElem.getVisibleText();
+    },
+
+    async deleteAllApiKeyOneByOne() {
+      const hasApiKeysToDelete = await testSubjects.exists('apiKeysTableDeleteAction');
       if (hasApiKeysToDelete) {
-        const apiKeysToDelete = await find.allByCssSelector(
-          '.euiBasicTable tbody tr td button.euiButtonIcon'
-        );
+        const apiKeysToDelete = await testSubjects.findAll('apiKeysTableDeleteAction');
         for (const element of apiKeysToDelete) {
           await element.click();
-          const deleteConfirmationButton = await find.byCssSelector(
-            'button[data-test-subj="confirmModalConfirmButton"]'
-          );
-          await deleteConfirmationButton.click();
+          await testSubjects.click('confirmModalConfirmButton');
         }
+      }
+    },
+
+    async bulkDeleteApiKeys() {
+      const hasApiKeysToDelete = await find.existsByCssSelector(
+        '[data-test-subj="checkboxSelectAll"]'
+      );
+      if (hasApiKeysToDelete) {
+        await testSubjects.click('checkboxSelectAll');
+        await testSubjects.click('bulkInvalidateActionButton');
+        await testSubjects.click('confirmModalConfirmButton');
       }
     },
   };

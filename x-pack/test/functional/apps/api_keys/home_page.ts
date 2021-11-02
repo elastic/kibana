@@ -45,15 +45,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await pageObjects.apiKeys.deleteAllApiKey();
+        await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
       });
 
       it('when submitting form, close dialog and displays new api key', async () => {
-        const ApiKeyName = 'Happy API Key';
-        await pageObjects.apiKeys.clickOnCreateApiKey();
+        const apiKeyName = 'Happy API Key';
+        await pageObjects.apiKeys.clickOnPromptCreateApiKey();
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/create');
 
-        await pageObjects.apiKeys.setApiKeyName(ApiKeyName);
+        await pageObjects.apiKeys.setApiKeyName(apiKeyName);
         await pageObjects.apiKeys.submitOnCreateApiKey();
         const newApiKeyCreation = await pageObjects.apiKeys.getNewApiKeyCreation();
 
@@ -62,22 +62,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.isApiKeyModalExists()).to.be(false);
-        expect(newApiKeyCreation).to.be(`Created API key '${ApiKeyName}'`);
+        expect(newApiKeyCreation).to.be(`Created API key '${apiKeyName}'`);
       });
 
       it('with optional expiration, redirects back and displays base64', async () => {
-        const ApiKeyName = 'Happy expiration API key';
-        await pageObjects.apiKeys.clickOnCreateApiKey();
+        const apiKeyName = 'Happy expiration API key';
+        await pageObjects.apiKeys.clickOnPromptCreateApiKey();
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/create');
 
-        await pageObjects.apiKeys.setApiKeyName(ApiKeyName);
-        await pageObjects.apiKeys.toggleExpireAfter();
+        await pageObjects.apiKeys.setApiKeyName(apiKeyName);
+        await pageObjects.apiKeys.toggleCustomExpiration();
         await pageObjects.apiKeys.submitOnCreateApiKey();
         expect(await pageObjects.apiKeys.getErrorCallOutText()).to.be(
           'Enter a valid duration or disable this option.'
         );
 
-        await pageObjects.apiKeys.setApiKeyExpireAfter('12');
+        await pageObjects.apiKeys.setApiKeyCustomExpiration('12');
         await pageObjects.apiKeys.submitOnCreateApiKey();
         const newApiKeyCreation = await pageObjects.apiKeys.getNewApiKeyCreation();
 
@@ -86,7 +86,39 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.isApiKeyModalExists()).to.be(false);
-        expect(newApiKeyCreation).to.be(`Created API key '${ApiKeyName}'`);
+        expect(newApiKeyCreation).to.be(`Created API key '${apiKeyName}'`);
+      });
+    });
+
+    describe('deletes API key(s)', function () {
+      before(async () => {
+        await security.testUser.setRoles(['kibana_admin']);
+        await security.testUser.setRoles(['test_api_keys']);
+        await pageObjects.common.navigateToApp('apiKeys');
+      });
+
+      beforeEach(async () => {
+        await pageObjects.apiKeys.clickOnPromptCreateApiKey();
+        await pageObjects.apiKeys.setApiKeyName('api key 1');
+        await pageObjects.apiKeys.submitOnCreateApiKey();
+      });
+
+      it('one by one', async () => {
+        await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
+        expect(await pageObjects.apiKeys.getApiKeysFirstPromptTitle()).to.be(
+          'Create your first API key'
+        );
+      });
+
+      it('by bulk', async () => {
+        await pageObjects.apiKeys.clickOnTableCreateApiKey();
+        await pageObjects.apiKeys.setApiKeyName('api key 2');
+        await pageObjects.apiKeys.submitOnCreateApiKey();
+
+        await pageObjects.apiKeys.bulkDeleteApiKeys();
+        expect(await pageObjects.apiKeys.getApiKeysFirstPromptTitle()).to.be(
+          'Create your first API key'
+        );
       });
     });
   });
