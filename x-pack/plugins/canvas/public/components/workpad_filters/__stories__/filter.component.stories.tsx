@@ -39,7 +39,6 @@ const component: FC<any> = ({ value }) => (
 );
 
 storiesOf('components/WorkpadFilters/FilterComponent', module)
-  // .addDecorator((story) => <div className="canvasLayout__sidebar">{story()}</div>)
   .add('default', () => <Filter filter={filter} />)
   .add('with component field', () => (
     <Filter filter={{ ...filter, value: { ...filter.value, component } }} />
