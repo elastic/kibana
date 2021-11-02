@@ -515,7 +515,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const alerts = [{ id: 'us-central' }, { id: 'us-east' }, { id: 'us-west' }];
         rule = await createRuleWithActionsAndParams(testRunUuid, {
-          alerts,
+          instances: alerts,
         });
 
         // refresh to see rule
@@ -716,7 +716,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ])
         );
         rule = await createRuleWithActionsAndParams(testRunUuid, {
-          alerts,
+          instances: alerts,
         });
 
         // await first run to complete so we have an initial state

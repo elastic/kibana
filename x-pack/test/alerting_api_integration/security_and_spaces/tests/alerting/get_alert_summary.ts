@@ -18,11 +18,11 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { UserAtSpaceScenarios } from '../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
-export default function createGetAlertInstanceSummaryTests({ getService }: FtrProviderContext) {
+export default function createGetAlertSummaryTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('getAlertInstanceSummary', () => {
+  describe('getAlertSummary', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
@@ -30,17 +30,17 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('should handle getAlertInstanceSummary alert request appropriately', async () => {
-          const { body: createdAlert } = await supertest
+        it('should handle getAlertSummary request appropriately', async () => {
+          const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(space.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+              `${getUrlPrefix(space.id)}/internal/alerting/rule/${createdRule.id}/_alert_summary`
             )
             .auth(user.username, user.password);
 
@@ -65,7 +65,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
                 status_start_date: statusStartDate,
                 status_end_date: statusEndDate,
               } = response.body;
-              expect(id).to.equal(createdAlert.id);
+              expect(id).to.equal(createdRule.id);
               expect(Date.parse(statusStartDate)).to.be.lessThan(Date.parse(statusEndDate));
 
               const stableBody = omit(response.body, [
@@ -93,8 +93,8 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
           }
         });
 
-        it('should handle getAlertInstanceSummary alert request appropriately when unauthorized', async () => {
-          const { body: createdAlert } = await supertest
+        it('should handle getAlertSummary request appropriately when unauthorized', async () => {
+          const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
@@ -104,11 +104,11 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(space.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+              `${getUrlPrefix(space.id)}/internal/alerting/rule/${createdRule.id}/_alert_summary`
             )
             .auth(user.username, user.password);
 
@@ -150,18 +150,16 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
           }
         });
 
-        it(`shouldn't getAlertInstanceSummary for an alert from another space`, async () => {
-          const { body: createdAlert } = await supertest
+        it(`shouldn't getAlertSummary for a rule from another space`, async () => {
+          const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix('other')}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
-            )
+            .get(`${getUrlPrefix('other')}/internal/alerting/rule/${createdRule.id}/_alert_summary`)
             .auth(user.username, user.password);
 
           expect(response.statusCode).to.eql(404);
@@ -176,7 +174,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
-                message: `Saved object [alert/${createdAlert.id}] not found`,
+                message: `Saved object [alert/${createdRule.id}] not found`,
               });
               break;
             default:
@@ -184,7 +182,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
           }
         });
 
-        it(`should handle getAlertInstanceSummary request appropriately when alert doesn't exist`, async () => {
+        it(`should handle getAlertSummary request appropriately when rule doesn't exist`, async () => {
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/internal/alerting/rule/1/_alert_summary`)
             .auth(user.username, user.password);
