@@ -28,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
             savedObjectsTagging: ['all', 'read'],
             canvas: ['all', 'read'],
             maps: ['all', 'read'],
+            observabilityCases: ['all', 'read'],
             fleet: ['all', 'read'],
             actions: ['all', 'read'],
             stackAlerts: ['all', 'read'],

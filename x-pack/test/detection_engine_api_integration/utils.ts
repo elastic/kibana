@@ -48,6 +48,7 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
   INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
+  UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '../../plugins/security_solution/common/constants';
 
 /**
@@ -509,6 +510,29 @@ export const createSignalsIndex = async (
   }, 'createSignalsIndex');
 };
 
+export const createLegacyRuleAction = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  alertId: string,
+  connectorId: string
+): Promise<unknown> =>
+  supertest
+    .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}`)
+    .set('kbn-xsrf', 'true')
+    .query({ alert_id: alertId })
+    .send({
+      name: 'Legacy notification with one action',
+      interval: '1m',
+      actions: [
+        {
+          id: connectorId,
+          group: 'default',
+          params: {
+            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          actionTypeId: '.slack',
+        },
+      ],
+    });
 /**
  * Deletes the signals index for use inside of afterEach blocks of tests
  * @param supertest The supertest client library
@@ -955,7 +979,9 @@ export const deleteRule = async (
   if (response.status !== 200) {
     // eslint-disable-next-line no-console
     console.log(
-      'Did not get an expected 200 "ok" when deleting the rule. CI issues could happen. Suspect this line if you are seeing CI issues.'
+      `Did not get an expected 200 "ok" when deleting the rule. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
     );
   }
 
@@ -1104,7 +1130,7 @@ export const createExceptionList = async (
 };
 
 /**
- * Helper to cut down on the noise in some of the tests. Does a delete of a rule.
+ * Helper to cut down on the noise in some of the tests. Does a delete of an exception list.
  * It does not check for a 200 "ok" on this.
  * @param supertest The supertest deps
  * @param id The rule id to delete
@@ -1119,7 +1145,9 @@ export const deleteExceptionList = async (
   if (response.status !== 200) {
     // eslint-disable-next-line no-console
     console.log(
-      'Did not get an expected 200 "ok" when deleting an exception list. CI issues could happen. Suspect this line if you are seeing CI issues.'
+      `Did not get an expected 200 "ok" when deleting an exception list. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
     );
   }
 
@@ -1136,12 +1164,20 @@ export const createExceptionListItem = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   exceptionListItem: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {
-  const { body } = await supertest
+  const response = await supertest
     .post(EXCEPTION_LIST_ITEM_URL)
     .set('kbn-xsrf', 'true')
-    .send(exceptionListItem)
-    .expect(200);
-  return body;
+    .send(exceptionListItem);
+
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when creating an exception list item. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  return response.body;
 };
 
 /**

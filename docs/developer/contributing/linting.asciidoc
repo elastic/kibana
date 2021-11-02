@@ -31,7 +31,7 @@ EditorConfig, which can be set up by installing a plugin in your editor
 that dynamically updates its configuration. Take a look at the
 http://editorconfig.org/#download[EditorConfig] site to find a plugin
 for your editor, and browse our
-https://github.com/elastic/kibana/blob/master/.editorconfig[`.editorconfig`]
+https://github.com/elastic/kibana/blob/main/.editorconfig[`.editorconfig`]
 file to see what config rules we set up.
 
 [discrete]

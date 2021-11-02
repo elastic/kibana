@@ -23,16 +23,16 @@ export function mysqlMetricsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'mysqlMetrics',
     name: i18n.translate('home.tutorials.mysqlMetrics.nameTitle', {
-      defaultMessage: 'MySQL metrics',
+      defaultMessage: 'MySQL Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.mysqlMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from MySQL.',
+      defaultMessage: 'Collect metrics from MySQL servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mysqlMetrics.longDescription', {
       defaultMessage:
-        'The `mysql` Metricbeat module fetches internal metrics from the MySQL server. \
+        'The `mysql` Metricbeat module fetches metrics from MySQL server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mysql.html',

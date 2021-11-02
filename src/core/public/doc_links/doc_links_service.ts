@@ -42,9 +42,9 @@ export class DocLinksService {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
           supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
           customLinks: `${KIBANA_DOCS}custom-links.html`,
-          droppedTransactionSpans: `${APM_DOCS}get-started/master/transaction-spans.html#dropped-spans`,
-          upgrading: `${APM_DOCS}server/master/upgrading.html`,
-          metaData: `${APM_DOCS}get-started/master/metadata.html`,
+          droppedTransactionSpans: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-spans.html#data-model-dropped-spans`,
+          upgrading: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade.html`,
+          metaData: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-metadata.html`,
         },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
@@ -490,7 +490,9 @@ export class DocLinksService {
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
           elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
+          beatsAgentComparison: `${FLEET_DOCS}beats-agent-comparison.html`,
           datastreams: `${FLEET_DOCS}data-streams.html`,
+          datastreamsILM: `${FLEET_DOCS}data-streams.html#data-streams-ilm`,
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
           installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
@@ -504,9 +506,9 @@ export class DocLinksService {
         clients: {
           /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
           guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/index.html`,
-          goOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/7.x/overview.html`,
+          goOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/overview.html`,
           javaIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/index.html`,
-          jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/7.x/introduction.html`,
+          jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/introduction.html`,
           netGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/7.x/index.html`,
           perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/current/index.html`,
           phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/7.x/index.html`,
@@ -752,6 +754,8 @@ export interface DocLinksStart {
     readonly snapshotRestore: Record<string, string>;
     readonly ingest: Record<string, string>;
     readonly fleet: Readonly<{
+      datastreamsILM: string;
+      beatsAgentComparison: string;
       guide: string;
       fleetServer: string;
       fleetServerAddFleetServer: string;
