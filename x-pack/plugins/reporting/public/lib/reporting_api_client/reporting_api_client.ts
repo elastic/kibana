@@ -87,7 +87,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async deleteReport(jobId: string) {
-    return await this.http.delete(`${API_LIST_URL}/delete/${jobId}`, {
+    return await this.http.delete<void>(`${API_LIST_URL}/delete/${jobId}`, {
       asSystemRequest: true,
     });
   }
@@ -108,7 +108,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async total() {
-    return await this.http.get(`${API_LIST_URL}/count`, {
+    return await this.http.get<number>(`${API_LIST_URL}/count`, {
       asSystemRequest: true,
     });
   }
@@ -196,13 +196,13 @@ export class ReportingAPIClient implements IReportingAPI {
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
   public verifyBrowser() {
-    return this.http.post(`${API_BASE_URL}/diagnose/browser`, {
+    return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/browser`, {
       asSystemRequest: true,
     });
   }
 
   public verifyScreenCapture() {
-    return this.http.post(`${API_BASE_URL}/diagnose/screenshot`, {
+    return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/screenshot`, {
       asSystemRequest: true,
     });
   }

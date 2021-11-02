@@ -24,7 +24,7 @@ const OsqueryAppComponent = () => {
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
   const { data: osqueryIntegration, isFetched } = useOsqueryIntegrationStatus();
 
-  if (isFetched && osqueryIntegration.install_status !== 'installed') {
+  if (isFetched && osqueryIntegration?.install_status !== 'installed') {
     return <OsqueryAppEmptyState />;
   }
 

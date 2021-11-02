@@ -9,7 +9,7 @@ Properties that can be returned by HttpInterceptor.request to override the respo
 <b>Signature:</b>
 
 ```typescript
-export interface IHttpResponseInterceptorOverrides<TResponseBody = any> 
+export interface IHttpResponseInterceptorOverrides<TResponseBody = unknown> 
 ```
 
 ## Properties

@@ -36,6 +36,8 @@ const rewriteBodyReq: RewriteRequestCase<AlertType> = ({
 });
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
-  const res = await http.get(`${BASE_ALERTING_API_PATH}/rule_types`);
+  const res = await http.get<Array<AsApiContract<AlertType<string, string>>>>(
+    `${BASE_ALERTING_API_PATH}/rule_types`
+  );
   return rewriteResponseRes(res);
 }

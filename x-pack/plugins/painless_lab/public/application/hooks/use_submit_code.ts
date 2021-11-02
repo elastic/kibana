@@ -31,7 +31,7 @@ export const useSubmitCode = (http: HttpSetup) => {
         const requestId = ++currentRequestIdRef.current;
 
         try {
-          const result = await http.post(`${API_BASE_PATH}/execute`, {
+          const result = await http.post<Response | undefined>(`${API_BASE_PATH}/execute`, {
             // Stringify the string, because http runs it through JSON.parse, and we want to actually
             // send a JSON string.
             body: JSON.stringify(formatRequestPayload(config, PayloadFormat.UGLY)),

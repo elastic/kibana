@@ -438,7 +438,7 @@ describe('Fetch', () => {
         headers: { 'Content-Type': 'application/ndjson' },
       });
 
-      const data = await fetchInstance.post('/my/path', {
+      const data = await fetchInstance.post<FormData>('/my/path', {
         body,
         headers: {
           'Content-Type': undefined,

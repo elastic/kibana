@@ -13,7 +13,7 @@ import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
 import { CrawlerLogic } from './crawler_logic';
-import { CrawlerDomain } from './types';
+import { CrawlerDataFromServer, CrawlerDomain } from './types';
 import { crawlerDataServerToClient, getDeleteDomainSuccessMessage } from './utils';
 
 interface CrawlerOverviewActions {
@@ -31,7 +31,7 @@ export const CrawlerOverviewLogic = kea<MakeLogicType<{}, CrawlerOverviewActions
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.delete(
+        const response = await http.delete<CrawlerDataFromServer>(
           `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}`,
           {
             query: {

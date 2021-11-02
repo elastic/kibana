@@ -20,7 +20,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { IHttpFetchError } from 'kibana/public';
+import type { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 
 import { VERIFICATION_CODE_LENGTH } from '../common';
 import { SingleCharsField } from './single_chars_field';
@@ -71,7 +71,7 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
         });
       } catch (error) {
         if ((error as IHttpFetchError).response?.status === 403) {
-          form.setError('code', (error as IHttpFetchError).body?.message);
+          form.setError('code', (error as IHttpFetchError<ResponseErrorBody>).body?.message || '');
           return;
         } else {
           throw error;

@@ -28,7 +28,7 @@ export const useFetchAlertDetail = (alertId: string): [boolean, TopAlert | null]
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await http.get('/internal/rac/alerts', {
+        const response = await http.get<Record<string, unknown>>('/internal/rac/alerts', {
           query: {
             id: alertId,
           },

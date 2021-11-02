@@ -63,7 +63,7 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
 
   return {
     get: async (id: string) => {
-      const workpad = await coreStart.http.get(`${getApiPath()}/${id}`);
+      const workpad = await coreStart.http.get<any>(`${getApiPath()}/${id}`);
 
       return { css: DEFAULT_WORKPAD_CSS, variables: [], ...workpad };
     },

@@ -12,14 +12,14 @@ import { SavedQueryAttributes } from '../../../common';
 
 export const createSavedQueryService = (http: HttpStart) => {
   const createQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
-    const savedQuery = await http.post('/api/saved_query/_create', {
+    const savedQuery = await http.post<SavedQuery>('/api/saved_query/_create', {
       body: JSON.stringify(attributes),
     });
     return savedQuery;
   };
 
   const updateQuery = async (id: string, attributes: SavedQueryAttributes) => {
-    const savedQuery = await http.put(`/api/saved_query/${id}`, {
+    const savedQuery = await http.put<SavedQuery>(`/api/saved_query/${id}`, {
       body: JSON.stringify(attributes),
     });
     return savedQuery;
@@ -27,9 +27,10 @@ export const createSavedQueryService = (http: HttpStart) => {
 
   // we have to tell the saved objects client how many to fetch, otherwise it defaults to fetching 20 per page
   const getAllSavedQueries = async (): Promise<SavedQuery[]> => {
-    const { savedQueries } = await http.post('/api/saved_query/_find', {
-      body: JSON.stringify({ perPage: 10000 }),
-    });
+    const { savedQueries } = await http.post<{ savedQueries: SavedQuery[] }>(
+      '/api/saved_query/_find',
+      { body: JSON.stringify({ perPage: 10000 }) }
+    );
     return savedQueries;
   };
 
@@ -39,7 +40,10 @@ export const createSavedQueryService = (http: HttpStart) => {
     perPage: number = 50,
     page: number = 1
   ): Promise<{ total: number; queries: SavedQuery[] }> => {
-    const { total, savedQueries: queries } = await http.post('/api/saved_query/_find', {
+    const { total, savedQueries: queries } = await http.post<{
+      savedQueries: SavedQuery[];
+      total: number;
+    }>('/api/saved_query/_find', {
       body: JSON.stringify({ page, perPage, search }),
     });
 
@@ -47,15 +51,15 @@ export const createSavedQueryService = (http: HttpStart) => {
   };
 
   const getSavedQuery = (id: string): Promise<SavedQuery> => {
-    return http.get(`/api/saved_query/${id}`);
+    return http.get<SavedQuery>(`/api/saved_query/${id}`);
   };
 
   const deleteSavedQuery = (id: string) => {
-    return http.delete(`/api/saved_query/${id}`);
+    return http.delete<{}>(`/api/saved_query/${id}`);
   };
 
   const getSavedQueryCount = async (): Promise<number> => {
-    return http.get('/api/saved_query/_count');
+    return http.get<number>('/api/saved_query/_count');
   };
 
   return {
