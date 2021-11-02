@@ -38,7 +38,7 @@ import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
 import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
 
-function getDataVIewId(dataViewsService: DataViewsService, patternName: string) {
+function getDataViewId(dataViewsService: DataViewsService, patternName: string) {
   const iph = new DataViewHandler(dataViewsService);
   return iph.getDataViewId(patternName);
 }
@@ -427,7 +427,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
             if (destinationIndex && deleteDestIndexPattern) {
               try {
                 const dataViewsService = await getDataViewsService();
-                const dataViewId = await getDataVIewId(dataViewsService, destinationIndex);
+                const dataViewId = await getDataViewId(dataViewsService, destinationIndex);
                 if (dataViewId) {
                   await deleteDestDataViewById(dataViewsService, dataViewId);
                 }

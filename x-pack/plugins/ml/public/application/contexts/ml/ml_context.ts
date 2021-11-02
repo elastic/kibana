@@ -12,7 +12,7 @@ import { MlServicesContext } from '../../app';
 
 export interface MlContextValue {
   combinedQuery: any;
-  currentDataView: DataView; // TODO this should be IndexPattern or null
+  currentDataView: DataView; // TODO this should be DataView or null
   currentSavedSearch: SavedSearchSavedObject | null;
   dataViewsContract: DataViewsContract;
   kibanaConfig: any; // IUiSettingsClient;
@@ -21,16 +21,8 @@ export interface MlContextValue {
 
 export type SavedSearchQuery = object;
 
-// This context provides dependencies which can be injected
-// via angularjs only (like services, currentDataView etc.).
-// Because we cannot just import these dependencies, the default value
-// for the context is just {} and of type `Partial<KibanaContextValue>`
-// for the angularjs based dependencies. Therefore, the
-// actual dependencies are set like we did previously with KibanaContext
-// in the wrapping angularjs directive. In the custom hook we check if
-// the dependencies are present with error reporting if they weren't
-// added properly. That's why in tests, these custom hooks must not
-// be mocked, instead <UiChrome.Provider value="mocked-value">` needs
+// In tests, these custom hooks must not be mocked,
+// instead <UiChrome.Provider value="mocked-value">` needs
 // to be used. This guarantees that we have both properly set up
 // TypeScript support and runtime checks for these dependencies.
 // Multiple custom hooks can be created to access subsets of

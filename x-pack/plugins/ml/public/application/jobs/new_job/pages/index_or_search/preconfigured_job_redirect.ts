@@ -71,7 +71,7 @@ async function getDataViewIdFromName(
   dataViewsContract: DataViewsContract
 ): Promise<string | null> {
   if (dataViewsContract === null) {
-    throw Error('ARGGHH');
+    throw new Error('Data views are not initialized!');
   }
 
   const [dv] = await dataViewsContract?.find(datafeed.indices.join(','));
