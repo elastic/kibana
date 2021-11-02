@@ -13,6 +13,7 @@ const testDataList = [
     type: ML_EMBEDDABLE_TYPES.ANOMALY_SWIMLANE,
     panelTitle: 'ML anomaly swim lane',
     dashboardSavedObject: {
+      type: 'dashboard',
       attributes: {
         title: `7.15.2 ML anomaly swimlane dashboard ${Date.now()}`,
         description: '',
@@ -36,6 +37,7 @@ const testDataList = [
     type: ML_EMBEDDABLE_TYPES.ANOMALY_CHARTS,
     panelTitle: 'ML anomaly charts',
     dashboardSavedObject: {
+      type: 'dashboard',
       attributes: {
         title: `7.15.2 ML anomaly charts dashboard ${Date.now()}`,
         description: '',
@@ -73,6 +75,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
 
       await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
+      // Using bulk API because create API might return 400 for conflict errors
+      await ml.testResources.createBulkSavedObjects(
+        testDataList.map((d) => d.dashboardSavedObject)
+      );
+
       await PageObjects.common.navigateToApp('dashboard');
     });
 
@@ -82,13 +89,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     for (const testData of testDataList) {
       const { dashboardSavedObject, panelTitle, type } = testData;
-      describe(`loads saved dashboard from version ${dashboardSavedObject.coreMigrationVersion}`, function () {
+      describe(`for ${panelTitle}`, function () {
         before(async () => {
-          await ml.testResources.createDashboardSavedObject(
-            dashboardSavedObject.attributes.title,
-            dashboardSavedObject,
-            true
-          );
           await PageObjects.common.navigateToApp('dashboard');
         });
 
@@ -100,11 +102,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.dashboard.loadSavedDashboard(dashboardSavedObject.attributes.title);
 
           await ml.dashboardEmbeddables.assertDashboardPanelExists(panelTitle);
-          await PageObjects.timePicker.setAbsoluteRange(
-            'Feb 7, 2015 @ 00:00:00.000',
-            'Feb 11, 2016 @ 00:00:00.000'
-          );
-          await PageObjects.timePicker.pauseAutoRefresh();
 
           if (type === ML_EMBEDDABLE_TYPES.ANOMALY_CHARTS) {
             await ml.dashboardEmbeddables.assertAnomalyChartsSeverityThresholdControlExists();

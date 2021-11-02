@@ -128,21 +128,18 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       return createResponse.id;
     },
 
-    async createDashboardSavedObject(
-      title: string,
-      body: object,
-      override = false
-    ): Promise<string> {
-      log.debug(`Creating dashboard with title '${title}'`);
+    async createBulkSavedObjects(body: object[]): Promise<string> {
+      log.debug(`Creating bulk saved objects'`);
 
       const createResponse = await supertest
-        .post(`/api/saved_objects/${SavedObjectType.DASHBOARD}?overwrite=${override}`)
+        .post(`/api/saved_objects/_bulk_create`)
         .set(COMMON_REQUEST_HEADERS)
         .send(body)
+        .expect(200)
         .then((res: any) => res.body);
 
-      log.debug(` > Created with id '${createResponse.id}'`);
-      return createResponse.id;
+      log.debug(` > Created bulk saved objects'`);
+      return createResponse;
     },
 
     async createIndexPatternIfNeeded(title: string, timeFieldName?: string): Promise<string> {
@@ -175,11 +172,11 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       return createResponse.id;
     },
 
-    async createDashboard(title: string, body: object): Promise<string> {
+    async createDashboard(title: string, body: object, override = false): Promise<string> {
       log.debug(`Creating dashboard with title '${title}'`);
 
       const createResponse = await supertest
-        .post(`/api/saved_objects/${SavedObjectType.DASHBOARD}`)
+        .post(`/api/saved_objects/${SavedObjectType.DASHBOARD}?override=${override}`)
         .set(COMMON_REQUEST_HEADERS)
         .send(body)
         .expect(200)
