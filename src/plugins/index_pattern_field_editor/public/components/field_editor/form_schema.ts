@@ -23,6 +23,14 @@ import type { Context } from '../preview';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 
 const { containsCharsField, emptyField, numberGreaterThanField } = fieldValidators;
+const i18nTexts = {
+  invalidScriptErrorMessage: i18n.translate(
+    'indexPatternFieldEditor.editor.form.scriptEditorPainlessValidationMessage',
+    {
+      defaultMessage: 'Invalid Painless script.',
+    }
+  ),
+};
 
 // Validate the painless **syntax** (no need to make an HTTP request)
 const painlessSyntaxValidator = () => {
@@ -41,12 +49,7 @@ const painlessSyntaxValidator = () => {
 
           if (editorHasSyntaxErrors) {
             return resolve({
-              message: i18n.translate(
-                'indexPatternFieldEditor.editor.form.scriptEditorValidationMessage',
-                {
-                  defaultMessage: 'Invalid Painless syntax.',
-                }
-              ),
+              message: i18nTexts.invalidScriptErrorMessage,
               code: 'ERR_PAINLESS_SYNTAX',
             });
           }
@@ -71,12 +74,7 @@ const painlessScriptValidator: ValidationFunc = async ({ customData: { provider 
 
   if (previewError && previewError.code === 'PAINLESS_SCRIPT_ERROR') {
     return {
-      message: i18n.translate(
-        'indexPatternFieldEditor.editor.form.scriptEditorPainlessValidationMessage',
-        {
-          defaultMessage: 'Invalid Painless script.',
-        }
-      ),
+      message: i18nTexts.invalidScriptErrorMessage,
     };
   }
 };

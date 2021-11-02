@@ -26,11 +26,6 @@ export const DocumentsNavPreview = () => {
   } = useFieldPreviewContext();
 
   const isInvalid = fetchDocError?.code === 'DOC_NOT_FOUND';
-  const errorMessage = isInvalid
-    ? i18n.translate('indexPatternFieldEditor.fieldPreview.documentIdField.documentNotFoundError', {
-        defaultMessage: 'Document not found',
-      })
-    : null;
 
   // We don't display the nav button when the user has entered a custom
   // document ID as at that point there is no more reference to what's "next"
@@ -52,7 +47,6 @@ export const DocumentsNavPreview = () => {
             label={i18n.translate('indexPatternFieldEditor.fieldPreview.documentIdField.label', {
               defaultMessage: 'Document ID',
             })}
-            error={errorMessage}
             isInvalid={isInvalid}
             fullWidth
           >

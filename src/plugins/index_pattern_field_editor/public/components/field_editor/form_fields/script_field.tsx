@@ -191,6 +191,8 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
   useEffect(() => {
     if (error?.code === 'PAINLESS_SCRIPT_ERROR') {
       displayPainlessScriptErrorInMonaco(error!.error as RuntimeFieldPainlessError);
+    } else if (error === null) {
+      updateMonacoMarkers([]);
     }
   }, [error, displayPainlessScriptErrorInMonaco, updateMonacoMarkers]);
 
@@ -205,7 +207,11 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
   return (
     <UseField<string> path="script.source" validationDataProvider={validationDataProvider}>
       {({ value, setValue, label, isValid, getErrorsMessages }) => {
-        const errorMessage: string | null = getErrorsMessages();
+        let errorMessage = getErrorsMessages();
+
+        if (error) {
+          errorMessage = error.error.reason!;
+        }
         fieldCurrentValue.current = value;
 
         return (
@@ -246,7 +252,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
                 suggestionProvider={suggestionProvider}
                 // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
                 width="99%"
-                height="300px"
+                height="210px"
                 value={value}
                 onChange={setValue}
                 editorDidMount={onEditorDidMount}

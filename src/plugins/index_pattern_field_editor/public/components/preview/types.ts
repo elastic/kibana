@@ -29,6 +29,7 @@ interface PreviewError {
   error:
     | RuntimeFieldPainlessError
     | {
+        reason?: string;
         [key: string]: unknown;
       };
 }

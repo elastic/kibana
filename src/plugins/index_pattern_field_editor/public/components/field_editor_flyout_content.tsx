@@ -15,13 +15,10 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiCallOut,
-  EuiSpacer,
   EuiText,
-  EuiTextColor,
 } from '@elastic/eui';
 
-import type { Field, RuntimeFieldPainlessError } from '../types';
+import type { Field } from '../types';
 import { euiFlyoutClassname } from '../constants';
 import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
@@ -35,9 +32,6 @@ const i18nTexts = {
   }),
   saveButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutSaveButtonLabel', {
     defaultMessage: 'Save',
-  }),
-  formErrorsCalloutTitle: i18n.translate('indexPatternFieldEditor.editor.validationErrorTitle', {
-    defaultMessage: 'Fix errors in form before continuing.',
   }),
 };
 
@@ -76,7 +70,6 @@ const FieldEditorFlyoutContentComponent = ({
   const { indexPattern } = useFieldEditorContext();
   const {
     panel: { isVisible: isPanelVisible },
-    error: painlessScriptError,
   } = useFieldPreviewContext();
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
@@ -91,7 +84,7 @@ const FieldEditorFlyoutContentComponent = ({
   const [modalVisibility, setModalVisibility] = useState(defaultModalVisibility);
   const [isFormModified, setIsFormModified] = useState(false);
 
-  const { submit, isValid: isFormValid, isSubmitted, isSubmitting } = formState;
+  const { submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
 
   const canCloseValidator = useCallback(() => {
@@ -241,31 +234,6 @@ const FieldEditorFlyoutContentComponent = ({
 
           <FlyoutPanels.Footer>
             <>
-              {Boolean(painlessScriptError) && (
-                <>
-                  <EuiText
-                    data-test-subj="painlessScriptError"
-                    size="s"
-                    style={{ fontWeight: 500 }}
-                  >
-                    <EuiTextColor color="danger">
-                      <p>{(painlessScriptError!.error as RuntimeFieldPainlessError).reason}</p>
-                    </EuiTextColor>
-                  </EuiText>
-                  <EuiSpacer size="s" />
-                </>
-              )}
-              {isSubmitted && hasErrors && (
-                <>
-                  <EuiCallOut
-                    title={i18nTexts.formErrorsCalloutTitle}
-                    color="danger"
-                    iconType="alert"
-                    data-test-subj="formError"
-                  />
-                  <EuiSpacer size="m" />
-                </>
-              )}
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty

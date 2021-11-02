@@ -116,19 +116,23 @@ export const FieldPreview = () => {
               <DocumentsNavPreview />
               <EuiSpacer size="s" />
 
-              <EuiFieldSearch
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                placeholder={i18n.translate(
-                  'indexPatternFieldEditor.fieldPreview.filterFieldsPlaceholder',
-                  {
-                    defaultMessage: 'Filter fields',
-                  }
-                )}
-                fullWidth
-                data-test-subj="filterFieldsInput"
-              />
-              <EuiSpacer size="s" />
+              {doRenderListOfFields && (
+                <>
+                  <EuiFieldSearch
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    placeholder={i18n.translate(
+                      'indexPatternFieldEditor.fieldPreview.filterFieldsPlaceholder',
+                      {
+                        defaultMessage: 'Filter fields',
+                      }
+                    )}
+                    fullWidth
+                    data-test-subj="filterFieldsInput"
+                  />
+                  <EuiSpacer size="s" />
+                </>
+              )}
 
               <FieldPreviewError />
               <EuiSpacer size="s" />
