@@ -1369,7 +1369,7 @@ export function getReferencedColumnIds(layer: IndexPatternLayer, columnId: strin
   return referencedIds;
 }
 
-export function hasTermsFunctionWithHighSize(layer: IndexPatternLayer): boolean {
+export function hasTermsWithManyBuckets(layer: IndexPatternLayer): boolean {
   return layer.columnOrder.some((columnId) => {
     const column = layer.columns[columnId];
     if (column) {

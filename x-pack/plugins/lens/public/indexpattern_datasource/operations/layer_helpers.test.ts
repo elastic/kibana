@@ -15,7 +15,7 @@ import {
   deleteColumn,
   updateLayerIndexPattern,
   getErrorMessages,
-  hasTermsFunctionWithHighSize,
+  hasTermsWithManyBuckets,
 } from './layer_helpers';
 import { operationDefinitionMap, OperationType } from '../operations';
 import { TermsIndexPatternColumn } from './definitions/terms';
@@ -3007,7 +3007,7 @@ describe('state_helpers', () => {
     });
   });
 
-  describe('hasTermsFunctionWithHighSize', () => {
+  describe('hasTermsWithManyBuckets', () => {
     it('should return false for a bucketed non terms operation', () => {
       const layer: IndexPatternLayer = {
         columnOrder: ['col1'],
@@ -3026,7 +3026,7 @@ describe('state_helpers', () => {
         indexPatternId: 'original',
       };
 
-      expect(hasTermsFunctionWithHighSize(layer)).toBeFalsy();
+      expect(hasTermsWithManyBuckets(layer)).toBeFalsy();
     });
 
     it('should return false if all terms operation have a lower size', () => {
@@ -3052,7 +3052,7 @@ describe('state_helpers', () => {
         indexPatternId: 'original',
       };
 
-      expect(hasTermsFunctionWithHighSize(layer)).toBeFalsy();
+      expect(hasTermsWithManyBuckets(layer)).toBeFalsy();
     });
 
     it('should return true if the size is high', () => {
@@ -3078,7 +3078,7 @@ describe('state_helpers', () => {
         indexPatternId: 'original',
       };
 
-      expect(hasTermsFunctionWithHighSize(layer)).toBeTruthy();
+      expect(hasTermsWithManyBuckets(layer)).toBeTruthy();
     });
   });
 });

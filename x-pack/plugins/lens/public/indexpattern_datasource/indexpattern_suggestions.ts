@@ -21,7 +21,7 @@ import {
   getExistingColumnGroups,
   isReferenced,
   getReferencedColumnIds,
-  hasTermsFunctionWithHighSize,
+  hasTermsWithManyBuckets,
 } from './operations';
 import { hasField } from './utils';
 import type {
@@ -425,7 +425,7 @@ export function getDatasourceSuggestionsFromCurrentState(
         );
 
         if (!references.length && metrics.length && buckets.length === 0) {
-          if (timeField && buckets.length < 1 && !hasTermsFunctionWithHighSize(layer)) {
+          if (timeField && buckets.length < 1 && !hasTermsWithManyBuckets(layer)) {
             // suggest current metric over time if there is a default time field
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
           }
@@ -442,7 +442,7 @@ export function getDatasourceSuggestionsFromCurrentState(
             timeField &&
             buckets.length < 2 &&
             !hasNumericDimension &&
-            !hasTermsFunctionWithHighSize(layer)
+            !hasTermsWithManyBuckets(layer)
           ) {
             // suggest current configuration over time if there is a default time field
             // and no time dimension yet
