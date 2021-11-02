@@ -260,6 +260,11 @@ export const Expressions: React.FC<Props> = (props) => {
     [alertParams.groupBy]
   );
 
+  const disableNoData = useMemo(
+    () => alertParams.criteria?.every((c) => c.aggType === Aggregators.COUNT),
+    [alertParams.criteria]
+  );
+
   const groupByFilterTestPatterns = useMemo(() => {
     if (!alertParams.groupBy) return null;
     const groups = !Array.isArray(alertParams.groupBy)
@@ -354,6 +359,7 @@ export const Expressions: React.FC<Props> = (props) => {
       >
         <EuiPanel color="subdued">
           <EuiCheckbox
+            disabled={disableNoData}
             id="metrics-alert-no-data-toggle"
             label={
               <>
@@ -361,10 +367,13 @@ export const Expressions: React.FC<Props> = (props) => {
                   defaultMessage: "Alert me if there's no data",
                 })}{' '}
                 <EuiToolTip
-                  content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
-                    defaultMessage:
-                      'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
-                  })}
+                  content={
+                    (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
+                    i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
+                      defaultMessage:
+                        'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+                    })
+                  }
                 >
                   <EuiIcon type="questionInCircle" color="subdued" />
                 </EuiToolTip>
@@ -474,16 +483,19 @@ export const Expressions: React.FC<Props> = (props) => {
               defaultMessage: 'Alert me if a group stops reporting data',
             })}{' '}
             <EuiToolTip
-              content={i18n.translate('xpack.infra.metrics.alertFlyout.groupDisappearHelpText', {
-                defaultMessage:
-                  'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
-              })}
+              content={
+                (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
+                i18n.translate('xpack.infra.metrics.alertFlyout.groupDisappearHelpText', {
+                  defaultMessage:
+                    'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                })
+              }
             >
               <EuiIcon type="questionInCircle" color="subdued" />
             </EuiToolTip>
           </>
         }
-        disabled={!hasGroupBy}
+        disabled={disableNoData || !hasGroupBy}
         checked={Boolean(hasGroupBy && alertParams.alertOnGroupDisappear)}
         onChange={(e) => setAlertParams('alertOnGroupDisappear', e.target.checked)}
       />
@@ -491,6 +503,13 @@ export const Expressions: React.FC<Props> = (props) => {
     </>
   );
 };
+
+const docCountNoDataDisabledHelpText = i18n.translate(
+  'xpack.infra.metrics.alertFlyout.docCountNoDataDisabledHelpText',
+  {
+    defaultMessage: '[This setting is not applicable to the Document Count aggregator.]',
+  }
+);
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
