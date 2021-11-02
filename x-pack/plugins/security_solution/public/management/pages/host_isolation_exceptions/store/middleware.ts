@@ -239,9 +239,17 @@ async function updateHostIsolationExceptionsItem(
       http,
       entry
     );
+
+    // notify the update was correct
     dispatch({
       type: 'hostIsolationExceptionsFormStateChanged',
       payload: createLoadedResourceState(response),
+    });
+
+    // clear the form
+    dispatch({
+      type: 'hostIsolationExceptionsFormEntryChanged',
+      payload: undefined,
     });
   } catch (error) {
     dispatch({
