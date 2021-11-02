@@ -108,11 +108,15 @@ export const ControlGroup = () => {
     return null;
   }
 
+  let panelBg: 'subdued' | 'primary' | 'success' = 'subdued';
+  if (emptyState) panelBg = 'primary';
+  if (draggingId) panelBg = 'success';
+
   return (
     <EuiPanel
       borderRadius="m"
-      color={draggingId ? 'success' : 'subdued'}
-      paddingSize="none"
+      color={panelBg}
+      paddingSize={emptyState ? 's' : 'none'}
       className={classNames('controlsWrapper', {
         'controlsWrapper--empty': emptyState,
         'controlsWrapper--twoLine': controlStyle === 'twoLine',

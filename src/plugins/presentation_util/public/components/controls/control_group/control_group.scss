@@ -4,7 +4,6 @@ $largeControl: $euiSize * 50;
 $controlMinWidth: $euiSize * 14;
 
 .controlGroup {
-  overflow-x: clip; // sometimes when using auto width, removing a control can cause a horizontal scrollbar to appear.
   min-height: $euiSize * 4;
 }
 
@@ -40,10 +39,6 @@ $controlMinWidth: $euiSize * 14;
 .controlFrameCloneWrapper {
   width: max-content;
 
-  .euiFormLabel {
-    padding-bottom: $euiSizeXS;
-  }
-
   &--small {
     width: $smallControl;
   }
@@ -60,7 +55,7 @@ $controlMinWidth: $euiSize * 14;
     margin-top: -$euiSize * 1.25;
   }
 
-  .euiFormLabel, div {
+  &__label {
     cursor: grabbing !important; // prevents cursor flickering while dragging the clone
   }
 
@@ -142,7 +137,7 @@ $controlMinWidth: $euiSize * 14;
       border-radius: $euiBorderRadius;
       top: 0;
       bottom: 0;
-      width: 2px;
+      width: $euiSizeXS * .5;
     }
   }
 

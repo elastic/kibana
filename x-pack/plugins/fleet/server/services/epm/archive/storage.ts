@@ -264,7 +264,7 @@ export const getEsPackage = async (
       dataStreams.push({
         dataset: dataset || `${pkgName}.${dataStreamPath}`,
         package: pkgName,
-        ingest_pipeline: ingestPipeline || 'default',
+        ingest_pipeline: ingestPipeline,
         path: dataStreamPath,
         streams,
         ...dataStreamManifestProps,
