@@ -14,6 +14,7 @@ import {
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
+import { mlLog } from '../lib/log';
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -74,8 +75,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           }
         } catch (e) {
           // the user might not have required permissions to fetch pipelines
-          // eslint-disable-next-line no-console
-          console.log(e);
+          mlLog.error(e);
         }
 
         return response.ok({
