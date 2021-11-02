@@ -117,7 +117,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the correct calculation for average', () => {
           expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(
-            `0.092511013215859`
+            `0.0848214285714286`
           );
         });
 
@@ -190,10 +190,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the correct calculation for average', () => {
           expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(
-            `0.102040816326531`
+            `0.0792079207920792`
           );
           expectSnapshot(errorRateResponse.previousPeriod.average).toMatchInline(
-            `0.0852713178294574`
+            `0.0894308943089431`
           );
         });
 
