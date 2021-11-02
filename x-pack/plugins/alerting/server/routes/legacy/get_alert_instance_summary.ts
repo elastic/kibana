@@ -10,7 +10,7 @@ import { UsageCounter } from 'src/plugins/usage_collection/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
+import { AlertSummary, LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
@@ -19,6 +19,12 @@ const paramSchema = schema.object({
 
 const querySchema = schema.object({
   dateStart: schema.maybe(schema.string()),
+});
+
+const rewriteBodyRes = ({ ruleTypeId, alerts, ...rest }: AlertSummary) => ({
+  ...rest,
+  alertTypeId: ruleTypeId,
+  instances: alerts,
 });
 
 export const getAlertInstanceSummaryRoute = (
@@ -45,8 +51,7 @@ export const getAlertInstanceSummaryRoute = (
       const { dateStart } = req.query;
       const summary = await rulesClient.getAlertSummary({ id, dateStart });
 
-      // TODO - rewrite so format is unchanged - ruleTypeId -> alertTypeId & alerts -> instances
-      return res.ok({ body: summary });
+      return res.ok({ body: rewriteBodyRes(summary) });
     })
   );
 };

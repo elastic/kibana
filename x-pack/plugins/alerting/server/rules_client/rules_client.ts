@@ -519,7 +519,7 @@ export class RulesClient {
       entity: AlertingAuthorizationEntity.Rule,
     });
 
-    // default duration of instance summary is 60 * alert interval
+    // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
     const durationMillis = parseDuration(rule.schedule.interval) * 60;
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
@@ -527,7 +527,7 @@ export class RulesClient {
 
     const eventLogClient = await this.getEventLogClient();
 
-    this.logger.debug(`getAlertSummary(): search the event log for alert ${id}`);
+    this.logger.debug(`getAlertSummary(): search the event log for rule ${id}`);
     let events: IEvent[];
     try {
       const queryResults = await eventLogClient.findEventsBySavedObjectIds(

@@ -101,12 +101,12 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     }
   }
 
-  // set the muted status of instances
+  // set the muted status of alerts
   for (const alertId of rule.mutedInstanceIds) {
     getAlertStatus(alerts, alertId).muted = true;
   }
 
-  // convert the instances map to object form
+  // convert the alerts map to object form
   const alertIds = Array.from(alerts.keys()).sort();
   for (const alertId of alertIds) {
     alertSummary.alerts[alertId] = alerts.get(alertId)!;

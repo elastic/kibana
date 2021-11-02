@@ -62,7 +62,7 @@ const AlertSummaryFindEventsResult: QueryEventsBySavedObjectResult = {
   data: [],
 };
 
-const AlertSummaryIntervalSeconds = 1;
+const RuleIntervalSeconds = 1;
 
 const BaseRuleSavedObject: SavedObject<RawAlert> = {
   id: '1',
@@ -74,7 +74,7 @@ const BaseRuleSavedObject: SavedObject<RawAlert> = {
     alertTypeId: '123',
     consumer: 'rule-consumer',
     legacyId: null,
-    schedule: { interval: `${AlertSummaryIntervalSeconds}s` },
+    schedule: { interval: `${RuleIntervalSeconds}s` },
     actions: [],
     params: {},
     createdBy: null,
@@ -226,7 +226,7 @@ describe('getAlertSummary()', () => {
 
     const startMillis = Date.parse(start!);
     const endMillis = Date.parse(end!);
-    const expectedDuration = 60 * AlertSummaryIntervalSeconds * 1000;
+    const expectedDuration = 60 * RuleIntervalSeconds * 1000;
     expect(endMillis - startMillis).toBeGreaterThan(expectedDuration - 2);
     expect(endMillis - startMillis).toBeLessThan(expectedDuration + 2);
   });
@@ -265,7 +265,7 @@ describe('getAlertSummary()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
 
-    const dateStart = new Date(Date.now() - 60 * AlertSummaryIntervalSeconds * 1000).toISOString();
+    const dateStart = new Date(Date.now() - 60 * RuleIntervalSeconds * 1000).toISOString();
     await rulesClient.getAlertSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
