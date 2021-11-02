@@ -53,6 +53,7 @@
   align-items: flex-start;
 }
 
+/**
 .kbnDocViewer__table {
   table {
     table-layout: auto;
@@ -82,6 +83,8 @@
   }
 }
 
+**/
+
 .kbnDocViewer__value {
   word-break: break-all;
   word-wrap: break-word;
@@ -89,8 +92,4 @@
   line-height: $euiLineHeight;
   color: $euiColorFullShade;
   vertical-align: top;
-}
-
-.kbnDocViewer__warning {
-  margin-right: $euiSizeS;
 }

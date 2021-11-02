@@ -141,6 +141,7 @@ export const DocViewerTable = ({
 
   return (
     <EuiInMemoryTable
+      tableLayout="auto"
       className="kbnDocViewer__table"
       items={items}
       columns={tableColumns}
