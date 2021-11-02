@@ -9068,7 +9068,6 @@
     "xpack.dataVisualizer.dataGrid.showDistributionsTooltip": "显示分布",
     "xpack.dataVisualizer.dataGrid.typeColumnName": "类型",
     "xpack.dataVisualizer.dataGridChart.histogramNotAvailable": "不支持图表。",
-    "xpack.dataVisualizer.dataGridChart.notEnoughData": "0 个文档包含字段。",
     "xpack.dataVisualizer.dataGridChart.singleCategoryLegend": "{cardinality, plural, other {# 个类别}}",
     "xpack.dataVisualizer.dataGridChart.topCategoriesLegend": "{cardinality} 个类别中的排名前 {maxChartColumns} 个",
     "xpack.dataVisualizer.description": "导入您自己的 CSV、NDJSON 或日志文件。",

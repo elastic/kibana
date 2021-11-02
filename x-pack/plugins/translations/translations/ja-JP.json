@@ -8985,7 +8985,6 @@
     "xpack.dataVisualizer.dataGrid.showDistributionsTooltip": "分布を表示",
     "xpack.dataVisualizer.dataGrid.typeColumnName": "型",
     "xpack.dataVisualizer.dataGridChart.histogramNotAvailable": "グラフはサポートされていません。",
-    "xpack.dataVisualizer.dataGridChart.notEnoughData": "0個のドキュメントにフィールドが含まれます。",
     "xpack.dataVisualizer.dataGridChart.topCategoriesLegend": "上位 {maxChartColumns}/{cardinality} カテゴリ",
     "xpack.dataVisualizer.description": "CSV、NDJSON、またはログファイルをインポートします。",
     "xpack.dataVisualizer.fieldNameSelect": "フィールド名",

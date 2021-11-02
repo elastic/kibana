@@ -325,9 +325,13 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       {(resizeRef) => (
         <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
           <EuiInMemoryTable<T>
-            message={i18n.translate('xpack.dataVisualizer.dataGrid.searchingMessage', {
-              defaultMessage: 'Searching',
-            })}
+            message={
+              loading
+                ? i18n.translate('xpack.dataVisualizer.dataGrid.searchingMessage', {
+                    defaultMessage: 'Searching',
+                  })
+                : undefined
+            }
             className={'dvTable'}
             items={items}
             itemId={FIELD_NAME}
