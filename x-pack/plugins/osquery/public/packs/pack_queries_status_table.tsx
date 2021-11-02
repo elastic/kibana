@@ -29,7 +29,7 @@ import {
   PieVisualizationState,
 } from '../../../lens/public';
 import { FilterStateStore, IndexPattern } from '../../../../../src/plugins/data/common';
-import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
+import { useKibana } from '../common/lib/kibana';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
 import { usePackQueryLastResults } from './use_pack_query_last_results';
@@ -207,8 +207,6 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
 
   const handleClick = useCallback(
     (event) => {
-      const openInNewTab = !(!isModifiedEvent(event) && isLeftClickEvent(event));
-
       event.preventDefault();
 
       lensService?.navigateToPrefilledEditor(
@@ -222,7 +220,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
           attributes: getLensAttributes(actionId, agentIds),
         },
         {
-          openInNewTab,
+          openInNewTab: true,
         }
       );
     },
@@ -337,7 +335,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
-      <EuiButtonEmpty size="xs" iconType="discoverApp" href={discoverUrl}>
+      <EuiButtonEmpty size="xs" iconType="discoverApp" href={discoverUrl} target="_blank">
         {VIEW_IN_DISCOVER}
       </EuiButtonEmpty>
     );
