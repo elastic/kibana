@@ -155,6 +155,40 @@ describe('External Url Service', () => {
         });
       });
 
+      internalRequestScenarios.forEach(({ description, policy, allowExternal }) => {
+        describe(description, () => {
+          it('allows relative URLs without absolute path replacing last path segment', () => {
+            const { setup } = setupService({ location, serverBasePath, policy });
+            const urlCandidate = `my_other_app?foo=bar`;
+            const result = setup.validateUrl(urlCandidate);
+
+            expect(result).toBeInstanceOf(URL);
+            expect(result?.toString()).toEqual(`${kibanaRoot}/app/${urlCandidate}`);
+          });
+
+          it('allows relative URLs without absolute path replacing multiple path segments', () => {
+            const { setup } = setupService({ location, serverBasePath, policy });
+            const urlCandidate = `/api/my_other_app?foo=bar`;
+            const result = setup.validateUrl(`..${urlCandidate}`);
+
+            expect(result).toBeInstanceOf(URL);
+            expect(result?.toString()).toEqual(`${kibanaRoot}${urlCandidate}`);
+          });
+
+          if (!allowExternal) {
+            describe('handles bypass of base path via relative URL', () => {
+              it('does not allow relative URLs that escape base path', () => {
+                const { setup } = setupService({ location, serverBasePath, policy: [] });
+                const urlCandidate = `../../base_path_escape`;
+                const result = setup.validateUrl(urlCandidate);
+
+                expect(result).toBeNull();
+              });
+            });
+          }
+        });
+      });
+
       describe('handles protocol resolution bypass', () => {
         it('does not allow relative URLs that include a host', () => {
           const { setup } = setupService({ location, serverBasePath, policy: [] });
@@ -194,7 +228,7 @@ describe('External Url Service', () => {
 
       internalRequestScenarios.forEach(({ description, policy }) => {
         describe(description, () => {
-          it('allows relative URLs', () => {
+          it('allows relative URLs with absolute path', () => {
             const { setup } = setupService({ location, serverBasePath, policy });
             const urlCandidate = `/some/path?foo=bar`;
             const result = setup.validateUrl(`${serverBasePath}${urlCandidate}`);
@@ -210,6 +244,28 @@ describe('External Url Service', () => {
 
             expect(result).toBeInstanceOf(URL);
             expect(result?.toString()).toEqual(`${kibanaRoot}/some/path?foo=bar`);
+          });
+        });
+      });
+
+      internalRequestScenarios.forEach(({ description, policy }) => {
+        describe(description, () => {
+          it('allows relative URLs without absolute path replacing last path segment', () => {
+            const { setup } = setupService({ location, serverBasePath, policy });
+            const urlCandidate = `my_other_app?foo=bar`;
+            const result = setup.validateUrl(urlCandidate);
+
+            expect(result).toBeInstanceOf(URL);
+            expect(result?.toString()).toEqual(`${kibanaRoot}/app/${urlCandidate}`);
+          });
+
+          it('allows relative URLs without absolute path replacing multiple path segments', () => {
+            const { setup } = setupService({ location, serverBasePath, policy });
+            const urlCandidate = `/api/my_other_app?foo=bar`;
+            const result = setup.validateUrl(`..${urlCandidate}`);
+
+            expect(result).toBeInstanceOf(URL);
+            expect(result?.toString()).toEqual(`${kibanaRoot}${urlCandidate}`);
           });
         });
       });
