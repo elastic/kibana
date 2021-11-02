@@ -65,7 +65,7 @@ export function LensEmbeddable(props: Props) {
     [reportType, setSeries, firstSeries, notifications?.toasts]
   );
 
-  if (!timeRange || !firstSeries) {
+  if (!timeRange || !lensAttributes) {
     return null;
   }
 

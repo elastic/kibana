@@ -256,7 +256,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
       await PageObjects.lens.openVisualOptions();
-      await testSubjects.click('lnsXY_valueLabels_inside');
+      await testSubjects.click('lns_valueLabels_inside');
 
       await PageObjects.lens.waitForVisualization();
 

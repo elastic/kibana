@@ -6,7 +6,7 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';

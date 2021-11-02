@@ -9,7 +9,7 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 
@@ -23,14 +23,14 @@ import {
 } from './actions';
 
 interface Options {
-  client: KibanaClient;
+  client: Client;
   baseDir?: string;
   log: ToolingLog;
   kbnClient: KbnClient;
 }
 
 export class EsArchiver {
-  private readonly client: KibanaClient;
+  private readonly client: Client;
   private readonly baseDir: string;
   private readonly log: ToolingLog;
   private readonly kbnClient: KbnClient;

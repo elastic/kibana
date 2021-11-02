@@ -547,9 +547,18 @@ class TimeseriesChartIntl extends Component {
 
     // Create the path elements for the forecast value line and bounds area.
     if (contextForecastData) {
-      fcsGroup.append('path').attr('class', 'area forecast');
-      fcsGroup.append('path').attr('class', 'values-line forecast');
-      fcsGroup.append('g').attr('class', 'focus-chart-markers forecast');
+      fcsGroup
+        .append('path')
+        .attr('class', 'area forecast')
+        .attr('data-test-subj', 'mlForecastArea');
+      fcsGroup
+        .append('path')
+        .attr('class', 'values-line forecast')
+        .attr('data-test-subj', 'mlForecastValuesline');
+      fcsGroup
+        .append('g')
+        .attr('class', 'focus-chart-markers forecast')
+        .attr('data-test-subj', 'mlForecastMarkers');
     }
 
     fcsGroup
