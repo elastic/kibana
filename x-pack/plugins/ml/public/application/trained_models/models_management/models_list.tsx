@@ -121,7 +121,7 @@ export const ModelsList: FC = () => {
         size: 1000,
       });
 
-      const newItems = [];
+      const newItems: ModelItem[] = [];
       const expandedItemsToRefresh = [];
 
       for (const model of response) {
@@ -205,14 +205,21 @@ export const ModelsList: FC = () => {
       }
 
       if (pytorchModels) {
-        const { deployment_stats: deploymentStatsResponse } =
-          await trainedModelsApiService.getTrainedModelDeploymentStats(
-            pytorchModels.map((m) => m.model_id)
-          );
+        try {
+          const { deployment_stats: deploymentStatsResponse } =
+            await trainedModelsApiService.getTrainedModelDeploymentStats(
+              pytorchModels.map((m) => m.model_id)
+            );
 
-        for (const { model_id: id, ...stats } of deploymentStatsResponse) {
-          const model = models.find((m) => m.model_id === id);
-          model!.stats!.deployment_stats = stats;
+          for (const { model_id: id, ...stats } of deploymentStatsResponse) {
+            const model = models.find((m) => m.model_id === id);
+            model!.stats!.deployment_stats = stats;
+          }
+        } catch (e) {
+          // For stopped models state endpoint returns 404
+          if (e.body.statusCode !== 404) {
+            throw new Error(e);
+          }
         }
       }
 
