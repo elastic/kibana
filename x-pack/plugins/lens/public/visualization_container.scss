@@ -1,6 +1,6 @@
 .lnsVisualizationContainer {
   @include euiScrollBar;
-  overflow: auto;
+  overflow: auto hidden;
   user-select: text;
 }
 
