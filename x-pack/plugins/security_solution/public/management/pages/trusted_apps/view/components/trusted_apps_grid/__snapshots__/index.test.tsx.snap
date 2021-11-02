@@ -743,7 +743,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -1123,7 +1123,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -1503,7 +1503,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -1883,7 +1883,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -2263,7 +2263,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -2643,7 +2643,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -3023,7 +3023,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -3403,7 +3403,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -3783,7 +3783,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -4163,7 +4163,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -4850,7 +4850,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -5230,7 +5230,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -5610,7 +5610,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -5990,7 +5990,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -6370,7 +6370,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -6750,7 +6750,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -7130,7 +7130,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -7510,7 +7510,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -7890,7 +7890,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -8270,7 +8270,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -8914,7 +8914,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -9294,7 +9294,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -9674,7 +9674,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -10054,7 +10054,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -10434,7 +10434,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -10814,7 +10814,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -11194,7 +11194,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -11574,7 +11574,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -11954,7 +11954,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
@@ -12334,7 +12334,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l"
+                class="euiSpacer euiSpacer--s"
               />
               <div
                 class="euiText euiText--medium eui-textBreakWord"
