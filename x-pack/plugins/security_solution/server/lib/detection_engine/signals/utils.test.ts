@@ -7,7 +7,8 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
+import { TransportResult } from '@elastic/elasticsearch';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
@@ -41,6 +42,7 @@ import {
   getValidDateFromDoc,
   calculateTotal,
   getTotalHitsValue,
+  isRACAlert,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -638,7 +640,7 @@ describe('utils', () => {
     test('returns true when missing timestamp override field', async () => {
       const timestampField = 'event.ingested';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -663,8 +665,10 @@ describe('utils', () => {
       const res = await hasTimestampFields({
         timestampField,
         ruleName: 'myfakerulename',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        timestampFieldCapsResponse: timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Record<string, any>
+        >,
         inputIndices: ['myfa*'],
         ruleStatusClient,
         ruleId: 'ruleId',
@@ -681,7 +685,7 @@ describe('utils', () => {
     test('returns true when missing timestamp field', async () => {
       const timestampField = '@timestamp';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -706,8 +710,10 @@ describe('utils', () => {
       const res = await hasTimestampFields({
         timestampField,
         ruleName: 'myfakerulename',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        timestampFieldCapsResponse: timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Record<string, any>
+        >,
         inputIndices: ['myfa*'],
         ruleStatusClient,
         ruleId: 'ruleId',
@@ -725,7 +731,7 @@ describe('utils', () => {
     test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
       const timestampField = '@timestamp';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
         body: {
           indices: [],
           fields: {},
@@ -735,8 +741,10 @@ describe('utils', () => {
       const res = await hasTimestampFields({
         timestampField,
         ruleName: 'Endpoint Security',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        timestampFieldCapsResponse: timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Record<string, any>
+        >,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleStatusClient,
         ruleId: 'ruleId',
@@ -754,7 +762,7 @@ describe('utils', () => {
     test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
       const timestampField = '@timestamp';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
         body: {
           indices: [],
           fields: {},
@@ -764,8 +772,10 @@ describe('utils', () => {
       const res = await hasTimestampFields({
         timestampField,
         ruleName: 'NOT Endpoint Security',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        timestampFieldCapsResponse: timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Record<string, any>
+        >,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleStatusClient,
         ruleId: 'ruleId',
@@ -1509,6 +1519,54 @@ describe('utils', () => {
 
     test('should return -1 if totalHits is undefined', () => {
       expect(calculateTotal(undefined, 2)).toBe(-1);
+    });
+  });
+
+  describe('isRACAlert', () => {
+    test('alert with dotted fields returns true', () => {
+      expect(
+        isRACAlert({
+          [ALERT_UUID]: '123',
+        })
+      ).toEqual(true);
+    });
+
+    test('alert with nested fields returns true', () => {
+      expect(
+        isRACAlert({
+          kibana: {
+            alert: { uuid: '123' },
+          },
+        })
+      ).toEqual(true);
+    });
+
+    test('undefined returns false', () => {
+      expect(isRACAlert(undefined)).toEqual(false);
+    });
+
+    test('null returns false', () => {
+      expect(isRACAlert(null)).toEqual(false);
+    });
+
+    test('number returns false', () => {
+      expect(isRACAlert(5)).toEqual(false);
+    });
+
+    test('string returns false', () => {
+      expect(isRACAlert('a')).toEqual(false);
+    });
+
+    test('array returns false', () => {
+      expect(isRACAlert([])).toEqual(false);
+    });
+
+    test('empty object returns false', () => {
+      expect(isRACAlert({})).toEqual(false);
+    });
+
+    test('alert with null value returns false', () => {
+      expect(isRACAlert({ 'kibana.alert.uuid': null })).toEqual(false);
     });
   });
 });

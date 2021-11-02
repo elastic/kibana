@@ -68,11 +68,10 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
       toastNotificationService.displayDangerToast(
         i18n.translate(
-          'xpack.ml.dataframe.analyticsList.errorWithCheckingIfIndexPatternExistsNotificationErrorMessage',
+          'xpack.ml.dataframe.analyticsList.errorWithCheckingIfDataViewExistsNotificationErrorMessage',
           {
-            defaultMessage:
-              'An error occurred checking if index pattern {indexPattern} exists: {error}',
-            values: { indexPattern: indexName, error },
+            defaultMessage: 'An error occurred checking if data view {dataView} exists: {error}',
+            values: { dataView: indexName, error },
           }
         )
       );
@@ -103,10 +102,10 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   useEffect(() => {
     setIsLoading(true);
-    // Check if an index pattern exists corresponding to current DFA job
-    // if pattern does exist, show it to user
+    // Check if a data view exists corresponding to current DFA job
+    // if data view does exist, show it to user
     checkIndexPatternExists();
-    // Check if an user has permission to delete the index & index pattern
+    // Check if an user has permission to delete the index & data view
     checkUserIndexPermission();
   }, [isModalVisible]);
 

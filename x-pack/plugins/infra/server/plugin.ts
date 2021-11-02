@@ -51,8 +51,6 @@ export const config: PluginConfigDescriptor = {
       schema.object({
         default: schema.maybe(
           schema.object({
-            logAlias: schema.maybe(schema.string()), // NOTE / TODO: Should be deprecated in 8.0.0
-            metricAlias: schema.maybe(schema.string()),
             fields: schema.maybe(
               schema.object({
                 timestamp: schema.maybe(schema.string()),
@@ -160,7 +158,8 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {
-        path: `/app/logs`,
+        sampleObject: null, // indicates that there is no sample object associated with this app link's path
+        getPath: () => `/app/logs`,
         label: logsSampleDataLinkLabel,
         icon: 'logsApp',
       },

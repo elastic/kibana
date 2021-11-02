@@ -52,8 +52,8 @@ export const EmptyIndexListPrompt = ({
           link: (
             <EuiLink onClick={() => createAnyway()} data-test-subj="createAnyway">
               <FormattedMessage
-                id="indexPatternEditor.createIndexPattern.emptyState.createAnywayLink"
-                defaultMessage="create an index pattern against hidden or system indices."
+                id="indexPatternEditor.createDataView.emptyState.createAnywayLink"
+                defaultMessage="create a data view against hidden or system indices."
               />
             </EuiLink>
           ),

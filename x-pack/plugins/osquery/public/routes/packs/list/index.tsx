@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { PacksTable } from '../../../packs/packs_table';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const PacksPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -22,12 +21,21 @@ const PacksPageComponent = () => {
     () => (
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage id="xpack.osquery.packList.pageTitle" defaultMessage="Packs" />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.osquery.packList.pageSubtitle"
+                defaultMessage="Create packs to organize sets of queries and to schedule queries for agent policies."
+              />
+            </p>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

@@ -40,11 +40,12 @@ import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../../../services';
 import { ControlGroupStrings } from '../control_group_strings';
 import { CreateControlButton } from '../editor/create_control';
+import { ViewMode } from '../../../../../../embeddable/public';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { forwardAllContext } from '../editor/forward_all_context';
+import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
-import { controlGroupReducers } from '../state/control_group_reducers';
 
 export const ControlGroup = () => {
   // Presentation Services Context
@@ -64,7 +65,9 @@ export const ControlGroup = () => {
   const dispatch = useEmbeddableDispatch();
 
   // current state
-  const { panels, controlStyle } = useEmbeddableSelector((state) => state);
+  const { panels, viewMode, controlStyle } = useEmbeddableSelector((state) => state);
+
+  const isEditable = viewMode === ViewMode.EDIT;
 
   const idsInOrder = useMemo(
     () =>
@@ -100,12 +103,20 @@ export const ControlGroup = () => {
   };
 
   const emptyState = !(idsInOrder && idsInOrder.length > 0);
+  // Empty, non-editable view is null
+  if (!isEditable && emptyState) {
+    return null;
+  }
+
+  let panelBg: 'subdued' | 'primary' | 'success' = 'subdued';
+  if (emptyState) panelBg = 'primary';
+  if (draggingId) panelBg = 'success';
 
   return (
     <EuiPanel
       borderRadius="m"
-      color={emptyState ? 'subdued' : undefined}
-      paddingSize={emptyState ? 'none' : 's'}
+      color={panelBg}
+      paddingSize={emptyState ? 's' : 'none'}
       className={classNames('controlsWrapper', {
         'controlsWrapper--empty': emptyState,
         'controlsWrapper--twoLine': controlStyle === 'twoLine',
@@ -134,13 +145,14 @@ export const ControlGroup = () => {
                 <EuiFlexGroup
                   className={classNames('controlGroup', { 'controlGroup-isDragging': draggingId })}
                   alignItems="center"
-                  gutterSize={'m'}
+                  gutterSize="s"
                   wrap={true}
                 >
                   {idsInOrder.map(
                     (controlId, index) =>
                       panels[controlId] && (
                         <SortableControl
+                          isEditable={isEditable}
                           dragInfo={{ index, draggingIndex }}
                           embeddableId={controlId}
                           key={controlId}
@@ -154,33 +166,35 @@ export const ControlGroup = () => {
               </DragOverlay>
             </DndContext>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} className="groupEditActions" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
-                  <EuiButtonIcon
-                    aria-label={ControlGroupStrings.management.getManageButtonTitle()}
-                    iconType="gear"
-                    color="subdued"
-                    data-test-subj="inputControlsSortingButton"
-                    onClick={() => {
-                      const flyoutInstance = openFlyout(
-                        forwardAllContext(
-                          <EditControlGroup closeFlyout={() => flyoutInstance.close()} />,
-                          reduxContainerContext
-                        )
-                      );
-                    }}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
-                  <CreateControlButton isIconButton={true} />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {isEditable && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} className="groupEditActions" gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiToolTip content={ControlGroupStrings.management.getManageButtonTitle()}>
+                    <EuiButtonIcon
+                      aria-label={ControlGroupStrings.management.getManageButtonTitle()}
+                      iconType="gear"
+                      color="subdued"
+                      data-test-subj="inputControlsSortingButton"
+                      onClick={() => {
+                        const flyoutInstance = openFlyout(
+                          forwardAllContext(
+                            <EditControlGroup closeFlyout={() => flyoutInstance.close()} />,
+                            reduxContainerContext
+                          )
+                        );
+                      }}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
+                    <CreateControlButton isIconButton={true} />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       ) : (
         <>

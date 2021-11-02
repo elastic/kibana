@@ -38,10 +38,10 @@ export function BackendContents({
     (callApmApi) => {
       if (backendName) {
         return callApmApi({
-          endpoint: 'GET /internal/apm/service-map/backend/{backendName}',
+          endpoint: 'GET /internal/apm/service-map/backend',
           params: {
-            path: { backendName },
             query: {
+              backendName,
               environment,
               start,
               end,
@@ -57,12 +57,11 @@ export function BackendContents({
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
-  const detailsUrl = apmRouter.link('/backends/{backendName}/overview', {
-    path: { backendName },
-    query: query as TypeOf<
-      ApmRoutes,
-      '/backends/{backendName}/overview'
-    >['query'],
+  const detailsUrl = apmRouter.link('/backends/overview', {
+    query: {
+      ...query,
+      backendName,
+    } as TypeOf<ApmRoutes, '/backends/overview'>['query'],
   });
 
   const trackEvent = useUiTracker();

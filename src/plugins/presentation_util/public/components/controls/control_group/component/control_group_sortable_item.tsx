@@ -25,17 +25,19 @@ interface DragInfo {
 
 export type SortableControlProps = ControlFrameProps & {
   dragInfo: DragInfo;
+  isEditable: boolean;
 };
 
 /**
  * A sortable wrapper around the generic control frame.
  */
 export const SortableControl = (frameProps: SortableControlProps) => {
-  const { embeddableId } = frameProps;
+  const { embeddableId, isEditable } = frameProps;
   const { over, listeners, isSorting, transform, transition, attributes, isDragging, setNodeRef } =
     useSortable({
       id: embeddableId,
       animateLayoutChanges: () => true,
+      disabled: !isEditable,
     });
 
   frameProps.dragInfo = { ...frameProps.dragInfo, isOver: over?.id === embeddableId, isDragging };
@@ -58,7 +60,7 @@ export const SortableControl = (frameProps: SortableControlProps) => {
 const SortableControlInner = forwardRef<
   HTMLButtonElement,
   SortableControlProps & { style: HTMLAttributes<HTMLButtonElement>['style'] }
->(({ embeddableId, dragInfo, style, ...dragHandleProps }, dragHandleRef) => {
+>(({ embeddableId, dragInfo, style, isEditable, ...dragHandleProps }, dragHandleRef) => {
   const { isOver, isDragging, draggingIndex, index } = dragInfo;
   const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupInput>();
   const { panels } = useEmbeddableSelector((state) => state);
@@ -85,9 +87,9 @@ const SortableControlInner = forwardRef<
       style={style}
     >
       <ControlFrame
-        enableActions={draggingIndex === -1}
+        enableActions={isEditable && draggingIndex === -1}
         embeddableId={embeddableId}
-        customPrepend={dragHandle}
+        customPrepend={isEditable ? dragHandle : undefined}
       />
     </EuiFlexItem>
   );
@@ -114,11 +116,15 @@ export const ControlClone = ({ draggingId }: { draggingId: string }) => {
       })}
     >
       {controlStyle === 'twoLine' ? <EuiFormLabel>{title}</EuiFormLabel> : undefined}
-      <EuiFlexGroup gutterSize="none" className={'controlFrame__draggable'}>
+      <EuiFlexGroup responsive={false} gutterSize="none" className={'controlFrame__draggable'}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="grabHorizontal" className="controlFrame__dragHandle" />
         </EuiFlexItem>
-        {controlStyle === 'oneLine' ? <EuiFlexItem>{title}</EuiFlexItem> : undefined}
+        {controlStyle === 'oneLine' ? (
+          <EuiFlexItem>
+            <label className="controlFrameCloneWrapper__label">{title}</label>
+          </EuiFlexItem>
+        ) : undefined}
       </EuiFlexGroup>
     </EuiFlexItem>
   );

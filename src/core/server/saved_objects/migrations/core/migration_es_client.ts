@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { Client, TransportRequestOptions } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 
@@ -58,7 +57,7 @@ export interface MigrationEsClient {
 }
 
 export function createMigrationEsClient(
-  client: ElasticsearchClient,
+  client: ElasticsearchClient | Client,
   log: Logger,
   delay?: number
 ): MigrationEsClient {
@@ -69,7 +68,7 @@ export function createMigrationEsClient(
         throw new Error(`unknown ElasticsearchClient client method [${key}]`);
       }
       return await migrationRetryCallCluster(
-        () => fn.call(client, params, { maxRetries: 0, ...options }),
+        () => fn.call(client, params, { maxRetries: 0, meta: true, ...options }),
         log,
         delay
       );

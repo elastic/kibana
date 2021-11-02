@@ -7,7 +7,7 @@
  */
 
 import { isUndefined } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';

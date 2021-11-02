@@ -65,7 +65,7 @@ export function emsBoundariesSpecProvider({
     }),
     category: TutorialsCategory.OTHER,
     shortDescription: i18n.translate('xpack.maps.tutorials.ems.shortDescription', {
-      defaultMessage: 'Administrative boundaries from the Elastic Maps Service.',
+      defaultMessage: 'Add administrative boundaries to your data with Elastic Maps Service.',
     }),
     longDescription: i18n.translate('xpack.maps.tutorials.ems.longDescription', {
       defaultMessage:

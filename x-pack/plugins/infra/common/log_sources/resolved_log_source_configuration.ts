@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/common';
 import { ObjectEntries } from '../utility_types';
 import { ResolveLogSourceConfigurationError } from './errors';

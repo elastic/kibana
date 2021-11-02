@@ -11,12 +11,9 @@ import isEmpty from 'lodash/isEmpty';
 
 import * as t from 'io-ts';
 import { validateNonExact, parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import { SIGNALS_ID } from '@kbn/securitysolution-rules';
 
-import {
-  SIGNALS_ID,
-  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
-  SERVER_APP_ID,
-} from '../../../../common/constants';
+import { DEFAULT_SEARCH_AFTER_PAGE_SIZE, SERVER_APP_ID } from '../../../../common/constants';
 import { isMlRule } from '../../../../common/machine_learning/helpers';
 import {
   isThresholdRule,
@@ -87,6 +84,7 @@ export const signalRulesAlertType = ({
   eventLogService,
   indexNameOverride,
   ruleExecutionLogClientOverride,
+  refreshOverride,
 }: {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
@@ -97,6 +95,7 @@ export const signalRulesAlertType = ({
   config: ConfigType;
   eventLogService: IEventLogService;
   indexNameOverride?: string;
+  refreshOverride?: string;
   ruleExecutionLogClientOverride?: IRuleExecutionLogClient;
 }): SignalRuleAlertTypeDefinition => {
   const { alertMergeStrategy: mergeStrategy, alertIgnoreFields: ignoreFields } = config;
@@ -143,12 +142,13 @@ export const signalRulesAlertType = ({
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
       let result = createSearchAfterReturnType();
+
       const ruleStatusClient = ruleExecutionLogClientOverride
         ? ruleExecutionLogClientOverride
         : new RuleExecutionLogClient({
-            eventLogService,
-            savedObjectsClient: services.savedObjectsClient,
             underlyingClient: config.ruleExecutionLog.underlyingClient,
+            savedObjectsClient: services.savedObjectsClient,
+            eventLogService,
           });
 
       const completeRule: CompleteRule<RuleParams> = {
@@ -164,7 +164,7 @@ export const signalRulesAlertType = ({
         ruleTypeId,
       } = completeRule.ruleConfig;
 
-      const refresh = actions.length ? 'wait_for' : false;
+      const refresh = refreshOverride ?? actions.length ? 'wait_for' : false;
       const buildRuleMessage = buildRuleMessageFactory({
         id: alertId,
         ruleId,
@@ -427,7 +427,7 @@ export const signalRulesAlertType = ({
                 ?.kibana_siem_app_url,
             });
 
-            logger.info(
+            logger.debug(
               buildRuleMessage(`Found ${result.createdSignalsCount} signals for notification.`)
             );
 
@@ -479,8 +479,7 @@ export const signalRulesAlertType = ({
             });
           }
 
-          // adding this log line so we can get some information from cloud
-          logger.info(
+          logger.debug(
             buildRuleMessage(
               `[+] Finished indexing ${result.createdSignalsCount}  ${
                 !isEmpty(tuples)

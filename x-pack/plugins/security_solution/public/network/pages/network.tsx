@@ -170,6 +170,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     />
                   }
                   title={i18n.PAGE_TITLE}
+                  border
                 />
 
                 <EmbeddedMap
