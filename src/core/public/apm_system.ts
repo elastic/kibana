@@ -8,6 +8,7 @@
 
 import type { ApmBase, AgentConfigOptions } from '@elastic/apm-rum';
 import { modifyUrl } from '@kbn/std';
+import { CachedResourceObserver } from './apm_resource_counter';
 import type { InternalApplicationStart } from './application';
 
 /** "GET protocol://hostname:port/pathname" */
@@ -31,17 +32,21 @@ interface StartDeps {
 export class ApmSystem {
   private readonly enabled: boolean;
   private pageLoadTransaction?: Transaction;
+  private resourceCounter: CachedResourceObserver;
+  private apm?: ApmBase;
   /**
    * `apmConfig` would be populated with relevant APM RUM agent
    * configuration if server is started with elastic.apm.* config.
    */
   constructor(private readonly apmConfig?: ApmConfig, private readonly basePath = '') {
     this.enabled = apmConfig != null && !!apmConfig.active;
+    this.resourceCounter = new CachedResourceObserver();
   }
 
   async setup() {
     if (!this.enabled) return;
     const { init, apm } = await import('@elastic/apm-rum');
+    this.apm = apm;
     const { globalLabels, ...apmConfig } = this.apmConfig!;
     if (globalLabels) {
       apm.addLabels(globalLabels);
@@ -64,10 +69,9 @@ export class ApmSystem {
      * route-change transactions after Kibana app is bootstrapped
      */
     start.application.currentAppId$.subscribe((appId) => {
-      const apmInstance = (window as any).elasticApm;
-      if (appId && apmInstance && typeof apmInstance.startTransaction === 'function') {
+      if (appId && this.apm) {
         this.closePageLoadTransaction();
-        apmInstance.startTransaction(`/app/${appId}`, 'route-change', {
+        this.apm.startTransaction(`/app/${appId}`, 'route-change', {
           managed: true,
           canReuse: true,
         });
@@ -88,22 +92,15 @@ export class ApmSystem {
     }
   }
 
-  /* Returns the number of resources that were loaded from network (vs. from disk cache) */
-  private getLoadedResourcesCount() {
-    try {
-      return window.performance
-        .getEntriesByType('resource')
-        .filter((r: Record<string, any>) => r.initiatorType === 'script' && r.transferSize > 0)
-        .length;
-    } catch (e) {
-      return -1;
-    }
-  }
-
   /* Close and clear the page load transaction */
   private closePageLoadTransaction() {
     if (this.pageLoadTransaction) {
-      this.pageLoadTransaction.addLabels({ loadedResources: this.getLoadedResourcesCount() });
+      const loadCounts = this.resourceCounter.getCounts();
+      this.pageLoadTransaction.addLabels({
+        loadedResources: loadCounts.networkOrDisk,
+        cachedResources: loadCounts.memory,
+      });
+      this.resourceCounter.destroy();
       this.pageLoadTransaction.end();
       this.pageLoadTransaction = undefined;
     }
