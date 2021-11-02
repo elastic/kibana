@@ -4,7 +4,7 @@
         "timeFieldName": "@timestamp",
         "title": "nonExistingDataView"
     },
-    "coreMigrationVersion": "8.0.0",
+    "coreMigrationVersion": "7.16.0",
     "id": "nonExistingDataView",
     "migrationVersion": {
         "index-pattern": "7.11.0"
