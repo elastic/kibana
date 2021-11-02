@@ -24,6 +24,8 @@ export const CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-${id}"]`;
 };
 
+export const CELL = '[data-test-subj="statefulCell"]';
+
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
 export const COMBO_BOX = '.euiComboBoxOption__content';
@@ -34,12 +36,28 @@ export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
 
+export const DATA_PROVIDERS = '.field-value';
+
 export const DATAGRID_HEADERS =
   '[data-test-subj="events-viewer-panel"] [data-test-subj^="dataGridHeaderCell-"]';
+
+export const DATE_PICKER_END = '[data-test-subj="superDatePickerendDatePopoverButton"]';
+
+export const DATE_PICKER_START = '[data-test-subj="superDatePickerstartDatePopoverButton"]';
+
+export const DELETE_TIMELINE_BTN = '[data-test-subj="delete-timeline"]';
+
+export const DELETION_CONFIRMATION = '[data-test-subj="confirmModalConfirmButton"]';
+
+export const DESTINATION_IP_KPI = '[data-test-subj="siem-timeline-destination-ip-kpi"]';
 
 export const FAVORITE_TIMELINE = '[data-test-subj="timeline-favorite-filled-star"]';
 
 export const FIELD_BROWSER = '[data-test-subj="show-field-browser"]';
+
+export const GRAPH_TAB_BUTTON = '[data-test-subj="timelineTabs-graph"]';
+
+export const HOST_KPI = '[data-test-subj="siem-timeline-host-kpi"]';
 
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
 
@@ -56,6 +74,10 @@ export const NOTES = '[data-test-subj="note-card-body"]';
 export const NOTE_CARD_CONTENT = '[data-test-subj="notes"]';
 
 export const EVENT_NOTE = '[data-test-subj="timeline-notes-button-small"]';
+
+export const NOTE_DESCRIPTION = '[data-test-subj="note-preview-description"]';
+
+export const NOTE_PREVIEW = '[data-test-subj^="note-preview"]';
 
 export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 
@@ -82,6 +104,10 @@ export const OPEN_TIMELINE_TEMPLATE_ICON =
 
 export const PIN_EVENT = '[data-test-subj="pin"]';
 
+export const PINNED_TAB_BUTTON = '[data-test-subj="timelineTabs-pinned"]';
+
+export const PROCESS_KPI = '[data-test-subj="siem-timeline-process-kpi"';
+
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 
 export const RESET_FIELDS =
@@ -97,6 +123,8 @@ export const INDICATOR_MATCH_ROW_RENDER = '[data-test-subj="threat-match-row"]';
 export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
+
+export const SOURCE_IP_KPI = '[data-test-subj="siem-timeline-source-ip-kpi"]';
 
 export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';
 
@@ -227,3 +255,5 @@ export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
   '[data-test-subj="timeline-tab-content-graph-notes"]';
 
 export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN = '[data-test-subj="more-actions-@timestamp"]';
+
+export const USER_KPI = '[data-test-subj="siem-timeline-user-kpi"]';
