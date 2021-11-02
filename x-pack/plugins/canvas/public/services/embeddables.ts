@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  EmbeddableFactory,
-  EmbeddableStateTransfer,
-} from '../../../../../src/plugins/embeddable/public';
+import { EmbeddableFactory } from '../../../../../src/plugins/embeddable/public';
 
 export interface CanvasEmbeddablesService {
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
-  getStateTransfer: () => EmbeddableStateTransfer;
 }

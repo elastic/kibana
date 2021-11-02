@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useEffect, useState, useMemo } from 'react';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
@@ -23,7 +23,11 @@ import { getPolicyDetailPath, getPolicyTrustedAppsPath } from '../../../../commo
 import { PolicyDetailsForm } from '../policy_details_form';
 import { AppAction } from '../../../../../common/store/actions';
 import { usePolicyDetailsSelector } from '../policy_hooks';
-import { policyDetailsForUpdate } from '../../store/policy_details/selectors';
+import {
+  apiError,
+  policyDetails,
+  policyDetailsForUpdate,
+} from '../../store/policy_details/selectors';
 import { FleetTrustedAppsCard } from './endpoint_package_custom_extension/components/fleet_trusted_apps_card';
 import { LinkWithIcon } from './endpoint_package_custom_extension/components/link_with_icon';
 /**
@@ -48,6 +52,8 @@ const WrappedPolicyDetailsForm = memo<{
 }>(({ policyId, onChange }) => {
   const dispatch = useDispatch<(a: AppAction) => void>();
   const updatedPolicy = usePolicyDetailsSelector(policyDetailsForUpdate);
+  const endpointPolicyDetails = usePolicyDetailsSelector(policyDetails);
+  const endpointDetailsLoadingError = usePolicyDetailsSelector(apiError);
   const { getAppUrl } = useAppUrl();
   const [, setLastUpdatedPolicy] = useState(updatedPolicy);
   // TODO: Remove this and related code when removing FF
@@ -185,7 +191,25 @@ const WrappedPolicyDetailsForm = memo<{
               </h5>
             </EuiText>
             <EuiSpacer size="s" />
-            <PolicyDetailsForm />
+            {endpointDetailsLoadingError ? (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.policyDetails.loadError"
+                    defaultMessage="Failed to load endpoint policy settings"
+                  />
+                }
+                iconType="alert"
+                color="warning"
+                data-test-subj="endpiontPolicySettingsLoadingError"
+              >
+                {endpointDetailsLoadingError.message}
+              </EuiCallOut>
+            ) : !endpointPolicyDetails ? (
+              <EuiLoadingSpinner size="l" className="essentialAnimation" />
+            ) : (
+              <PolicyDetailsForm />
+            )}
           </div>
         </>
       ) : (
