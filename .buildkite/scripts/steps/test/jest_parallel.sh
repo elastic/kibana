@@ -5,24 +5,26 @@ set -uo pipefail
 JOB=$BUILDKITE_PARALLEL_JOB
 JOB_COUNT=$BUILDKITE_PARALLEL_JOB_COUNT
 
-# a jest failure will result in the script returning an exit
-# code of 10
+# a jest failure will result in the script returning an exit code of 10
 
 i=0
 exitCode=0
 
-find src x-pack packages -name jest.config.js -not -path "*/__fixtures__/*" | sort | while read config; do
-  if [ "$(($i % $JOB_COUNT))" -eq $JOB ]; then
+while read -r config; do
+  if [ "$((i % JOB_COUNT))" -eq "$JOB" ]; then
     echo "--- $ node scripts/jest --config $config"
-    node --max-old-space-size=5632 ./node_modules/.bin/jest --config=$config --runInBand --coverage=false
+    node --max-old-space-size=5632 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false
+    lastCode=$?
 
-    if [ $? -ne 0 ]; then
+    if [ $lastCode -ne 0 ]; then
       exitCode=10
+      echo "Jest exited with code $lastCode"
       echo "^^^ +++"
     fi
   fi
 
   ((i=i+1))
-done
+# uses heredoc to avoid the while loop being in a sub-shell thus unable to overwrite exitCode
+done <<< "$(find src x-pack packages -name jest.config.js -not -path "*/__fixtures__/*" | sort)"
 
 exit $exitCode
