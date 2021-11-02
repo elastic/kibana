@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-process.env.ALLOW_PERFORMANCE_HOOKS_IN_TASK_MANAGER = true;
+export const ADD_AGENT_BUTTON = 'addAgentButton';
 
-require('../../src/setup_node_env');
-require('@kbn/test').startServersCli(require.resolve('../test/functional/config.js'));
+export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
+export const ENROLLMENT_TOKENS_TAB = 'fleet-enrollment-tokens-tab';

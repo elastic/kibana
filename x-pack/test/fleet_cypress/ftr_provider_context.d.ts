@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-process.env.ALLOW_PERFORMANCE_HOOKS_IN_TASK_MANAGER = true;
+import { GenericFtrProviderContext } from '@kbn/test';
 
-require('../../src/setup_node_env');
-require('@kbn/test').startServersCli(require.resolve('../test/functional/config.js'));
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
