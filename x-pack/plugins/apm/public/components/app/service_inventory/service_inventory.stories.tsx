@@ -54,10 +54,6 @@ const stories: Meta<{}> = {
           <KibanaReactContext.Provider>
             <MockUrlParamsContextProvider
               params={{
-                rangeFrom: 'now-15m',
-                rangeTo: 'now',
-                start: '2021-02-12T13:20:43.344Z',
-                end: '2021-02-12T13:20:58.344Z',
                 comparisonEnabled: true,
                 comparisonType: TimeRangeComparisonEnum.DayBefore,
               }}
@@ -80,6 +76,6 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const Example: Story<{}> = (args) => {
+export const Example: Story<{}> = () => {
   return <ServiceInventory />;
 };
