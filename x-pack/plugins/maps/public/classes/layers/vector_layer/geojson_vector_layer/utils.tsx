@@ -13,19 +13,19 @@ import {
   SOURCE_BOUNDS_DATA_REQUEST_ID,
   SOURCE_DATA_REQUEST_ID,
   VECTOR_SHAPE_TYPE,
-} from '../../../../common/constants';
+} from '../../../../../common/constants';
 import {
   DataRequestMeta,
   MapExtent,
   Timeslice,
   VectorSourceRequestMeta,
-} from '../../../../common/descriptor_types';
-import { DataRequestContext } from '../../../actions';
-import { IVectorSource } from '../../sources/vector_source';
-import { DataRequestAbortError } from '../../util/data_request';
-import { DataRequest } from '../../util/data_request';
+} from '../../../../../common/descriptor_types';
+import { DataRequestContext } from '../../../../actions';
+import { IVectorSource } from '../../../sources/vector_source';
+import { DataRequestAbortError } from '../../../util/data_request';
+import { DataRequest } from '../../../util/data_request';
 import { getCentroidFeatures } from './get_centroid_features';
-import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
+import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
 import { assignFeatureIds } from './assign_feature_ids';
 
 export function addGeoJsonMbSource(mbSourceId: string, mbLayerIds: string[], mbMap: MbMap) {

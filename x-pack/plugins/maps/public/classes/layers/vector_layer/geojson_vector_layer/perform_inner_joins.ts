@@ -7,10 +7,10 @@
 
 import { FeatureCollection } from 'geojson';
 import { i18n } from '@kbn/i18n';
-import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../../common/constants';
-import { DataRequestContext } from '../../../actions';
-import { InnerJoin } from '../../joins/inner_join';
-import { PropertiesMap } from '../../../../common/elasticsearch_util';
+import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../../../common/constants';
+import { DataRequestContext } from '../../../../actions';
+import { InnerJoin } from '../../../joins/inner_join';
+import { PropertiesMap } from '../../../../../common/elasticsearch_util';
 
 interface SourceResult {
   refreshed: boolean;
