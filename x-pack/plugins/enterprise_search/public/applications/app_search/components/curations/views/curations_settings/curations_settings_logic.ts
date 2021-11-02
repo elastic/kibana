@@ -71,7 +71,7 @@ export const CurationsSettingsLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(
+        const response = await http.get<{ curation: CurationsSettings }>(
           `/internal/app_search/engines/${engineName}/adaptive_relevance/settings`
         );
         actions.onCurationsSettingsLoad(response.curation);
@@ -95,7 +95,7 @@ export const CurationsSettingsLogic = kea<
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
       try {
-        const response = await http.put(
+        const response = await http.put<{ curation: CurationsSettings }>(
           `/internal/app_search/engines/${engineName}/adaptive_relevance/settings`,
           {
             body: JSON.stringify({ curation: currationsSetting }),
