@@ -286,7 +286,7 @@ describe('Task Runner', () => {
     expect(call.services).toBeTruthy();
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(2);
+    expect(logger.debug).toHaveBeenCalledTimes(3);
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -433,7 +433,7 @@ describe('Task Runner', () => {
     `);
 
         const logger = customTaskRunnerFactoryInitializerParams.logger;
-        expect(logger.debug).toHaveBeenCalledTimes(3);
+        expect(logger.debug).toHaveBeenCalledTimes(4);
         expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
         expect(logger.debug).nthCalledWith(
           2,
@@ -649,7 +649,7 @@ describe('Task Runner', () => {
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(4);
+    expect(logger.debug).toHaveBeenCalledTimes(5);
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -849,7 +849,7 @@ describe('Task Runner', () => {
         expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
         const logger = customTaskRunnerFactoryInitializerParams.logger;
-        expect(logger.debug).toHaveBeenCalledTimes(4);
+        expect(logger.debug).toHaveBeenCalledTimes(5);
         expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
         expect(logger.debug).nthCalledWith(
           2,
@@ -1538,7 +1538,7 @@ describe('Task Runner', () => {
         `);
 
         const logger = customTaskRunnerFactoryInitializerParams.logger;
-        expect(logger.debug).toHaveBeenCalledTimes(4);
+        expect(logger.debug).toHaveBeenCalledTimes(5);
         expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
         expect(logger.debug).nthCalledWith(
           2,
@@ -4340,7 +4340,7 @@ describe('Task Runner', () => {
     expect(call.services).toBeTruthy();
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(2);
+    expect(logger.debug).toHaveBeenCalledTimes(3);
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
