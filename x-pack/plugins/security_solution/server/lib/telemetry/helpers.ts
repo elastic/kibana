@@ -161,7 +161,7 @@ export const ruleExceptionListItemToTelemetryEvent = (
 export const templateExceptionList = (listData: ExceptionListItem[], listType: string) => {
   return listData.map((item) => {
     const template: ListTemplate = {
-      '@timestamp': new Date().getTime(),
+      '@timestamp': moment().toISOString(),
     };
 
     // cast exception list type to a TelemetryEvent for allowlist filtering
