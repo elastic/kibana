@@ -14,7 +14,7 @@ import {
   TaskManagerStartContract,
 } from '../../../task_manager/server';
 import { PreConfiguredAction } from '../types';
-import { getTotalCount, getInUseTotalCount, getExecutionsTotalCount } from './actions_telemetry';
+import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 
@@ -102,9 +102,9 @@ export function telemetryTaskRunner(
         return Promise.all([
           getTotalCount(esClient, kibanaIndex, preconfiguredActions),
           getInUseTotalCount(esClient, kibanaIndex, undefined, preconfiguredActions),
-          getExecutionsTotalCount(esClient, eventLogIndex),
+          getExecutionsPerDayCount(esClient, eventLogIndex),
         ])
-          .then(([totalAggegations, totalInUse, totalExecutions]) => {
+          .then(([totalAggegations, totalInUse, totalExecutionsPerDay]) => {
             return {
               state: {
                 runs: (state.runs || 0) + 1,
@@ -115,12 +115,13 @@ export function telemetryTaskRunner(
                 count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
                 count_active_email_connectors_by_service_type: totalInUse.countEmailByService,
                 count_actions_namespaces: totalInUse.countNamespaces,
-                count_actions_executions: totalExecutions.countTotal,
-                count_actions_executions_by_type: totalExecutions.countByType,
-                count_actions_executions_failed: totalExecutions.countFailed,
-                count_actions_executions_failed_by_type: totalExecutions.countFailedByType,
-                avg_execution_time: totalExecutions.avgExecutionTime,
-                avg_execution_time_by_type: totalExecutions.avgExecutionTimeByType,
+                count_actions_executions_per_day: totalExecutionsPerDay.countTotal,
+                count_actions_executions_by_type_per_day: totalExecutionsPerDay.countByType,
+                count_actions_executions_failed_per_day: totalExecutionsPerDay.countFailed,
+                count_actions_executions_failed_by_type_per_day:
+                  totalExecutionsPerDay.countFailedByType,
+                avg_execution_time_per_day: totalExecutionsPerDay.avgExecutionTime,
+                avg_execution_time_by_type_per_day: totalExecutionsPerDay.avgExecutionTimeByType,
               },
               runAt: getNextMidnight(),
             };

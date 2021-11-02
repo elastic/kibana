@@ -16,12 +16,12 @@ export interface ActionsUsage {
   count_active_by_type: Record<string, number>;
   count_active_email_connectors_by_service_type: Record<string, number>;
   count_actions_namespaces: number;
-  count_actions_executions: number;
-  count_actions_executions_by_type: Record<string, number>;
-  count_actions_executions_failed: number;
-  count_actions_executions_failed_by_type: Record<string, number>;
-  avg_execution_time: number;
-  avg_execution_time_by_type: Record<string, number>;
+  count_actions_executions_per_day: number;
+  count_actions_executions_by_type_per_day: Record<string, number>;
+  count_actions_executions_failed_per_day: number;
+  count_actions_executions_failed_by_type_per_day: Record<string, number>;
+  avg_execution_time_per_day: number;
+  avg_execution_time_by_type_per_day: Record<string, number>;
 }
 
 export const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
