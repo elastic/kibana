@@ -52,6 +52,7 @@ export const useWorkpad = (
         // If it's an alias match, we know we are going to redirect so don't even dispatch that we got the workpad
         if (outcome !== 'aliasMatch') {
           workpad.aliasId = aliasId;
+        }
 
         if (storedWorkpad.id !== workpadId || storedWorkpad.aliasId !== aliasId) {
           dispatch(setAssets(assets));
