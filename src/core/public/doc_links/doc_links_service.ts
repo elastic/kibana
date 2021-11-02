@@ -18,7 +18,9 @@ export class DocLinksService {
   public setup() {}
 
   public start({ injectedMetadata }: StartDeps): DocLinksStart {
-    const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
+    const kibanaBranch = injectedMetadata.getKibanaBranch();
+    // Documentation for `main` branches is still published at a `master` URL.
+    const DOC_LINK_VERSION = kibanaBranch === 'main' ? 'master' : kibanaBranch;
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
     const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
@@ -38,9 +40,9 @@ export class DocLinksService {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
           supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
           customLinks: `${KIBANA_DOCS}custom-links.html`,
-          droppedTransactionSpans: `${APM_DOCS}get-started/master/transaction-spans.html#dropped-spans`,
-          upgrading: `${APM_DOCS}server/master/upgrading.html`,
-          metaData: `${APM_DOCS}get-started/master/metadata.html`,
+          droppedTransactionSpans: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-spans.html#data-model-dropped-spans`,
+          upgrading: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade.html`,
+          metaData: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-metadata.html`,
         },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,

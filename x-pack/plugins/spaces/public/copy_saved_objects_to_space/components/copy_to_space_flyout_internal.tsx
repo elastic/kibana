@@ -75,7 +75,7 @@ export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
           isLoading: false,
           spaces: [...spacesMap.values()].filter(
             ({ isActiveSpace, isAuthorizedForPurpose }) =>
-              isActiveSpace || isAuthorizedForPurpose('copySavedObjectsIntoSpace')
+              !isActiveSpace && isAuthorizedForPurpose('copySavedObjectsIntoSpace')
           ),
         });
       })
