@@ -57,7 +57,8 @@ export const withSecurityContext = <P extends {}>({
         }),
         {
           management: undefined,
-          // @ts-ignore ignore this error as we just need the enableExperimental and it's temporary
+          // ignore this error as we just need the enableExperimental and it's temporary
+          // @ts-expect-error TS2739
           app: {
             enableExperimental: ExperimentalFeaturesService.get(),
           },
