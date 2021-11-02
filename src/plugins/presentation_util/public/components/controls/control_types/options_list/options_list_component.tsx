@@ -108,8 +108,8 @@ export const OptionsListComponent = ({
       <EuiPopover
         button={button}
         isOpen={isPopoverOpen}
-        className="optionsList--popoverOverride"
-        anchorClassName="optionsList--anchorOverride"
+        className="optionsList__popoverOverride"
+        anchorClassName="optionsList__anchorOverride"
         closePopover={() => setIsPopoverOpen(false)}
         panelPaddingSize="none"
         anchorPosition="downCenter"
