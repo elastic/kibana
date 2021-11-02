@@ -94,7 +94,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
         <KpiPanel hasBorder data-test-subj="alertsCountPanel">
           <HeaderSection
             id={uniqueQueryId}
-            title={<span className="eui-textBreakNormal">{i18n.COUNT_TABLE_TITLE}</span>}
+            title={i18n.COUNT_TABLE_TITLE}
             titleSize="s"
             hideSubtitle
           >
