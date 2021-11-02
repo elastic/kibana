@@ -65,7 +65,7 @@ async function cypressStart(
 
   const esRequestTimeout = config.get('timeouts.esRequestTimeout');
 
-  console.log('Loading ES archives...');
+  console.log(`Loading ES archive "${archiveName}"`);
   await esArchiverLoad(archiveName);
 
   const res = await cypressExecution({
