@@ -29,7 +29,6 @@ test('Registering and retrieving a generator', async () => {
       "createUrl": [Function],
       "id": "TEST_GENERATOR",
       "isDeprecated": false,
-      "migrate": [Function],
     }
   `);
   expect(await generator.createUrl({})).toBe('myurl');
@@ -40,7 +39,6 @@ test('Registering and retrieving a generator', async () => {
       "createUrl": [Function],
       "id": "TEST_GENERATOR",
       "isDeprecated": false,
-      "migrate": [Function],
     }
   `);
   expect(await generator.createUrl({})).toBe('myurl');
