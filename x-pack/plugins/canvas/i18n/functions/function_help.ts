@@ -27,7 +27,6 @@ import { help as demodata } from './dict/demodata';
 import { help as doFn } from './dict/do';
 import { help as dropdownControl } from './dict/dropdown_control';
 import { help as eq } from './dict/eq';
-import { help as embeddable } from './dict/embeddable';
 import { help as escount } from './dict/escount';
 import { help as esdocs } from './dict/esdocs';
 import { help as essql } from './dict/essql';
@@ -183,7 +182,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   do: doFn,
   dropdownControl,
   eq,
-  embeddable,
   escount,
   esdocs,
   essql,
