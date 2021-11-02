@@ -49,12 +49,6 @@ export function MetricDimensionEditor(
   const currentColorMode = state?.colorMode || ColorMode.None;
   const hasDynamicColoring = currentColorMode !== ColorMode.None;
 
-  const currentMinMax = {
-    min: Math.min(0, firstRow[accessor] * 2),
-    // if value is 0, then fallback to 100 as last resort
-    max: Math.max(0, firstRow[accessor] * 2, firstRow[accessor] === 0 ? 100 : 0),
-  };
-
   const activePalette = state?.palette || {
     type: 'palette',
     name: defaultPaletteParams.name,
@@ -64,6 +58,23 @@ export function MetricDimensionEditor(
       colorStops: undefined,
     },
   };
+
+  const currentMinMax = {
+    min: Math.min(firstRow[accessor] * 2, firstRow[accessor] === 0 ? -50 : 0),
+    // if value is 0, then fallback to 100 as last resort
+    max: Math.max(firstRow[accessor] * 2, firstRow[accessor] === 0 ? 100 : 0),
+  };
+
+  // overwrite the artifical computed min/max with the custom stops if provided
+  if (activePalette?.params?.colorStops) {
+    const customStops = activePalette.params.colorStops;
+    if (customStops[0].stop != null) {
+      currentMinMax.min = customStops[0].stop;
+    }
+    if (customStops[customStops.length - 1].stop != null) {
+      currentMinMax.max = customStops[customStops.length - 1].stop;
+    }
+  }
   // need to tell the helper that the colorStops are required to display
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 

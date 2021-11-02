@@ -14,9 +14,22 @@ import { MetricDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { ColorMode, PaletteRegistry } from 'src/plugins/charts/public';
 import { act } from 'react-dom/test-utils';
-import { PalettePanelContainer } from '../shared_components';
+import { CustomizablePalette, PalettePanelContainer } from '../shared_components';
 import { layerTypes } from '../../common';
 import { MetricState } from '../../common/expressions';
+
+// mocking random id generator function
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      let counter = 0;
+      return () => counter++;
+    },
+  };
+});
 
 describe('metric dimension editor', () => {
   let frame: FramePublicAPI;
@@ -66,6 +79,8 @@ describe('metric dimension editor', () => {
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
     };
+    // add a div to the ref
+    props.panelRef.current = document.createElement('div');
   });
 
   it('should not show the dynamic coloring option for non numeric columns', () => {
@@ -119,6 +134,7 @@ describe('metric dimension editor', () => {
         .find(EuiButtonGroup)
         .prop('onChange')!(ColorMode.Labels);
     });
+    instance.update();
 
     expect(props.setState).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -142,7 +158,71 @@ describe('metric dimension editor', () => {
         .first()
         .simulate('click');
     });
+    instance.update();
 
     expect(instance.find(PalettePanelContainer).exists()).toBe(true);
+  });
+
+  it('should provide have a special data min/max for zero metric value', () => {
+    frame.activeData!.first.columns[0].meta.type = 'number';
+    frame.activeData!.first.rows[0].foo = 0;
+    state.colorMode = ColorMode.Background;
+    const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
+
+    act(() => {
+      instance
+        .find('[data-test-subj="lnsMetric_dynamicColoring_trigger"]')
+        .first()
+        .simulate('click');
+    });
+    instance.update();
+
+    expect(instance.find(CustomizablePalette).prop('dataBounds')).toEqual({ min: -50, max: 100 });
+  });
+
+  it('should work for negative metric value', () => {
+    frame.activeData!.first.columns[0].meta.type = 'number';
+    frame.activeData!.first.rows[0].foo = -1;
+    state.colorMode = ColorMode.Background;
+    const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
+
+    act(() => {
+      instance
+        .find('[data-test-subj="lnsMetric_dynamicColoring_trigger"]')
+        .first()
+        .simulate('click');
+    });
+    instance.update();
+
+    expect(instance.find(CustomizablePalette).prop('dataBounds')).toEqual({ min: -2, max: 0 });
+  });
+
+  it('should preserve custom stops when computing data range', () => {
+    frame.activeData!.first.columns[0].meta.type = 'number';
+    frame.activeData!.first.rows[0].foo = 5;
+    state.colorMode = ColorMode.Background;
+    state.palette = {
+      type: 'palette',
+      name: 'custom',
+      params: {
+        steps: 2,
+        stops: undefined,
+        colorStops: [
+          { stop: -1, color: 'blue' },
+          { stop: 100, color: 'red' },
+        ],
+      },
+    };
+    const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
+
+    act(() => {
+      instance
+        .find('[data-test-subj="lnsMetric_dynamicColoring_trigger"]')
+        .first()
+        .simulate('click');
+    });
+    instance.update();
+
+    expect(instance.find(CustomizablePalette).prop('dataBounds')).toEqual({ min: -1, max: 100 });
   });
 });
