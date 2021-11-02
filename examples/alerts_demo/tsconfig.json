@@ -22,5 +22,7 @@
     "references": [
       { "path": "../../src/core/tsconfig.json" },
       { "path": "../../x-pack/plugins/observability/tsconfig.json" },
+      { "path": "../developer_examples/tsconfig.json" },
+
     ]
   }

@@ -8,6 +8,7 @@
 
 import uuid from 'uuid';
 import { range } from 'lodash';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { AlertType } from '../../../../x-pack/plugins/alerting/server';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,
@@ -15,6 +16,15 @@ import {
   AlwaysFiringParams,
   AlwaysFiringActionGroupIds,
 } from '../../common/constants';
+
+import { PluginSetupContract } from '../../../../x-pack/plugins/alerting/server';
+import { BackendLibs } from '../types';
+
+import {
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../x-pack/plugins/alerting/common';
+import { AlertTypeState, AlertInstance } from '../../../../x-pack/plugins/alerting/server';
 
 type ActionGroups = 'small' | 'medium' | 'large';
 const DEFAULT_ACTION_GROUP: ActionGroups = 'small';
@@ -37,6 +47,67 @@ function getTShirtSizeByIdAndThreshold(
   }
   return DEFAULT_ACTION_GROUP;
 }
+
+type AlwaysFiringAlertInstance = AlertInstance<
+  AlertInstanceState,
+  AlertInstanceContext,
+  ActionGroups
+>;
+
+type AlertInstanceFactory = (
+  id: string,
+  reason: string,
+  threshold?: number | undefined,
+  value?: number | undefined
+) => AlwaysFiringAlertInstance;
+
+export const createAlertsDemoExecutor = (libs: BackendLibs) =>
+  libs.rules.createLifecycleRuleExecutor<
+    AlwaysFiringParams,
+    AlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    AlwaysFiringActionGroupIds
+  >(async function ({
+    services,
+    params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
+  }) {
+    const { alertWithLifecycle } = services;
+    const alertInstanceFactory: AlertInstanceFactory = (id, reason) =>
+      alertWithLifecycle({
+        id,
+        fields: {
+          [ALERT_REASON]: reason,
+        },
+      });
+    range(instances)
+      .map(() => uuid.v4())
+      .forEach((id: string) => {
+        const tShirtSize = getTShirtSizeByIdAndThreshold(id, thresholds);
+        const alertInstance = alertInstanceFactory(id, tShirtSize);
+        alertInstance.scheduleActions(tShirtSize);
+      });
+  });
+
+export const registerAlwaysFiringRuleType = (
+  alertingPlugin: PluginSetupContract,
+  libs: BackendLibs
+) =>
+  alertingPlugin.registerType({
+    id: 'example.always-firing-demo',
+    name: 'Always firing demo',
+    validate: {},
+    defaultActionGroupId: DEFAULT_ACTION_GROUP,
+    actionGroups: [
+      { id: 'small', name: 'Small t-shirt' },
+      { id: 'medium', name: 'Medium t-shirt' },
+      { id: 'large', name: 'Large t-shirt' },
+    ],
+    isExportable: true,
+    executor: createAlertsDemoExecutor(libs),
+    minimumLicenseRequired: 'basic',
+    producer: ALERTS_DEMO_APP_ID,
+  });
 
 export const alertType: AlertType<
   AlwaysFiringParams,

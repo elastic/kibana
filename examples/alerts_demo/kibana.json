@@ -9,6 +9,6 @@
   "description": "Alerts Demo",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "observability","kibanaReact", "triggersActionsUi", "alerting", "features", "developerExamples"],
+  "requiredPlugins": ["navigation", "observability","kibanaReact", "triggersActionsUi", "alerting", "features", "developerExamples", "ruleRegistry"],
   "optionalPlugins": []
 }

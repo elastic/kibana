@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AppMountParameters, PluginInitializerContext } from '../../../src/core/public';
+import { AppMountParameters } from '../../../src/core/public';
 import {
   AlertsDemoClientCoreStart,
   AlertsDemoClientCoreSetup,
@@ -19,10 +19,10 @@ import {
 } from './types';
 import { PLUGIN_NAME } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../src/core/public';
-import { getAlertType as getAlwaysFiringAlertType } from './alert_types/always_firing';
-
+// import { getAlertType as getAlwaysFiringAlertType } from './alert_types/always_firing';
+import { createAlwaysFiringAlertType } from './alert_types/always_firing';
 export class AlertsDemoPlugin implements AlertsDemoPluginClass {
-  constructor(_context: PluginInitializerContext) {}
+  constructor() {}
 
   public setup(core: AlertsDemoClientCoreSetup, pluginsSetup: AlertsDemoClientSetupDeps) {
     pluginsSetup.observability.navigation.registerSections(
@@ -44,7 +44,10 @@ export class AlertsDemoPlugin implements AlertsDemoPluginClass {
         )
       )
     );
-    pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(getAlwaysFiringAlertType());
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createAlwaysFiringAlertType()
+    );
+    // pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(getAlwaysFiringAlertType());
     pluginsSetup.developerExamples.register({
       appId: 'alertsDemo',
       title: 'Alerts Demo example',

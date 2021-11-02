@@ -9,17 +9,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
-import { EuiSideNav, EuiPage } from '@elastic/eui';
+import { /* EuiSideNav,*/ EuiPage } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '../../../src/core/public';
 import { AlertsDemoClientStartDeps } from './types';
 import {
   KibanaContextProvider,
-  KibanaPageTemplate,
+  /* KibanaPageTemplate, */
 } from '../../../src/plugins/kibana_react/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../x-pack/plugins/triggers_actions_ui/public';
 import { CreateRule } from './components/create_rule';
 
-function AlertsDemoPageTemplate({ children, ...rest }) {
+/* function AlertsDemoPageTemplate({ children, ...rest }) {
   const items = [
     {
       name: 'Section1',
@@ -48,7 +48,7 @@ function AlertsDemoPageTemplate({ children, ...rest }) {
   ];
   const sideNav = <EuiSideNav heading="Sidebar" items={items} />;
   return <KibanaPageTemplate pageSideBar={sideNav}>{children}</KibanaPageTemplate>;
-}
+}*/
 
 export const renderApp = (
   core: CoreStart,
@@ -77,17 +77,15 @@ interface AlertsDemoAppDeps {
 
 const AlertsDemoApp: React.FC<AlertsDemoAppDeps> = ({ basename, triggersActionsUi }) => {
   return (
-    <AlertsDemoPageTemplate>
-      <Router basename={basename}>
-        <EuiPage>
-          <Route
-            path="/"
-            exact={true}
-            render={() => <CreateRule triggersActionsUi={triggersActionsUi} />}
-          />
-          <Route path={`/rule/:id`} render={(props) => <h1>Rule info</h1>} />
-        </EuiPage>
-      </Router>
-    </AlertsDemoPageTemplate>
+    <Router basename={basename}>
+      <EuiPage>
+        <Route
+          path="/"
+          exact={true}
+          render={() => <CreateRule triggersActionsUi={triggersActionsUi} />}
+        />
+        <Route path={`/rule/:id`} render={(props) => <h1>Rule info</h1>} />
+      </EuiPage>
+    </Router>
   );
 };

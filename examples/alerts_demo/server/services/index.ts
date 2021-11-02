@@ -6,12 +6,4 @@
  * Side Public License, v 1.
  */
 
-import './index.scss';
-import { AlertsDemoPlugin } from './plugin';
-
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
-export function plugin() {
-  return new AlertsDemoPlugin();
-}
-export { AlertsDemoPluginSetup, AlertsDemoPluginStart } from './types';
+export * from './rules_service';

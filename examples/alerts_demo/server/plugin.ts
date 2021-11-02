@@ -15,26 +15,36 @@ import {
 } from '../../../src/core/server';
 
 import { defineRoutes } from './routes';
-import { AlertsDemoServerSetupDeps } from '../server/types';
-import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
+import { AlertsDemoServerSetupDeps, BackendLibs } from '../server/types';
+import {
+  alertType as alwaysFiringAlert,
+  registerAlwaysFiringRuleType,
+} from './alert_types/always_firing';
 import { ALERTS_DEMO_APP_ID } from '../common/constants';
 import { DEFAULT_APP_CATEGORIES } from '../../../src/core/utils/default_app_categories';
+import { RulesService } from './services';
 
 export class AlertsDemoPlugin implements Plugin<void, void, AlertsDemoServerSetupDeps> {
+  public libs: BackendLibs | undefined;
   private readonly logger: Logger;
+  private rules: RulesService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.rules = new RulesService('logs', 'observability.logs', this.logger);
   }
 
-  public setup(core: CoreSetup, { alerting, features }: AlertsDemoServerSetupDeps) {
+  public setup(core: CoreSetup, { alerting, features, ruleRegistry }: AlertsDemoServerSetupDeps) {
     this.logger.debug('alertsDemo: Setup');
     const router = core.http.createRouter();
 
     // Register server side APIs
     defineRoutes(router);
-
-    alerting.registerType(alwaysFiringAlert);
+    this.libs = {
+      rules: this.rules.setup(core, { alerting, ruleRegistry }),
+    };
+    registerAlwaysFiringRuleType(alerting, this.libs);
+    // alerting.registerType(alwaysFiringAlertType);
     features.registerKibanaFeature({
       id: ALERTS_DEMO_APP_ID,
       name: 'Alerts Demo examples',

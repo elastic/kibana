@@ -25,11 +25,51 @@ import {
   AlertTypeModel,
   AlertTypeParamsExpressionProps,
 } from '../../../../x-pack/plugins/triggers_actions_ui/public';
+import { ObservabilityRuleTypeModel } from '../../../../x-pack/plugins/observability/public';
+
 import {
   AlwaysFiringParams,
   AlwaysFiringActionGroupIds,
   DEFAULT_INSTANCES_TO_GENERATE,
 } from '../../common/constants';
+
+export function createAlwaysFiringAlertType(): ObservabilityRuleTypeModel<AlwaysFiringParams> {
+  return {
+    id: 'example.always-firing-demo',
+    description: 'Alert when called',
+    iconClass: 'bell',
+    documentationUrl: null,
+    alertParamsExpression: AlwaysFiringExpression,
+    validate: (alertParams: AlwaysFiringParams) => {
+      const { instances } = alertParams;
+      const validationResult = {
+        errors: {
+          instances: new Array<string>(),
+        },
+      };
+      if (instances && instances < 0) {
+        validationResult.errors.instances.push(
+          i18n.translate('AlertingExample.addAlert.error.invalidRandomInstances', {
+            defaultMessage: 'instances must be equal or greater than zero.',
+          })
+        );
+      }
+      return validationResult;
+    },
+    requiresAppContext: false,
+    defaultActionMessage: i18n.translate(
+      'xpack.infra.metrics.alerting.threshold.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
+
+Reason:
+\\{\\{context.reason\\}\\}
+`,
+      }
+    ),
+    format: () => ({ reason: 'Some reason', link: 'some_link' }),
+  };
+}
 
 export function getAlertType(): AlertTypeModel {
   return {

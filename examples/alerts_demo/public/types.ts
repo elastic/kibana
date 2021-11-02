@@ -40,7 +40,7 @@ export interface AlertsDemoClientStartDeps {
   observability: ObservabilityPublicStart;
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  developerExamplers: DeveloperExamplesSetup;
+  developerExamples: DeveloperExamplesSetup;
 }
 
 export type AlertsDemoSetupExports = void;
