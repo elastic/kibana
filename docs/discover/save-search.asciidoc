@@ -24,7 +24,7 @@ image::discover/images/read-only-badge.png[Example of Discover's read only acces
 [float]
 === Save a search
 
-. Once you've created a search worth saving, click *Save* in the toolbar.
+. Once you've created a search worth saving in *Discover*, click *Save* in the toolbar.
 . Enter a name for the search and click *Save*.
 . To reload your search results in *Discover*, click *Open* in the toolbar, and select the saved search.
 +

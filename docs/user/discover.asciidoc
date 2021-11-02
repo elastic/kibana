@@ -3,32 +3,22 @@
 
 [partintro]
 --
-**_Gain insight to your data._**
-
-*Discover* enables you to quickly search and filter your data, get information
-about the structure of the fields, and visualize your data with *Lens* and *Maps*.
-You can customize and save your searches and place them on a dashboard.
-
-++++
-<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
-</script>
-<img
-style="width: 100%; margin: auto; display: block;"
-class="vidyard-player-embed"
-src="https://play.vidyard.com/c2qBPz74BU16ncbvDWGvbz.jpg"
-data-uuid="c2qBPz74BU16ncbvDWGvbz"
-data-v="4"
-data-type="inline"
-/>
-++++
-
-[float]
-=== Explore and query your data
-
 You have questions about your data.
 What pages on your website contain a
 specific word or phrase? What events were logged most recently?
 What processes take longer than 500 milliseconds to respond?
+
+With *Discover*, you can quickly gain insight to your data: search and filter your data, get information
+about the structure of the fields, and present your findings in a visualization.
+You can also customize and save your searches and place them on a dashboard.
+
+[role="screenshot"]
+image::images/discover.png[A view of the Discover app]
+
+
+[float]
+== Explore and query your data
+
 This tutorial shows you how to use *Discover* to quickly search large amounts of
 data and understand what’s going on at any given time.
 
@@ -38,14 +28,12 @@ You’ll learn to:
 search it with the {kib} Query Language, and filter the results.
 - **Explore** the details of your data, view individual documents, and create tables
 that summarize the contents of the data.
-- **Present** your findings in a visualization.
+- **Present** your findings in a chart and map.
 
 At the end of this tutorial, you’ll be ready to start exploring with your own
 data in *Discover*.
 
-
-[float]
-=== Prerequisites
+*Prerequisites:*
 
 - If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 - You must have data in {es}.  This tutorial uses the
@@ -166,7 +154,7 @@ refer to <<runtime-fields, Explore your data with runtime fields>>.
 
 One of the unique capabilities of **Discover** is the ability to combine
 free text search with filtering based on structured data.
-To search all fields, enter a simple string in the **Search** field.
+To search all fields, enter a simple string in the query bar.
 
 [role="screenshot"]
 image:images/discover-search-field.png[Search field in Discover]
