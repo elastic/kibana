@@ -32,9 +32,9 @@ jest.mock('../../../common/lib/kibana', () => ({
 }));
 
 jest.mock('react-reverse-portal', () => ({
-  InPortal: ({children}) => (<>{children}</>),
-  OutPortal: ({children}) => (<>{children}</>),
-  createPortalNode: () => ({unmount: jest.fn()})
+  InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  OutPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  createPortalNode: () => ({ unmount: jest.fn() }),
 }));
 
 describe('global header', () => {
@@ -58,7 +58,7 @@ describe('global header', () => {
     (useRouteSpy as jest.Mock).mockReturnValue([
       { pageName: SecurityPageName.overview, detailName: undefined },
     ]);
-    const { getByTestId, getByText } = render(
+    const { getByText } = render(
       <TestProviders store={store}>
         <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestProviders>
@@ -116,6 +116,5 @@ describe('global header', () => {
     );
 
     expect(queryByTestId('sourcerer-trigger')).not.toBeInTheDocument();
-
   });
 });
