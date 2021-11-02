@@ -266,7 +266,8 @@ describe('useSecuritySolutionNavigation', () => {
       { wrapper: TestProviders }
     );
 
-    // @ts-ignore possibly undefined, but if undefined we want this test to fail
+    // possibly undefined, but if undefined we want this test to fail
+    // @ts-expect-error TS2532
     expect(result.current.items[2].items[2].id).toEqual(SecurityPageName.ueba);
   });
 
