@@ -124,7 +124,11 @@ export class Node extends React.PureComponent<Props, State> {
 
         {isAlertFlyoutVisible && (
           <AlertFlyout
-            filter={`${findInventoryFields(nodeType).id}: "${node.id}"`}
+            filter={
+              options.fields
+                ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
+                : ''
+            }
             options={options}
             nodeType={nodeType}
             setVisible={this.setAlertFlyoutVisible}

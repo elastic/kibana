@@ -47,7 +47,12 @@ const source: InfraSource = {
       indexPatternId: 'kibana_index_pattern',
     },
     fields: {
+      container: 'container.id',
+      host: 'host.name',
       message: ['message', '@message'],
+      pod: 'kubernetes.pod.uid',
+      tiebreaker: '_doc',
+      timestamp: '@timestamp',
     },
     inventoryDefaultView: '0',
     metricsExplorerDefaultView: '0',
@@ -75,7 +80,7 @@ const snapshotRequest: SnapshotRequest = {
 
 const metricsApiRequest = {
   indexPattern: 'metrics-*,metricbeat-*',
-  timerange: { from: 1605705900000, to: 1605706200000, interval: '60s' },
+  timerange: { field: '@timestamp', from: 1605705900000, to: 1605706200000, interval: '60s' },
   metrics: [
     {
       id: 'cpu',
