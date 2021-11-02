@@ -79,7 +79,8 @@ export const CurationSuggestionLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        const suggestionResponse = await http.get(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const suggestionResponse = await http.get<any>(
           `/internal/app_search/engines/${engineName}/search_relevance_suggestions/${props.query}`,
           {
             query: {
