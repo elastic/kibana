@@ -281,10 +281,10 @@ const OSQUERY_COLUMN_VALUE_TYPE_OPTIONS = [
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s" className="eui-textNoWrap">
-          <FormattedMessage
-            id="xpack.osquery.pack.form.ecsMappingSection.osqueryValueOptionLabel"
-            defaultMessage="Osquery value"
-          />
+            <FormattedMessage
+              id="xpack.osquery.pack.form.ecsMappingSection.osqueryValueOptionLabel"
+              defaultMessage="Osquery value"
+            />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -300,10 +300,10 @@ const OSQUERY_COLUMN_VALUE_TYPE_OPTIONS = [
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s" className="eui-textNoWrap">
-          <FormattedMessage
-            id="xpack.osquery.pack.form.ecsMappingSection.staticValueOptionLabel"
-            defaultMessage="Static value"
-          />
+            <FormattedMessage
+              id="xpack.osquery.pack.form.ecsMappingSection.staticValueOptionLabel"
+              defaultMessage="Static value"
+            />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -384,6 +384,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       <StyledEuiSuperSelect
         options={OSQUERY_COLUMN_VALUE_TYPE_OPTIONS}
         valueOfSelected={resultType.value}
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         popoverProps={{
           panelStyle: {
             minWidth: '250px',
@@ -629,6 +630,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
     const MultiFields = useMemo(
       () => (
         <UseMultiFields
+          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
           fields={{
             resultType: {
               path: 'result.type',
@@ -641,6 +643,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
           {(fields) => (
             <OsqueryColumnField
               {...fields}
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
               euiFieldProps={{
                 // @ts-expect-error update types
                 options: osquerySchemaOptions,
@@ -653,7 +656,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
       [osquerySchemaOptions, isDisabled]
     );
 
-    const ecsComboBoxEuiFieldProps = useMemo(() => ({ isDisabled }), []);
+    const ecsComboBoxEuiFieldProps = useMemo(() => ({ isDisabled }), [isDisabled]);
 
     useImperativeHandle(
       ref,

@@ -233,9 +233,10 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       if (isValid === undefined) return;
 
       const updatedPolicy = produce(newPolicy, (draft) => {
-        let parsedConfig ;
+        let parsedConfig;
         try {
           parsedConfig = JSON.parse(config);
+          // eslint-disable-next-line no-empty
         } catch (e) {}
 
         if (isEmpty(parsedConfig)) {

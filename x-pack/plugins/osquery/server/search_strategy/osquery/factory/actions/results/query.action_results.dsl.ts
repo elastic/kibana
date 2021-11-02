@@ -49,7 +49,7 @@ export const buildActionResultsQuery = ({
                 rows_count: {
                   sum: {
                     field: 'action_response.osquery.count',
-                  }
+                  },
                 },
                 responses: {
                   terms: {

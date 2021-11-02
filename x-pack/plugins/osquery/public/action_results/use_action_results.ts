@@ -81,13 +81,12 @@ export const useActionResults = ({
         )
         .toPromise();
 
-
       const totalResponded =
         // @ts-expect-error update types
         responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
-        const totalRowCount =
+      const totalRowCount =
         // @ts-expect-error update types
-          responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.rows_count?.value ?? 0;
+        responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.rows_count?.value ?? 0;
       const aggsBuckets =
         // @ts-expect-error update types
         responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
