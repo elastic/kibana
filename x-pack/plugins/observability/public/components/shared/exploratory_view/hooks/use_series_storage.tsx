@@ -21,6 +21,7 @@ import type {
 import { convertToShortUrl } from '../configurations/utils';
 import { OperationType, SeriesType } from '../../../../../../lens/public';
 import { URL_KEYS } from '../configurations/constants/url_constants';
+import { trackTelemetryOnApply } from '../utils/telemetry';
 
 export interface SeriesContextValue {
   firstSeries?: SeriesUrl;
@@ -120,7 +121,7 @@ export function UrlStorageContextProvider({
       (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
       setLastRefresh(Date.now());
 
-      trackTelemetry(trackEvent, allSeries, reportType);
+      trackTelemetryOnApply(trackEvent, allSeries, reportType);
 
       if (onApply) {
         onApply();
@@ -183,70 +184,6 @@ interface ShortUrlSeries {
     from: string;
   };
 }
-
-const trackTelemetry = (trackEvent: TrackEvent, allSeries: AllSeries, reportType: string) => {
-  trackFilters(trackEvent, allSeries, reportType);
-  trackDataType(trackEvent, allSeries, reportType);
-  trackApplyChanges(trackEvent);
-};
-
-const getAppliedFilters = (allSeries: AllSeries) => {
-  const filtersByDataType = new Map<string, string[]>();
-  allSeries.forEach((series) => {
-    const seriesFilters = filtersByDataType.get(series.dataType);
-    const filterFields = (series.filters || []).map((filter) => filter.field);
-
-    if (seriesFilters) {
-      seriesFilters.push(...filterFields);
-    } else {
-      filtersByDataType.set(series.dataType, [...filterFields]);
-    }
-  });
-  return filtersByDataType;
-};
-
-const trackFilters = (trackEvent: TrackEvent, allSeries: AllSeries, reportType: string) => {
-  const filtersByDataType = getAppliedFilters(allSeries);
-  [...filtersByDataType.keys()].forEach((dataType) => {
-    const filtersForDataType = filtersByDataType.get(dataType);
-
-    (filtersForDataType || []).forEach((filter) => {
-      trackEvent({
-        app: 'observability-overview',
-        metricType: METRIC_TYPE.COUNT,
-        metric: `exploratory_view__filters__filter_${filter}`,
-      });
-      trackEvent({
-        app: 'observability-overview',
-        metricType: METRIC_TYPE.COUNT,
-        metric: `exploratory_view__filters__report_type_${reportType}__data_type_${dataType}__filter_${filter}`,
-      });
-    });
-  });
-};
-
-const trackApplyChanges = (trackEvent: TrackEvent) => {
-  trackEvent({
-    app: 'observability-overview',
-    metricType: METRIC_TYPE.COUNT,
-    metric: 'exploratory_view_apply_changes',
-  });
-};
-
-const trackDataType = (trackEvent: TrackEvent, allSeries: AllSeries, reportType: string) => {
-  const metrics = allSeries.map((series) => ({
-    dataType: series.dataType,
-    metricType: series.selectedMetricField,
-  }));
-
-  metrics.forEach(({ dataType, metricType }) => {
-    trackEvent({
-      app: 'observability-overview',
-      metricType: METRIC_TYPE.COUNT,
-      metric: `exploratory_view__report_type_${reportType}__data_type_${dataType}__metric_type_${metricType}`,
-    });
-  });
-};
 
 export type AllShortSeries = ShortUrlSeries[];
 export type AllSeries = SeriesUrl[];

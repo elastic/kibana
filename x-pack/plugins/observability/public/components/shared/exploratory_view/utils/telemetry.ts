@@ -72,37 +72,34 @@ const trackDataType = (trackEvent: TrackEvent, allSeries: SeriesUrl[], reportTyp
   }));
 
   metrics.forEach(({ dataType, metricType }) => {
-    trackEvent({
-      app: 'observability-overview',
-      metricType: METRIC_TYPE.COUNT,
-      metric: `exploratory_view__report_type_${reportType}__data_type_${dataType}__metric_type_${metricType}`,
-    });
+    if (reportType && dataType && metricType) {
+      trackEvent({
+        app: 'observability-overview',
+        metricType: METRIC_TYPE.COUNT,
+        metric: `exploratory_view__report_type_${reportType}__data_type_${dataType}__metric_type_${metricType}`,
+      });
+    }
   });
 };
 
 export const trackChartLoadingTime = (trackEvent: TrackEvent, start: number, end: number) => {
   const secondsLoading = (end - start) / 1000;
-  switch (true) {
-    case secondsLoading >= 60:
-      trackChartLoadingMetric(trackEvent, '60+');
-      break;
-    case secondsLoading >= 30:
-      trackChartLoadingMetric(trackEvent, '30-60');
-      break;
-    case secondsLoading >= 20:
-      trackChartLoadingMetric(trackEvent, '20-30');
-      break;
-    case secondsLoading >= 10:
-      trackChartLoadingMetric(trackEvent, '10-20');
-      break;
-    case secondsLoading >= 5:
-      trackChartLoadingMetric(trackEvent, '5-10');
-      break;
-    case secondsLoading >= 0:
-      trackChartLoadingMetric(trackEvent, '0-5');
-      break;
+  const rangeStr = toRangeStr(secondsLoading);
+
+  if (rangeStr) {
+    trackChartLoadingMetric(trackEvent, rangeStr);
   }
 };
+
+function toRangeStr(n: number) {
+  if (n < 0 || isNaN(n)) return null;
+  if (n >= 60) return '60+';
+  else if (n >= 30) return '30-60';
+  else if (n >= 20) return '20-30';
+  else if (n >= 10) return '10-20';
+  else if (n >= 5) return '5-10';
+  return '0-5';
+}
 
 const trackChartLoadingMetric = (trackEvent: TrackEvent, range: string) => {
   trackEvent({

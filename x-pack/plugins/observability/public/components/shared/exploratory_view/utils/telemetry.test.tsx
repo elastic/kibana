@@ -82,6 +82,24 @@ describe('telemetry', function () {
     });
   });
 
+  it('does not call track event for report type/data type/metric type config unless all values are truthy', () => {
+    const trackEvent = jest.fn();
+    const series = {
+      ...mockMultipleSeries[1],
+      filters: undefined,
+      selectedMetricField: undefined,
+    };
+
+    trackTelemetryOnApply(trackEvent, [series], 'kpi-over-time');
+
+    expect(trackEvent).toBeCalledTimes(1);
+    expect(trackEvent).toBeCalledWith({
+      app: 'observability-overview',
+      metric: 'exploratory_view_apply_changes',
+      metricType: 'count',
+    });
+  });
+
   it.each([
     [1635784025000, '5-10'],
     [1635784030000, '10-20'],
