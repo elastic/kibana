@@ -145,7 +145,7 @@ export const DashboardListing = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              iconType="check"
+              iconType="pencil"
               color="primary"
               onClick={() => redirectTo({ destination: 'dashboard' })}
               data-test-subj={`edit-unsaved-${getNewDashboardTitle().split(' ').join('-')}`}
