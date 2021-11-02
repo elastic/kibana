@@ -290,7 +290,7 @@ To create a week-over-week comparison, shift *Count of Records [1]* by one week.
 
 . Click *Add advanced options > Time shift*, select *1 week ago*, then click *Close*.
 +
-To use custom time shifts, enter the time value and incrememnt, then press Enter. For example, enter *1w* to use the *1 week ago* time shift.
+To use custom time shifts, enter the time value and increment, then press Enter. For example, enter *1w* to use the *1 week ago* time shift.
 +
 [role="screenshot"]
 image::images/lens_time_shift.png[Line chart with week-over-week sales comparison]
