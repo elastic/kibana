@@ -33,6 +33,7 @@ export interface IEventLogService {
   getProviderActions(): Map<string, Set<string>>;
   registerSavedObjectProvider(type: string, provider: SavedObjectProvider): void;
   getLogger(properties: IEvent): IEventLogger;
+  getIndexPattern(): string;
 }
 
 export interface IEventLogClientService {
