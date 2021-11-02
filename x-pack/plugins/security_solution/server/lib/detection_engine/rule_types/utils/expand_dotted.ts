@@ -45,6 +45,9 @@ const expandDottedField = (dottedFieldName: string, val: unknown): object => {
  *   }
  */
 export const expandDottedObject = (dottedObj: object) => {
+  if (Array.isArray(dottedObj)) {
+    return dottedObj;
+  }
   return Object.entries(dottedObj).reduce(
     (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
     {}

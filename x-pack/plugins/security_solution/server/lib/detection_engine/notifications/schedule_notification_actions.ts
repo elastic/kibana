@@ -34,7 +34,7 @@ const convertToLegacyAlert = (alert: RACAlert) =>
  * Formats alerts before sending to `scheduleActions`. We augment the context with
  * the equivalent "legacy" alert context so that pre-8.0 actions will continue to work.
  */
-const formatAlertsForNotificationActions = (alerts: unknown[]) => {
+const formatAlertsForNotificationActions = (alerts: unknown[]): unknown[] => {
   return alerts.map((alert) =>
     isRACAlert(alert)
       ? {
