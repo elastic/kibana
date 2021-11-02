@@ -6,10 +6,9 @@
  */
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { deleteRules } from './delete_rules';
-import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
-import { DeleteRuleOptions, IRuleStatusSOAttributes } from './types';
 import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import { deleteRules } from './delete_rules';
+import { DeleteRuleOptions } from './types';
 
 describe('deleteRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
@@ -21,35 +20,15 @@ describe('deleteRules', () => {
   });
 
   it('should delete the rule along with its actions, and statuses', async () => {
-    const ruleStatus: SavedObjectsFindResult<IRuleStatusSOAttributes> = {
-      id: 'statusId',
-      type: '',
-      references: [],
-      attributes: {
-        statusDate: '',
-        lastFailureAt: null,
-        lastFailureMessage: null,
-        lastSuccessAt: null,
-        lastSuccessMessage: null,
-        status: null,
-        lastLookBackDate: null,
-        gap: null,
-        bulkCreateTimeDurations: null,
-        searchAfterTimeDurations: null,
-      },
-      score: 0,
-    };
-
-    const rule: DeleteRuleOptions = {
+    const options: DeleteRuleOptions = {
+      ruleId: 'ruleId',
       rulesClient,
       ruleStatusClient,
-      id: 'ruleId',
-      ruleStatuses: [ruleStatus],
     };
 
-    await deleteRules(rule);
+    await deleteRules(options);
 
-    expect(rulesClient.delete).toHaveBeenCalledWith({ id: rule.id });
-    expect(ruleStatusClient.delete).toHaveBeenCalledWith(ruleStatus.id);
+    expect(rulesClient.delete).toHaveBeenCalledWith({ id: options.ruleId });
+    expect(ruleStatusClient.deleteCurrentStatus).toHaveBeenCalledWith(options.ruleId);
   });
 });

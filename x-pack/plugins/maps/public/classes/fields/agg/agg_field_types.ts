@@ -19,5 +19,4 @@ export interface CountAggFieldParams {
   label?: string;
   source: IESAggSource;
   origin: FIELD_ORIGIN;
-  canReadFromGeoJson?: boolean;
 }
