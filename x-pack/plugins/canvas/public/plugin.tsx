@@ -8,7 +8,6 @@
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup } from 'src/plugins/share/public';
 import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
-import { VisualizationsStart } from 'src/plugins/visualizations/public';
 import { ReportingStart } from '../../reporting/public';
 import {
   CoreSetup,
@@ -64,7 +63,6 @@ export interface CanvasStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  visualizations: VisualizationsStart;
   spaces?: SpacesPluginStart;
 }
 
@@ -124,12 +122,7 @@ export class CanvasPlugin
 
         const { pluginServices } = await import('./services');
         pluginServices.setRegistry(
-          pluginServiceRegistry.start({
-            coreStart,
-            startPlugins,
-            appUpdater: this.appUpdater,
-            initContext: this.initContext,
-          })
+          pluginServiceRegistry.start({ coreStart, startPlugins, initContext: this.initContext })
         );
 
         // Load application bundle
