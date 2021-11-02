@@ -7,6 +7,12 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import {
+  CustomTooltip,
+  TooltipValue,
+  TooltipValueFormatter,
+  XYChartSeriesIdentifier,
+} from '@elastic/charts';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../common/components/header_page';
 
