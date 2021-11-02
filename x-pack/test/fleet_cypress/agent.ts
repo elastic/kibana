@@ -45,19 +45,6 @@ export class AgentManager extends Manager {
       {},
       this.requestOptions
     );
-
-    // this.log.info('Updating the default agent output');
-    // const {
-    //   data: {
-    //     items: [defaultOutput],
-    //   },
-    // } = await axios.get(this.params.kibanaUrl + '/api/fleet/outputs', this.requestOptions);
-
-    // await axios.put(
-    //   `${this.params.kibanaUrl}/api/fleet/outputs/${defaultOutput.id}`,
-    //   { hosts: [this.params.esHost] },
-    //   this.requestOptions
-    // );
   }
 
   public async startAgent() {
