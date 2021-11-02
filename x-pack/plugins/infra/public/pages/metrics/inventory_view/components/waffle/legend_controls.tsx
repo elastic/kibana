@@ -132,6 +132,7 @@ export const LegendControls = ({
       bounds: { min: draftBounds.min / 100, max: draftBounds.max / 100 },
       legend: draftLegend,
     });
+    setPopoverState(false);
   }, [onChange, draftAuto, draftBounds, draftLegend]);
 
   const handleCancelClick = useCallback(() => {
