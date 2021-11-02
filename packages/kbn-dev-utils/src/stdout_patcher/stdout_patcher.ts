@@ -38,9 +38,15 @@ export class StdoutPatcher {
     this.originalWrite = this.stdout.write;
     this.renderer = renderer;
     this.maxWidth = stdout.columns;
+
+    // verify this stdout has not been patched before
     if (!patched.includes(stdout)) {
       patched.push(stdout);
+
+      // monkey-patch stdout write
       this.stdout.write = this.customStdoutWrite.bind(this) as StdoutWriter;
+
+      // to adapt to terminal window changes
       stdout.on('resize', () => {
         this.maxWidth = stdout.columns;
       });
@@ -55,6 +61,8 @@ export class StdoutPatcher {
 
     // print the actual line to output
     this.originalWrite.apply(this.stdout, [buffer, ...args]);
+
+    // render the additional lines below
     this.render(buffer);
 
     return true;
