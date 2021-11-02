@@ -83,7 +83,7 @@ export const validateSelectedPatterns = (
     }
   }
 
-  // TO DO: If dataView is still undefined here, create temporary dataView
+  // TO DO: Steph/sourcerer If dataView is still undefined here, create temporary dataView
   // and prompt user to go create this dataView
   // currently UI will take the undefined dataView and default to defaultDataView anyways
   // this is a "strategically merged" bug ;)
