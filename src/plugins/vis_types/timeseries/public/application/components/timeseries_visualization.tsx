@@ -81,10 +81,12 @@ function TimeseriesVisualization({
             timeFieldName: '*',
             filters: [
               {
-                range: {
-                  '*': {
-                    gte,
-                    lte,
+                query: {
+                  range: {
+                    '*': {
+                      gte,
+                      lte,
+                    },
                   },
                 },
               },
