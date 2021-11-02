@@ -45,8 +45,10 @@ export const getTimelionVisRenderer: (
           timeFieldName: '*',
           filters: [
             {
-              range: {
-                '*': rangeFilterParams,
+              query: {
+                range: {
+                  '*': rangeFilterParams,
+                },
               },
             },
           ],
