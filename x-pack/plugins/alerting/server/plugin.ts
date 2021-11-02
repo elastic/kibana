@@ -209,7 +209,13 @@ export class AlertingPlugin {
         usageCollection,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
-      initializeAlertingTelemetry(this.telemetryLogger, core, plugins.taskManager, kibanaIndex);
+      initializeAlertingTelemetry(
+        this.telemetryLogger,
+        core,
+        plugins.taskManager,
+        kibanaIndex,
+        this.eventLogService
+      );
     }
 
     // Usage counter for telemetry
