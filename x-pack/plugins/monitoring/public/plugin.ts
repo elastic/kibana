@@ -50,7 +50,7 @@ export class MonitoringPlugin
 {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
-  public async setup(
+  public setup(
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
@@ -83,7 +83,7 @@ export class MonitoringPlugin
       });
     }
 
-    await this.registerAlerts(plugins, monitoring);
+    this.registerAlerts(plugins, monitoring);
 
     const app: App = {
       id,
@@ -144,10 +144,7 @@ export class MonitoringPlugin
     ];
   }
 
-  private async registerAlerts(
-    plugins: MonitoringSetupPluginDependencies,
-    config: MonitoringConfig
-  ) {
+  private registerAlerts(plugins: MonitoringSetupPluginDependencies, config: MonitoringConfig) {
     const {
       triggersActionsUi: { ruleTypeRegistry },
     } = plugins;
