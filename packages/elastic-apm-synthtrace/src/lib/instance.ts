@@ -38,6 +38,11 @@ export class Instance extends Entity {
     });
   }
 
+  podId(podId: string) {
+    this.fields['kubernetes.pod.uid'] = podId;
+    return this;
+  }
+
   appMetrics(metrics: ApplicationMetricFields) {
     return new Metricset({
       ...this.fields,
