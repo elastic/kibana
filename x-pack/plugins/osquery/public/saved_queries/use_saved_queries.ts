@@ -24,6 +24,7 @@ export const useSavedQueries = ({
   return useQuery(
     [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortDirection }],
     () =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       http.get<any>('/internal/osquery/saved_query', {
         query: { pageIndex, pageSize, sortField, sortDirection },
       }),
