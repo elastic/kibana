@@ -6930,12 +6930,6 @@
             "description": "Indicates if audit logging is both enabled and supported by the current license."
           }
         },
-        "auditLoggingType": {
-          "type": "keyword",
-          "_meta": {
-            "description": "If auditLoggingEnabled is true, indicates what type is enabled (ECS or legacy)."
-          }
-        },
         "loginSelectorEnabled": {
           "type": "boolean",
           "_meta": {

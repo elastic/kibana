@@ -83,89 +83,95 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('data is loaded', { config: 'basic', archives: ['apm_8.0.0_empty'] }, () => {
-    describe('Observability overview api ', () => {
-      const GO_PROD_RATE = 50;
-      const GO_DEV_RATE = 5;
-      const JAVA_PROD_RATE = 45;
-      before(async () => {
-        const serviceGoProdInstance = service('synth-go', 'production', 'go').instance(
-          'instance-a'
-        );
-        const serviceGoDevInstance = service('synth-go', 'development', 'go').instance(
-          'instance-b'
-        );
-        const serviceJavaInstance = service('synth-java', 'production', 'java').instance(
-          'instance-c'
-        );
-
-        await synthtraceEsClient.index([
-          ...timerange(start, end)
-            .interval('1m')
-            .rate(GO_PROD_RATE)
-            .flatMap((timestamp) =>
-              serviceGoProdInstance
-                .transaction('GET /api/product/list')
-                .duration(1000)
-                .timestamp(timestamp)
-                .serialize()
-            ),
-          ...timerange(start, end)
-            .interval('1m')
-            .rate(GO_DEV_RATE)
-            .flatMap((timestamp) =>
-              serviceGoDevInstance
-                .transaction('GET /api/product/:id')
-                .duration(1000)
-                .timestamp(timestamp)
-                .serialize()
-            ),
-          ...timerange(start, end)
-            .interval('1m')
-            .rate(JAVA_PROD_RATE)
-            .flatMap((timestamp) =>
-              serviceJavaInstance
-                .transaction('POST /api/product/buy')
-                .duration(1000)
-                .timestamp(timestamp)
-                .serialize()
-            ),
-        ]);
-      });
-
-      after(() => synthtraceEsClient.clean());
-
-      describe('compare throughput values', () => {
-        let throughputValues: PromiseReturnType<typeof getThroughputValues>;
+  registry.when(
+    'data is loaded',
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    () => {
+      describe('Observability overview api ', () => {
+        const GO_PROD_RATE = 50;
+        const GO_DEV_RATE = 5;
+        const JAVA_PROD_RATE = 45;
         before(async () => {
-          throughputValues = await getThroughputValues();
+          const serviceGoProdInstance = service('synth-go', 'production', 'go').instance(
+            'instance-a'
+          );
+          const serviceGoDevInstance = service('synth-go', 'development', 'go').instance(
+            'instance-b'
+          );
+          const serviceJavaInstance = service('synth-java', 'production', 'java').instance(
+            'instance-c'
+          );
+
+          await synthtraceEsClient.index([
+            ...timerange(start, end)
+              .interval('1m')
+              .rate(GO_PROD_RATE)
+              .flatMap((timestamp) =>
+                serviceGoProdInstance
+                  .transaction('GET /api/product/list')
+                  .duration(1000)
+                  .timestamp(timestamp)
+                  .serialize()
+              ),
+            ...timerange(start, end)
+              .interval('1m')
+              .rate(GO_DEV_RATE)
+              .flatMap((timestamp) =>
+                serviceGoDevInstance
+                  .transaction('GET /api/product/:id')
+                  .duration(1000)
+                  .timestamp(timestamp)
+                  .serialize()
+              ),
+            ...timerange(start, end)
+              .interval('1m')
+              .rate(JAVA_PROD_RATE)
+              .flatMap((timestamp) =>
+                serviceJavaInstance
+                  .transaction('POST /api/product/buy')
+                  .duration(1000)
+                  .timestamp(timestamp)
+                  .serialize()
+              ),
+          ]);
         });
 
-        it('returns same number of service as shown on service inventory API', () => {
-          const { serviceInventoryCount, observabilityOverview } = throughputValues;
-          [serviceInventoryCount, observabilityOverview.serviceCount].forEach((value) =>
-            expect(value).to.be.equal(2)
-          );
-        });
+        after(() => synthtraceEsClient.clean());
 
-        it('returns same throughput value on service inventory and obs throughput count', () => {
-          const { serviceInventoryThroughputSum, observabilityOverview } = throughputValues;
-          const obsThroughputCount = roundNumber(observabilityOverview.transactionPerMinute.value);
-          [serviceInventoryThroughputSum, obsThroughputCount].forEach((value) =>
-            expect(value).to.be.equal(roundNumber(GO_PROD_RATE + GO_DEV_RATE + JAVA_PROD_RATE))
-          );
-        });
+        describe('compare throughput values', () => {
+          let throughputValues: PromiseReturnType<typeof getThroughputValues>;
+          before(async () => {
+            throughputValues = await getThroughputValues();
+          });
 
-        it('returns same throughput value on service inventory and obs mean throughput timeseries', () => {
-          const { serviceInventoryThroughputSum, observabilityOverview } = throughputValues;
-          const obsThroughputMean = roundNumber(
-            meanBy(observabilityOverview.transactionPerMinute.timeseries, 'y')
-          );
-          [serviceInventoryThroughputSum, obsThroughputMean].forEach((value) =>
-            expect(value).to.be.equal(roundNumber(GO_PROD_RATE + GO_DEV_RATE + JAVA_PROD_RATE))
-          );
+          it('returns same number of service as shown on service inventory API', () => {
+            const { serviceInventoryCount, observabilityOverview } = throughputValues;
+            [serviceInventoryCount, observabilityOverview.serviceCount].forEach((value) =>
+              expect(value).to.be.equal(2)
+            );
+          });
+
+          it('returns same throughput value on service inventory and obs throughput count', () => {
+            const { serviceInventoryThroughputSum, observabilityOverview } = throughputValues;
+            const obsThroughputCount = roundNumber(
+              observabilityOverview.transactionPerMinute.value
+            );
+            [serviceInventoryThroughputSum, obsThroughputCount].forEach((value) =>
+              expect(value).to.be.equal(roundNumber(GO_PROD_RATE + GO_DEV_RATE + JAVA_PROD_RATE))
+            );
+          });
+
+          it('returns same throughput value on service inventory and obs mean throughput timeseries', () => {
+            const { serviceInventoryThroughputSum, observabilityOverview } = throughputValues;
+            const obsThroughputMean = roundNumber(
+              meanBy(observabilityOverview.transactionPerMinute.timeseries, 'y')
+            );
+            [serviceInventoryThroughputSum, obsThroughputMean].forEach((value) =>
+              expect(value).to.be.equal(roundNumber(GO_PROD_RATE + GO_DEV_RATE + JAVA_PROD_RATE))
+            );
+          });
         });
       });
-    });
-  });
+    }
+  );
 }
