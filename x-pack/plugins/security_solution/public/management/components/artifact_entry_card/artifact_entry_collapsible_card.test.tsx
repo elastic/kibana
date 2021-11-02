@@ -75,6 +75,25 @@ describe.each([
     expect(renderResult.getByTestId('testCard-criteriaConditions')).not.toBeNull();
   });
 
+  it('should display tooltip if collapsed', () => {
+    render();
+
+    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(2);
+  });
+
+  it('should display tooltip when collapsed but only if not empty', () => {
+    item.description = '';
+    render();
+
+    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(1);
+  });
+
+  it('should NOT display a tooltip if expanded', () => {
+    render({ expanded: true });
+
+    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(0);
+  });
+
   it('should call `onExpandCollapse` callback when button is clicked', () => {
     render();
     act(() => {
