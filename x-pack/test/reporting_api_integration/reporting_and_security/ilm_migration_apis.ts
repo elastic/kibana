@@ -22,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('ILM policy migration APIs', () => {
     before(async () => {
       await reportingAPI.initLogs();
+      await reportingAPI.migrateReportingIndices(); // ensure that the ILM policy exists for the first test
     });
 
     after(async () => {
