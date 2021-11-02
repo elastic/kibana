@@ -10,7 +10,7 @@ import {
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
 } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { useUiTracker, TrackEvent, METRIC_TYPE } from '../../../../hooks/use_track_metric';
+import { useUiTracker } from '../../../../hooks/use_track_metric';
 import type {
   AppDataType,
   ReportViewType,
