@@ -107,7 +107,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
               yAccessors={[1]}
               data={paddedExecutionDurations.map((val, ndx) => [
                 ndx,
-                paddedExecutionDurations[ndx] ? executionDuration.average : null,
+                val ? executionDuration.average : null,
               ])}
               curve={CurveType.CURVE_NATURAL}
             />
