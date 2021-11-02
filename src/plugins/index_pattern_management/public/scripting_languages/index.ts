@@ -21,12 +21,12 @@ export const getEnabledScriptingLanguages = (
   http: HttpStart,
   toasts: NotificationsStart['toasts']
 ) =>
-  http.get('/api/kibana/scripts/languages').catch(() => {
+  http.get<estypes.ScriptLanguage[]>('/api/kibana/scripts/languages').catch(() => {
     toasts.addDanger(
       i18n.translate('indexPatternManagement.scriptingLanguages.errorFetchingToastDescription', {
         defaultMessage: 'Error getting available scripting languages from Elasticsearch',
       })
     );
 
-    return [];
+    return [] as estypes.ScriptLanguage[];
   });

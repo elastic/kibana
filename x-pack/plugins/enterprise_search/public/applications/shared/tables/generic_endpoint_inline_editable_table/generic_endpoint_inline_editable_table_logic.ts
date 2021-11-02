@@ -88,7 +88,9 @@ export const GenericEndpointInlineEditableTableLogic = kea<
       const { addRoute, onAdd, dataProperty } = props;
 
       try {
-        const response = await http.post(addRoute, { body: JSON.stringify(item) });
+        const response = await http.post<Record<string, ItemWithAnID[]>>(addRoute, {
+          body: JSON.stringify(item),
+        });
         const itemsFromResponse = response[dataProperty];
 
         onAdd(item, itemsFromResponse);
@@ -107,7 +109,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
       const { deleteRoute, onDelete, dataProperty } = props;
 
       try {
-        const response = await http.delete(deleteRoute(item));
+        const response = await http.delete<Record<string, ItemWithAnID[]>>(deleteRoute(item));
         const itemsFromResponse = response[dataProperty];
 
         onDelete(item, itemsFromResponse);
@@ -127,7 +129,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
 
       const dataToSubmit = stripIdAndCreatedAtFromItem(item);
       try {
-        const response = await http.put(updateRoute(item), {
+        const response = await http.put<Record<string, ItemWithAnID[]>>(updateRoute(item), {
           body: JSON.stringify(dataToSubmit),
         });
         const itemsFromResponse = response[dataProperty];
@@ -155,7 +157,7 @@ export const GenericEndpointInlineEditableTableLogic = kea<
       try {
         actions.setLoading();
 
-        const response = await http.put(reorderRoute, {
+        const response = await http.put<Record<string, ItemWithAnID[]>>(reorderRoute, {
           body: JSON.stringify({ [dataProperty]: reorderedItemIds }),
         });
         const itemsFromResponse = response[dataProperty];

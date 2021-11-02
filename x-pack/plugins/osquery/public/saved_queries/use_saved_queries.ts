@@ -24,7 +24,7 @@ export const useSavedQueries = ({
   return useQuery(
     [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortDirection }],
     () =>
-      http.get('/internal/osquery/saved_query', {
+      http.get<any>('/internal/osquery/saved_query', {
         query: { pageIndex, pageSize, sortField, sortDirection },
       }),
     {

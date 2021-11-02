@@ -257,11 +257,14 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     if (editMode && policyAgentsCount === null) {
       const fetchAgentsCount = async () => {
         try {
-          const response = await http.fetch(agentRouteService.getStatusPath(), {
-            query: {
-              policyId: policy?.policy_id,
-            },
-          });
+          const response = await http.fetch<{ results: { total: number } }>(
+            agentRouteService.getStatusPath(),
+            {
+              query: {
+                policyId: policy?.policy_id,
+              },
+            }
+          );
           if (response.results) {
             setPolicyAgentsCount(response.results.total);
           }
@@ -272,7 +275,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       const fetchAgentPolicyDetails = async () => {
         if (policy?.policy_id) {
           try {
-            const response = await http.fetch(
+            const response = await http.fetch<{ item: AgentPolicy }>(
               agentPolicyRouteService.getInfoPath(policy?.policy_id)
             );
             if (response.item) {
