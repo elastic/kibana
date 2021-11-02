@@ -9,7 +9,6 @@ import { ChildProcess, spawn } from 'child_process';
 import { ToolingLog } from '@kbn/dev-utils';
 import axios from 'axios';
 import { Manager } from './resource_manager';
-import { getLatestVersion } from './artifact_manager';
 
 export interface ElasticsearchConfig {
   esHost: string;
@@ -35,7 +34,7 @@ export class FleetManager extends Manager {
           `${this.esConfig.esHost}/_security/service/elastic/fleet-server/credential/token`
         );
         const serviceToken = response.data.token.value;
-        const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
+        const artifact = `docker.elastic.co/beats/elastic-agent:8.0.0-SNAPSHOT`;
         this.log.info(artifact);
 
         const host = 'host.docker.internal';
