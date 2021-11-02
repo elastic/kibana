@@ -37,6 +37,7 @@ Object {
               "traces-*",
               "synthetics-*",
               ".logs-endpoint.diagnostic.collection-*",
+              ".logs-endpoint.action.responses-*",
             ],
             "privileges": Array [
               "auto_configure",
@@ -123,6 +124,7 @@ Object {
               "traces-*",
               "synthetics-*",
               ".logs-endpoint.diagnostic.collection-*",
+              ".logs-endpoint.action.responses-*",
             ],
             "privileges": Array [
               "auto_configure",
@@ -209,6 +211,7 @@ Object {
               "traces-*",
               "synthetics-*",
               ".logs-endpoint.diagnostic.collection-*",
+              ".logs-endpoint.action.responses-*",
             ],
             "privileges": Array [
               "auto_configure",
