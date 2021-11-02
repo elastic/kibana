@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n/react';
+import moment from 'moment-timezone';
 
 import {
   TypedLensByValueInput,
@@ -376,6 +377,7 @@ interface ScheduledQueryLastResultsProps {
   actionId: string;
   queryId: string;
   interval: number;
+  logsIndexPattern: IndexPattern | undefined;
   toggleErrors: (payload: { queryId: string; interval: number }) => void;
   expanded: boolean;
 }
@@ -384,12 +386,10 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   actionId,
   queryId,
   interval,
+  logsIndexPattern,
   toggleErrors,
   expanded,
 }) => {
-  const data = useKibana().services.data;
-  const [logsIndexPattern, setLogsIndexPattern] = useState<IndexPattern | undefined>(undefined);
-
   const { data: lastResultsData, isFetched } = usePackQueryLastResults({
     actionId,
     interval,
@@ -406,15 +406,6 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
     () => toggleErrors({ queryId, interval }),
     [queryId, interval, toggleErrors]
   );
-
-  useEffect(() => {
-    const fetchLogsIndexPattern = async () => {
-      const indexPattern = await data.indexPatterns.find('logs-*');
-
-      setLogsIndexPattern(indexPattern[0]);
-    };
-    fetchLogsIndexPattern();
-  }, [data.indexPatterns]);
 
   if (!isFetched || !errorsFetched) {
     return <EuiLoadingSpinner />;
@@ -516,6 +507,86 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
 
 const getPackActionId = (actionId: string, packName: string) => `pack_${packName}_${actionId}`;
 
+interface PackViewInActionProps {
+  item: {
+    id: string;
+    interval: number;
+  };
+  logsIndexPattern: IndexPattern | undefined;
+  packName: string;
+  agentIds?: string[];
+}
+
+const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
+  item,
+  logsIndexPattern,
+  packName,
+  agentIds,
+}) => {
+  const { id, interval } = item;
+  const actionId = getPackActionId(id, packName);
+  const { data: lastResultsData } = usePackQueryLastResults({
+    actionId,
+    interval,
+    logsIndexPattern,
+  });
+
+  const startDate = lastResultsData?.['@timestamp']
+    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
+    : `now-${interval}s`;
+  const endDate = lastResultsData?.['@timestamp']
+    ? moment(lastResultsData?.['@timestamp'][0]).toISOString()
+    : 'now';
+
+  return (
+    <ViewResultsInDiscoverAction
+      actionId={actionId}
+      agentIds={agentIds}
+      buttonType={ViewResultsActionButtonType.icon}
+      startDate={startDate}
+      endDate={endDate}
+      mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+    />
+  );
+};
+
+const PackViewInDiscoverAction = React.memo(PackViewInDiscoverActionComponent);
+
+const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
+  item,
+  logsIndexPattern,
+  packName,
+  agentIds,
+}) => {
+  const { id, interval } = item;
+  const actionId = getPackActionId(id, packName);
+  const { data: lastResultsData } = usePackQueryLastResults({
+    actionId,
+    interval,
+    logsIndexPattern,
+  });
+
+  const startDate = lastResultsData?.['@timestamp']
+    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
+    : `now-${interval}s`;
+  const endDate = lastResultsData?.['@timestamp']
+    ? moment(lastResultsData?.['@timestamp'][0]).toISOString()
+    : 'now';
+
+  return (
+    <ViewResultsInLensAction
+      actionId={actionId}
+      agentIds={agentIds}
+      buttonType={ViewResultsActionButtonType.icon}
+      startDate={startDate}
+      endDate={endDate}
+      mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+    />
+  );
+};
+
+const PackViewInLensAction = React.memo(PackViewInLensActionComponent);
+
 interface PackQueriesStatusTableProps {
   agentIds?: string[];
   data: OsqueryManagerPackagePolicyInputStream[];
@@ -530,6 +601,18 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
   >({});
+
+  const indexPatterns = useKibana().services.data.indexPatterns;
+  const [logsIndexPattern, setLogsIndexPattern] = useState<IndexPattern | undefined>(undefined);
+
+  useEffect(() => {
+    const fetchLogsIndexPattern = async () => {
+      const indexPattern = await indexPatterns.find('logs-*');
+
+      setLogsIndexPattern(indexPattern[0]);
+    };
+    fetchLogsIndexPattern();
+  }, [indexPatterns]);
 
   const renderQueryColumn = useCallback(
     (query: string) => (
@@ -562,6 +645,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderLastResultsColumn = useCallback(
     (item) => (
       <ScheduledQueryLastResults
+        logsIndexPattern={logsIndexPattern}
         queryId={item.id}
         actionId={getPackActionId(item.id, packName)}
         interval={item.interval}
@@ -569,35 +653,31 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         expanded={!!itemIdToExpandedRowMap[item.id]}
       />
     ),
-    [itemIdToExpandedRowMap, packName, toggleErrors]
+    [itemIdToExpandedRowMap, packName, toggleErrors, logsIndexPattern]
   );
 
   const renderDiscoverResultsAction = useCallback(
     (item) => (
-      <ViewResultsInDiscoverAction
-        actionId={getPackActionId(item.id, packName)}
+      <PackViewInDiscoverAction
+        item={item}
         agentIds={agentIds}
-        buttonType={ViewResultsActionButtonType.icon}
-        startDate={`now-${item.interval * 2}s`}
-        endDate="now"
-        mode="relative"
+        logsIndexPattern={logsIndexPattern}
+        packName={packName}
       />
     ),
-    [agentIds, packName]
+    [agentIds, logsIndexPattern, packName]
   );
 
   const renderLensResultsAction = useCallback(
     (item) => (
-      <ViewResultsInLensAction
-        actionId={getPackActionId(item.id, packName)}
+      <PackViewInLensAction
+        item={item}
         agentIds={agentIds}
-        buttonType={ViewResultsActionButtonType.icon}
-        startDate={`now-${item.interval * 2}s`}
-        endDate="now"
-        mode="relative"
+        logsIndexPattern={logsIndexPattern}
+        packName={packName}
       />
     ),
-    [agentIds, packName]
+    [agentIds, logsIndexPattern, packName]
   );
 
   const getItemId = useCallback(
