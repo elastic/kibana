@@ -85,12 +85,15 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/internal/app_search/engines/${engineName}/curations`, {
-          query: {
-            'page[current]': meta.page.current,
-            'page[size]': meta.page.size,
-          },
-        });
+        const response = await http.get<CurationsAPIResponse>(
+          `/internal/app_search/engines/${engineName}/curations`,
+          {
+            query: {
+              'page[current]': meta.page.current,
+              'page[size]': meta.page.size,
+            },
+          }
+        );
         actions.onCurationsLoad(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -118,9 +121,10 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
       clearFlashMessages();
 
       try {
-        const response = await http.post(`/internal/app_search/engines/${engineName}/curations`, {
-          body: JSON.stringify({ queries }),
-        });
+        const response = await http.post<{ id: string }>(
+          `/internal/app_search/engines/${engineName}/curations`,
+          { body: JSON.stringify({ queries }) }
+        );
         navigateToUrl(generateEnginePath(ENGINE_CURATION_PATH, { curationId: response.id }));
       } catch (e) {
         flashAPIErrors(e);
