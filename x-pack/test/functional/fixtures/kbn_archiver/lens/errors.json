@@ -4,7 +4,7 @@
         "timeFieldName": "@timestamp",
         "title": "nonExistingDataView"
     },
-    "coreMigrationVersion": "8.0.0",
+    "coreMigrationVersion": "7.16.0",
     "id": "nonExistingDataView",
     "migrationVersion": {
         "index-pattern": "7.11.0"
@@ -55,10 +55,10 @@
         "title": "lnsMetricWithNonExistingDataView",
         "visualizationType": "lnsMetric"
     },
-    "coreMigrationVersion": "8.0.0",
+    "coreMigrationVersion": "7.16.0",
     "id": "3454af30-30e2-11ec-8dbc-f13e30d4f8ac",
     "migrationVersion": {
-        "lens": "8.0.0"
+        "lens": "7.16.0"
     },
     "references": [
         {
