@@ -746,14 +746,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/components/controls.tsx"
               },
               {
@@ -771,6 +763,14 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/timeseriesexplorer/components/timeseriesexplorer_no_jobs_found/timeseriesexplorer_no_jobs_found.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
               },
               {
                 "plugin": "ml",
@@ -2567,14 +2567,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/components/controls.tsx"
               },
               {
@@ -2592,6 +2584,14 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/timeseriesexplorer/components/timeseriesexplorer_no_jobs_found/timeseriesexplorer_no_jobs_found.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
               },
               {
                 "plugin": "ml",
