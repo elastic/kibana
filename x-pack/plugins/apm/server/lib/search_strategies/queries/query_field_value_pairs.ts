@@ -60,12 +60,15 @@ const fetchTransactionDurationFieldTerms = async (
       resp.body.aggregations
         .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
         key: string;
+        key_as_string?: string;
       }>
     )?.buckets;
     if (buckets?.length >= 1) {
       return buckets.map((d) => ({
         fieldName,
-        fieldValue: d.key,
+        // The terms aggregation returns boolean fields as { key: 0, key_as_string: "false" },
+        // so we need to pick `key_as_string` if it's present, otherwise searches on boolean fields would fail later on.
+        fieldValue: d.key_as_string ?? d.key,
       }));
     }
   } catch (e) {
