@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { chunk, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'src/core/server';
 import {
   transformError,
-  getIndexExists,
+  getBootstrapIndexExists,
   getPolicyExists,
   setPolicy,
   createBootstrapIndex,
@@ -25,6 +25,8 @@ import {
   getSignalsTemplate,
   SIGNALS_TEMPLATE_VERSION,
   createBackwardsCompatibilityMapping,
+  ALIAS_VERSION_FIELD,
+  SIGNALS_FIELD_ALIASES_VERSION,
 } from './get_signals_template';
 import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import signalsPolicy from './signals_policy.json';
@@ -71,7 +73,10 @@ export const createDetectionIndex = async (
   const spaceId = context.getSpaceId();
   const index = siemClient.getSignalsIndex();
 
-  const indexExists = await getIndexExists(esClient, index);
+  const indexExists = await getBootstrapIndexExists(
+    context.core.elasticsearch.client.asInternalUser,
+    index
+  );
   const { ruleRegistryEnabled } = config.experimentalFeatures;
 
   // If using the rule registry implementation, we don't want to create new .siem-signals indices -
@@ -124,6 +129,11 @@ export const createDetectionIndex = async (
   }
 };
 
+// This function can be expensive if there are lots of existing .siem-signals indices
+// because any new backwards compatibility mappings need to be applied to all of them
+// while also preserving the original 'version' of the mapping. To do it somewhat efficiently,
+// we first group the indices by version and exclude any that already have up-to-date
+// aliases. Then we start updating the mappings sequentially in chunks.
 const addFieldAliasesToIndices = async ({
   esClient,
   index,
@@ -132,14 +142,34 @@ const addFieldAliasesToIndices = async ({
   index: string;
 }) => {
   const { body: indexMappings } = await esClient.indices.get({ index });
+  const indicesByVersion: Record<number, string[]> = {};
+  const versions: Set<number> = new Set();
   for (const [indexName, mapping] of Object.entries(indexMappings)) {
-    const currentVersion: number | undefined = get(mapping.mappings?._meta, 'version');
-    const body = createBackwardsCompatibilityMapping(currentVersion ?? 0);
-    await esClient.indices.putMapping({
-      index: indexName,
-      body,
-      allow_no_indices: true,
-    } as estypes.IndicesPutMappingRequest);
+    const version: number = get(mapping.mappings?._meta, 'version') ?? 0;
+    const aliasesVersion: number = get(mapping.mappings?._meta, ALIAS_VERSION_FIELD) ?? 0;
+    // Only attempt to add backwards compatibility mappings to indices whose names start with the alias
+    // This limits us to legacy .siem-signals indices, since alerts as data indices use a different naming
+    // scheme (but have the same alias, so will also be returned by the "get" request)
+    if (
+      indexName.startsWith(`${index}-`) &&
+      isOutdated({ current: aliasesVersion, target: SIGNALS_FIELD_ALIASES_VERSION })
+    ) {
+      indicesByVersion[version] = indicesByVersion[version]
+        ? [...indicesByVersion[version], indexName]
+        : [indexName];
+      versions.add(version);
+    }
+  }
+  for (const version of versions) {
+    const body = createBackwardsCompatibilityMapping(version);
+    const indexNameChunks = chunk(indicesByVersion[version], 20);
+    for (const indexNameChunk of indexNameChunks) {
+      await esClient.indices.putMapping({
+        index: indexNameChunk,
+        body,
+        allow_no_indices: true,
+      } as estypes.IndicesPutMappingRequest);
+    }
   }
 };
 
@@ -152,7 +182,7 @@ const addIndexAliases = async ({
   index: string;
   aadIndexAliasName: string;
 }) => {
-  const { body: indices } = await esClient.indices.getAlias({ name: index });
+  const { body: indices } = await esClient.indices.getAlias({ index: `${index}-*`, name: index });
   const aliasActions = {
     actions: Object.keys(indices).map((concreteIndexName) => {
       return {
