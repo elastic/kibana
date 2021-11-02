@@ -165,7 +165,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Maps navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Maps']);
+        expect(navLinks).to.eql(['Maps']);
       });
 
       it(`does not show create new button`, async () => {

@@ -89,11 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('only shows the dashboard navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql([
-          'Overview',
-          'Dashboard',
-          'Stack Management',
-        ]);
+        expect(navLinks.map((link) => link.text)).to.eql(['Dashboard', 'Stack Management']);
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -296,7 +292,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Dashboard']);
+        expect(navLinks).to.eql(['Dashboard']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -427,7 +423,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Dashboard']);
+        expect(navLinks).to.eql(['Dashboard']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {

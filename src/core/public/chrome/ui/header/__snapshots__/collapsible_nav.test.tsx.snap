@@ -425,7 +425,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             }
           >
             <EuiCollapsibleNavGroup
-              background="light"
+              background="dark"
               className="eui-yScroll"
               style={
                 Object {
@@ -434,7 +434,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               }
             >
               <div
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--dark eui-yScroll"
                 id="generated-id"
                 style={
                   Object {
@@ -446,7 +446,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   className="euiCollapsibleNavGroup__children"
                 >
                   <EuiListGroup
-                    color="text"
+                    color="ghost"
                     gutterSize="none"
                     listItems={
                       Array [
@@ -454,6 +454,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           "data-test-subj": "collapsibleNavCustomNavLink",
                           "href": "Custom link",
                           "icon": undefined,
+                          "iconProps": Object {
+                            "color": "ghost",
+                          },
                           "iconType": undefined,
                           "isActive": false,
                           "isDisabled": undefined,
@@ -474,9 +477,14 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       }
                     >
                       <EuiListGroupItem
-                        color="text"
+                        color="ghost"
                         data-test-subj="collapsibleNavCustomNavLink"
                         href="Custom link"
+                        iconProps={
+                          Object {
+                            "color": "ghost",
+                          }
+                        }
                         isActive={false}
                         key="title-0"
                         label="Custom link"
@@ -486,7 +494,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         wrapText={false}
                       >
                         <li
-                          className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                          className="euiListGroupItem euiListGroupItem--small euiListGroupItem--ghost euiListGroupItem-isClickable"
                         >
                           <a
                             className="euiListGroupItem__button"
@@ -910,6 +918,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             className="euiFlexItem eui-yScroll"
           >
             <EuiCollapsibleNavGroup
+              buttonClassName="kbnCollapsibleNav__solutionGroupButton"
+              buttonElement="button"
               data-test-subj="collapsibleNavGroup-kibana"
               iconSize="m"
               iconType="logoKibana"
@@ -926,7 +936,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     "color": "text",
                   }
                 }
-                buttonClassName="euiCollapsibleNavGroup__heading"
+                buttonClassName="kbnCollapsibleNav__solutionGroupButton"
                 buttonContent={
                   <EuiFlexGroup
                     alignItems="center"
@@ -977,7 +987,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <button
                       aria-controls="generated-id"
                       aria-expanded={true}
-                      className="euiAccordion__button euiCollapsibleNavGroup__heading"
+                      className="euiAccordion__button kbnCollapsibleNav__solutionGroupButton"
                       id="generated-id"
                       onClick={[Function]}
                       type="button"
@@ -1231,6 +1241,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              buttonClassName="kbnCollapsibleNav__solutionGroupButton"
+              buttonElement="button"
               data-test-subj="collapsibleNavGroup-observability"
               iconSize="m"
               iconType="logoObservability"
@@ -1247,7 +1259,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     "color": "text",
                   }
                 }
-                buttonClassName="euiCollapsibleNavGroup__heading"
+                buttonClassName="kbnCollapsibleNav__solutionGroupButton"
                 buttonContent={
                   <EuiFlexGroup
                     alignItems="center"
@@ -1298,7 +1310,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <button
                       aria-controls="generated-id"
                       aria-expanded={true}
-                      className="euiAccordion__button euiCollapsibleNavGroup__heading"
+                      className="euiAccordion__button kbnCollapsibleNav__solutionGroupButton"
                       id="generated-id"
                       onClick={[Function]}
                       type="button"
@@ -1513,6 +1525,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              buttonClassName="kbnCollapsibleNav__solutionGroupButton"
+              buttonElement="button"
               data-test-subj="collapsibleNavGroup-securitySolution"
               iconSize="m"
               iconType="logoSecurity"
@@ -1529,7 +1543,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     "color": "text",
                   }
                 }
-                buttonClassName="euiCollapsibleNavGroup__heading"
+                buttonClassName="kbnCollapsibleNav__solutionGroupButton"
                 buttonContent={
                   <EuiFlexGroup
                     alignItems="center"
@@ -1580,7 +1594,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <button
                       aria-controls="generated-id"
                       aria-expanded={true}
-                      className="euiAccordion__button euiCollapsibleNavGroup__heading"
+                      className="euiAccordion__button kbnCollapsibleNav__solutionGroupButton"
                       id="generated-id"
                       onClick={[Function]}
                       type="button"
@@ -1756,6 +1770,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              buttonClassName="kbnCollapsibleNav__solutionGroupButton"
+              buttonElement="button"
               data-test-subj="collapsibleNavGroup-management"
               iconSize="m"
               iconType="managementApp"
@@ -1772,7 +1788,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     "color": "text",
                   }
                 }
-                buttonClassName="euiCollapsibleNavGroup__heading"
+                buttonClassName="kbnCollapsibleNav__solutionGroupButton"
                 buttonContent={
                   <EuiFlexGroup
                     alignItems="center"
@@ -1823,7 +1839,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <button
                       aria-controls="generated-id"
                       aria-expanded={true}
-                      className="euiAccordion__button euiCollapsibleNavGroup__heading"
+                      className="euiAccordion__button kbnCollapsibleNav__solutionGroupButton"
                       id="generated-id"
                       onClick={[Function]}
                       type="button"
@@ -2049,9 +2065,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 </div>
               </div>
             </EuiCollapsibleNavGroup>
-            <EuiShowFor
-              sizes="none"
-            />
           </div>
         </EuiFlexItem>
       </nav>

@@ -177,7 +177,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('does not show Management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Discover']);
+        expect(navLinks).to.eql(['Discover']);
       });
 
       it(`does not allow navigation to advanced settings; shows "not found" error`, async () => {
