@@ -45,11 +45,25 @@ describe('ExampleResultDetailCard', () => {
       ...exampleResult,
       searchResultConfig: { detailFields: [{ fieldName: 'date', label: 'Date' }] },
       exampleDocuments: [{ date }],
+      schemaFields: { date: 'date' },
     });
     const wrapper = shallow(<ExampleResultDetailCard />);
 
     expect(wrapper.find(EuiText).children().text()).toContain(
       new Date(Date.parse(date)).toLocaleString()
     );
+  });
+
+  it('shows non-formatted value when not a date field', () => {
+    const value = '9999';
+    setMockValues({
+      ...exampleResult,
+      searchResultConfig: { detailFields: [{ fieldName: 'value', label: 'Value' }] },
+      exampleDocuments: [{ value }],
+      schemaFields: { value: 'text' },
+    });
+    const wrapper = shallow(<ExampleResultDetailCard />);
+
+    expect(wrapper.find(EuiText).children().text()).toContain(value);
   });
 });

@@ -20,6 +20,8 @@ import { createUserAndRole, deleteUserAndRole } from '../../../common/services/s
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   describe('create_index', () => {
     afterEach(async () => {
@@ -27,6 +29,65 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('elastic admin', () => {
+      describe('with another index that shares index alias', () => {
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/signals/index_alias_clash');
+        });
+
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/signals/index_alias_clash');
+        });
+
+        it('should report that signals index does not exist', async () => {
+          const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(404);
+          expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
+        });
+
+        it('should return 200 for create_index', async () => {
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_INDEX_URL)
+            .set('kbn-xsrf', 'true')
+            .send()
+            .expect(200);
+          expect(body).to.eql({ acknowledged: true });
+        });
+      });
+
+      describe('with an outdated signals index', () => {
+        beforeEach(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+        });
+
+        afterEach(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+        });
+
+        it('should report that signals index is outdated', async () => {
+          const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(200);
+          expect(body).to.eql({
+            index_mapping_outdated: true,
+            name: `${DEFAULT_SIGNALS_INDEX}-default`,
+          });
+        });
+
+        it('should return 200 for create_index and add field aliases', async () => {
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_INDEX_URL)
+            .set('kbn-xsrf', 'true')
+            .send()
+            .expect(200);
+          expect(body).to.eql({ acknowledged: true });
+
+          const { body: mappings } = await es.indices.get({
+            index: '.siem-signals-default-000001',
+          });
+          // Make sure that aliases_version has been updated on the existing index
+          expect(mappings['.siem-signals-default-000001'].mappings?._meta?.aliases_version).to.eql(
+            1
+          );
+        });
+      });
+
       it('should return a 404 when the signal index has never been created', async () => {
         const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(404);
         expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });

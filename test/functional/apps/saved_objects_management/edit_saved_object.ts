@@ -49,16 +49,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const focusAndClickButton = async (buttonSubject: string) => {
     const button = await testSubjects.find(buttonSubject);
     await button.scrollIntoViewIfNecessary();
-    await delay(10);
+    await delay(100);
     await button.focus();
-    await delay(10);
+    await delay(100);
     await button.click();
     // Allow some time for the transition/animations to occur before assuming the click is done
-    await delay(10);
+    await delay(100);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/68400
-  describe.skip('saved objects edition page', () => {
+  describe('saved objects edition page', () => {
     beforeEach(async () => {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/edit_saved_object'
@@ -119,7 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldUseHashForSubUrl: false,
         }
       );
-
+      // wait for the Edit view to load
       await focusAndClickButton('savedObjectEditDelete');
       await PageObjects.common.clickConfirmOnModal();
 

@@ -225,7 +225,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     }
   },
   // Default values for session expiration timeouts.
-  (settings, fromPath, addDeprecation) => {
+  (settings, fromPath, addDeprecation, { branch }) => {
     if (settings?.xpack?.security?.session?.idleTimeout === undefined) {
       addDeprecation({
         configPath: 'xpack.security.session.idleTimeout',
@@ -237,6 +237,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           defaultMessage:
             'User sessions will automatically time out after 8 hours of inactivity starting in 8.0. Override this value to change the timeout.',
         }),
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/xpack-security-session-management.html#session-idle-timeout`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.idleTimeout.manualStepOneMessage', {
@@ -261,6 +262,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           defaultMessage:
             'Users are automatically required to log in again after 30 days starting in 8.0. Override this value to change the timeout.',
         }),
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/xpack-security-session-management.html#session-lifespan`,
         correctiveActions: {
           manualSteps: [
             i18n.translate('xpack.security.deprecations.lifespan.manualStepOneMessage', {
