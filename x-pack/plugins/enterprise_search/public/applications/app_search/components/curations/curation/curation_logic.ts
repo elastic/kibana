@@ -194,15 +194,18 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       const { engineName } = EngineLogic.values;
 
       try {
-        await http.put(`/internal/app_search/engines/${engineName}/search_relevance_suggestions`, {
-          body: JSON.stringify([
-            {
-              query: values.activeQuery,
-              type: 'curation',
-              status: 'applied',
-            },
-          ]),
-        });
+        await http.put(
+          `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions`,
+          {
+            body: JSON.stringify([
+              {
+                query: values.activeQuery,
+                type: 'curation',
+                status: 'applied',
+              },
+            ]),
+          }
+        );
         actions.loadCuration();
       } catch (e) {
         flashAPIErrors(e);
