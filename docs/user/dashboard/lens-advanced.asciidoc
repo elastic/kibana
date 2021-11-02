@@ -73,15 +73,15 @@ To identify the 75th percentile of orders, add a reference line:
 
 . Click the *Percentile* function, then enter `75` in the *Percentile* field. 
 
-. Configure the following display options:
+. Configure the display options.
 
-* In the *Display name* field, enter `75th`.
+.. In the *Display name* field, enter `75th`.
 
-* Select *Show display name*.
+.. Select *Show display name*.
 
-* From the *Icon* dropdown, select *Tag*.
+.. From the *Icon* dropdown, select *Tag*.
 
-* In the *Color* field, `#E7664C`.
+.. In the *Color* field, enter `#E7664C`.
 
 . Click *Close*.
 +
@@ -138,7 +138,7 @@ image::images/lens_lineChartMultipleDataSeries_7.16.png[Percentiles for product 
 
 With layers, you can analyze your data with multiple visualization types. When you create layered visualizations, match the data on the horizontal axis so that it uses the same scale. 
 
-To analyze multiple visualization types, create an area chart that displays the average order prices, then overlay with a line chart that displays the number of customers. 
+To analyze multiple visualization types, create an area chart that displays the average order prices, then add a line chart layer that displays the number of customers. 
 
 . On the dashboard, click *Create visualization*.
 
@@ -152,7 +152,7 @@ To analyze multiple visualization types, create an area chart that displays the 
 
 . Open the *Visualization type* dropdown, then select *Area*.
 
-Add a layer to display the customer traffic.
+Add a layer to display the customer traffic:
 
 . In the layer pane, click *Add layer > Add visualization layer*.
 
@@ -184,7 +184,7 @@ image::images/lens_mixedXYChart_7.16.png[Layer visualization type menu]
 [[percentage-stacked-area]]
 === Compare the change in percentage over time
 
-By default, the visualization editors displays time series data with stacked chart visualizations, which shows how the different document sets change over time. 
+By default, the visualization editor displays time series data with stacked charts, which show how the different document sets change over time. 
 
 To view change over time as a percentage, create an *Area percentage* chart that displays three order categories over time:
 
@@ -194,7 +194,7 @@ To view change over time as a percentage, create an *Area percentage* chart that
 
 . Open the *Visualization type* dropdown, then select *Area percentage*.
 
-For each order category, create a filter. 
+For each order category, create a filter: 
 
 . In the layer pane, click *Add or drag-and-drop a field* for *Break down by*.
 
@@ -237,7 +237,7 @@ To determine the number of orders made only on Saturday and Sunday, create an ar
 
 . Open the *Visualization type* dropdown, then select *Area*.
 
-Configure the cumulative sum of store orders.
+Configure the cumulative sum of store orders:
 
 . From the *Available fields* list, drag *Records* to the workspace.
 
@@ -247,7 +247,7 @@ Configure the cumulative sum of store orders.
 
 . In the *Display name* field, enter `Cumulative weekend orders`, then click *Close*.
 
-Filter the results to display the data for only Saturday and Sunday.
+Filter the results to display the data for only Saturday and Sunday:
 
 . In the layer pane, click *Add or drag-and-drop a field* for *Break down by*. 
 
@@ -284,7 +284,7 @@ To compare two time ranges, create a line chart that compares the sales in the c
 
 . To duplicate *Count of Records*, drag *Count of Records* to *Add or drag-and-drop a field* for *Vertical axis* in the layer pane.
 
-To create a week-over-week comparison, shift *Count of Records [1]* by one week.
+To create a week-over-week comparison, shift *Count of Records [1]* by one week:
 
 . In the layer pane, click *Count of Records [1]*.
 
@@ -324,9 +324,9 @@ image::images/lens_percent_chage.png[Bar chart with percent change in sales betw
 
 [discrete]
 [[view-customers-over-time-by-continents]]
-=== Analyze data in a table
+=== Analyze the data in a table
 
-Use tables when you want to display field values.
+With tables, you can view and compare the field values, which is useful for displaying the locations of customer orders.
 
 Create a date histogram table and group the customer count metric by category, such as the continent registered in user accounts:
 
