@@ -285,7 +285,7 @@ const handleIsolateEndpointHost = async (
   dispatch({
     type: 'endpointIsolationRequestStateChange',
     // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
+    // @ts-expect-error TS2345
     payload: createLoadingResourceState(getCurrentIsolationRequestState(state)),
   });
 
@@ -321,7 +321,7 @@ async function getEndpointPackageInfo(
   dispatch({
     type: 'endpointPackageInfoStateChanged',
     // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
+    // @ts-expect-error TS2345
     payload: createLoadingResourceState<PackageListItem>(endpointPackageInfo(state)),
   });
 

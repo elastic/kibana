@@ -7,6 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+
 import type { ElasticsearchClient } from 'src/core/server';
 
 import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
@@ -21,6 +23,12 @@ import { hasPrefixToInclude } from '../utils';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
+
+const SUPPORTED_ES_FIELD_TYPES = [
+  ES_FIELD_TYPES.KEYWORD,
+  ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.BOOLEAN,
+];
 
 export const shouldBeExcluded = (fieldName: string) => {
   return (
@@ -54,7 +62,7 @@ export const fetchTransactionDurationFieldCandidates = async (
   params: SearchStrategyParams
 ): Promise<{ fieldCandidates: string[] }> => {
   const { index } = params;
-  // Get all fields with keyword mapping
+  // Get all supported fields
   const respMapping = await esClient.fieldCaps({
     index,
     fields: '*',
@@ -64,9 +72,9 @@ export const fetchTransactionDurationFieldCandidates = async (
   const acceptableFields: Set<string> = new Set();
 
   Object.entries(respMapping.body.fields).forEach(([key, value]) => {
-    const fieldTypes = Object.keys(value);
-    const isSupportedType = fieldTypes.some(
-      (type) => type === 'keyword' || type === 'ip'
+    const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
+    const isSupportedType = fieldTypes.some((type) =>
+      SUPPORTED_ES_FIELD_TYPES.includes(type)
     );
     // Definitely include if field name matches any of the wild card
     if (hasPrefixToInclude(key) && isSupportedType) {
