@@ -3416,7 +3416,7 @@
         },
         ">>,Pick<",
         "UiActionsServiceEnhancements",
-        ", \"telemetry\" | \"inject\" | \"extract\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
+        ", \"telemetry\" | \"extract\" | \"inject\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
       ],
       "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
       "deprecated": false,
