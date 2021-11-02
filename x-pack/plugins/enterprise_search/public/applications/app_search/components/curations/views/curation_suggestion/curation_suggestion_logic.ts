@@ -80,7 +80,7 @@ export const CurationSuggestionLogic = kea<
 
       try {
         const suggestionResponse = await http.get(
-          `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions/query/${props.query}`,
+          `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions/${props.query}`,
           {
             query: {
               type: 'curation',

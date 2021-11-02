@@ -116,10 +116,10 @@ describe('search relevance insights routes', () => {
     });
   });
 
-  describe('GET /internal/app_search/engines/{engineName}/adaptive_relevance/suggestions/query/{query}', () => {
+  describe('GET /internal/app_search/engines/{engineName}/adaptive_relevance/suggestions/{query}', () => {
     const mockRouter = new MockRouter({
       method: 'get',
-      path: '/internal/app_search/engines/{engineName}/adaptive_relevance/suggestions/query/{query}',
+      path: '/internal/app_search/engines/{engineName}/adaptive_relevance/suggestions/{query}',
     });
 
     beforeEach(() => {
@@ -136,7 +136,7 @@ describe('search relevance insights routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/:engineName/adaptive_relevance/suggestions/query/:query',
+        path: '/as/engines/:engineName/adaptive_relevance/suggestions/:query',
       });
     });
   });
