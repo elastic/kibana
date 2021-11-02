@@ -412,6 +412,7 @@ describe('CurationLogic', () => {
         expect(http.put).toHaveBeenCalledWith(
           '/internal/app_search/engines/some-engine/curations/cur-123456789',
           {
+            query: { skip_record_analytics: 'true' },
             body: '{"queries":["a","b","c"],"query":"b","promoted":["d","e","f"],"hidden":["g"]}', // Uses state currently in CurationLogic
           }
         );
