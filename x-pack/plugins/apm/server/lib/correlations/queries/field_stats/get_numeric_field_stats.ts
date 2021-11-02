@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { find, get } from 'lodash';
+import { get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   NumericFieldStats,
@@ -18,9 +18,6 @@ import { FieldValuePair } from '../../../../../common/correlations/types';
 import { getQueryWithParams } from '../get_query_with_params';
 import { buildSamplerAggregation } from '../../utils/field_stats_utils';
 
-// Only need 50th percentile for the median
-const PERCENTILES = [50];
-
 export const getNumericFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fieldName: string,
@@ -31,7 +28,6 @@ export const getNumericFieldStatsRequest = (
 
   const { index, samplerShardSize } = params;
 
-  const percents = PERCENTILES;
   const aggs: Aggs = {
     sampled_field_stats: {
       filter: { exists: { field: fieldName } },
@@ -39,13 +35,6 @@ export const getNumericFieldStatsRequest = (
         actual_stats: {
           stats: { field: fieldName },
         },
-      },
-    },
-    sampled_percentiles: {
-      percentiles: {
-        field: fieldName,
-        percents,
-        keyed: false,
       },
     },
     sampled_top: {
@@ -113,17 +102,6 @@ export const fetchNumericFieldStats = async (
       aggregations.sample.sampled_top?.sum_other_doc_count ?? 0
     ),
   };
-
-  if (stats.count !== undefined && stats.count > 0) {
-    const percentiles = aggregations?.sample.sampled_percentiles.values ?? [];
-    const medianPercentile: { value: number; key: number } | undefined = find(
-      percentiles,
-      {
-        key: 50,
-      }
-    );
-    stats.median = medianPercentile !== undefined ? medianPercentile!.value : 0;
-  }
 
   return stats;
 };

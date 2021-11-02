@@ -20,7 +20,7 @@ const params = {
   includeFrozen: false,
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
-  samplerShardSize: 5000,
+  samplerShardSize: 10000,
 };
 
 export const getExpectedQuery = (aggs: any) => {

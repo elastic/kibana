@@ -13,6 +13,7 @@ import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
 import {
   DEBOUNCE_INTERVAL,
   DEFAULT_PERCENTILE_THRESHOLD,
+  SAMPLER_SHARD_SIZE,
 } from '../../../../common/correlations/constants';
 import type { FieldValuePair } from '../../../../common/correlations/types';
 import { getPrioritizedFieldValuePairs } from '../../../../common/correlations/utils';
@@ -214,6 +215,7 @@ export function useLatencyCorrelations() {
           body: {
             ...fetchParams,
             fieldsToSample: [...fieldsToSample],
+            samplerShardSize: SAMPLER_SHARD_SIZE,
           },
         },
       });

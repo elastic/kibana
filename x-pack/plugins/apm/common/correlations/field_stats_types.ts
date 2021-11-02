@@ -55,3 +55,5 @@ export type FieldStats =
   | NumericFieldStats
   | KeywordFieldStats
   | BooleanFieldStats;
+
+export type FieldValueFieldStats = TopValuesStats;
