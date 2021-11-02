@@ -53,6 +53,11 @@ export const savedQueryType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: savedQuerySavedObjectMappings,
+  management: {
+    defaultSearchField: 'id',
+    importableAndExportable: true,
+    getTitle: (savedObject) => savedObject.attributes.id,
+  },
 };
 
 export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
@@ -109,4 +114,9 @@ export const packType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: packSavedObjectMappings,
+  management: {
+    defaultSearchField: 'name',
+    importableAndExportable: true,
+    getTitle: (savedObject) => savedObject.attributes.name,
+  },
 };

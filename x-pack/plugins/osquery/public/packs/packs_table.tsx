@@ -126,7 +126,7 @@ const PacksTableComponent = () => {
       {
         field: 'policy_ids',
         name: i18n.translate('xpack.osquery.packs.table.policyColumnTitle', {
-          defaultMessage: 'Policies',
+          defaultMessage: 'Scheduled policies',
         }),
         truncateText: true,
         render: renderAgentPolicy,

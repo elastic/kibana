@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from 'react-query';
+import moment from 'moment-timezone';
 import { IndexPattern } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../common/lib/kibana';
 
@@ -46,13 +47,12 @@ export const usePackQueryLastResults = ({
       });
 
       const lastResultsResponse = await lastResultsSearchSource.fetch$().toPromise();
+      const timestamp = lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'][0];
 
-      const responseId = lastResultsResponse.rawResponse?.hits?.hits[0]?._source?.response_id;
-
-      if (responseId) {
+      if (timestamp) {
         const aggsSearchSource = await data.search.searchSource.create({
           index: logsIndexPattern,
-          size: 0,
+          size: 1,
           aggs: {
             unique_agents: { cardinality: { field: 'agent.id' } },
           },
@@ -61,13 +61,16 @@ export const usePackQueryLastResults = ({
             bool: {
               filter: [
                 {
-                  match_phrase: {
-                    action_id: actionId,
+                  range: {
+                    '@timestamp': {
+                      gte: moment(timestamp).subtract(interval, 'seconds').format(),
+                      lte: moment(timestamp).format(),
+                    },
                   },
                 },
                 {
                   match_phrase: {
-                    response_id: responseId,
+                    action_id: actionId,
                   },
                 },
               ],
@@ -81,7 +84,7 @@ export const usePackQueryLastResults = ({
           '@timestamp': lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'],
           // @ts-expect-error update types
           uniqueAgentsCount: aggsResponse.rawResponse.aggregations?.unique_agents?.value,
-          docCount: aggsResponse.rawResponse?.hits?.total,
+          docCount: aggsResponse?.rawResponse?.hits?.total,
         };
       }
 

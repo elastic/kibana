@@ -34,7 +34,8 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
               schema.recordOf(
                 schema.string(),
                 schema.object({
-                  field: schema.string(),
+                  field: schema.maybe(schema.string()),
+                  value: schema.maybe(schema.string()),
                 })
               )
             ),
