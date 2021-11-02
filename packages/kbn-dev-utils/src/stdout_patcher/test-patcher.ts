@@ -12,7 +12,7 @@ import { KibanaStdoutStatus } from './kibana_stdout_status';
 import { StdoutPatcher } from './stdout_patcher';
 
 function main() {
-  new StdoutPatcher(process.stdout, new KibanaStdoutStatus());
+  new StdoutPatcher(process.stdout, new KibanaStdoutStatus({ maxWidth: process.stdout.columns }));
   const array = fs.readFileSync('/home/academo/kibana-test-output.log').toString().split('\n');
   let curr = 0;
   setInterval(() => {

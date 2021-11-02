@@ -10,6 +10,7 @@ import chalk from 'chalk';
 import { StatusRenderer } from './stdout_patcher';
 
 export class KibanaStdoutStatus implements StatusRenderer {
+  maxWidth = 30;
   state = new Map<string, string>();
   re = {
     optimizer: /\[@kbn\/optimizer\]\s+\[(\d+)\/(\d+)\]/,
@@ -17,6 +18,10 @@ export class KibanaStdoutStatus implements StatusRenderer {
     kibanaServerRunning: /.*http\.server\.Kibana.*?http server running/,
     kibanaStatus: /.*?status.*?\sKibana\sis\snow\s(\w+)/,
   };
+
+  constructor({ maxWidth }: { maxWidth: number }) {
+    this.maxWidth = maxWidth;
+  }
 
   render(line: string, _rawLine: string): string[] {
     this.state = this.parseLine(this.state, line);
@@ -84,7 +89,7 @@ export class KibanaStdoutStatus implements StatusRenderer {
     const totalPercentage = 100;
 
     // modify the left number to adjust the max cols in terminal
-    const widthMultiplier = 30 / 100;
+    const widthMultiplier = this.maxWidth / 2 / 100;
 
     if (total >= current) {
       currentPercentage = Math.floor((current * 100) / total);

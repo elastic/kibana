@@ -23,11 +23,13 @@ export class StdoutPatcher {
   currentState: string[] = [];
   currentParsed: Map<string, string> = new Map();
   renderer: StatusRenderer;
+  maxWidth = 30;
 
   constructor(stdout: Stdout, renderer: StatusRenderer) {
     this.stdout = stdout;
     this.originalWrite = this.stdout.write;
     this.renderer = renderer;
+    this.maxWidth = stdout.columns;
     if (!patched.includes(stdout)) {
       patched.push(stdout);
       this.stdout.write = this.customStdoutWrite.bind(this) as StdoutWriter;
@@ -60,11 +62,14 @@ export class StdoutPatcher {
         if (i > 0 && i < this.currentState.length) {
           prefix = '\n';
         }
-        this.originalWrite.call(this.stdout, prefix + this.currentState[i]);
+        this.originalWrite.call(this.stdout, prefix + this.trimLine(this.currentState[i]));
       }
     }
   }
 
+  trimLine(line: string): string {
+    return line.substr(0, this.maxWidth - 1);
+  }
   unpatch() {
     if (this.stdout.write !== this.originalWrite) {
       this.stdout.write = this.originalWrite;
