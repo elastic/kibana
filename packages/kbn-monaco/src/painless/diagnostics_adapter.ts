@@ -31,6 +31,8 @@ export class DiagnosticsAdapter {
   // To avoid stale validation data we keep track of the latest call to validate().
   private validateIdx = 0;
 
+  public validation$ = this.validation.asObservable();
+
   constructor(private worker: WorkerAccessor) {
     const onModelAdd = (model: monaco.editor.IModel): void => {
       let handle: any;
@@ -114,9 +116,5 @@ export class DiagnosticsAdapter {
 
   public getSyntaxErrors() {
     return this.errors;
-  }
-
-  public get validation$() {
-    return this.validation.asObservable();
   }
 }
