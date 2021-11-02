@@ -81,7 +81,8 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
               }}
             />
             <BarSeries
-              id={i18n.translate(
+              id="executionDuration"
+              name={i18n.translate(
                 'xpack.triggersActionsUI.sections.executionDurationChart.durationLabel',
                 {
                   defaultMessage: `Duration`,
@@ -95,7 +96,8 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
               minBarHeight={2}
             />
             <LineSeries
-              id={i18n.translate(
+              id="rule_duration_avg"
+              name={i18n.translate(
                 'xpack.triggersActionsUI.sections.executionDurationChart.avgDurationLabel',
                 {
                   defaultMessage: `Avg Duration`,
