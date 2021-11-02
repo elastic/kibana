@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
-import { EuiTabbedContent } from '@elastic/eui';
+import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 // @ts-expect-error unconverted component
@@ -15,6 +15,7 @@ import { Datasource } from '../../datasource';
 // @ts-expect-error unconverted component
 import { FunctionFormList } from '../../function_form_list';
 import { PositionedElement } from '../../../../types';
+import { WorkpadFilters } from '../../workpad_filters/workpad_filters';
 
 const strings = {
   getDataTabLabel: () =>
@@ -29,6 +30,11 @@ const strings = {
       defaultMessage: 'Display',
       description: 'This tab contains the settings for how data is displayed in a Canvas element',
     }),
+  getFiltersTabLabel: () =>
+    i18n.translate('xpack.canvas.elementSettings.filtersTabLabel', {
+      defaultMessage: 'Filters',
+      description: 'This tab contains information about filters related to a Canvas element',
+    }),
 };
 
 interface Props {
@@ -39,6 +45,16 @@ interface Props {
 }
 
 export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
+  const filtersTab = !element.filter && {
+    id: 'filters',
+    name: strings.getFiltersTabLabel(),
+    content: (
+      <div className="canvasSidebar__pop">
+        <WorkpadFilters />
+      </div>
+    ),
+  };
+
   const tabs = [
     {
       id: 'edit',
@@ -60,9 +76,23 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
         </div>
       ),
     },
+    ...(filtersTab ? [filtersTab] : []),
   ];
 
-  return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />;
+  const [selectedTab, setSelectedTab] = useState<EuiTabbedContentTab>(tabs[0]);
+
+  const onTabClick = (tab: EuiTabbedContentTab) => setSelectedTab(tab);
+
+  const getTab = (tabId: string) => tabs.filter((tab) => tab.id === tabId)[0] ?? tabs[0];
+
+  return (
+    <EuiTabbedContent
+      tabs={tabs}
+      selectedTab={getTab(selectedTab.id)}
+      onTabClick={onTabClick}
+      size="s"
+    />
+  );
 };
 
 ElementSettings.propTypes = {
