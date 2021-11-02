@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
-import { getExecutionsTotalCount, getInUseTotalCount, getTotalCount } from './actions_telemetry';
+import { getExecutionsPerDayCount, getInUseTotalCount, getTotalCount } from './actions_telemetry';
 
 describe('actions telemetry', () => {
   test('getTotalCount should replace first symbol . to __ for action types names', async () => {
@@ -680,7 +680,7 @@ Object {
         },
       })
     );
-    const telemetry = await getExecutionsTotalCount(mockEsClient, 'test');
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test');
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(telemetry).toStrictEqual({
