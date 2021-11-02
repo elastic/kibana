@@ -104,7 +104,7 @@ export const mlExecutor = async ({
 
   const anomalyCount = filteredAnomalyResults.hits.hits.length;
   if (anomalyCount) {
-    logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
+    logger.debug(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
   }
   const { success, errors, bulkCreateDuration, createdItemsCount, createdItems } =
     await bulkCreateMlSignals({
