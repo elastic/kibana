@@ -33,6 +33,9 @@ export class StdoutPatcher {
     if (!patched.includes(stdout)) {
       patched.push(stdout);
       this.stdout.write = this.customStdoutWrite.bind(this) as StdoutWriter;
+      stdout.on('resize', () => {
+        this.maxWidth = stdout.columns;
+      });
     }
   }
 
