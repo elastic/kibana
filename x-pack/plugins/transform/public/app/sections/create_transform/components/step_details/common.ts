@@ -27,6 +27,7 @@ export interface StepDetailsExposedState {
   transformSettingsDocsPerSecond?: number;
   valid: boolean;
   indexPatternTimeField?: string | undefined;
+  _meta?: Record<string, unknown>;
 }
 
 const defaultContinuousModeDelay = '60s';
@@ -93,6 +94,10 @@ export function applyTransformConfigToDetailsState(
       if (typeof transformConfig.settings?.docs_per_second === 'number') {
         state.transformSettingsDocsPerSecond = transformConfig.settings.docs_per_second;
       }
+    }
+
+    if (transformConfig._meta) {
+      state._meta = transformConfig._meta;
     }
   }
   return state;

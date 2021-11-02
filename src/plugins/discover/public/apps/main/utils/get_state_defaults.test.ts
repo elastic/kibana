@@ -31,6 +31,7 @@ describe('getStateDefaults', () => {
           "default_column",
         ],
         "filters": undefined,
+        "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "index": "index-pattern-with-timefield-id",
         "interval": "auto",
@@ -42,6 +43,7 @@ describe('getStateDefaults', () => {
             "desc",
           ],
         ],
+        "viewMode": undefined,
       }
     `);
   });
@@ -61,12 +63,14 @@ describe('getStateDefaults', () => {
           "default_column",
         ],
         "filters": undefined,
+        "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "index": "the-index-pattern-id",
         "interval": "auto",
         "query": undefined,
         "savedQuery": undefined,
         "sort": Array [],
+        "viewMode": undefined,
       }
     `);
   });

@@ -12,7 +12,8 @@ import { PhaseWithTiming } from '../../../../common/types';
 import { setupEnvironment } from '../../helpers';
 import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
-describe('<EditPolicy /> timing validation', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/115307
+describe.skip('<EditPolicy /> timing validation', () => {
   let testBed: ValidationTestBed;
   let actions: ValidationTestBed['actions'];
   const { server, httpRequestsMockHelpers } = setupEnvironment();

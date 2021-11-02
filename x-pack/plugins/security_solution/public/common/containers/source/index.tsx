@@ -254,7 +254,12 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                       errorMessage: null,
                       id: sourcererScopeName,
                       indexPattern: getIndexFields(stringifyIndices, response.indexFields),
-                      indicesExist: response.indicesExist.length > 0,
+                      // If checking for DE signals index, lie and say the index is created (it's
+                      // no longer created on startup, but is created lazily before writing).
+                      indicesExist:
+                        sourcererScopeName === SourcererScopeName.detections
+                          ? true
+                          : response.indicesExist.length > 0,
                       loading: false,
                     },
                   })
