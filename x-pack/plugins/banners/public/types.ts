@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { EditorMenu } from './editor_menu';
-export { EditorMenu as EditorMenuComponent } from './editor_menu.component';
+import type { ScreenshotModePluginStart } from '../../../../src/plugins/screenshot_mode/public';
+
+export interface BannerPluginStartDependencies {
+  screenshotMode: ScreenshotModePluginStart;
+}
