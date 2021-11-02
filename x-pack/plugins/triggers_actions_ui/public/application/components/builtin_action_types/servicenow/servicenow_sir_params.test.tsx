@@ -165,33 +165,6 @@ describe('ServiceNowSIRParamsFields renders', () => {
     expect(title.prop('isInvalid')).toBeTruthy();
   });
 
-  test('When subActionParams is undefined, set to default', () => {
-    const { subActionParams, ...newParams } = actionParams;
-
-    const newProps = {
-      ...defaultProps,
-      actionParams: newParams,
-    };
-    mountWithIntl(<ServiceNowSIRParamsFields {...newProps} />);
-    expect(editAction.mock.calls[0][1]).toEqual({
-      incident: {
-        correlation_id: '{{rule.id}}:{{alert.id}}',
-      },
-      comments: [],
-    });
-  });
-
-  test('When subAction is undefined, set to default', () => {
-    const { subAction, ...newParams } = actionParams;
-
-    const newProps = {
-      ...defaultProps,
-      actionParams: newParams,
-    };
-    mountWithIntl(<ServiceNowSIRParamsFields {...newProps} />);
-    expect(editAction.mock.calls[0][1]).toEqual('pushToService');
-  });
-
   test('Resets fields when connector changes', () => {
     const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
