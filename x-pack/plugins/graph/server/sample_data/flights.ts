@@ -1602,7 +1602,6 @@ const wsState: any = {
     maxValuesPerDoc: 1,
     minDocCount: 3,
   },
-  indexPatternRefName: 'indexPattern_0',
 };
 
 export function registerFlightsSampleData(sampleDataRegistry: SampleDataRegistrySetup) {
@@ -1619,16 +1618,11 @@ export function registerFlightsSampleData(sampleDataRegistry: SampleDataRegistry
         numVertices: 91,
         version: 1,
         wsState: JSON.stringify(JSON.stringify(wsState)),
+        legacyIndexPatternRef: 'kibana_sample_data_flights',
       },
-      references: [
-        {
-          name: 'indexPattern_0',
-          type: 'index-pattern',
-          id: 'kibana_sample_data_flights',
-        },
-      ],
+      references: [],
       migrationVersion: {
-        'graph-workspace': '7.0.0',
+        'graph-workspace': '7.11.0',
       },
       updated_at: '2020-01-09T15:55:24.013Z',
     },
@@ -1637,7 +1631,11 @@ export function registerFlightsSampleData(sampleDataRegistry: SampleDataRegistry
 export function registerFlightsSampleDataLink(sampleDataRegistry: SampleDataRegistrySetup) {
   sampleDataRegistry.addAppLinksToSampleDataset(datasetId, [
     {
-      path: createWorkspacePath('5dc018d0-32f8-11ea-bbe4-818d9c786051'),
+      sampleObject: {
+        type: 'graph-workspace',
+        id: '5dc018d0-32f8-11ea-bbe4-818d9c786051',
+      },
+      getPath: createWorkspacePath,
       label: i18n.translate('xpack.graph.sampleData.label', { defaultMessage: 'Graph' }),
       icon: APP_ICON,
     },

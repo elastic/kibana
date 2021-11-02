@@ -77,7 +77,11 @@ export class MapsPlugin implements Plugin {
 
     home.sampleData.addAppLinksToSampleDataset('ecommerce', [
       {
-        path: getFullPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
+        sampleObject: {
+          type: MAP_SAVED_OBJECT_TYPE,
+          id: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+        },
+        getPath: getFullPath,
         label: sampleDataLinkLabel,
         icon: APP_ICON,
       },
@@ -99,7 +103,11 @@ export class MapsPlugin implements Plugin {
 
     home.sampleData.addAppLinksToSampleDataset('flights', [
       {
-        path: getFullPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
+        sampleObject: {
+          type: MAP_SAVED_OBJECT_TYPE,
+          id: '5dd88580-1906-11e9-919b-ffe5949a18d2',
+        },
+        getPath: getFullPath,
         label: sampleDataLinkLabel,
         icon: APP_ICON,
       },
@@ -120,7 +128,11 @@ export class MapsPlugin implements Plugin {
     home.sampleData.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
     home.sampleData.addAppLinksToSampleDataset('logs', [
       {
-        path: getFullPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
+        sampleObject: {
+          type: MAP_SAVED_OBJECT_TYPE,
+          id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+        },
+        getPath: getFullPath,
         label: sampleDataLinkLabel,
         icon: APP_ICON,
       },

@@ -140,9 +140,10 @@ export const getSavedObjects = (): SavedObject[] => [
   {
     id: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
     type: 'visualization',
-    updated_at: '2018-10-01T15:13:03.270Z',
+    updated_at: '2021-10-28T15:07:24.077Z',
     version: '1',
-    migrationVersion: {},
+    coreMigrationVersion: '8.0.0',
+    migrationVersion: { visualization: '8.0.0' },
     attributes: {
       title: i18n.translate('home.sampleData.ecommerceSpec.salesCountMapTitle', {
         defaultMessage: '[eCommerce] Sales Count Map',
@@ -154,10 +155,16 @@ export const getSavedObjects = (): SavedObject[] => [
       version: 1,
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
       },
     },
-    references: [],
+    references: [
+      {
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
   },
   {
     attributes: {
