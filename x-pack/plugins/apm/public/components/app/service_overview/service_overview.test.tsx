@@ -130,13 +130,11 @@ describe('ServiceOverview', () => {
       'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate':
         {
           currentPeriod: {
-            transactionErrorRate: [],
-            noHits: true,
+            timeseries: [],
             average: null,
           },
           previousPeriod: {
-            transactionErrorRate: [],
-            noHits: true,
+            timeseries: [],
             average: null,
           },
         },
