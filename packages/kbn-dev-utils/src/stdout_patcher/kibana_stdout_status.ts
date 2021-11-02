@@ -19,11 +19,10 @@ export class KibanaStdoutStatus implements StatusRenderer {
     kibanaStatus: /.*?status.*?\sKibana\sis\snow\s(\w+)/,
   };
 
-  constructor({ maxWidth }: { maxWidth: number }) {
-    this.maxWidth = maxWidth;
-  }
+  constructor() {}
 
-  render(line: string, _rawLine: string): string[] {
+  render({ line, maxWidth }: { line: string; rawLine: string; maxWidth?: number }): string[] {
+    this.maxWidth = maxWidth || this.maxWidth;
     this.state = this.parseLine(this.state, line);
     return [this.renderStatus(this.state), this.renderProgress(this.state)];
   }

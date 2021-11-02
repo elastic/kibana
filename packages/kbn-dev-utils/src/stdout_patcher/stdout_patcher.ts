@@ -14,7 +14,15 @@ import { ansiEscapes } from './ansi_codes';
 const patched: Stdout[] = [];
 
 export interface StatusRenderer {
-  render: (line: string, rawLine: string) => string[];
+  render: ({
+    line,
+    rawLine,
+    maxWidth,
+  }: {
+    line: string;
+    rawLine: string;
+    maxWidth?: number;
+  }) => string[];
 }
 
 export class StdoutPatcher {
@@ -59,7 +67,11 @@ export class StdoutPatcher {
 
   private render(buffer: Uint8Array | string) {
     if (typeof buffer === 'string') {
-      this.currentState = this.renderer.render(stripAnsi(buffer), buffer);
+      this.currentState = this.renderer.render({
+        line: stripAnsi(buffer),
+        rawLine: buffer,
+        maxWidth: this.maxWidth,
+      });
       for (let i = 0; i < this.currentState.length; i++) {
         let prefix = '';
         if (i > 0 && i < this.currentState.length) {
