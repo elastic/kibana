@@ -11,16 +11,18 @@ else
   node scripts/build
 fi
 
-echo "--- Build Kibana Cloud Distribution"
-node scripts/build \
-  --skip-initialize \
-  --skip-generic-folders \
-  --skip-platform-folders \
-  --skip-archives \
-  --docker-images \
-  --skip-docker-ubi \
-  --skip-docker-centos \
-  --skip-docker-contexts
+if [[ "${GITHUB_PR_LABELS:-}" == *"ci:deploy-cloud"* ]]; then
+  echo "--- Build Kibana Cloud Distribution"
+  node scripts/build \
+    --skip-initialize \
+    --skip-generic-folders \
+    --skip-platform-folders \
+    --skip-archives \
+    --docker-images \
+    --skip-docker-ubi \
+    --skip-docker-centos \
+    --skip-docker-contexts
+fi
 
 echo "--- Archive Kibana Distribution"
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
