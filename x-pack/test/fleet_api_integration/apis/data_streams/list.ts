@@ -70,11 +70,11 @@ export default function (providerContext: FtrProviderContext) {
       })
     );
 
-    return responses as any;
+    return responses.map((r) => r.body as IndexResponse);
   };
 
-  const getSeedDocsFromResponse = async (indexResponses: IndexResponse[]) =>
-    Promise.all(
+  const getSeedDocsFromResponse = async (indexResponses: IndexResponse[]) => {
+    const docs = await Promise.all(
       indexResponses.map((indexResponse) =>
         es.transport.request({
           method: 'GET',
@@ -82,6 +82,9 @@ export default function (providerContext: FtrProviderContext) {
         })
       )
     );
+
+    return docs.map((doc) => doc.body);
+  };
 
   const getDataStreams = async () => {
     return await supertest.get(`/api/fleet/data_streams`).set('kbn-xsrf', 'xxxx');
