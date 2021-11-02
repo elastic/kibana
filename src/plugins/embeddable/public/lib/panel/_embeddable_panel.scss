@@ -21,8 +21,7 @@
     min-height: 0; // Absolute must for Firefox to scroll contents
   }
 
-  // SASSTODO: Pretty sure this doesn't do anything since the flex-basis 100%,
-  // but it MIGHT be fixing IE
+  // SASSTODO: this MIGHT be fixing IE
   .embPanel__content--fullWidth {
     width: 100%;
   }

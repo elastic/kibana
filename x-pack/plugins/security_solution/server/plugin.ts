@@ -70,6 +70,7 @@ import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
 import { registerPrivilegeDeprecations } from './deprecation_privileges';
+import { registerRulePreviewPrivilegeDeprecations } from './deprecations';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
 // eslint-disable-next-line no-restricted-imports
@@ -334,6 +335,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       deprecationsService: core.deprecations,
       getKibanaRoles: plugins.security?.privilegeDeprecationsService.getKibanaRoles,
       logger: this.logger.get('deprecations'),
+    });
+    registerRulePreviewPrivilegeDeprecations({
+      deprecationsService: core.deprecations,
+      getKibanaRoles: plugins.security?.privilegeDeprecationsService.getKibanaRoles,
+      packageInfo: this.pluginContext.env.packageInfo,
     });
 
     return {};

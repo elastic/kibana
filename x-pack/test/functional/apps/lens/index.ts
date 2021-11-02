@@ -11,6 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('lens app', () => {
     before(async () => {
@@ -18,16 +19,21 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await browser.setWindowSize(1280, 800);
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/default'
+      );
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/default'
+      );
     });
 
     describe('', function () {
       this.tags(['ciGroup4', 'skipFirefox']);
-
       loadTestFile(require.resolve('./smokescreen'));
       loadTestFile(require.resolve('./add_to_dashboard'));
       loadTestFile(require.resolve('./table'));
