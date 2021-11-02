@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { flowRight, groupBy } from 'lodash';
+import { fromExpression } from '@kbn/interpreter/common';
+import { flowRight, get, groupBy } from 'lodash';
 import {
   Filter as FilterType,
   FilterField,
@@ -62,4 +63,18 @@ export const groupFiltersBy = (filters: FilterType[], groupByField: FilterField)
     name: groupedFilters[key]?.[0]?.[groupByField] ? key : null,
     filters: groupedFilters[key],
   }));
+};
+
+export const getFiltersByGroup = (allFilters: string[], groups: string[]) =>
+  allFilters.filter((filter: string) => {
+    const ast = fromExpression(filter);
+    const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
+    return expGroups.length > 0 && expGroups.every((expGroup) => groups.includes(expGroup));
+  });
+
+export const extractGroupsFromElementsFilters = (expr: string) => {
+  const ast = fromExpression(expr);
+  const filtersFn = ast.chain.filter((expression) => expression.function === 'filters')[0];
+  const groups = filtersFn?.arguments.group?.map((g) => g.toString()) ?? undefined;
+  return groups;
 };

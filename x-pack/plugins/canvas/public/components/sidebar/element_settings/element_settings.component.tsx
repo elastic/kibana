@@ -50,7 +50,7 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
     name: strings.getFiltersTabLabel(),
     content: (
       <div className="canvasSidebar__pop">
-        <WorkpadFilters />
+        <WorkpadFilters element={element} />
       </div>
     ),
   };
