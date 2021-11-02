@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { pick, reduce } from 'lodash';
+import { reduce } from 'lodash';
 
 export const convertECSMappingToArray = (ecsMapping: Record<string, object> | undefined) =>
   ecsMapping
     ? Object.entries(ecsMapping).map((item) => ({
-        value: item[0],
-        ...item[1],
+        key: item[0],
+        value: item[1],
       }))
     : undefined;
 
-export const convertECSMappingToObject = (ecsMapping: Array<{ field: string; value: string }>) =>
+export const convertECSMappingToObject = (
+  ecsMapping: Array<{ key: string; value: Record<string, object> }>
+) =>
   reduce(
     ecsMapping,
     (acc, value) => {
-      acc[value.value] = pick(value, 'field');
+      acc[value.key] = value.value;
       return acc;
     },
-    {} as Record<string, { field: string }>
+    {} as Record<string, { field?: string; value?: string }>
   );
