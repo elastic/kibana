@@ -121,6 +121,8 @@ describe('getAlertInstanceSummaryRoute', () => {
 
     getAlertInstanceSummaryRoute(router, licenseState, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
+
+    rulesClient.getAlertSummary.mockResolvedValueOnce(mockedAlertInstanceSummary);
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       { params: { id: '1' }, query: {} },

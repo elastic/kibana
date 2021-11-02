@@ -250,7 +250,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           actionGroupId: 'default',
           activeStartDate: actualAlerts.alertC.activeStartDate,
         },
-        instanceD: {
+        alertD: {
           status: 'OK',
           muted: true,
         },
