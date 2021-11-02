@@ -87,13 +87,13 @@ exports[`AddData render 1`] = `
             grow={false}
           >
             <EuiButtonEmpty
-              data-test-subj="uploadData"
+              data-test-subj="uploadFile"
               href="#/tutorial_directory/fileDataViz"
               iconType="importAction"
             >
               <FormattedMessage
-                defaultMessage="Upload data"
-                id="home.addData.uploadDataButtonLabel"
+                defaultMessage="Upload a file"
+                id="home.addData.uploadFileButtonLabel"
                 values={Object {}}
               />
             </EuiButtonEmpty>
