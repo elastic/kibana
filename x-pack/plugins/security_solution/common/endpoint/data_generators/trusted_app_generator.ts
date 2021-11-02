@@ -67,8 +67,8 @@ export class TrustedAppGenerator extends BaseDataGenerator<TrustedApp> {
       ...(scopeType === 'policy' ? { policies: this.randomArray(5, () => this.randomUUID()) } : {}),
     }) as EffectScope;
 
-    // TODO: remove ts-ignore. TS types are conditional when it comes to the combination of OS and ENTRIES
-    // @ts-ignore
+    // TS types are conditional when it comes to the combination of OS and ENTRIES
+    // @ts-expect-error TS2322
     return merge(
       {
         description: `Generator says we trust ${name}`,

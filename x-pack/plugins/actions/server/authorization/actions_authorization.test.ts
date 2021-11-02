@@ -8,8 +8,6 @@
 import { KibanaRequest } from 'kibana/server';
 import { securityMock } from '../../../../plugins/security/server/mocks';
 import { ActionsAuthorization } from './actions_authorization';
-import { actionsAuthorizationAuditLoggerMock } from './audit_logger.mock';
-import { ActionsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -18,9 +16,6 @@ import { AuthenticatedUser } from '../../../security/server';
 import { AuthorizationMode } from './get_authorization_mode_by_source';
 
 const request = {} as KibanaRequest;
-
-const auditLogger = actionsAuthorizationAuditLoggerMock.create();
-const realAuditLogger = new ActionsAuthorizationAuditLogger();
 
 const mockAuthorizationAction = (type: string, operation: string) => `${type}/${operation}`;
 function mockSecurity() {
@@ -39,19 +34,12 @@ function mockSecurity() {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  auditLogger.actionsAuthorizationFailure.mockImplementation((username, ...args) =>
-    realAuditLogger.getAuthorizationMessage(AuthorizationResult.Unauthorized, ...args)
-  );
-  auditLogger.actionsAuthorizationSuccess.mockImplementation((username, ...args) =>
-    realAuditLogger.getAuthorizationMessage(AuthorizationResult.Authorized, ...args)
-  );
 });
 
 describe('ensureAuthorized', () => {
   test('is a no-op when there is no authorization api', async () => {
     const actionsAuthorization = new ActionsAuthorization({
       request,
-      auditLogger,
     });
 
     await actionsAuthorization.ensureAuthorized('create', 'myType');
@@ -63,7 +51,6 @@ describe('ensureAuthorized', () => {
     const actionsAuthorization = new ActionsAuthorization({
       request,
       authorization,
-      auditLogger,
     });
 
     await actionsAuthorization.ensureAuthorized('create', 'myType');
@@ -78,7 +65,6 @@ describe('ensureAuthorized', () => {
     const actionsAuthorization = new ActionsAuthorization({
       request,
       authorization,
-      auditLogger,
     });
 
     checkPrivileges.mockResolvedValueOnce({
@@ -98,16 +84,6 @@ describe('ensureAuthorized', () => {
     expect(checkPrivileges).toHaveBeenCalledWith({
       kibana: mockAuthorizationAction('action', 'create'),
     });
-
-    expect(auditLogger.actionsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-    expect(auditLogger.actionsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(auditLogger.actionsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "some-user",
-        "create",
-        "myType",
-      ]
-    `);
   });
 
   test('ensures the user has privileges to execute an Actions Saved Object type', async () => {
@@ -119,7 +95,6 @@ describe('ensureAuthorized', () => {
     const actionsAuthorization = new ActionsAuthorization({
       request,
       authorization,
-      auditLogger,
     });
 
     checkPrivileges.mockResolvedValueOnce({
@@ -149,16 +124,6 @@ describe('ensureAuthorized', () => {
         mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
       ],
     });
-
-    expect(auditLogger.actionsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-    expect(auditLogger.actionsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(auditLogger.actionsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "some-user",
-        "execute",
-        "myType",
-      ]
-    `);
   });
 
   test('throws if user lacks the required privieleges', async () => {
@@ -170,7 +135,6 @@ describe('ensureAuthorized', () => {
     const actionsAuthorization = new ActionsAuthorization({
       request,
       authorization,
-      auditLogger,
     });
 
     checkPrivileges.mockResolvedValueOnce({
@@ -191,16 +155,6 @@ describe('ensureAuthorized', () => {
     await expect(
       actionsAuthorization.ensureAuthorized('create', 'myType')
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized to create a \\"myType\\" action"`);
-
-    expect(auditLogger.actionsAuthorizationSuccess).not.toHaveBeenCalled();
-    expect(auditLogger.actionsAuthorizationFailure).toHaveBeenCalledTimes(1);
-    expect(auditLogger.actionsAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "some-user",
-        "create",
-        "myType",
-      ]
-    `);
   });
 
   test('exempts users from requiring privileges to execute actions when authorizationMode is Legacy', async () => {
@@ -213,7 +167,6 @@ describe('ensureAuthorized', () => {
       request,
       authorization,
       authentication,
-      auditLogger,
       authorizationMode: AuthorizationMode.Legacy,
     });
 
@@ -225,15 +178,5 @@ describe('ensureAuthorized', () => {
 
     expect(authorization.actions.savedObject.get).not.toHaveBeenCalled();
     expect(checkPrivileges).not.toHaveBeenCalled();
-
-    expect(auditLogger.actionsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-    expect(auditLogger.actionsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(auditLogger.actionsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "some-user",
-        "execute",
-        "myType",
-      ]
-    `);
   });
 });
