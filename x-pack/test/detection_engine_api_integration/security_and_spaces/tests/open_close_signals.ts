@@ -91,18 +91,18 @@ export default ({ getService }: FtrProviderContext) => {
         it('should be able to execute and get 10 signals', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 10, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 10, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           expect(signalsOpen.hits.hits.length).equal(10);
         });
 
         it('should be have set the signals in an open state initially', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 10, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 10, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const everySignalOpen = signalsOpen.hits.hits.every(
             (hit) => hit._source?.[ALERT_WORKFLOW_STATUS] === 'open'
           );
@@ -112,9 +112,9 @@ export default ({ getService }: FtrProviderContext) => {
         it('should be able to get a count of 10 closed signals when closing 10', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 10, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 10, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
           // set all of the signals to the state of closed. There is no reason to use a waitUntil here
@@ -138,9 +138,9 @@ export default ({ getService }: FtrProviderContext) => {
         it('should be able close signals immediately and they all should be closed', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
           // set all of the signals to the state of closed. There is no reason to use a waitUntil here
@@ -168,10 +168,10 @@ export default ({ getService }: FtrProviderContext) => {
         it('should be able to close signals with t1 analyst user', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
           await createUserAndRole(getService, ROLES.t1_analyst);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
           // Try to set all of the signals to the state of closed.
@@ -203,11 +203,11 @@ export default ({ getService }: FtrProviderContext) => {
         it('should be able to close signals with soc_manager user', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const userAndRole = ROLES.soc_manager;
           await createUserAndRole(getService, userAndRole);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
           // Try to set all of the signals to the state of closed.

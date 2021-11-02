@@ -58,19 +58,23 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ index: [outdatedSignalsIndexName] })
         .expect(200));
 
-      await waitFor(async () => {
-        ({
-          body: {
-            migrations: [finalizedMigration],
-          },
-        } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ migration_ids: [createdMigration.migration_id] })
-          .expect(200));
+      await waitFor(
+        async () => {
+          ({
+            body: {
+              migrations: [finalizedMigration],
+            },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ migration_ids: [createdMigration.migration_id] })
+            .expect(200));
 
-        return finalizedMigration.completed ?? false;
-      }, `polling finalize_migration until all complete`);
+          return finalizedMigration.completed ?? false;
+        },
+        `polling finalize_migration until all complete`,
+        log
+      );
     });
 
     afterEach(async () => {

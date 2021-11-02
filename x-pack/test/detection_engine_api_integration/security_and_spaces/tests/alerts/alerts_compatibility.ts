@@ -104,14 +104,23 @@ export default ({ getService }: FtrProviderContext) => {
         expect(indices.length).to.eql(1);
         expect(indices[0].is_outdated).to.eql(true);
 
-        const [migration] = await startSignalsMigration({ indices: [indices[0].index], supertest });
-        await waitFor(async () => {
-          const [{ completed }] = await finalizeSignalsMigration({
-            migrationIds: [migration.migration_id],
-            supertest,
-          });
-          return completed === true;
-        }, `polling finalize_migration until complete`);
+        const [migration] = await startSignalsMigration({
+          indices: [indices[0].index],
+          supertest,
+          log,
+        });
+        await waitFor(
+          async () => {
+            const [{ completed }] = await finalizeSignalsMigration({
+              migrationIds: [migration.migration_id],
+              supertest,
+              log,
+            });
+            return completed === true;
+          },
+          `polling finalize_migration until complete`,
+          log
+        );
 
         const {
           body: {

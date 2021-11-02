@@ -73,9 +73,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, id);
-      await waitForSignalsToBePresent(supertest, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, id);
+      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForSignalsToBePresent(supertest, log, 4, [id]);
+      const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits
         .map((hit) => (hit._source as Ignore).testing_ignored)
         .sort();
@@ -88,9 +88,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, id);
-      await waitForSignalsToBePresent(supertest, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, id);
+      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForSignalsToBePresent(supertest, log, 4, [id]);
+      const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits.map((hit) => (hit._source as Ignore).testing_regex).sort();
 
       // Value should be "undefined for all records"
@@ -101,9 +101,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, id);
-      await waitForSignalsToBePresent(supertest, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, id);
+      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForSignalsToBePresent(supertest, log, 4, [id]);
+      const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits
         .map((hit) => (hit._source as Ignore).normal_constant)
         .sort();
@@ -117,9 +117,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, id);
-      await waitForSignalsToBePresent(supertest, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, id);
+      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForSignalsToBePresent(supertest, log, 4, [id]);
+      const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits.map((hit) => (hit._source as Ignore).small_field).sort();
 
       // We just test a constant value to ensure this did not blow up on us and did index data.

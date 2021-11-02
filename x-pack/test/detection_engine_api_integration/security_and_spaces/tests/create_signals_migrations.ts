@@ -111,7 +111,7 @@ export default ({ getService }: FtrProviderContext): void => {
       createResponses.forEach((response) => expect(response.migration_id).to.be.a('string'));
 
       const [{ migration_index: newIndex }] = createResponses;
-      await waitForIndexToPopulate(es, newIndex);
+      await waitForIndexToPopulate(es, log, newIndex);
       const migrationResults = await es.search<{ signal: Signal }>({ index: newIndex });
 
       expect(migrationResults.hits.hits).length(1);

@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, body.id);
+          await waitForRuleSuccessOrStatus(supertest, log, body.id);
 
           const { body: statusBody } = await supertest
             .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, body.id, 'partial failure');
+          await waitForRuleSuccessOrStatus(supertest, log, body.id, 'partial failure');
 
           const { body: statusBody } = await supertest
             .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, body.id, 'succeeded');
+          await waitForRuleSuccessOrStatus(supertest, log, body.id, 'succeeded');
 
           const { body: statusBody } = await supertest
             .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -317,8 +317,8 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
         const bodyId = body.id;
 
-        await waitForAlertToComplete(supertest, bodyId);
-        await waitForRuleSuccessOrStatus(supertest, bodyId, 'partial failure');
+        await waitForAlertToComplete(supertest, log, bodyId);
+        await waitForRuleSuccessOrStatus(supertest, log, bodyId, 'partial failure');
         await sleep(5000);
 
         const { body: statusBody } = await supertest
@@ -349,9 +349,9 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
         const bodyId = body.id;
 
-        await waitForRuleSuccessOrStatus(supertest, bodyId, 'partial failure');
+        await waitForRuleSuccessOrStatus(supertest, log, bodyId, 'partial failure');
         await sleep(5000);
-        await waitForSignalsToBePresent(supertest, 2, [bodyId]);
+        await waitForSignalsToBePresent(supertest, log, 2, [bodyId]);
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)

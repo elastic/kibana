@@ -61,9 +61,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should find all the double from the data set when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['double']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql(['1.0', '1.1', '1.2', '1.3']);
       });
@@ -80,9 +80,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql(['1.1', '1.2', '1.3']);
       });
@@ -107,9 +107,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql(['1.2', '1.3']);
       });
@@ -142,9 +142,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql(['1.3']);
       });
@@ -185,8 +185,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql([]);
       });
@@ -205,8 +205,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql([]);
       });
@@ -223,9 +223,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql(['1.0']);
       });
@@ -250,8 +250,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql([]);
       });
@@ -270,9 +270,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql(['1.1', '1.2', '1.3']);
       });
@@ -289,9 +289,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql(['1.2', '1.3']);
       });
@@ -308,9 +308,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql(['1.3']);
       });
@@ -327,8 +327,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql([]);
       });
@@ -347,8 +347,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql([]);
       });
@@ -365,9 +365,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql(['1.0', '1.3']);
       });
@@ -385,8 +385,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql([]);
       });
@@ -404,9 +404,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
         expect(hits).to.eql(['1.0', '1.1', '1.2', '1.3']);
       });
@@ -415,7 +415,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"is in list" operator', () => {
       describe('working against double values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 double', async () => {
-          await importFile(supertest, 'double', ['1.0'], 'list_items.txt');
+          await importFile(supertest, log, 'double', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['double']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -430,15 +430,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.1', '1.2', '1.3']);
         });
 
         it('will return 2 results if we have a list that includes 2 double', async () => {
-          await importFile(supertest, 'double', ['1.0', '1.2'], 'list_items.txt');
+          await importFile(supertest, log, 'double', ['1.0', '1.2'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['double']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -453,15 +453,21 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.1', '1.3']);
         });
 
         it('will return 0 results if we have a list that includes all double', async () => {
-          await importFile(supertest, 'double', ['1.0', '1.1', '1.2', '1.3'], 'list_items.txt');
+          await importFile(
+            supertest,
+            log,
+            'double',
+            ['1.0', '1.1', '1.2', '1.3'],
+            'list_items.txt'
+          );
           const rule = getRuleForSignalTesting(['double']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -476,8 +482,8 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql([]);
         });
@@ -485,7 +491,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('working against string values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 double', async () => {
-          await importFile(supertest, 'double', ['1.0'], 'list_items.txt');
+          await importFile(supertest, log, 'double', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['double_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -500,15 +506,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.1', '1.2', '1.3']);
         });
 
         it('will return 2 results if we have a list that includes 2 double', async () => {
-          await importFile(supertest, 'double', ['1.0', '1.2'], 'list_items.txt');
+          await importFile(supertest, log, 'double', ['1.0', '1.2'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['double_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -523,15 +529,21 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.1', '1.3']);
         });
 
         it('will return 0 results if we have a list that includes all double', async () => {
-          await importFile(supertest, 'double', ['1.0', '1.1', '1.2', '1.3'], 'list_items.txt');
+          await importFile(
+            supertest,
+            log,
+            'double',
+            ['1.0', '1.1', '1.2', '1.3'],
+            'list_items.txt'
+          );
           const rule = getRuleForSignalTesting(['double_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -546,14 +558,14 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql([]);
         });
 
         it('will return 1 result if we have a list which contains the double range of 1.0-1.2', async () => {
-          await importFile(supertest, 'double_range', ['1.0-1.2'], 'list_items.txt', [
+          await importFile(supertest, log, 'double_range', ['1.0-1.2'], 'list_items.txt', [
             '1.0',
             '1.2',
           ]);
@@ -571,9 +583,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.3']);
         });
@@ -583,7 +595,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"is not in list" operator', () => {
       describe('working against double values in the data set', () => {
         it('will return 1 result if we have a list that excludes 1 double', async () => {
-          await importFile(supertest, 'double', ['1.0'], 'list_items.txt');
+          await importFile(supertest, log, 'double', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['double']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -598,15 +610,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.0']);
         });
 
         it('will return 2 results if we have a list that excludes 2 double', async () => {
-          await importFile(supertest, 'double', ['1.0', '1.2'], 'list_items.txt');
+          await importFile(supertest, log, 'double', ['1.0', '1.2'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['double']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -621,15 +633,21 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.0', '1.2']);
         });
 
         it('will return 4 results if we have a list that excludes all double', async () => {
-          await importFile(supertest, 'double', ['1.0', '1.1', '1.2', '1.3'], 'list_items.txt');
+          await importFile(
+            supertest,
+            log,
+            'double',
+            ['1.0', '1.1', '1.2', '1.3'],
+            'list_items.txt'
+          );
           const rule = getRuleForSignalTesting(['double']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -644,9 +662,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 4, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 4, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.0', '1.1', '1.2', '1.3']);
         });
@@ -654,7 +672,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('working against string values in the data set', () => {
         it('will return 1 result if we have a list that excludes 1 double', async () => {
-          await importFile(supertest, 'double', ['1.0'], 'list_items.txt');
+          await importFile(supertest, log, 'double', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['double_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -669,15 +687,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.0']);
         });
 
         it('will return 2 results if we have a list that excludes 2 double', async () => {
-          await importFile(supertest, 'double', ['1.0', '1.2'], 'list_items.txt');
+          await importFile(supertest, log, 'double', ['1.0', '1.2'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['double_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -692,15 +710,21 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.0', '1.2']);
         });
 
         it('will return 4 results if we have a list that excludes all double', async () => {
-          await importFile(supertest, 'double', ['1.0', '1.1', '1.2', '1.3'], 'list_items.txt');
+          await importFile(
+            supertest,
+            log,
+            'double',
+            ['1.0', '1.1', '1.2', '1.3'],
+            'list_items.txt'
+          );
           const rule = getRuleForSignalTesting(['double_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -715,15 +739,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 4, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 4, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.0', '1.1', '1.2', '1.3']);
         });
 
         it('will return 3 results if we have a list which contains the double range of 1.0-1.2', async () => {
-          await importFile(supertest, 'double_range', ['1.0-1.2'], 'list_items.txt', [
+          await importFile(supertest, log, 'double_range', ['1.0-1.2'], 'list_items.txt', [
             '1.0',
             '1.2',
           ]);
@@ -741,9 +765,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.0', '1.1', '1.2']);
         });

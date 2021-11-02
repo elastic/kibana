@@ -52,9 +52,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits
           .map((signal) => (signal._source?.host as Runtime).name)
           .sort();
@@ -64,9 +64,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits
           .map((signal) => (signal._source?.host as Runtime).hostname)
           .sort();
@@ -98,9 +98,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should NOT copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime_conflicting_fields']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits
           .map((signal) => signal._source?.host as Array<{ name: string }>)
           .map((host) => {
@@ -155,9 +155,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should NOT copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime_conflicting_fields']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map(
           (signal) => (signal._source?.host as Runtime).hostname
         );

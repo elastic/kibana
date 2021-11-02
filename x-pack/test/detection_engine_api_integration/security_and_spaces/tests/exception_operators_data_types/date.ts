@@ -57,9 +57,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should find all the dates from the data set when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['date']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([
           '2020-10-01T05:08:53.000Z',
@@ -81,9 +81,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([
           '2020-10-02T05:08:53.000Z',
@@ -112,9 +112,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql(['2020-10-03T05:08:53.000Z', '2020-10-04T05:08:53.000Z']);
       });
@@ -147,9 +147,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql(['2020-10-04T05:08:53.000Z']);
       });
@@ -190,8 +190,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([]);
       });
@@ -210,8 +210,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([]);
       });
@@ -228,9 +228,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql(['2020-10-01T05:08:53.000Z']);
       });
@@ -255,8 +255,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([]);
       });
@@ -275,9 +275,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([
           '2020-10-02T05:08:53.000Z',
@@ -298,9 +298,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql(['2020-10-03T05:08:53.000Z', '2020-10-04T05:08:53.000Z']);
       });
@@ -321,9 +321,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql(['2020-10-04T05:08:53.000Z']);
       });
@@ -345,8 +345,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([]);
       });
@@ -365,8 +365,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([]);
       });
@@ -383,9 +383,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql(['2020-10-01T05:08:53.000Z', '2020-10-04T05:08:53.000Z']);
       });
@@ -403,8 +403,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([]);
       });
@@ -422,9 +422,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([
           '2020-10-01T05:08:53.000Z',
@@ -437,7 +437,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('"is in list" operator', () => {
       it('will return 3 results if we have a list that includes 1 date', async () => {
-        await importFile(supertest, 'date', ['2020-10-01T05:08:53.000Z'], 'list_items.txt');
+        await importFile(supertest, log, 'date', ['2020-10-01T05:08:53.000Z'], 'list_items.txt');
         const rule = getRuleForSignalTesting(['date']);
         const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
@@ -452,9 +452,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([
           '2020-10-02T05:08:53.000Z',
@@ -466,6 +466,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('will return 2 results if we have a list that includes 2 dates', async () => {
         await importFile(
           supertest,
+          log,
           'date',
           ['2020-10-01T05:08:53.000Z', '2020-10-03T05:08:53.000Z'],
           'list_items.txt'
@@ -484,9 +485,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql(['2020-10-02T05:08:53.000Z', '2020-10-04T05:08:53.000Z']);
       });
@@ -494,6 +495,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('will return 0 results if we have a list that includes all dates', async () => {
         await importFile(
           supertest,
+          log,
           'date',
           [
             '2020-10-01T05:08:53.000Z',
@@ -517,8 +519,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([]);
       });
@@ -526,7 +528,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('"is not in list" operator', () => {
       it('will return 1 result if we have a list that excludes 1 date', async () => {
-        await importFile(supertest, 'date', ['2020-10-01T05:08:53.000Z'], 'list_items.txt');
+        await importFile(supertest, log, 'date', ['2020-10-01T05:08:53.000Z'], 'list_items.txt');
         const rule = getRuleForSignalTesting(['date']);
         const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
@@ -541,9 +543,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql(['2020-10-01T05:08:53.000Z']);
       });
@@ -551,6 +553,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('will return 2 results if we have a list that excludes 2 dates', async () => {
         await importFile(
           supertest,
+          log,
           'date',
           ['2020-10-01T05:08:53.000Z', '2020-10-03T05:08:53.000Z'],
           'list_items.txt'
@@ -569,9 +572,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql(['2020-10-01T05:08:53.000Z', '2020-10-03T05:08:53.000Z']);
       });
@@ -579,6 +582,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('will return 4 results if we have a list that excludes all dates', async () => {
         await importFile(
           supertest,
+          log,
           'date',
           [
             '2020-10-01T05:08:53.000Z',
@@ -602,9 +606,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.date).sort();
         expect(hits).to.eql([
           '2020-10-01T05:08:53.000Z',

@@ -89,12 +89,16 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Although we try to be aggressive with waitFor in the lists code base, there is still not guarantees
         // that we will have the data just yet so we have to do a waitFor here for when it shows up
-        await waitFor(async () => {
-          const { status } = await supertest
-            .get(`${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`)
-            .send();
-          return status !== 404;
-        }, `${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`);
+        await waitFor(
+          async () => {
+            const { status } = await supertest
+              .get(`${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`)
+              .send();
+            return status !== 404;
+          },
+          `${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`,
+          log
+        );
         const { body } = await supertest
           .get(`${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`)
           .send()

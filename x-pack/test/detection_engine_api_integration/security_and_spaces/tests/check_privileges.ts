@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
             user: ROLES.detections_admin,
             pass: 'changeme',
           });
-          await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+          await waitForRuleSuccessOrStatus(supertest, log, id, 'partial failure');
           const { body } = await supertest
             .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
             .set('kbn-xsrf', 'true')
@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
             user: ROLES.detections_admin,
             pass: 'changeme',
           });
-          await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+          await waitForRuleSuccessOrStatus(supertest, log, id, 'partial failure');
           const { body } = await supertest
             .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
             .set('kbn-xsrf', 'true')

@@ -51,18 +51,18 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able to execute and get 10 signals', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
       });
 
       it('should be have set the signals in an open state initially', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         const everySignalOpen = signalsOpen.hits.hits.every(
           (hit) => hit._source?.[ALERT_WORKFLOW_STATUS] === 'open'
         );
@@ -72,9 +72,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able to get a count of 10 closed signals when closing 10', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
         // set all of the signals to the state of closed. There is no reason to use a waitUntil here
@@ -97,9 +97,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able close 10 signals immediately and they all should be closed', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
         // set all of the signals to the state of closed. There is no reason to use a waitUntil here
@@ -126,9 +126,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able mark 10 signals as acknowledged immediately and they all should be acknowledged', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
         // set all of the signals to the state of acknowledged. There is no reason to use a waitUntil here

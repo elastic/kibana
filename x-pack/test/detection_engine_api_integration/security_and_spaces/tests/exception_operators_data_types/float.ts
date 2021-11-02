@@ -59,9 +59,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should find all the float from the data set when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['float']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql(['1.0', '1.1', '1.2', '1.3']);
       });
@@ -78,9 +78,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql(['1.1', '1.2', '1.3']);
       });
@@ -105,9 +105,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql(['1.2', '1.3']);
       });
@@ -140,9 +140,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql(['1.3']);
       });
@@ -183,8 +183,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql([]);
       });
@@ -203,8 +203,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql([]);
       });
@@ -221,9 +221,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql(['1.0']);
       });
@@ -248,8 +248,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql([]);
       });
@@ -268,9 +268,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql(['1.1', '1.2', '1.3']);
       });
@@ -287,9 +287,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql(['1.2', '1.3']);
       });
@@ -306,9 +306,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql(['1.3']);
       });
@@ -325,8 +325,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql([]);
       });
@@ -345,8 +345,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql([]);
       });
@@ -363,9 +363,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql(['1.0', '1.3']);
       });
@@ -383,8 +383,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql([]);
       });
@@ -402,9 +402,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
         expect(hits).to.eql(['1.0', '1.1', '1.2', '1.3']);
       });
@@ -413,7 +413,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"is in list" operator', () => {
       describe('working against float values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 float', async () => {
-          await importFile(supertest, 'float', ['1.0'], 'list_items.txt');
+          await importFile(supertest, log, 'float', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -428,15 +428,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql(['1.1', '1.2', '1.3']);
         });
 
         it('will return 2 results if we have a list that includes 2 float', async () => {
-          await importFile(supertest, 'float', ['1.0', '1.2'], 'list_items.txt');
+          await importFile(supertest, log, 'float', ['1.0', '1.2'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -451,15 +451,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql(['1.1', '1.3']);
         });
 
         it('will return 0 results if we have a list that includes all float', async () => {
-          await importFile(supertest, 'float', ['1.0', '1.1', '1.2', '1.3'], 'list_items.txt');
+          await importFile(supertest, log, 'float', ['1.0', '1.1', '1.2', '1.3'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -474,8 +474,8 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql([]);
         });
@@ -483,7 +483,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('working against string values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 float', async () => {
-          await importFile(supertest, 'float', ['1.0'], 'list_items.txt');
+          await importFile(supertest, log, 'float', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -498,15 +498,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql(['1.1', '1.2', '1.3']);
         });
 
         it('will return 2 results if we have a list that includes 2 float', async () => {
-          await importFile(supertest, 'float', ['1.0', '1.2'], 'list_items.txt');
+          await importFile(supertest, log, 'float', ['1.0', '1.2'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -521,15 +521,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql(['1.1', '1.3']);
         });
 
         it('will return 0 results if we have a list that includes all float', async () => {
-          await importFile(supertest, 'float', ['1.0', '1.1', '1.2', '1.3'], 'list_items.txt');
+          await importFile(supertest, log, 'float', ['1.0', '1.1', '1.2', '1.3'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -544,14 +544,17 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql([]);
         });
 
         it('will return 1 result if we have a list which contains the float range of 1.0-1.2', async () => {
-          await importFile(supertest, 'float_range', ['1.0-1.2'], 'list_items.txt', ['1.0', '1.2']);
+          await importFile(supertest, log, 'float_range', ['1.0-1.2'], 'list_items.txt', [
+            '1.0',
+            '1.2',
+          ]);
           const rule = getRuleForSignalTesting(['float_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -566,9 +569,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql(['1.3']);
         });
@@ -578,7 +581,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"is not in list" operator', () => {
       describe('working against float values in the data set', () => {
         it('will return 1 result if we have a list that excludes 1 float', async () => {
-          await importFile(supertest, 'float', ['1.0'], 'list_items.txt');
+          await importFile(supertest, log, 'float', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -593,15 +596,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql(['1.0']);
         });
 
         it('will return 2 results if we have a list that excludes 2 float', async () => {
-          await importFile(supertest, 'float', ['1.0', '1.2'], 'list_items.txt');
+          await importFile(supertest, log, 'float', ['1.0', '1.2'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -616,15 +619,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql(['1.0', '1.2']);
         });
 
         it('will return 4 results if we have a list that excludes all float', async () => {
-          await importFile(supertest, 'float', ['1.0', '1.1', '1.2', '1.3'], 'list_items.txt');
+          await importFile(supertest, log, 'float', ['1.0', '1.1', '1.2', '1.3'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -639,9 +642,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 4, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 4, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql(['1.0', '1.1', '1.2', '1.3']);
         });
@@ -649,7 +652,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('working against string values in the data set', () => {
         it('will return 1 result if we have a list that excludes 1 float', async () => {
-          await importFile(supertest, 'float', ['1.0'], 'list_items.txt');
+          await importFile(supertest, log, 'float', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -664,15 +667,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql(['1.0']);
         });
 
         it('will return 2 results if we have a list that excludes 2 float', async () => {
-          await importFile(supertest, 'float', ['1.0', '1.2'], 'list_items.txt');
+          await importFile(supertest, log, 'float', ['1.0', '1.2'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -687,15 +690,15 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql(['1.0', '1.2']);
         });
 
         it('will return 4 results if we have a list that excludes all float', async () => {
-          await importFile(supertest, 'float', ['1.0', '1.1', '1.2', '1.3'], 'list_items.txt');
+          await importFile(supertest, log, 'float', ['1.0', '1.1', '1.2', '1.3'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['float_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -710,15 +713,18 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 4, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 4, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql(['1.0', '1.1', '1.2', '1.3']);
         });
 
         it('will return 3 results if we have a list which contains the float range of 1.0-1.2', async () => {
-          await importFile(supertest, 'float_range', ['1.0-1.2'], 'list_items.txt', ['1.0', '1.2']);
+          await importFile(supertest, log, 'float_range', ['1.0-1.2'], 'list_items.txt', [
+            '1.0',
+            '1.2',
+          ]);
           const rule = getRuleForSignalTesting(['float_as_string']);
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
@@ -733,9 +739,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.float).sort();
           expect(hits).to.eql(['1.0', '1.1', '1.2']);
         });

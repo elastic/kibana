@@ -108,8 +108,8 @@ export default ({ getService }: FtrProviderContext) => {
                 webhookUrl: 'http://localhost:1234',
               },
             }),
-          createRule(supertest, getSimpleRule('rule-1')),
-          createRule(supertest, getSimpleRule('rule-2')),
+          createRule(supertest, log, getSimpleRule('rule-1')),
+          createRule(supertest, log, getSimpleRule('rule-2')),
         ]);
         await Promise.all([
           createLegacyRuleAction(supertest, rule1.id, connector.body.id),

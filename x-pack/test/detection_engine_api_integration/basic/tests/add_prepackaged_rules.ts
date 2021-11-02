@@ -40,16 +40,20 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should create the prepackaged rules and return a count greater than zero, rules_updated to be zero, and contain the correct keys', async () => {
         let responseBody: unknown;
-        await waitFor(async () => {
-          const { body, status } = await supertest
-            .put(DETECTION_ENGINE_PREPACKAGED_URL)
-            .set('kbn-xsrf', 'true')
-            .send();
-          if (status === 200) {
-            responseBody = body;
-          }
-          return status === 200;
-        }, DETECTION_ENGINE_PREPACKAGED_URL);
+        await waitFor(
+          async () => {
+            const { body, status } = await supertest
+              .put(DETECTION_ENGINE_PREPACKAGED_URL)
+              .set('kbn-xsrf', 'true')
+              .send();
+            if (status === 200) {
+              responseBody = body;
+            }
+            return status === 200;
+          },
+          DETECTION_ENGINE_PREPACKAGED_URL,
+          log
+        );
 
         const prepackagedRules = responseBody as PrePackagedRulesAndTimelinesSchema;
         expect(prepackagedRules.rules_installed).to.be.greaterThan(0);
@@ -67,25 +71,33 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // NOTE: I call the GET call until eventually it becomes consistent and that the number of rules to install are zero.
         // This is to reduce flakiness where it can for a short period of time try to install the same rule twice.
-        await waitFor(async () => {
-          const { body } = await supertest
-            .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
-            .set('kbn-xsrf', 'true')
-            .expect(200);
-          return body.rules_not_installed === 0;
-        }, `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`);
+        await waitFor(
+          async () => {
+            const { body } = await supertest
+              .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+              .set('kbn-xsrf', 'true')
+              .expect(200);
+            return body.rules_not_installed === 0;
+          },
+          `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
+          log
+        );
 
         let responseBody: unknown;
-        await waitFor(async () => {
-          const { body, status } = await supertest
-            .put(DETECTION_ENGINE_PREPACKAGED_URL)
-            .set('kbn-xsrf', 'true')
-            .send();
-          if (status === 200) {
-            responseBody = body;
-          }
-          return status === 200;
-        }, DETECTION_ENGINE_PREPACKAGED_URL);
+        await waitFor(
+          async () => {
+            const { body, status } = await supertest
+              .put(DETECTION_ENGINE_PREPACKAGED_URL)
+              .set('kbn-xsrf', 'true')
+              .send();
+            if (status === 200) {
+              responseBody = body;
+            }
+            return status === 200;
+          },
+          DETECTION_ENGINE_PREPACKAGED_URL,
+          log
+        );
 
         const prepackagedRules = responseBody as PrePackagedRulesAndTimelinesSchema;
         expect(prepackagedRules.rules_installed).to.eql(0);

@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
       const createdRule = await createRule(supertest, log, testRule);
-      const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+      const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(1);
       const signal = signalsOpen.hits.hits[0];
       if (!signal._source) {
@@ -211,7 +211,7 @@ export default ({ getService }: FtrProviderContext) => {
         anomaly_threshold: 20,
       };
       const createdRule = await createRule(supertest, log, rule);
-      const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+      const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(7);
     });
 
@@ -230,7 +230,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
     });
@@ -247,7 +247,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('generates no signals when a value list exception is added for an ML rule', async () => {
         const valueListId = 'value-list-id';
-        await importFile(supertest, 'keyword', ['mothra'], valueListId);
+        await importFile(supertest, log, 'keyword', ['mothra'], valueListId);
         const createdRule = await createRuleWithExceptionEntries(supertest, log, testRule, [
           [
             {
@@ -261,7 +261,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
     });

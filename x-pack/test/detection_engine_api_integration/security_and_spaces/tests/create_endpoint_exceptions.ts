@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ToolingLog } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
 
 import type SuperTest from 'supertest';
@@ -42,9 +43,10 @@ interface Host {
  */
 export const getHostHits = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   id: string
 ): Promise<Host[]> => {
-  const signalsOpen = await getSignalsById(supertest, id);
+  const signalsOpen = await getSignalsById(supertest, log, id);
   return signalsOpen.hits.hits
     .map<Host>((hit) => hit._source?.host as Host)
     .sort((a, b) => {
@@ -102,9 +104,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should find all the "hosts" from a "agent" index when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['agent']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const hits = await getHostHits(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
           {
             os: { type: 'linux' },
@@ -124,9 +126,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should find all the "hosts" from a "endpoint_without_host_type" index when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['endpoint_without_host_type']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const hits = await getHostHits(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
           {
             os: { name: 'Linux' },
@@ -167,9 +169,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const hits = await getHostHits(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
             {
               os: { name: 'Linux' },
@@ -204,9 +206,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const hits = await getHostHits(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
             {
               os: { name: 'Linux' },
@@ -252,9 +254,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const hits = await getHostHits(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
             {
               os: { name: 'Linux' },
@@ -297,9 +299,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const hits = await getHostHits(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
             {
               os: { name: 'Linux' },
@@ -333,9 +335,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const hits = await getHostHits(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
             {
               os: { type: 'linux' },
@@ -370,9 +372,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const hits = await getHostHits(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
             {
               os: { type: 'linux' },
@@ -418,9 +420,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const hits = await getHostHits(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
             {
               os: { type: 'linux' },
@@ -463,9 +465,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const hits = await getHostHits(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
             {
               os: { type: 'linux' },
@@ -499,9 +501,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 6, [id]);
-          const hits = await getHostHits(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 6, [id]);
+          const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
             {
               os: { type: 'linux' },
@@ -545,9 +547,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 6, [id]);
-          const hits = await getHostHits(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 6, [id]);
+          const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
             {
               os: { type: 'linux' },
@@ -602,9 +604,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 4, [id]);
-          const hits = await getHostHits(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 4, [id]);
+          const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
             {
               os: { type: 'linux' },
@@ -653,9 +655,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 4, [id]);
-          const hits = await getHostHits(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 4, [id]);
+          const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
             {
               os: { type: 'linux' },
@@ -705,9 +707,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]
         );
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const hits = await getHostHits(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
           {
             os: { type: 'macos' },
@@ -745,9 +747,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]
         );
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const hits = await getHostHits(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
           {
             os: { type: 'macos' },
@@ -778,9 +780,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]
         );
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const hits = await getHostHits(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
           {
             os: { type: 'linux' },
@@ -815,9 +817,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]
         );
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const hits = await getHostHits(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
           {
             os: { type: 'linux' },
@@ -849,9 +851,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]
         );
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const hits = await getHostHits(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
           {
             os: { type: 'linux' },
@@ -883,9 +885,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]
         );
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const hits = await getHostHits(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
           {
             os: { type: 'linux' },
