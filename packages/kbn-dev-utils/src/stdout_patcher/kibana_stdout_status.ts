@@ -6,20 +6,11 @@
  * Side Public License, v 1.
  */
 
-type StdoutWriter = typeof process.stdout.write;
-type Stdout = typeof process.stdout;
 import chalk from 'chalk';
-import stripAnsi from 'strip-ansi';
-import { ansiEscapes } from './lib/ansi';
+import { StatusRenderer } from './stdout_patcher';
 
-const patched: Stdout[] = [];
-
-export class StdoutPatcher {
-  stdout: Stdout;
-  originalWrite: StdoutWriter;
-  currentState: string[] = [];
-  currentParsed: Map<string, string> = new Map();
-
+export class KibanaStdoutStatus implements StatusRenderer {
+  state = new Map<string, string>();
   re = {
     optimizer: /\[@kbn\/optimizer\]\s+\[(\d+)\/(\d+)\]/,
     optimizerSuccess: /\[success\]\[@kbn\/optimizer\].*?/,
@@ -27,45 +18,9 @@ export class StdoutPatcher {
     kibanaStatus: /.*?status.*?\sKibana\sis\snow\s(\w+)/,
   };
 
-  constructor(stdout: Stdout) {
-    this.stdout = stdout;
-    this.originalWrite = this.stdout.write;
-    if (!patched.includes(stdout)) {
-      patched.push(stdout);
-      this.stdout.write = this.customStdoutWrite.bind(this) as StdoutWriter;
-    }
-  }
-
-  private customStdoutWrite(
-    buffer: Uint8Array | string,
-    ...args: [BufferEncoding, (err?: Error) => void]
-  ): boolean {
-    this.clearCurrentState();
-
-    // print the actual line to output
-    this.originalWrite.apply(this.stdout, [buffer, ...args]);
-    this.renderNewState(buffer);
-
-    return true;
-  }
-
-  private clearCurrentState() {
-    this.originalWrite.call(this.stdout, ansiEscapes.cursorLeft);
-    this.originalWrite.call(this.stdout, ansiEscapes.eraseLines(this.currentState.length));
-  }
-
-  private renderNewState(buffer: Uint8Array | string) {
-    if (typeof buffer === 'string') {
-      this.currentParsed = this.parseLine(this.currentParsed, buffer);
-      this.currentState = [
-        this.renderStatus(this.currentParsed) + '\n',
-        this.renderProgress(this.currentParsed),
-      ];
-
-      for (let i = 0; i < this.currentState.length; i++) {
-        this.originalWrite.call(this.stdout, this.currentState[i]);
-      }
-    }
+  render(line: string, _rawLine: string): string[] {
+    this.state = this.parseLine(this.state, line);
+    return [this.renderStatus(this.state), this.renderProgress(this.state)];
   }
 
   private renderStatus(parsed: Map<string, string>) {
@@ -90,9 +45,7 @@ export class StdoutPatcher {
     }
   }
 
-  private parseLine(currentParsed: Map<string, string>, buffer: string): Map<string, string> {
-    const line = stripAnsi(buffer);
-
+  private parseLine(currentParsed: Map<string, string>, line: string): Map<string, string> {
     let match;
 
     // optimizer finished
@@ -141,12 +94,5 @@ export class StdoutPatcher {
     const empty = ' '.repeat((totalPercentage - currentPercentage) * widthMultiplier);
 
     return `${currentPercentage}% [${dots}${empty}] %`;
-  }
-
-  unpatch() {
-    if (this.stdout.write !== this.originalWrite) {
-      this.stdout.write = this.originalWrite;
-      patched.splice(patched.indexOf(this.stdout), 1);
-    }
   }
 }
