@@ -14,7 +14,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     before(async () => {
       const reportingAPI = getService('reportingAPI');
-      await reportingAPI.checkTaskManagerHealth();
+      await reportingAPI.logTaskManagerHealth();
       await reportingAPI.createDataAnalystRole();
       await reportingAPI.createTestReportingUserRole();
       await reportingAPI.createDataAnalyst();

@@ -12,7 +12,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('Reporting API Integration Tests with Security disabled', function () {
     before(async () => {
       const reportingAPI = getService('reportingAPI');
-      await reportingAPI.checkTaskManagerHealth();
+      await reportingAPI.logTaskManagerHealth();
     });
     this.tags('ciGroup13');
     loadTestFile(require.resolve('./job_apis_csv'));

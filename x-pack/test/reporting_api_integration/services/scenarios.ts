@@ -36,7 +36,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const REPORTING_USER_USERNAME = 'reporting_user';
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
 
-  const checkTaskManagerHealth = async () => {
+  const logTaskManagerHealth = async () => {
     // Check task manager health for analyzing test failures. See https://github.com/elastic/kibana/issues/114946
     const tmHealth = await supertest.get(`/api/task_manager/_health`);
     const driftValues = tmHealth.body?.stats?.runtime?.value;
@@ -215,7 +215,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   return {
-    checkTaskManagerHealth,
+    logTaskManagerHealth,
     initEcommerce,
     teardownEcommerce,
     DATA_ANALYST_USERNAME,
