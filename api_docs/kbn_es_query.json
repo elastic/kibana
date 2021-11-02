@@ -2812,7 +2812,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          ") => { meta: { disabled: boolean; alias?: string | null | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
+          ") => { meta: { disabled: boolean; alias?: string | null | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2869,7 +2869,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          ") => { meta: { negate: boolean; alias?: string | null | undefined; disabled?: boolean | undefined; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
+          ") => { meta: { negate: boolean; alias?: string | null | undefined; disabled?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -3240,9 +3240,6 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
             "path": "packages/kbn-es-query/src/es_query/types.ts",
             "deprecated": false
           }
@@ -3920,7 +3917,7 @@
         "label": "FilterMeta",
         "description": [],
         "signature": [
-          "{ alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }"
+          "{ alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/types.ts",
         "deprecated": false,
@@ -4032,11 +4029,11 @@
           },
           " & { meta: ",
           "PhraseFilterMeta",
-          "; query: { match_phrase?: Record<string, string | ",
+          "; query: { match_phrase?: Partial<Record<string, string | ",
           "QueryDslMatchPhraseQuery",
-          "> | undefined; match?: Record<string, string | number | boolean | ",
+          ">> | undefined; match?: Partial<Record<string, string | number | boolean | ",
           "QueryDslMatchQuery",
-          "> | undefined; }; }"
+          ">> | undefined; }; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/phrase_filter.ts",
         "deprecated": false,
