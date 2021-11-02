@@ -50,6 +50,7 @@ export const HostIsolationExceptionDeleteModal = memo(
               }
             )
           );
+          onCancel(true);
         },
         onSuccess: () => {
           toasts.addSuccess(
