@@ -127,22 +127,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Expand',
       description: 'ARIA label for a button that enters fullscreen view',
     }),
-    'euiCodeEditor.startEditing': i18n.translate('core.euiCodeEditor.startEditing', {
-      defaultMessage: 'Press Enter to start editing.',
-      description: 'Screen reader text to prompt editing',
-    }),
-    'euiCodeEditor.startInteracting': i18n.translate('core.euiCodeEditor.startInteracting', {
-      defaultMessage: 'Press Enter to start interacting with the code.',
-      description: 'Screen reader text to prompt interaction',
-    }),
-    'euiCodeEditor.stopEditing': i18n.translate('core.euiCodeEditor.stopEditing', {
-      defaultMessage: "When you're done, press Escape to stop editing.",
-      description: 'Screen reader text to describe ending editing',
-    }),
-    'euiCodeEditor.stopInteracting': i18n.translate('core.euiCodeEditor.stopInteracting', {
-      defaultMessage: "When you're done, press Escape to stop interacting with the code.",
-      description: 'Screen reader text to describe ending interactions',
-    }),
     'euiCollapsedItemActions.allActions': i18n.translate(
       'core.euiCollapsedItemActions.allActions',
       {
