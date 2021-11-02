@@ -17,7 +17,7 @@ import {
 import {
   getTotalCountAggregations,
   getTotalCountInUse,
-  getTotalExecutionsCount,
+  getExecutionsPerDayCount,
 } from './alerts_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
@@ -93,7 +93,7 @@ export function telemetryTaskRunner(
         return Promise.all([
           getTotalCountAggregations(esClient, kibanaIndex),
           getTotalCountInUse(esClient, kibanaIndex),
-          getTotalExecutionsCount(esClient, eventLogIndex),
+          getExecutionsPerDayCount(esClient, eventLogIndex),
         ])
           .then(([totalCountAggregations, totalInUse, totalExecutions]) => {
             return {
@@ -104,14 +104,15 @@ export function telemetryTaskRunner(
                 count_active_total: totalInUse.countTotal,
                 count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
                 count_rules_namespaces: totalInUse.countNamespaces,
-                count_rules_executions: totalExecutions.countTotal,
-                count_rules_executions_by_type: totalExecutions.countByType,
-                count_rules_executions_failured: totalExecutions.countTotalFailures,
-                count_rules_executions_failured_by_reason: totalExecutions.countFailuresByReason,
-                count_rules_executions_failured_by_reason_by_type:
+                count_rules_executions_per_day: totalExecutions.countTotal,
+                count_rules_executions_by_type_per_day: totalExecutions.countByType,
+                count_rules_executions_failured_per_day: totalExecutions.countTotalFailures,
+                count_rules_executions_failured_by_reason_per_day:
+                  totalExecutions.countFailuresByReason,
+                count_rules_executions_failured_by_reason_by_type_per_day:
                   totalExecutions.countFailuresByReasonByType,
-                avg_execution_time: totalExecutions.avgExecutionTime,
-                avg_execution_time_by_type: totalExecutions.avgExecutionTimeByType,
+                avg_execution_time_per_day: totalExecutions.avgExecutionTime,
+                avg_execution_time_by_type_per_day: totalExecutions.avgExecutionTimeByType,
               },
               runAt: getNextMidnight(),
             };

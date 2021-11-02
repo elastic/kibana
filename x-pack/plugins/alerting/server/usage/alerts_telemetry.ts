@@ -319,7 +319,7 @@ function replaceFirstAndLastDotSymbols(strToReplace: string) {
   return hasLastSymbolDot ? `${appliedString.slice(0, -1)}__` : appliedString;
 }
 
-export async function getTotalExecutionsCount(
+export async function getExecutionsPerDayCount(
   esClient: ElasticsearchClient,
   eventLogIndex: string
 ) {
@@ -337,6 +337,13 @@ export async function getTotalExecutionsCount(
                 },
                 {
                   term: { 'event.provider': 'alerting' },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-1d',
+                    },
+                  },
                 },
               ],
             },

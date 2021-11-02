@@ -10,7 +10,7 @@ import { elasticsearchClientMock } from '../../../../../src/core/server/elastics
 import {
   getTotalCountAggregations,
   getTotalCountInUse,
-  getTotalExecutionsCount,
+  getExecutionsPerDayCount,
 } from './alerts_telemetry';
 
 describe('alerts telemetry', () => {
@@ -158,7 +158,7 @@ Object {
       })
     );
 
-    const telemetry = await getTotalExecutionsCount(mockEsClient, 'test');
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test');
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
