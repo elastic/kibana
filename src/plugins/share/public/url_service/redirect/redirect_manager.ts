@@ -66,7 +66,7 @@ export class RedirectManager {
     });
 
     locator
-      .navigate(migratedParams)
+      .navigate(migratedParams, { replace: true })
       .then()
       .catch((error) => {
         // eslint-disable-next-line no-console
