@@ -21,6 +21,7 @@ export const DEFAULT_PERMISSIONS = {
         'traces-*',
         'synthetics-*',
         '.logs-endpoint.diagnostic.collection-*',
+        '.logs-endpoint.action.responses-*',
       ],
       privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
     },
@@ -63,7 +64,7 @@ export async function storedPackagePoliciesToAgentPermissions(
           // - Endpoint doesn't store the `data_stream` metadata in
           // `packagePolicy.inputs`, so we will use _all_ data_streams from the
           // package.
-          dataStreamsForPermissions = pkg.data_streams;
+          dataStreamsForPermissions = removeArray;
           break;
 
         case 'apm':
