@@ -49,7 +49,11 @@ export function modelsProvider(
         modelIds.map((id: string) => [id, null])
       );
 
-      const { body } = await client.asCurrentUser.ingest.getPipeline();
+      const { body, statusCode } = await client.asCurrentUser.ingest.getPipeline();
+
+      if (statusCode !== 200) {
+        return modelIdsMap;
+      }
 
       for (const [pipelineName, pipelineDefinition] of Object.entries(body)) {
         const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
