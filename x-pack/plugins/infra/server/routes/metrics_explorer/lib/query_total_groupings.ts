@@ -6,7 +6,6 @@
  */
 
 import { isArray } from 'lodash';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { MetricsAPIRequest } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
 
@@ -27,7 +26,7 @@ export const queryTotalGroupings = async (
   let filters: Array<Record<string, any>> = [
     {
       range: {
-        [TIMESTAMP_FIELD]: {
+        [options.timerange.field]: {
           gte: options.timerange.from,
           lte: options.timerange.to,
           format: 'epoch_millis',

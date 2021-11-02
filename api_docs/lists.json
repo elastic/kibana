@@ -1013,6 +1013,46 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "lists",
+            "id": "def-server.ExceptionListClient.exportExceptionListAndItems",
+            "type": "Function",
+            "tags": [],
+            "label": "exportExceptionListAndItems",
+            "description": [],
+            "signature": [
+              "({ listId, id, namespaceType, }: ",
+              "ExportExceptionListAndItemsOptions",
+              ") => Promise<",
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
+                "section": "def-server.ExportExceptionListAndItemsReturn",
+                "text": "ExportExceptionListAndItemsReturn"
+              },
+              " | null>"
+            ],
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lists",
+                "id": "def-server.ExceptionListClient.exportExceptionListAndItems.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    listId,\n    id,\n    namespaceType,\n  }",
+                "description": [],
+                "signature": [
+                  "ExportExceptionListAndItemsOptions"
+                ],
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2083,6 +2123,42 @@
       },
       {
         "parentPluginId": "lists",
+        "id": "def-server.ExportExceptionListAndItemsReturn",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExportExceptionListAndItemsReturn",
+        "description": [],
+        "path": "x-pack/plugins/lists/server/services/exception_lists/export_exception_list_and_items.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lists",
+            "id": "def-server.ExportExceptionListAndItemsReturn.exportData",
+            "type": "string",
+            "tags": [],
+            "label": "exportData",
+            "description": [],
+            "path": "x-pack/plugins/lists/server/services/exception_lists/export_exception_list_and_items.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lists",
+            "id": "def-server.ExportExceptionListAndItemsReturn.exportDetails",
+            "type": "Object",
+            "tags": [],
+            "label": "exportDetails",
+            "description": [],
+            "signature": [
+              "{ exported_exception_list_count: number; exported_exception_list_item_count: number; missing_exception_list_item_count: number; missing_exception_list_items: string[]; missing_exception_lists: string[]; missing_exception_lists_count: number; }"
+            ],
+            "path": "x-pack/plugins/lists/server/services/exception_lists/export_exception_list_and_items.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lists",
         "id": "def-server.ListsApiRequestHandlerContext",
         "type": "Interface",
         "tags": [],
@@ -2738,15 +2814,13 @@
               "signature": [
                 "Pick<",
                 "KibanaClient",
-                ", \"monitoring\" | \"security\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+                ", \"monitoring\" | \"security\" | \"create\" | \"name\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
                 "TransportRequestParams",
                 ", options?: ",
                 "TransportRequestOptions",
-                " | undefined): ",
-                "TransportRequestPromise",
-                "<",
-                "ApiResponse",
-                "<Record<string, any>, unknown>>; }; }"
+                " | undefined): Promise<",
+                "TransportResult",
+                "<TResponse, unknown>>; }; }"
               ],
               "path": "x-pack/plugins/lists/server/types.ts",
               "deprecated": false

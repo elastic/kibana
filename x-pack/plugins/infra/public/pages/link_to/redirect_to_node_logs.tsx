@@ -34,11 +34,12 @@ export const RedirectToNodeLogs = ({
   location,
 }: RedirectToNodeLogsType) => {
   const { services } = useKibanaContextForPlugin();
-  const { isLoading, loadSource } = useLogSource({
+  const { isLoading, loadSource, sourceConfiguration } = useLogSource({
     fetch: services.http.fetch,
     sourceId,
     indexPatternsService: services.data.indexPatterns,
   });
+  const fields = sourceConfiguration?.configuration.fields;
 
   useMount(() => {
     loadSource();
@@ -56,9 +57,11 @@ export const RedirectToNodeLogs = ({
         })}
       />
     );
+  } else if (fields == null) {
+    return null;
   }
 
-  const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
+  const nodeFilter = `${findInventoryFields(nodeType, fields).id}: ${nodeId}`;
   const userFilter = getFilterFromLocation(location);
   const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
 

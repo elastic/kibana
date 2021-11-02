@@ -134,7 +134,7 @@
             "label": "layerType",
             "description": [],
             "signature": [
-              "\"data\" | \"threshold\""
+              "\"data\" | \"referenceLine\""
             ],
             "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
             "deprecated": false
@@ -874,7 +874,7 @@
             "label": "layerType",
             "description": [],
             "signature": [
-              "\"data\" | \"threshold\""
+              "\"data\" | \"referenceLine\""
             ],
             "path": "x-pack/plugins/lens/common/expressions/metric_chart/types.ts",
             "deprecated": false
@@ -1179,7 +1179,7 @@
             "label": "legendDisplay",
             "description": [],
             "signature": [
-              "\"default\" | \"hide\" | \"show\""
+              "\"default\" | \"show\" | \"hide\""
             ],
             "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
             "deprecated": false
@@ -1435,7 +1435,7 @@
             "label": "layerType",
             "description": [],
             "signature": [
-              "\"data\" | \"threshold\""
+              "\"data\" | \"referenceLine\""
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config.ts",
             "deprecated": false
@@ -2451,7 +2451,7 @@
         "signature": [
           "\"hide\" | \"inside\" | \"outside\""
         ],
-        "path": "x-pack/plugins/lens/common/expressions/xy_chart/xy_args.ts",
+        "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4310,7 +4310,7 @@
         "label": "LayerType",
         "description": [],
         "signature": [
-          "\"data\" | \"threshold\""
+          "\"data\" | \"referenceLine\""
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -4401,6 +4401,20 @@
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-common.ValueLabelConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ValueLabelConfig",
+        "description": [],
+        "signature": [
+          "\"hide\" | \"inside\" | \"outside\""
+        ],
+        "path": "x-pack/plugins/lens/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -4429,13 +4443,13 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-common.layerTypes.THRESHOLD",
+            "id": "def-common.layerTypes.REFERENCELINE",
             "type": "string",
             "tags": [],
-            "label": "THRESHOLD",
+            "label": "REFERENCELINE",
             "description": [],
             "signature": [
-              "\"threshold\""
+              "\"referenceLine\""
             ],
             "path": "x-pack/plugins/lens/common/constants.ts",
             "deprecated": false
