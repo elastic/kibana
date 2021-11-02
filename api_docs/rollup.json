@@ -52,6 +52,20 @@
       },
       {
         "parentPluginId": "rollup",
+        "id": "def-common.MAJOR_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "MAJOR_VERSION",
+        "description": [],
+        "signature": [
+          "\"8.0.0\""
+        ],
+        "path": "x-pack/plugins/rollup/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "rollup",
         "id": "def-common.UIM_APP_LOAD",
         "type": "string",
         "tags": [],
