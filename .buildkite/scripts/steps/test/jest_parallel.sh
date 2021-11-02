@@ -14,7 +14,7 @@ exitCode=0
 find src x-pack packages -name jest.config.js -not -path "*/__fixtures__/*" | sort | while read config; do
   if [ "$(($i % $JOB_COUNT))" -eq $JOB ]; then
     echo "--- $ node scripts/jest --config $config"
-    node --max-old-space-size=7168 ./node_modules/.bin/jest --config=$config --runInBand --coverage=false
+    node --max-old-space-size=5632 ./node_modules/.bin/jest --config=$config --runInBand --coverage=false
 
     if [ $? -ne 0 ]; then
       exitCode=10
