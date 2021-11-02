@@ -230,7 +230,7 @@ export abstract class Container<
 
   /**
    * Return state that comes from the container and is passed down to the child. For instance, time range and
-   * filters are common inherited input state. Note that any state stored in `this.input.panels[embeddableId].explicitInput`
+   * filters are common inherited input state. Note that state stored in `this.input.panels[embeddableId].explicitInput`
    * will override inherited input.
    */
   protected abstract getInheritedInput(id: string): TChildInput;
@@ -309,8 +309,7 @@ export abstract class Container<
         throw new EmbeddableFactoryNotFoundError(panel.type);
       }
 
-      // TODO: lets get rid of this distinction with factories, I don't think it will be needed
-      // anymore after this change.
+      // TODO: lets get rid of this distinction with factories, I don't think it will be needed after this change.
       embeddable = isSavedObjectEmbeddableInput(inputForChild)
         ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);
