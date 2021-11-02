@@ -10,7 +10,6 @@ import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framewor
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { findInventoryFields } from '../../../../common/inventory_models';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export const getPodNodeName = async (
   framework: KibanaFramework,
@@ -20,7 +19,8 @@ export const getPodNodeName = async (
   nodeType: 'host' | 'pod' | 'container',
   timeRange: { from: number; to: number }
 ): Promise<string | undefined> => {
-  const fields = findInventoryFields(nodeType);
+  const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
+  const timestampField = sourceConfiguration.fields.timestamp;
   const params = {
     allow_no_indices: true,
     ignore_unavailable: true,
@@ -29,7 +29,7 @@ export const getPodNodeName = async (
     body: {
       size: 1,
       _source: ['kubernetes.node.name'],
-      sort: [{ [TIMESTAMP_FIELD]: 'desc' }],
+      sort: [{ [timestampField]: 'desc' }],
       query: {
         bool: {
           filter: [
@@ -37,7 +37,7 @@ export const getPodNodeName = async (
             { exists: { field: `kubernetes.node.name` } },
             {
               range: {
-                [TIMESTAMP_FIELD]: {
+                [timestampField]: {
                   gte: timeRange.from,
                   lte: timeRange.to,
                   format: 'epoch_millis',

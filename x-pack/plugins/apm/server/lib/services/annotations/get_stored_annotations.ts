@@ -55,12 +55,12 @@ export function getStoredAnnotations({
 
     try {
       const response: ESSearchResponse<ESAnnotation, { body: typeof body }> =
-        await (unwrapEsResponse(
+        (await unwrapEsResponse(
           client.search({
             index: annotationsClient.index,
             body,
           })
-        ) as any);
+        )) as any;
 
       return response.hits.hits.map((hit) => {
         return {

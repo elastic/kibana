@@ -8,12 +8,7 @@
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 
-import {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectsClientContract,
-  SavedObjectsFindResult,
-} from 'kibana/server';
+import { SavedObject, SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -207,10 +202,8 @@ export const isAlertType = (
     : partialAlert.alertTypeId === SIGNALS_ID;
 };
 
-export const isRuleStatusSavedObjectType = (
-  obj: unknown
-): obj is SavedObject<IRuleSavedAttributesSavedObjectAttributes> => {
-  return get('attributes', obj) != null;
+export const isRuleStatusSavedObjectAttributes = (obj: unknown): obj is IRuleStatusSOAttributes => {
+  return get('status', obj) != null;
 };
 
 export interface CreateRulesOptions {
@@ -274,6 +267,8 @@ export interface UpdateRulesOptions {
   ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
   defaultOutputIndex: string;
+  existingRule: SanitizedAlert<RuleParams> | null | undefined;
+  migratedRule: SanitizedAlert<RuleParams> | null | undefined;
   ruleUpdate: UpdateRulesSchema;
 }
 
@@ -340,10 +335,9 @@ export interface ReadRuleOptions {
 }
 
 export interface DeleteRuleOptions {
+  ruleId: Id;
   rulesClient: RulesClient;
   ruleStatusClient: IRuleExecutionLogClient;
-  ruleStatuses: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>;
-  id: Id;
 }
 
 export interface FindRuleOptions {

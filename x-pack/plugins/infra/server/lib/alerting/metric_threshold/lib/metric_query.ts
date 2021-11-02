@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 import { networkTraffic } from '../../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricExpressionParams, Aggregators } from '../types';
 import { createPercentileAggregation } from './create_percentile_aggregation';
@@ -22,6 +21,7 @@ const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, 
 
 export const getElasticsearchMetricQuery = (
   { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
+  timefield: string,
   timeframe: { start: number; end: number },
   groupBy?: string | string[],
   filterQuery?: string
@@ -56,9 +56,9 @@ export const getElasticsearchMetricQuery = (
       ? {
           aggregatedIntervals: {
             date_histogram: {
-              field: TIMESTAMP_FIELD,
+              field: timefield,
               fixed_interval: interval,
-              offset: calculateDateHistogramOffset({ from, to, interval }),
+              offset: calculateDateHistogramOffset({ from, to, interval, field: timefield }),
               extended_bounds: {
                 min: from,
                 max: to,
