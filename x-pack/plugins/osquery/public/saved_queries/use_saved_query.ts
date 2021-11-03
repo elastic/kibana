@@ -26,6 +26,7 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
 
   return useQuery(
     [SAVED_QUERY_ID, { savedQueryId }],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     () => http.get<any>(`/internal/osquery/saved_query/${savedQueryId}`),
     {
       keepPreviousData: true,
