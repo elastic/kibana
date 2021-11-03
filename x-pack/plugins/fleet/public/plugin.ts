@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type {
   AppMountParameters,
   CoreSetup,
@@ -22,6 +23,8 @@ import type {
 } from 'src/plugins/custom_integrations/public';
 
 import type { SharePluginStart } from 'src/plugins/share/public';
+
+import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
 
@@ -49,7 +52,7 @@ import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 
-export { FleetConfigType } from '../common/types';
+export type { FleetConfigType } from '../common/types';
 
 import { setCustomIntegrations } from './services/custom_integrations';
 
@@ -73,6 +76,7 @@ export interface FleetSetupDeps {
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
   customIntegrations: CustomIntegrationsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface FleetStartDeps {
@@ -137,7 +141,17 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           cloud: deps.cloud,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
-        const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
+
+        const Tracker =
+          deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+        const unmount = renderApp(
+          startServices,
+          params,
+          config,
+          kibanaVersion,
+          extensions,
+          Tracker
+        );
 
         return () => {
           unmount();

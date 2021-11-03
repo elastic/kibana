@@ -62,16 +62,16 @@ export function getActions(
     });
   }
 
-  // Allow to edit index pattern field
+  // Allow to edit data view field
   if (services.indexPatternFieldEditor?.userPermissions.editIndexPattern()) {
     actions.push({
-      name: i18n.translate('xpack.dataVisualizer.index.dataGrid.editIndexPatternFieldTitle', {
-        defaultMessage: 'Edit index pattern field',
+      name: i18n.translate('xpack.dataVisualizer.index.dataGrid.editDataViewFieldTitle', {
+        defaultMessage: 'Edit data view field',
       }),
       description: i18n.translate(
-        'xpack.dataVisualizer.index.dataGrid.editIndexPatternFieldDescription',
+        'xpack.dataVisualizer.index.dataGrid.editDataViewFieldDescription',
         {
-          defaultMessage: 'Edit index pattern field',
+          defaultMessage: 'Edit data view field',
         }
       ),
       type: 'icon',
@@ -86,13 +86,13 @@ export function getActions(
       'data-test-subj': 'dataVisualizerActionEditIndexPatternFieldButton',
     });
     actions.push({
-      name: i18n.translate('xpack.dataVisualizer.index.dataGrid.deleteIndexPatternFieldTitle', {
-        defaultMessage: 'Delete index pattern field',
+      name: i18n.translate('xpack.dataVisualizer.index.dataGrid.deleteDataViewFieldTitle', {
+        defaultMessage: 'Delete data view field',
       }),
       description: i18n.translate(
         'xpack.dataVisualizer.index.dataGrid.deleteIndexPatternFieldDescription',
         {
-          defaultMessage: 'Delete index pattern field',
+          defaultMessage: 'Delete data view field',
         }
       ),
       type: 'icon',

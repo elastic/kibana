@@ -120,13 +120,13 @@ export const useAddToCase = ({
   const isAlert = useMemo(() => {
     if (event !== undefined) {
       const data = [...event.data];
-      return data.some(({ field }) => field === 'kibana.alert.uuid');
+      return data.some(({ field }) => field === 'kibana.alert.rule.uuid');
     } else {
       return false;
     }
   }, [event]);
   const isSecurityAlert = useMemo(() => {
-    return !isEmpty(event?.ecs.signal?.rule?.id);
+    return !isEmpty(event?.ecs.signal?.rule?.id ?? event?.ecs.kibana?.alert?.rule?.uuid);
   }, [event]);
   const isEventSupported = isSecurityAlert || isAlert;
   const userCanCrud = casePermissions?.crud ?? false;

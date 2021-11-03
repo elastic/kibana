@@ -37,14 +37,9 @@ export interface KFetchKibanaOptions {
   prependBasePath?: boolean;
 }
 
-const angularNoop = () => {
-  throw new Error('Angular has been removed.');
-};
-
 export interface IShims {
   toastNotifications: CoreStart['notifications']['toasts'];
   capabilities: CoreStart['application']['capabilities'];
-  getAngularInjector: typeof angularNoop;
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
   breadcrumbs: {
@@ -84,7 +79,6 @@ export class Legacy {
     this._shims = {
       toastNotifications: core.notifications.toasts,
       capabilities: core.application.capabilities,
-      getAngularInjector: angularNoop,
       getBasePath: (): string => core.http.basePath.get(),
       getInjected: (name: string, defaultValue?: unknown): string | unknown =>
         core.injectedMetadata.getInjectedVar(name, defaultValue),

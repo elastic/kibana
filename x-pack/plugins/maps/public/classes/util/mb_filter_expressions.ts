@@ -9,7 +9,6 @@ import {
   GEO_JSON_TYPE,
   FEATURE_VISIBLE_PROPERTY_NAME,
   KBN_IS_CENTROID_FEATURE,
-  KBN_METADATA_FEATURE,
 } from '../../../common/constants';
 
 import { Timeslice } from '../../../common/descriptor_types';
@@ -19,7 +18,6 @@ export interface TimesliceMaskConfig {
   timeslice: Timeslice;
 }
 
-export const EXCLUDE_TOO_MANY_FEATURES_BOX = ['!=', ['get', KBN_METADATA_FEATURE], true];
 export const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true];
 
 function getFilterExpression(
@@ -56,8 +54,7 @@ export function getFillFilterExpression(
 ): unknown[] {
   return getFilterExpression(
     [
-      EXCLUDE_TOO_MANY_FEATURES_BOX,
-      EXCLUDE_CENTROID_FEATURES,
+      // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
       [
         'any',
         ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
@@ -75,8 +72,7 @@ export function getLineFilterExpression(
 ): unknown[] {
   return getFilterExpression(
     [
-      EXCLUDE_TOO_MANY_FEATURES_BOX,
-      EXCLUDE_CENTROID_FEATURES,
+      // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
       [
         'any',
         ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
@@ -90,32 +86,36 @@ export function getLineFilterExpression(
   );
 }
 
+const IS_POINT_FEATURE = [
+  'any',
+  ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT],
+];
+
 export function getPointFilterExpression(
   hasJoins: boolean,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
   return getFilterExpression(
-    [
-      EXCLUDE_TOO_MANY_FEATURES_BOX,
-      EXCLUDE_CENTROID_FEATURES,
-      [
-        'any',
-        ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
-        ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT],
-      ],
-    ],
+    [EXCLUDE_CENTROID_FEATURES, IS_POINT_FEATURE],
     hasJoins,
     timesliceMaskConfig
   );
 }
 
-export function getCentroidFilterExpression(
+export function getLabelFilterExpression(
   hasJoins: boolean,
+  isSourceGeoJson: boolean,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
-  return getFilterExpression(
-    [EXCLUDE_TOO_MANY_FEATURES_BOX, ['==', ['get', KBN_IS_CENTROID_FEATURE], true]],
-    hasJoins,
-    timesliceMaskConfig
-  );
+  const filters: unknown[] = [];
+
+  if (isSourceGeoJson) {
+    // Centroid feature added to GeoJSON feature collection for LINE_STRING, MULTI_LINE_STRING, POLYGON, MULTI_POLYGON, and GEOMETRY_COLLECTION geometries
+    // For GeoJSON sources, show label for centroid features or point/multi-point features only.
+    // no explicit isCentroidFeature filter is needed, centroids are points and are included in the geometry filter.
+    filters.push(IS_POINT_FEATURE);
+  }
+
+  return getFilterExpression(filters, hasJoins, timesliceMaskConfig);
 }

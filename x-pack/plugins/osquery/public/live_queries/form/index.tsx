@@ -86,7 +86,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const { data, isLoading, mutateAsync, isError, isSuccess } = useMutation(
     (payload: Record<string, unknown>) =>
-      http.post('/internal/osquery/action', {
+      http.post<any>('/internal/osquery/action', {
         body: JSON.stringify(payload),
       }),
     {
@@ -328,6 +328,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           )}
           <EuiFlexItem grow={false}>
             <EuiButton
+              id="submit-button"
               disabled={!enabled || !agentSelected || !queryValueProvided || isSubmitting}
               onClick={submit}
             >

@@ -7,7 +7,7 @@
 
 import { Writable } from 'stream';
 import { i18n } from '@kbn/i18n';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { Datatable } from 'src/plugins/expressions/server';
@@ -109,10 +109,8 @@ export class CsvGenerator {
     this.logger.debug(`executing scroll request`);
     const results = (
       await this.clients.es.asCurrentUser.scroll({
-        body: {
-          scroll: scrollSettings.duration,
-          scroll_id: scrollId,
-        },
+        scroll: scrollSettings.duration,
+        scroll_id: scrollId,
       })
     ).body;
     return results;
@@ -356,7 +354,7 @@ export class CsvGenerator {
 
         let table: Datatable | undefined;
         try {
-          table = tabifyDocs(results, index, { shallow: true });
+          table = tabifyDocs(results, index, { shallow: true, includeIgnoredValues: true });
         } catch (err) {
           this.logger.error(err);
         }
@@ -403,7 +401,7 @@ export class CsvGenerator {
       if (scrollId) {
         this.logger.debug(`executing clearScroll request`);
         try {
-          await this.clients.es.asCurrentUser.clearScroll({ body: { scroll_id: [scrollId] } });
+          await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
         } catch (err) {
           this.logger.error(err);
         }

@@ -282,9 +282,7 @@ export function insertNewColumn({
 
     const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
     if (!possibleOperation) {
-      throw new Error(
-        `Can't create operation ${op} because it's incompatible with the index pattern`
-      );
+      throw new Error(`Can't create operation ${op} because it's incompatible with the data view`);
     }
     const isBucketed = Boolean(possibleOperation.isBucketed);
 
@@ -1369,6 +1367,17 @@ export function getReferencedColumnIds(layer: IndexPatternLayer, columnId: strin
   collect(columnId);
 
   return referencedIds;
+}
+
+export function hasTermsWithManyBuckets(layer: IndexPatternLayer): boolean {
+  return layer.columnOrder.some((columnId) => {
+    const column = layer.columns[columnId];
+    if (column) {
+      return (
+        column.isBucketed && column.params && 'size' in column.params && column.params.size > 5
+      );
+    }
+  });
 }
 
 export function isOperationAllowedAsReference({

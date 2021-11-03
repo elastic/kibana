@@ -90,9 +90,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
     ) : (
       <Fragment>
         {renderJoins()}
-
         <EuiSpacer size="s" />
-
         <EuiTextAlign textAlign="center">
           <EuiButtonEmpty
             onClick={addJoin}

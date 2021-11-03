@@ -12,6 +12,7 @@ import { CoreStart } from 'kibana/public';
 import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly } from '@elastic/eui';
 import { useKibana } from '../../../context';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+import { RedirectAppLinks } from '../../../app_links';
 
 export type ElasticAgentCardProps = NoDataPageActions & {
   solution: string;
@@ -76,23 +77,25 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     );
 
   return (
-    <EuiCard
-      paddingSize="l"
-      image={image}
-      href={href ?? addBasePath(`/app/integrations/browse${hasCategory}`)}
-      // Bad hack to fix the need for an a11y title even though the button exists
-      title={
-        <EuiScreenReaderOnly>
-          <span>{defaultCTAtitle}</span>
-        </EuiScreenReaderOnly>
-      }
-      description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
-        defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
-      })}
-      betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
-      footer={footer}
-      layout={layout as 'vertical' | undefined}
-      {...cardRest}
-    />
+    <RedirectAppLinks application={application}>
+      <EuiCard
+        paddingSize="l"
+        image={image}
+        href={href ?? addBasePath(`/app/integrations/browse${hasCategory}`)}
+        // Bad hack to fix the need for an a11y title even though the button exists
+        title={
+          <EuiScreenReaderOnly>
+            <span>{defaultCTAtitle}</span>
+          </EuiScreenReaderOnly>
+        }
+        description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
+          defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
+        })}
+        betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
+        footer={footer}
+        layout={layout as 'vertical' | undefined}
+        {...cardRest}
+      />
+    </RedirectAppLinks>
   );
 };

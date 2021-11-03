@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useContext } from 'react';
+import React, { ReactNode } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxProps,
@@ -20,8 +20,6 @@ import type { TimeseriesUIRestrictions } from '../../../../common/ui_restriction
 
 // @ts-ignore
 import { isFieldEnabled } from '../../lib/check_ui_restrictions';
-import { PanelModelContext } from '../../contexts/panel_model_context';
-import { USE_KIBANA_INDEXES_KEY } from '../../../../common/constants';
 
 interface FieldSelectProps {
   label: string | ReactNode;
@@ -64,7 +62,6 @@ export function FieldSelect({
   uiRestrictions,
   'data-test-subj': dataTestSubj = 'metricsIndexPatternFieldsSelect',
 }: FieldSelectProps) {
-  const panelModel = useContext(PanelModelContext);
   const htmlId = htmlIdGenerator();
 
   let selectedOptions: Array<EuiComboBoxOptionOption<string>> = [];
@@ -119,18 +116,10 @@ export function FieldSelect({
     }
   });
 
-  let isInvalid;
+  const isInvalid = Boolean(value && fields[fieldsSelector] && !selectedOptions.length);
 
-  if (Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY])) {
-    isInvalid = Boolean(value && fields[fieldsSelector] && !selectedOptions.length);
-
-    if (value && !selectedOptions.length) {
-      selectedOptions = [{ label: value!, id: 'INVALID_FIELD' }];
-    }
-  } else {
-    if (value && fields[fieldsSelector] && !selectedOptions.length) {
-      onChange([]);
-    }
+  if (value && !selectedOptions.length) {
+    selectedOptions = [{ label: value, id: 'INVALID_FIELD' }];
   }
 
   return (

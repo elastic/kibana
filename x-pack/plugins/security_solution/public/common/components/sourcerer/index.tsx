@@ -169,55 +169,62 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     [isPopoverOpen, sourcererScope.selectedPatterns]
   );
 
+  const buttonWithTooptip = useMemo(() => {
+    return tooltipContent ? (
+      <EuiToolTip position="top" content={tooltipContent} data-test-subj="sourcerer-tooltip">
+        {trigger}
+      </EuiToolTip>
+    ) : (
+      trigger
+    );
+  }, [trigger, tooltipContent]);
+
   return (
-    <EuiToolTip position="top" content={tooltipContent}>
-      <EuiPopover
-        data-test-subj="sourcerer-popover"
-        button={trigger}
-        isOpen={isPopoverOpen}
-        closePopover={handleClosePopOver}
-        display="block"
-        panelPaddingSize="s"
-        repositionOnScroll
-        ownFocus
-      >
-        <PopoverContent>
-          <EuiPopoverTitle>
-            <>{i18n.SELECT_INDEX_PATTERNS}</>
-          </EuiPopoverTitle>
-          <EuiSpacer size="s" />
-          <EuiText color="default">{i18n.INDEX_PATTERNS_SELECTION_LABEL}</EuiText>
-          <EuiSpacer size="xs" />
-          {comboBox}
-          <EuiSpacer size="s" />
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <ResetButton
-                aria-label={i18n.INDEX_PATTERNS_RESET}
-                data-test-subj="sourcerer-reset"
-                flush="left"
-                onClick={resetDataSources}
-                title={i18n.INDEX_PATTERNS_RESET}
-              >
-                {i18n.INDEX_PATTERNS_RESET}
-              </ResetButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={handleSaveIndices}
-                disabled={isSavingDisabled}
-                data-test-subj="add-index"
-                fill
-                fullWidth
-                size="s"
-              >
-                {i18n.SAVE_INDEX_PATTERNS}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </PopoverContent>
-      </EuiPopover>
-    </EuiToolTip>
+    <EuiPopover
+      data-test-subj="sourcerer-popover"
+      button={buttonWithTooptip}
+      isOpen={isPopoverOpen}
+      closePopover={handleClosePopOver}
+      panelPaddingSize="s"
+      repositionOnScroll
+      ownFocus
+    >
+      <PopoverContent>
+        <EuiPopoverTitle>
+          <>{i18n.SELECT_INDEX_PATTERNS}</>
+        </EuiPopoverTitle>
+        <EuiSpacer size="s" />
+        <EuiText color="default">{i18n.INDEX_PATTERNS_SELECTION_LABEL}</EuiText>
+        <EuiSpacer size="xs" />
+        {comboBox}
+        <EuiSpacer size="s" />
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <ResetButton
+              aria-label={i18n.INDEX_PATTERNS_RESET}
+              data-test-subj="sourcerer-reset"
+              flush="left"
+              onClick={resetDataSources}
+              title={i18n.INDEX_PATTERNS_RESET}
+            >
+              {i18n.INDEX_PATTERNS_RESET}
+            </ResetButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={handleSaveIndices}
+              disabled={isSavingDisabled}
+              data-test-subj="add-index"
+              fill
+              fullWidth
+              size="s"
+            >
+              {i18n.SAVE_INDEX_PATTERNS}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </PopoverContent>
+    </EuiPopover>
   );
 });
 Sourcerer.displayName = 'Sourcerer';
