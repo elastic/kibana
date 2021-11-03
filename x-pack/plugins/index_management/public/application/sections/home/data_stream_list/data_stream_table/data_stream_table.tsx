@@ -183,7 +183,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       ) : undefined,
     toolsRight: [
       <EuiButton
-        color="secondary"
+        color="success"
         iconType="refresh"
         onClick={reload}
         data-test-subj="reloadButton"
