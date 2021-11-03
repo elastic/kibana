@@ -507,9 +507,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async toggleIndexPatternSelectionModePopover(shouldOpen: boolean) {
     await this.retry.try(async () => {
-      const isPopoverOpened = await this.testSubjects.exists(
-        'switchIndexPatternSelectionMode'
-      );
+      const isPopoverOpened = await this.testSubjects.exists('switchIndexPatternSelectionMode');
       if ((shouldOpen && !isPopoverOpened) || (!shouldOpen && isPopoverOpened)) {
         await this.testSubjects.click('switchIndexPatternSelectionModePopover');
       }
