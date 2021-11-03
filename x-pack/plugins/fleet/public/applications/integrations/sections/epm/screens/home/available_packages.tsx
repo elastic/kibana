@@ -221,6 +221,7 @@ export const AvailablePackages: React.FC = memo(() => {
     if (selectedCategory === '') {
       return true;
     }
+
     return c.categories.includes(selectedCategory);
   });
 

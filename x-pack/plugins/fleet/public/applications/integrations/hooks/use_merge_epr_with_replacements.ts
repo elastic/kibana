@@ -22,11 +22,16 @@ function findReplacementsForEprPackage(
 }
 
 export function useMergeEprPackagesWithReplacements(
-  eprPackages: PackageListItem[],
+  rawEprPackages: PackageListItem[],
   replacements: CustomIntegration[]
 ): Array<PackageListItem | CustomIntegration> {
   const merged: Array<PackageListItem | CustomIntegration> = [];
   const filteredReplacements = replacements;
+
+  // APM EPR-packages should _never_ show. They have special handling.
+  const eprPackages = rawEprPackages.filter((p) => {
+    return p.name !== 'apm';
+  });
 
   // Either select replacement or select beat
   eprPackages.forEach((eprPackage: PackageListItem) => {
