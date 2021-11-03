@@ -16,7 +16,6 @@ import {
   EuiRangeProps,
 } from '@elastic/eui';
 import { ANOMALY_THRESHOLD } from '../../../../common';
-import './styles.scss';
 
 export interface SeveritySelectorProps {
   value: number | undefined;
@@ -29,23 +28,23 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
   const levels: EuiRangeProps['levels'] = [
     {
       min: ANOMALY_THRESHOLD.LOW,
-      max: ANOMALY_THRESHOLD.MINOR - 1,
-      color: 'success',
+      max: ANOMALY_THRESHOLD.MINOR,
+      color: '#8BC8FB',
     },
     {
       min: ANOMALY_THRESHOLD.MINOR,
-      max: ANOMALY_THRESHOLD.MAJOR - 1,
-      color: 'primary',
+      max: ANOMALY_THRESHOLD.MAJOR,
+      color: '#FDEC25',
     },
     {
       min: ANOMALY_THRESHOLD.MAJOR,
       max: ANOMALY_THRESHOLD.CRITICAL,
-      color: 'warning',
+      color: '#FBA740',
     },
     {
       min: ANOMALY_THRESHOLD.CRITICAL,
       max: MAX_ANOMALY_SCORE,
-      color: 'danger',
+      color: '#FE5050',
     },
   ];
 

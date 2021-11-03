@@ -240,12 +240,17 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
       loadTestFile(require.resolve('./latency/service_apis'));
     });
 
+    // Errors
     describe('errors/group_id', function () {
       loadTestFile(require.resolve('./errors/group_id'));
     });
 
     describe('errors/distribution', function () {
       loadTestFile(require.resolve('./errors/distribution'));
+    });
+
+    describe('errors/error_group_list', function () {
+      loadTestFile(require.resolve('./errors/error_group_list'));
     });
 
     // Dependencies

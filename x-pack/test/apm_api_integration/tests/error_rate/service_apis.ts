@@ -87,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       serviceInventoryAPIResponse.body.items[0].transactionErrorRate;
 
     const errorRateChartApiMean = meanBy(
-      transactionsErrorRateChartAPIResponse.body.currentPeriod.transactionErrorRate.filter(
+      transactionsErrorRateChartAPIResponse.body.currentPeriod.timeseries.filter(
         (item) => isFiniteNumber(item.y) && item.y > 0
       ),
       'y'

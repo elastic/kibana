@@ -64,8 +64,6 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
-import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
-import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
 import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
@@ -88,6 +86,7 @@ import type {
   SecuritySolutionPluginStart,
   PluginInitializerContext,
 } from './plugin_contract';
+import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 
 export { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
