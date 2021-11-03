@@ -20,7 +20,9 @@ import {
 } from '../../../common/runtime_types/ping/synthetics';
 
 export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
-  return apiService.post('/api/uptime/journey/screenshot/block', { hashes: params });
+  return apiService.post<ScreenshotBlockDoc[]>('/api/uptime/journey/screenshot/block', {
+    hashes: params,
+  });
 }
 
 export async function fetchJourneySteps(
@@ -49,10 +51,12 @@ export async function fetchLastSuccessfulStep({
   monitorId,
   timestamp,
   stepIndex,
+  location,
 }: {
   monitorId: string;
   timestamp: string;
   stepIndex: number;
+  location?: string;
 }): Promise<JourneyStep> {
   return await apiService.get(
     `/api/uptime/synthetics/step/success/`,
@@ -60,6 +64,7 @@ export async function fetchLastSuccessfulStep({
       monitorId,
       timestamp,
       stepIndex,
+      location,
     },
     JourneyStepType
   );
