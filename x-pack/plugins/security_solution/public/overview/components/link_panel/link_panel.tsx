@@ -20,7 +20,7 @@ import { InspectButtonContainer } from '../../../common/components/inspect';
 import { HeaderSection } from '../../../common/components/header_section';
 import { LinkPanelListItem } from './types';
 
-// @ts-ignore-next-line
+// @ts-expect-error TS2769
 const StyledTable = styled(EuiBasicTable)`
   [data-test-subj='panel-link'],
   [data-test-subj='panel-no-link'] {
