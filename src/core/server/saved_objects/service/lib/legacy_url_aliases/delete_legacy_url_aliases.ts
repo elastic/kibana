@@ -8,6 +8,7 @@
 
 import * as esKuery from '@kbn/es-query';
 
+import { getErrorMessage as getEsErrorMessage } from '../../../../elasticsearch';
 import type { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 import type { IndexMapping } from '../../../mappings';
 import { LEGACY_URL_ALIAS_TYPE } from '../../../object_types';
@@ -76,6 +77,10 @@ export async function deleteLegacyUrlAliases(params: DeleteLegacyUrlAliasesParam
         index: getIndexForType(LEGACY_URL_ALIAS_TYPE),
         refresh: false, // This could be called many times in succession, intentionally do not wait for a refresh
         body: {
+          ...getSearchDsl(mappings, registry, {
+            type: LEGACY_URL_ALIAS_TYPE,
+            kueryNode,
+          }),
           script: {
             // Intentionally use one script source with variable params to take advantage of ES script caching
             source: `
@@ -93,17 +98,13 @@ export async function deleteLegacyUrlAliases(params: DeleteLegacyUrlAliasesParam
             lang: 'painless',
           },
           conflicts: 'proceed',
-          ...getSearchDsl(mappings, registry, {
-            type: LEGACY_URL_ALIAS_TYPE,
-            kueryNode,
-          }),
         },
       },
       { ignore: [404] }
     );
   } catch (err) {
-    const { error } = err.body;
-    throwError(type, id, `${error.type}, ${error.reason}`);
+    const errorMessage = getEsErrorMessage(err);
+    throwError(type, id, `${errorMessage}`);
   }
 }
 

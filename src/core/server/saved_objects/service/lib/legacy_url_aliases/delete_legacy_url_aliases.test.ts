@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-// Mock these functions to return empty results, as this simplifies test cases and we don't need to exercise alternate code paths for these
-jest.mock('@kbn/es-query', () => {
-  return { nodeTypes: { function: { buildNode: jest.fn() } } };
-});
-jest.mock('../search_dsl', () => {
-  return { getSearchDsl: jest.fn() };
-});
+import { mockGetEsErrorMessage } from './delete_legacy_url_aliases.test.mock'; // Note: importing this file applies default mocks for other functions too
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
@@ -45,7 +39,7 @@ describe('deleteLegacyUrlAliases', () => {
     const namespaces = [ALL_NAMESPACES_STRING];
     const params = setup({ type, id, namespaces, deleteBehavior: 'inclusive' });
 
-    expect(() => deleteLegacyUrlAliases(params)).rejects.toThrowError(
+    await expect(() => deleteLegacyUrlAliases(params)).rejects.toThrowError(
       `Failed to delete legacy URL aliases for ${type}/${id}: "namespaces" cannot include the * string`
     );
     expect(params.client.updateByQuery).not.toHaveBeenCalled();
@@ -63,11 +57,15 @@ describe('deleteLegacyUrlAliases', () => {
     params.client.updateByQuery.mockResolvedValueOnce(
       elasticsearchClientMock.createErrorTransportRequestPromise(esError)
     );
+    mockGetEsErrorMessage.mockClear();
+    mockGetEsErrorMessage.mockReturnValue('Oh no!');
 
-    expect(() => deleteLegacyUrlAliases(params)).rejects.toThrowError(
-      `Failed to delete legacy URL aliases for ${type}/${id}: es_type, es_reason`
+    await expect(() => deleteLegacyUrlAliases(params)).rejects.toThrowError(
+      `Failed to delete legacy URL aliases for ${type}/${id}: Oh no!`
     );
     expect(params.client.updateByQuery).toHaveBeenCalledTimes(1);
+    expect(mockGetEsErrorMessage).toHaveBeenCalledTimes(1);
+    expect(mockGetEsErrorMessage).toHaveBeenCalledWith(esError);
   });
 
   describe('deleteBehavior "inclusive"', () => {
