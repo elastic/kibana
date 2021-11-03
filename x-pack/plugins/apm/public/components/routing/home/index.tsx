@@ -67,7 +67,7 @@ export const home = {
         kuery: t.string,
       }),
       t.partial({
-        refreshPaused: toBooleanRt,
+        refreshPaused: t.union([t.literal('true'), t.literal('false')]),
         refreshInterval: t.string,
         comparisonEnabled: toBooleanRt,
         comparisonType: comparisonTypeRt,
