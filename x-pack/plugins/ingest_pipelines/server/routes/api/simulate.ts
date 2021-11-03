@@ -38,7 +38,7 @@ export const registerSimulateRoute = ({
           verbose,
           body: {
             pipeline,
-            docs: documents as estypes.IngestSimulatePipelineDocument[],
+            docs: documents as estypes.IngestSimulateDocument[],
           },
         });
 
