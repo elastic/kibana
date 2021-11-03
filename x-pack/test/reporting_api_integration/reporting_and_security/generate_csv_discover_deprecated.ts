@@ -12,7 +12,6 @@ import { JOB_PARAMS_RISON_CSV_DEPRECATED } from '../services/fixtures';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const supertestSvc = getService('supertest');
   const reportingAPI = getService('reportingAPI');
 
@@ -32,13 +31,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Generation from Legacy Job Params', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await reportingAPI.initLogs();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await reportingAPI.teardownLogs();
       await reportingAPI.deleteAllReports();
     });
 
