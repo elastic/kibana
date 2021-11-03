@@ -8,7 +8,7 @@
 import { fromExpression } from '@kbn/interpreter/common';
 import { shallowEqual, useSelector } from 'react-redux';
 import { State } from '../../../../types';
-import { getFiltersByGroup } from '../../../lib/filter';
+import { getFiltersByGroups } from '../../../lib/filter';
 import { adaptCanvasFilter } from '../../../lib/filter_adapters';
 import { getGlobalFilters } from '../../../state/selectors/workpad';
 
@@ -18,7 +18,7 @@ const extractExpressionAST = (filtersExpressions: string[]) =>
 export function useCanvasFilters(groups?: string[]) {
   const filterExpressions = useSelector((state: State) => getGlobalFilters(state), shallowEqual);
   const filtersByGroups = groups?.length
-    ? getFiltersByGroup(filterExpressions, groups)
+    ? getFiltersByGroups(filterExpressions, groups)
     : filterExpressions;
 
   const expression = extractExpressionAST(filtersByGroups);

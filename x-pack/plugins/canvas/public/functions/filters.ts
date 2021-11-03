@@ -15,7 +15,7 @@ import { getGlobalFilters, getWorkpadVariablesAsObject } from '../state/selector
 import { ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 import { InitializeArguments } from '.';
-import { getFiltersByGroup as getFiltersByGroups } from '../lib/filter';
+import { getFiltersByGroups } from '../lib/filter';
 
 export interface Arguments {
   group: string[];

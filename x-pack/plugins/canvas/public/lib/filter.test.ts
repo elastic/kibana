@@ -27,6 +27,8 @@ import {
   transformFilterView,
   formatFilter,
   groupFiltersBy,
+  getFiltersByGroups,
+  extractGroupsFromElementsFilters,
 } from './filter';
 
 const formatterFactory = (value: unknown) => () => JSON.stringify(value);
@@ -338,5 +340,53 @@ describe('groupFiltersBy', () => {
 
     const grouped = groupFiltersBy(filtersWithoutGroups, 'filterGroup');
     expect(grouped).toEqual([{ name: null, filters: filtersWithoutGroups }]);
+  });
+});
+
+describe('getFiltersByGroups', () => {
+  const group1 = 'Group 1';
+  const group2 = 'Group 2';
+
+  const filters = [
+    `exactly value="x-pack" column="project1" filterGroup="${group1}"`,
+    `exactly value="beats" column="project1" filterGroup="${group2}"`,
+    `exactly value="machine-learning" column="project1"`,
+    `exactly value="kibana" column="project2" filterGroup="${group2}"`,
+  ];
+
+  it('returns all filters related to a specified groups', () => {
+    expect(getFiltersByGroups(filters, [group1, group2])).toEqual([
+      filters[0],
+      filters[1],
+      filters[3],
+    ]);
+
+    expect(getFiltersByGroups(filters, [group2])).toEqual([filters[1], filters[3]]);
+  });
+
+  it('returns empty array if not found any filter with a specified group', () => {
+    expect(getFiltersByGroups(filters, ['absent group'])).toEqual([]);
+  });
+
+  it('returns empty array if not groups specified', () => {
+    expect(getFiltersByGroups(filters, [])).toEqual([]);
+  });
+});
+
+describe('extractGroupsFromElementsFilters', () => {
+  const exprFilters = 'filters';
+  const exprRest = 'demodata | plot | render';
+
+  it('returns groups which are specified at filters expression', () => {
+    const groups = ['group 1', 'group 2', 'group 3', 'group 4'];
+    const groupsExpr = groups.map((group) => `group="${group}"`).join(' ');
+
+    expect(extractGroupsFromElementsFilters(`${exprFilters} ${groupsExpr} | ${exprRest}`)).toEqual(
+      groups
+    );
+  });
+
+  it('returns empty array if no groups were specified at filters expression', () => {
+    expect(extractGroupsFromElementsFilters(`${exprFilters} | ${exprRest}`)).toEqual([]);
   });
 });

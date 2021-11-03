@@ -65,8 +65,8 @@ export const groupFiltersBy = (filters: FilterType[], groupByField: FilterField)
   }));
 };
 
-export const getFiltersByGroup = (allFilters: string[], groups: string[]) =>
-  allFilters.filter((filter: string) => {
+export const getFiltersByGroups = (filters: string[], groups: string[]) =>
+  filters.filter((filter: string) => {
     const ast = fromExpression(filter);
     const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
     return expGroups.length > 0 && expGroups.every((expGroup) => groups.includes(expGroup));
@@ -75,6 +75,5 @@ export const getFiltersByGroup = (allFilters: string[], groups: string[]) =>
 export const extractGroupsFromElementsFilters = (expr: string) => {
   const ast = fromExpression(expr);
   const filtersFn = ast.chain.filter((expression) => expression.function === 'filters')[0];
-  const groups = filtersFn?.arguments.group?.map((g) => g.toString()) ?? undefined;
-  return groups;
+  return filtersFn?.arguments.group?.map((g) => g.toString()) ?? [];
 };
