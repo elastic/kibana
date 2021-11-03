@@ -60,12 +60,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal('Average of bytes');
 
-      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger');
+      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger', 1);
 
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('Average of bytes');
 
-      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger');
+      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger', 4);
 
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('Top values of ip');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');

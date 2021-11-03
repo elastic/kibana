@@ -9,24 +9,28 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['header', 'common', 'dashboard', 'timePicker', 'lens']);
 
   // Dashboard shares a search session with lens when navigating to and from by value lens to hit search cache
   // https://github.com/elastic/kibana/issues/99310
   describe('Search session sharing with lens', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
 
     // NOTE: This test doesn't check if the cache was actually hit, but just checks if the same search session id is used
