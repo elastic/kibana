@@ -637,7 +637,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async setBackgroundColor(colorHex: string): Promise<void> {
     await this.clickColorPicker();
     await this.checkColorPickerPopUpIsPresent();
-    await this.find.setValue('.euiColorPicker input', colorHex);
+    await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
     await this.clickColorPicker();
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
@@ -650,7 +653,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async setColorPickerValue(colorHex: string, nth: number = 0): Promise<void> {
     await this.clickColorPicker(nth);
     await this.checkColorPickerPopUpIsPresent();
-    await this.find.setValue('.euiColorPicker input', colorHex);
+    await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
     await this.clickColorPicker(nth);
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
