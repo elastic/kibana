@@ -66,9 +66,9 @@ export const fetchBooleanFieldStats = async (
     termFilters
   );
   const { body } = await esClient.search(request);
-  const aggregations = body.aggregations as {
+  const aggregations = body.aggregations as unknown as {
     sample: {
-      sampled_value_count: estypes.AggregationsFiltersBucketItemKeys;
+      sampled_value_count: estypes.AggregationsFiltersBucketItem;
       sampled_values: estypes.AggregationsTermsAggregate<TopValueBucket>;
     };
   };
