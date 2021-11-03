@@ -28,7 +28,8 @@ const { argv } = yargs(process.argv.slice(2))
     description:
       'Run all tests (an instance of Elasticsearch and kibana are needs to be available)',
   })
-  .option('spec', {
+  .option('grep', {
+    alias: 'spec',
     default: false,
     type: 'string',
     description:
@@ -46,7 +47,7 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const { server, runner, open, spec, bail, kibanaInstallDir } = argv;
+const { server, runner, open, grep, bail, kibanaInstallDir } = argv;
 
 const e2eDir = path.join(__dirname, '../../ftr_e2e');
 
@@ -58,7 +59,7 @@ if (server) {
 }
 
 const config = open ? './ftr_config_open.ts' : './ftr_config_run.ts';
-const grepArg = spec ? `--grep ${spec}` : '';
+const grepArg = grep ? `--grep ${grep}` : '';
 const bailArg = bail ? `--bail` : '';
 
 childProcess.execSync(
