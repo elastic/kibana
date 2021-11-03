@@ -77,10 +77,10 @@ export class TabbedAggResponseWriter {
               column.aggConfig.type.valueType || column.aggConfig.params.field?.type || 'number',
             field: column.aggConfig.params.field?.name,
             index: column.aggConfig.getIndexPattern()?.title,
-            hasPrecisionError: Boolean(column.hasPrecisionError),
             params: column.aggConfig.toSerializedFieldFormat(),
             source: 'esaggs',
             sourceParams: {
+              hasPrecisionError: Boolean(column.hasPrecisionError),
               indexPatternId: column.aggConfig.getIndexPattern()?.id,
               appliedTimeRange:
                 column.aggConfig.params.field?.name &&

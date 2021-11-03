@@ -56,11 +56,8 @@ import { deleteColumn, isReferenced } from './operations';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { DraggingIdentifier } from '../drag_drop';
-import {
-  getPrecisionErrorWarningMessages,
-  getStateTimeShiftWarningMessages,
-} from './time_shift_utils';
-
+import { getStateTimeShiftWarningMessages } from './time_shift_utils';
+import { getPrecisionErrorWarningMessages } from './utils';
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {

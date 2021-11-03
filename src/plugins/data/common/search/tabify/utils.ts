@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { tabifyDocs, flattenHit } from './tabify_docs';
-export { tabifyAggResponse } from './tabify';
-export { tabifyGetColumns } from './get_columns';
-export { checkDatatableForPrecisionError } from './utils';
+import type { Datatable } from '../../../../expressions';
+
+/** @public **/
+export const checkDatatableForPrecisionError = (datatable: Datatable) =>
+  datatable.columns.some(({ meta }) => meta.sourceParams?.hasPrecisionError);

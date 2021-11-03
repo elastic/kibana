@@ -164,9 +164,9 @@ describe('TabbedAggResponseWriter class', () => {
             },
           },
           field: 'geo.src',
-          hasPrecisionError: false,
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             enabled: true,
             id: '1',
             indexPatternId: '1234',
@@ -189,12 +189,12 @@ describe('TabbedAggResponseWriter class', () => {
         expect(response.columns[1]).toHaveProperty('meta', {
           index: 'logstash-*',
           field: 'machine.os.raw',
-          hasPrecisionError: false,
           params: {
             id: 'number',
           },
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             appliedTimeRange: undefined,
             enabled: true,
             id: '2',
@@ -227,9 +227,9 @@ describe('TabbedAggResponseWriter class', () => {
             },
           },
           field: 'geo.src',
-          hasPrecisionError: false,
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             enabled: true,
             id: '1',
             indexPatternId: '1234',
@@ -252,12 +252,12 @@ describe('TabbedAggResponseWriter class', () => {
         expect(response.columns[1]).toHaveProperty('meta', {
           index: 'logstash-*',
           field: 'machine.os.raw',
-          hasPrecisionError: false,
           params: {
             id: 'number',
           },
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             appliedTimeRange: undefined,
             enabled: true,
             id: '2',

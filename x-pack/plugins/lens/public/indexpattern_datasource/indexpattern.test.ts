@@ -1452,7 +1452,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should show different types of warning messages', () => {
-      framePublicAPI.activeData!.first.columns[0].meta.hasPrecisionError = true;
+      framePublicAPI.activeData!.first.columns[0].meta.sourceParams!.hasPrecisionError = true;
 
       const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI);
 

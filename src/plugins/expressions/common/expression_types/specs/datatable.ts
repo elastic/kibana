@@ -80,11 +80,6 @@ export interface DatatableColumnMeta {
    * any extra parameters for the source that produced this column
    */
   sourceParams?: SerializableRecord;
-
-  /**
-   * has precision error
-   */
-  hasPrecisionError?: boolean;
 }
 
 /**

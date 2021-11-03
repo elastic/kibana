@@ -142,6 +142,7 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
+  checkDatatableForPrecisionError,
 } from '../common';
 
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
@@ -248,6 +249,7 @@ export const search = {
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
+  checkDatatableForPrecisionError,
 };
 
 /*

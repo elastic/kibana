@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getPrecisionErrorWarningMessages } from './time_shift_utils';
+import { getPrecisionErrorWarningMessages } from './utils';
 import type { IndexPatternPrivateState } from './types';
-import { FramePublicAPI } from '../types';
+import type { FramePublicAPI } from '../types';
 
-describe('time_shift_utils', () => {
+describe('indexpattern_datasource utils', () => {
   describe('getPrecisionErrorWarningMessages', () => {
     let state: IndexPatternPrivateState;
     let framePublicAPI: FramePublicAPI;
@@ -22,7 +22,9 @@ describe('time_shift_utils', () => {
             columns: [
               {
                 meta: {
-                  hasPrecisionError: false,
+                  sourceParams: {
+                    hasPrecisionError: false,
+                  },
                 },
               },
             ],
@@ -37,7 +39,7 @@ describe('time_shift_utils', () => {
     });
 
     test('should not show precisionError if hasPrecisionError is not defined', () => {
-      delete framePublicAPI.activeData!.id.columns[0].meta.hasPrecisionError;
+      delete framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError;
 
       expect(getPrecisionErrorWarningMessages(state, framePublicAPI)).toMatchInlineSnapshot(
         `Array []`
@@ -45,7 +47,7 @@ describe('time_shift_utils', () => {
     });
 
     test('should show precisionError if hasPrecisionError is true', () => {
-      framePublicAPI.activeData!.id.columns[0].meta.hasPrecisionError = true;
+      framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
 
       expect(getPrecisionErrorWarningMessages(state, framePublicAPI)).toMatchInlineSnapshot(`
         Array [

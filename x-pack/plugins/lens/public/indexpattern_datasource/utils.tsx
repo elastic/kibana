@@ -5,17 +5,27 @@
  * 2.0.
  */
 
-import { DataType } from '../types';
-import { IndexPattern, IndexPatternLayer, DraggedField } from './types';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { DataType, FramePublicAPI } from '../types';
+import type {
+  IndexPattern,
+  IndexPatternLayer,
+  DraggedField,
+  IndexPatternPrivateState,
+} from './types';
 import type {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
+
 import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
 import { getInvalidFieldMessage } from './operations/definitions/helpers';
 import { isQueryValid } from './operations/definitions/filters';
+import { search } from '../../../../../src/plugins/data/public';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations
@@ -100,4 +110,39 @@ export function fieldIsInvalid(column: IndexPatternColumn | undefined, indexPatt
     return false;
   }
   return !!getInvalidFieldMessage(column, indexPattern)?.length;
+}
+
+export function getPrecisionErrorWarningMessages(
+  state: IndexPatternPrivateState,
+  { activeData }: FramePublicAPI
+) {
+  const warningMessages: React.ReactNode[] = [];
+
+  if (state && activeData) {
+    const hasPrecisionError = Object.values(activeData).some(
+      search.checkDatatableForPrecisionError
+    );
+
+    if (hasPrecisionError) {
+      warningMessages.push(
+        <FormattedMessage
+          key={`precision-error`}
+          id="xpack.lens.indexPattern.precisionErrorWarning"
+          defaultMessage="{docCount} values for a terms aggregation may be approximate. As a result, any sub-aggregations on the terms aggregation may also be approximate."
+          values={{
+            docCount: (
+              <strong>
+                <FormattedMessage
+                  id="xpack.lens.indexPattern.precisionErrorWarning.docCount"
+                  defaultMessage="doc_count"
+                />
+              </strong>
+            ),
+          }}
+        />
+      );
+    }
+  }
+
+  return warningMessages;
 }

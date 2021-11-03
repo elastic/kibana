@@ -34,6 +34,7 @@ export {
   SearchSourceDependencies,
   SearchSourceFields,
   SortDirection,
+  checkDatatableForPrecisionError,
 } from '../../common/search';
 export {
   SessionService,
